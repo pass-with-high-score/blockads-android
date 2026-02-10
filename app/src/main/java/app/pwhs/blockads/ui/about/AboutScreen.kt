@@ -49,10 +49,14 @@ import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onBack: () -> Unit) {
+fun AboutScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
 
     Scaffold(
@@ -65,7 +69,7 @@ fun AboutScreen(onBack: () -> Unit) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

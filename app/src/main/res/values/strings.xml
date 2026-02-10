@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">BlockAds</string>
+    <string name="app_tagline">Ad-Free Browsing</string>
     <string name="notification_channel_name">Ad Blocker Service</string>
     <string name="notification_channel_description">Shows when VPN ad blocker is active</string>
     <string name="vpn_notification_title">BlockAds is active</string>
@@ -64,8 +65,12 @@
     <string name="log_search_hint">Search domains…</string>
     <string name="domain_copied">Domain copied to clipboard</string>
 
+    <!-- Test Block Ads -->
+    <string name="test_block_ads">Test Ad Blocking</string>
+    <string name="test_block_ads_title">Test Ad Blocking</string>
+
     <!-- Home Screen -->
-    <string name="home_connecting_desc">Your device is protected from ads</string>
+    <string name="home_connecting_desc">Establishing VPN connection…</string>
     <string name="home_protected_desc">Your device is protected from ads</string>
     <string name="home_unprotected_desc">Tap the button to enable ad blocking</string>
     <string name="home_block_rate">Block Rate</string>

@@ -1,6 +1,7 @@
 package app.pwhs.blockads.ui
 
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
@@ -16,59 +17,71 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.annotation.StringRes
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.ui.about.AboutScreen
-import app.pwhs.blockads.ui.home.HomeScreen
-import app.pwhs.blockads.ui.logs.LogScreen
-import app.pwhs.blockads.ui.onboarding.OnboardingScreen
-import app.pwhs.blockads.ui.settings.SettingsScreen
-import app.pwhs.blockads.ui.whitelist.AppWhitelistScreen
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.LogScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.rememberNavHostEngine
+import com.ramcosta.composedestinations.spec.Direction
 
 sealed class Screen(
+    val destination: Direction,
     val route: String,
     @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
-    data object Home : Screen("home", R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home)
+    data object Home :
+        Screen(
+            destination = HomeScreenDestination(),
+            route = HomeScreenDestination.route,
+            labelRes = R.string.nav_home,
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home
+        )
+
     data object Logs : Screen(
-        "logs", R.string.nav_logs, Icons.AutoMirrored.Filled.List,
-        Icons.AutoMirrored.Outlined.List
+        destination = LogScreenDestination(),
+        route = LogScreenDestination.route,
+        labelRes = R.string.nav_logs,
+        selectedIcon = Icons.AutoMirrored.Filled.List,
+        unselectedIcon = Icons.AutoMirrored.Outlined.List
     )
 
     data object Settings :
-        Screen("settings", R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings)
+        Screen(
+            destination = SettingsScreenDestination(),
+            route = SettingsScreenDestination.route,
+            labelRes = R.string.nav_settings,
+            selectedIcon = Icons.Filled.Settings,
+            unselectedIcon = Icons.Outlined.Settings
+        )
 }
 
 @Composable
 fun BlockAdsApp(
     onRequestVpnPermission: () -> Unit
 ) {
-    val navController = rememberNavController()
+    val engine = rememberNavHostEngine()
+    val navController = engine.rememberNavController()
     val screens = listOf(Screen.Home, Screen.Logs, Screen.Settings)
-    val appPrefs: AppPreferences = koinInject()
-    val onboardingCompleted by appPrefs.onboardingCompleted.collectAsState(initial = true)
-    val scope = rememberCoroutineScope()
-
+    val newBackStackEntry by navController.currentBackStackEntryAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val showBottomBar = currentRoute in screens.map { it.route }
+    val currentDestination = navBackStackEntry?.destination
+    val route = newBackStackEntry?.destination?.route
+    val showBottomBar = route in listOf(
+        HomeScreenDestination.route,
+        LogScreenDestination.route,
+        SettingsScreenDestination.route,
+    )
 
     Scaffold(
         bottomBar = {
@@ -77,11 +90,8 @@ fun BlockAdsApp(
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
-                    val currentDestination = navBackStackEntry?.destination
-
                     screens.forEach { screen ->
-                        val selected =
-                            currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                        val selected = currentDestination?.route?.contains(screen.route) == true
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
@@ -110,49 +120,16 @@ fun BlockAdsApp(
                 }
             }
         }
-    ) { innerPadding ->
-        val startDestination = if (onboardingCompleted) Screen.Home.route else "onboarding"
-
-        NavHost(
+    ) { paddingValues ->
+        Log.d("BlockAdsApp", "$paddingValues")
+        DestinationsNavHost(
+            navGraph = NavGraphs.root,
+            engine = engine,
             navController = navController,
-            startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable("onboarding") {
-                OnboardingScreen(
-                    onFinish = {
-                        scope.launch {
-                            appPrefs.setOnboardingCompleted(true)
-                        }
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo("onboarding") { inclusive = true }
-                        }
-                    }
-                )
+            dependenciesContainerBuilder = {
+                dependency(onRequestVpnPermission)
             }
-            composable(Screen.Home.route) {
-                HomeScreen(onRequestVpnPermission = onRequestVpnPermission)
-            }
-            composable(Screen.Logs.route) {
-                LogScreen()
-            }
-            composable(Screen.Settings.route) {
-                SettingsScreen(
-                    onNavigateToAbout = {
-                        navController.navigate("about")
-                    },
-                    onNavigateToWhitelistApps = {
-                        navController.navigate("whitelist_apps")
-                    }
-                )
-            }
-            composable("about") {
-                AboutScreen(onBack = { navController.popBackStack() })
-            }
-            composable("whitelist_apps") {
-                AppWhitelistScreen(onBack = { navController.popBackStack() })
-            }
-        }
+        )
     }
 }
 

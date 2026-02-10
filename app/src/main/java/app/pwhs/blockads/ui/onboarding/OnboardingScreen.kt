@@ -26,21 +26,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,7 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.NeonGreen
-import app.pwhs.blockads.ui.theme.NeonGreenDim
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
@@ -61,10 +67,11 @@ data class OnboardingPage(
     val accentColor: Color = NeonGreen
 )
 
-@OptIn(ExperimentalFoundationApi::class)
+@Destination<RootGraph>
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
-    onFinish: () -> Unit
+    navigator: DestinationsNavigator
 ) {
     val pages = listOf(
         OnboardingPage(
@@ -88,98 +95,109 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == pages.size - 1
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Skip button
-        Row(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                actions = {
+                    AnimatedVisibility(
+                        visible = !isLastPage,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        TextButton(onClick = {
+                            navigator.navigate(HomeScreenDestination) {
+                                popUpTo(NavGraphs.root) { inclusive = true }
+                            }
+                        }) {
+                            Text(
+                                text = stringResource(R.string.onboarding_skip),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.End
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AnimatedVisibility(
-                visible = !isLastPage,
-                enter = fadeIn(),
-                exit = fadeOut()
+            // Pager content
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                OnboardingPageContent(pages[page])
+            }
+
+            // Page indicators
+            Row(
+                modifier = Modifier.padding(vertical = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onFinish) {
-                    Text(
-                        text = stringResource(R.string.onboarding_skip),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                repeat(pages.size) { index ->
+                    val isSelected = pagerState.currentPage == index
+                    val width by animateFloatAsState(
+                        targetValue = if (isSelected) 24f else 8f,
+                        animationSpec = tween(300), label = "indicator_width"
+                    )
+                    val color by animateColorAsState(
+                        targetValue = if (isSelected) NeonGreen else MaterialTheme.colorScheme.surfaceVariant,
+                        animationSpec = tween(300), label = "indicator_color"
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .height(8.dp)
+                            .width(width.dp)
+                            .clip(CircleShape)
+                            .background(color)
                     )
                 }
             }
-        }
 
-        // Pager content
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { page ->
-            OnboardingPageContent(pages[page])
-        }
-
-        // Page indicators
-        Row(
-            modifier = Modifier.padding(vertical = 24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            repeat(pages.size) { index ->
-                val isSelected = pagerState.currentPage == index
-                val width by animateFloatAsState(
-                    targetValue = if (isSelected) 24f else 8f,
-                    animationSpec = tween(300), label = "indicator_width"
+            // Action button
+            Button(
+                onClick = {
+                    if (isLastPage) {
+                        navigator.navigate(HomeScreenDestination) {
+                            popUpTo(NavGraphs.root) { inclusive = true }
+                        }
+                    } else {
+                        scope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = NeonGreen,
+                    contentColor = Color.Black
                 )
-                val color by animateColorAsState(
-                    targetValue = if (isSelected) NeonGreen else MaterialTheme.colorScheme.surfaceVariant,
-                    animationSpec = tween(300), label = "indicator_color"
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .height(8.dp)
-                        .width(width.dp)
-                        .clip(CircleShape)
-                        .background(color)
+            ) {
+                Text(
+                    text = if (isLastPage) stringResource(R.string.onboarding_get_started)
+                    else stringResource(R.string.onboarding_next),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
-        }
 
-        // Action button
-        Button(
-            onClick = {
-                if (isLastPage) {
-                    onFinish()
-                } else {
-                    scope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = NeonGreen,
-                contentColor = Color.Black
-            )
-        ) {
-            Text(
-                text = if (isLastPage) stringResource(R.string.onboarding_get_started)
-                else stringResource(R.string.onboarding_next),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

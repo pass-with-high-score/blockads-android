@@ -54,12 +54,16 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
+@Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppWhitelistScreen(
-    onBack: () -> Unit,
+    navigator: DestinationsNavigator,
     viewModel: AppWhitelistViewModel = koinViewModel()
 ) {
     val whitelistedApps by viewModel.whitelistedApps.collectAsState()
@@ -92,7 +96,7 @@ fun AppWhitelistScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
@@ -19,8 +18,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val appPrefs: AppPreferences,
-    private val dnsLogDao: DnsLogDao,
+    dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
 ) : ViewModel() {
 

@@ -41,7 +41,7 @@ val appModule = module {
     single { FilterListRepository(androidContext(), get(), get(), get()) }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get()) }
     viewModel { LogViewModel(get(), get(), androidContext()) }
     viewModel { SettingsViewModel(get(), get(), get(), get(), androidContext()) }
     viewModel { AppWhitelistViewModel(get(), androidContext()) }

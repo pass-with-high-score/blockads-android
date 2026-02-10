@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">BlockAds</string>
+    <string name="app_tagline">Duyệt Web Không Quảng Cáo</string>
     <string name="notification_channel_name">Dịch vụ chặn quảng cáo</string>
     <string name="notification_channel_description">Hiển thị khi VPN chặn quảng cáo đang hoạt động</string>
     <string name="vpn_notification_title">BlockAds đang hoạt động</string>
@@ -63,6 +64,10 @@
     <string name="log_action_copy">Sao chép tên miền</string>
     <string name="log_search_hint">Tìm kiếm tên miền…</string>
     <string name="domain_copied">Đã sao chép tên miền</string>
+
+    <!-- Test Block Ads -->
+    <string name="test_block_ads">Kiểm tra chặn QC</string>
+    <string name="test_block_ads_title">Kiểm tra chặn quảng cáo</string>
 
     <!-- Home Screen -->
     <string name="home_connecting_desc">Đang thiết lập kết nối VPN…</string>

@@ -76,16 +76,21 @@ import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onNavigateToAbout: () -> Unit = {},
-    onNavigateToWhitelistApps: () -> Unit = {},
+    navigator: DestinationsNavigator,
     viewModel: SettingsViewModel = koinViewModel()
 ) {
     val autoReconnect by viewModel.autoReconnect.collectAsState()
@@ -140,7 +145,10 @@ fun SettingsScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.settings_theme),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -179,7 +187,10 @@ fun SettingsScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.settings_language),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -231,7 +242,11 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Filter Lists
-            SectionHeader(stringResource(R.string.settings_filter_lists, filterLists.count { it.isEnabled }))
+            SectionHeader(
+                stringResource(
+                    R.string.settings_filter_lists,
+                    filterLists.count { it.isEnabled })
+            )
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
@@ -259,7 +274,11 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.settings_add_custom_filter))
                     }
@@ -285,7 +304,11 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.settings_updating))
                 } else {
-                    Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Default.CloudDownload,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.settings_update_all))
                 }
@@ -301,10 +324,17 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Dns, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                        Icon(
+                            Icons.Default.Dns,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp)
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(R.string.settings_upstream_dns), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.settings_upstream_dns),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
@@ -339,12 +369,14 @@ fun SettingsScreen(
             // Whitelist Apps
             SectionHeader(stringResource(R.string.settings_whitelist))
             Card(
-                onClick = onNavigateToWhitelistApps,
+                onClick = { navigator.navigate(AppWhitelistScreenDestination) },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -354,7 +386,10 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.settings_whitelist_apps), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.settings_whitelist_apps),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                         Text(
                             stringResource(R.string.settings_whitelist_apps_desc),
                             style = MaterialTheme.typography.bodySmall,
@@ -380,7 +415,9 @@ fun SettingsScreen(
             ) {
                 Column {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -390,7 +427,10 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.settings_whitelist_domains), style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                stringResource(R.string.settings_whitelist_domains),
+                                style = MaterialTheme.typography.titleSmall
+                            )
                             Text(
                                 stringResource(R.string.settings_whitelist_domains_desc),
                                 style = MaterialTheme.typography.bodySmall,
@@ -439,7 +479,11 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.settings_add_domain))
                     }
@@ -464,7 +508,11 @@ fun SettingsScreen(
                         contentColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Default.Upload,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(stringResource(R.string.settings_export))
                 }
@@ -477,7 +525,11 @@ fun SettingsScreen(
                         contentColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
-                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Default.Download,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(stringResource(R.string.settings_import))
                 }
@@ -494,7 +546,11 @@ fun SettingsScreen(
                     contentColor = DangerRed
                 )
             ) {
-                Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Default.DeleteForever,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.settings_clear_logs))
             }
@@ -503,12 +559,14 @@ fun SettingsScreen(
 
             // About
             Card(
-                onClick = onNavigateToAbout,
+                onClick = { navigator.navigate(AboutScreenDestination) },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -518,7 +576,10 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.settings_about), style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            stringResource(R.string.settings_about),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                         Text(
                             stringResource(R.string.settings_about_desc),
                             style = MaterialTheme.typography.bodySmall,
@@ -534,7 +595,7 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(200.dp))
         }
     }
 
@@ -726,11 +787,15 @@ private fun SettingsToggleItem(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(20.dp))
+        Icon(
+            icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(20.dp)
+        )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleSmall)

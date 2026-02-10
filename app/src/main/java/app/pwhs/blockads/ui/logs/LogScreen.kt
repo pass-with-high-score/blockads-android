@@ -72,11 +72,14 @@ import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogScreen(
@@ -247,7 +250,7 @@ fun LogScreen(
                         onLongPress = { selectedEntry = entry }
                     )
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(200.dp)) }
             }
         }
     }
@@ -256,7 +259,8 @@ fun LogScreen(
     selectedEntry?.let { entry ->
         ModalBottomSheet(
             onDismissRequest = { selectedEntry = null },
-            sheetState = rememberModalBottomSheetState()
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier
@@ -285,7 +289,7 @@ fun LogScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.surface
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -305,7 +309,7 @@ fun LogScreen(
                         Text(
                             text = stringResource(R.string.log_action_whitelist),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -322,7 +326,7 @@ fun LogScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.surface
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -342,7 +346,7 @@ fun LogScreen(
                         Text(
                             text = stringResource(R.string.log_action_copy),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
