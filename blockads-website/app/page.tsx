@@ -53,7 +53,7 @@ export default function Home() {
               Download for Android
             </a>
             <a
-              href="https://github.com/user/blockads"
+              href="https://github.com/nqmgaming/blockads-android"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 border border-white/10 text-white font-medium rounded-2xl text-lg hover:bg-white/5 transition-all"

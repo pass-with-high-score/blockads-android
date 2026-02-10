@@ -171,7 +171,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 icon = Icons.Filled.Code,
                 title = stringResource(R.string.about_github),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/pwhswordman/blockads"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/pass-with-high-score/blockads-android"))
                     context.startActivity(intent)
                 }
             )
@@ -180,7 +180,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 icon = Icons.Filled.PrivacyTip,
                 title = stringResource(R.string.about_privacy_policy),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://pwhswordman.github.io/blockads/privacy"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://blockads.pwhs.app/privacy"))
                     context.startActivity(intent)
                 }
             )
@@ -190,7 +190,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 title = stringResource(R.string.about_contact),
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:support@blockads.app")
+                        data = Uri.parse("mailto:support@pwhs.app")
                     }
                     context.startActivity(intent)
                 }

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "BlockAds – Ad Blocker for Android | No Root",
   description:
     "Block ads & trackers system-wide on Android. DNS filtering, no root needed. Free & open source.",
-  metadataBase: new URL("https://blockads.app"),
+  metadataBase: new URL("https://blockads.pwhs.app/"),
   keywords: [
     "ad blocker",
     "block ads",

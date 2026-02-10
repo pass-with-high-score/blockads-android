@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
             userAgent: "*",
             allow: "/",
         },
-        sitemap: "https://blockads.app/sitemap.xml",
+        sitemap: "https://blockads.pwhs.app/sitemap.xml",
     };
 }

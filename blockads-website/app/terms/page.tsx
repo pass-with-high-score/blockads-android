@@ -144,10 +144,10 @@ export default function TermsOfService() {
                 <p>
                     <strong>Email:</strong>{" "}
                     <a
-                        href="mailto:contact@blockads.app"
+                        href="mailto:contact@pwhs.app"
                         className="text-[#00E676] hover:underline"
                     >
-                        contact@blockads.app
+                        contact@pwhs.app
                     </a>
                 </p>
             </div>
