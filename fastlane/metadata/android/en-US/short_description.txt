@@ -1,0 +1,1 @@
+Block ads & trackers system-wide. DNS filtering, no root. Free & open source!

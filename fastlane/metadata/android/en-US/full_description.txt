@@ -1,0 +1,78 @@
+🛡️ BlockAds — Smart Ad Blocker for Android
+
+Tired of intrusive ads slowing down your phone? BlockAds blocks ads across ALL your apps and browsers with just ONE tap — no root required!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ KEY FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚫 SYSTEM-WIDE AD BLOCKING
+• Block ads in every app and browser
+• Smart DNS-based filtering technology
+• No root access needed
+
+🔒 PRIVACY PROTECTION
+• Block trackers and spyware
+• All data stored locally on your device
+• Zero data collection — we don't track you
+
+📊 DETAILED STATISTICS
+• Real-time blocked ad counter
+• 24-hour activity chart
+• Detailed DNS query logs — see exactly what's blocked
+
+⚙️ FULLY CUSTOMIZABLE
+• Multiple built-in filter lists (ABPVN, AdGuard DNS, EasyList, and more)
+• Add custom filter lists via URL
+• Choose your DNS server (Google, Cloudflare, or custom)
+• Whitelist specific apps or domains
+• Auto-reconnect on device boot
+
+🎨 BEAUTIFUL MODERN UI
+• Material 3 design with Jetpack Compose
+• Dark, Light, and System theme modes
+• Quick Settings tile for instant toggle
+
+💾 BACKUP & RESTORE
+• Export all settings to JSON
+• Import settings on a new device
+• Never lose your configuration
+
+🔋 BATTERY & DATA FRIENDLY
+• Only filters DNS traffic — minimal performance impact
+• Reduces unnecessary ad data downloads
+• Runs quietly in the background
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 HOW TO USE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ Open BlockAds
+2️⃣ Tap the power button to start blocking
+3️⃣ Allow VPN connection
+4️⃣ Enjoy an ad-free internet! 🎉
+
+You can also toggle protection from the Quick Settings tile in your notification shade.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤔 FAQ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ Is BlockAds safe?
+✅ Completely safe! The app only filters DNS queries locally to block ads. No personal data is intercepted or transmitted.
+
+❓ Why does it need VPN permission?
+✅ BlockAds creates a local VPN tunnel on your device to filter DNS requests. No data is sent to external servers — everything stays on your phone.
+
+❓ Does it work with all apps?
+✅ Yes! BlockAds works system-wide across all apps, browsers, and games. You can also whitelist specific apps if needed.
+
+❓ Is it really free?
+✅ 100% free, no ads inside the app, no in-app purchases, and open source!
+
+❓ Will it slow down my internet?
+✅ No. BlockAds only processes DNS queries (tiny packets), so there's virtually no impact on speed or battery life.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BlockAds is free, open source, and respects your privacy. Download now and take back control of your Android experience!
