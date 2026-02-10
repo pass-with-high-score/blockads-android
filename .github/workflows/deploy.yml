@@ -1,98 +1,34 @@
-name: Build & Deploy
+name: Deploy
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
-  pull_request:
-    branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  JAVA_VERSION: '17'
-  RUBY_VERSION: '3.2'
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  # ──────────────────────────────────────────────
-  # JOB 1: Build & Test (runs on every push/PR)
-  # ──────────────────────────────────────────────
-  build:
-    name: Build & Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-
-      # ── Gradle cache ──
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/wrapper
-          key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/daemon
-          key: gradle-deps-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml') }}
-          restore-keys: |
-            gradle-deps-${{ runner.os }}-
-
-      # ── Build ──
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run lint
-        run: ./gradlew lint
-
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
-
-  # ──────────────────────────────────────────────
-  # JOB 2: Deploy to Play Store (only on tags)
-  # ──────────────────────────────────────────────
   deploy:
-    name: Deploy to Play Store
+    name: Build & Deploy to Play Store
     runs-on: ubuntu-latest
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ env.JAVA_VERSION }}
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Ruby ${{ env.RUBY_VERSION }}
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ env.RUBY_VERSION }}
-          bundler-cache: true  # caches gems automatically
+          ruby-version: '3.2'
+          bundler-cache: true
 
-      # ── Gradle cache ──
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -100,55 +36,47 @@ jobs:
             ~/.gradle/wrapper
             ~/.gradle/caches
             ~/.gradle/daemon
-          key: gradle-full-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
-            gradle-full-${{ runner.os }}-
+            gradle-${{ runner.os }}-
 
-      # ── Signing ──
+      # Signing
       - name: Decode keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > app/blockads-release.jks
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/blockads-release.jks
 
-      - name: Create key properties
-        env:
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+      - name: Create key.properties
         run: |
           cat > key.properties <<EOF
           storeFile=blockads-release.jks
-          storePassword=$STORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      # ── Play Store key ──
-      - name: Decode Play Store service account key
-        env:
-          PLAY_STORE_KEY_BASE64: ${{ secrets.PLAY_STORE_KEY_BASE64 }}
-        run: |
-          echo "$PLAY_STORE_KEY_BASE64" | base64 --decode > fastlane/play-store-key.json
+      - name: Decode Play Store key
+        run: echo "${{ secrets.PLAY_STORE_KEY_BASE64 }}" | base64 --decode > fastlane/play-store-key.json
 
-      # ── Build & Deploy ──
-      - name: Grant execute permission for gradlew
+      # Build & Deploy
+      - name: Grant execute permission
         run: chmod +x gradlew
 
       - name: Deploy to internal track
         run: bundle exec fastlane internal
 
-      - name: Upload release AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-aab
-          path: app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
-
-      # ── GitHub Release ──
-      - name: Build release APK (for GitHub Release)
+      - name: Build release APK
         run: ./gradlew assembleRelease
 
+      # Artifacts
+      - name: Upload release AAB & APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build
+          path: |
+            app/build/outputs/bundle/release/app-release.aab
+            app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+
+      # GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
