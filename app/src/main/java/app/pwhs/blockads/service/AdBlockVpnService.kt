@@ -39,6 +39,10 @@ class AdBlockVpnService : VpnService() {
         @Volatile
         var isRunning = false
             private set
+
+        @Volatile
+        var isConnecting = false
+            private set
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -72,7 +76,8 @@ class AdBlockVpnService : VpnService() {
     }
 
     private fun startVpn() {
-        if (isRunning) return
+        if (isRunning || isConnecting) return
+        isConnecting = true
 
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
@@ -124,6 +129,7 @@ class AdBlockVpnService : VpnService() {
                     return@launch
                 }
 
+                isConnecting = false
                 isRunning = true
                 appPrefs.setVpnEnabled(true)
                 Log.d(TAG, "VPN established successfully")
@@ -133,6 +139,7 @@ class AdBlockVpnService : VpnService() {
 
             } catch (e: Exception) {
                 Log.e(TAG, "VPN startup failed", e)
+                isConnecting = false
                 stopVpn()
             }
         }
@@ -272,6 +279,7 @@ class AdBlockVpnService : VpnService() {
 
     private fun stopVpn() {
         isProcessing = false
+        isConnecting = false
         isRunning = false
 
         runBlocking {
@@ -298,6 +306,7 @@ class AdBlockVpnService : VpnService() {
 
     override fun onDestroy() {
         isProcessing = false
+        isConnecting = false
         isRunning = false
         serviceScope.cancel()
         try {

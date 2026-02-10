@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.settings
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -10,8 +11,8 @@ import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListBackup
-import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
@@ -51,6 +52,9 @@ class SettingsViewModel(
     val themeMode: StateFlow<String> = appPrefs.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.THEME_SYSTEM)
 
+    val appLanguage: StateFlow<String> = appPrefs.appLanguage
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.LANGUAGE_SYSTEM)
+
     init {
         viewModelScope.launch {
             filterRepo.seedDefaultsIfNeeded()
@@ -67,6 +71,17 @@ class SettingsViewModel(
 
     fun setThemeMode(mode: String) {
         viewModelScope.launch { appPrefs.setThemeMode(mode) }
+    }
+
+    fun setAppLanguage(language: String) {
+        viewModelScope.launch {
+            appPrefs.setAppLanguage(language)
+            LocaleHelper.setLocale(context, language)
+            // On pre-API 33, we need to recreate the activity
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                (context as? Activity)?.recreate()
+            }
+        }
     }
 
     fun toggleFilterList(filter: FilterList) {
@@ -149,6 +164,7 @@ class SettingsViewModel(
                     upstreamDns = appPrefs.upstreamDns.first(),
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
+                    appLanguage = appPrefs.appLanguage.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -182,6 +198,7 @@ class SettingsViewModel(
                 appPrefs.setUpstreamDns(backup.upstreamDns)
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
+                appPrefs.setAppLanguage(backup.appLanguage)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->

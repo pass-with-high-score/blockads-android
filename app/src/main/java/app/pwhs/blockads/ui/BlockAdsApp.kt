@@ -21,12 +21,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.ui.about.AboutScreen
 import app.pwhs.blockads.ui.home.HomeScreen
@@ -39,18 +42,18 @@ import org.koin.compose.koinInject
 
 sealed class Screen(
     val route: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
-    data object Home : Screen("home", "Home", Icons.Filled.Home, Icons.Outlined.Home)
+    data object Home : Screen("home", R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home)
     data object Logs : Screen(
-        "logs", "Logs", Icons.AutoMirrored.Filled.List,
+        "logs", R.string.nav_logs, Icons.AutoMirrored.Filled.List,
         Icons.AutoMirrored.Outlined.List
     )
 
     data object Settings :
-        Screen("settings", "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
+        Screen("settings", R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings)
 }
 
 @Composable
@@ -93,10 +96,10 @@ fun BlockAdsApp(
                             icon = {
                                 Icon(
                                     imageVector = if (selected) screen.selectedIcon else screen.unselectedIcon,
-                                    contentDescription = screen.label
+                                    contentDescription = stringResource(screen.labelRes)
                                 )
                             },
-                            label = { Text(screen.label) },
+                            label = { Text(stringResource(screen.labelRes)) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,

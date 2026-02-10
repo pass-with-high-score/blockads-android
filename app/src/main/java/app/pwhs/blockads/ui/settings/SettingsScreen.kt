@@ -1,6 +1,5 @@
 package app.pwhs.blockads.ui.settings
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -26,13 +25,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SettingsBrightness
@@ -67,12 +66,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterList
-import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -94,6 +94,7 @@ fun SettingsScreen(
     val isUpdatingFilter by viewModel.isUpdatingFilter.collectAsState()
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
+    val appLanguage by viewModel.appLanguage.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -113,7 +114,7 @@ fun SettingsScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         TopAppBar(
-            title = { Text("Settings", fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background
             )
@@ -126,7 +127,7 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // Appearance
-            SectionHeader("Appearance")
+            SectionHeader(stringResource(R.string.settings_appearance))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
@@ -139,7 +140,7 @@ fun SettingsScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Theme", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.titleSmall)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
@@ -147,24 +148,63 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         ThemeModeChip(
-                            label = "System",
+                            label = stringResource(R.string.settings_theme_system),
                             icon = Icons.Default.SettingsBrightness,
                             selected = themeMode == AppPreferences.THEME_SYSTEM,
                             onClick = { viewModel.setThemeMode(AppPreferences.THEME_SYSTEM) },
                             modifier = Modifier.weight(1f)
                         )
                         ThemeModeChip(
-                            label = "Light",
+                            label = stringResource(R.string.settings_theme_light),
                             icon = Icons.Default.LightMode,
                             selected = themeMode == AppPreferences.THEME_LIGHT,
                             onClick = { viewModel.setThemeMode(AppPreferences.THEME_LIGHT) },
                             modifier = Modifier.weight(1f)
                         )
                         ThemeModeChip(
-                            label = "Dark",
+                            label = stringResource(R.string.settings_theme_dark),
                             icon = Icons.Default.DarkMode,
                             selected = themeMode == AppPreferences.THEME_DARK,
                             onClick = { viewModel.setThemeMode(AppPreferences.THEME_DARK) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Language, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleSmall)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ThemeModeChip(
+                            label = stringResource(R.string.settings_lang_system),
+                            icon = Icons.Default.SettingsBrightness,
+                            selected = appLanguage == AppPreferences.LANGUAGE_SYSTEM,
+                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_SYSTEM) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        ThemeModeChip(
+                            label = stringResource(R.string.settings_lang_en),
+                            icon = Icons.Default.Language,
+                            selected = appLanguage == AppPreferences.LANGUAGE_EN,
+                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_EN) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        ThemeModeChip(
+                            label = stringResource(R.string.settings_lang_vi),
+                            icon = Icons.Default.Language,
+                            selected = appLanguage == AppPreferences.LANGUAGE_VI,
+                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -174,15 +214,15 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Connection
-            SectionHeader("Connection")
+            SectionHeader(stringResource(R.string.settings_connection))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 SettingsToggleItem(
                     icon = Icons.Default.Replay,
-                    title = "Auto-reconnect",
-                    subtitle = "Restart ad blocker on device boot",
+                    title = stringResource(R.string.settings_auto_reconnect),
+                    subtitle = stringResource(R.string.settings_auto_reconnect_desc),
                     isChecked = autoReconnect,
                     onCheckedChange = { viewModel.setAutoReconnect(it) }
                 )
@@ -191,7 +231,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Filter Lists
-            SectionHeader("Filter Lists (${filterLists.count { it.isEnabled }} active)")
+            SectionHeader(stringResource(R.string.settings_filter_lists, filterLists.count { it.isEnabled }))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
@@ -221,7 +261,7 @@ fun SettingsScreen(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Custom Filter List")
+                        Text(stringResource(R.string.settings_add_custom_filter))
                     }
                 }
             }
@@ -243,18 +283,18 @@ fun SettingsScreen(
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Updating…")
+                    Text(stringResource(R.string.settings_updating))
                 } else {
                     Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Update All Filters")
+                    Text(stringResource(R.string.settings_update_all))
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // DNS
-            SectionHeader("DNS Configuration")
+            SectionHeader(stringResource(R.string.settings_dns_config))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
@@ -264,7 +304,7 @@ fun SettingsScreen(
                         Icon(Icons.Default.Dns, contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Upstream DNS Server", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_upstream_dns), style = MaterialTheme.typography.titleSmall)
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
@@ -289,7 +329,7 @@ fun SettingsScreen(
                                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                                 contentColor = MaterialTheme.colorScheme.primary
                             )
-                        ) { Text("Save DNS") }
+                        ) { Text(stringResource(R.string.settings_save_dns)) }
                     }
                 }
             }
@@ -297,7 +337,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Whitelist Apps
-            SectionHeader("Whitelist")
+            SectionHeader(stringResource(R.string.settings_whitelist))
             Card(
                 onClick = onNavigateToWhitelistApps,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -314,9 +354,9 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Whitelisted Apps", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_whitelist_apps), style = MaterialTheme.typography.titleSmall)
                         Text(
-                            "Exclude apps from ad blocking",
+                            stringResource(R.string.settings_whitelist_apps_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -350,9 +390,9 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Whitelisted Domains", style = MaterialTheme.typography.titleSmall)
+                            Text(stringResource(R.string.settings_whitelist_domains), style = MaterialTheme.typography.titleSmall)
                             Text(
-                                "These domains will never be blocked",
+                                stringResource(R.string.settings_whitelist_domains_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextSecondary
                             )
@@ -401,7 +441,7 @@ fun SettingsScreen(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Domain")
+                        Text(stringResource(R.string.settings_add_domain))
                     }
                 }
             }
@@ -409,7 +449,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Data
-            SectionHeader("Data & Backup")
+            SectionHeader(stringResource(R.string.settings_data_backup))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -426,7 +466,7 @@ fun SettingsScreen(
                 ) {
                     Icon(Icons.Default.Upload, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Export")
+                    Text(stringResource(R.string.settings_export))
                 }
                 Button(
                     onClick = { importLauncher.launch(arrayOf("application/json")) },
@@ -439,7 +479,7 @@ fun SettingsScreen(
                 ) {
                     Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Import")
+                    Text(stringResource(R.string.settings_import))
                 }
             }
 
@@ -456,7 +496,7 @@ fun SettingsScreen(
             ) {
                 Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Clear All Logs")
+                Text(stringResource(R.string.settings_clear_logs))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -478,9 +518,9 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("About", style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.settings_about), style = MaterialTheme.typography.titleSmall)
                         Text(
-                            "Version, privacy policy, source code",
+                            stringResource(R.string.settings_about_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -601,13 +641,13 @@ private fun AddFilterDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Filter List") },
+        title = { Text(stringResource(R.string.settings_add_filter_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.settings_add_filter_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -615,7 +655,7 @@ private fun AddFilterDialog(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("URL (hosts format)") },
+                    label = { Text(stringResource(R.string.settings_add_filter_url)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -626,10 +666,10 @@ private fun AddFilterDialog(
             Button(
                 onClick = { if (name.isNotBlank() && url.isNotBlank()) onAdd(name, url) },
                 enabled = name.isNotBlank() && url.isNotBlank()
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.settings_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) }
         }
     )
 }
@@ -643,12 +683,12 @@ private fun AddDomainDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Whitelisted Domain") },
+        title = { Text(stringResource(R.string.settings_add_domain_title)) },
         text = {
             OutlinedTextField(
                 value = domain,
                 onValueChange = { domain = it },
-                label = { Text("Domain (e.g. example.com)") },
+                label = { Text(stringResource(R.string.settings_add_domain_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
@@ -658,10 +698,10 @@ private fun AddDomainDialog(
             Button(
                 onClick = { if (domain.isNotBlank()) onAdd(domain) },
                 enabled = domain.isNotBlank()
-            ) { Text("Add") }
+            ) { Text(stringResource(R.string.settings_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) }
         }
     )
 }

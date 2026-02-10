@@ -1,6 +1,7 @@
 package app.pwhs.blockads
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.VpnService
@@ -17,9 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.BlockAdsApp
 import app.pwhs.blockads.ui.theme.BlockadsTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.getKoin
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +41,13 @@ class MainActivity : ComponentActivity() {
     ) { granted ->
         // Proceed regardless — notification is optional but nice to have
         requestVpnPermission()
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        // Apply saved locale for pre-API 33 devices
+        val appPrefs = AppPreferences(newBase)
+        val savedLang = runBlocking { appPrefs.appLanguage.first() }
+        super.attachBaseContext(LocaleHelper.wrapContext(newBase, savedLang))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

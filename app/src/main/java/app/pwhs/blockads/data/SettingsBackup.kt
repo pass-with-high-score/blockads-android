@@ -8,6 +8,7 @@ data class SettingsBackup(
     val upstreamDns: String = AppPreferences.DEFAULT_UPSTREAM_DNS,
     val autoReconnect: Boolean = true,
     val themeMode: String = AppPreferences.THEME_SYSTEM,
+    val appLanguage: String = AppPreferences.LANGUAGE_SYSTEM,
     val filterLists: List<FilterListBackup> = emptyList(),
     val whitelistDomains: List<String> = emptyList(),
     val whitelistedApps: List<String> = emptyList()

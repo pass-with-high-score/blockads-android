@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.home
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -71,6 +72,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val vpnEnabled by viewModel.vpnEnabled.collectAsState()
+    val vpnConnecting by viewModel.vpnConnecting.collectAsState()
     val blockedCount by viewModel.blockedCount.collectAsState()
     val totalCount by viewModel.totalCount.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -95,18 +97,28 @@ fun HomeScreen(
 
         // Status text
         Text(
-            text = if (vpnEnabled) stringResource(R.string.status_protected)
-            else stringResource(R.string.status_unprotected),
+            text = when {
+                vpnConnecting -> stringResource(R.string.status_connecting)
+                vpnEnabled -> stringResource(R.string.status_protected)
+                else -> stringResource(R.string.status_unprotected)
+            },
             style = MaterialTheme.typography.headlineMedium,
-            color = if (vpnEnabled) NeonGreen else DangerRed,
+            color = when {
+                vpnConnecting -> AccentBlue
+                vpnEnabled -> NeonGreen
+                else -> DangerRed
+            },
             fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = if (vpnEnabled) stringResource(R.string.home_protected_desc)
-            else stringResource(R.string.home_unprotected_desc),
+            text = when {
+                vpnConnecting -> stringResource(R.string.home_connecting_desc)
+                vpnEnabled -> stringResource(R.string.home_protected_desc)
+                else -> stringResource(R.string.home_unprotected_desc)
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary
         )
@@ -116,11 +128,14 @@ fun HomeScreen(
         // Power button — never blocked by filter loading
         PowerButton(
             isActive = vpnEnabled,
+            isConnecting = vpnConnecting,
             onClick = {
-                if (vpnEnabled) {
-                    viewModel.stopVpn(context)
-                } else {
-                    onRequestVpnPermission()
+                if (!vpnConnecting) {
+                    if (vpnEnabled) {
+                        viewModel.stopVpn(context)
+                    } else {
+                        onRequestVpnPermission()
+                    }
                 }
             }
         )
@@ -381,22 +396,31 @@ private fun StatsChart(
 @Composable
 private fun PowerButton(
     isActive: Boolean,
+    isConnecting: Boolean,
     onClick: () -> Unit
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isActive) 1f else 0.95f,
-        animationSpec = tween(300),
-        label = "scale"
-    )
-
     val buttonColor by animateColorAsState(
-        targetValue = if (isActive) NeonGreen else DangerRed,
+        targetValue = when {
+            isConnecting -> AccentBlue
+            isActive -> NeonGreen
+            else -> DangerRed
+        },
         animationSpec = tween(500),
         label = "buttonColor"
     )
 
+    val scale by animateFloatAsState(
+        targetValue = if (isActive || isConnecting) 1f else 0.95f,
+        animationSpec = tween(300),
+        label = "scale"
+    )
+
     val glowAlpha by animateFloatAsState(
-        targetValue = if (isActive) 0.4f else 0.2f,
+        targetValue = when {
+            isConnecting -> 0.3f
+            isActive -> 0.4f
+            else -> 0.2f
+        },
         animationSpec = tween(500),
         label = "glow"
     )
@@ -405,12 +429,23 @@ private fun PowerButton(
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = if (isActive) 1.08f else 1f,
+        targetValue = if (isActive && !isConnecting) 1.08f else 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
+    )
+
+    // Spinning animation when connecting
+    val connectingRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = if (isConnecting) 360f else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "connectingRotation"
     )
 
     Box(
@@ -440,7 +475,7 @@ private fun PowerButton(
                 .size(140.dp)
                 .scale(scale)
                 .shadow(
-                    elevation = if (isActive) 20.dp else 8.dp,
+                    elevation = if (isActive || isConnecting) 20.dp else 8.dp,
                     shape = CircleShape,
                     ambientColor = buttonColor.copy(alpha = 0.3f),
                     spotColor = buttonColor.copy(alpha = 0.3f)
@@ -466,15 +501,24 @@ private fun PowerButton(
                 )
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
+                    indication = null,
+                    enabled = !isConnecting
                 ) { onClick() }
         ) {
-            Icon(
-                imageVector = Icons.Default.PowerSettingsNew,
-                contentDescription = "Toggle VPN",
-                tint = buttonColor,
-                modifier = Modifier.size(64.dp)
-            )
+            if (isConnecting) {
+                CircularProgressIndicator(
+                    color = buttonColor,
+                    modifier = Modifier.size(56.dp),
+                    strokeWidth = 3.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.PowerSettingsNew,
+                    contentDescription = "Toggle VPN",
+                    tint = buttonColor,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
         }
     }
 }

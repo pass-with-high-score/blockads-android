@@ -24,10 +24,15 @@ class AppPreferences(private val context: Context) {
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
+        private val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
 
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
         const val THEME_LIGHT = "light"
+
+        const val LANGUAGE_SYSTEM = "system"
+        const val LANGUAGE_EN = "en"
+        const val LANGUAGE_VI = "vi"
 
         const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
         const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
@@ -59,6 +64,10 @@ class AppPreferences(private val context: Context) {
 
     val themeMode: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_THEME_MODE] ?: THEME_SYSTEM
+    }
+
+    val appLanguage: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_APP_LANGUAGE] ?: LANGUAGE_SYSTEM
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -111,6 +120,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_THEME_MODE] = mode
+        }
+    }
+
+    suspend fun setAppLanguage(language: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_APP_LANGUAGE] = language
         }
     }
 

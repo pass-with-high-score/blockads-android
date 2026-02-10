@@ -5,18 +5,15 @@
     <string name="vpn_notification_title">BlockAds đang hoạt động</string>
     <string name="vpn_notification_text">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
     <string name="status_protected">Được bảo vệ</string>
+    <string name="status_connecting">Đang kết nối</string>
     <string name="status_unprotected">Chưa bảo vệ</string>
     <string name="total_queries">Tổng truy vấn</string>
     <string name="blocked_queries">Đã chặn</string>
     <string name="nav_home">Trang chủ</string>
     <string name="nav_logs">Nhật ký</string>
     <string name="nav_settings">Cài đặt</string>
-    <string name="settings_auto_reconnect">Tự động kết nối lại</string>
-    <string name="settings_auto_reconnect_desc">Tự động khởi động lại chặn quảng cáo khi bật máy</string>
     <string name="settings_filter_url">URL danh sách bộ lọc</string>
-    <string name="settings_upstream_dns">Máy chủ DNS upstream</string>
     <string name="settings_update_filter">Cập nhật danh sách bộ lọc</string>
-    <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
     <string name="filter_updating">Đang cập nhật danh sách bộ lọc…</string>
     <string name="filter_updated">Đã cập nhật bộ lọc: %d tên miền</string>
     <string name="filter_update_failed">Không thể cập nhật danh sách bộ lọc</string>
@@ -68,9 +65,51 @@
     <string name="domain_copied">Đã sao chép tên miền</string>
 
     <!-- Home Screen -->
+    <string name="home_connecting_desc">Đang thiết lập kết nối VPN…</string>
     <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
     <string name="home_unprotected_desc">Nhấn nút để bật chặn quảng cáo</string>
     <string name="home_block_rate">Tỷ lệ chặn</string>
     <string name="home_filter_rules">Quy tắc lọc</string>
     <string name="home_recent_blocked">Chặn gần đây</string>
+    <string name="settings_language">Ngôn ngữ</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_appearance">Giao diện</string>
+    <string name="settings_theme">Chủ đề</string>
+    <string name="settings_theme_system">Hệ thống</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+    <string name="settings_lang_system">Hệ thống</string>
+    <string name="settings_lang_en">English</string>
+    <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_connection">Kết nối</string>
+    <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
+    <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>
+    <string name="settings_updating">Đang cập nhật…</string>
+    <string name="settings_update_all">Cập nhật tất cả bộ lọc</string>
+    <string name="settings_dns_config">Cấu hình DNS</string>
+    <string name="settings_save_dns">Lưu DNS</string>
+    <string name="settings_whitelist">Danh sách cho phép</string>
+    <string name="settings_whitelist_apps">Ứng dụng được phép</string>
+    <string name="settings_whitelist_apps_desc">Loại trừ ứng dụng khỏi chặn quảng cáo</string>
+    <string name="settings_whitelist_domains">Tên miền được phép</string>
+    <string name="settings_whitelist_domains_desc">Các tên miền này sẽ không bao giờ bị chặn</string>
+    <string name="settings_add_domain">Thêm tên miền</string>
+    <string name="settings_data_backup">Dữ liệu &amp; Sao lưu</string>
+    <string name="settings_export">Xuất</string>
+    <string name="settings_import">Nhập</string>
+    <string name="settings_about">Giới thiệu</string>
+    <string name="settings_about_desc">Phiên bản, chính sách bảo mật, mã nguồn</string>
+    <string name="settings_add_filter_title">Thêm danh sách bộ lọc</string>
+    <string name="settings_add_filter_name">Tên</string>
+    <string name="settings_add_filter_url">URL (định dạng hosts)</string>
+    <string name="settings_add">Thêm</string>
+    <string name="settings_cancel">Hủy</string>
+    <string name="settings_add_domain_title">Thêm tên miền cho phép</string>
+    <string name="settings_add_domain_hint">Tên miền (vd: example.com)</string>
+    <string name="settings_auto_reconnect">Tự động kết nối lại</string>
+    <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
+    <string name="settings_upstream_dns">Máy chủ DNS</string>
+    <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
 </resources>

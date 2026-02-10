@@ -28,6 +28,9 @@ class HomeViewModel(
     private val _vpnEnabled = MutableStateFlow(AdBlockVpnService.isRunning)
     val vpnEnabled: StateFlow<Boolean> = _vpnEnabled.asStateFlow()
 
+    private val _vpnConnecting = MutableStateFlow(AdBlockVpnService.isConnecting)
+    val vpnConnecting: StateFlow<Boolean> = _vpnConnecting.asStateFlow()
+
     val blockedCount: StateFlow<Int> = dnsLogDao.getBlockedCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
@@ -53,6 +56,7 @@ class HomeViewModel(
         viewModelScope.launch {
             while (isActive) {
                 _vpnEnabled.value = AdBlockVpnService.isRunning
+                _vpnConnecting.value = AdBlockVpnService.isConnecting
                 delay(500)
             }
         }
