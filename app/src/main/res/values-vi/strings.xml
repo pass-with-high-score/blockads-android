@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">BlockAds</string>
+    <string name="notification_channel_name">Dịch vụ chặn quảng cáo</string>
+    <string name="notification_channel_description">Hiển thị khi VPN chặn quảng cáo đang hoạt động</string>
+    <string name="vpn_notification_title">BlockAds đang hoạt động</string>
+    <string name="vpn_notification_text">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
+    <string name="status_protected">Được bảo vệ</string>
+    <string name="status_unprotected">Chưa bảo vệ</string>
+    <string name="total_queries">Tổng truy vấn</string>
+    <string name="blocked_queries">Đã chặn</string>
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_logs">Nhật ký</string>
+    <string name="nav_settings">Cài đặt</string>
+    <string name="settings_auto_reconnect">Tự động kết nối lại</string>
+    <string name="settings_auto_reconnect_desc">Tự động khởi động lại chặn quảng cáo khi bật máy</string>
+    <string name="settings_filter_url">URL danh sách bộ lọc</string>
+    <string name="settings_upstream_dns">Máy chủ DNS upstream</string>
+    <string name="settings_update_filter">Cập nhật danh sách bộ lọc</string>
+    <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
+    <string name="filter_updating">Đang cập nhật danh sách bộ lọc…</string>
+    <string name="filter_updated">Đã cập nhật bộ lọc: %d tên miền</string>
+    <string name="filter_update_failed">Không thể cập nhật danh sách bộ lọc</string>
+    <string name="logs_empty">Chưa có truy vấn DNS nào được ghi lại</string>
+    <string name="logs_filter_all">Tất cả</string>
+    <string name="logs_filter_blocked">Đã chặn</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Chặn quảng cáo thông minh</string>
+    <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.</string>
+    <string name="onboarding_title_2">Quyền riêng tư của bạn, được bảo vệ</string>
+    <string name="onboarding_desc_2">Không thu thập dữ liệu. Không theo dõi. Tất cả nhật ký DNS chỉ lưu trên thiết bị của bạn. Chúng tôi không bao giờ xem hoạt động duyệt web của bạn.</string>
+    <string name="onboarding_title_3">Miễn phí &amp; Mã nguồn mở</string>
+    <string name="onboarding_desc_3">BlockAds hoàn toàn miễn phí, không có mua hàng trong ứng dụng. Mã nguồn được công khai để bất kỳ ai cũng có thể kiểm tra và xác minh.</string>
+    <string name="onboarding_skip">Bỏ qua</string>
+    <string name="onboarding_next">Tiếp theo</string>
+    <string name="onboarding_get_started">Bắt đầu</string>
+
+    <!-- Whitelist Apps -->
+    <string name="whitelist_apps_title">Ứng dụng được phép</string>
+    <string name="whitelist_apps_subtitle">Các ứng dụng này sẽ bỏ qua chặn quảng cáo</string>
+    <string name="whitelist_apps_search">Tìm ứng dụng…</string>
+    <string name="whitelist_apps_empty">Không có ứng dụng nào</string>
+    <string name="whitelist_apps_count">%d ứng dụng được phép</string>
+
+    <!-- Whitelist Domains -->
+    <string name="whitelist_domains_title">Tên miền được phép</string>
+    <string name="whitelist_domains_subtitle">Các tên miền này sẽ không bao giờ bị chặn</string>
+    <string name="whitelist_domains_add">Thêm tên miền</string>
+    <string name="whitelist_domains_hint">vd: example.com</string>
+    <string name="whitelist_domains_empty">Chưa có tên miền được phép</string>
+    <string name="whitelist_domain_added">Đã thêm tên miền: %s</string>
+    <string name="whitelist_domain_removed">Đã xóa tên miền khỏi danh sách</string>
+
+    <!-- About -->
+    <string name="about_title">Giới thiệu</string>
+    <string name="about_description">Ứng dụng chặn quảng cáo miễn phí, mã nguồn mở.\nKhông thu thập dữ liệu. Không theo dõi.</string>
+    <string name="about_version">Phiên bản %s</string>
+    <string name="about_github">Mã nguồn (GitHub)</string>
+    <string name="about_privacy_policy">Chính sách bảo mật</string>
+    <string name="about_contact">Liên hệ</string>
+    <string name="about_licenses">Giấy phép mã nguồn mở</string>
+    <string name="about_no_data">🔒 Ứng dụng này không thu thập bất kỳ dữ liệu cá nhân nào</string>
+
+    <!-- Log Actions -->
+    <string name="log_action_whitelist">Thêm vào danh sách cho phép</string>
+    <string name="log_action_copy">Sao chép tên miền</string>
+    <string name="log_search_hint">Tìm kiếm tên miền…</string>
+    <string name="domain_copied">Đã sao chép tên miền</string>
+
+    <!-- Home Screen -->
+    <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
+    <string name="home_unprotected_desc">Nhấn nút để bật chặn quảng cáo</string>
+    <string name="home_block_rate">Tỷ lệ chặn</string>
+    <string name="home_filter_rules">Quy tắc lọc</string>
+    <string name="home_recent_blocked">Chặn gần đây</string>
+</resources>

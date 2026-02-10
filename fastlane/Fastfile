@@ -1,0 +1,90 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Run tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Build debug APK"
+  lane :build_debug do
+    gradle(
+      task: "assembleDebug"
+    )
+  end
+
+  desc "Build release AAB (Android App Bundle)"
+  lane :build_release do
+    gradle(
+      task: "bundleRelease"
+    )
+  end
+
+  desc "Deploy internal testing track"
+  lane :internal do
+    gradle(
+      task: "bundleRelease"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      json_key: "fastlane/play-store-key.json",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+  end
+
+  desc "Promote internal to closed beta"
+  lane :beta do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "beta",
+      json_key: "fastlane/play-store-key.json",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Deploy to production"
+  lane :production do
+    gradle(
+      task: "bundleRelease"
+    )
+    upload_to_play_store(
+      track: "production",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      json_key: "fastlane/play-store-key.json",
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      release_status: "draft"
+    )
+  end
+
+  desc "Increment version code"
+  lane :bump_version do |options|
+    version_name = options[:version] || "1.0"
+    # Read current versionCode from build.gradle.kts
+    build_gradle = File.read("../app/build.gradle.kts")
+    current_code = build_gradle.match(/versionCode = (\d+)/)[1].to_i
+    new_code = current_code + 1
+
+    # Update versionCode
+    new_content = build_gradle.gsub(
+      /versionCode = \d+/,
+      "versionCode = #{new_code}"
+    )
+    # Update versionName if provided
+    new_content = new_content.gsub(
+      /versionName = ".*"/,
+      "versionName = \"#{version_name}\""
+    )
+    File.write("../app/build.gradle.kts", new_content)
+
+    UI.success("✅ Bumped to versionCode=#{new_code}, versionName=#{version_name}")
+  end
+end

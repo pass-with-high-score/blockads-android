@@ -1,0 +1,10 @@
+v1.0
+- Initial release
+- Ad blocking via DNS filtering
+- Multiple filter list support
+- Dark/Light/System theme
+- Quick Settings tile
+- Export/Import settings
+- 24-hour stats chart
+- App whitelist
+- DNS query logging

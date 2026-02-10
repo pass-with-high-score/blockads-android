@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">BlockAds</string>
+    <string name="notification_channel_name">Ad Blocker Service</string>
+    <string name="notification_channel_description">Shows when VPN ad blocker is active</string>
+    <string name="vpn_notification_title">BlockAds is active</string>
+    <string name="vpn_notification_text">Protecting your device from ads</string>
+    <string name="status_protected">Protected</string>
+    <string name="status_unprotected">Unprotected</string>
+    <string name="total_queries">Total Queries</string>
+    <string name="blocked_queries">Blocked</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_logs">Logs</string>
+    <string name="nav_settings">Settings</string>
+    <string name="settings_auto_reconnect">Auto-reconnect</string>
+    <string name="settings_auto_reconnect_desc">Automatically restart ad blocker on boot</string>
+    <string name="settings_filter_url">Filter List URL</string>
+    <string name="settings_upstream_dns">Upstream DNS Server</string>
+    <string name="settings_update_filter">Update Filter List</string>
+    <string name="settings_clear_logs">Clear All Logs</string>
+    <string name="filter_updating">Updating filter list…</string>
+    <string name="filter_updated">Filter list updated: %d domains</string>
+    <string name="filter_update_failed">Failed to update filter list</string>
+    <string name="logs_empty">No DNS queries logged yet</string>
+    <string name="logs_filter_all">All</string>
+    <string name="logs_filter_blocked">Blocked</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Block Ads Smartly</string>
+    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.</string>
+    <string name="onboarding_title_2">Your Privacy, Protected</string>
+    <string name="onboarding_desc_2">No data collection. No tracking. All DNS logs stay on your device only. We never see your browsing activity.</string>
+    <string name="onboarding_title_3">Free &amp; Open Source</string>
+    <string name="onboarding_desc_3">BlockAds is completely free with no in-app purchases. Our source code is open for anyone to inspect and verify.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+
+    <!-- Whitelist Apps -->
+    <string name="whitelist_apps_title">Whitelisted Apps</string>
+    <string name="whitelist_apps_subtitle">These apps will bypass ad blocking</string>
+    <string name="whitelist_apps_search">Search apps…</string>
+    <string name="whitelist_apps_empty">No apps installed</string>
+    <string name="whitelist_apps_count">%d apps whitelisted</string>
+
+    <!-- Whitelist Domains -->
+    <string name="whitelist_domains_title">Whitelisted Domains</string>
+    <string name="whitelist_domains_subtitle">These domains will never be blocked</string>
+    <string name="whitelist_domains_add">Add Domain</string>
+    <string name="whitelist_domains_hint">e.g. example.com</string>
+    <string name="whitelist_domains_empty">No whitelisted domains</string>
+    <string name="whitelist_domain_added">Domain whitelisted: %s</string>
+    <string name="whitelist_domain_removed">Domain removed from whitelist</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_description">Free, open-source ad blocker.\nNo data collection. No tracking.</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_github">Source Code (GitHub)</string>
+    <string name="about_privacy_policy">Privacy Policy</string>
+    <string name="about_contact">Contact Us</string>
+    <string name="about_licenses">Open Source Licenses</string>
+    <string name="about_no_data">🔒 This app does not collect any personal data</string>
+
+    <!-- Log Actions -->
+    <string name="log_action_whitelist">Add to Whitelist</string>
+    <string name="log_action_copy">Copy Domain</string>
+    <string name="log_search_hint">Search domains…</string>
+    <string name="domain_copied">Domain copied to clipboard</string>
+
+    <!-- Home Screen -->
+    <string name="home_protected_desc">Your device is protected from ads</string>
+    <string name="home_unprotected_desc">Tap the button to enable ad blocking</string>
+    <string name="home_block_rate">Block Rate</string>
+    <string name="home_filter_rules">Filter Rules</string>
+    <string name="home_recent_blocked">Recently Blocked</string>
+</resources>

@@ -1,0 +1,120 @@
+package app.pwhs.blockads
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.VpnService
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.content.ContextCompat
+import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.ui.BlockAdsApp
+import app.pwhs.blockads.ui.theme.BlockadsTheme
+import org.koin.java.KoinJavaComponent.getKoin
+
+class MainActivity : ComponentActivity() {
+
+    private val vpnPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            startVpnService()
+        }
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        // Proceed regardless — notification is optional but nice to have
+        requestVpnPermission()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            val appPrefs: AppPreferences = getKoin().get()
+            val themeMode by appPrefs.themeMode.collectAsState(initial = AppPreferences.THEME_SYSTEM)
+
+            val isDark = when (themeMode) {
+                AppPreferences.THEME_DARK -> true
+                AppPreferences.THEME_LIGHT -> false
+                else -> isSystemInDarkTheme()
+            }
+
+            // Update status bar icons when theme changes
+            DisposableEffect(isDark) {
+                enableEdgeToEdge(
+                    statusBarStyle = if (isDark) {
+                        SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(
+                            android.graphics.Color.TRANSPARENT,
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    },
+                    navigationBarStyle = if (isDark) {
+                        SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(
+                            android.graphics.Color.TRANSPARENT,
+                            android.graphics.Color.TRANSPARENT
+                        )
+                    }
+                )
+                onDispose {}
+            }
+
+            BlockadsTheme(themeMode = themeMode) {
+                BlockAdsApp(
+                    onRequestVpnPermission = { handleVpnToggle() }
+                )
+            }
+        }
+    }
+
+    private fun handleVpnToggle() {
+        // Check notification permission first (Android 13+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+        requestVpnPermission()
+    }
+
+    private fun requestVpnPermission() {
+        val intent = VpnService.prepare(this)
+        if (intent != null) {
+            vpnPermissionLauncher.launch(intent)
+        } else {
+            // Already have permission
+            startVpnService()
+        }
+    }
+
+    private fun startVpnService() {
+        val intent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = AdBlockVpnService.ACTION_START
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
+}
