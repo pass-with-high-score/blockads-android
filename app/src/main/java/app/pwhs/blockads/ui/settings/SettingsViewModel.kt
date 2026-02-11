@@ -56,6 +56,18 @@ class SettingsViewModel(
     val appLanguage: StateFlow<String> = appPrefs.appLanguage
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.LANGUAGE_SYSTEM)
 
+    val autoUpdateEnabled: StateFlow<Boolean> = appPrefs.autoUpdateEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val autoUpdateFrequency: StateFlow<String> = appPrefs.autoUpdateFrequency
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.UPDATE_FREQUENCY_24H)
+
+    val autoUpdateWifiOnly: StateFlow<Boolean> = appPrefs.autoUpdateWifiOnly
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val autoUpdateNotification: StateFlow<String> = appPrefs.autoUpdateNotification
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.NOTIFICATION_NORMAL)
+
     init {
         viewModelScope.launch {
             filterRepo.seedDefaultsIfNeeded()
@@ -86,6 +98,33 @@ class SettingsViewModel(
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
                 (context as? Activity)?.recreate()
             }
+        }
+    }
+
+    fun setAutoUpdateEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setAutoUpdateEnabled(enabled)
+            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+        }
+    }
+
+    fun setAutoUpdateFrequency(frequency: String) {
+        viewModelScope.launch {
+            appPrefs.setAutoUpdateFrequency(frequency)
+            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+        }
+    }
+
+    fun setAutoUpdateWifiOnly(wifiOnly: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setAutoUpdateWifiOnly(wifiOnly)
+            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+        }
+    }
+
+    fun setAutoUpdateNotification(notificationType: String) {
+        viewModelScope.launch {
+            appPrefs.setAutoUpdateNotification(notificationType)
         }
     }
 
