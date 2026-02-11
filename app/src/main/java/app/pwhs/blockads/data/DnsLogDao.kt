@@ -24,14 +24,11 @@ interface DnsLogDao {
     @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1")
     fun getBlockedCount(): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1")
-    suspend fun getBlockedCountOnce(): Int
-
     @Query("SELECT COUNT(*) FROM dns_logs")
     fun getTotalCount(): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM dns_logs")
-    suspend fun getTotalCountOnce(): Int
+    @Query("SELECT SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked, COUNT(*) AS total FROM dns_logs")
+    suspend fun getWidgetStats(): WidgetStats
 
     @Query("DELETE FROM dns_logs")
     suspend fun clearAll()

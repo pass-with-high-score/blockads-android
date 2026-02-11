@@ -17,6 +17,7 @@ import app.pwhs.blockads.service.AdBlockVpnService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -62,6 +63,11 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
         newOptions: Bundle
     ) {
         updateWidget(context, appWidgetManager, appWidgetId)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        coroutineScope.cancel()
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -259,16 +265,15 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
         coroutineScope.launch {
             try {
                 val dnsLogDao: DnsLogDao = getKoin().get()
-                val blocked = dnsLogDao.getBlockedCountOnce()
-                val total = dnsLogDao.getTotalCountOnce()
-                val blockRate = if (total > 0) {
-                    String.format("%.1f%%", blocked.toFloat() / total * 100)
+                val stats = dnsLogDao.getWidgetStats()
+                val blockRate = if (stats.total > 0) {
+                    String.format("%.1f%%", stats.blocked.toFloat() / stats.total * 100)
                 } else {
                     "0%"
                 }
 
-                views.setTextViewText(R.id.widget_blocked_count, formatCount(blocked))
-                views.setTextViewText(R.id.widget_total_count, formatCount(total))
+                views.setTextViewText(R.id.widget_blocked_count, formatCount(stats.blocked))
+                views.setTextViewText(R.id.widget_total_count, formatCount(stats.total))
                 views.setTextViewText(R.id.widget_block_rate, blockRate)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
