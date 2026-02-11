@@ -462,9 +462,10 @@ class AdBlockVpnService : VpnService() {
     private fun onNetworkAvailable() {
         Log.d(TAG, "Network available - checking VPN status")
         val autoReconnect = runBlocking { appPrefs.autoReconnect.first() }
+        val vpnWasEnabled = runBlocking { appPrefs.vpnEnabled.first() }
         
         // If VPN should be running but isn't, try to reconnect
-        if (autoReconnect && !isRunning && !isConnecting && !isReconnecting) {
+        if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isReconnecting) {
             Log.d(TAG, "Auto-reconnecting VPN after network became available")
             isReconnecting = true
             serviceScope.launch {
