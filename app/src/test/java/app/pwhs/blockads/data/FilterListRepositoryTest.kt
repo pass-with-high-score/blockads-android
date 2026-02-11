@@ -151,6 +151,54 @@ class FilterListRepositoryTest {
     }
 
     @Test
+    fun testBloomFilterWithLargeDataset() = runBlocking {
+        val testFilter = FilterList(
+            id = 1,
+            name = "Large Filter",
+            url = "https://example.com/large.txt",
+            description = "Large filter list",
+            isEnabled = true,
+            isBuiltIn = true
+        )
+        `when`(filterListDao.getEnabled()).thenReturn(listOf(testFilter))
+        
+        // Create a cache file with many domains
+        val cacheDir = File(tempDir, "filter_cache")
+        cacheDir.mkdirs()
+        val cacheFile = File(cacheDir, "${testFilter.url.hashCode()}.txt")
+        
+        val domains = StringBuilder()
+        for (i in 1..10000) {
+            domains.append("0.0.0.0 ad$i.example.com\n")
+        }
+        cacheFile.writeText(domains.toString())
+        
+        // Load filters and measure time
+        val startTime = System.currentTimeMillis()
+        val result = repository.loadAllEnabledFilters()
+        val loadTime = System.currentTimeMillis() - startTime
+        
+        assertTrue(result.isSuccess)
+        assertEquals(10000, result.getOrNull())
+        
+        // Test lookups are fast with Bloom filter
+        val lookupStart = System.currentTimeMillis()
+        for (i in 1..1000) {
+            repository.isBlocked("ad$i.example.com")
+            repository.isBlocked("notblocked$i.example.com")
+        }
+        val lookupTime = System.currentTimeMillis() - lookupStart
+        
+        println("Load time for 10k domains: ${loadTime}ms")
+        println("Lookup time for 2k checks: ${lookupTime}ms")
+        
+        // Verify correct blocking
+        assertTrue(repository.isBlocked("ad1.example.com"))
+        assertTrue(repository.isBlocked("ad5000.example.com"))
+        assertFalse(repository.isBlocked("notblocked.example.com"))
+    }
+
+    @Test
     fun testClearCache() = runBlocking {
         val testFilter = FilterList(
             id = 1,

@@ -159,38 +159,41 @@ class FilterListRepository(
 
     val domainCount: Int get() = blockedDomains.size
 
+    /**
+     * Check if a domain or any of its parent domains exist in the given set/filter.
+     * Returns true if found, false otherwise.
+     */
+    private inline fun checkDomainAndParents(
+        domain: String,
+        checker: (String) -> Boolean
+    ): Boolean {
+        if (checker(domain)) return true
+        var d = domain
+        while (d.contains('.')) {
+            d = d.substringAfter('.')
+            if (checker(d)) return true
+        }
+        return false
+    }
+
     fun isBlocked(domain: String): Boolean {
         // Check whitelist first — whitelisted domains are always allowed
-        if (whitelistedDomains.contains(domain)) return false
-        var wd = domain
-        while (wd.contains('.')) {
-            wd = wd.substringAfter('.')
-            if (whitelistedDomains.contains(wd)) return false
+        if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
+            return false
         }
 
         // Use Bloom filter for fast negative check
         // If Bloom filter says "definitely not present", skip exact lookup
         val bloomFilter = blockedDomainsBloomFilter
         if (bloomFilter != null) {
-            // Check domain and all parent domains through Bloom filter
-            var d = domain
-            var possiblyBlocked = bloomFilter.mightContain(d)
-            while (!possiblyBlocked && d.contains('.')) {
-                d = d.substringAfter('.')
-                possiblyBlocked = bloomFilter.mightContain(d)
-            }
+            // Check if domain or any parent might be in blocklist
+            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
             // If no match in Bloom filter, definitely not blocked
             if (!possiblyBlocked) return false
         }
 
-        // Check blocklist (exact lookup only if Bloom filter suggested possibility)
-        if (blockedDomains.contains(domain)) return true
-        var d = domain
-        while (d.contains('.')) {
-            d = d.substringAfter('.')
-            if (blockedDomains.contains(d)) return true
-        }
-        return false
+        // Check exact blocklist (only if Bloom filter suggested possibility)
+        return checkDomainAndParents(domain) { blockedDomains.contains(it) }
     }
 
     suspend fun loadWhitelist() {

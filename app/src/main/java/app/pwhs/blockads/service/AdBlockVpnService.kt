@@ -60,6 +60,7 @@ class AdBlockVpnService : VpnService() {
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
+    private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
 
     @Volatile
     private var isProcessing = false
@@ -407,6 +408,9 @@ class AdBlockVpnService : VpnService() {
 
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
+        
+        // Stop battery monitoring
+        stopBatteryMonitoring()
 
         runBlocking {
             appPrefs.setVpnEnabled(false)
@@ -443,6 +447,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
+        
+        // Stop battery monitoring
+        stopBatteryMonitoring()
         
         serviceScope.cancel()
         try {
@@ -563,7 +570,10 @@ class AdBlockVpnService : VpnService() {
      * Logs battery status every 5 minutes while VPN is running.
      */
     private fun startBatteryMonitoring() {
-        serviceScope.launch {
+        // Cancel any existing monitoring job
+        batteryMonitoringJob?.cancel()
+        
+        batteryMonitoringJob = serviceScope.launch {
             while (isRunning) {
                 try {
                     delay(5 * 60 * 1000L) // Wait 5 minutes
@@ -576,5 +586,10 @@ class AdBlockVpnService : VpnService() {
                 }
             }
         }
+    }
+    
+    private fun stopBatteryMonitoring() {
+        batteryMonitoringJob?.cancel()
+        batteryMonitoringJob = null
     }
 }
