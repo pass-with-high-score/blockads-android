@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import MobileNav from "./components/MobileNav";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -159,6 +160,7 @@ export default function RootLayout({
         <Navbar />
         <main className="pt-16">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
