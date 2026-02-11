@@ -349,7 +349,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun logDnsError(domain: String, errorType: String, errorMessage: String, upstreamDns: String, attemptedFallback: Boolean) {
+    private fun logDnsError(domain: String, errorType: String, errorMessage: String, dnsServer: String, attemptedFallback: Boolean) {
         serviceScope.launch {
             try {
                 dnsErrorDao.insert(
@@ -357,7 +357,7 @@ class AdBlockVpnService : VpnService() {
                         domain = domain,
                         errorType = errorType,
                         errorMessage = errorMessage,
-                        upstreamDns = upstreamDns,
+                        upstreamDns = dnsServer,
                         attemptedFallback = attemptedFallback
                     )
                 )

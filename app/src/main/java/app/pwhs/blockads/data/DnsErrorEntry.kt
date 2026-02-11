@@ -1,5 +1,6 @@
 package app.pwhs.blockads.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -12,5 +13,6 @@ data class DnsErrorEntry(
     val errorType: String, // "TIMEOUT", "IO_ERROR", "UNKNOWN"
     val errorMessage: String,
     val upstreamDns: String,
+    @ColumnInfo(name = "attempted_fallback")
     val attemptedFallback: Boolean = false
 )
