@@ -25,3 +25,5 @@ fastlane/report.xml
 fastlane/README.md
 app/release/app-release.aab
 .idea
+keystore.txt
+play-store-key.json
