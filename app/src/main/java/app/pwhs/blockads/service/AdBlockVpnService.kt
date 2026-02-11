@@ -39,6 +39,7 @@ class AdBlockVpnService : VpnService() {
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "blockads_vpn_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
 
@@ -220,7 +221,7 @@ class AdBlockVpnService : VpnService() {
         // Reusable buffer for packet reading - SAFE because processing is single-threaded
         // The inputStream.read() call blocks until a packet arrives, ensuring sequential
         // processing. Each packet is fully processed before the next read() call.
-        val buffer = ByteArray(32767)
+        val buffer = ByteArray(MAX_PACKET_SIZE)
 
         try {
             while (isProcessing && isRunning) {

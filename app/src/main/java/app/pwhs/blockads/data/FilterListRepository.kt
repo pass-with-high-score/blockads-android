@@ -175,6 +175,18 @@ class FilterListRepository(
      * @param checker A function that returns true if the domain matches the condition.
      *                This could check a Set, Bloom filter, or any other data structure.
      * @return true if the domain or any parent domain matches; false otherwise
+     *
+     * @sample Usage examples:
+     * ```
+     * // Check whitelist (Set)
+     * checkDomainAndParents(domain) { whitelistedDomains.contains(it) }
+     * 
+     * // Check Bloom filter
+     * checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
+     * 
+     * // Check exact blocklist (HashMap)
+     * checkDomainAndParents(domain) { blockedDomains.contains(it) }
+     * ```
      */
     private inline fun checkDomainAndParents(
         domain: String,
