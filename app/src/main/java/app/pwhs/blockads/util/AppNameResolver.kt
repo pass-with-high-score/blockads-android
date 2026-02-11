@@ -3,8 +3,8 @@ package app.pwhs.blockads.util
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import java.io.BufferedReader
-import java.io.FileReader
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Resolves the source app name for a DNS query by looking up the source port
@@ -18,7 +18,7 @@ class AppNameResolver(private val context: Context) {
     }
 
     // Cache UID -> app name to avoid repeated PackageManager lookups
-    private val uidToAppNameCache = HashMap<Int, String>()
+    private val uidToAppNameCache = ConcurrentHashMap<Int, String>()
 
     /**
      * Resolve the app name that owns the given local UDP source port.
@@ -52,7 +52,7 @@ class AppNameResolver(private val context: Context) {
 
     private fun findUidInProcFile(path: String, hexPort: String): Int? {
         try {
-            BufferedReader(FileReader(path)).use { reader ->
+            File(path).bufferedReader(Charsets.UTF_8).use { reader ->
                 // Skip header line
                 reader.readLine() ?: return null
 
