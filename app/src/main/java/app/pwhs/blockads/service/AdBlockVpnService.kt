@@ -16,6 +16,7 @@ import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -355,7 +356,8 @@ class AdBlockVpnService : VpnService() {
     override fun onRevoke() {
         Log.w(TAG, "VPN revoked by system or user")
         // Update preferences to reflect VPN is no longer enabled
-        runBlocking {
+        // Use a non-cancellable context to ensure preference is updated
+        serviceScope.launch(kotlinx.coroutines.NonCancellable) {
             appPrefs.setVpnEnabled(false)
         }
         stopVpn()
@@ -456,14 +458,17 @@ class AdBlockVpnService : VpnService() {
 
     private fun onNetworkAvailable() {
         Log.d(TAG, "Network available - checking VPN status")
-        val autoReconnect = runBlocking { appPrefs.autoReconnect.first() }
-        val vpnWasEnabled = runBlocking { appPrefs.vpnEnabled.first() }
         
-        // If VPN should be running but isn't, try to reconnect
-        if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isReconnecting) {
-            Log.d(TAG, "Auto-reconnecting VPN after network became available")
-            isReconnecting = true
-            serviceScope.launch {
+        // Use serviceScope to avoid blocking the callback thread
+        serviceScope.launch {
+            val autoReconnect = appPrefs.autoReconnect.first()
+            val vpnWasEnabled = appPrefs.vpnEnabled.first()
+            
+            // If VPN should be running but isn't, try to reconnect
+            if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isReconnecting) {
+                Log.d(TAG, "Auto-reconnecting VPN after network became available")
+                isReconnecting = true
+                
                 // Wait a bit for network to stabilize
                 delay(NETWORK_STABILIZATION_DELAY_MS)
                 

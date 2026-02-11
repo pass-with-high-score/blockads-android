@@ -9,6 +9,10 @@ import android.util.Log
 
 /**
  * Monitors network connectivity changes and notifies when network is available or lost.
+ * 
+ * Note: This monitor requires NET_CAPABILITY_VALIDATED, which means it waits for the network
+ * to be fully validated before triggering onNetworkAvailable(). This ensures the network is
+ * actually usable but may delay reconnection by a few seconds on networks with slow validation.
  */
 class NetworkMonitor(
     private val context: Context,
