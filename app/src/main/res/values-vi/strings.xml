@@ -120,6 +120,7 @@
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
     <string name="settings_upstream_dns">Máy chủ DNS</string>
+    <string name="settings_fallback_dns">Máy chủ DNS dự phòng</string>
     <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
 
     <!-- Filter Setup Screen -->
