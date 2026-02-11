@@ -26,6 +26,10 @@ class AppPreferences(private val context: Context) {
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
+        private val KEY_AUTO_UPDATE_ENABLED = booleanPreferencesKey("auto_update_enabled")
+        private val KEY_AUTO_UPDATE_FREQUENCY = stringPreferencesKey("auto_update_frequency")
+        private val KEY_AUTO_UPDATE_WIFI_ONLY = booleanPreferencesKey("auto_update_wifi_only")
+        private val KEY_AUTO_UPDATE_NOTIFICATION = stringPreferencesKey("auto_update_notification")
 
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
@@ -34,6 +38,16 @@ class AppPreferences(private val context: Context) {
         const val LANGUAGE_SYSTEM = "system"
         const val LANGUAGE_EN = "en"
         const val LANGUAGE_VI = "vi"
+
+        const val UPDATE_FREQUENCY_6H = "6h"
+        const val UPDATE_FREQUENCY_12H = "12h"
+        const val UPDATE_FREQUENCY_24H = "24h"
+        const val UPDATE_FREQUENCY_48H = "48h"
+        const val UPDATE_FREQUENCY_MANUAL = "manual"
+
+        const val NOTIFICATION_SILENT = "silent"
+        const val NOTIFICATION_NORMAL = "normal"
+        const val NOTIFICATION_NONE = "none"
 
         const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
         const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
@@ -74,6 +88,22 @@ class AppPreferences(private val context: Context) {
 
     val appLanguage: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_APP_LANGUAGE] ?: LANGUAGE_SYSTEM
+    }
+
+    val autoUpdateEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_UPDATE_ENABLED] ?: true
+    }
+
+    val autoUpdateFrequency: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_UPDATE_FREQUENCY] ?: UPDATE_FREQUENCY_24H
+    }
+
+    val autoUpdateWifiOnly: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_UPDATE_WIFI_ONLY] ?: true
+    }
+
+    val autoUpdateNotification: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_UPDATE_NOTIFICATION] ?: NOTIFICATION_NORMAL
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -138,6 +168,30 @@ class AppPreferences(private val context: Context) {
     suspend fun setAppLanguage(language: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_APP_LANGUAGE] = language
+        }
+    }
+
+    suspend fun setAutoUpdateEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUTO_UPDATE_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setAutoUpdateFrequency(frequency: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUTO_UPDATE_FREQUENCY] = frequency
+        }
+    }
+
+    suspend fun setAutoUpdateWifiOnly(wifiOnly: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUTO_UPDATE_WIFI_ONLY] = wifiOnly
+        }
+    }
+
+    suspend fun setAutoUpdateNotification(notificationType: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUTO_UPDATE_NOTIFICATION] = notificationType
         }
     }
 

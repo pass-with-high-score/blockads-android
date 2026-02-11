@@ -111,6 +111,9 @@ dependencies {
     // Guava for Bloom Filter
     implementation(libs.guava)
 
+    // WorkManager for auto-update
+    implementation(libs.androidx.work.runtime.ktx)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.kotlinx.coroutines.test)

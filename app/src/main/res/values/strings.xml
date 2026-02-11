@@ -129,4 +129,26 @@
     <string name="filter_built_in">Built-in</string>
     <string name="filter_custom">Custom</string>
     <string name="filter_custom_empty">No custom filters added yet</string>
+
+    <!-- Auto-update Filter Lists -->
+    <string name="settings_auto_update">Auto-update Filter Lists</string>
+    <string name="settings_auto_update_enabled">Enable auto-update</string>
+    <string name="settings_auto_update_enabled_desc">Automatically update filter lists in background</string>
+    <string name="settings_auto_update_frequency">Update frequency</string>
+    <string name="settings_auto_update_frequency_6h">Every 6 hours</string>
+    <string name="settings_auto_update_frequency_12h">Every 12 hours</string>
+    <string name="settings_auto_update_frequency_24h">Every 24 hours</string>
+    <string name="settings_auto_update_frequency_48h">Every 48 hours</string>
+    <string name="settings_auto_update_frequency_manual">Manual only</string>
+    <string name="settings_auto_update_wifi_only">Wi-Fi only</string>
+    <string name="settings_auto_update_wifi_only_desc">Only update when connected to Wi-Fi</string>
+    <string name="settings_auto_update_notification">Update notifications</string>
+    <string name="settings_auto_update_notification_normal">Normal</string>
+    <string name="settings_auto_update_notification_silent">Silent</string>
+    <string name="settings_auto_update_notification_none">None</string>
+    <string name="filter_update_success">Filter lists updated</string>
+    <string name="filter_update_success_message">Successfully updated %d domains</string>
+    <string name="filter_update_failed_message">Failed to update filter lists</string>
+    <string name="filter_update_notification_channel">Filter Updates</string>
+    <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
 </resources>

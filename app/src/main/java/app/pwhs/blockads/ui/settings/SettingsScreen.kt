@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -280,6 +282,218 @@ fun SettingsScreen(
                         modifier = Modifier.size(16.dp)
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Auto-update Filter Lists
+            val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsState()
+            val autoUpdateFrequency by viewModel.autoUpdateFrequency.collectAsState()
+            val autoUpdateWifiOnly by viewModel.autoUpdateWifiOnly.collectAsState()
+            val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsState()
+            var showFrequencyDialog by remember { mutableStateOf(false) }
+            var showNotificationDialog by remember { mutableStateOf(false) }
+
+            SectionHeader(stringResource(R.string.settings_auto_update))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    SettingsToggleItem(
+                        icon = Icons.Default.Download,
+                        title = stringResource(R.string.settings_auto_update_enabled),
+                        subtitle = stringResource(R.string.settings_auto_update_enabled_desc),
+                        isChecked = autoUpdateEnabled,
+                        onCheckedChange = { viewModel.setAutoUpdateEnabled(it) }
+                    )
+
+                    if (autoUpdateEnabled) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        )
+
+                        // Update frequency
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showFrequencyDialog = true }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_auto_update_frequency),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    when (autoUpdateFrequency) {
+                                        AppPreferences.UPDATE_FREQUENCY_6H -> stringResource(R.string.settings_auto_update_frequency_6h)
+                                        AppPreferences.UPDATE_FREQUENCY_12H -> stringResource(R.string.settings_auto_update_frequency_12h)
+                                        AppPreferences.UPDATE_FREQUENCY_24H -> stringResource(R.string.settings_auto_update_frequency_24h)
+                                        AppPreferences.UPDATE_FREQUENCY_48H -> stringResource(R.string.settings_auto_update_frequency_48h)
+                                        AppPreferences.UPDATE_FREQUENCY_MANUAL -> stringResource(R.string.settings_auto_update_frequency_manual)
+                                        else -> stringResource(R.string.settings_auto_update_frequency_24h)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        )
+
+                        // Wi-Fi only
+                        SettingsToggleItem(
+                            icon = Icons.Default.Wifi,
+                            title = stringResource(R.string.settings_auto_update_wifi_only),
+                            subtitle = stringResource(R.string.settings_auto_update_wifi_only_desc),
+                            isChecked = autoUpdateWifiOnly,
+                            onCheckedChange = { viewModel.setAutoUpdateWifiOnly(it) }
+                        )
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        )
+
+                        // Notification preference
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showNotificationDialog = true }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_auto_update_notification),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    when (autoUpdateNotification) {
+                                        AppPreferences.NOTIFICATION_NORMAL -> stringResource(R.string.settings_auto_update_notification_normal)
+                                        AppPreferences.NOTIFICATION_SILENT -> stringResource(R.string.settings_auto_update_notification_silent)
+                                        AppPreferences.NOTIFICATION_NONE -> stringResource(R.string.settings_auto_update_notification_none)
+                                        else -> stringResource(R.string.settings_auto_update_notification_normal)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Frequency dialog
+            if (showFrequencyDialog) {
+                AlertDialog(
+                    onDismissRequest = { showFrequencyDialog = false },
+                    title = { Text(stringResource(R.string.settings_auto_update_frequency)) },
+                    text = {
+                        Column {
+                            listOf(
+                                AppPreferences.UPDATE_FREQUENCY_6H to R.string.settings_auto_update_frequency_6h,
+                                AppPreferences.UPDATE_FREQUENCY_12H to R.string.settings_auto_update_frequency_12h,
+                                AppPreferences.UPDATE_FREQUENCY_24H to R.string.settings_auto_update_frequency_24h,
+                                AppPreferences.UPDATE_FREQUENCY_48H to R.string.settings_auto_update_frequency_48h,
+                                AppPreferences.UPDATE_FREQUENCY_MANUAL to R.string.settings_auto_update_frequency_manual
+                            ).forEach { (freq, labelRes) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.setAutoUpdateFrequency(freq)
+                                            showFrequencyDialog = false
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        stringResource(labelRes),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    if (autoUpdateFrequency == freq) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showFrequencyDialog = false }) {
+                            Text(stringResource(R.string.settings_cancel))
+                        }
+                    }
+                )
+            }
+
+            // Notification dialog
+            if (showNotificationDialog) {
+                AlertDialog(
+                    onDismissRequest = { showNotificationDialog = false },
+                    title = { Text(stringResource(R.string.settings_auto_update_notification)) },
+                    text = {
+                        Column {
+                            listOf(
+                                AppPreferences.NOTIFICATION_NORMAL to R.string.settings_auto_update_notification_normal,
+                                AppPreferences.NOTIFICATION_SILENT to R.string.settings_auto_update_notification_silent,
+                                AppPreferences.NOTIFICATION_NONE to R.string.settings_auto_update_notification_none
+                            ).forEach { (type, labelRes) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.setAutoUpdateNotification(type)
+                                            showNotificationDialog = false
+                                        }
+                                        .padding(vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        stringResource(labelRes),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    if (autoUpdateNotification == type) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showNotificationDialog = false }) {
+                            Text(stringResource(R.string.settings_cancel))
+                        }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
