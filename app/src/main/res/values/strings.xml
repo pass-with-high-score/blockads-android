@@ -159,4 +159,9 @@
     <string name="filter_update_failed_message">Failed to update filter lists</string>
     <string name="filter_update_notification_channel">Filter Updates</string>
     <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
+
+    <!-- Widget -->
+    <string name="widget_name">BlockAds Toggle</string>
+    <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
+    <string name="widget_toggle_description">Toggle ad blocking</string>
 </resources>

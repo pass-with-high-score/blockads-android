@@ -27,6 +27,9 @@ interface DnsLogDao {
     @Query("SELECT COUNT(*) FROM dns_logs")
     fun getTotalCount(): Flow<Int>
 
+    @Query("SELECT COALESCE(SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END), 0) AS blocked, COUNT(*) AS total FROM dns_logs")
+    suspend fun getWidgetStats(): WidgetStats
+
     @Query("DELETE FROM dns_logs")
     suspend fun clearAll()
 

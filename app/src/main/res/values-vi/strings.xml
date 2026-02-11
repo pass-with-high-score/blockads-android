@@ -159,4 +159,9 @@
     <string name="filter_update_failed_message">Không thể cập nhật danh sách bộ lọc</string>
     <string name="filter_update_notification_channel">Cập nhật bộ lọc</string>
     <string name="filter_update_notification_channel_desc">Thông báo về cập nhật danh sách bộ lọc</string>
+
+    <!-- Widget -->
+    <string name="widget_name">Bật/Tắt BlockAds</string>
+    <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
+    <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
 </resources>

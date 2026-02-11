@@ -17,6 +17,7 @@ import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.util.BatteryMonitor
+import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.util.AppNameResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -161,6 +162,7 @@ class AdBlockVpnService : VpnService() {
                 blockedQueries.set(0)
                 vpnStartTime = System.currentTimeMillis()
                 updateNotification() // Update to normal notification
+                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
 
                 // Log initial battery state
@@ -455,7 +457,8 @@ class AdBlockVpnService : VpnService() {
             Log.e(TAG, "Error closing VPN interface", e)
         }
         vpnInterface = null
-
+        AdBlockWidgetProvider.sendUpdateBroadcast(this)
+        stopForeground(STOP_FOREGROUND_REMOVE)
         if (showStoppedNotification) {
             stopForeground(STOP_FOREGROUND_DETACH)
             showStoppedNotification()
