@@ -152,7 +152,7 @@ class FilterListRepository(
     
     // Bloom filter for fast negative lookups (reduces exact match checks)
     @Volatile
-    private var blockedDomainsBloomFilter: BloomFilter<String>? = null
+    private var blockedDomainsBloomFilter: BloomFilter<CharSequence>? = null
     
     // Expected false positive rate of 1% for Bloom filter
     private val bloomFilterFpp = 0.01
