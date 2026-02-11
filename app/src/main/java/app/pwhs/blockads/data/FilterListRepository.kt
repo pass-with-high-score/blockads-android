@@ -171,19 +171,16 @@ class FilterListRepository(
         // Use Bloom filter for fast negative check
         // If Bloom filter says "definitely not present", skip exact lookup
         val bloomFilter = blockedDomainsBloomFilter
-        if (bloomFilter != null && !bloomFilter.mightContain(domain)) {
-            // Also check parent domains through Bloom filter
+        if (bloomFilter != null) {
+            // Check domain and all parent domains through Bloom filter
             var d = domain
-            var foundInBloom = false
-            while (d.contains('.')) {
+            var possiblyBlocked = bloomFilter.mightContain(d)
+            while (!possiblyBlocked && d.contains('.')) {
                 d = d.substringAfter('.')
-                if (bloomFilter.mightContain(d)) {
-                    foundInBloom = true
-                    break
-                }
+                possiblyBlocked = bloomFilter.mightContain(d)
             }
-            // If no parent domain found in Bloom filter, definitely not blocked
-            if (!foundInBloom) return false
+            // If no match in Bloom filter, definitely not blocked
+            if (!possiblyBlocked) return false
         }
 
         // Check blocklist (exact lookup only if Bloom filter suggested possibility)

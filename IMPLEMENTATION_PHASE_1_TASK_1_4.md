@@ -103,7 +103,7 @@ The `DnsPacketParser.parseIpPacket()` method:
 ```kotlin
 private fun startBatteryMonitoring() {
     serviceScope.launch {
-        while (isRunning || isConnecting) {
+        while (isRunning) {
             delay(5 * 60 * 1000L)  // Every 5 minutes
             if (isRunning) {
                 batteryMonitor.logBatteryStatus()
@@ -111,6 +111,10 @@ private fun startBatteryMonitoring() {
         }
     }
 }
+
+// Called when VPN starts
+batteryMonitor.logBatteryStatus()  // Log initial state
+startBatteryMonitoring()  // Start periodic monitoring
 ```
 
 ### Log Format

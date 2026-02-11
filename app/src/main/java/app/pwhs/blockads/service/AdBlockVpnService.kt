@@ -82,9 +82,6 @@ class AdBlockVpnService : VpnService() {
             onNetworkAvailable = { onNetworkAvailable() },
             onNetworkLost = { onNetworkLost() }
         )
-        
-        // Start periodic battery monitoring
-        startBatteryMonitoring()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -149,6 +146,12 @@ class AdBlockVpnService : VpnService() {
                 appPrefs.setVpnEnabled(true)
                 updateNotification() // Update to normal notification
                 Log.d(TAG, "VPN established successfully")
+
+                // Log initial battery state
+                batteryMonitor.logBatteryStatus()
+                
+                // Start periodic battery monitoring
+                startBatteryMonitoring()
 
                 // Start processing packets
                 processPackets(upstreamDns, fallbackDns)
@@ -556,21 +559,17 @@ class AdBlockVpnService : VpnService() {
     }
     
     /**
-     * Start periodic battery monitoring to track battery usage
+     * Start periodic battery monitoring to track battery usage.
+     * Logs battery status every 5 minutes while VPN is running.
      */
     private fun startBatteryMonitoring() {
         serviceScope.launch {
-            while (true) {
+            while (isRunning) {
                 try {
-                    // Log battery status when VPN is running
+                    delay(5 * 60 * 1000L) // Wait 5 minutes
                     if (isRunning) {
                         batteryMonitor.logBatteryStatus()
-                    } else {
-                        // Stop monitoring if VPN is not running
-                        break
                     }
-                    // Wait 5 minutes before next check
-                    delay(5 * 60 * 1000L)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error monitoring battery", e)
                     break
