@@ -16,6 +16,7 @@ import app.pwhs.blockads.data.DnsErrorDao
 import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.util.BatteryMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -58,6 +59,7 @@ class AdBlockVpnService : VpnService() {
     private lateinit var dnsErrorDao: DnsErrorDao
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
+    private lateinit var batteryMonitor: BatteryMonitor
 
     @Volatile
     private var isProcessing = false
@@ -72,6 +74,7 @@ class AdBlockVpnService : VpnService() {
         appPrefs = koin.get()
         dnsLogDao = koin.get()
         dnsErrorDao = koin.get()
+        batteryMonitor = BatteryMonitor(this)
         
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -79,6 +82,9 @@ class AdBlockVpnService : VpnService() {
             onNetworkAvailable = { onNetworkAvailable() },
             onNetworkLost = { onNetworkLost() }
         )
+        
+        // Start periodic battery monitoring
+        startBatteryMonitoring()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -213,11 +219,9 @@ class AdBlockVpnService : VpnService() {
                 val length = inputStream.read(buffer)
                 if (length <= 0) continue
 
-                // Copy packet data
-                val packet = buffer.copyOf(length)
-
-                // Try to parse DNS query
-                val query = DnsPacketParser.parseIpPacket(packet, length)
+                // Parse DNS query directly from the reusable buffer
+                // No need to copy since parseIpPacket doesn't modify the buffer
+                val query = DnsPacketParser.parseIpPacket(buffer, length)
 
                 if (query != null) {
                     handleDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -549,5 +553,24 @@ class AdBlockVpnService : VpnService() {
         Log.d(TAG, "Network lost")
         // Note: We don't stop the VPN when network is lost, as it may come back
         // The VPN will automatically reconnect when network is available again
+    }
+    
+    /**
+     * Start periodic battery monitoring to track battery usage
+     */
+    private fun startBatteryMonitoring() {
+        serviceScope.launch {
+            while (isRunning || isConnecting) {
+                try {
+                    // Log battery status every 5 minutes
+                    delay(5 * 60 * 1000L)
+                    if (isRunning) {
+                        batteryMonitor.logBatteryStatus()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error monitoring battery", e)
+                }
+            }
+        }
     }
 }

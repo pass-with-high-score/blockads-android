@@ -2,12 +2,15 @@ package app.pwhs.blockads.data
 
 import android.content.Context
 import android.util.Log
+import com.google.common.hash.BloomFilter
+import com.google.common.hash.Funnels
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
 class FilterListRepository(
@@ -146,6 +149,13 @@ class FilterListRepository(
 
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
+    
+    // Bloom filter for fast negative lookups (reduces exact match checks)
+    @Volatile
+    private var blockedDomainsBloomFilter: BloomFilter<String>? = null
+    
+    // Expected false positive rate of 1% for Bloom filter
+    private val bloomFilterFpp = 0.01
 
     val domainCount: Int get() = blockedDomains.size
 
@@ -158,7 +168,25 @@ class FilterListRepository(
             if (whitelistedDomains.contains(wd)) return false
         }
 
-        // Check blocklist
+        // Use Bloom filter for fast negative check
+        // If Bloom filter says "definitely not present", skip exact lookup
+        val bloomFilter = blockedDomainsBloomFilter
+        if (bloomFilter != null && !bloomFilter.mightContain(domain)) {
+            // Also check parent domains through Bloom filter
+            var d = domain
+            var foundInBloom = false
+            while (d.contains('.')) {
+                d = d.substringAfter('.')
+                if (bloomFilter.mightContain(d)) {
+                    foundInBloom = true
+                    break
+                }
+            }
+            // If no parent domain found in Bloom filter, definitely not blocked
+            if (!foundInBloom) return false
+        }
+
+        // Check blocklist (exact lookup only if Bloom filter suggested possibility)
         if (blockedDomains.contains(domain)) return true
         var d = domain
         while (d.contains('.')) {
@@ -196,6 +224,7 @@ class FilterListRepository(
             val enabledLists = filterListDao.getEnabled()
             if (enabledLists.isEmpty()) {
                 blockedDomains.clear()
+                blockedDomainsBloomFilter = null
                 return@withContext Result.success(0)
             }
 
@@ -221,12 +250,46 @@ class FilterListRepository(
 
             blockedDomains.clear()
             blockedDomains.addAll(newDomains)
+            
+            // Build Bloom filter for fast negative lookups
+            buildBloomFilter(newDomains)
+            
             Log.d(TAG, "Total unique domains loaded: ${blockedDomains.size}")
 
             Result.success(blockedDomains.size)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load filters", e)
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Build a Bloom filter from the domain set for memory-efficient lookups.
+     */
+    private fun buildBloomFilter(domains: Set<String>) {
+        if (domains.isEmpty()) {
+            blockedDomainsBloomFilter = null
+            return
+        }
+        
+        try {
+            val startTime = System.currentTimeMillis()
+            // Create Bloom filter with expected insertions and FPP
+            val filter = BloomFilter.create(
+                Funnels.stringFunnel(StandardCharsets.UTF_8),
+                domains.size,
+                bloomFilterFpp
+            )
+            
+            // Add all domains to Bloom filter
+            domains.forEach { filter.put(it) }
+            
+            blockedDomainsBloomFilter = filter
+            val elapsed = System.currentTimeMillis() - startTime
+            Log.d(TAG, "Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to build Bloom filter, falling back to direct lookup", e)
+            blockedDomainsBloomFilter = null
         }
     }
 
@@ -319,6 +382,7 @@ class FilterListRepository(
 
     fun clearCache() {
         blockedDomains.clear()
+        blockedDomainsBloomFilter = null
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }
 }
