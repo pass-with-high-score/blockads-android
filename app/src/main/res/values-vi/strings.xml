@@ -24,6 +24,7 @@
     <string name="blocked_queries">Đã chặn</string>
     <string name="nav_home">Trang chủ</string>
     <string name="nav_logs">Nhật ký</string>
+    <string name="nav_filter">Bộ lọc</string>
     <string name="nav_settings">Cài đặt</string>
     <string name="settings_filter_url">URL danh sách bộ lọc</string>
     <string name="settings_update_filter">Cập nhật danh sách bộ lọc</string>
