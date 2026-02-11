@@ -78,6 +78,69 @@ class FilterListRepository(
                 isEnabled = false,
                 isBuiltIn = true
             ),
+            FilterList(
+                name = "EasyList",
+                url = "https://easylist.to/easylist/easylist.txt",
+                description = "Most popular global ad filter — blocks ads on most websites",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "EasyPrivacy",
+                url = "https://easylist.to/easylist/easyprivacy.txt",
+                description = "Blocks tracking scripts and privacy-invasive trackers",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "Peter Lowe's Ad and tracking server list",
+                url = "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext",
+                description = "Lightweight host-based ad and tracking server blocklist",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "uBlock filters",
+                url = "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+                description = "uBlock Origin filters — blocks pop-ups, anti-adblock, and annoyances",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "AdGuard Base Filter",
+                url = "https://filters.adtidy.org/extension/ublock/filters/2.txt",
+                description = "AdGuard base ad filter — comprehensive alternative to EasyList",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "AdGuard Mobile Ads",
+                url = "https://filters.adtidy.org/extension/ublock/filters/11.txt",
+                description = "Optimized filter for mobile ads in apps and mobile websites",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "Fanboy's Annoyances",
+                url = "https://easylist.to/easylist/fanboy-annoyance.txt",
+                description = "Blocks cookie banners, pop-ups, newsletter prompts, and chat boxes",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "uBlock filters – Annoyances",
+                url = "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt",
+                description = "Blocks social media ads and suggestions on Facebook, YouTube, Twitter, etc.",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "AdGuard Social Media",
+                url = "https://filters.adtidy.org/extension/ublock/filters/4.txt",
+                description = "Blocks social media widgets — like buttons, share buttons, and embeds",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
         )
     }
 
