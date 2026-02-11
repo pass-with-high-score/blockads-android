@@ -5,6 +5,10 @@
     <string name="notification_channel_description">Shows when VPN ad blocker is active</string>
     <string name="vpn_notification_title">BlockAds is active</string>
     <string name="vpn_notification_text">Protecting your device from ads</string>
+    <string name="vpn_notification_reconnecting">BlockAds is reconnecting</string>
+    <string name="vpn_notification_reconnecting_text">Network changed, reconnecting VPN…</string>
+    <string name="vpn_notification_retrying">BlockAds is retrying</string>
+    <string name="vpn_notification_retry_text">Retry attempt %1$d of %2$d</string>
     <string name="status_protected">Protected</string>
     <string name="status_connecting">Connecting</string>
     <string name="status_unprotected">Unprotected</string>
