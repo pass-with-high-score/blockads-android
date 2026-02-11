@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -50,9 +51,14 @@ class AdBlockVpnService : VpnService() {
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
     private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
+    private var networkMonitor: NetworkMonitor? = null
+    private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
 
     @Volatile
     private var isProcessing = false
+    
+    @Volatile
+    private var isReconnecting = false
 
     override fun onCreate() {
         super.onCreate()
@@ -60,6 +66,13 @@ class AdBlockVpnService : VpnService() {
         filterRepo = koin.get()
         appPrefs = koin.get()
         dnsLogDao = koin.get()
+        
+        // Initialize network monitor
+        networkMonitor = NetworkMonitor(
+            context = this,
+            onNetworkAvailable = { onNetworkAvailable() },
+            onNetworkLost = { onNetworkLost() }
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -82,6 +95,9 @@ class AdBlockVpnService : VpnService() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
 
+        // Start network monitoring
+        networkMonitor?.startMonitoring()
+
         serviceScope.launch {
             try {
                 // Seed defaults and load all enabled filter lists
@@ -94,47 +110,31 @@ class AdBlockVpnService : VpnService() {
                 val upstreamDns = appPrefs.upstreamDns.first()
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
 
-                // Establish VPN — only route DNS traffic, NOT all traffic
-                // We use a fake DNS server IP (10.0.0.1) and only route that IP
-                // through the TUN. All other traffic uses the normal network.
-                val builder = Builder()
-                    .setSession("BlockAds")
-                    .addAddress("10.0.0.2", 32)
-                    .addRoute("10.0.0.1", 32)    // Only route fake DNS IP through TUN
-                    .addDnsServer("10.0.0.1")     // System sends DNS queries here
-                    .addAddress("fd00::2", 128)   // IPv6 TUN address
-                    .addRoute("fd00::1", 128)     // Route IPv6 DNS through TUN
-                    .addDnsServer("fd00::1")       // IPv6 DNS server
-                    .setBlocking(true)
-                    .setMtu(1500)
-
-                // Exclude our own app from VPN to avoid loops
-                try {
-                    builder.addDisallowedApplication(packageName)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Could not exclude self from VPN", e)
-                }
-
-                // Exclude whitelisted apps from VPN
-                for (appPackage in whitelistedApps) {
-                    try {
-                        builder.addDisallowedApplication(appPackage)
-                        Log.d(TAG, "Excluded from VPN: $appPackage")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Could not exclude $appPackage from VPN", e)
+                // Try to establish VPN with retry logic
+                var vpnEstablished = false
+                while (!vpnEstablished && retryManager.shouldRetry()) {
+                    vpnEstablished = establishVpn(upstreamDns, whitelistedApps)
+                    
+                    if (!vpnEstablished && retryManager.shouldRetry()) {
+                        Log.w(TAG, "VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
+                        updateNotificationWithRetry()
+                        retryManager.waitForRetry()
                     }
                 }
 
-                vpnInterface = builder.establish()
-                if (vpnInterface == null) {
-                    Log.e(TAG, "Failed to establish VPN interface")
-                    stopSelf()
+                if (!vpnEstablished) {
+                    Log.e(TAG, "Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
+                    isConnecting = false
+                    stopVpn()
                     return@launch
                 }
 
+                // VPN established successfully - reset retry counter
+                retryManager.reset()
                 isConnecting = false
                 isRunning = true
                 appPrefs.setVpnEnabled(true)
+                updateNotification() // Update to normal notification
                 Log.d(TAG, "VPN established successfully")
 
                 // Start processing packets
@@ -145,6 +145,52 @@ class AdBlockVpnService : VpnService() {
                 isConnecting = false
                 stopVpn()
             }
+        }
+    }
+
+    private fun establishVpn(upstreamDns: String, whitelistedApps: Set<String>): Boolean {
+        return try {
+            // Establish VPN — only route DNS traffic, NOT all traffic
+            // We use a fake DNS server IP (10.0.0.1) and only route that IP
+            // through the TUN. All other traffic uses the normal network.
+            val builder = Builder()
+                .setSession("BlockAds")
+                .addAddress("10.0.0.2", 32)
+                .addRoute("10.0.0.1", 32)    // Only route fake DNS IP through TUN
+                .addDnsServer("10.0.0.1")     // System sends DNS queries here
+                .addAddress("fd00::2", 128)   // IPv6 TUN address
+                .addRoute("fd00::1", 128)     // Route IPv6 DNS through TUN
+                .addDnsServer("fd00::1")       // IPv6 DNS server
+                .setBlocking(true)
+                .setMtu(1500)
+
+            // Exclude our own app from VPN to avoid loops
+            try {
+                builder.addDisallowedApplication(packageName)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not exclude self from VPN", e)
+            }
+
+            // Exclude whitelisted apps from VPN
+            for (appPackage in whitelistedApps) {
+                try {
+                    builder.addDisallowedApplication(appPackage)
+                    Log.d(TAG, "Excluded from VPN: $appPackage")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not exclude $appPackage from VPN", e)
+                }
+            }
+
+            vpnInterface = builder.establish()
+            if (vpnInterface == null) {
+                Log.e(TAG, "Failed to establish VPN interface")
+                return false
+            }
+
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error establishing VPN", e)
+            false
         }
     }
 
@@ -284,6 +330,10 @@ class AdBlockVpnService : VpnService() {
         isProcessing = false
         isConnecting = false
         isRunning = false
+        isReconnecting = false
+
+        // Stop network monitoring
+        networkMonitor?.stopMonitoring()
 
         runBlocking {
             appPrefs.setVpnEnabled(false)
@@ -302,7 +352,11 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onRevoke() {
-        Log.d(TAG, "VPN revoked by system")
+        Log.w(TAG, "VPN revoked by system or user")
+        // Update preferences to reflect VPN is no longer enabled
+        runBlocking {
+            appPrefs.setVpnEnabled(false)
+        }
         stopVpn()
         super.onRevoke()
     }
@@ -311,6 +365,11 @@ class AdBlockVpnService : VpnService() {
         isProcessing = false
         isConnecting = false
         isRunning = false
+        isReconnecting = false
+        
+        // Stop network monitoring
+        networkMonitor?.stopMonitoring()
+        
         serviceScope.cancel()
         try {
             vpnInterface?.close()
@@ -358,9 +417,25 @@ class AdBlockVpnService : VpnService() {
             Notification.Builder(this)
         }
 
+        val title = when {
+            isReconnecting -> getString(R.string.vpn_notification_reconnecting)
+            retryManager.getRetryCount() > 0 -> getString(R.string.vpn_notification_retrying)
+            else -> getString(R.string.vpn_notification_title)
+        }
+
+        val text = when {
+            isReconnecting -> getString(R.string.vpn_notification_reconnecting_text)
+            retryManager.getRetryCount() > 0 -> getString(
+                R.string.vpn_notification_retry_text,
+                retryManager.getRetryCount(),
+                retryManager.getMaxRetries()
+            )
+            else -> getString(R.string.vpn_notification_text)
+        }
+
         return builder
-            .setContentTitle(getString(R.string.vpn_notification_title))
-            .setContentText(getString(R.string.vpn_notification_text))
+            .setContentTitle(title)
+            .setContentText(text)
             .setSmallIcon(android.R.drawable.ic_lock_lock)
             .setOngoing(true)
             .setContentIntent(pendingIntent)
@@ -370,5 +445,44 @@ class AdBlockVpnService : VpnService() {
                 ).build()
             )
             .build()
+    }
+
+    private fun updateNotification() {
+        val notification = buildNotification()
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun updateNotificationWithRetry() {
+        val notification = buildNotification()
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun onNetworkAvailable() {
+        Log.d(TAG, "Network available - checking VPN status")
+        val autoReconnect = runBlocking { appPrefs.autoReconnect.first() }
+        
+        // If VPN should be running but isn't, try to reconnect
+        if (autoReconnect && !isRunning && !isConnecting && !isReconnecting) {
+            Log.d(TAG, "Auto-reconnecting VPN after network became available")
+            isReconnecting = true
+            serviceScope.launch {
+                // Wait a bit for network to stabilize
+                delay(2000)
+                
+                if (!isRunning && !isConnecting) {
+                    retryManager.reset()
+                    startVpn()
+                }
+                isReconnecting = false
+            }
+        }
+    }
+
+    private fun onNetworkLost() {
+        Log.d(TAG, "Network lost")
+        // Note: We don't stop the VPN when network is lost, as it may come back
+        // The VPN will automatically reconnect when network is available again
     }
 }
