@@ -14,7 +14,6 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class BlockAdsApplication : Application() {
-    private val appPreferences: AppPreferences by inject()
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onCreate() {
@@ -25,7 +24,8 @@ class BlockAdsApplication : Application() {
             modules(appModule)
         }
 
-        // Schedule auto-update for filter lists
+        // Schedule auto-update for filter lists after Koin is initialized
+        val appPreferences: AppPreferences by inject()
         applicationScope.launch {
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
         }
