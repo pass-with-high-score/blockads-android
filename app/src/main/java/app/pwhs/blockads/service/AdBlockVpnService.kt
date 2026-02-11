@@ -31,13 +31,16 @@ import java.io.FileOutputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
 
     companion object {
         private const val TAG = "AdBlockVpnService"
         private const val NOTIFICATION_ID = 1
+        private const val REVOKED_NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "blockads_vpn_channel"
+        private const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
@@ -62,6 +65,11 @@ class AdBlockVpnService : VpnService() {
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
+    private var notificationUpdateJob: kotlinx.coroutines.Job? = null
+
+    private val totalQueries = AtomicLong(0)
+    private val blockedQueries = AtomicLong(0)
+    private var vpnStartTime: Long = 0L
 
     @Volatile
     private var isProcessing = false
@@ -146,6 +154,9 @@ class AdBlockVpnService : VpnService() {
                 isConnecting = false
                 isRunning = true
                 appPrefs.setVpnEnabled(true)
+                totalQueries.set(0)
+                blockedQueries.set(0)
+                vpnStartTime = System.currentTimeMillis()
                 updateNotification() // Update to normal notification
                 Log.d(TAG, "VPN established successfully")
 
@@ -154,6 +165,9 @@ class AdBlockVpnService : VpnService() {
                 
                 // Start periodic battery monitoring
                 startBatteryMonitoring()
+
+                // Start periodic notification updates with stats
+                startNotificationUpdates()
 
                 // Start processing packets
                 processPackets(upstreamDns, fallbackDns)
@@ -268,6 +282,8 @@ class AdBlockVpnService : VpnService() {
             }
 
             val elapsed = System.currentTimeMillis() - startTime
+            totalQueries.incrementAndGet()
+            blockedQueries.incrementAndGet()
             logDnsQuery(domain, true, query.queryType, elapsed)
             Log.d(TAG, "BLOCKED: $domain")
         } else {
@@ -275,6 +291,7 @@ class AdBlockVpnService : VpnService() {
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
 
             val elapsed = System.currentTimeMillis() - startTime
+            totalQueries.incrementAndGet()
             logDnsQuery(domain, false, query.queryType, elapsed)
         }
     }
@@ -405,7 +422,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun stopVpn() {
+    private fun stopVpn(showStoppedNotification: Boolean = true) {
         isProcessing = false
         isConnecting = false
         isRunning = false
@@ -416,6 +433,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop battery monitoring
         stopBatteryMonitoring()
+        
+        // Stop notification updates
+        stopNotificationUpdates()
 
         runBlocking {
             appPrefs.setVpnEnabled(false)
@@ -428,7 +448,12 @@ class AdBlockVpnService : VpnService() {
         }
         vpnInterface = null
 
-        stopForeground(STOP_FOREGROUND_REMOVE)
+        if (showStoppedNotification) {
+            stopForeground(STOP_FOREGROUND_DETACH)
+            showStoppedNotification()
+        } else {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        }
         stopSelf()
         Log.d(TAG, "VPN stopped")
     }
@@ -440,7 +465,8 @@ class AdBlockVpnService : VpnService() {
         serviceScope.launch(NonCancellable) {
             appPrefs.setVpnEnabled(false)
         }
-        stopVpn()
+        showRevokedNotification()
+        stopVpn(showStoppedNotification = false)
         super.onRevoke()
     }
 
@@ -455,6 +481,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop battery monitoring
         stopBatteryMonitoring()
+
+        // Stop notification updates
+        stopNotificationUpdates()
         
         serviceScope.cancel()
         try {
@@ -477,6 +506,100 @@ class AdBlockVpnService : VpnService() {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createAlertNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ALERT_CHANNEL_ID,
+                getString(R.string.vpn_alert_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.vpn_alert_channel_description)
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun showRevokedNotification() {
+        createAlertNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 2, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, ALERT_CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.vpn_revoked_title))
+            .setContentText(getString(R.string.vpn_revoked_text))
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(REVOKED_NOTIFICATION_ID, notification)
+    }
+
+    private fun showStoppedNotification() {
+        createNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val startIntent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = ACTION_START
+        }
+        val startPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.vpn_stopped_title))
+            .setContentText(getString(R.string.vpn_stopped_text))
+            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setOngoing(false)
+            .setContentIntent(pendingIntent)
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_stopped_action_enable), startPendingIntent
+                ).build()
+            )
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun buildNotification(): Notification {
@@ -516,6 +639,12 @@ class AdBlockVpnService : VpnService() {
                 retryManager.getRetryCount(),
                 retryManager.getMaxRetries()
             )
+            isRunning -> {
+                val blocked = blockedQueries.get()
+                val total = totalQueries.get()
+                val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
+                getString(R.string.vpn_notification_stats_text, blocked, total, uptimeStr)
+            }
             else -> getString(R.string.vpn_notification_text)
         }
 
@@ -596,5 +725,44 @@ class AdBlockVpnService : VpnService() {
     private fun stopBatteryMonitoring() {
         batteryMonitoringJob?.cancel()
         batteryMonitoringJob = null
+    }
+
+    /**
+     * Start periodic notification updates to refresh stats display.
+     * Updates the notification every 30 seconds while VPN is running.
+     */
+    private fun startNotificationUpdates() {
+        notificationUpdateJob?.cancel()
+
+        notificationUpdateJob = serviceScope.launch {
+            while (isRunning) {
+                try {
+                    delay(30_000L) // Update every 30 seconds
+                    if (isRunning) {
+                        updateNotification()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating notification", e)
+                    break
+                }
+            }
+        }
+    }
+
+    private fun stopNotificationUpdates() {
+        notificationUpdateJob?.cancel()
+        notificationUpdateJob = null
+    }
+
+    private fun formatUptime(millis: Long): String {
+        val totalSeconds = millis / 1000
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return if (hours > 0) {
+            String.format("%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%d:%02d", minutes, seconds)
+        }
     }
 }
