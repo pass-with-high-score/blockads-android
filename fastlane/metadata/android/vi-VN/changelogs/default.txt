@@ -1,4 +1,4 @@
-v1.0
+v1.0.0
 - Phiên bản đầu tiên
 - Chặn quảng cáo qua lọc DNS
 - Hỗ trợ nhiều bộ lọc (ABPVN, AdGuard, EasyList...)

@@ -1,4 +1,4 @@
-v1.0
+v1.0.0
 - Initial release
 - Ad blocking via DNS filtering
 - Multiple filter list support
