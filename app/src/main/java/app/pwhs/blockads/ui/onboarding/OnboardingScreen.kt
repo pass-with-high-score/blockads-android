@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.ui.theme.NeonGreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -59,6 +60,7 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 data class OnboardingPage(
     val icon: ImageVector,
@@ -71,7 +73,8 @@ data class OnboardingPage(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    appPrefs: AppPreferences = koinInject()
 ) {
     val pages = listOf(
         OnboardingPage(
@@ -106,8 +109,11 @@ fun OnboardingScreen(
                         exit = fadeOut()
                     ) {
                         TextButton(onClick = {
-                            navigator.navigate(HomeScreenDestination) {
-                                popUpTo(NavGraphs.root) { inclusive = true }
+                            scope.launch {
+                                appPrefs.setOnboardingCompleted(true)
+                                navigator.navigate(HomeScreenDestination) {
+                                    popUpTo(NavGraphs.root) { inclusive = true }
+                                }
                             }
                         }) {
                             Text(
@@ -170,8 +176,11 @@ fun OnboardingScreen(
             Button(
                 onClick = {
                     if (isLastPage) {
-                        navigator.navigate(HomeScreenDestination) {
-                            popUpTo(NavGraphs.root) { inclusive = true }
+                        scope.launch {
+                            appPrefs.setOnboardingCompleted(true)
+                            navigator.navigate(HomeScreenDestination) {
+                                popUpTo(NavGraphs.root) { inclusive = true }
+                            }
                         }
                     } else {
                         scope.launch {
