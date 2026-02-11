@@ -34,6 +34,7 @@ class AdBlockVpnService : VpnService() {
         private const val TAG = "AdBlockVpnService"
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "blockads_vpn_channel"
+        private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
 
@@ -117,7 +118,7 @@ class AdBlockVpnService : VpnService() {
                     
                     if (!vpnEstablished && retryManager.shouldRetry()) {
                         Log.w(TAG, "VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
-                        updateNotificationWithRetry()
+                        updateNotification()
                         retryManager.waitForRetry()
                     }
                 }
@@ -453,12 +454,6 @@ class AdBlockVpnService : VpnService() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun updateNotificationWithRetry() {
-        val notification = buildNotification()
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.notify(NOTIFICATION_ID, notification)
-    }
-
     private fun onNetworkAvailable() {
         Log.d(TAG, "Network available - checking VPN status")
         val autoReconnect = runBlocking { appPrefs.autoReconnect.first() }
@@ -470,7 +465,7 @@ class AdBlockVpnService : VpnService() {
             isReconnecting = true
             serviceScope.launch {
                 // Wait a bit for network to stabilize
-                delay(2000)
+                delay(NETWORK_STABILIZATION_DELAY_MS)
                 
                 if (!isRunning && !isConnecting) {
                     retryManager.reset()
