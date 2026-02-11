@@ -2,14 +2,21 @@ package app.pwhs.blockads.util
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.os.Build
+import android.system.OsConstants
 import android.util.Log
 import java.io.File
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Resolves the source app name for a DNS query by looking up the source port
- * in /proc/net/udp (and /proc/net/udp6) to find the owning UID,
- * then mapping that UID to an app label via PackageManager.
+ * Resolves the source app name for a DNS query by mapping the connection
+ * to the owning UID, then looking up the app label via PackageManager.
+ *
+ * On Android 10+ (API 29+): Uses the official ConnectivityManager.getConnectionOwnerUid() API.
+ * On older versions: Falls back to parsing /proc/net/udp (and /proc/net/udp6).
  */
 class AppNameResolver(private val context: Context) {
 
@@ -21,29 +28,53 @@ class AppNameResolver(private val context: Context) {
     private val uidToAppNameCache = ConcurrentHashMap<Int, String>()
 
     /**
-     * Resolve the app name that owns the given local UDP source port.
+     * Resolve the app name that owns the given DNS query connection.
      * Returns the app label (e.g. "Chrome") or empty string if not found.
+     *
+     * @param sourcePort  Local UDP source port of the DNS query
+     * @param sourceIp    Source IP address bytes from the DNS packet
+     * @param destIp      Destination IP address bytes from the DNS packet
+     * @param destPort    Destination port (typically 53)
      */
-    fun resolve(sourcePort: Int): String {
-        val uid = findUidForPort(sourcePort)
+    fun resolve(sourcePort: Int, sourceIp: ByteArray, destIp: ByteArray, destPort: Int): String {
+        val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
         if (uid < 0) return ""
         return getAppNameForUid(uid)
     }
 
     /**
-     * Look up /proc/net/udp and /proc/net/udp6 to find the UID owning the given local port.
-     * Returns -1 if not found.
-     *
-     * Format of /proc/net/udp:
-     *   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
-     *    0: 0100007F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 12345
-     *
-     * local_address is hex IP:port. We match the port portion.
+     * Find the UID owning the connection.
+     * Uses official API on Android 10+, falls back to /proc/net/udp on older versions.
      */
-    private fun findUidForPort(port: Int): Int {
+    private fun findUidForConnection(
+        sourcePort: Int,
+        sourceIp: ByteArray,
+        destIp: ByteArray,
+        destPort: Int
+    ): Int {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val local = InetSocketAddress(InetAddress.getByAddress(sourceIp), sourcePort)
+                val remote = InetSocketAddress(InetAddress.getByAddress(destIp), destPort)
+                val uid = cm.getConnectionOwnerUid(OsConstants.IPPROTO_UDP, local, remote)
+                if (uid >= 0) return uid
+            } catch (e: Exception) {
+                Log.d(TAG, "getConnectionOwnerUid failed, trying fallback: ${e.message}")
+            }
+        }
+
+        // Fallback for API < 29 or if official API fails
+        return findUidFromProcNet(sourcePort)
+    }
+
+    /**
+     * Fallback: Look up /proc/net/udp and /proc/net/udp6 to find the UID owning the given port.
+     * Used on Android versions before 10 (API < 29) where getConnectionOwnerUid() is unavailable.
+     */
+    private fun findUidFromProcNet(port: Int): Int {
         val hexPort = String.format("%04X", port)
 
-        // Try IPv4 first, then IPv6
         findUidInProcFile("/proc/net/udp", hexPort)?.let { return it }
         findUidInProcFile("/proc/net/udp6", hexPort)?.let { return it }
 

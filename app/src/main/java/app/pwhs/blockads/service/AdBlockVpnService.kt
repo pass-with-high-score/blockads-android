@@ -259,7 +259,7 @@ class AdBlockVpnService : VpnService() {
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
-        val appName = appNameResolver.resolve(query.sourcePort)
+        val appName = appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         if (filterRepo.isBlocked(domain)) {
             // Build and write blocked response (0.0.0.0)
