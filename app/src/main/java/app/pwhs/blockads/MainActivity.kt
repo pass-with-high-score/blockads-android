@@ -28,6 +28,12 @@ import org.koin.java.KoinJavaComponent.getKoin
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        const val EXTRA_START_VPN = "extra_start_vpn"
+    }
+
+    private var widgetIntentHandled = false
+
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -90,6 +96,23 @@ class MainActivity : ComponentActivity() {
                 BlockAdsApp(
                     onRequestVpnPermission = { handleVpnToggle() }
                 )
+            }
+        }
+        handleWidgetIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        widgetIntentHandled = false
+        handleWidgetIntent(intent)
+    }
+
+    private fun handleWidgetIntent(intent: Intent?) {
+        if (!widgetIntentHandled && intent?.getBooleanExtra(EXTRA_START_VPN, false) == true) {
+            widgetIntentHandled = true
+            if (!AdBlockVpnService.isRunning) {
+                handleVpnToggle()
             }
         }
     }
