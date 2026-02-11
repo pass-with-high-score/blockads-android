@@ -203,7 +203,13 @@ fun AboutScreen(navigator: DestinationsNavigator) {
             AboutLinkItem(
                 icon = Icons.Filled.Gavel,
                 title = stringResource(R.string.about_licenses),
-                onClick = { /* TODO: Open licenses screen */ }
+                onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/pass-with-high-score/blockads-android/blob/main/LICENSE")
+                    )
+                    context.startActivity(intent)
+                }
             )
         }
     }
