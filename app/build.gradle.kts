@@ -10,9 +10,7 @@ plugins {
 
 android {
     namespace = "app.pwhs.blockads"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "app.pwhs.blockads"
