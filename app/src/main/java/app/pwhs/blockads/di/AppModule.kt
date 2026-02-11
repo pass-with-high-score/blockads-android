@@ -3,6 +3,7 @@ package app.pwhs.blockads.di
 import app.pwhs.blockads.data.AppDatabase
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
@@ -44,6 +45,7 @@ val appModule = module {
     viewModel { HomeViewModel(get(), get()) }
     viewModel { LogViewModel(get(), get(), androidContext()) }
     viewModel { SettingsViewModel(get(), get(), get(), get(), androidContext()) }
+    viewModel { FilterSetupViewModel(get(), androidContext()) }
     viewModel { AppWhitelistViewModel(get(), androidContext()) }
 }
 

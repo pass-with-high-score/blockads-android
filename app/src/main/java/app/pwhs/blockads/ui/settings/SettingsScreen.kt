@@ -24,12 +24,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
@@ -41,7 +41,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,11 +67,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -80,6 +77,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
@@ -96,13 +94,11 @@ fun SettingsScreen(
     val autoReconnect by viewModel.autoReconnect.collectAsState()
     val upstreamDns by viewModel.upstreamDns.collectAsState()
     val filterLists by viewModel.filterLists.collectAsState()
-    val isUpdatingFilter by viewModel.isUpdatingFilter.collectAsState()
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
-    var showAddDialog by remember { mutableStateOf(false) }
     var showAddDomainDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -241,76 +237,46 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Filter Lists
+            // Filter Lists — navigate to setup screen
             SectionHeader(
                 stringResource(
                     R.string.settings_filter_lists,
                     filterLists.count { it.isEnabled })
             )
             Card(
+                onClick = { navigator.navigate(FilterSetupScreenDestination) },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.animateContentSize()
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Column {
-                    filterLists.forEachIndexed { index, filter ->
-                        FilterListItem(
-                            filter = filter,
-                            onToggle = { viewModel.toggleFilterList(filter) },
-                            onDelete = { viewModel.deleteFilterList(filter) }
-                        )
-                        if (index < filterLists.lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                            )
-                        }
-                    }
-
-                    // Add button
-                    TextButton(
-                        onClick = { showAddDialog = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_add_custom_filter))
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Update all button
-            Button(
-                onClick = { viewModel.updateAllFilters() },
-                enabled = !isUpdatingFilter,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                if (isUpdatingFilter) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.settings_updating))
-                } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        Icons.Default.CloudDownload,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        Icons.Default.FilterList, contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.settings_update_all))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.filter_setup_title),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            stringResource(R.string.filter_setup_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        tint = TextSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
@@ -599,16 +565,7 @@ fun SettingsScreen(
         }
     }
 
-    // Add filter dialog
-    if (showAddDialog) {
-        AddFilterDialog(
-            onDismiss = { showAddDialog = false },
-            onAdd = { name, url ->
-                viewModel.addFilterList(name, url)
-                showAddDialog = false
-            }
-        )
-    }
+
 
     // Add domain whitelist dialog
     if (showAddDomainDialog) {
@@ -620,119 +577,6 @@ fun SettingsScreen(
             }
         )
     }
-}
-
-@Composable
-private fun FilterListItem(
-    filter: FilterList,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = filter.name,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium,
-                color = if (filter.isEnabled) MaterialTheme.colorScheme.onBackground
-                else TextSecondary
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (filter.domainCount > 0) {
-                    Text(
-                        text = "${formatCount(filter.domainCount)} rules",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary
-                    )
-                }
-                if (filter.lastUpdated > 0) {
-                    Text(
-                        text = "·",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = formatDate(filter.lastUpdated),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary
-                    )
-                }
-            }
-            Text(
-                text = filter.url,
-                style = MaterialTheme.typography.labelSmall,
-                color = TextSecondary.copy(alpha = 0.6f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-            Icon(
-                Icons.Default.Delete,
-                contentDescription = "Delete",
-                tint = TextSecondary.copy(alpha = 0.5f),
-                modifier = Modifier.size(16.dp)
-            )
-        }
-
-        Switch(
-            checked = filter.isEnabled,
-            onCheckedChange = { onToggle() },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = NeonGreen
-            )
-        )
-    }
-}
-
-@Composable
-private fun AddFilterDialog(
-    onDismiss: () -> Unit,
-    onAdd: (name: String, url: String) -> Unit
-) {
-    var name by remember { mutableStateOf("") }
-    var url by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_add_filter_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.settings_add_filter_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text(stringResource(R.string.settings_add_filter_url)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { if (name.isNotBlank() && url.isNotBlank()) onAdd(name, url) },
-                enabled = name.isNotBlank() && url.isNotBlank()
-            ) { Text(stringResource(R.string.settings_add)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) }
-        }
-    )
 }
 
 @Composable

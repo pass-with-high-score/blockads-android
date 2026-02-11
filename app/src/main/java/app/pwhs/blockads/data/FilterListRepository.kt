@@ -22,9 +22,62 @@ class FilterListRepository(
         private const val CACHE_DIR = "filter_cache"
 
         val DEFAULT_LISTS = listOf(
-            FilterList(name = "ABPVN", url = "https://abpvn.com/android/abpvn.txt", isEnabled = true),
-            FilterList(name = "HostsVN", url = "https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts", isEnabled = true),
-            FilterList(name = "AdGuard DNS", url = "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt", isEnabled = false),
+            FilterList(
+                name = "ABPVN",
+                url = "https://abpvn.com/android/abpvn.txt",
+                description = "Vietnamese ad filter list",
+                isEnabled = true,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "HostsVN",
+                url = "https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts",
+                description = "Vietnamese hosts-based ad blocker",
+                isEnabled = true,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "AdGuard DNS",
+                url = "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt",
+                description = "AdGuard DNS filter for ad & tracker blocking",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "StevenBlack Unified",
+                url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+                description = "Unified hosts from multiple curated sources — ads & malware",
+                isEnabled = true,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "StevenBlack Fakenews",
+                url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts",
+                description = "Block fake news domains",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "StevenBlack Gambling",
+                url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts",
+                description = "Block gambling & betting sites",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "StevenBlack Adult",
+                url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn-only/hosts",
+                description = "Block adult content domains",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
+                name = "StevenBlack Social",
+                url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social-only/hosts",
+                description = "Block social media platforms",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
         )
     }
 
@@ -60,12 +113,15 @@ class FilterListRepository(
     }
 
     /**
-     * Seeds default filter lists if the database is empty.
+     * Seeds default filter lists. Uses URL-based dedup so new built-in
+     * filters are added on app updates without creating duplicates.
      */
     suspend fun seedDefaultsIfNeeded() {
-        if (filterListDao.count() == 0) {
-            DEFAULT_LISTS.forEach { filterListDao.insert(it) }
-            Log.d(TAG, "Seeded ${DEFAULT_LISTS.size} default filter lists")
+        for (filter in DEFAULT_LISTS) {
+            if (filterListDao.getByUrl(filter.url) == null) {
+                filterListDao.insert(filter)
+                Log.d(TAG, "Seeded filter: ${filter.name}")
+            }
         }
     }
 

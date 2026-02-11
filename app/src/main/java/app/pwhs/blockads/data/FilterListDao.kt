@@ -34,4 +34,7 @@ interface FilterListDao {
 
     @Query("UPDATE filter_lists SET domainCount = :count, lastUpdated = :timestamp WHERE id = :id")
     suspend fun updateStats(id: Long, count: Int, timestamp: Long)
+
+    @Query("SELECT * FROM filter_lists WHERE url = :url LIMIT 1")
+    suspend fun getByUrl(url: String): FilterList?
 }

@@ -5,8 +5,10 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Filter
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -23,9 +25,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.filter.FilterSetupScreen
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.LogScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.navigation.dependency
@@ -56,6 +60,14 @@ sealed class Screen(
         unselectedIcon = Icons.AutoMirrored.Outlined.List
     )
 
+    data object FilterSetup : Screen(
+        destination = FilterSetupScreenDestination(),
+        route = FilterSetupScreenDestination.route,
+        labelRes = R.string.nav_logs,
+        selectedIcon = Icons.Default.Filter,
+        unselectedIcon = Icons.Outlined.Filter
+    )
+
     data object Settings :
         Screen(
             destination = SettingsScreenDestination(),
@@ -72,7 +84,7 @@ fun BlockAdsApp(
 ) {
     val engine = rememberNavHostEngine()
     val navController = engine.rememberNavController()
-    val screens = listOf(Screen.Home, Screen.Logs, Screen.Settings)
+    val screens = listOf(Screen.Home, Screen.FilterSetup, Screen.Logs, Screen.Settings)
     val newBackStackEntry by navController.currentBackStackEntryAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -81,6 +93,7 @@ fun BlockAdsApp(
         HomeScreenDestination.route,
         LogScreenDestination.route,
         SettingsScreenDestination.route,
+        FilterSetupScreenDestination.route
     )
 
     Scaffold(

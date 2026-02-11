@@ -46,8 +46,6 @@ class SettingsViewModel(
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _isUpdatingFilter = MutableStateFlow(false)
-    val isUpdatingFilter: StateFlow<Boolean> = _isUpdatingFilter.asStateFlow()
 
     val themeMode: StateFlow<String> = appPrefs.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.THEME_SYSTEM)
@@ -81,50 +79,6 @@ class SettingsViewModel(
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
                 (context as? Activity)?.recreate()
             }
-        }
-    }
-
-    fun toggleFilterList(filter: FilterList) {
-        viewModelScope.launch {
-            filterListDao.setEnabled(filter.id, !filter.isEnabled)
-        }
-    }
-
-    fun addFilterList(name: String, url: String) {
-        viewModelScope.launch {
-            filterListDao.insert(FilterList(name = name, url = url, isEnabled = true))
-            Toast.makeText(context, "Added: $name", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun deleteFilterList(filter: FilterList) {
-        viewModelScope.launch {
-            filterListDao.delete(filter)
-        }
-    }
-
-    fun updateAllFilters() {
-        viewModelScope.launch {
-            _isUpdatingFilter.value = true
-            val result = filterRepo.loadAllEnabledFilters()
-            _isUpdatingFilter.value = false
-
-            result.fold(
-                onSuccess = { count ->
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.filter_updated, count),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                onFailure = {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.filter_update_failed),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            )
         }
     }
 

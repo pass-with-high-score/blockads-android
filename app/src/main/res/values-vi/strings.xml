@@ -117,4 +117,11 @@
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
     <string name="settings_upstream_dns">Máy chủ DNS</string>
     <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
+
+    <!-- Filter Setup Screen -->
+    <string name="filter_setup_title">Cài đặt bộ lọc</string>
+    <string name="filter_setup_desc">Quản lý bộ lọc tích hợp &amp; tùy chỉnh</string>
+    <string name="filter_built_in">Tích hợp</string>
+    <string name="filter_custom">Tùy chỉnh</string>
+    <string name="filter_custom_empty">Chưa thêm bộ lọc tùy chỉnh nào</string>
 </resources>

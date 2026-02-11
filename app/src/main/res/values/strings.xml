@@ -117,4 +117,11 @@
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
     <string name="settings_upstream_dns">Upstream DNS Server</string>
     <string name="settings_clear_logs">Clear All Logs</string>
+
+    <!-- Filter Setup Screen -->
+    <string name="filter_setup_title">Filter Setup</string>
+    <string name="filter_setup_desc">Manage built-in &amp; custom filter lists</string>
+    <string name="filter_built_in">Built-in</string>
+    <string name="filter_custom">Custom</string>
+    <string name="filter_custom_empty">No custom filters added yet</string>
 </resources>
