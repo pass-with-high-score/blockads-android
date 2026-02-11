@@ -215,6 +215,22 @@ object DnsPacketParser {
         )
     }
 
+    /**
+     * Build a DNS SERVFAIL response for when DNS resolution fails.
+     * This creates the full IP+UDP+DNS packet to write back to the TUN.
+     */
+    fun buildServfailResponse(query: DnsQuery): ByteArray {
+        val dnsResponse = buildServfailDnsResponse(query)
+
+        return buildIpUdpPacket(
+            sourceIp = query.destIp,   // Swap: original dest becomes source
+            destIp = query.sourceIp,   // Swap: original source becomes dest
+            sourcePort = query.destPort,
+            destPort = query.sourcePort,
+            payload = dnsResponse
+        )
+    }
+
     private fun buildDnsResponse(query: DnsQuery): ByteArray {
         val out = ByteArrayOutputStream()
 
@@ -296,6 +312,48 @@ object DnsPacketParser {
             out.write(0x00)
             out.write(0x00)
         }
+
+        return out.toByteArray()
+    }
+
+    private fun buildServfailDnsResponse(query: DnsQuery): ByteArray {
+        val out = ByteArrayOutputStream()
+
+        // Transaction ID
+        out.write(query.transactionId shr 8)
+        out.write(query.transactionId and 0xFF)
+
+        // Flags: QR=1 (response), RD mirrors query, RA=1, RCODE=2 (SERVFAIL)
+        // RD is the least significant bit of the first flags byte in the original query
+        val originalFlagsByte1 = query.rawDnsPayload?.getOrNull(2)?.toInt() ?: 0
+        val rdSet = (originalFlagsByte1 and 0x01) == 0x01
+        val responseFlagsByte1 = 0x80 or if (rdSet) 0x01 else 0x00  // QR=1, RD from query
+        // 0x82 = 10000010 (RA=1, RCODE=2)
+        out.write(responseFlagsByte1)
+        out.write(0x82)
+
+        // QDCOUNT = 1
+        out.write(0x00)
+        out.write(0x01)
+        // ANCOUNT = 0 (no answers in SERVFAIL)
+        out.write(0x00)
+        out.write(0x00)
+        // NSCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+        // ARCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+
+        // Question section (copy from original query)
+        val domainBytes = encodeDomainName(query.domain)
+        out.write(domainBytes)
+        // Query type
+        out.write(query.queryType shr 8)
+        out.write(query.queryType and 0xFF)
+        // Query class
+        out.write(query.queryClass shr 8)
+        out.write(query.queryClass and 0xFF)
 
         return out.toByteArray()
     }

@@ -120,6 +120,7 @@
     <string name="settings_auto_reconnect">Auto-reconnect</string>
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
     <string name="settings_upstream_dns">Upstream DNS Server</string>
+    <string name="settings_fallback_dns">Fallback DNS Server</string>
     <string name="settings_clear_logs">Clear All Logs</string>
 
     <!-- Filter Setup Screen -->

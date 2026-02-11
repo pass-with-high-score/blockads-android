@@ -34,6 +34,7 @@ val appModule = module {
     single { get<AppDatabase>().dnsLogDao() }
     single { get<AppDatabase>().filterListDao() }
     single { get<AppDatabase>().whitelistDomainDao() }
+    single { get<AppDatabase>().dnsErrorDao() }
 
     // Preferences
     single { AppPreferences(androidContext()) }

@@ -248,6 +248,63 @@ class DnsPacketParserTest {
     }
 
     @Test
+    fun `buildServfailResponse returns DNS response with SERVFAIL rcode`() {
+        val packet = buildTestIpv4DnsPacket(domain = "example.com", queryType = 1)
+        val query = DnsPacketParser.parseIpPacket(packet, packet.size)!!
+
+        val response = DnsPacketParser.buildServfailResponse(query)
+
+        // Response should be an IPv4 packet
+        val version = (response[0].toInt() and 0xFF) shr 4
+        assertEquals(4, version)
+
+        // Extract DNS response and verify SERVFAIL (RCODE=2)
+        val ipHeaderLen = (response[0].toInt() and 0x0F) * 4
+        val dnsOffset = ipHeaderLen + 8 // skip UDP header
+        val dnsBuf = ByteBuffer.wrap(response, dnsOffset, response.size - dnsOffset)
+
+        // Transaction ID should match
+        val txId = dnsBuf.short.toInt() and 0xFFFF
+        assertEquals(0x1234, txId)
+
+        // Flags byte 2 should have RCODE=2 (SERVFAIL)
+        dnsBuf.get() // flags byte 1
+        val flags2 = dnsBuf.get().toInt() and 0xFF
+        val rcode = flags2 and 0x0F
+        assertEquals(2, rcode) // SERVFAIL
+
+        // QDCOUNT should be 1
+        val qdcount = dnsBuf.short.toInt() and 0xFFFF
+        assertEquals(1, qdcount)
+
+        // ANCOUNT should be 0 (no answers in SERVFAIL)
+        val ancount = dnsBuf.short.toInt() and 0xFFFF
+        assertEquals(0, ancount)
+    }
+
+    @Test
+    fun `buildServfailResponse for IPv6 query returns IPv6 packet`() {
+        val packet = buildTestIpv6DnsPacket(domain = "test.com", queryType = 28)
+        val query = DnsPacketParser.parseIpPacket(packet, packet.size)!!
+
+        val response = DnsPacketParser.buildServfailResponse(query)
+
+        // Response should be an IPv6 packet
+        val version = (response[0].toInt() and 0xFF) shr 4
+        assertEquals(6, version)
+
+        // Verify SERVFAIL rcode
+        val dnsOffset = 48 // IPv6 header (40) + UDP header (8)
+        val dnsBuf = ByteBuffer.wrap(response, dnsOffset, response.size - dnsOffset)
+        
+        val transactionId = dnsBuf.short // Skip transaction ID
+        val flags1 = dnsBuf.get()  // Skip flags byte 1
+        val flags2 = dnsBuf.get().toInt() and 0xFF
+        val rcode = flags2 and 0x0F
+        assertEquals(2, rcode) // SERVFAIL
+    }
+
+    @Test
     fun `buildBlockedResponse for IPv6 AAAA query returns IPv6 packet with all-zeros`() {
         val packet = buildTestIpv6DnsPacket(domain = "tracker.example.com", queryType = 28)
         val query = DnsPacketParser.parseIpPacket(packet, packet.size)!!

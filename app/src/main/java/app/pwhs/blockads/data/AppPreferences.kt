@@ -21,6 +21,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_AUTO_RECONNECT = booleanPreferencesKey("auto_reconnect")
         private val KEY_FILTER_URL = stringPreferencesKey("filter_url")
         private val KEY_UPSTREAM_DNS = stringPreferencesKey("upstream_dns")
+        private val KEY_FALLBACK_DNS = stringPreferencesKey("fallback_dns")
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
@@ -36,6 +37,7 @@ class AppPreferences(private val context: Context) {
 
         const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
         const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
+        const val DEFAULT_FALLBACK_DNS = "1.1.1.1"
     }
 
     val vpnEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -52,6 +54,10 @@ class AppPreferences(private val context: Context) {
 
     val upstreamDns: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_UPSTREAM_DNS] ?: DEFAULT_UPSTREAM_DNS
+    }
+
+    val fallbackDns: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FALLBACK_DNS] ?: DEFAULT_FALLBACK_DNS
     }
 
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -91,6 +97,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setUpstreamDns(dns: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_UPSTREAM_DNS] = dns
+        }
+    }
+
+    suspend fun setFallbackDns(dns: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FALLBACK_DNS] = dns
         }
     }
 

@@ -93,12 +93,14 @@ fun SettingsScreen(
 ) {
     val autoReconnect by viewModel.autoReconnect.collectAsState()
     val upstreamDns by viewModel.upstreamDns.collectAsState()
+    val fallbackDns by viewModel.fallbackDns.collectAsState()
     val filterLists by viewModel.filterLists.collectAsState()
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
+    var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
     var showAddDomainDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -319,6 +321,39 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) { Text(stringResource(R.string.settings_save_dns)) }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Fallback DNS
+                    Text(
+                        stringResource(R.string.settings_fallback_dns),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = editFallbackDns,
+                        onValueChange = { editFallbackDns = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("1.1.1.1") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    )
+                    if (editFallbackDns != fallbackDns) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { viewModel.setFallbackDns(editFallbackDns) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(

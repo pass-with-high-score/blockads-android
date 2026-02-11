@@ -40,6 +40,9 @@ class SettingsViewModel(
     val upstreamDns: StateFlow<String> = appPrefs.upstreamDns
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.DEFAULT_UPSTREAM_DNS)
 
+    val fallbackDns: StateFlow<String> = appPrefs.fallbackDns
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.DEFAULT_FALLBACK_DNS)
+
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -65,6 +68,10 @@ class SettingsViewModel(
 
     fun setUpstreamDns(dns: String) {
         viewModelScope.launch { appPrefs.setUpstreamDns(dns) }
+    }
+
+    fun setFallbackDns(dns: String) {
+        viewModelScope.launch { appPrefs.setFallbackDns(dns) }
     }
 
     fun setThemeMode(mode: String) {
@@ -116,6 +123,7 @@ class SettingsViewModel(
             try {
                 val backup = SettingsBackup(
                     upstreamDns = appPrefs.upstreamDns.first(),
+                    fallbackDns = appPrefs.fallbackDns.first(),
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
@@ -150,6 +158,7 @@ class SettingsViewModel(
 
                 // Preferences
                 appPrefs.setUpstreamDns(backup.upstreamDns)
+                appPrefs.setFallbackDns(backup.fallbackDns)
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
