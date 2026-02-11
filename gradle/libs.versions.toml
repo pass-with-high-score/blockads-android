@@ -1,27 +1,25 @@
 [versions]
-agp = "8.7.2"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.28"
-composeDestinations = "2.1.0-beta12"
-coreKtx = "1.15.0"
+agp = "8.13.2"
+kotlin = "2.3.10"
+ksp = "2.3.4"
+composeDestinations = "2.3.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.8.6"
-activityCompose = "1.9.3"
-composeBom = "2024.06.00"
-navigationCompose = "2.8.4"
-room = "2.6.1"
-datastorePreferences = "1.1.1"
-ktor = "3.0.3"
-materialIconsExtended = "1.7.5"
-koin = "4.0.0"
-accompanist = "0.34.0"
-kotlinxSerialization = "1.7.3"
-guava = "33.0.0-android"
-mockito = "5.8.0"
-coroutinesTest = "1.7.3"
-workManager = "2.9.1"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.3"
+composeBom = "2026.01.01"
+room = "2.8.4"
+datastorePreferences = "1.2.0"
+ktor = "3.4.0"
+materialIconsExtended = "1.7.8"
+koin = "4.1.1"
+accompanist = "0.37.3"
+kotlinxSerialization = "1.10.0"
+guava = "33.5.0-android"
+coroutinesTest = "1.10.2"
+workManager = "2.11.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -55,7 +53,6 @@ koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 
