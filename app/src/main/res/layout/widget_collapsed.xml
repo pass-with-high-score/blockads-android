@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/widget_shield_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_shield_off"
+        android:contentDescription="@string/app_name" />
+
+    <TextView
+        android:id="@+id/widget_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/widget_shield_icon"
+        android:layout_alignTop="@id/widget_shield_icon"
+        android:layout_marginStart="4dp"
+        android:text="@string/app_name"
+        android:textColor="#212121"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:maxLines="1" />
+
+    <ImageView
+        android:id="@+id/widget_toggle_btn"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/widget_toggle_off"
+        android:src="@drawable/ic_power"
+        android:scaleType="center"
+        android:contentDescription="@string/widget_toggle_description"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/widget_status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="@string/status_unprotected"
+        android:textColor="#757575"
+        android:textSize="11sp"
+        android:maxLines="1" />
+
+</RelativeLayout>

@@ -17,6 +17,7 @@ import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.util.BatteryMonitor
+import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -147,6 +148,7 @@ class AdBlockVpnService : VpnService() {
                 isRunning = true
                 appPrefs.setVpnEnabled(true)
                 updateNotification() // Update to normal notification
+                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
 
                 // Log initial battery state
@@ -428,6 +430,7 @@ class AdBlockVpnService : VpnService() {
         }
         vpnInterface = null
 
+        AdBlockWidgetProvider.sendUpdateBroadcast(this)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
         Log.d(TAG, "VPN stopped")
