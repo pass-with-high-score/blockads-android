@@ -10,6 +10,10 @@
     <string name="vpn_notification_retrying">BlockAds is retrying</string>
     <string name="vpn_notification_retry_text">Retry attempt %1$d of %2$d</string>
     <string name="vpn_notification_stats_text">Blocked %1$d | Queries %2$d | Uptime %3$s</string>
+    <string name="vpn_alert_channel_name">VPN Alerts</string>
+    <string name="vpn_alert_channel_description">Important alerts about VPN status changes</string>
+    <string name="vpn_revoked_title">Ad blocking stopped</string>
+    <string name="vpn_revoked_text">Another VPN app took over the connection. Tap to re-enable BlockAds.</string>
     <string name="status_protected">Protected</string>
     <string name="status_connecting">Connecting</string>
     <string name="status_unprotected">Unprotected</string>

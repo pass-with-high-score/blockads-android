@@ -38,7 +38,9 @@ class AdBlockVpnService : VpnService() {
     companion object {
         private const val TAG = "AdBlockVpnService"
         private const val NOTIFICATION_ID = 1
+        private const val REVOKED_NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "blockads_vpn_channel"
+        private const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
@@ -458,6 +460,7 @@ class AdBlockVpnService : VpnService() {
         serviceScope.launch(NonCancellable) {
             appPrefs.setVpnEnabled(false)
         }
+        showRevokedNotification()
         stopVpn()
         super.onRevoke()
     }
@@ -498,6 +501,50 @@ class AdBlockVpnService : VpnService() {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createAlertNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ALERT_CHANNEL_ID,
+                getString(R.string.vpn_alert_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.vpn_alert_channel_description)
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun showRevokedNotification() {
+        createAlertNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 2, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, ALERT_CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.vpn_revoked_title))
+            .setContentText(getString(R.string.vpn_revoked_text))
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(REVOKED_NOTIFICATION_ID, notification)
     }
 
     private fun buildNotification(): Notification {
