@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.2"
+agp = "8.7.2"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
 composeDestinations = "2.1.0-beta12"
