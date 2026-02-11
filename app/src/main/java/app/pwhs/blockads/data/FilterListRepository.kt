@@ -176,8 +176,8 @@ class FilterListRepository(
      *                This could check a Set, Bloom filter, or any other data structure.
      * @return true if the domain or any parent domain matches; false otherwise
      *
-     * @sample Usage examples:
-     * ```
+     * Usage examples:
+     * ```kotlin
      * // Check whitelist (Set)
      * checkDomainAndParents(domain) { whitelistedDomains.contains(it) }
      * 
