@@ -10,8 +10,11 @@ data class DnsErrorEntry(
     val id: Long = 0,
     val domain: String,
     val timestamp: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "error_type")
     val errorType: String, // "TIMEOUT", "IO_ERROR", "UNKNOWN"
+    @ColumnInfo(name = "error_message")
     val errorMessage: String,
+    @ColumnInfo(name = "upstream_dns")
     val upstreamDns: String,
     @ColumnInfo(name = "attempted_fallback")
     val attemptedFallback: Boolean = false

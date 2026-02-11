@@ -64,10 +64,10 @@ abstract class AppDatabase : RoomDatabase() {
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `domain` TEXT NOT NULL,
                         `timestamp` INTEGER NOT NULL,
-                        `errorType` TEXT NOT NULL,
-                        `errorMessage` TEXT NOT NULL,
-                        `upstreamDns` TEXT NOT NULL,
-                        `attemptedFallback` INTEGER NOT NULL DEFAULT 0
+                        `error_type` TEXT NOT NULL,
+                        `error_message` TEXT NOT NULL,
+                        `upstream_dns` TEXT NOT NULL,
+                        `attempted_fallback` INTEGER NOT NULL DEFAULT 0
                     )"""
                 )
             }
