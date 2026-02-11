@@ -63,7 +63,7 @@
     </RelativeLayout>
 
     <!-- Divider -->
-    <View
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="8dp"
@@ -104,7 +104,7 @@
         </LinearLayout>
 
         <!-- Separator -->
-        <View
+        <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginTop="4dp"
@@ -137,7 +137,7 @@
         </LinearLayout>
 
         <!-- Separator -->
-        <View
+        <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginTop="4dp"
