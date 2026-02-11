@@ -9,14 +9,6 @@
     <string name="vpn_notification_reconnecting_text">Mạng thay đổi, đang kết nối lại VPN…</string>
     <string name="vpn_notification_retrying">BlockAds đang thử lại</string>
     <string name="vpn_notification_retry_text">Lần thử %1$d / %2$d</string>
-    <string name="vpn_notification_stats_text">Đã chặn %1$d | Truy vấn %2$d | Uptime %3$s</string>
-    <string name="vpn_alert_channel_name">Cảnh báo VPN</string>
-    <string name="vpn_alert_channel_description">Cảnh báo quan trọng về thay đổi trạng thái VPN</string>
-    <string name="vpn_revoked_title">Chặn quảng cáo đã dừng</string>
-    <string name="vpn_revoked_text">Ứng dụng VPN khác đã chiếm kết nối. Nhấn để bật lại BlockAds.</string>
-    <string name="vpn_stopped_title">BlockAds đã tạm dừng</string>
-    <string name="vpn_stopped_text">Chặn quảng cáo đã tắt. Nhấn Bật để tiếp tục.</string>
-    <string name="vpn_stopped_action_enable">Bật</string>
     <string name="status_protected">Được bảo vệ</string>
     <string name="status_connecting">Đang kết nối</string>
     <string name="status_unprotected">Chưa bảo vệ</string>
