@@ -323,10 +323,13 @@ object DnsPacketParser {
         out.write(query.transactionId shr 8)
         out.write(query.transactionId and 0xFF)
 
-        // Flags: QR=1 (response), RD=1, RA=1, RCODE=2 (SERVFAIL)
-        // 0x81 = 10000001 (QR=1, RD=1)
+        // Flags: QR=1 (response), RD mirrors query, RA=1, RCODE=2 (SERVFAIL)
+        // RD is the least significant bit of the first flags byte in the original query
+        val originalFlagsByte1 = query.rawDnsPayload?.getOrNull(2)?.toInt() ?: 0
+        val rdSet = (originalFlagsByte1 and 0x01) == 0x01
+        val responseFlagsByte1 = 0x80 or if (rdSet) 0x01 else 0x00  // QR=1, RD from query
         // 0x82 = 10000010 (RA=1, RCODE=2)
-        out.write(0x81)
+        out.write(responseFlagsByte1)
         out.write(0x82)
 
         // QDCOUNT = 1
