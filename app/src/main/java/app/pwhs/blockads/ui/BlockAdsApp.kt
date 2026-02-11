@@ -5,10 +5,10 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Filter
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -63,9 +63,9 @@ sealed class Screen(
     data object FilterSetup : Screen(
         destination = FilterSetupScreenDestination(),
         route = FilterSetupScreenDestination.route,
-        labelRes = R.string.nav_logs,
-        selectedIcon = Icons.Default.Filter,
-        unselectedIcon = Icons.Outlined.Filter
+        labelRes = R.string.nav_filter,
+        selectedIcon = Icons.Filled.Shield,
+        unselectedIcon = Icons.Outlined.Shield
     )
 
     data object Settings :

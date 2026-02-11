@@ -24,6 +24,7 @@
     <string name="blocked_queries">Blocked</string>
     <string name="nav_home">Home</string>
     <string name="nav_logs">Logs</string>
+    <string name="nav_filter">Filter</string>
     <string name="nav_settings">Settings</string>
     <string name="settings_filter_url">Filter List URL</string>
     <string name="settings_update_filter">Update Filter List</string>
