@@ -31,6 +31,7 @@ import java.io.FileOutputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
 
@@ -62,6 +63,11 @@ class AdBlockVpnService : VpnService() {
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
+    private var notificationUpdateJob: kotlinx.coroutines.Job? = null
+
+    private val totalQueries = AtomicLong(0)
+    private val blockedQueries = AtomicLong(0)
+    private var vpnStartTime: Long = 0L
 
     @Volatile
     private var isProcessing = false
@@ -146,6 +152,9 @@ class AdBlockVpnService : VpnService() {
                 isConnecting = false
                 isRunning = true
                 appPrefs.setVpnEnabled(true)
+                totalQueries.set(0)
+                blockedQueries.set(0)
+                vpnStartTime = System.currentTimeMillis()
                 updateNotification() // Update to normal notification
                 Log.d(TAG, "VPN established successfully")
 
@@ -154,6 +163,9 @@ class AdBlockVpnService : VpnService() {
                 
                 // Start periodic battery monitoring
                 startBatteryMonitoring()
+
+                // Start periodic notification updates with stats
+                startNotificationUpdates()
 
                 // Start processing packets
                 processPackets(upstreamDns, fallbackDns)
@@ -268,6 +280,8 @@ class AdBlockVpnService : VpnService() {
             }
 
             val elapsed = System.currentTimeMillis() - startTime
+            totalQueries.incrementAndGet()
+            blockedQueries.incrementAndGet()
             logDnsQuery(domain, true, query.queryType, elapsed)
             Log.d(TAG, "BLOCKED: $domain")
         } else {
@@ -275,6 +289,7 @@ class AdBlockVpnService : VpnService() {
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
 
             val elapsed = System.currentTimeMillis() - startTime
+            totalQueries.incrementAndGet()
             logDnsQuery(domain, false, query.queryType, elapsed)
         }
     }
@@ -416,6 +431,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop battery monitoring
         stopBatteryMonitoring()
+        
+        // Stop notification updates
+        stopNotificationUpdates()
 
         runBlocking {
             appPrefs.setVpnEnabled(false)
@@ -455,6 +473,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop battery monitoring
         stopBatteryMonitoring()
+
+        // Stop notification updates
+        stopNotificationUpdates()
         
         serviceScope.cancel()
         try {
@@ -516,6 +537,12 @@ class AdBlockVpnService : VpnService() {
                 retryManager.getRetryCount(),
                 retryManager.getMaxRetries()
             )
+            isRunning -> {
+                val blocked = blockedQueries.get()
+                val total = totalQueries.get()
+                val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
+                getString(R.string.vpn_notification_stats_text, blocked, total, uptimeStr)
+            }
             else -> getString(R.string.vpn_notification_text)
         }
 
@@ -596,5 +623,44 @@ class AdBlockVpnService : VpnService() {
     private fun stopBatteryMonitoring() {
         batteryMonitoringJob?.cancel()
         batteryMonitoringJob = null
+    }
+
+    /**
+     * Start periodic notification updates to refresh stats display.
+     * Updates the notification every 30 seconds while VPN is running.
+     */
+    private fun startNotificationUpdates() {
+        notificationUpdateJob?.cancel()
+
+        notificationUpdateJob = serviceScope.launch {
+            while (isRunning) {
+                try {
+                    delay(30_000L) // Update every 30 seconds
+                    if (isRunning) {
+                        updateNotification()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating notification", e)
+                    break
+                }
+            }
+        }
+    }
+
+    private fun stopNotificationUpdates() {
+        notificationUpdateJob?.cancel()
+        notificationUpdateJob = null
+    }
+
+    private fun formatUptime(millis: Long): String {
+        val totalSeconds = millis / 1000
+        val hours = totalSeconds / 3600
+        val minutes = (totalSeconds % 3600) / 60
+        val seconds = totalSeconds % 60
+        return if (hours > 0) {
+            String.format("%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%d:%02d", minutes, seconds)
+        }
     }
 }
