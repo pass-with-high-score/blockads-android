@@ -321,10 +321,10 @@ object DnsPacketParser {
         destPort: Int,
         payload: ByteArray
     ): ByteArray {
-        return if (sourceIp.size == 16) {
-            buildIpv6UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
-        } else {
-            buildIpv4UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
+        return when (sourceIp.size) {
+            16 -> buildIpv6UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
+            4 -> buildIpv4UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
+            else -> throw IllegalArgumentException("Unsupported IP address size: ${sourceIp.size}")
         }
     }
 
