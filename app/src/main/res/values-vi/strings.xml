@@ -129,4 +129,26 @@
     <string name="filter_built_in">Tích hợp</string>
     <string name="filter_custom">Tùy chỉnh</string>
     <string name="filter_custom_empty">Chưa thêm bộ lọc tùy chỉnh nào</string>
+
+    <!-- Auto-update Filter Lists -->
+    <string name="settings_auto_update">Tự động cập nhật bộ lọc</string>
+    <string name="settings_auto_update_enabled">Bật tự động cập nhật</string>
+    <string name="settings_auto_update_enabled_desc">Tự động cập nhật danh sách bộ lọc ở chế độ nền</string>
+    <string name="settings_auto_update_frequency">Tần suất cập nhật</string>
+    <string name="settings_auto_update_frequency_6h">Mỗi 6 giờ</string>
+    <string name="settings_auto_update_frequency_12h">Mỗi 12 giờ</string>
+    <string name="settings_auto_update_frequency_24h">Mỗi 24 giờ</string>
+    <string name="settings_auto_update_frequency_48h">Mỗi 48 giờ</string>
+    <string name="settings_auto_update_frequency_manual">Chỉ thủ công</string>
+    <string name="settings_auto_update_wifi_only">Chỉ qua Wi-Fi</string>
+    <string name="settings_auto_update_wifi_only_desc">Chỉ cập nhật khi kết nối Wi-Fi</string>
+    <string name="settings_auto_update_notification">Thông báo cập nhật</string>
+    <string name="settings_auto_update_notification_normal">Bình thường</string>
+    <string name="settings_auto_update_notification_silent">Im lặng</string>
+    <string name="settings_auto_update_notification_none">Không</string>
+    <string name="filter_update_success">Đã cập nhật bộ lọc</string>
+    <string name="filter_update_success_message">Đã cập nhật thành công %d tên miền</string>
+    <string name="filter_update_failed_message">Không thể cập nhật danh sách bộ lọc</string>
+    <string name="filter_update_notification_channel">Cập nhật bộ lọc</string>
+    <string name="filter_update_notification_channel_desc">Thông báo về cập nhật danh sách bộ lọc</string>
 </resources>
