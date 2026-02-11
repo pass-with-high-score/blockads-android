@@ -26,8 +26,10 @@ object DnsPacketParser {
 
     // DNS header is always 12 bytes
     private const val DNS_HEADER_SIZE = 12
-    // IP header minimum 20 bytes
+    // IPv4 header minimum 20 bytes
     private const val IP_HEADER_SIZE = 20
+    // IPv6 header is always 40 bytes (fixed)
+    private const val IPV6_HEADER_SIZE = 40
     // UDP header 8 bytes
     private const val UDP_HEADER_SIZE = 8
 
@@ -57,32 +59,57 @@ object DnsPacketParser {
     /**
      * Parse a raw IP packet from the TUN device and extract DNS query info.
      * Returns null if the packet is not a DNS query.
+     * Supports both IPv4 and IPv6 packets.
      */
     fun parseIpPacket(packet: ByteArray, length: Int): DnsQuery? {
         if (length < IP_HEADER_SIZE + UDP_HEADER_SIZE + DNS_HEADER_SIZE) return null
 
         val buffer = ByteBuffer.wrap(packet, 0, length)
 
-        // IP Header
-        val versionAndIhl = buffer.get().toInt() and 0xFF
-        val version = versionAndIhl shr 4
-        if (version != 4) return null // Only handle IPv4
+        val firstByte = buffer.get().toInt() and 0xFF
+        val version = firstByte shr 4
 
-        val ihl = (versionAndIhl and 0x0F) * 4
-        if (ihl < IP_HEADER_SIZE) return null
+        val sourceIp: ByteArray
+        val destIp: ByteArray
+        val udpStart: Int
 
-        buffer.position(9)
-        val protocol = buffer.get().toInt() and 0xFF
-        if (protocol != 17) return null // Only UDP (protocol 17)
+        when (version) {
+            4 -> {
+                val ihl = (firstByte and 0x0F) * 4
+                if (ihl < IP_HEADER_SIZE) return null
 
-        buffer.position(12)
-        val sourceIp = ByteArray(4)
-        buffer.get(sourceIp)
-        val destIp = ByteArray(4)
-        buffer.get(destIp)
+                buffer.position(9)
+                val protocol = buffer.get().toInt() and 0xFF
+                if (protocol != 17) return null // Only UDP
 
-        // Move to UDP header
-        buffer.position(ihl)
+                buffer.position(12)
+                sourceIp = ByteArray(4)
+                buffer.get(sourceIp)
+                destIp = ByteArray(4)
+                buffer.get(destIp)
+
+                udpStart = ihl
+            }
+            6 -> {
+                if (length < IPV6_HEADER_SIZE + UDP_HEADER_SIZE + DNS_HEADER_SIZE) return null
+
+                buffer.position(6)
+                val nextHeader = buffer.get().toInt() and 0xFF
+                if (nextHeader != 17) return null // Only UDP (no extension headers)
+
+                buffer.position(8)
+                sourceIp = ByteArray(16)
+                buffer.get(sourceIp)
+                destIp = ByteArray(16)
+                buffer.get(destIp)
+
+                udpStart = IPV6_HEADER_SIZE
+            }
+            else -> return null
+        }
+
+        // Parse UDP header (common for both IPv4 and IPv6)
+        buffer.position(udpStart)
         if (buffer.remaining() < UDP_HEADER_SIZE + DNS_HEADER_SIZE) return null
 
         val sourcePort = buffer.short.toInt() and 0xFFFF
@@ -227,25 +254,48 @@ object DnsPacketParser {
         out.write(0xC0)
         out.write(0x0C)
 
-        // Type A (1)
-        out.write(0x00)
-        out.write(0x01)
-        // Class IN (1)
-        out.write(0x00)
-        out.write(0x01)
-        // TTL = 300 seconds
-        out.write(0x00)
-        out.write(0x00)
-        out.write(0x01)
-        out.write(0x2C)
-        // RDLENGTH = 4
-        out.write(0x00)
-        out.write(0x04)
-        // RDATA = 0.0.0.0
-        out.write(0x00)
-        out.write(0x00)
-        out.write(0x00)
-        out.write(0x00)
+        if (query.queryType == 28) {
+            // AAAA record (IPv6)
+            // Type AAAA (28)
+            out.write(0x00)
+            out.write(0x1C)
+            // Class IN (1)
+            out.write(0x00)
+            out.write(0x01)
+            // TTL = 300 seconds
+            out.write(0x00)
+            out.write(0x00)
+            out.write(0x01)
+            out.write(0x2C)
+            // RDLENGTH = 16
+            out.write(0x00)
+            out.write(0x10)
+            // RDATA = :: (16 zero bytes)
+            for (i in 0 until 16) {
+                out.write(0x00)
+            }
+        } else {
+            // A record (IPv4)
+            // Type A (1)
+            out.write(0x00)
+            out.write(0x01)
+            // Class IN (1)
+            out.write(0x00)
+            out.write(0x01)
+            // TTL = 300 seconds
+            out.write(0x00)
+            out.write(0x00)
+            out.write(0x01)
+            out.write(0x2C)
+            // RDLENGTH = 4
+            out.write(0x00)
+            out.write(0x04)
+            // RDATA = 0.0.0.0
+            out.write(0x00)
+            out.write(0x00)
+            out.write(0x00)
+            out.write(0x00)
+        }
 
         return out.toByteArray()
     }
@@ -260,7 +310,25 @@ object DnsPacketParser {
         return out.toByteArray()
     }
 
+    /**
+     * Build a complete IP+UDP packet wrapping the given payload.
+     * Automatically detects IPv4 or IPv6 based on source IP address size.
+     */
     fun buildIpUdpPacket(
+        sourceIp: ByteArray,
+        destIp: ByteArray,
+        sourcePort: Int,
+        destPort: Int,
+        payload: ByteArray
+    ): ByteArray {
+        return if (sourceIp.size == 16) {
+            buildIpv6UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
+        } else {
+            buildIpv4UdpPacket(sourceIp, destIp, sourcePort, destPort, payload)
+        }
+    }
+
+    private fun buildIpv4UdpPacket(
         sourceIp: ByteArray,
         destIp: ByteArray,
         sourcePort: Int,
@@ -300,6 +368,93 @@ object DnsPacketParser {
         buffer.put(payload)
 
         return packet
+    }
+
+    private fun buildIpv6UdpPacket(
+        sourceIp: ByteArray,
+        destIp: ByteArray,
+        sourcePort: Int,
+        destPort: Int,
+        payload: ByteArray
+    ): ByteArray {
+        val udpLength = UDP_HEADER_SIZE + payload.size
+        val totalLength = IPV6_HEADER_SIZE + udpLength
+
+        val packet = ByteArray(totalLength)
+        val buffer = ByteBuffer.wrap(packet)
+
+        // === IPv6 Header (40 bytes) ===
+        buffer.putInt(0x60000000) // Version 6, Traffic Class 0, Flow Label 0
+        buffer.putShort(udpLength.toShort()) // Payload Length
+        buffer.put(17.toByte()) // Next Header: UDP
+        buffer.put(64.toByte()) // Hop Limit
+        buffer.put(sourceIp) // Source Address (16 bytes)
+        buffer.put(destIp)   // Destination Address (16 bytes)
+
+        // === UDP Header ===
+        buffer.putShort(sourcePort.toShort())
+        buffer.putShort(destPort.toShort())
+        buffer.putShort(udpLength.toShort())
+        val checksumPosition = buffer.position()
+        buffer.putShort(0) // UDP checksum placeholder
+
+        // === Payload ===
+        buffer.put(payload)
+
+        // Calculate UDP checksum (mandatory for IPv6)
+        val udpChecksum = calculateUdpIpv6Checksum(
+            sourceIp, destIp, packet, IPV6_HEADER_SIZE, udpLength
+        )
+        packet[checksumPosition] = (udpChecksum shr 8).toByte()
+        packet[checksumPosition + 1] = (udpChecksum and 0xFF).toByte()
+
+        return packet
+    }
+
+    /**
+     * Calculate UDP checksum for IPv6 using the pseudo-header as per RFC 2460.
+     * The pseudo-header includes: source address, dest address, UDP length, next header (17).
+     */
+    private fun calculateUdpIpv6Checksum(
+        sourceIp: ByteArray,
+        destIp: ByteArray,
+        packet: ByteArray,
+        udpOffset: Int,
+        udpLength: Int
+    ): Int {
+        var sum = 0L
+
+        // Pseudo-header: Source Address (16 bytes)
+        for (i in 0 until 16 step 2) {
+            sum += ((sourceIp[i].toInt() and 0xFF) shl 8) or (sourceIp[i + 1].toInt() and 0xFF)
+        }
+        // Pseudo-header: Destination Address (16 bytes)
+        for (i in 0 until 16 step 2) {
+            sum += ((destIp[i].toInt() and 0xFF) shl 8) or (destIp[i + 1].toInt() and 0xFF)
+        }
+        // Pseudo-header: UDP Length (32-bit)
+        sum += udpLength.toLong()
+        // Pseudo-header: Next Header = 17 (32-bit)
+        sum += 17L
+
+        // UDP header + payload
+        var i = udpOffset
+        val end = udpOffset + udpLength
+        while (i < end - 1) {
+            sum += ((packet[i].toInt() and 0xFF) shl 8) or (packet[i + 1].toInt() and 0xFF)
+            i += 2
+        }
+        if (i < end) {
+            sum += (packet[i].toInt() and 0xFF) shl 8
+        }
+
+        while (sum shr 16 != 0L) {
+            sum = (sum and 0xFFFF) + (sum shr 16)
+        }
+
+        val result = (sum.toInt().inv()) and 0xFFFF
+        // Per RFC 2460: UDP checksum of 0 must be transmitted as 0xFFFF
+        return if (result == 0) 0xFFFF else result
     }
 
     private fun calculateChecksum(data: ByteArray, offset: Int, length: Int): Int {

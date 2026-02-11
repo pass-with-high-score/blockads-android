@@ -102,6 +102,9 @@ class AdBlockVpnService : VpnService() {
                     .addAddress("10.0.0.2", 32)
                     .addRoute("10.0.0.1", 32)    // Only route fake DNS IP through TUN
                     .addDnsServer("10.0.0.1")     // System sends DNS queries here
+                    .addAddress("fd00::2", 128)   // IPv6 TUN address
+                    .addRoute("fd00::1", 128)     // Route IPv6 DNS through TUN
+                    .addDnsServer("fd00::1")       // IPv6 DNS server
                     .setBlocking(true)
                     .setMtu(1500)
 
