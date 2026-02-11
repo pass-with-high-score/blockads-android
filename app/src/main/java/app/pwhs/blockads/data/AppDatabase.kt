@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [DnsLogEntry::class, FilterList::class, WhitelistDomain::class, DnsErrorEntry::class],
     version = 5,
-    exportSchema = true
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
