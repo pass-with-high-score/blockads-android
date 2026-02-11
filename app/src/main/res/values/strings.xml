@@ -14,6 +14,9 @@
     <string name="vpn_alert_channel_description">Important alerts about VPN status changes</string>
     <string name="vpn_revoked_title">Ad blocking stopped</string>
     <string name="vpn_revoked_text">Another VPN app took over the connection. Tap to re-enable BlockAds.</string>
+    <string name="vpn_stopped_title">BlockAds is paused</string>
+    <string name="vpn_stopped_text">Ad blocking is disabled. Tap Enable to resume.</string>
+    <string name="vpn_stopped_action_enable">Enable</string>
     <string name="status_protected">Protected</string>
     <string name="status_connecting">Connecting</string>
     <string name="status_unprotected">Unprotected</string>
