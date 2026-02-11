@@ -357,7 +357,7 @@ class AdBlockVpnService : VpnService() {
         Log.w(TAG, "VPN revoked by system or user")
         // Update preferences to reflect VPN is no longer enabled
         // Use a non-cancellable context to ensure preference is updated
-        serviceScope.launch(kotlinx.coroutines.NonCancellable) {
+        serviceScope.launch(NonCancellable) {
             appPrefs.setVpnEnabled(false)
         }
         stopVpn()
