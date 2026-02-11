@@ -12,6 +12,8 @@ import android.util.Log
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.DnsErrorDao
+import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +55,7 @@ class AdBlockVpnService : VpnService() {
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
     private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
-    private lateinit var dnsErrorDao: app.pwhs.blockads.data.DnsErrorDao
+    private lateinit var dnsErrorDao: DnsErrorDao
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
 
