@@ -297,8 +297,8 @@ class DnsPacketParserTest {
         val dnsOffset = 48 // IPv6 header (40) + UDP header (8)
         val dnsBuf = ByteBuffer.wrap(response, dnsOffset, response.size - dnsOffset)
         
-        dnsBuf.short // transaction ID
-        dnsBuf.get()  // flags byte 1
+        val transactionId = dnsBuf.short // Skip transaction ID
+        val flags1 = dnsBuf.get()  // Skip flags byte 1
         val flags2 = dnsBuf.get().toInt() and 0xFF
         val rcode = flags2 and 0x0F
         assertEquals(2, rcode) // SERVFAIL

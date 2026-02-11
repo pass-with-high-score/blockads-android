@@ -352,8 +352,6 @@ object DnsPacketParser {
         out.write(query.queryClass shr 8)
         out.write(query.queryClass and 0xFF)
 
-        // No answer section for SERVFAIL
-
         return out.toByteArray()
     }
 
