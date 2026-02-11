@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -353,7 +355,7 @@ fun SettingsScreen(
 
                         // Wi-Fi only
                         SettingsToggleItem(
-                            icon = Icons.Default.Replay,
+                            icon = Icons.Default.Wifi,
                             title = stringResource(R.string.settings_auto_update_wifi_only),
                             subtitle = stringResource(R.string.settings_auto_update_wifi_only_desc),
                             isChecked = autoUpdateWifiOnly,
@@ -430,7 +432,7 @@ fun SettingsScreen(
                                     )
                                     if (autoUpdateFrequency == freq) {
                                         Icon(
-                                            Icons.Default.Block,
+                                            Icons.Default.Check,
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(20.dp)
@@ -476,7 +478,7 @@ fun SettingsScreen(
                                     )
                                     if (autoUpdateNotification == type) {
                                         Icon(
-                                            Icons.Default.Block,
+                                            Icons.Default.Check,
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(20.dp)
