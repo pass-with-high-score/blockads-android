@@ -16,6 +16,7 @@ import app.pwhs.blockads.data.DnsErrorDao
 import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.util.BatteryMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -38,6 +39,7 @@ class AdBlockVpnService : VpnService() {
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "blockads_vpn_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
 
@@ -58,6 +60,8 @@ class AdBlockVpnService : VpnService() {
     private lateinit var dnsErrorDao: DnsErrorDao
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
+    private lateinit var batteryMonitor: BatteryMonitor
+    private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
 
     @Volatile
     private var isProcessing = false
@@ -72,6 +76,7 @@ class AdBlockVpnService : VpnService() {
         appPrefs = koin.get()
         dnsLogDao = koin.get()
         dnsErrorDao = koin.get()
+        batteryMonitor = BatteryMonitor(this)
         
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -144,6 +149,12 @@ class AdBlockVpnService : VpnService() {
                 updateNotification() // Update to normal notification
                 Log.d(TAG, "VPN established successfully")
 
+                // Log initial battery state
+                batteryMonitor.logBatteryStatus()
+                
+                // Start periodic battery monitoring
+                startBatteryMonitoring()
+
                 // Start processing packets
                 processPackets(upstreamDns, fallbackDns)
 
@@ -206,18 +217,20 @@ class AdBlockVpnService : VpnService() {
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
         val outputStream = FileOutputStream(fd)
-        val buffer = ByteArray(32767)
+        
+        // Reusable buffer for packet reading - SAFE because processing is single-threaded
+        // The inputStream.read() call blocks until a packet arrives, ensuring sequential
+        // processing. Each packet is fully processed before the next read() call.
+        val buffer = ByteArray(MAX_PACKET_SIZE)
 
         try {
             while (isProcessing && isRunning) {
                 val length = inputStream.read(buffer)
                 if (length <= 0) continue
 
-                // Copy packet data
-                val packet = buffer.copyOf(length)
-
-                // Try to parse DNS query
-                val query = DnsPacketParser.parseIpPacket(packet, length)
+                // Parse DNS query directly from the reusable buffer
+                // No need to copy since parseIpPacket doesn't modify the buffer
+                val query = DnsPacketParser.parseIpPacket(buffer, length)
 
                 if (query != null) {
                     handleDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -400,6 +413,9 @@ class AdBlockVpnService : VpnService() {
 
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
+        
+        // Stop battery monitoring
+        stopBatteryMonitoring()
 
         runBlocking {
             appPrefs.setVpnEnabled(false)
@@ -436,6 +452,9 @@ class AdBlockVpnService : VpnService() {
         
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
+        
+        // Stop battery monitoring
+        stopBatteryMonitoring()
         
         serviceScope.cancel()
         try {
@@ -549,5 +568,33 @@ class AdBlockVpnService : VpnService() {
         Log.d(TAG, "Network lost")
         // Note: We don't stop the VPN when network is lost, as it may come back
         // The VPN will automatically reconnect when network is available again
+    }
+    
+    /**
+     * Start periodic battery monitoring to track battery usage.
+     * Logs battery status every 5 minutes while VPN is running.
+     */
+    private fun startBatteryMonitoring() {
+        // Cancel any existing monitoring job
+        batteryMonitoringJob?.cancel()
+        
+        batteryMonitoringJob = serviceScope.launch {
+            while (isRunning) {
+                try {
+                    delay(5 * 60 * 1000L) // Wait 5 minutes
+                    if (isRunning) {
+                        batteryMonitor.logBatteryStatus()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error monitoring battery", e)
+                    break
+                }
+            }
+        }
+    }
+    
+    private fun stopBatteryMonitoring() {
+        batteryMonitoringJob?.cancel()
+        batteryMonitoringJob = null
     }
 }

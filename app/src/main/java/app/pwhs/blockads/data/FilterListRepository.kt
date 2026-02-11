@@ -2,12 +2,15 @@ package app.pwhs.blockads.data
 
 import android.content.Context
 import android.util.Log
+import com.google.common.hash.BloomFilter
+import com.google.common.hash.Funnels
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
 class FilterListRepository(
@@ -146,26 +149,76 @@ class FilterListRepository(
 
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
+    
+    // Bloom filter for fast negative lookups (reduces exact match checks)
+    @Volatile
+    private var blockedDomainsBloomFilter: BloomFilter<CharSequence>? = null
+    
+    // Expected false positive rate of 1% for Bloom filter
+    private val bloomFilterFpp = 0.01
 
     val domainCount: Int get() = blockedDomains.size
 
-    fun isBlocked(domain: String): Boolean {
-        // Check whitelist first — whitelisted domains are always allowed
-        if (whitelistedDomains.contains(domain)) return false
-        var wd = domain
-        while (wd.contains('.')) {
-            wd = wd.substringAfter('.')
-            if (whitelistedDomains.contains(wd)) return false
-        }
-
-        // Check blocklist
-        if (blockedDomains.contains(domain)) return true
+    /**
+     * Check if a domain or any of its parent domains matches a condition.
+     * 
+     * This helper function iterates through a domain and all its parent domains
+     * (by removing the leftmost subdomain each time), checking each against the
+     * provided checker function.
+     * 
+     * Example: For "sub.example.com", checks:
+     * 1. "sub.example.com"
+     * 2. "example.com"  
+     * 3. "com"
+     *
+     * @param domain The domain to check (e.g., "ads.example.com")
+     * @param checker A function that returns true if the domain matches the condition.
+     *                This could check a Set, Bloom filter, or any other data structure.
+     * @return true if the domain or any parent domain matches; false otherwise
+     *
+     * Usage examples:
+     * ```kotlin
+     * // Check whitelist (Set)
+     * checkDomainAndParents(domain) { whitelistedDomains.contains(it) }
+     * 
+     * // Check Bloom filter
+     * checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
+     * 
+     * // Check exact blocklist (HashMap)
+     * checkDomainAndParents(domain) { blockedDomains.contains(it) }
+     * ```
+     */
+    private inline fun checkDomainAndParents(
+        domain: String,
+        checker: (String) -> Boolean
+    ): Boolean {
+        if (checker(domain)) return true
         var d = domain
         while (d.contains('.')) {
             d = d.substringAfter('.')
-            if (blockedDomains.contains(d)) return true
+            if (checker(d)) return true
         }
         return false
+    }
+
+    fun isBlocked(domain: String): Boolean {
+        // Check whitelist first — whitelisted domains are always allowed
+        if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
+            return false
+        }
+
+        // Use Bloom filter for fast negative check
+        // If Bloom filter says "definitely not present", skip exact lookup
+        val bloomFilter = blockedDomainsBloomFilter
+        if (bloomFilter != null) {
+            // Check if domain or any parent might be in blocklist
+            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
+            // If no match in Bloom filter, definitely not blocked
+            if (!possiblyBlocked) return false
+        }
+
+        // Check exact blocklist (only if Bloom filter suggested possibility)
+        return checkDomainAndParents(domain) { blockedDomains.contains(it) }
     }
 
     suspend fun loadWhitelist() {
@@ -196,6 +249,7 @@ class FilterListRepository(
             val enabledLists = filterListDao.getEnabled()
             if (enabledLists.isEmpty()) {
                 blockedDomains.clear()
+                blockedDomainsBloomFilter = null
                 return@withContext Result.success(0)
             }
 
@@ -221,12 +275,46 @@ class FilterListRepository(
 
             blockedDomains.clear()
             blockedDomains.addAll(newDomains)
+            
+            // Build Bloom filter for fast negative lookups
+            buildBloomFilter(newDomains)
+            
             Log.d(TAG, "Total unique domains loaded: ${blockedDomains.size}")
 
             Result.success(blockedDomains.size)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load filters", e)
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Build a Bloom filter from the domain set for memory-efficient lookups.
+     */
+    private fun buildBloomFilter(domains: Set<String>) {
+        if (domains.isEmpty()) {
+            blockedDomainsBloomFilter = null
+            return
+        }
+        
+        try {
+            val startTime = System.currentTimeMillis()
+            // Create Bloom filter with expected insertions and FPP
+            val filter = BloomFilter.create(
+                Funnels.stringFunnel(StandardCharsets.UTF_8),
+                domains.size,
+                bloomFilterFpp
+            )
+            
+            // Add all domains to Bloom filter
+            domains.forEach { filter.put(it) }
+            
+            blockedDomainsBloomFilter = filter
+            val elapsed = System.currentTimeMillis() - startTime
+            Log.d(TAG, "Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to build Bloom filter, falling back to direct lookup", e)
+            blockedDomainsBloomFilter = null
         }
     }
 
@@ -319,6 +407,7 @@ class FilterListRepository(
 
     fun clearCache() {
         blockedDomains.clear()
+        blockedDomainsBloomFilter = null
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }
 }
