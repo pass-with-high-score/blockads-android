@@ -160,8 +160,21 @@ class FilterListRepository(
     val domainCount: Int get() = blockedDomains.size
 
     /**
-     * Check if a domain or any of its parent domains exist in the given set/filter.
-     * Returns true if found, false otherwise.
+     * Check if a domain or any of its parent domains matches a condition.
+     * 
+     * This helper function iterates through a domain and all its parent domains
+     * (by removing the leftmost subdomain each time), checking each against the
+     * provided checker function.
+     * 
+     * Example: For "sub.example.com", checks:
+     * 1. "sub.example.com"
+     * 2. "example.com"  
+     * 3. "com"
+     *
+     * @param domain The domain to check (e.g., "ads.example.com")
+     * @param checker A function that returns true if the domain matches the condition.
+     *                This could check a Set, Bloom filter, or any other data structure.
+     * @return true if the domain or any parent domain matches; false otherwise
      */
     private inline fun checkDomainAndParents(
         domain: String,

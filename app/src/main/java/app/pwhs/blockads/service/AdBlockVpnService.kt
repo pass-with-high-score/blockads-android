@@ -216,6 +216,10 @@ class AdBlockVpnService : VpnService() {
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
         val outputStream = FileOutputStream(fd)
+        
+        // Reusable buffer for packet reading - SAFE because processing is single-threaded
+        // The inputStream.read() call blocks until a packet arrives, ensuring sequential
+        // processing. Each packet is fully processed before the next read() call.
         val buffer = ByteArray(32767)
 
         try {
