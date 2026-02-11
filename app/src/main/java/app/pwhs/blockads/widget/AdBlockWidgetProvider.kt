@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
@@ -25,8 +24,6 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "AdBlockWidget"
-        const val ACTION_TOGGLE_VPN = "app.pwhs.blockads.widget.TOGGLE_VPN"
-        const val ACTION_WIDGET_UPDATE = "app.pwhs.blockads.widget.UPDATE"
 
         private const val EXPANDED_MIN_WIDTH_DP = 200
         private const val EXPANDED_MIN_HEIGHT_DP = 120
@@ -68,59 +65,6 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
         coroutineScope.cancel()
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-
-        when (intent.action) {
-            ACTION_TOGGLE_VPN -> {
-                toggleVpn(context)
-                // Update widgets after a short delay to reflect new state
-                val widgetManager = AppWidgetManager.getInstance(context)
-                val ids = widgetManager.getAppWidgetIds(
-                    ComponentName(context, AdBlockWidgetProvider::class.java)
-                )
-                for (id in ids) {
-                    updateWidget(context, widgetManager, id)
-                }
-            }
-            ACTION_WIDGET_UPDATE -> {
-                val widgetManager = AppWidgetManager.getInstance(context)
-                val ids = widgetManager.getAppWidgetIds(
-                    ComponentName(context, AdBlockWidgetProvider::class.java)
-                )
-                for (id in ids) {
-                    updateWidget(context, widgetManager, id)
-                }
-            }
-        }
-    }
-
-    private fun toggleVpn(context: Context) {
-        if (AdBlockVpnService.isRunning) {
-            val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = AdBlockVpnService.ACTION_STOP
-            }
-            context.startService(stopIntent)
-        } else {
-            val startIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = AdBlockVpnService.ACTION_START
-            }
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(startIntent)
-                } else {
-                    context.startService(startIntent)
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Cannot start VPN from widget, opening app", e)
-                val appIntent = Intent(context, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                context.startActivity(appIntent)
-            }
-        }
     }
 
     private fun updateWidget(
@@ -178,9 +122,9 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
             if (isRunning) 0xFF00E676.toInt() else 0xFF757575.toInt()
         )
 
-        // Set toggle click action
-        val toggleIntent = Intent(context, AdBlockWidgetProvider::class.java).apply {
-            action = ACTION_TOGGLE_VPN
+        // Set toggle click action (targets internal unexported receiver)
+        val toggleIntent = Intent(context, WidgetToggleReceiver::class.java).apply {
+            action = WidgetToggleReceiver.ACTION_TOGGLE_VPN
         }
         val togglePendingIntent = PendingIntent.getBroadcast(
             context, 0, toggleIntent,
@@ -239,9 +183,9 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
             if (isRunning) 0xFF00E676.toInt() else 0xFF757575.toInt()
         )
 
-        // Set toggle click action
-        val toggleIntent = Intent(context, AdBlockWidgetProvider::class.java).apply {
-            action = ACTION_TOGGLE_VPN
+        // Set toggle click action (targets internal unexported receiver)
+        val toggleIntent = Intent(context, WidgetToggleReceiver::class.java).apply {
+            action = WidgetToggleReceiver.ACTION_TOGGLE_VPN
         }
         val togglePendingIntent = PendingIntent.getBroadcast(
             context, 0, toggleIntent,
@@ -260,7 +204,10 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
         views.setOnClickPendingIntent(R.id.widget_shield_icon, appPendingIntent)
         views.setOnClickPendingIntent(R.id.widget_app_name, appPendingIntent)
 
-        // Load stats asynchronously
+        // Update widget immediately with header state (toggle, shield, status)
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+
+        // Then load stats asynchronously and update again
         val result = goAsync()
         coroutineScope.launch {
             try {
