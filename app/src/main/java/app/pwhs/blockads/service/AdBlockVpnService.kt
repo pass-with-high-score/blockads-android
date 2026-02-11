@@ -562,14 +562,15 @@ class AdBlockVpnService : VpnService() {
         serviceScope.launch {
             while (true) {
                 try {
-                    // Log battery status every 5 minutes
-                    delay(5 * 60 * 1000L)
+                    // Log battery status when VPN is running
                     if (isRunning) {
                         batteryMonitor.logBatteryStatus()
                     } else {
                         // Stop monitoring if VPN is not running
                         break
                     }
+                    // Wait 5 minutes before next check
+                    delay(5 * 60 * 1000L)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error monitoring battery", e)
                     break
