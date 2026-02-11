@@ -100,7 +100,48 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { },
+                title = {
+                    if (isLoading) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(
+                                color = NeonGreen,
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Loading filters…",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+                    } else if (filterLoadFailed) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(DangerRed.copy(alpha = 0.1f))
+                                .clickable { viewModel.retryLoadFilter() }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Retry",
+                                tint = DangerRed,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Filter load failed · Tap to retry",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = DangerRed,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(Intent.ACTION_VIEW).apply {
@@ -177,52 +218,6 @@ fun HomeScreen(
                 }
             }
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Filter loading status (below power button)
-        if (isLoading) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(
-                    color = NeonGreen,
-                    modifier = Modifier.size(16.dp),
-                    strokeWidth = 2.dp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Loading filters…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
-                )
-            }
-        } else if (filterLoadFailed) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(DangerRed.copy(alpha = 0.1f))
-                    .clickable { viewModel.retryLoadFilter() }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Retry",
-                    tint = DangerRed,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "Filter load failed · Tap to retry",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = DangerRed,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
 
         Spacer(modifier = Modifier.height(36.dp))
 
