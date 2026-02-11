@@ -17,6 +17,7 @@ import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.util.BatteryMonitor
+import app.pwhs.blockads.util.AppNameResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -64,6 +65,7 @@ class AdBlockVpnService : VpnService() {
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
+    private lateinit var appNameResolver: AppNameResolver
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
     private var notificationUpdateJob: kotlinx.coroutines.Job? = null
 
@@ -85,6 +87,7 @@ class AdBlockVpnService : VpnService() {
         dnsLogDao = koin.get()
         dnsErrorDao = koin.get()
         batteryMonitor = BatteryMonitor(this)
+        appNameResolver = AppNameResolver(this)
         
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -270,6 +273,7 @@ class AdBlockVpnService : VpnService() {
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
+        val appName = appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         if (filterRepo.isBlocked(domain)) {
             // Build and write blocked response (0.0.0.0)
@@ -282,6 +286,8 @@ class AdBlockVpnService : VpnService() {
             }
 
             val elapsed = System.currentTimeMillis() - startTime
+            logDnsQuery(domain, true, query.queryType, elapsed, appName)
+            Log.d(TAG, "BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
             logDnsQuery(domain, true, query.queryType, elapsed)
@@ -291,6 +297,7 @@ class AdBlockVpnService : VpnService() {
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
 
             val elapsed = System.currentTimeMillis() - startTime
+            logDnsQuery(domain, false, query.queryType, elapsed, appName)
             totalQueries.incrementAndGet()
             logDnsQuery(domain, false, query.queryType, elapsed)
         }
@@ -399,7 +406,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun logDnsQuery(domain: String, isBlocked: Boolean, queryType: Int, responseTimeMs: Long) {
+    private fun logDnsQuery(domain: String, isBlocked: Boolean, queryType: Int, responseTimeMs: Long, appName: String = "") {
         serviceScope.launch {
             try {
                 val typeStr = when (queryType) {
@@ -413,7 +420,8 @@ class AdBlockVpnService : VpnService() {
                         domain = domain,
                         isBlocked = isBlocked,
                         queryType = typeStr,
-                        responseTimeMs = responseTimeMs
+                        responseTimeMs = responseTimeMs,
+                        appName = appName
                     )
                 )
             } catch (e: Exception) {

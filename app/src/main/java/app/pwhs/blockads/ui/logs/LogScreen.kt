@@ -274,6 +274,14 @@ fun LogScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                if (entry.appName.isNotEmpty()) {
+                    Text(
+                        text = entry.appName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
                 Text(
                     text = if (entry.isBlocked) "Blocked" else "Allowed",
                     style = MaterialTheme.typography.bodySmall,
@@ -413,6 +421,16 @@ private fun LogEntryItem(
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+                if (entry.appName.isNotEmpty()) {
+                    Text(
+                        text = entry.appName,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
