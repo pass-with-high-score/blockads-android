@@ -359,7 +359,7 @@ class AdBlockVpnService : VpnService() {
                         domain = domain,
                         errorType = errorType,
                         errorMessage = errorMessage,
-                        upstreamDns = dnsServer,
+                        dnsServer = dnsServer,
                         attemptedFallback = attemptedFallback
                     )
                 )
