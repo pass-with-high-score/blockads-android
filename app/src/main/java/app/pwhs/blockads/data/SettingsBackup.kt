@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class SettingsBackup(
     val version: Int = 1,
     val upstreamDns: String = AppPreferences.DEFAULT_UPSTREAM_DNS,
+    val fallbackDns: String = AppPreferences.DEFAULT_FALLBACK_DNS,
     val autoReconnect: Boolean = true,
     val themeMode: String = AppPreferences.THEME_SYSTEM,
     val appLanguage: String = AppPreferences.LANGUAGE_SYSTEM,

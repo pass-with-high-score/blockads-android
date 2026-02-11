@@ -53,6 +53,7 @@ class AdBlockVpnService : VpnService() {
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
     private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
+    private lateinit var dnsErrorDao: app.pwhs.blockads.data.DnsErrorDao
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
 
@@ -68,6 +69,7 @@ class AdBlockVpnService : VpnService() {
         filterRepo = koin.get()
         appPrefs = koin.get()
         dnsLogDao = koin.get()
+        dnsErrorDao = koin.get()
         
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -108,8 +110,9 @@ class AdBlockVpnService : VpnService() {
                 val result = filterRepo.loadAllEnabledFilters()
                 Log.d(TAG, "Filters loaded: ${result.getOrDefault(0)} unique domains")
 
-                // Get upstream DNS and whitelisted apps
+                // Get upstream DNS, fallback DNS, and whitelisted apps
                 val upstreamDns = appPrefs.upstreamDns.first()
+                val fallbackDns = appPrefs.fallbackDns.first()
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
 
                 // Try to establish VPN with retry logic
@@ -140,7 +143,7 @@ class AdBlockVpnService : VpnService() {
                 Log.d(TAG, "VPN established successfully")
 
                 // Start processing packets
-                processPackets(upstreamDns)
+                processPackets(upstreamDns, fallbackDns)
 
             } catch (e: Exception) {
                 Log.e(TAG, "VPN startup failed", e)
@@ -196,7 +199,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun processPackets(upstreamDns: String) {
+    private fun processPackets(upstreamDns: String, fallbackDns: String) {
         isProcessing = true
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
@@ -215,7 +218,7 @@ class AdBlockVpnService : VpnService() {
                 val query = DnsPacketParser.parseIpPacket(packet, length)
 
                 if (query != null) {
-                    handleDnsQuery(query, outputStream, upstreamDns)
+                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns)
                 }
                 // Non-DNS packets are silently dropped (they'll go through the normal
                 // network stack since we only handle DNS via VPN routing)
@@ -233,7 +236,8 @@ class AdBlockVpnService : VpnService() {
     private fun handleDnsQuery(
         query: DnsPacketParser.DnsQuery,
         outputStream: FileOutputStream,
-        upstreamDns: String
+        upstreamDns: String,
+        fallbackDns: String
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
@@ -253,7 +257,7 @@ class AdBlockVpnService : VpnService() {
             Log.d(TAG, "BLOCKED: $domain")
         } else {
             // Forward to upstream DNS
-            forwardDnsQuery(query, outputStream, upstreamDns)
+            forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
 
             val elapsed = System.currentTimeMillis() - startTime
             logDnsQuery(domain, false, query.queryType, elapsed)
@@ -263,21 +267,50 @@ class AdBlockVpnService : VpnService() {
     private fun forwardDnsQuery(
         query: DnsPacketParser.DnsQuery,
         outputStream: FileOutputStream,
-        upstreamDns: String
+        upstreamDns: String,
+        fallbackDns: String
     ) {
+        // Try primary DNS server first
+        var success = tryDnsQuery(query, outputStream, upstreamDns, false)
+        
+        // If primary fails and fallback is different, try fallback
+        if (!success && fallbackDns != upstreamDns) {
+            Log.w(TAG, "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns)")
+            success = tryDnsQuery(query, outputStream, fallbackDns, true)
+        }
+        
+        // If both failed, return SERVFAIL
+        if (!success) {
+            Log.e(TAG, "Both primary and fallback DNS failed for ${query.domain}, returning SERVFAIL")
+            try {
+                val servfailResponse = DnsPacketParser.buildServfailResponse(query)
+                outputStream.write(servfailResponse)
+                outputStream.flush()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error writing SERVFAIL response", e)
+            }
+        }
+    }
+
+    private fun tryDnsQuery(
+        query: DnsPacketParser.DnsQuery,
+        outputStream: FileOutputStream,
+        dnsServer: String,
+        isFallback: Boolean
+    ): Boolean {
         var socket: DatagramSocket? = null
         try {
             socket = DatagramSocket()
             protect(socket) // Prevent VPN loop
 
-            val dnsServer = InetAddress.getByName(upstreamDns)
+            val serverAddress = InetAddress.getByName(dnsServer)
             val requestPacket = DatagramPacket(
                 query.rawDnsPayload,
                 query.rawDnsPayload.size,
-                dnsServer,
+                serverAddress,
                 53
             )
-            socket.soTimeout = 5000
+            socket.soTimeout = 5000 // 5 second timeout
             socket.send(requestPacket)
 
             // Receive response
@@ -297,11 +330,40 @@ class AdBlockVpnService : VpnService() {
 
             outputStream.write(fullResponse)
             outputStream.flush()
+            return true
 
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.w(TAG, "DNS timeout for ${query.domain} on $dnsServer", e)
+            logDnsError(query.domain, "TIMEOUT", e.message ?: "Socket timeout", dnsServer, isFallback)
+            return false
+        } catch (e: java.io.IOException) {
+            Log.w(TAG, "DNS IO error for ${query.domain} on $dnsServer", e)
+            logDnsError(query.domain, "IO_ERROR", e.message ?: "IO exception", dnsServer, isFallback)
+            return false
         } catch (e: Exception) {
-            Log.e(TAG, "DNS forward error for ${query.domain}", e)
+            Log.e(TAG, "DNS error for ${query.domain} on $dnsServer", e)
+            logDnsError(query.domain, "UNKNOWN", e.message ?: "Unknown error", dnsServer, isFallback)
+            return false
         } finally {
             socket?.close()
+        }
+    }
+
+    private fun logDnsError(domain: String, errorType: String, errorMessage: String, upstreamDns: String, attemptedFallback: Boolean) {
+        serviceScope.launch {
+            try {
+                dnsErrorDao.insert(
+                    DnsErrorEntry(
+                        domain = domain,
+                        errorType = errorType,
+                        errorMessage = errorMessage,
+                        upstreamDns = upstreamDns,
+                        attemptedFallback = attemptedFallback
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to log DNS error", e)
+            }
         }
     }
 

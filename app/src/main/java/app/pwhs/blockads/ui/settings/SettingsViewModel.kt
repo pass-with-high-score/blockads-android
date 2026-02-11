@@ -116,6 +116,7 @@ class SettingsViewModel(
             try {
                 val backup = SettingsBackup(
                     upstreamDns = appPrefs.upstreamDns.first(),
+                    fallbackDns = appPrefs.fallbackDns.first(),
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
@@ -150,6 +151,7 @@ class SettingsViewModel(
 
                 // Preferences
                 appPrefs.setUpstreamDns(backup.upstreamDns)
+                appPrefs.setFallbackDns(backup.fallbackDns)
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
