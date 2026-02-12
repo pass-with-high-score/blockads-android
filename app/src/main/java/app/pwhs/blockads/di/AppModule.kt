@@ -11,6 +11,7 @@ import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -44,9 +45,23 @@ val appModule = module {
 
     // ViewModels
     viewModel { HomeViewModel(get(), get()) }
-    viewModel { LogViewModel(get(), get(), androidContext()) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), androidContext()) }
-    viewModel { FilterSetupViewModel(get(), androidContext()) }
-    viewModel { AppWhitelistViewModel(get(), androidContext()) }
+    viewModel { LogViewModel(get(), get()) }
+    viewModel {
+        SettingsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            application = androidApplication()
+        )
+    }
+    viewModel { FilterSetupViewModel(get(), get()) }
+    viewModel {
+        AppWhitelistViewModel(
+            appPrefs = get(),
+            application = androidApplication()
+        )
+    }
 }
 

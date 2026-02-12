@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.filter
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterDialog
 import app.pwhs.blockads.ui.filter.component.FilterItem
 import app.pwhs.blockads.ui.filter.component.SectionHeader
@@ -59,150 +60,159 @@ fun FilterSetupScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    stringResource(R.string.filter_setup_title),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
-            )
-        )
+    UiEventEffect(viewModel.events)
 
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.filter_setup_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(innerPadding)
         ) {
-            // Built-in filters section
-            val builtInFilters = filterLists.filter { it.isBuiltIn }
-            val customFilters = filterLists.filter { !it.isBuiltIn }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
+            ) {
+                // Built-in filters section
+                val builtInFilters = filterLists.filter { it.isBuiltIn }
+                val customFilters = filterLists.filter { !it.isBuiltIn }
 
-            if (builtInFilters.isNotEmpty()) {
-                SectionHeader(stringResource(R.string.filter_built_in))
+                if (builtInFilters.isNotEmpty()) {
+                    SectionHeader(stringResource(R.string.filter_built_in))
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.animateContentSize()
+                    ) {
+                        Column {
+                            builtInFilters.forEachIndexed { index, filter ->
+                                FilterItem(
+                                    filter = filter,
+                                    onToggle = { viewModel.toggleFilterList(filter) },
+                                    onDelete = null // built-in cannot be deleted
+                                )
+                                if (index < builtInFilters.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Custom filters section
+                SectionHeader(stringResource(R.string.filter_custom))
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.animateContentSize()
                 ) {
                     Column {
-                        builtInFilters.forEachIndexed { index, filter ->
-                            FilterItem(
-                                filter = filter,
-                                onToggle = { viewModel.toggleFilterList(filter) },
-                                onDelete = null // built-in cannot be deleted
+                        if (customFilters.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.filter_custom_empty),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary,
+                                modifier = Modifier.padding(16.dp)
                             )
-                            if (index < builtInFilters.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        } else {
+                            customFilters.forEachIndexed { index, filter ->
+                                FilterItem(
+                                    filter = filter,
+                                    onToggle = { viewModel.toggleFilterList(filter) },
+                                    onDelete = { viewModel.deleteFilterList(filter) }
                                 )
+                                if (index < customFilters.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                    )
+                                }
                             }
+                        }
+
+                        // Add button
+                        TextButton(
+                            onClick = { showAddDialog = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.settings_add_custom_filter))
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Custom filters section
-            SectionHeader(stringResource(R.string.filter_custom))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.animateContentSize()
-            ) {
-                Column {
-                    if (customFilters.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.filter_custom_empty),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary,
-                            modifier = Modifier.padding(16.dp)
+                // Update all button
+                Button(
+                    onClick = { viewModel.updateAllFilters() },
+                    enabled = !isUpdatingFilter,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    if (isUpdatingFilter) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.settings_updating))
                     } else {
-                        customFilters.forEachIndexed { index, filter ->
-                            FilterItem(
-                                filter = filter,
-                                onToggle = { viewModel.toggleFilterList(filter) },
-                                onDelete = { viewModel.deleteFilterList(filter) }
-                            )
-                            if (index < customFilters.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                                )
-                            }
-                        }
-                    }
-
-                    // Add button
-                    TextButton(
-                        onClick = { showAddDialog = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
                         Icon(
-                            Icons.Default.Add,
+                            Icons.Default.CloudDownload,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_add_custom_filter))
+                        Text(stringResource(R.string.settings_update_all))
                     }
                 }
+
+                Spacer(modifier = Modifier.height(200.dp))
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Update all button
-            Button(
-                onClick = { viewModel.updateAllFilters() },
-                enabled = !isUpdatingFilter,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                if (isUpdatingFilter) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.settings_updating))
-                } else {
-                    Icon(
-                        Icons.Default.CloudDownload,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.settings_update_all))
+        // Add filter dialog
+        if (showAddDialog) {
+            AddFilterDialog(
+                onDismiss = { showAddDialog = false },
+                onAdd = { name, url ->
+                    viewModel.addFilterList(name, url)
+                    showAddDialog = false
                 }
-            }
-
-            Spacer(modifier = Modifier.height(200.dp))
+            )
         }
     }
 
-    // Add filter dialog
-    if (showAddDialog) {
-        AddFilterDialog(
-            onDismiss = { showAddDialog = false },
-            onAdd = { name, url ->
-                viewModel.addFilterList(name, url)
-                showAddDialog = false
-            }
-        )
-    }
 }

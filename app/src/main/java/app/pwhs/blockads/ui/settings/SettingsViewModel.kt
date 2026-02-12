@@ -1,22 +1,29 @@
 package app.pwhs.blockads.ui.settings
 
 import android.app.Activity
-import android.content.Context
+import android.app.Application
 import android.net.Uri
-import android.widget.Toast
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListBackup
+import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
+import app.pwhs.blockads.ui.event.UiEvent
+import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.worker.FilterUpdateScheduler
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -26,19 +33,26 @@ class SettingsViewModel(
     private val filterRepo: FilterListRepository,
     private val dnsLogDao: DnsLogDao,
     private val whitelistDomainDao: WhitelistDomainDao,
-    private val context: Context,
-) : ViewModel() {
-
-    private val filterListDao = app.pwhs.blockads.data.AppDatabase.getInstance(context).filterListDao()
+    private val filterListDao: FilterListDao,
+    application: Application,
+) : AndroidViewModel(application) {
 
     val autoReconnect: StateFlow<Boolean> = appPrefs.autoReconnect
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val upstreamDns: StateFlow<String> = appPrefs.upstreamDns
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.DEFAULT_UPSTREAM_DNS)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DEFAULT_UPSTREAM_DNS
+        )
 
     val fallbackDns: StateFlow<String> = appPrefs.fallbackDns
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.DEFAULT_FALLBACK_DNS)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DEFAULT_FALLBACK_DNS
+        )
 
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -46,24 +60,38 @@ class SettingsViewModel(
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-
     val themeMode: StateFlow<String> = appPrefs.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.THEME_SYSTEM)
 
     val appLanguage: StateFlow<String> = appPrefs.appLanguage
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.LANGUAGE_SYSTEM)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.LANGUAGE_SYSTEM
+        )
 
     val autoUpdateEnabled: StateFlow<Boolean> = appPrefs.autoUpdateEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val autoUpdateFrequency: StateFlow<String> = appPrefs.autoUpdateFrequency
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.UPDATE_FREQUENCY_24H)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.UPDATE_FREQUENCY_24H
+        )
 
     val autoUpdateWifiOnly: StateFlow<Boolean> = appPrefs.autoUpdateWifiOnly
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val autoUpdateNotification: StateFlow<String> = appPrefs.autoUpdateNotification
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.NOTIFICATION_NORMAL)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.NOTIFICATION_NORMAL
+        )
+
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -90,10 +118,10 @@ class SettingsViewModel(
     fun setAppLanguage(language: String) {
         viewModelScope.launch {
             appPrefs.setAppLanguage(language)
-            LocaleHelper.setLocale(context, language)
+            LocaleHelper.setLocale(getApplication<Application>().applicationContext, language)
             // On pre-API 33, we need to recreate the activity
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-                (context as? Activity)?.recreate()
+                (getApplication<Application>().applicationContext as? Activity)?.recreate()
             }
         }
     }
@@ -101,21 +129,30 @@ class SettingsViewModel(
     fun setAutoUpdateEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setAutoUpdateEnabled(enabled)
-            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+            FilterUpdateScheduler.scheduleFilterUpdate(
+                getApplication<Application>().applicationContext,
+                appPrefs
+            )
         }
     }
 
     fun setAutoUpdateFrequency(frequency: String) {
         viewModelScope.launch {
             appPrefs.setAutoUpdateFrequency(frequency)
-            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+            FilterUpdateScheduler.scheduleFilterUpdate(
+                getApplication<Application>().applicationContext,
+                appPrefs
+            )
         }
     }
 
     fun setAutoUpdateWifiOnly(wifiOnly: Boolean) {
         viewModelScope.launch {
             appPrefs.setAutoUpdateWifiOnly(wifiOnly)
-            app.pwhs.blockads.worker.FilterUpdateScheduler.scheduleFilterUpdate(context, appPrefs)
+            FilterUpdateScheduler.scheduleFilterUpdate(
+                getApplication<Application>().applicationContext,
+                appPrefs
+            )
         }
     }
 
@@ -128,7 +165,7 @@ class SettingsViewModel(
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
-            Toast.makeText(context, "Logs cleared", Toast.LENGTH_SHORT).show()
+            _events.toast(R.string.filter_log_cleared)
         }
     }
 
@@ -139,9 +176,9 @@ class SettingsViewModel(
                 val exists = whitelistDomainDao.exists(cleanDomain)
                 if (exists == 0) {
                     whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
-                    Toast.makeText(context, "Domain whitelisted: $cleanDomain", Toast.LENGTH_SHORT).show()
+                    _events.toast(R.string.filter_domain_whitelisted, listOf(cleanDomain))
                 } else {
-                    Toast.makeText(context, "Domain already whitelisted", Toast.LENGTH_SHORT).show()
+                    _events.toast(R.string.filter_domain_already_whitelisted)
                 }
             }
         }
@@ -171,12 +208,16 @@ class SettingsViewModel(
                 )
 
                 val jsonFormat = kotlinx.serialization.json.Json { prettyPrint = true }
-                context.contentResolver.openOutputStream(uri)?.use { out ->
-                    out.write(jsonFormat.encodeToString(SettingsBackup.serializer(), backup).toByteArray())
+                getApplication<Application>().applicationContext.contentResolver.openOutputStream(
+                    uri
+                )?.use { out ->
+                    out.write(
+                        jsonFormat.encodeToString(SettingsBackup.serializer(), backup).toByteArray()
+                    )
                 }
-                Toast.makeText(context, "Settings exported", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.filter_settings_export)
             } catch (e: Exception) {
-                Toast.makeText(context, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.filter_export_failed, listOf("${e.message}"))
             }
         }
     }
@@ -185,9 +226,12 @@ class SettingsViewModel(
     fun importSettings(uri: Uri) {
         viewModelScope.launch {
             try {
-                val jsonStr = context.contentResolver.openInputStream(uri)?.use { input ->
-                    input.bufferedReader().readText()
-                } ?: throw Exception("Cannot read file")
+                val jsonStr =
+                    getApplication<Application>().applicationContext.contentResolver.openInputStream(
+                        uri
+                    )?.use { input ->
+                        input.bufferedReader().readText()
+                    } ?: throw Exception("Cannot read file")
 
                 val jsonFormat = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                 val backup = jsonFormat.decodeFromString(SettingsBackup.serializer(), jsonStr)
@@ -202,7 +246,13 @@ class SettingsViewModel(
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->
                     if (filterLists.value.none { it.url == f.url }) {
-                        filterListDao.insert(FilterList(name = f.name, url = f.url, isEnabled = f.isEnabled))
+                        filterListDao.insert(
+                            FilterList(
+                                name = f.name,
+                                url = f.url,
+                                isEnabled = f.isEnabled
+                            )
+                        )
                     }
                 }
 
@@ -216,10 +266,10 @@ class SettingsViewModel(
                 // Whitelisted apps — merge
                 val current = appPrefs.getWhitelistedAppsSnapshot()
                 appPrefs.setWhitelistedApps(current + backup.whitelistedApps.toSet())
-
-                Toast.makeText(context, "Settings imported", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.filter_settings_imported)
             } catch (e: Exception) {
-                Toast.makeText(context, "Import failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.filter_import_failed, listOf("${e.message}"))
+
             }
         }
     }

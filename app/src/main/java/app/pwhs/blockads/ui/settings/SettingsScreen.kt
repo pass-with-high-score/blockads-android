@@ -3,7 +3,6 @@ package app.pwhs.blockads.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,6 +46,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.AddDomainDialog
 import app.pwhs.blockads.ui.settings.component.FrequencyDialog
 import app.pwhs.blockads.ui.settings.component.NotificationDialog
@@ -115,420 +116,156 @@ fun SettingsScreen(
         ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { viewModel.importSettings(it) } }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.settings_title), fontWeight = FontWeight.Bold) },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
-            )
-        )
+    UiEventEffect(viewModel.events)
 
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.settings_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(innerPadding)
         ) {
-            // Appearance
-            SectionHeader(stringResource(R.string.settings_appearance))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.DarkMode, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            stringResource(R.string.settings_theme),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_theme_system),
-                            icon = Icons.Default.SettingsBrightness,
-                            selected = themeMode == AppPreferences.THEME_SYSTEM,
-                            onClick = { viewModel.setThemeMode(AppPreferences.THEME_SYSTEM) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_theme_light),
-                            icon = Icons.Default.LightMode,
-                            selected = themeMode == AppPreferences.THEME_LIGHT,
-                            onClick = { viewModel.setThemeMode(AppPreferences.THEME_LIGHT) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_theme_dark),
-                            icon = Icons.Default.DarkMode,
-                            selected = themeMode == AppPreferences.THEME_DARK,
-                            onClick = { viewModel.setThemeMode(AppPreferences.THEME_DARK) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Language, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            stringResource(R.string.settings_language),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_lang_system),
-                            icon = Icons.Default.SettingsBrightness,
-                            selected = appLanguage == AppPreferences.LANGUAGE_SYSTEM,
-                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_SYSTEM) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_lang_en),
-                            icon = Icons.Default.Language,
-                            selected = appLanguage == AppPreferences.LANGUAGE_EN,
-                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_EN) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeModeChip(
-                            label = stringResource(R.string.settings_lang_vi),
-                            icon = Icons.Default.Language,
-                            selected = appLanguage == AppPreferences.LANGUAGE_VI,
-                            onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Connection
-            SectionHeader(stringResource(R.string.settings_connection))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                SettingsToggleItem(
-                    icon = Icons.Default.Replay,
-                    title = stringResource(R.string.settings_auto_reconnect),
-                    subtitle = stringResource(R.string.settings_auto_reconnect_desc),
-                    isChecked = autoReconnect,
-                    onCheckedChange = { viewModel.setAutoReconnect(it) }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Filter Lists — navigate to setup screen
-            SectionHeader(
-                stringResource(
-                    R.string.settings_filter_lists,
-                    filterLists.count { it.isEnabled })
-            )
-            Card(
-                onClick = { navigator.navigate(FilterSetupScreenDestination) },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                // Appearance
+                SectionHeader(stringResource(R.string.settings_appearance))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(
-                        Icons.Default.FilterList, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.filter_setup_title),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Text(
-                            stringResource(R.string.filter_setup_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
-                        )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.DarkMode, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                stringResource(R.string.settings_theme),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_theme_system),
+                                icon = Icons.Default.SettingsBrightness,
+                                selected = themeMode == AppPreferences.THEME_SYSTEM,
+                                onClick = { viewModel.setThemeMode(AppPreferences.THEME_SYSTEM) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_theme_light),
+                                icon = Icons.Default.LightMode,
+                                selected = themeMode == AppPreferences.THEME_LIGHT,
+                                onClick = { viewModel.setThemeMode(AppPreferences.THEME_LIGHT) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_theme_dark),
+                                icon = Icons.Default.DarkMode,
+                                selected = themeMode == AppPreferences.THEME_DARK,
+                                onClick = { viewModel.setThemeMode(AppPreferences.THEME_DARK) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Language, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                stringResource(R.string.settings_language),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_lang_system),
+                                icon = Icons.Default.SettingsBrightness,
+                                selected = appLanguage == AppPreferences.LANGUAGE_SYSTEM,
+                                onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_SYSTEM) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_lang_en),
+                                icon = Icons.Default.Language,
+                                selected = appLanguage == AppPreferences.LANGUAGE_EN,
+                                onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_EN) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ThemeModeChip(
+                                label = stringResource(R.string.settings_lang_vi),
+                                icon = Icons.Default.Language,
+                                selected = appLanguage == AppPreferences.LANGUAGE_VI,
+                                onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            SectionHeader(stringResource(R.string.settings_auto_update))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                // Connection
+                SectionHeader(stringResource(R.string.settings_connection))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
                     SettingsToggleItem(
-                        icon = Icons.Default.Download,
-                        title = stringResource(R.string.settings_auto_update_enabled),
-                        subtitle = stringResource(R.string.settings_auto_update_enabled_desc),
-                        isChecked = autoUpdateEnabled,
-                        onCheckedChange = { viewModel.setAutoUpdateEnabled(it) }
+                        icon = Icons.Default.Replay,
+                        title = stringResource(R.string.settings_auto_reconnect),
+                        subtitle = stringResource(R.string.settings_auto_reconnect_desc),
+                        isChecked = autoReconnect,
+                        onCheckedChange = { viewModel.setAutoReconnect(it) }
                     )
-
-                    if (autoUpdateEnabled) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                        )
-
-                        // Update frequency
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showFrequencyDialog = true }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(R.string.settings_auto_update_frequency),
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                                Text(
-                                    when (autoUpdateFrequency) {
-                                        AppPreferences.UPDATE_FREQUENCY_6H -> stringResource(R.string.settings_auto_update_frequency_6h)
-                                        AppPreferences.UPDATE_FREQUENCY_12H -> stringResource(R.string.settings_auto_update_frequency_12h)
-                                        AppPreferences.UPDATE_FREQUENCY_24H -> stringResource(R.string.settings_auto_update_frequency_24h)
-                                        AppPreferences.UPDATE_FREQUENCY_48H -> stringResource(R.string.settings_auto_update_frequency_48h)
-                                        AppPreferences.UPDATE_FREQUENCY_MANUAL -> stringResource(R.string.settings_auto_update_frequency_manual)
-                                        else -> stringResource(R.string.settings_auto_update_frequency_24h)
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-                            }
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                        )
-
-                        // Wi-Fi only
-                        SettingsToggleItem(
-                            icon = Icons.Default.Wifi,
-                            title = stringResource(R.string.settings_auto_update_wifi_only),
-                            subtitle = stringResource(R.string.settings_auto_update_wifi_only_desc),
-                            isChecked = autoUpdateWifiOnly,
-                            onCheckedChange = { viewModel.setAutoUpdateWifiOnly(it) }
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                        )
-
-                        // Notification preference
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showNotificationDialog = true }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    stringResource(R.string.settings_auto_update_notification),
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                                Text(
-                                    when (autoUpdateNotification) {
-                                        AppPreferences.NOTIFICATION_NORMAL -> stringResource(R.string.settings_auto_update_notification_normal)
-                                        AppPreferences.NOTIFICATION_SILENT -> stringResource(R.string.settings_auto_update_notification_silent)
-                                        AppPreferences.NOTIFICATION_NONE -> stringResource(R.string.settings_auto_update_notification_none)
-                                        else -> stringResource(R.string.settings_auto_update_notification_normal)
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-                            }
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // DNS
-            SectionHeader(stringResource(R.string.settings_dns_config))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Dns,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            stringResource(R.string.settings_upstream_dns),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = editUpstreamDns,
-                        onValueChange = { editUpstreamDns = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("8.8.8.8") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
-                    )
-                    if (editUpstreamDns != upstreamDns) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) { Text(stringResource(R.string.settings_save_dns)) }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Fallback DNS
-                    Text(
-                        stringResource(R.string.settings_fallback_dns),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = editFallbackDns,
-                        onValueChange = { editFallbackDns = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("1.1.1.1") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
-                    )
-                    if (editFallbackDns != fallbackDns) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.setFallbackDns(editFallbackDns) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) { Text(stringResource(R.string.settings_save_dns)) }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Whitelist Apps
-            SectionHeader(stringResource(R.string.settings_whitelist))
-            Card(
-                onClick = { navigator.navigate(AppWhitelistScreenDestination) },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                // Filter Lists — navigate to setup screen
+                SectionHeader(
+                    stringResource(
+                        R.string.settings_filter_lists,
+                        filterLists.count { it.isEnabled })
+                )
+                Card(
+                    onClick = { navigator.navigate(FilterSetupScreenDestination) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(
-                        Icons.Default.AppBlocking, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.settings_whitelist_apps),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Text(
-                            stringResource(R.string.settings_whitelist_apps_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
-                        )
-                    }
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Whitelist Domains
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.animateContentSize()
-            ) {
-                Column {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -536,218 +273,498 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.Block, contentDescription = null,
+                            Icons.Default.FilterList, contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                stringResource(R.string.settings_whitelist_domains),
+                                stringResource(R.string.filter_setup_title),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                stringResource(R.string.settings_whitelist_domains_desc),
+                                stringResource(R.string.filter_setup_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = TextSecondary
                             )
                         }
-                    }
-
-                    if (whitelistDomains.isNotEmpty()) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = TextSecondary,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
+                }
 
-                    whitelistDomains.forEach { domain ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = domain.domain,
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
+                Spacer(modifier = Modifier.height(24.dp))
+
+                SectionHeader(stringResource(R.string.settings_auto_update))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        SettingsToggleItem(
+                            icon = Icons.Default.Download,
+                            title = stringResource(R.string.settings_auto_update_enabled),
+                            subtitle = stringResource(R.string.settings_auto_update_enabled_desc),
+                            isChecked = autoUpdateEnabled,
+                            onCheckedChange = { viewModel.setAutoUpdateEnabled(it) }
+                        )
+
+                        if (autoUpdateEnabled) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 16.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                             )
-                            IconButton(
-                                onClick = { viewModel.removeWhitelistDomain(domain) },
-                                modifier = Modifier.size(32.dp)
+
+                            // Update frequency
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showFrequencyDialog = true }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(R.string.settings_auto_update_frequency),
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                    Text(
+                                        when (autoUpdateFrequency) {
+                                            AppPreferences.UPDATE_FREQUENCY_6H -> stringResource(R.string.settings_auto_update_frequency_6h)
+                                            AppPreferences.UPDATE_FREQUENCY_12H -> stringResource(R.string.settings_auto_update_frequency_12h)
+                                            AppPreferences.UPDATE_FREQUENCY_24H -> stringResource(R.string.settings_auto_update_frequency_24h)
+                                            AppPreferences.UPDATE_FREQUENCY_48H -> stringResource(R.string.settings_auto_update_frequency_48h)
+                                            AppPreferences.UPDATE_FREQUENCY_MANUAL -> stringResource(
+                                                R.string.settings_auto_update_frequency_manual
+                                            )
+
+                                            else -> stringResource(R.string.settings_auto_update_frequency_24h)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextSecondary
+                                    )
+                                }
                                 Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Remove",
-                                    tint = TextSecondary.copy(alpha = 0.5f),
+                                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                    contentDescription = null,
+                                    tint = TextSecondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 16.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
+
+                            // Wi-Fi only
+                            SettingsToggleItem(
+                                icon = Icons.Default.Wifi,
+                                title = stringResource(R.string.settings_auto_update_wifi_only),
+                                subtitle = stringResource(R.string.settings_auto_update_wifi_only_desc),
+                                isChecked = autoUpdateWifiOnly,
+                                onCheckedChange = { viewModel.setAutoUpdateWifiOnly(it) }
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 16.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
+
+                            // Notification preference
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showNotificationDialog = true }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(R.string.settings_auto_update_notification),
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                    Text(
+                                        when (autoUpdateNotification) {
+                                            AppPreferences.NOTIFICATION_NORMAL -> stringResource(R.string.settings_auto_update_notification_normal)
+                                            AppPreferences.NOTIFICATION_SILENT -> stringResource(R.string.settings_auto_update_notification_silent)
+                                            AppPreferences.NOTIFICATION_NONE -> stringResource(R.string.settings_auto_update_notification_none)
+                                            else -> stringResource(R.string.settings_auto_update_notification_normal)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = TextSecondary
+                                    )
+                                }
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                    contentDescription = null,
+                                    tint = TextSecondary,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
                     }
+                }
 
-                    TextButton(
-                        onClick = { showAddDomainDialog = true },
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // DNS
+                SectionHeader(stringResource(R.string.settings_dns_config))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Dns,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                stringResource(R.string.settings_upstream_dns),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = editUpstreamDns,
+                            onValueChange = { editUpstreamDns = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("8.8.8.8") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
+                        )
+                        if (editUpstreamDns != upstreamDns) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) { Text(stringResource(R.string.settings_save_dns)) }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Fallback DNS
+                        Text(
+                            stringResource(R.string.settings_fallback_dns),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = editFallbackDns,
+                            onValueChange = { editFallbackDns = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("1.1.1.1") },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
+                        )
+                        if (editFallbackDns != fallbackDns) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { viewModel.setFallbackDns(editFallbackDns) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) { Text(stringResource(R.string.settings_save_dns)) }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Whitelist Apps
+                SectionHeader(stringResource(R.string.settings_whitelist))
+                Card(
+                    onClick = { navigator.navigate(AppWhitelistScreenDestination) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.Add,
+                            Icons.Default.AppBlocking, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.settings_whitelist_apps),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                stringResource(R.string.settings_whitelist_apps_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = TextSecondary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Whitelist Domains
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.animateContentSize()
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Block, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_whitelist_domains),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    stringResource(R.string.settings_whitelist_domains_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+
+                        if (whitelistDomains.isNotEmpty()) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
+                        }
+
+                        whitelistDomains.forEach { domain ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = domain.domain,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                IconButton(
+                                    onClick = { viewModel.removeWhitelistDomain(domain) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Remove",
+                                        tint = TextSecondary.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        TextButton(
+                            onClick = { showAddDomainDialog = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.settings_add_domain))
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Data
+                SectionHeader(stringResource(R.string.settings_data_backup))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { exportLauncher.launch("blockads_settings.json") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Upload,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_add_domain))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.settings_export))
+                    }
+                    Button(
+                        onClick = { importLauncher.launch(arrayOf("application/json")) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
+                            contentColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.settings_import))
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            // Data
-            SectionHeader(stringResource(R.string.settings_data_backup))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
                 Button(
-                    onClick = { exportLauncher.launch("blockads_settings.json") },
-                    modifier = Modifier.weight(1f),
+                    onClick = { viewModel.clearLogs() },
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        contentColor = MaterialTheme.colorScheme.primary
+                        containerColor = DangerRed.copy(alpha = 0.1f),
+                        contentColor = DangerRed
                     )
                 ) {
                     Icon(
-                        Icons.Default.Upload,
+                        Icons.Default.DeleteForever,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.settings_export))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.settings_clear_logs))
                 }
-                Button(
-                    onClick = { importLauncher.launch(arrayOf("application/json")) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                        contentColor = MaterialTheme.colorScheme.secondary
-                    )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // About
+                Card(
+                    onClick = { navigator.navigate(AboutScreenDestination) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Download,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.settings_import))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { viewModel.clearLogs() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = DangerRed.copy(alpha = 0.1f),
-                    contentColor = DangerRed
-                )
-            ) {
-                Icon(
-                    Icons.Default.DeleteForever,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.settings_clear_logs))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // About
-            Card(
-                onClick = { navigator.navigate(AboutScreenDestination) },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Info, contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            stringResource(R.string.settings_about),
-                            style = MaterialTheme.typography.titleSmall
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Info, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp)
                         )
-                        Text(
-                            stringResource(R.string.settings_about_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.settings_about),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                stringResource(R.string.settings_about_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = TextSecondary,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(200.dp))
+                Spacer(modifier = Modifier.height(200.dp))
+            }
+        }
+
+
+        // Add domain whitelist dialog
+        if (showAddDomainDialog) {
+            AddDomainDialog(
+                onDismiss = { showAddDomainDialog = false },
+                onAdd = { domain ->
+                    viewModel.addWhitelistDomain(domain)
+                    showAddDomainDialog = false
+                }
+            )
+        }
+
+
+        // Frequency dialog
+        if (showFrequencyDialog) {
+            FrequencyDialog(
+                autoUpdateFrequency = autoUpdateFrequency,
+                onUpdateFrequencyChange = { freq ->
+                    viewModel.setAutoUpdateFrequency(freq)
+                    showFrequencyDialog = false
+                },
+                onDismiss = { showFrequencyDialog = false }
+            )
+        }
+
+        // Notification dialog
+        if (showNotificationDialog) {
+            NotificationDialog(
+                autoUpdateNotification = autoUpdateNotification,
+                onUpdateNotification = { type ->
+                    viewModel.setAutoUpdateNotification(type)
+                    showNotificationDialog = false
+                },
+                onDismiss = { showNotificationDialog = false }
+            )
         }
     }
 
-
-    // Add domain whitelist dialog
-    if (showAddDomainDialog) {
-        AddDomainDialog(
-            onDismiss = { showAddDomainDialog = false },
-            onAdd = { domain ->
-                viewModel.addWhitelistDomain(domain)
-                showAddDomainDialog = false
-            }
-        )
-    }
-
-
-    // Frequency dialog
-    if (showFrequencyDialog) {
-        FrequencyDialog(
-            autoUpdateFrequency = autoUpdateFrequency,
-            onUpdateFrequencyChange = { freq ->
-                viewModel.setAutoUpdateFrequency(freq)
-                showFrequencyDialog = false
-            },
-            onDismiss = { showFrequencyDialog = false }
-        )
-    }
-
-    // Notification dialog
-    if (showNotificationDialog) {
-        NotificationDialog(
-            autoUpdateNotification = autoUpdateNotification,
-            onUpdateNotification = { type ->
-                viewModel.setAutoUpdateNotification(type)
-                showNotificationDialog = false
-            },
-            onDismiss = { showNotificationDialog = false }
-        )
-    }
 }

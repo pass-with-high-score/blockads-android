@@ -77,6 +77,8 @@
     <string name="log_action_copy">Sao chép tên miền</string>
     <string name="log_search_hint">Tìm kiếm tên miền…</string>
     <string name="domain_copied">Đã sao chép tên miền</string>
+    <string name="log_whitelisted">Đã thêm vào danh sách cho phép: %s</string>
+    <string name="log_already_whitelisted">Đã có trong danh sách cho phép</string>
 
     <!-- Test Block Ads -->
     <string name="test_block_ads">Kiểm tra chặn QC</string>
@@ -138,6 +140,13 @@
     <string name="filter_built_in">Tích hợp</string>
     <string name="filter_custom">Tùy chỉnh</string>
     <string name="filter_custom_empty">Chưa thêm bộ lọc tùy chỉnh nào</string>
+    <string name="filter_log_cleared">Đã xóa nhật ký</string>
+    <string name="filter_domain_whitelisted">Tên miền đã được thêm vào danh sách cho phép: %s</string>
+    <string name="filter_domain_already_whitelisted">Tên miền đã tồn tại trong danh sách cho phép</string>
+    <string name="filter_settings_export">Xuất cài đặt thành công</string>
+    <string name="filter_export_failed">Lỗi khi xuất cài đặt: %s</string>
+    <string name="filter_settings_imported">Nhập cài đặt thành công</string>
+    <string name="filter_import_failed">Lỗi khi nhập cài đặt: %s</string>
 
     <!-- Auto-update Filter Lists -->
     <string name="settings_auto_update">Tự động cập nhật bộ lọc</string>

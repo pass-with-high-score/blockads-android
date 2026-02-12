@@ -76,7 +76,9 @@
     <string name="log_action_whitelist">Add to Whitelist</string>
     <string name="log_action_copy">Copy Domain</string>
     <string name="log_search_hint">Search domains…</string>
-    <string name="domain_copied">Domain copied to clipboard</string>
+    <string name="domain_copied">Domain copied</string>
+    <string name="log_whitelisted">Whitelisted: %s</string>
+    <string name="log_already_whitelisted">Already whitelisted</string>
 
     <!-- Test Block Ads -->
     <string name="test_block_ads">Test Ad Blocking</string>
@@ -138,6 +140,13 @@
     <string name="filter_built_in">Built-in</string>
     <string name="filter_custom">Custom</string>
     <string name="filter_custom_empty">No custom filters added yet</string>
+    <string name="filter_log_cleared">Log cleared</string>
+    <string name="filter_domain_whitelisted">Domain whitelisted: %s</string>
+    <string name="filter_domain_already_whitelisted">Domain already whitelisted</string>
+    <string name="filter_settings_export">Settings exported</string>
+    <string name="filter_export_failed">Export failed: %s</string>
+    <string name="filter_settings_imported">Settings imported</string>
+    <string name="filter_import_failed">Import failed: %s</string>
 
     <!-- Auto-update Filter Lists -->
     <string name="settings_auto_update">Auto-update Filter Lists</string>

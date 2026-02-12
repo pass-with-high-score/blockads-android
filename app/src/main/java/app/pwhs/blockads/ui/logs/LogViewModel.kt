@@ -1,28 +1,30 @@
 package app.pwhs.blockads.ui.logs
 
-import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
+import app.pwhs.blockads.ui.event.UiEvent
+import app.pwhs.blockads.ui.event.toast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
     private val whitelistDomainDao: WhitelistDomainDao,
-    private val context: Context,
 ) : ViewModel() {
 
     private val _showBlockedOnly = MutableStateFlow(false)
@@ -30,6 +32,9 @@ class LogViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val logs: StateFlow<List<DnsLogEntry>> = _showBlockedOnly.flatMapLatest { blockedOnly ->
@@ -62,9 +67,9 @@ class LogViewModel(
             val exists = whitelistDomainDao.exists(cleanDomain)
             if (exists == 0) {
                 whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
-                Toast.makeText(context, "Whitelisted: $cleanDomain", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.log_whitelisted, listOf(": $cleanDomain"))
             } else {
-                Toast.makeText(context, "Already whitelisted", Toast.LENGTH_SHORT).show()
+                _events.toast(R.string.log_already_whitelisted)
             }
         }
     }

@@ -35,6 +35,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogEntry
+import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.LogEntryBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -78,189 +80,198 @@ fun LogScreen(
     val context = LocalContext.current
     val resource = LocalResources.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    stringResource(R.string.nav_logs),
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            actions = {
-                IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
-                    Icon(
-                        if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = TextSecondary
-                    )
-                }
-                IconButton(onClick = { viewModel.clearLogs() }) {
-                    Icon(
-                        Icons.Default.DeleteSweep,
-                        contentDescription = "Clear logs",
-                        tint = TextSecondary
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
-            )
-        )
+    UiEventEffect(viewModel.events)
 
-        // Search bar
-        AnimatedVisibility(
-            visible = isSearchVisible,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200))
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = { viewModel.setSearchQuery(it) },
-                placeholder = {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
                     Text(
-                        stringResource(R.string.log_search_hint),
-                        color = TextSecondary
+                        stringResource(R.string.nav_logs),
+                        fontWeight = FontWeight.Bold
                     )
                 },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        tint = TextSecondary
-                    )
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "Clear",
-                                tint = TextSecondary
-                            )
-                        }
+                actions = {
+                    IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
+                        Icon(
+                            if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = TextSecondary
+                        )
+                    }
+                    IconButton(onClick = { viewModel.clearLogs() }) {
+                        Icon(
+                            Icons.Default.DeleteSweep,
+                            contentDescription = "Clear logs",
+                            tint = TextSecondary
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+
+            // Search bar
+            AnimatedVisibility(
+                visible = isSearchVisible,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(200))
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { viewModel.setSearchQuery(it) },
+                    placeholder = {
+                        Text(
+                            stringResource(R.string.log_search_hint),
+                            color = TextSecondary
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = TextSecondary
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.setSearchQuery("") }) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Clear",
+                                    tint = TextSecondary
+                                )
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    singleLine = true
+                )
+            }
+
+            // Filter chips
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                singleLine = true
-            )
-        }
-
-        // Filter chips
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            FilterChip(
-                selected = !showBlockedOnly,
-                onClick = { if (showBlockedOnly) viewModel.toggleFilter() },
-                label = { Text(stringResource(R.string.logs_filter_all)) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Dns,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    selectedLabelColor = MaterialTheme.colorScheme.primary
-                )
-            )
-            FilterChip(
-                selected = showBlockedOnly,
-                onClick = { if (!showBlockedOnly) viewModel.toggleFilter() },
-                label = { Text(stringResource(R.string.logs_filter_blocked)) },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Block,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = DangerRed.copy(alpha = 0.15f),
-                    selectedLabelColor = DangerRed
-                )
-            )
-        }
-
-        if (logs.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.FilterList,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = TextSecondary.copy(alpha = 0.5f)
+                FilterChip(
+                    selected = !showBlockedOnly,
+                    onClick = { if (showBlockedOnly) viewModel.toggleFilter() },
+                    label = { Text(stringResource(R.string.logs_filter_all)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Dns,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = if (searchQuery.isNotEmpty()) "No results for \"$searchQuery\""
-                        else stringResource(R.string.logs_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = TextSecondary
+                )
+                FilterChip(
+                    selected = showBlockedOnly,
+                    onClick = { if (!showBlockedOnly) viewModel.toggleFilter() },
+                    label = { Text(stringResource(R.string.logs_filter_blocked)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Block,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = DangerRed.copy(alpha = 0.15f),
+                        selectedLabelColor = DangerRed
                     )
+                )
+            }
+
+            if (logs.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.FilterList,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = TextSecondary.copy(alpha = 0.5f)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = if (searchQuery.isNotEmpty()) "No results for \"$searchQuery\""
+                            else stringResource(R.string.logs_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = TextSecondary
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    item { Spacer(modifier = Modifier.height(4.dp)) }
+                    items(logs, key = { it.id }) { entry ->
+                        LogEntryItem(
+                            entry = entry,
+                            onLongPress = { selectedEntry = entry }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(200.dp)) }
                 }
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                item { Spacer(modifier = Modifier.height(4.dp)) }
-                items(logs, key = { it.id }) { entry ->
-                    LogEntryItem(
-                        entry = entry,
-                        onLongPress = { selectedEntry = entry }
-                    )
+        }
+
+        // Bottom sheet for log entry actions
+        selectedEntry?.let { entry ->
+            LogEntryBottomSheet(
+                entry = entry,
+                onDismiss = { selectedEntry = null },
+                onAddToWhiteList = {
+                    viewModel.addToWhitelist(entry.domain)
+                    selectedEntry = null
+                },
+                onCopyDomain = {
+                    val clipboard =
+                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
+                    Toast.makeText(
+                        context,
+                        resource.getString(R.string.domain_copied),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    selectedEntry = null
                 }
-                item { Spacer(modifier = Modifier.height(200.dp)) }
-            }
+            )
         }
     }
 
-    // Bottom sheet for log entry actions
-    selectedEntry?.let { entry ->
-        LogEntryBottomSheet(
-            entry = entry,
-            onDismiss = { selectedEntry = null },
-            onAddToWhiteList = {
-                viewModel.addToWhitelist(entry.domain)
-                selectedEntry = null
-            },
-            onCopyDomain = {
-                val clipboard =
-                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
-                Toast.makeText(
-                    context,
-                    resource.getString(R.string.domain_copied),
-                    Toast.LENGTH_SHORT
-                ).show()
-                selectedEntry = null
-            }
-        )
-    }
 }

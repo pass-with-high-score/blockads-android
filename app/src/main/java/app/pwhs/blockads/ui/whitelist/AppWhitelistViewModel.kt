@@ -1,9 +1,10 @@
 package app.pwhs.blockads.ui.whitelist
 
-import android.content.Context
+import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.ui.whitelist.data.AppInfoData
@@ -19,8 +20,8 @@ import kotlinx.coroutines.withContext
 
 class AppWhitelistViewModel(
     private val appPrefs: AppPreferences,
-    private val context: Context,
-) : ViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
 
     val whitelistedApps: StateFlow<Set<String>> = appPrefs.whitelistedApps
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
@@ -39,7 +40,7 @@ class AppWhitelistViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             val apps = withContext(Dispatchers.IO) {
-                val pm = context.packageManager
+                val pm = application.applicationContext.packageManager
                 val launchIntent = Intent(Intent.ACTION_MAIN, null).apply {
                     addCategory(Intent.CATEGORY_LAUNCHER)
                 }
@@ -49,7 +50,7 @@ class AppWhitelistViewModel(
 
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
                     .filter { it.packageName in launchablePackages }
-                    .filter { it.packageName != context.packageName }
+                    .filter { it.packageName != application.applicationContext.packageName }
                     .map { appInfo ->
                         AppInfoData(
                             packageName = appInfo.packageName,
