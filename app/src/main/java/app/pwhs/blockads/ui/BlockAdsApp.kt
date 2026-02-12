@@ -107,6 +107,7 @@ fun BlockAdsApp(
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
+                                if (selected) return@NavigationBarItem
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true

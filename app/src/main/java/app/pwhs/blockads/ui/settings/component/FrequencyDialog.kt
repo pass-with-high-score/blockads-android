@@ -29,6 +29,7 @@ fun FrequencyDialog(
 ) {
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_auto_update_frequency)) },
         text = {
