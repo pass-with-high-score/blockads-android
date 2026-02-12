@@ -8,27 +8,27 @@
 
 ## 📊 So sánh hiện trạng BlockAds vs AdGuard Android
 
-| Tính năng | BlockAds | AdGuard | Ghi chú |
-|-----------|----------|---------|---------|
-| DNS filtering (hosts/adblock) | ✅ | ✅ | Tương đương |
-| Encrypted DNS (DoH/DoT/DoQ) | ❌ | ✅ | **Thiếu quan trọng** |
-| DNS server presets | ❌ (chỉ input thủ công) | ✅ | UX kém |
-| Custom user rules | ❌ | ✅ | Power user cần |
-| HTTPS filtering | ❌ | ✅ | Phức tạp, ưu tiên thấp |
-| Firewall (per-app internet control) | ❌ | ✅ | High value feature |
-| Browsing security (phishing/malware) | ❌ | ✅ | Dễ thêm qua filter list |
-| Per-app DNS control | ❌ | ✅ | Nâng cao |
-| Statistics chi tiết (per-app, per-domain) | ❌ (chỉ tổng) | ✅ | **Thiếu quan trọng** |
-| IPv6 support | ❌ | ✅ | Stability issue |
-| DNS response customization | ❌ (chỉ NXDOMAIN) | ✅ | Nice to have |
-| Auto-update filter lists | ❌ | ✅ | **Thiếu quan trọng** |
-| Home screen widget | ❌ | ✅ | Retention feature |
-| Blocked domain notification | ❌ | ✅ | Engagement |
-| App management screen | ❌ | ✅ | UX improvement |
-| Dark/Light/System theme | ✅ | ✅ | Tương đương |
-| Quick Settings tile | ✅ | ✅ | Tương đương |
-| Export/Import settings | ✅ | ✅ | Tương đương |
-| Multi-language (EN/VI) | ✅ | ✅ | Tương đương |
+| Tính năng                                 | BlockAds               | AdGuard | Ghi chú                 |
+|-------------------------------------------|------------------------|---------|-------------------------|
+| DNS filtering (hosts/adblock)             | ✅                      | ✅       | Tương đương             |
+| Encrypted DNS (DoH/DoT/DoQ)               | ❌                      | ✅       | **Thiếu quan trọng**    |
+| DNS server presets                        | ❌ (chỉ input thủ công) | ✅       | UX kém                  |
+| Custom user rules                         | ❌                      | ✅       | Power user cần          |
+| HTTPS filtering                           | ❌                      | ✅       | Phức tạp, ưu tiên thấp  |
+| Firewall (per-app internet control)       | ❌                      | ✅       | High value feature      |
+| Browsing security (phishing/malware)      | ❌                      | ✅       | Dễ thêm qua filter list |
+| Per-app DNS control                       | ❌                      | ✅       | Nâng cao                |
+| Statistics chi tiết (per-app, per-domain) | ❌ (chỉ tổng)           | ✅       | **Thiếu quan trọng**    |
+| IPv6 support                              | ❌                      | ✅       | Stability issue         |
+| DNS response customization                | ❌ (chỉ NXDOMAIN)       | ✅       | Nice to have            |
+| Auto-update filter lists                  | ❌                      | ✅       | **Thiếu quan trọng**    |
+| Home screen widget                        | ❌                      | ✅       | Retention feature       |
+| Blocked domain notification               | ❌                      | ✅       | Engagement              |
+| App management screen                     | ❌                      | ✅       | UX improvement          |
+| Dark/Light/System theme                   | ✅                      | ✅       | Tương đương             |
+| Quick Settings tile                       | ✅                      | ✅       | Tương đương             |
+| Export/Import settings                    | ✅                      | ✅       | Tương đương             |
+| Multi-language (EN/VI)                    | ✅                      | ✅       | Tương đương             |
 
 ---
 
