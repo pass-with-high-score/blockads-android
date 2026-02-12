@@ -1,3 +1,0 @@
-- Cải thiện hiệu suất và độ ổn định
-- Sửa các lỗi nhỏ và sự cố
-- Cập nhật giao diện người dùng để mang lại trải nghiệm tốt hơn
