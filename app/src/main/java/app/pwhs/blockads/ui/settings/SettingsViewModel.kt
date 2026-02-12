@@ -90,6 +90,13 @@ class SettingsViewModel(
             AppPreferences.NOTIFICATION_NORMAL
         )
 
+    val dnsResponseType: StateFlow<String> = appPrefs.dnsResponseType
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DNS_RESPONSE_CUSTOM_IP
+        )
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -162,6 +169,12 @@ class SettingsViewModel(
         }
     }
 
+    fun setDnsResponseType(responseType: String) {
+        viewModelScope.launch {
+            appPrefs.setDnsResponseType(responseType)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
@@ -200,6 +213,7 @@ class SettingsViewModel(
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
+                    dnsResponseType = appPrefs.dnsResponseType.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -242,6 +256,7 @@ class SettingsViewModel(
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
+                appPrefs.setDnsResponseType(backup.dnsResponseType)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->

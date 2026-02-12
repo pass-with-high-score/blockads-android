@@ -294,8 +294,16 @@ class AdBlockVpnService : VpnService() {
             appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         if (filterRepo.isBlocked(domain)) {
-            // Build and write blocked response (0.0.0.0)
-            val response = DnsPacketParser.buildBlockedResponse(query)
+            // Build and write blocked response based on configured response type
+            val responseType = runBlocking { appPrefs.dnsResponseType.first() }
+            val response = when (responseType) {
+                app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_NXDOMAIN -> 
+                    DnsPacketParser.buildNxdomainResponse(query)
+                app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_REFUSED -> 
+                    DnsPacketParser.buildRefusedResponse(query)
+                else -> // DNS_RESPONSE_CUSTOM_IP (0.0.0.0)
+                    DnsPacketParser.buildBlockedResponse(query)
+            }
             try {
                 outputStream.write(response)
                 outputStream.flush()
@@ -308,8 +316,6 @@ class AdBlockVpnService : VpnService() {
             Log.d(TAG, "BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
-            logDnsQuery(domain, true, query.queryType, elapsed)
-            Log.d(TAG, "BLOCKED: $domain")
         } else {
             // Forward to upstream DNS
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -317,7 +323,6 @@ class AdBlockVpnService : VpnService() {
             val elapsed = System.currentTimeMillis() - startTime
             logDnsQuery(domain, false, query.queryType, elapsed, appName)
             totalQueries.incrementAndGet()
-            logDnsQuery(domain, false, query.queryType, elapsed)
         }
     }
 

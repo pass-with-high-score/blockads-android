@@ -132,6 +132,14 @@
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
     <string name="settings_upstream_dns">Upstream DNS Server</string>
     <string name="settings_fallback_dns">Fallback DNS Server</string>
+    <string name="settings_dns_response_type">DNS Response Type</string>
+    <string name="settings_dns_response_type_desc">Response type for blocked domains</string>
+    <string name="dns_response_nxdomain">NXDOMAIN</string>
+    <string name="dns_response_nxdomain_desc">Domain does not exist (standard)</string>
+    <string name="dns_response_refused">REFUSED</string>
+    <string name="dns_response_refused_desc">Query refused (better compatibility)</string>
+    <string name="dns_response_custom_ip">Custom IP (0.0.0.0)</string>
+    <string name="dns_response_custom_ip_desc">Return null route address (default)</string>
     <string name="settings_clear_logs">Clear All Logs</string>
 
     <!-- Filter Setup Screen -->
