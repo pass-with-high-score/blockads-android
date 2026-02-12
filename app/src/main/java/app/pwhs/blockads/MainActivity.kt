@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted ->
+    ) { _ ->
         // Proceed regardless — notification is optional but nice to have
         requestVpnPermission()
     }

@@ -36,7 +36,7 @@ fun SplashScreen(
 ) {
     val onboardingCompleted by appPrefs.onboardingCompleted.collectAsState(initial = false)
     var startAnimation by remember { mutableStateOf(false) }
-    
+
     val scale by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0.5f,
         animationSpec = tween(
@@ -49,7 +49,7 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         startAnimation = true
         delay(1500) // Show splash for 1.5 seconds
-        
+
         // Navigate based on onboarding status
         if (onboardingCompleted) {
             navigator.navigate(HomeScreenDestination) {
@@ -86,9 +86,9 @@ fun SplashScreen(
                 contentDescription = "App Logo",
                 modifier = Modifier.size(120.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // App Name
             Text(
                 text = stringResource(R.string.app_name),
@@ -96,9 +96,9 @@ fun SplashScreen(
                 fontWeight = FontWeight.Bold,
                 color = NeonGreen
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Tagline
             Text(
                 text = stringResource(R.string.app_tagline),

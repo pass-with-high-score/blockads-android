@@ -19,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
+import java.util.Locale
 
 class AdBlockWidgetProvider : AppWidgetProvider() {
 
@@ -214,7 +215,12 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
                 val dnsLogDao: DnsLogDao = getKoin().get()
                 val stats = dnsLogDao.getWidgetStats()
                 val blockRate = if (stats.total > 0) {
-                    String.format("%.1f%%", stats.blocked.toFloat() / stats.total * 100)
+                    String.format(
+                        Locale.US,
+                        "%.1f%%",
+                        stats.blocked.toFloat() / stats.total * 100
+                    )
+
                 } else {
                     "0%"
                 }
@@ -236,8 +242,8 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
 
     private fun formatCount(count: Int): String {
         return when {
-            count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000f)
-            count >= 1_000 -> String.format("%.1fK", count / 1_000f)
+            count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
+            count >= 1_000 -> String.format(Locale.getDefault(), "%.1fK", count / 1_000f)
             else -> count.toString()
         }
     }

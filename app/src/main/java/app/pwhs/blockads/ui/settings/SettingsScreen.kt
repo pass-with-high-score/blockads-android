@@ -543,9 +543,9 @@ fun SettingsScreen(
                             )
                         ) { Text(stringResource(R.string.settings_save_dns)) }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     // Fallback DNS
                     Text(
                         stringResource(R.string.settings_fallback_dns),
@@ -815,7 +815,6 @@ fun SettingsScreen(
     }
 
 
-
     // Add domain whitelist dialog
     if (showAddDomainDialog) {
         AddDomainDialog(
@@ -906,8 +905,8 @@ private fun SettingsToggleItem(
 }
 
 private fun formatCount(count: Int): String = when {
-    count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000f)
-    count >= 1_000 -> String.format("%.1fK", count / 1_000f)
+    count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
+    count >= 1_000 -> String.format(Locale.getDefault(), "%.1fK", count / 1_000f)
     else -> count.toString()
 }
 

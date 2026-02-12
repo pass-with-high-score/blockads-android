@@ -36,7 +36,8 @@ interface DnsLogDao {
     @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 ORDER BY timestamp DESC LIMIT :limit")
     fun getRecentBlocked(limit: Int = 5): Flow<List<DnsLogEntry>>
 
-    @Query("""
+    @Query(
+        """
         SELECT (timestamp / 3600000) * 3600000 AS hour,
                COUNT(*) AS total,
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
@@ -44,6 +45,7 @@ interface DnsLogDao {
         WHERE timestamp > :since
         GROUP BY hour
         ORDER BY hour ASC
-    """)
+    """
+    )
     fun getHourlyStats(since: Long = System.currentTimeMillis() - 86400000): Flow<List<HourlyStat>>
 }

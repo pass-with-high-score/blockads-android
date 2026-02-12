@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.about
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +51,7 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import androidx.core.net.toUri
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -175,7 +175,10 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 icon = Icons.Filled.Code,
                 title = stringResource(R.string.about_github),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/pass-with-high-score/blockads-android"))
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://github.com/pass-with-high-score/blockads-android".toUri()
+                    )
                     context.startActivity(intent)
                 }
             )
@@ -184,7 +187,8 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 icon = Icons.Filled.PrivacyTip,
                 title = stringResource(R.string.about_privacy_policy),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://blockads.pwhs.app/privacy"))
+                    val intent =
+                        Intent(Intent.ACTION_VIEW, "https://blockads.pwhs.app/privacy".toUri())
                     context.startActivity(intent)
                 }
             )
@@ -194,7 +198,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 title = stringResource(R.string.about_contact),
                 onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:support@pwhs.app")
+                        data = "mailto:support@pwhs.app".toUri()
                     }
                     context.startActivity(intent)
                 }
@@ -206,7 +210,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 onClick = {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://github.com/pass-with-high-score/blockads-android/blob/main/LICENSE")
+                        "https://github.com/pass-with-high-score/blockads-android/blob/main/LICENSE".toUri()
                     )
                     context.startActivity(intent)
                 }

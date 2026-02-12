@@ -14,7 +14,7 @@ object FilterUpdateScheduler {
 
     suspend fun scheduleFilterUpdate(context: Context, appPreferences: AppPreferences) {
         val enabled = appPreferences.autoUpdateEnabled.first()
-        
+
         if (!enabled) {
             cancelFilterUpdate(context)
             return

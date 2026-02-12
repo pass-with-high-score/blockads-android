@@ -33,6 +33,7 @@ import java.io.FileOutputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
@@ -64,7 +65,8 @@ class AdBlockVpnService : VpnService() {
     private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
     private lateinit var dnsErrorDao: DnsErrorDao
     private var networkMonitor: NetworkMonitor? = null
-    private val retryManager = VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
+    private val retryManager =
+        VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private lateinit var appNameResolver: AppNameResolver
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
@@ -76,7 +78,7 @@ class AdBlockVpnService : VpnService() {
 
     @Volatile
     private var isProcessing = false
-    
+
     @Volatile
     private var isReconnecting = false
 
@@ -89,7 +91,7 @@ class AdBlockVpnService : VpnService() {
         dnsErrorDao = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
-        
+
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
             context = this,
@@ -104,6 +106,7 @@ class AdBlockVpnService : VpnService() {
                 stopVpn()
                 return START_NOT_STICKY
             }
+
             else -> {
                 startVpn()
                 return START_STICKY
@@ -138,16 +141,22 @@ class AdBlockVpnService : VpnService() {
                 var vpnEstablished = false
                 while (!vpnEstablished && retryManager.shouldRetry()) {
                     vpnEstablished = establishVpn(upstreamDns, whitelistedApps)
-                    
+
                     if (!vpnEstablished && retryManager.shouldRetry()) {
-                        Log.w(TAG, "VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
+                        Log.w(
+                            TAG,
+                            "VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})"
+                        )
                         updateNotification()
                         retryManager.waitForRetry()
                     }
                 }
 
                 if (!vpnEstablished) {
-                    Log.e(TAG, "Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
+                    Log.e(
+                        TAG,
+                        "Failed to establish VPN after ${retryManager.getMaxRetries()} attempts"
+                    )
                     isConnecting = false
                     stopVpn()
                     return@launch
@@ -167,7 +176,7 @@ class AdBlockVpnService : VpnService() {
 
                 // Log initial battery state
                 batteryMonitor.logBatteryStatus()
-                
+
                 // Start periodic battery monitoring
                 startBatteryMonitoring()
 
@@ -236,7 +245,7 @@ class AdBlockVpnService : VpnService() {
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
         val outputStream = FileOutputStream(fd)
-        
+
         // Reusable buffer for packet reading - SAFE because processing is single-threaded
         // The inputStream.read() call blocks until a packet arrives, ensuring sequential
         // processing. Each packet is fully processed before the next read() call.
@@ -262,8 +271,14 @@ class AdBlockVpnService : VpnService() {
                 Log.e(TAG, "Packet processing error", e)
             }
         } finally {
-            try { inputStream.close() } catch (_: Exception) {}
-            try { outputStream.close() } catch (_: Exception) {}
+            try {
+                inputStream.close()
+            } catch (_: Exception) {
+            }
+            try {
+                outputStream.close()
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -275,7 +290,8 @@ class AdBlockVpnService : VpnService() {
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
-        val appName = appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+        val appName =
+            appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         if (filterRepo.isBlocked(domain)) {
             // Build and write blocked response (0.0.0.0)
@@ -313,16 +329,22 @@ class AdBlockVpnService : VpnService() {
     ) {
         // Try primary DNS server first
         var success = tryDnsQuery(query, outputStream, upstreamDns, false)
-        
+
         // If primary fails and fallback is different, try fallback
         if (!success && fallbackDns != upstreamDns) {
-            Log.w(TAG, "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns)")
+            Log.w(
+                TAG,
+                "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns)"
+            )
             success = tryDnsQuery(query, outputStream, fallbackDns, true)
         }
-        
+
         // If both failed, return SERVFAIL
         if (!success) {
-            Log.e(TAG, "Both primary and fallback DNS failed for ${query.domain}, returning SERVFAIL")
+            Log.e(
+                TAG,
+                "Both primary and fallback DNS failed for ${query.domain}, returning SERVFAIL"
+            )
             try {
                 val servfailResponse = DnsPacketParser.buildServfailResponse(query)
                 outputStream.write(servfailResponse)
@@ -375,22 +397,46 @@ class AdBlockVpnService : VpnService() {
 
         } catch (e: java.net.SocketTimeoutException) {
             Log.w(TAG, "DNS timeout for ${query.domain} on $dnsServer", e)
-            logDnsError(query.domain, "TIMEOUT", e.message ?: "Socket timeout", dnsServer, isFallback)
+            logDnsError(
+                query.domain,
+                "TIMEOUT",
+                e.message ?: "Socket timeout",
+                dnsServer,
+                isFallback
+            )
             return false
         } catch (e: java.io.IOException) {
             Log.w(TAG, "DNS IO error for ${query.domain} on $dnsServer", e)
-            logDnsError(query.domain, "IO_ERROR", e.message ?: "IO exception", dnsServer, isFallback)
+            logDnsError(
+                query.domain,
+                "IO_ERROR",
+                e.message ?: "IO exception",
+                dnsServer,
+                isFallback
+            )
             return false
         } catch (e: Exception) {
             Log.e(TAG, "DNS error for ${query.domain} on $dnsServer", e)
-            logDnsError(query.domain, "UNKNOWN", e.message ?: "Unknown error", dnsServer, isFallback)
+            logDnsError(
+                query.domain,
+                "UNKNOWN",
+                e.message ?: "Unknown error",
+                dnsServer,
+                isFallback
+            )
             return false
         } finally {
             socket?.close()
         }
     }
 
-    private fun logDnsError(domain: String, errorType: String, errorMessage: String, dnsServer: String, attemptedFallback: Boolean) {
+    private fun logDnsError(
+        domain: String,
+        errorType: String,
+        errorMessage: String,
+        dnsServer: String,
+        attemptedFallback: Boolean
+    ) {
         serviceScope.launch {
             try {
                 dnsErrorDao.insert(
@@ -408,7 +454,13 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun logDnsQuery(domain: String, isBlocked: Boolean, queryType: Int, responseTimeMs: Long, appName: String = "") {
+    private fun logDnsQuery(
+        domain: String,
+        isBlocked: Boolean,
+        queryType: Int,
+        responseTimeMs: Long,
+        appName: String = ""
+    ) {
         serviceScope.launch {
             try {
                 val typeStr = when (queryType) {
@@ -440,10 +492,10 @@ class AdBlockVpnService : VpnService() {
 
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
-        
+
         // Stop battery monitoring
         stopBatteryMonitoring()
-        
+
         // Stop notification updates
         stopNotificationUpdates()
 
@@ -486,20 +538,21 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
-        
+
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
-        
+
         // Stop battery monitoring
         stopBatteryMonitoring()
 
         // Stop notification updates
         stopNotificationUpdates()
-        
+
         serviceScope.cancel()
         try {
             vpnInterface?.close()
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         vpnInterface = null
         super.onDestroy()
     }
@@ -650,12 +703,14 @@ class AdBlockVpnService : VpnService() {
                 retryManager.getRetryCount(),
                 retryManager.getMaxRetries()
             )
+
             isRunning -> {
                 val blocked = blockedQueries.get()
                 val total = totalQueries.get()
                 val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
                 getString(R.string.vpn_notification_stats_text, blocked, total, uptimeStr)
             }
+
             else -> getString(R.string.vpn_notification_text)
         }
 
@@ -681,20 +736,20 @@ class AdBlockVpnService : VpnService() {
 
     private fun onNetworkAvailable() {
         Log.d(TAG, "Network available - checking VPN status")
-        
+
         // Use serviceScope to avoid blocking the callback thread
         serviceScope.launch {
             val autoReconnect = appPrefs.autoReconnect.first()
             val vpnWasEnabled = appPrefs.vpnEnabled.first()
-            
+
             // If VPN should be running but isn't, try to reconnect
             if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isReconnecting) {
                 Log.d(TAG, "Auto-reconnecting VPN after network became available")
                 isReconnecting = true
-                
+
                 // Wait a bit for network to stabilize
                 delay(NETWORK_STABILIZATION_DELAY_MS)
-                
+
                 if (!isRunning && !isConnecting) {
                     retryManager.reset()
                     startVpn()
@@ -709,7 +764,7 @@ class AdBlockVpnService : VpnService() {
         // Note: We don't stop the VPN when network is lost, as it may come back
         // The VPN will automatically reconnect when network is available again
     }
-    
+
     /**
      * Start periodic battery monitoring to track battery usage.
      * Logs battery status every 5 minutes while VPN is running.
@@ -717,7 +772,7 @@ class AdBlockVpnService : VpnService() {
     private fun startBatteryMonitoring() {
         // Cancel any existing monitoring job
         batteryMonitoringJob?.cancel()
-        
+
         batteryMonitoringJob = serviceScope.launch {
             while (isRunning) {
                 try {
@@ -732,7 +787,7 @@ class AdBlockVpnService : VpnService() {
             }
         }
     }
-    
+
     private fun stopBatteryMonitoring() {
         batteryMonitoringJob?.cancel()
         batteryMonitoringJob = null
@@ -771,9 +826,9 @@ class AdBlockVpnService : VpnService() {
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
         return if (hours > 0) {
-            String.format("%d:%02d:%02d", hours, minutes, seconds)
+            String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds)
         } else {
-            String.format("%d:%02d", minutes, seconds)
+            String.format(Locale.getDefault(), "%d:%02d", minutes, seconds)
         }
     }
 }

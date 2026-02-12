@@ -111,9 +111,11 @@ class BatteryMonitor(private val context: Context) {
      */
     fun logBatteryStatus() {
         val info = getBatteryInfo()
-        Log.d(TAG, "Battery Status: ${info.level}%, Charging: ${info.isCharging}, " +
-                "Method: ${info.chargingMethod}, Health: ${info.health}, " +
-                "Temp: ${info.temperature}°C, Voltage: ${info.voltage}mV")
+        Log.d(
+            TAG, "Battery Status: ${info.level}%, Charging: ${info.isCharging}, " +
+                    "Method: ${info.chargingMethod}, Health: ${info.health}, " +
+                    "Temp: ${info.temperature}°C, Voltage: ${info.voltage}mV"
+        )
     }
 
     private fun getBatteryStatus(): Intent? {

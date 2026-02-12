@@ -149,11 +149,11 @@ class FilterListRepository(
 
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
-    
+
     // Bloom filter for fast negative lookups (reduces exact match checks)
     @Volatile
     private var blockedDomainsBloomFilter: BloomFilter<CharSequence>? = null
-    
+
     // Expected false positive rate of 1% for Bloom filter
     private val bloomFilterFpp = 0.01
 
@@ -161,14 +161,14 @@ class FilterListRepository(
 
     /**
      * Check if a domain or any of its parent domains matches a condition.
-     * 
+     *
      * This helper function iterates through a domain and all its parent domains
      * (by removing the leftmost subdomain each time), checking each against the
      * provided checker function.
-     * 
+     *
      * Example: For "sub.example.com", checks:
      * 1. "sub.example.com"
-     * 2. "example.com"  
+     * 2. "example.com"
      * 3. "com"
      *
      * @param domain The domain to check (e.g., "ads.example.com")
@@ -180,10 +180,10 @@ class FilterListRepository(
      * ```kotlin
      * // Check whitelist (Set)
      * checkDomainAndParents(domain) { whitelistedDomains.contains(it) }
-     * 
+     *
      * // Check Bloom filter
      * checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
-     * 
+     *
      * // Check exact blocklist (HashMap)
      * checkDomainAndParents(domain) { blockedDomains.contains(it) }
      * ```
@@ -275,10 +275,10 @@ class FilterListRepository(
 
             blockedDomains.clear()
             blockedDomains.addAll(newDomains)
-            
+
             // Build Bloom filter for fast negative lookups
             buildBloomFilter(newDomains)
-            
+
             Log.d(TAG, "Total unique domains loaded: ${blockedDomains.size}")
 
             Result.success(blockedDomains.size)
@@ -287,7 +287,7 @@ class FilterListRepository(
             Result.failure(e)
         }
     }
-    
+
     /**
      * Build a Bloom filter from the domain set for memory-efficient lookups.
      */
@@ -296,7 +296,7 @@ class FilterListRepository(
             blockedDomainsBloomFilter = null
             return
         }
-        
+
         try {
             val startTime = System.currentTimeMillis()
             // Create Bloom filter with expected insertions and FPP
@@ -305,10 +305,10 @@ class FilterListRepository(
                 domains.size,
                 bloomFilterFpp
             )
-            
+
             // Add all domains to Bloom filter
             domains.forEach { filter.put(it) }
-            
+
             blockedDomainsBloomFilter = filter
             val elapsed = System.currentTimeMillis() - startTime
             Log.d(TAG, "Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
@@ -392,12 +392,14 @@ class FilterListRepository(
                             output.add(domain.lowercase())
                         }
                     }
+
                     line.startsWith("||") && line.endsWith("^") -> {
                         val domain = line.removePrefix("||").removeSuffix("^").trim()
                         if (domain.isNotBlank() && domain.contains('.')) {
                             output.add(domain.lowercase())
                         }
                     }
+
                     line.contains('.') && !line.contains(' ') && !line.contains('/') -> {
                         output.add(line.lowercase())
                     }

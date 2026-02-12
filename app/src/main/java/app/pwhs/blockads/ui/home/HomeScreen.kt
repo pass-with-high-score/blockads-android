@@ -75,6 +75,7 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
+import java.util.Locale
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,212 +175,212 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-        // Status text
-        Text(
-            text = when {
-                vpnConnecting -> stringResource(R.string.status_connecting)
-                vpnEnabled -> stringResource(R.string.status_protected)
-                else -> stringResource(R.string.status_unprotected)
-            },
-            style = MaterialTheme.typography.headlineMedium,
-            color = when {
-                vpnConnecting -> AccentBlue
-                vpnEnabled -> NeonGreen
-                else -> DangerRed
-            },
-            fontWeight = FontWeight.Bold
-        )
+            // Status text
+            Text(
+                text = when {
+                    vpnConnecting -> stringResource(R.string.status_connecting)
+                    vpnEnabled -> stringResource(R.string.status_protected)
+                    else -> stringResource(R.string.status_unprotected)
+                },
+                style = MaterialTheme.typography.headlineMedium,
+                color = when {
+                    vpnConnecting -> AccentBlue
+                    vpnEnabled -> NeonGreen
+                    else -> DangerRed
+                },
+                fontWeight = FontWeight.Bold
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = when {
-                vpnConnecting -> stringResource(R.string.home_connecting_desc)
-                vpnEnabled -> stringResource(R.string.home_protected_desc)
-                else -> stringResource(R.string.home_unprotected_desc)
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = TextSecondary
-        )
+            Text(
+                text = when {
+                    vpnConnecting -> stringResource(R.string.home_connecting_desc)
+                    vpnEnabled -> stringResource(R.string.home_protected_desc)
+                    else -> stringResource(R.string.home_unprotected_desc)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextSecondary
+            )
 
-        Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(48.dp))
 
-        // Power button — never blocked by filter loading
-        PowerButton(
-            isActive = vpnEnabled,
-            isConnecting = vpnConnecting,
-            onClick = {
-                if (!vpnConnecting) {
-                    if (vpnEnabled) {
-                        viewModel.stopVpn(context)
-                    } else {
-                        onRequestVpnPermission()
+            // Power button — never blocked by filter loading
+            PowerButton(
+                isActive = vpnEnabled,
+                isConnecting = vpnConnecting,
+                onClick = {
+                    if (!vpnConnecting) {
+                        if (vpnEnabled) {
+                            viewModel.stopVpn(context)
+                        } else {
+                            onRequestVpnPermission()
+                        }
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // Stats cards
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QueryStats,
+                    label = stringResource(R.string.total_queries),
+                    value = formatCount(totalCount),
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Block,
+                    label = stringResource(R.string.blocked_queries),
+                    value = formatCount(blockedCount),
+                    color = DangerRed
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Block rate card
+            val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = NeonGreen,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.home_block_rate),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "${String.format("%.1f", blockRate)}%",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = stringResource(R.string.home_filter_rules),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = formatCount(viewModel.domainCount),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = NeonGreen
+                        )
                     }
                 }
             }
-        )
 
-        Spacer(modifier = Modifier.height(36.dp))
+            // 24h Activity Chart
+            if (hourlyStats.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
 
-        // Stats cards
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.QueryStats,
-                label = stringResource(R.string.total_queries),
-                value = formatCount(totalCount),
-                color = MaterialTheme.colorScheme.secondary
-            )
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Block,
-                label = stringResource(R.string.blocked_queries),
-                value = formatCount(blockedCount),
-                color = DangerRed
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Block rate card
-        val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Shield,
-                    contentDescription = null,
-                    tint = NeonGreen,
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.home_block_rate),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = "${String.format("%.1f", blockRate)}%",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = stringResource(R.string.home_filter_rules),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = formatCount(viewModel.domainCount),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = NeonGreen
-                    )
-                }
-            }
-        }
-
-        // 24h Activity Chart
-        if (hourlyStats.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "24-HOUR ACTIVITY",
-                style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp, bottom = 8.dp)
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                StatsChart(
-                    stats = hourlyStats,
+                Text(
+                    text = "24-HOUR ACTIVITY",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp)
-                        .padding(16.dp)
+                        .padding(start = 4.dp, bottom = 8.dp)
                 )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    StatsChart(
+                        stats = hourlyStats,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .padding(16.dp)
+                    )
+                }
             }
-        }
 
-        // Recent blocked domains
-        if (recentBlocked.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(20.dp))
+            // Recent blocked domains
+            if (recentBlocked.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = stringResource(R.string.home_recent_blocked),
-                style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp, bottom = 8.dp)
-            )
+                Text(
+                    text = stringResource(R.string.home_recent_blocked),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp, bottom = 8.dp)
+                )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                    recentBlocked.forEach { entry ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        recentBlocked.forEach { entry ->
+                            Row(
                                 modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(DangerRed)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = entry.domain,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                text = formatTimeSince(entry.timestamp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextSecondary
-                            )
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(DangerRed)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = entry.domain,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = formatTimeSince(entry.timestamp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TextSecondary
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
             Spacer(modifier = Modifier.height(200.dp))
         }
@@ -419,7 +420,10 @@ private fun StatsChart(
             val blockedBarHeight = (stat.blocked.toFloat() / maxVal) * chartHeight
             drawRoundRect(
                 color = blockedColor,
-                topLeft = androidx.compose.ui.geometry.Offset(x + 1f, chartHeight - blockedBarHeight),
+                topLeft = androidx.compose.ui.geometry.Offset(
+                    x + 1f,
+                    chartHeight - blockedBarHeight
+                ),
                 size = androidx.compose.ui.geometry.Size(barWidth - 2f, blockedBarHeight),
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f, 2f)
             )
@@ -599,8 +603,8 @@ private fun StatCard(
 
 private fun formatCount(count: Int): String {
     return when {
-        count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000f)
-        count >= 1_000 -> String.format("%.1fK", count / 1_000f)
+        count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
+        count >= 1_000 -> String.format(Locale.getDefault(), "%.1fK", count / 1_000f)
         else -> count.toString()
     }
 }

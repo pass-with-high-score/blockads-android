@@ -74,13 +74,14 @@ class WidgetToggleReceiver : BroadcastReceiver() {
         val needsVpnPermission = VpnService.prepare(context) != null
 
         // Check notification permission (Android 13+)
-        val needsNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        } else {
-            false
-        }
+        val needsNotificationPermission =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            } else {
+                false
+            }
 
         return needsVpnPermission || needsNotificationPermission
     }

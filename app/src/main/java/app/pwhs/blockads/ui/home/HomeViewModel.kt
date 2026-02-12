@@ -35,8 +35,9 @@ class HomeViewModel(
     val totalCount: StateFlow<Int> = dnsLogDao.getTotalCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val recentBlocked: StateFlow<List<app.pwhs.blockads.data.DnsLogEntry>> = dnsLogDao.getRecentBlocked()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val recentBlocked: StateFlow<List<app.pwhs.blockads.data.DnsLogEntry>> =
+        dnsLogDao.getRecentBlocked()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val hourlyStats: StateFlow<List<app.pwhs.blockads.data.HourlyStat>> = dnsLogDao.getHourlyStats()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

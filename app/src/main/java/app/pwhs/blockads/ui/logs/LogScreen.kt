@@ -329,9 +329,14 @@ fun LogScreen(
                 // Copy domain
                 Card(
                     onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
-                        Toast.makeText(context, resource.getString(R.string.domain_copied), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            resource.getString(R.string.domain_copied),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         selectedEntry = null
                     },
                     modifier = Modifier.fillMaxWidth(),

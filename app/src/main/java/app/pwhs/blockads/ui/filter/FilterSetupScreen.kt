@@ -387,8 +387,8 @@ private fun SectionHeader(title: String) {
 }
 
 private fun formatCount(count: Int): String = when {
-    count >= 1_000_000 -> String.format("%.1fM", count / 1_000_000f)
-    count >= 1_000 -> String.format("%.1fK", count / 1_000f)
+    count >= 1_000_000 -> String.format(Locale.getDefault(),"%.1fM", count / 1_000_000f)
+    count >= 1_000 -> String.format(Locale.getDefault(),"%.1fK", count / 1_000f)
     else -> count.toString()
 }
 

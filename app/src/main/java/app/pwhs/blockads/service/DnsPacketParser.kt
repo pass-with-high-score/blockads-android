@@ -1,8 +1,6 @@
 package app.pwhs.blockads.service
 
-import android.util.Log
 import java.io.ByteArrayOutputStream
-import java.net.InetAddress
 import java.nio.ByteBuffer
 
 /**
@@ -26,10 +24,13 @@ object DnsPacketParser {
 
     // DNS header is always 12 bytes
     private const val DNS_HEADER_SIZE = 12
+
     // IPv4 header minimum 20 bytes
     private const val IP_HEADER_SIZE = 20
+
     // IPv6 header is always 40 bytes (fixed)
     private const val IPV6_HEADER_SIZE = 40
+
     // UDP header 8 bytes
     private const val UDP_HEADER_SIZE = 8
 
@@ -90,6 +91,7 @@ object DnsPacketParser {
 
                 udpStart = ihl
             }
+
             6 -> {
                 if (length < IPV6_HEADER_SIZE + UDP_HEADER_SIZE + DNS_HEADER_SIZE) return null
 
@@ -105,6 +107,7 @@ object DnsPacketParser {
 
                 udpStart = IPV6_HEADER_SIZE
             }
+
             else -> return null
         }
 

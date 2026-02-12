@@ -38,7 +38,7 @@ class LogViewModel(
         if (query.isBlank()) logs
         else logs.filter {
             it.domain.contains(query.trim(), ignoreCase = true) ||
-                it.appName.contains(query.trim(), ignoreCase = true)
+                    it.appName.contains(query.trim(), ignoreCase = true)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

@@ -50,6 +50,7 @@ class FilterUpdateWorker(
                                 isSuccess = true
                             )
                         }
+
                         AppPreferences.NOTIFICATION_SILENT -> {
                             showUpdateNotification(
                                 title = applicationContext.getString(R.string.filter_update_success),
@@ -61,6 +62,7 @@ class FilterUpdateWorker(
                                 silent = true
                             )
                         }
+
                         AppPreferences.NOTIFICATION_NONE -> {
                             // No notification
                         }
@@ -72,7 +74,8 @@ class FilterUpdateWorker(
                     if (notificationType != AppPreferences.NOTIFICATION_NONE) {
                         showUpdateNotification(
                             title = applicationContext.getString(R.string.filter_update_failed),
-                            message = error.message ?: applicationContext.getString(R.string.filter_update_failed_message),
+                            message = error.message
+                                ?: applicationContext.getString(R.string.filter_update_failed_message),
                             isSuccess = false
                         )
                     }
@@ -100,7 +103,8 @@ class FilterUpdateWorker(
                 applicationContext.getString(R.string.filter_update_notification_channel),
                 if (silent) NotificationManager.IMPORTANCE_LOW else NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = applicationContext.getString(R.string.filter_update_notification_channel_desc)
+                description =
+                    applicationContext.getString(R.string.filter_update_notification_channel_desc)
                 if (silent) {
                     setSound(null, null)
                     enableVibration(false)

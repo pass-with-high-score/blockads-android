@@ -6,7 +6,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterList
@@ -16,10 +15,8 @@ import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
