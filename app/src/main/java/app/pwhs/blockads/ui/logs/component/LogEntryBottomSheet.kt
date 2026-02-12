@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,7 +38,8 @@ fun LogEntryBottomSheet(
     entry: DnsLogEntry,
     onDismiss: () -> Unit,
     onCopyDomain: () -> Unit,
-    onAddToWhiteList: () -> Unit
+    onAddToWhiteList: () -> Unit,
+    onAddToCustomBlockRules: () -> Unit = {}
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -70,6 +72,39 @@ fun LogEntryBottomSheet(
                 color = if (entry.isBlocked) DangerRed else NeonGreen
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Block this domain (add to custom rules)
+            if (!entry.isBlocked) {
+                Card(
+                    onClick = onAddToCustomBlockRules,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Block,
+                            contentDescription = null,
+                            tint = DangerRed,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.block_this_domain),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             // Add to whitelist
             Card(

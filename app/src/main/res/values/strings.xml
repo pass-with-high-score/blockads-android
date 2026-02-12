@@ -174,4 +174,32 @@
     <string name="widget_name">BlockAds Toggle</string>
     <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
     <string name="widget_toggle_description">Toggle ad blocking</string>
+
+    <!-- Custom Rules -->
+    <string name="custom_rules">Custom Rules</string>
+    <string name="add_custom_rule">Add Custom Rule</string>
+    <string name="import_rules">Import Rules</string>
+    <string name="export_rules">Export Rules</string>
+    <string name="delete_all_rules">Delete All Rules</string>
+    <string name="delete_all_rules_confirmation">Are you sure you want to delete all custom rules? This action cannot be undone.</string>
+    <string name="all_rules_deleted">All rules deleted</string>
+    <string name="rule_added">Rule added successfully</string>
+    <string name="rules_imported">Imported %d rules</string>
+    <string name="rules_copied_to_clipboard">Rules copied to clipboard</string>
+    <string name="no_rules_to_export">No rules to export</string>
+    <string name="no_custom_rules">No custom rules</string>
+    <string name="tap_add_to_create_rule">Tap + to create your first custom rule</string>
+    <string name="rule">Rule</string>
+    <string name="rules">Rules</string>
+    <string name="add_rule_hint">Enter a custom DNS rule:\n• Block: ||example.com^ or example.com\n• Allow: @@||example.com^\n• Comment: ! This is a comment</string>
+    <string name="import_rules_hint">Paste rules (one per line):</string>
+    <string name="import_label">Import</string>
+    <string name="custom_rules_help">Custom Rules Help</string>
+    <string name="custom_rules_help_text">Custom rules are applied before filter lists, giving them higher priority.\n\nSupported formats:\n• Block domain: ||example.com^ or example.com\n• Allow domain: @@||example.com^\n• Comment: ! This is a comment\n\nExamples:\n• ||ads.example.com^ - Blocks ads.example.com\n• @@||example.com^ - Allows example.com (overrides blocklists)\n• ! My custom rules - A comment line</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="block_this_domain">Block this domain</string>
+    <string name="add_to_custom_rules">Add to custom rules</string>
 </resources>

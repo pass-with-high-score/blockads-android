@@ -269,6 +269,10 @@ fun LogScreen(
                         Toast.LENGTH_SHORT
                     ).show()
                     selectedEntry = null
+                },
+                onAddToCustomBlockRules = {
+                    viewModel.addToCustomBlockRules(entry.domain)
+                    selectedEntry = null
                 }
             )
         }

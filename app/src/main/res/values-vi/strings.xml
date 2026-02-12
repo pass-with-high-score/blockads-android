@@ -174,4 +174,33 @@
     <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
     <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
+
+    <!-- Custom Rules -->
+    <string name="custom_rules">Quy Tắc Tùy Chỉnh</string>
+    <string name="add_custom_rule">Thêm Quy Tắc</string>
+    <string name="import_rules">Nhập Quy Tắc</string>
+    <string name="export_rules">Xuất Quy Tắc</string>
+    <string name="delete_all_rules">Xóa Tất Cả</string>
+    <string name="delete_all_rules_confirmation">Bạn có chắc chắn muốn xóa tất cả quy tắc tùy chỉnh? Hành động này không thể hoàn tác.</string>
+    <string name="all_rules_deleted">Đã xóa tất cả quy tắc</string>
+    <string name="rule_added">Đã thêm quy tắc thành công</string>
+    <string name="rules_imported">Đã nhập %d quy tắc</string>
+    <string name="rules_copied_to_clipboard">Đã sao chép quy tắc vào clipboard</string>
+    <string name="no_rules_to_export">Không có quy tắc để xuất</string>
+    <string name="no_custom_rules">Chưa có quy tắc tùy chỉnh</string>
+    <string name="tap_add_to_create_rule">Nhấn + để tạo quy tắc đầu tiên</string>
+    <string name="rule">Quy tắc</string>
+    <string name="rules">Quy tắc</string>
+    <string name="add_rule_hint">Nhập quy tắc DNS tùy chỉnh:\n• Chặn: ||example.com^ hoặc example.com\n• Cho phép: @@||example.com^\n• Ghi chú: ! Đây là ghi chú</string>
+    <string name="import_rules_hint">Dán quy tắc (mỗi dòng một quy tắc):</string>
+    <string name="import_label">Nhập</string>
+    <string name="custom_rules_help">Trợ Giúp Quy Tắc</string>
+    <string name="custom_rules_help_text">Quy tắc tùy chỉnh được áp dụng trước danh sách bộ lọc, có ưu tiên cao hơn.\n\nĐịnh dạng hỗ trợ:\n• Chặn tên miền: ||example.com^ hoặc example.com\n• Cho phép tên miền: @@||example.com^\n• Ghi chú: ! Đây là ghi chú\n\nVí dụ:\n• ||ads.example.com^ - Chặn ads.example.com\n• @@||example.com^ - Cho phép example.com (ghi đè blocklist)\n• ! Quy tắc của tôi - Dòng ghi chú</string>
+    <string name="add">Thêm</string>
+    <string name="delete">Xóa</string>
+    <string name="cancel">Hủy</string>
+    <string name="ok">OK</string>
+    <string name="block_this_domain">Chặn tên miền này</string>
+    <string name="add_to_custom_rules">Thêm vào quy tắc tùy chỉnh</string>
+
 </resources>

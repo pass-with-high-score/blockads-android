@@ -129,6 +129,7 @@ class AdBlockVpnService : VpnService() {
                 // Seed defaults and load all enabled filter lists
                 filterRepo.seedDefaultsIfNeeded()
                 filterRepo.loadWhitelist()
+                filterRepo.loadCustomRules()
                 val result = filterRepo.loadAllEnabledFilters()
                 Log.d(TAG, "Filters loaded: ${result.getOrDefault(0)} unique domains")
 

@@ -17,6 +17,7 @@ class FilterListRepository(
     private val context: Context,
     private val filterListDao: FilterListDao,
     private val whitelistDomainDao: WhitelistDomainDao,
+    private val customDnsRuleDao: CustomDnsRuleDao,
     private val client: HttpClient
 ) {
 
@@ -149,6 +150,10 @@ class FilterListRepository(
 
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
+    
+    // Custom rules - higher priority than filter lists
+    private val customBlockDomains = ConcurrentHashMap.newKeySet<String>()
+    private val customAllowDomains = ConcurrentHashMap.newKeySet<String>()
 
     // Bloom filter for fast negative lookups (reduces exact match checks)
     @Volatile
@@ -202,12 +207,22 @@ class FilterListRepository(
     }
 
     fun isBlocked(domain: String): Boolean {
-        // Check whitelist first — whitelisted domains are always allowed
+        // Priority 1: Check custom allow rules first (@@||example.com^)
+        if (checkDomainAndParents(domain) { customAllowDomains.contains(it) }) {
+            return false
+        }
+        
+        // Priority 2: Check custom block rules (||example.com^)
+        if (checkDomainAndParents(domain) { customBlockDomains.contains(it) }) {
+            return true
+        }
+        
+        // Priority 3: Check whitelist — whitelisted domains are always allowed
         if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
             return false
         }
 
-        // Use Bloom filter for fast negative check
+        // Priority 4: Check filter lists using Bloom filter for fast negative check
         // If Bloom filter says "definitely not present", skip exact lookup
         val bloomFilter = blockedDomainsBloomFilter
         if (bloomFilter != null) {
@@ -219,6 +234,19 @@ class FilterListRepository(
 
         // Check exact blocklist (only if Bloom filter suggested possibility)
         return checkDomainAndParents(domain) { blockedDomains.contains(it) }
+    }
+    
+    suspend fun loadCustomRules() {
+        val blockDomains = customDnsRuleDao.getBlockDomains()
+        val allowDomains = customDnsRuleDao.getAllowDomains()
+        
+        customBlockDomains.clear()
+        customBlockDomains.addAll(blockDomains.map { it.lowercase() })
+        
+        customAllowDomains.clear()
+        customAllowDomains.addAll(allowDomains.map { it.lowercase() })
+        
+        Log.d(TAG, "Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules")
     }
 
     suspend fun loadWhitelist() {
