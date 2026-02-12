@@ -426,7 +426,7 @@ fun SettingsScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         // DNS Protocol Selector
                         Text(
-                            "DNS Protocol",
+                            stringResource(R.string.settings_dns_protocol),
                             style = MaterialTheme.typography.titleSmall
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -440,7 +440,7 @@ fun SettingsScreen(
                         // Show DoH URL input when DoH is selected
                         if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOH) {
                             Text(
-                                "DoH Server URL",
+                                stringResource(R.string.settings_doh_server_url),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -466,7 +466,7 @@ fun SettingsScreen(
                                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                                         contentColor = MaterialTheme.colorScheme.primary
                                     )
-                                ) { Text("Save DoH URL") }
+                                ) { Text(stringResource(R.string.settings_save_doh_url)) }
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                         }
@@ -483,7 +483,7 @@ fun SettingsScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT)
-                                        "DoT Server (hostname or IP)"
+                                        stringResource(R.string.settings_dot_server)
                                     else
                                         stringResource(R.string.settings_upstream_dns),
                                     style = MaterialTheme.typography.titleSmall

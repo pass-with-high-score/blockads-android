@@ -331,7 +331,12 @@ class AdBlockVpnService : VpnService() {
         upstreamDns: String,
         fallbackDns: String
     ) {
-        // Get DNS protocol settings synchronously (we're already in a coroutine context)
+        // Note: Using runBlocking here is intentional and necessary. This method is called
+        // from processPackets(), which is a blocking I/O loop reading from a FileInputStream.
+        // The entire packet processing pipeline is synchronous by design (VPN TUN interface
+        // requires blocking reads). Making this suspend would require converting the entire
+        // packet processing loop to coroutines, which is not compatible with blocking I/O
+        // on FileInputStream/FileOutputStream.
         val dnsProtocol = runBlocking { appPrefs.dnsProtocol.first() }
         val dohUrl = runBlocking { appPrefs.dohUrl.first() }
 
@@ -380,6 +385,9 @@ class AdBlockVpnService : VpnService() {
     ): Boolean {
         try {
             // Get DNS response based on protocol
+            // Note: Using runBlocking for suspend functions is necessary here because
+            // we're in a blocking I/O context (processPackets loop). The VPN TUN interface
+            // requires synchronous packet processing with FileInputStream/FileOutputStream.
             val dnsResponseData = when (protocol) {
                 app.pwhs.blockads.data.DnsProtocol.DOH -> {
                     Log.d(TAG, "Using DoH for ${query.domain} to $dohUrl")

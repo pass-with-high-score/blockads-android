@@ -19,6 +19,7 @@ class DotClient {
         private const val DOT_PORT = 853
         private const val QUERY_TIMEOUT_MS = 5000L
         private const val CONNECTION_TIMEOUT_MS = 3000
+        private const val MAX_DNS_RESPONSE_LENGTH = 4096 // RFC 1035 max UDP packet size
     }
 
     /**
@@ -87,7 +88,7 @@ class DotClient {
             val responseLength = ((lengthBytes[0].toInt() and 0xFF) shl 8) or
                     (lengthBytes[1].toInt() and 0xFF)
 
-            if (responseLength <= 0 || responseLength > 4096) {
+            if (responseLength <= 0 || responseLength > MAX_DNS_RESPONSE_LENGTH) {
                 Log.e(TAG, "Invalid response length: $responseLength")
                 return null
             }
