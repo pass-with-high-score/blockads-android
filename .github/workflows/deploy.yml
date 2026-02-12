@@ -77,8 +77,8 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
-      # GitHub Release
-      - name: Create GitHub Release
+      # Upload assets to existing GitHub Release (or create if missing)
+      - name: Upload Release Assets
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
@@ -86,6 +86,8 @@ jobs:
           files: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/bundle/release/app-release.aab
-          generate_release_notes: true
+          append_release_assets: true
+          overwrite_files: true
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
