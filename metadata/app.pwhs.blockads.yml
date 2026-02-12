@@ -2,7 +2,9 @@ Categories:
   - Internet
   - Security
 License: GPL-3.0-only
-AuthorName: Pass With High Score
+AuthorName: Nguyen Quang Minh (NQM)
+AuthorEmail: nguyenquangminh570@gmail.com
+WebSite: https://blockads.pwhs.app/
 SourceCode: https://github.com/pass-with-high-score/blockads-android
 IssueTracker: https://github.com/pass-with-high-score/blockads-android/issues
 
@@ -10,6 +12,8 @@ AutoName: BlockAds
 
 RepoType: git
 Repo: https://github.com/pass-with-high-score/blockads-android.git
+Binaries:
+  https://github.com/pass-with-high-score/blockads-android/releases/download/v%v/app-release.apk
 
 Builds:
   - versionName: 1.0.0
@@ -19,7 +23,13 @@ Builds:
     gradle:
       - yes
 
+# TODO: Replace with actual SHA-256 fingerprint of the APK signing certificate.
+# Generate with: apksigner verify --print-certs app-release.apk | grep SHA-256
+AllowedAPKSigningKeys: TODO
+
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: HTTP
+UpdateCheckData:
+  https://raw.githubusercontent.com/pass-with-high-score/blockads-android/main/app/build.gradle.kts|versionCode\s*=\s*(\d+)|.|versionName\s*=\s*"([\d.]+)"
 CurrentVersion: 1.0.0
 CurrentVersionCode: 1
