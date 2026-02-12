@@ -1,82 +1,108 @@
-🛡️ BlockAds — Chặn Quảng Cáo Thông Minh cho Android
+BlockAds — Chặn Quảng Cáo Thông Minh cho Android
 
-Bạn mệt mỏi với quảng cáo phiền phức trên điện thoại? BlockAds giúp bạn chặn quảng cáo trên TOÀN BỘ ứng dụng và trình duyệt chỉ với MỘT nút bấm — không cần root!
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✨ TÍNH NĂNG NỔI BẬT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🚫 CHẶN QUẢNG CÁO TOÀN HỆ THỐNG
-• Chặn quảng cáo trong mọi ứng dụng và trình duyệt
-• Công nghệ lọc DNS thông minh
-• Không cần root thiết bị
-
-🔒 BẢO VỆ QUYỀN RIÊNG TƯ
-• Chặn tracker và phần mềm theo dõi
-• Mọi dữ liệu được lưu trữ cục bộ trên thiết bị
-• Không thu thập thông tin cá nhân
-
-📊 THỐNG KÊ CHI TIẾT
-• Đếm số quảng cáo đã chặn theo thời gian thực
-• Biểu đồ hoạt động 24 giờ
-• Nhật ký DNS chi tiết — xem chính xác gì bị chặn
-
-⚙️ TÙY CHỈNH LINH HOẠT
-• Nhiều bộ lọc có sẵn (ABPVN, AdGuard DNS, EasyList...)
-• Thêm bộ lọc tùy chỉnh theo URL
-• Tự chọn DNS server (Google, Cloudflare, hoặc tùy chỉnh)
-• Cho phép ngoại lệ theo ứng dụng hoặc tên miền
-• Tự động kết nối lại khi khởi động máy
-
-🎨 GIAO DIỆN HIỆN ĐẠI
-• Thiết kế Material 3 với Jetpack Compose
-• Chế độ Tối, Sáng và theo Hệ thống
-• Quick Settings tile để bật/tắt nhanh
-
-💾 SAO LƯU & KHÔI PHỤC
-• Xuất toàn bộ cài đặt ra file JSON
-• Nhập cài đặt trên thiết bị mới
-• Không bao giờ mất cấu hình của bạn
-
-🔋 TIẾT KIỆM PIN & DỮ LIỆU
-• Chỉ lọc DNS — hầu như không ảnh hưởng hiệu suất
-• Giảm tải dữ liệu quảng cáo không cần thiết
-• Hoạt động nhẹ nhàng trong nền
+Bạn mệt mỏi với quảng cáo phiền phức trên điện thoại? BlockAds giúp bạn chặn quảng cáo trên toàn bộ ứng dụng và trình duyệt chỉ với một nút bấm — không cần root.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📱 CÁCH SỬ DỤNG
+TÍNH NĂNG NỔI BẬT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1️⃣ Mở BlockAds
-2️⃣ Nhấn nút nguồn để bật chặn quảng cáo
-3️⃣ Cho phép kết nối VPN
-4️⃣ Tận hưởng internet không quảng cáo! 🎉
+CHẶN QUẢNG CÁO TOÀN HỆ THỐNG
+
+Chặn quảng cáo trong mọi ứng dụng và trình duyệt
+
+Công nghệ lọc DNS thông minh
+
+Không cần root thiết bị
+
+BẢO VỆ QUYỀN RIÊNG TƯ
+
+Chặn tracker và phần mềm theo dõi
+
+Mọi dữ liệu được lưu trữ cục bộ trên thiết bị
+
+Không thu thập thông tin cá nhân
+
+THỐNG KÊ CHI TIẾT
+
+Đếm số quảng cáo đã chặn theo thời gian thực
+
+Biểu đồ hoạt động 24 giờ
+
+Nhật ký DNS chi tiết — xem chính xác những gì đã bị chặn
+
+TÙY CHỈNH LINH HOẠT
+
+Nhiều bộ lọc có sẵn (ABPVN, AdGuard DNS, EasyList...)
+
+Thêm bộ lọc tùy chỉnh theo URL
+
+Tùy chọn DNS server (Google, Cloudflare hoặc DNS riêng)
+
+Cho phép ngoại lệ theo ứng dụng hoặc tên miền
+
+Tự động kết nối lại khi khởi động máy
+
+GIAO DIỆN HIỆN ĐẠI
+
+Thiết kế Material 3 với Jetpack Compose
+
+Chế độ Tối, Sáng và theo Hệ thống
+
+Quick Settings tile để bật/tắt nhanh
+
+SAO LƯU & KHÔI PHỤC
+
+Xuất toàn bộ cài đặt ra file JSON
+
+Nhập cài đặt trên thiết bị mới
+
+Không bao giờ mất cấu hình
+
+TIẾT KIỆM PIN & DỮ LIỆU
+
+Chỉ lọc DNS — hầu như không ảnh hưởng hiệu suất
+
+Giảm tải dữ liệu quảng cáo không cần thiết
+
+Hoạt động nhẹ nhàng trong nền
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CÁCH SỬ DỤNG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mở BlockAds
+
+Nhấn nút nguồn để bật chặn quảng cáo
+
+Cho phép kết nối VPN
+
+Tận hưởng internet không quảng cáo
 
 Bạn cũng có thể bật/tắt nhanh từ Quick Settings trong thanh thông báo.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🤔 CÂU HỎI THƯỜNG GẶP
+CÂU HỎI THƯỜNG GẶP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-❓ BlockAds có an toàn không?
-✅ Hoàn toàn an toàn! App chỉ lọc DNS cục bộ để chặn quảng cáo. Không có dữ liệu cá nhân nào bị thu thập hay gửi đi.
+BlockAds có an toàn không?
+Hoàn toàn an toàn. Ứng dụng chỉ lọc DNS cục bộ để chặn quảng cáo. Không có dữ liệu cá nhân nào bị thu thập hay gửi đi.
 
-❓ Tại sao cần quyền VPN?
-✅ BlockAds tạo một VPN cục bộ trên thiết bị để lọc DNS. Không có dữ liệu nào được gửi ra server bên ngoài — mọi thứ đều ở trên điện thoại của bạn.
+Tại sao cần quyền VPN?
+BlockAds tạo một VPN cục bộ trên thiết bị để lọc DNS. Không có dữ liệu nào được gửi ra server bên ngoài.
 
-❓ Có hoạt động với mọi ứng dụng không?
-✅ Có! BlockAds chặn quảng cáo trên toàn bộ hệ thống, bao gồm tất cả ứng dụng, trình duyệt và game. Bạn cũng có thể thêm ngoại lệ cho ứng dụng cụ thể.
+Có hoạt động với mọi ứng dụng không?
+Có. BlockAds chặn quảng cáo trên toàn bộ hệ thống, bao gồm ứng dụng, trình duyệt và game. Bạn cũng có thể thêm ngoại lệ cho ứng dụng cụ thể.
 
-❓ App có thực sự miễn phí không?
-✅ Hoàn toàn miễn phí, không có quảng cáo trong app, không mua hàng trong ứng dụng, và mã nguồn mở!
+Ứng dụng có miễn phí không?
+Hoàn toàn miễn phí, không quảng cáo trong app, không mua hàng trong ứng dụng và mã nguồn mở.
 
-❓ App có làm chậm internet không?
-✅ Không. BlockAds chỉ xử lý DNS queries (gói dữ liệu rất nhỏ), nên hầu như không ảnh hưởng đến tốc độ hay pin.
+Có làm chậm internet không?
+Không. BlockAds chỉ xử lý DNS (gói dữ liệu rất nhỏ), nên gần như không ảnh hưởng đến tốc độ hay pin.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🇻🇳 TỐI ƯU CHO NGƯỜI VIỆT
+TỐI ƯU CHO NGƯỜI VIỆT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-BlockAds tích hợp sẵn bộ lọc ABPVN — bộ lọc quảng cáo được thiết kế riêng cho các trang web Việt Nam. Chặn hiệu quả quảng cáo trên Zing, VnExpress, 24h, và nhiều trang khác!
+BlockAds tích hợp sẵn bộ lọc ABPVN — bộ lọc quảng cáo dành riêng cho các website Việt Nam. Chặn hiệu quả quảng cáo trên Zing, VnExpress, 24h và nhiều trang khác.
 
-Tải ngay BlockAds và lấy lại quyền kiểm soát trải nghiệm Android của bạn!
+Tải BlockAds ngay và lấy lại quyền kiểm soát trải nghiệm Android của bạn.

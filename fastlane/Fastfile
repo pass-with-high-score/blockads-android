@@ -32,7 +32,8 @@ platform :android do
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
-      skip_upload_changelogs: false
+      skip_upload_changelogs: false,
+      languages: ["en-US"],
     )
   end
 
