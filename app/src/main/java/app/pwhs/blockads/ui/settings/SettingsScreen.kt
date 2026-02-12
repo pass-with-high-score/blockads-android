@@ -4,7 +4,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -38,7 +36,6 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -50,8 +47,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -64,16 +59,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.ui.settings.component.AddDomainDialog
+import app.pwhs.blockads.ui.settings.component.FrequencyDialog
+import app.pwhs.blockads.ui.settings.component.NotificationDialog
+import app.pwhs.blockads.ui.settings.component.SectionHeader
+import app.pwhs.blockads.ui.settings.component.SettingsToggleItem
+import app.pwhs.blockads.ui.settings.component.ThemeModeChip
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -82,9 +79,6 @@ import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScree
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +94,14 @@ fun SettingsScreen(
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
+
+    // Auto-update Filter Lists
+    val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsState()
+    val autoUpdateFrequency by viewModel.autoUpdateFrequency.collectAsState()
+    val autoUpdateWifiOnly by viewModel.autoUpdateWifiOnly.collectAsState()
+    val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsState()
+    var showFrequencyDialog by remember { mutableStateOf(false) }
+    var showNotificationDialog by remember { mutableStateOf(false) }
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -286,14 +288,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Auto-update Filter Lists
-            val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsState()
-            val autoUpdateFrequency by viewModel.autoUpdateFrequency.collectAsState()
-            val autoUpdateWifiOnly by viewModel.autoUpdateWifiOnly.collectAsState()
-            val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsState()
-            var showFrequencyDialog by remember { mutableStateOf(false) }
-            var showNotificationDialog by remember { mutableStateOf(false) }
-
             SectionHeader(stringResource(R.string.settings_auto_update))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -400,100 +394,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-            }
-
-            // Frequency dialog
-            if (showFrequencyDialog) {
-                AlertDialog(
-                    onDismissRequest = { showFrequencyDialog = false },
-                    title = { Text(stringResource(R.string.settings_auto_update_frequency)) },
-                    text = {
-                        Column {
-                            listOf(
-                                AppPreferences.UPDATE_FREQUENCY_6H to R.string.settings_auto_update_frequency_6h,
-                                AppPreferences.UPDATE_FREQUENCY_12H to R.string.settings_auto_update_frequency_12h,
-                                AppPreferences.UPDATE_FREQUENCY_24H to R.string.settings_auto_update_frequency_24h,
-                                AppPreferences.UPDATE_FREQUENCY_48H to R.string.settings_auto_update_frequency_48h,
-                                AppPreferences.UPDATE_FREQUENCY_MANUAL to R.string.settings_auto_update_frequency_manual
-                            ).forEach { (freq, labelRes) ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            viewModel.setAutoUpdateFrequency(freq)
-                                            showFrequencyDialog = false
-                                        }
-                                        .padding(vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        stringResource(labelRes),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    if (autoUpdateFrequency == freq) {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showFrequencyDialog = false }) {
-                            Text(stringResource(R.string.settings_cancel))
-                        }
-                    }
-                )
-            }
-
-            // Notification dialog
-            if (showNotificationDialog) {
-                AlertDialog(
-                    onDismissRequest = { showNotificationDialog = false },
-                    title = { Text(stringResource(R.string.settings_auto_update_notification)) },
-                    text = {
-                        Column {
-                            listOf(
-                                AppPreferences.NOTIFICATION_NORMAL to R.string.settings_auto_update_notification_normal,
-                                AppPreferences.NOTIFICATION_SILENT to R.string.settings_auto_update_notification_silent,
-                                AppPreferences.NOTIFICATION_NONE to R.string.settings_auto_update_notification_none
-                            ).forEach { (type, labelRes) ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            viewModel.setAutoUpdateNotification(type)
-                                            showNotificationDialog = false
-                                        }
-                                        .padding(vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        stringResource(labelRes),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    if (autoUpdateNotification == type) {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showNotificationDialog = false }) {
-                            Text(stringResource(R.string.settings_cancel))
-                        }
-                    }
-                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -825,132 +725,29 @@ fun SettingsScreen(
             }
         )
     }
-}
 
-@Composable
-private fun AddDomainDialog(
-    onDismiss: () -> Unit,
-    onAdd: (String) -> Unit
-) {
-    var domain by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_add_domain_title)) },
-        text = {
-            OutlinedTextField(
-                value = domain,
-                onValueChange = { domain = it },
-                label = { Text(stringResource(R.string.settings_add_domain_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = { if (domain.isNotBlank()) onAdd(domain) },
-                enabled = domain.isNotBlank()
-            ) { Text(stringResource(R.string.settings_add)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) }
-        }
-    )
-}
-
-@Composable
-private fun SectionHeader(title: String) {
-    Text(
-        text = title.uppercase(),
-        style = MaterialTheme.typography.labelMedium,
-        color = TextSecondary,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-    )
-}
-
-@Composable
-private fun SettingsToggleItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleSmall)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
-        }
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = NeonGreen
-            )
+    // Frequency dialog
+    if (showFrequencyDialog) {
+        FrequencyDialog(
+            autoUpdateFrequency = autoUpdateFrequency,
+            onUpdateFrequencyChange = { freq ->
+                viewModel.setAutoUpdateFrequency(freq)
+                showFrequencyDialog = false
+            },
+            onDismiss = { showFrequencyDialog = false }
         )
     }
-}
 
-private fun formatCount(count: Int): String = when {
-    count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
-    count >= 1_000 -> String.format(Locale.getDefault(), "%.1fK", count / 1_000f)
-    else -> count.toString()
-}
-
-private fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
-    return sdf.format(Date(timestamp))
-}
-
-@Composable
-private fun ThemeModeChip(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val bgColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    val contentColor = if (selected) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant
-    val borderColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-    else Color.Transparent
-
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            icon, contentDescription = label,
-            tint = contentColor,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = contentColor,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+    // Notification dialog
+    if (showNotificationDialog) {
+        NotificationDialog(
+            autoUpdateNotification = autoUpdateNotification,
+            onUpdateNotification = { type ->
+                viewModel.setAutoUpdateNotification(type)
+                showNotificationDialog = false
+            },
+            onDismiss = { showNotificationDialog = false }
         )
     }
 }

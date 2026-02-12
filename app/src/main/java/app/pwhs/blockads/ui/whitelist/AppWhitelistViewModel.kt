@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.ui.whitelist.data.AppInfoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,11 +16,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class AppInfoData(
-    val packageName: String,
-    val label: String,
-    val icon: android.graphics.drawable.Drawable
-)
 
 class AppWhitelistViewModel(
     private val appPrefs: AppPreferences,

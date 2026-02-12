@@ -1,20 +1,8 @@
 package app.pwhs.blockads.ui.home
 
 import android.content.Intent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
@@ -52,15 +39,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,10 +49,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.home.component.PowerButton
+import app.pwhs.blockads.ui.home.component.StatCard
+import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.util.formatCount
+import app.pwhs.blockads.util.formatTimeSince
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
@@ -274,7 +260,7 @@ fun HomeScreen(
                             color = TextSecondary
                         )
                         Text(
-                            text = "${String.format("%.1f", blockRate)}%",
+                            text = "${String.format(Locale.getDefault(), "%.1f", blockRate)}%",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -386,237 +372,3 @@ fun HomeScreen(
         }
     }
 }
-
-@Composable
-private fun StatsChart(
-    stats: List<app.pwhs.blockads.data.HourlyStat>,
-    modifier: Modifier = Modifier
-) {
-    val totalColor = AccentBlue.copy(alpha = 0.4f)
-    val blockedColor = DangerRed.copy(alpha = 0.7f)
-    val labelColor = TextSecondary
-
-    Canvas(modifier = modifier) {
-        if (stats.isEmpty()) return@Canvas
-
-        val barCount = stats.size
-        val maxVal = (stats.maxOfOrNull { it.total } ?: 1).coerceAtLeast(1)
-        val barWidth = size.width / barCount.toFloat()
-        val chartHeight = size.height - 16f // leave room for bottom labels
-
-        stats.forEachIndexed { index, stat ->
-            val x = index * barWidth
-
-            // Total bar
-            val totalBarHeight = (stat.total.toFloat() / maxVal) * chartHeight
-            drawRoundRect(
-                color = totalColor,
-                topLeft = androidx.compose.ui.geometry.Offset(x + 1f, chartHeight - totalBarHeight),
-                size = androidx.compose.ui.geometry.Size(barWidth - 2f, totalBarHeight),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f, 2f)
-            )
-
-            // Blocked bar (overlaid)
-            val blockedBarHeight = (stat.blocked.toFloat() / maxVal) * chartHeight
-            drawRoundRect(
-                color = blockedColor,
-                topLeft = androidx.compose.ui.geometry.Offset(
-                    x + 1f,
-                    chartHeight - blockedBarHeight
-                ),
-                size = androidx.compose.ui.geometry.Size(barWidth - 2f, blockedBarHeight),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(2f, 2f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun PowerButton(
-    isActive: Boolean,
-    isConnecting: Boolean,
-    onClick: () -> Unit
-) {
-    val buttonColor by animateColorAsState(
-        targetValue = when {
-            isConnecting -> AccentBlue
-            isActive -> NeonGreen
-            else -> DangerRed
-        },
-        animationSpec = tween(500),
-        label = "buttonColor"
-    )
-
-    val scale by animateFloatAsState(
-        targetValue = if (isActive || isConnecting) 1f else 0.95f,
-        animationSpec = tween(300),
-        label = "scale"
-    )
-
-    val glowAlpha by animateFloatAsState(
-        targetValue = when {
-            isConnecting -> 0.3f
-            isActive -> 0.4f
-            else -> 0.2f
-        },
-        animationSpec = tween(500),
-        label = "glow"
-    )
-
-    // Pulsing animation when active
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = if (isActive && !isConnecting) 1.08f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulseScale"
-    )
-
-    // Spinning animation when connecting
-    val connectingRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = if (isConnecting) 360f else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "connectingRotation"
-    )
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.size(180.dp)
-    ) {
-        // Outer glow ring
-        Box(
-            modifier = Modifier
-                .size(180.dp)
-                .scale(pulseScale)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            buttonColor.copy(alpha = glowAlpha),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-
-        // Main button
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(140.dp)
-                .scale(scale)
-                .shadow(
-                    elevation = if (isActive || isConnecting) 20.dp else 8.dp,
-                    shape = CircleShape,
-                    ambientColor = buttonColor.copy(alpha = 0.3f),
-                    spotColor = buttonColor.copy(alpha = 0.3f)
-                )
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            buttonColor.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
-                .border(
-                    width = 3.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            buttonColor,
-                            buttonColor.copy(alpha = 0.5f)
-                        )
-                    ),
-                    shape = CircleShape
-                )
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    enabled = !isConnecting
-                ) { onClick() }
-        ) {
-            if (isConnecting) {
-                CircularProgressIndicator(
-                    color = buttonColor,
-                    modifier = Modifier.size(56.dp),
-                    strokeWidth = 3.dp
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.PowerSettingsNew,
-                    contentDescription = "Toggle VPN",
-                    tint = buttonColor,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatCard(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    label: String,
-    value: String,
-    color: Color
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary
-            )
-        }
-    }
-}
-
-private fun formatCount(count: Int): String {
-    return when {
-        count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
-        count >= 1_000 -> String.format(Locale.getDefault(), "%.1fK", count / 1_000f)
-        else -> count.toString()
-    }
-}
-
-private fun formatTimeSince(timestamp: Long): String {
-    val diff = System.currentTimeMillis() - timestamp
-    val seconds = diff / 1000
-    return when {
-        seconds < 60 -> "${seconds}s"
-        seconds < 3600 -> "${seconds / 60}m"
-        seconds < 86400 -> "${seconds / 3600}h"
-        else -> "${seconds / 86400}d"
-    }
-}
-

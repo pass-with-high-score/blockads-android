@@ -52,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import androidx.core.net.toUri
+import app.pwhs.blockads.ui.about.component.AboutLinkItem
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -214,45 +215,6 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     )
                     context.startActivity(intent)
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun AboutLinkItem(
-    icon: ImageVector,
-    title: String,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = NeonGreen,
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Medium
             )
         }
     }
