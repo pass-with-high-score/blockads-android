@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.CustomDnsRuleDao
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListBackup
@@ -18,6 +19,7 @@ import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.util.CustomRuleParser
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +36,7 @@ class SettingsViewModel(
     private val dnsLogDao: DnsLogDao,
     private val whitelistDomainDao: WhitelistDomainDao,
     private val filterListDao: FilterListDao,
+    private val customDnsRuleDao: CustomDnsRuleDao,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -204,7 +207,8 @@ class SettingsViewModel(
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
                     whitelistDomains = whitelistDomains.value.map { it.domain },
-                    whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList()
+                    whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList(),
+                    customRules = customDnsRuleDao.getAll().map { it.rule }
                 )
 
                 val jsonFormat = kotlinx.serialization.json.Json { prettyPrint = true }
@@ -266,6 +270,15 @@ class SettingsViewModel(
                 // Whitelisted apps — merge
                 val current = appPrefs.getWhitelistedAppsSnapshot()
                 appPrefs.setWhitelistedApps(current + backup.whitelistedApps.toSet())
+
+                // Custom rules — parse and add
+                backup.customRules.forEach { ruleText ->
+                    val rule = CustomRuleParser.parseRule(ruleText)
+                    if (rule != null) {
+                        customDnsRuleDao.insert(rule)
+                    }
+                }
+
                 _events.toast(R.string.filter_settings_imported)
             } catch (e: Exception) {
                 _events.toast(R.string.filter_import_failed, listOf("${e.message}"))

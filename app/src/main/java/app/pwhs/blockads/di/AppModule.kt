@@ -54,6 +54,7 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
             application = androidApplication()
         )
     }
