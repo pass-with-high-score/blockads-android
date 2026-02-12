@@ -271,11 +271,14 @@ class SettingsViewModel(
                 val current = appPrefs.getWhitelistedAppsSnapshot()
                 appPrefs.setWhitelistedApps(current + backup.whitelistedApps.toSet())
 
-                // Custom rules — parse and add
+                // Custom rules — parse and add (avoid duplicates)
+                val existingRules = customDnsRuleDao.getAll().map { it.rule }.toSet()
                 backup.customRules.forEach { ruleText ->
-                    val rule = CustomRuleParser.parseRule(ruleText)
-                    if (rule != null) {
-                        customDnsRuleDao.insert(rule)
+                    if (ruleText !in existingRules) {
+                        val rule = CustomRuleParser.parseRule(ruleText)
+                        if (rule != null) {
+                            customDnsRuleDao.insert(rule)
+                        }
                     }
                 }
 

@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.customrules
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
