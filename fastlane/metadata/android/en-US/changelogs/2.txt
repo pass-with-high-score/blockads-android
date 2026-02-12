@@ -1,0 +1,3 @@
+- Improve performance and stability
+- Fix minor bugs and issues
+- Update user interface for better user experience
