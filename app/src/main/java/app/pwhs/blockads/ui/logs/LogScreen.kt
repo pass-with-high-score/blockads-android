@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,6 +92,7 @@ fun LogScreen(
     var isSearchVisible by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
     val context = LocalContext.current
+    val resource = LocalResources.current
 
     Column(
         modifier = Modifier
@@ -329,7 +331,7 @@ fun LogScreen(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
-                        Toast.makeText(context, context.getString(R.string.domain_copied), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, resource.getString(R.string.domain_copied), Toast.LENGTH_SHORT).show()
                         selectedEntry = null
                     },
                     modifier = Modifier.fillMaxWidth(),
