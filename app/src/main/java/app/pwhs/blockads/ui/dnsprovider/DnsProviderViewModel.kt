@@ -8,7 +8,7 @@ import app.pwhs.blockads.data.DnsProvider
 import app.pwhs.blockads.data.DnsProviders
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -31,12 +31,26 @@ class DnsProviderViewModel(
             AppPreferences.DEFAULT_FALLBACK_DNS
         )
 
-    val selectedProviderId: StateFlow<String?> = appPrefs.dnsProviderId
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val selectedProviderId: StateFlow<String?> = combine(
+        appPrefs.dnsProviderId,
+        appPrefs.upstreamDns
+    ) { providerId, upstreamDns ->
+        // If provider ID is set, use it
+        if (providerId != null) {
+            providerId
+        } else {
+            // Otherwise, try to detect provider from current upstream DNS
+            DnsProviders.getByIp(upstreamDns)?.id
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val customDnsEnabled: StateFlow<Boolean> = appPrefs.dnsProviderId
-        .map { it == null }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val customDnsEnabled: StateFlow<Boolean> = combine(
+        appPrefs.dnsProviderId,
+        appPrefs.upstreamDns
+    ) { providerId, upstreamDns ->
+        // Custom DNS is enabled if no provider ID is set and IP doesn't match any preset
+        providerId == null && DnsProviders.getByIp(upstreamDns) == null
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun selectProvider(provider: DnsProvider) {
         viewModelScope.launch {
