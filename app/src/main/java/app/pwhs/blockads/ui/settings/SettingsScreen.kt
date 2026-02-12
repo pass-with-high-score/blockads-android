@@ -104,8 +104,6 @@ fun SettingsScreen(
     var showFrequencyDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
 
-    var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
-    var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
     var showAddDomainDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -416,81 +414,42 @@ fun SettingsScreen(
                 // DNS
                 SectionHeader(stringResource(R.string.settings_dns_config))
                 Card(
+                    onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.DnsProviderScreenDestination) },
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Dns,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Dns,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                stringResource(R.string.settings_upstream_dns),
-                                style = MaterialTheme.typography.titleSmall
+                                stringResource(R.string.dns_select_server),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "$upstreamDns / $fallbackDns",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedTextField(
-                            value = editUpstreamDns,
-                            onValueChange = { editUpstreamDns = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("8.8.8.8") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                            )
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
                         )
-                        if (editUpstreamDns != upstreamDns) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) { Text(stringResource(R.string.settings_save_dns)) }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Fallback DNS
-                        Text(
-                            stringResource(R.string.settings_fallback_dns),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedTextField(
-                            value = editFallbackDns,
-                            onValueChange = { editFallbackDns = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("1.1.1.1") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                            )
-                        )
-                        if (editFallbackDns != fallbackDns) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = { viewModel.setFallbackDns(editFallbackDns) },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                    contentColor = MaterialTheme.colorScheme.primary
-                                )
-                            ) { Text(stringResource(R.string.settings_save_dns)) }
-                        }
                     }
                 }
 
