@@ -177,7 +177,7 @@ fun DnsProviderCard(
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
-                                text = "DoH",
+                                text = stringResource(R.string.dns_doh_badge),
                                 style = MaterialTheme.typography.labelSmall,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
