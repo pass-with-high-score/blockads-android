@@ -19,7 +19,10 @@ class DotClient {
         private const val DOT_PORT = 853
         private const val QUERY_TIMEOUT_MS = 5000L
         private const val CONNECTION_TIMEOUT_MS = 3000
-        private const val MAX_DNS_RESPONSE_LENGTH = 4096 // RFC 1035 max UDP packet size
+        // Maximum DNS response size for DNS-over-TLS. While UDP DNS is limited to 512 bytes
+        // (RFC 1035), TCP/TLS-based DNS can handle larger responses. 4096 bytes is a common
+        // practical limit that accommodates most DNS responses while preventing excessive memory use.
+        private const val MAX_DNS_RESPONSE_LENGTH = 4096
     }
 
     /**

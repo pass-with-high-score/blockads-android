@@ -30,8 +30,8 @@ fun DnsProtocolSelector(
                     Text(
                         when (protocol) {
                             DnsProtocol.PLAIN -> "Plain DNS"
-                            DnsProtocol.DOH -> "DoH (HTTPS)"
-                            DnsProtocol.DOT -> "DoT (TLS)"
+                            DnsProtocol.DOH -> "DoH"
+                            DnsProtocol.DOT -> "DoT"
                         }
                     )
                 },

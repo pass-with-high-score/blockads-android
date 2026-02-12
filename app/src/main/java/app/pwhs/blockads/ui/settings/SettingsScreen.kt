@@ -448,7 +448,7 @@ fun SettingsScreen(
                                 value = editDohUrl,
                                 onValueChange = { editDohUrl = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text("https://dns.google/dns-query") },
+                                placeholder = { Text(stringResource(R.string.settings_doh_url_placeholder)) },
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -497,9 +497,9 @@ fun SettingsScreen(
                                 placeholder = {
                                     Text(
                                         if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT)
-                                            "dns.google"
+                                            stringResource(R.string.settings_dot_server_placeholder)
                                         else
-                                            "8.8.8.8"
+                                            stringResource(R.string.settings_upstream_dns_placeholder)
                                     )
                                 },
                                 singleLine = true,
@@ -536,7 +536,7 @@ fun SettingsScreen(
                                 value = editFallbackDns,
                                 onValueChange = { editFallbackDns = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text("1.1.1.1") },
+                                placeholder = { Text(stringResource(R.string.settings_fallback_dns_placeholder)) },
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
