@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,10 +43,13 @@ class AppManagementViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _totalAppCount = MutableStateFlow(0)
+    val totalAppCount: StateFlow<Int> = _totalAppCount.asStateFlow()
+
     val apps: StateFlow<List<AppManagementData>> = combine(
         _installedApps,
         appPrefs.whitelistedApps,
-        dnsLogDao.getPerAppStats(),
+        dnsLogDao.getPerAppStats().distinctUntilChanged(),
         _searchQuery,
         _sortOption
     ) { installedApps, whitelisted, stats, query, sort ->
@@ -81,30 +86,38 @@ class AppManagementViewModel(
     private fun loadApps() {
         viewModelScope.launch {
             _isLoading.value = true
-            val apps = withContext(Dispatchers.IO) {
-                val pm = application.applicationContext.packageManager
-                val launchIntent = Intent(Intent.ACTION_MAIN, null).apply {
-                    addCategory(Intent.CATEGORY_LAUNCHER)
-                }
-                val launchablePackages = pm.queryIntentActivities(launchIntent, 0)
-                    .map { it.activityInfo.packageName }
-                    .toSet()
-
-                pm.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .filter { it.packageName in launchablePackages }
-                    .filter { it.packageName != application.applicationContext.packageName }
-                    .map { appInfo ->
-                        AppManagementData(
-                            packageName = appInfo.packageName,
-                            label = appInfo.loadLabel(pm).toString(),
-                            icon = appInfo.loadIcon(pm),
-                            isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                        )
+            try {
+                val apps = withContext(Dispatchers.IO) {
+                    val pm = application.applicationContext.packageManager
+                    val launchIntent = Intent(Intent.ACTION_MAIN, null).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
                     }
-                    .sortedBy { it.label.lowercase() }
+                    val launchablePackages = pm.queryIntentActivities(launchIntent, 0)
+                        .map { it.activityInfo.packageName }
+                        .toSet()
+
+                    pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                        .filter { it.packageName in launchablePackages }
+                        .filter { it.packageName != application.applicationContext.packageName }
+                        .map { appInfo ->
+                            AppManagementData(
+                                packageName = appInfo.packageName,
+                                label = appInfo.loadLabel(pm).toString(),
+                                icon = appInfo.loadIcon(pm),
+                                isSystemApp = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+                            )
+                        }
+                        .sortedBy { it.label.lowercase() }
+                }
+                _installedApps.value = apps
+                _totalAppCount.value = apps.size
+            } catch (e: Exception) {
+                Log.e("AppManagementVM", "Failed to load apps", e)
+                _installedApps.value = emptyList()
+                _totalAppCount.value = 0
+            } finally {
+                _isLoading.value = false
             }
-            _installedApps.value = apps
-            _isLoading.value = false
         }
     }
 

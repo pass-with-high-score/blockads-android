@@ -244,6 +244,7 @@
     <!-- App Management -->
     <string name="app_management_title">App Management</string>
     <string name="app_management_subtitle">%d apps</string>
+    <string name="app_management_subtitle_filtered">%1$d of %2$d apps</string>
     <string name="app_management_desc">Manage per-app VPN routing and view stats</string>
     <string name="app_management_search">Search apps…</string>
     <string name="app_management_loading">Loading apps…</string>
@@ -254,4 +255,5 @@
     <string name="app_management_queries">Queries: %d</string>
     <string name="app_management_blocked">Blocked: %d</string>
     <string name="app_management_system">System</string>
+    <string name="app_management_vpn_toggle">VPN routing for %s</string>
 </resources>

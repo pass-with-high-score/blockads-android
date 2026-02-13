@@ -239,6 +239,7 @@
     <!-- App Management -->
     <string name="app_management_title">Quản lý ứng dụng</string>
     <string name="app_management_subtitle">%d ứng dụng</string>
+    <string name="app_management_subtitle_filtered">%1$d / %2$d ứng dụng</string>
     <string name="app_management_desc">Quản lý VPN theo ứng dụng và xem thống kê</string>
     <string name="app_management_search">Tìm ứng dụng…</string>
     <string name="app_management_loading">Đang tải ứng dụng…</string>
@@ -249,4 +250,5 @@
     <string name="app_management_queries">Truy vấn: %d</string>
     <string name="app_management_blocked">Bị chặn: %d</string>
     <string name="app_management_system">Hệ thống</string>
+    <string name="app_management_vpn_toggle">Định tuyến VPN cho %s</string>
 </resources>

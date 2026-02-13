@@ -49,6 +49,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,6 +76,7 @@ fun AppManagementScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val sortOption by viewModel.sortOption.collectAsState()
+    val totalAppCount by viewModel.totalAppCount.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -87,7 +90,10 @@ fun AppManagementScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            stringResource(R.string.app_management_subtitle, apps.size),
+                            if (searchQuery.isNotBlank() && apps.size != totalAppCount)
+                                stringResource(R.string.app_management_subtitle_filtered, apps.size, totalAppCount)
+                            else
+                                stringResource(R.string.app_management_subtitle, totalAppCount),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextSecondary
                         )
@@ -314,10 +320,12 @@ private fun AppManagementItem(
                 }
             }
 
-            // VPN routing toggle
+            // VPN routing toggle (ON = routed through VPN, OFF = excluded from VPN)
+            val vpnToggleDescription = stringResource(R.string.app_management_vpn_toggle, app.label)
             Switch(
                 checked = !app.isWhitelisted,
                 onCheckedChange = { onToggle() },
+                modifier = Modifier.semantics { contentDescription = vpnToggleDescription },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = NeonGreen
