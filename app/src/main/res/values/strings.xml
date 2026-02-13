@@ -102,6 +102,7 @@
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_search_hint">Search settings…</string>
+    <string name="settings_search_clear">Clear search</string>
     <string name="settings_category_protection">Protection</string>
     <string name="settings_category_protection_desc">DNS server, protocol, auto-reconnect</string>
     <string name="settings_category_interface">Interface</string>

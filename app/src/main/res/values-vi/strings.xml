@@ -102,6 +102,7 @@
     <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>
     <string name="settings_search_hint">Tìm kiếm cài đặt…</string>
+    <string name="settings_search_clear">Xóa tìm kiếm</string>
     <string name="settings_category_protection">Bảo vệ</string>
     <string name="settings_category_protection_desc">Máy chủ DNS, giao thức, tự động kết nối lại</string>
     <string name="settings_category_interface">Giao diện</string>

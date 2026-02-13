@@ -63,6 +63,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,17 +125,17 @@ fun SettingsScreen(
     var showAddDomainDialog by remember { mutableStateOf(false) }
 
     // Search
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     fun matchesSearch(keywords: List<String>): Boolean =
         searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
 
-    val protectionKeywords = listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection")
-    val interfaceKeywords = listOf("theme", "language", "appearance", "dark", "light", "interface")
-    val appsKeywords = listOf("app", "whitelist", "domain", "application", "exclude")
-    val filtersKeywords = listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule")
-    val dataKeywords = listOf("export", "import", "backup", "clear", "log", "data")
-    val infoKeywords = listOf("about", "version", "privacy", "source", "information")
+    val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi") }
+    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
+    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
+    val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
+    val dataKeywords = remember { listOf("export", "import", "backup", "clear", "log", "data", "xuất", "nhập", "sao lưu", "xóa", "nhật ký", "dữ liệu") }
+    val infoKeywords = remember { listOf("about", "version", "privacy", "source", "information", "giới thiệu", "phiên bản", "bảo mật", "mã nguồn", "thông tin") }
 
     val showProtection by remember(searchQuery) { derivedStateOf { matchesSearch(protectionKeywords) } }
     val showInterface by remember(searchQuery) { derivedStateOf { matchesSearch(interfaceKeywords) } }
@@ -194,7 +195,7 @@ fun SettingsScreen(
                         IconButton(onClick = { searchQuery = "" }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Clear search",
+                                contentDescription = stringResource(R.string.settings_search_clear),
                                 tint = TextSecondary
                             )
                         }
@@ -711,7 +712,7 @@ fun SettingsScreen(
                     SectionHeader(
                         title = stringResource(R.string.settings_category_filters),
                         icon = Icons.Default.FilterList,
-                        description = "Manage filter lists, auto-update, and custom rules via Filter setup"
+                        description = stringResource(R.string.settings_category_filters_desc)
                     )
                     Card(
                         onClick = { navigator.navigate(FilterSetupScreenDestination) },
