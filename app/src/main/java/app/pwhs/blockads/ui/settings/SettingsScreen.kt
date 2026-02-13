@@ -126,6 +126,9 @@ fun SettingsScreen(
     // Search
     var searchQuery by remember { mutableStateOf("") }
 
+    fun matchesSearch(keywords: List<String>): Boolean =
+        searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
+
     val protectionKeywords = listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection")
     val interfaceKeywords = listOf("theme", "language", "appearance", "dark", "light", "interface")
     val appsKeywords = listOf("app", "whitelist", "domain", "application", "exclude")
@@ -133,36 +136,12 @@ fun SettingsScreen(
     val dataKeywords = listOf("export", "import", "backup", "clear", "log", "data")
     val infoKeywords = listOf("about", "version", "privacy", "source", "information")
 
-    val showProtection by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || protectionKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
-    val showInterface by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || interfaceKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
-    val showApps by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || appsKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
-    val showFilters by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || filtersKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
-    val showData by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || dataKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
-    val showInfo by remember(searchQuery) {
-        derivedStateOf {
-            searchQuery.isBlank() || infoKeywords.any { it.contains(searchQuery.lowercase()) }
-        }
-    }
+    val showProtection by remember(searchQuery) { derivedStateOf { matchesSearch(protectionKeywords) } }
+    val showInterface by remember(searchQuery) { derivedStateOf { matchesSearch(interfaceKeywords) } }
+    val showApps by remember(searchQuery) { derivedStateOf { matchesSearch(appsKeywords) } }
+    val showFilters by remember(searchQuery) { derivedStateOf { matchesSearch(filtersKeywords) } }
+    val showData by remember(searchQuery) { derivedStateOf { matchesSearch(dataKeywords) } }
+    val showInfo by remember(searchQuery) { derivedStateOf { matchesSearch(infoKeywords) } }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
