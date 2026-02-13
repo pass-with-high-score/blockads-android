@@ -240,4 +240,34 @@
     <string name="ok">OK</string>
     <string name="block_this_domain">Block this domain</string>
     <string name="add_to_custom_rules">Add to custom rules</string>
+
+    <!-- Improved DNS Log Screen -->
+    <string name="log_status_blocked">Blocked</string>
+    <string name="log_status_allowed">Allowed</string>
+    <string name="log_status_whitelisted">Whitelisted</string>
+    <string name="log_detail_title">Domain Details</string>
+    <string name="log_detail_query_type">Query Type</string>
+    <string name="log_detail_response_time">Response Time</string>
+    <string name="log_detail_status">Status</string>
+    <string name="log_detail_app">App</string>
+    <string name="log_detail_resolved_ip">Resolved IP</string>
+    <string name="log_detail_blocked_by">Blocked By</string>
+    <string name="log_detail_timestamp">Time</string>
+    <string name="log_detail_unknown">Unknown</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_realtime_on">Real-time: ON</string>
+    <string name="log_realtime_off">Real-time: OFF</string>
+    <string name="log_time_range_all">All Time</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7d</string>
+    <string name="log_filter_all_apps">All Apps</string>
+    <string name="log_bulk_mode">Select</string>
+    <string name="log_bulk_selected">%d selected</string>
+    <string name="log_bulk_block">Block All</string>
+    <string name="log_bulk_whitelist">Whitelist All</string>
+    <string name="log_bulk_done">Done</string>
+    <string name="log_unblock_domain">Unblock this domain</string>
+    <string name="log_domain_unblocked">Domain unblocked: %s</string>
 </resources>

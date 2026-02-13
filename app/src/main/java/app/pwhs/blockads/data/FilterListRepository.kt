@@ -235,6 +235,31 @@ class FilterListRepository(
         // Check exact blocklist (only if Bloom filter suggested possibility)
         return checkDomainAndParents(domain) { blockedDomains.contains(it) }
     }
+
+    /**
+     * Returns a human-readable reason for why a domain is blocked.
+     * Returns empty string if the domain is not blocked.
+     */
+    fun getBlockReason(domain: String): String {
+        if (checkDomainAndParents(domain) { customAllowDomains.contains(it) }) {
+            return ""
+        }
+        if (checkDomainAndParents(domain) { customBlockDomains.contains(it) }) {
+            return "Custom Block Rule"
+        }
+        if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
+            return ""
+        }
+        val bloomFilter = blockedDomainsBloomFilter
+        if (bloomFilter != null) {
+            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
+            if (!possiblyBlocked) return ""
+        }
+        if (checkDomainAndParents(domain) { blockedDomains.contains(it) }) {
+            return "Filter List"
+        }
+        return ""
+    }
     
     suspend fun loadCustomRules() {
         val blockDomains = customDnsRuleDao.getBlockDomains()
