@@ -9,13 +9,12 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     name: Build & Deploy to Play Store
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
