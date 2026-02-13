@@ -187,6 +187,12 @@ class SettingsViewModel(
         }
     }
 
+    fun setDnsResponseType(responseType: String) {
+        viewModelScope.launch {
+            appPrefs.setDnsResponseType(responseType)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()

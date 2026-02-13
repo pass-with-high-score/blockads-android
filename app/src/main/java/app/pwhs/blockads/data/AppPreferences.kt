@@ -33,6 +33,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_AUTO_UPDATE_FREQUENCY = stringPreferencesKey("auto_update_frequency")
         private val KEY_AUTO_UPDATE_WIFI_ONLY = booleanPreferencesKey("auto_update_wifi_only")
         private val KEY_AUTO_UPDATE_NOTIFICATION = stringPreferencesKey("auto_update_notification")
+        private val KEY_DNS_RESPONSE_TYPE = stringPreferencesKey("dns_response_type")
 
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
@@ -51,6 +52,10 @@ class AppPreferences(private val context: Context) {
         const val NOTIFICATION_SILENT = "silent"
         const val NOTIFICATION_NORMAL = "normal"
         const val NOTIFICATION_NONE = "none"
+
+        const val DNS_RESPONSE_NXDOMAIN = "nxdomain"
+        const val DNS_RESPONSE_REFUSED = "refused"
+        const val DNS_RESPONSE_CUSTOM_IP = "custom_ip"
 
         const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
         const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
@@ -126,6 +131,10 @@ class AppPreferences(private val context: Context) {
 
     val dnsProviderId: Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[KEY_DNS_PROVIDER_ID]
+    }
+
+    val dnsResponseType: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DNS_RESPONSE_TYPE] ?: DNS_RESPONSE_CUSTOM_IP
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -236,6 +245,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setAutoUpdateNotification(notificationType: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_AUTO_UPDATE_NOTIFICATION] = notificationType
+        }
+    }
+
+    suspend fun setDnsResponseType(responseType: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DNS_RESPONSE_TYPE] = responseType
         }
     }
 

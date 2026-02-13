@@ -67,6 +67,7 @@ import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.AddDomainDialog
 import app.pwhs.blockads.ui.settings.component.DnsProtocolSelector
+import app.pwhs.blockads.ui.settings.component.DnsResponseTypeDialog
 import app.pwhs.blockads.ui.settings.component.FrequencyDialog
 import app.pwhs.blockads.ui.settings.component.NotificationDialog
 import app.pwhs.blockads.ui.settings.component.SectionHeader
@@ -106,6 +107,9 @@ fun SettingsScreen(
     val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsState()
     var showFrequencyDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
+
+    val dnsResponseType by viewModel.dnsResponseType.collectAsState()
+    var showDnsResponseTypeDialog by remember { mutableStateOf(false) }
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -605,6 +609,54 @@ fun SettingsScreen(
                             modifier = Modifier.size(16.dp)
                         )
                     }
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+
+                    // DNS Response Type
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDnsResponseTypeDialog = true }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Block,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.settings_dns_response_type),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                when (dnsResponseType) {
+                                    AppPreferences.DNS_RESPONSE_NXDOMAIN -> 
+                                        stringResource(R.string.dns_response_nxdomain)
+                                    AppPreferences.DNS_RESPONSE_REFUSED -> 
+                                        stringResource(R.string.dns_response_refused)
+                                    else -> 
+                                        stringResource(R.string.dns_response_custom_ip)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -876,6 +928,18 @@ fun SettingsScreen(
                     showNotificationDialog = false
                 },
                 onDismiss = { showNotificationDialog = false }
+            )
+        }
+
+        // DNS Response Type dialog
+        if (showDnsResponseTypeDialog) {
+            DnsResponseTypeDialog(
+                dnsResponseType = dnsResponseType,
+                onUpdateResponseType = { type ->
+                    viewModel.setDnsResponseType(type)
+                    showDnsResponseTypeDialog = false
+                },
+                onDismiss = { showDnsResponseTypeDialog = false }
             )
         }
     }

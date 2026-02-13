@@ -234,6 +234,38 @@ object DnsPacketParser {
         )
     }
 
+    /**
+     * Build a DNS NXDOMAIN response for a blocked domain.
+     * This creates the full IP+UDP+DNS packet to write back to the TUN.
+     */
+    fun buildNxdomainResponse(query: DnsQuery): ByteArray {
+        val dnsResponse = buildNxdomainDnsResponse(query)
+
+        return buildIpUdpPacket(
+            sourceIp = query.destIp,   // Swap: original dest becomes source
+            destIp = query.sourceIp,   // Swap: original source becomes dest
+            sourcePort = query.destPort,
+            destPort = query.sourcePort,
+            payload = dnsResponse
+        )
+    }
+
+    /**
+     * Build a DNS REFUSED response for a blocked domain.
+     * This creates the full IP+UDP+DNS packet to write back to the TUN.
+     */
+    fun buildRefusedResponse(query: DnsQuery): ByteArray {
+        val dnsResponse = buildRefusedDnsResponse(query)
+
+        return buildIpUdpPacket(
+            sourceIp = query.destIp,   // Swap: original dest becomes source
+            destIp = query.sourceIp,   // Swap: original source becomes dest
+            sourcePort = query.destPort,
+            destPort = query.sourcePort,
+            payload = dnsResponse
+        )
+    }
+
     private fun buildDnsResponse(query: DnsQuery): ByteArray {
         val out = ByteArrayOutputStream()
 
@@ -339,6 +371,88 @@ object DnsPacketParser {
         out.write(0x00)
         out.write(0x01)
         // ANCOUNT = 0 (no answers in SERVFAIL)
+        out.write(0x00)
+        out.write(0x00)
+        // NSCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+        // ARCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+
+        // Question section (copy from original query)
+        val domainBytes = encodeDomainName(query.domain)
+        out.write(domainBytes)
+        // Query type
+        out.write(query.queryType shr 8)
+        out.write(query.queryType and 0xFF)
+        // Query class
+        out.write(query.queryClass shr 8)
+        out.write(query.queryClass and 0xFF)
+
+        return out.toByteArray()
+    }
+
+    private fun buildNxdomainDnsResponse(query: DnsQuery): ByteArray {
+        val out = ByteArrayOutputStream()
+
+        // Transaction ID
+        out.write(query.transactionId shr 8)
+        out.write(query.transactionId and 0xFF)
+
+        // Flags: QR=1 (response), AA=1 (authoritative), RD mirrors query, RA=1, RCODE=3 (NXDOMAIN)
+        val originalFlagsByte1 = query.rawDnsPayload.getOrNull(2)?.toInt() ?: 0
+        val rdSet = (originalFlagsByte1 and 0x01) == 0x01
+        val responseFlagsByte1 = 0x84 or if (rdSet) 0x01 else 0x00  // QR=1, AA=1, conditionally set RD from query
+        // 0x83 = 10000011 (RA=1, RCODE=3 NXDOMAIN)
+        out.write(responseFlagsByte1)
+        out.write(0x83)
+
+        // QDCOUNT = 1
+        out.write(0x00)
+        out.write(0x01)
+        // ANCOUNT = 0 (no answers in NXDOMAIN)
+        out.write(0x00)
+        out.write(0x00)
+        // NSCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+        // ARCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+
+        // Question section (copy from original query)
+        val domainBytes = encodeDomainName(query.domain)
+        out.write(domainBytes)
+        // Query type
+        out.write(query.queryType shr 8)
+        out.write(query.queryType and 0xFF)
+        // Query class
+        out.write(query.queryClass shr 8)
+        out.write(query.queryClass and 0xFF)
+
+        return out.toByteArray()
+    }
+
+    private fun buildRefusedDnsResponse(query: DnsQuery): ByteArray {
+        val out = ByteArrayOutputStream()
+
+        // Transaction ID
+        out.write(query.transactionId shr 8)
+        out.write(query.transactionId and 0xFF)
+
+        // Flags: QR=1 (response), RD mirrors query, RA=1, RCODE=5 (REFUSED)
+        val originalFlagsByte1 = query.rawDnsPayload.getOrNull(2)?.toInt() ?: 0
+        val rdSet = (originalFlagsByte1 and 0x01) == 0x01
+        val responseFlagsByte1 = 0x80 or if (rdSet) 0x01 else 0x00  // QR=1, conditionally set RD from query
+        // 0x85 = 10000101 (RA=1, RCODE=5 REFUSED)
+        out.write(responseFlagsByte1)
+        out.write(0x85)
+
+        // QDCOUNT = 1
+        out.write(0x00)
+        out.write(0x01)
+        // ANCOUNT = 0 (no answers in REFUSED)
         out.write(0x00)
         out.write(0x00)
         // NSCOUNT = 0
