@@ -240,4 +240,18 @@
     <string name="ok">OK</string>
     <string name="block_this_domain">Block this domain</string>
     <string name="add_to_custom_rules">Add to custom rules</string>
+
+    <!-- Statistics Screen -->
+    <string name="nav_statistics">Stats</string>
+    <string name="stats_title">Statistics</string>
+    <string name="stats_overview">Overview</string>
+    <string name="stats_all_time_queries">All Time Queries</string>
+    <string name="stats_all_time_blocked">All Time Blocked</string>
+    <string name="stats_today_queries">Today Queries</string>
+    <string name="stats_today_blocked">Today Blocked</string>
+    <string name="stats_charts">Activity Charts</string>
+    <string name="stats_chart_4w">4 Weeks</string>
+    <string name="stats_chart_12m">12 Months</string>
+    <string name="stats_per_app">Per-App Statistics</string>
+    <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 </resources>
