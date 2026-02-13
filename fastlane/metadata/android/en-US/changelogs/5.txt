@@ -1,0 +1,6 @@
+- Encrypted DNS (DoH/DoT)
+- DNS provider presets
+- Custom DNS rules
+- DNS response customization
+- Auto-update filter lists
+- Performance improvements
