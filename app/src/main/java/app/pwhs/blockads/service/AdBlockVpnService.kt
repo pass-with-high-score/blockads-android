@@ -56,6 +56,10 @@ class AdBlockVpnService : VpnService() {
         @Volatile
         var isConnecting = false
             private set
+
+        @Volatile
+        var startTimestamp = 0L
+            private set
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -176,6 +180,7 @@ class AdBlockVpnService : VpnService() {
                 totalQueries.set(0)
                 blockedQueries.set(0)
                 vpnStartTime = System.currentTimeMillis()
+                startTimestamp = vpnStartTime
                 updateNotification() // Update to normal notification
                 AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
@@ -564,6 +569,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        startTimestamp = 0L
 
         // Stop network monitoring
         networkMonitor?.stopMonitoring()
@@ -613,6 +619,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        startTimestamp = 0L
 
         // Stop network monitoring
         networkMonitor?.stopMonitoring()

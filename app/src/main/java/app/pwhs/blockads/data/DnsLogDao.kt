@@ -48,4 +48,31 @@ interface DnsLogDao {
     """
     )
     fun getHourlyStats(since: Long = System.currentTimeMillis() - 86400000): Flow<List<HourlyStat>>
+
+    @Query(
+        """
+        SELECT (timestamp / 86400000) * 86400000 AS day,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY day
+        ORDER BY day ASC
+    """
+    )
+    fun getDailyStats(
+        since: Long = System.currentTimeMillis() - 7 * 86_400_000L // 7 days in ms
+    ): Flow<List<DailyStat>>
+
+    @Query(
+        """
+        SELECT domain, COUNT(*) AS count
+        FROM dns_logs
+        WHERE isBlocked = 1
+        GROUP BY domain
+        ORDER BY count DESC
+        LIMIT :limit
+    """
+    )
+    fun getTopBlockedDomains(limit: Int = 10): Flow<List<TopBlockedDomain>>
 }

@@ -1,9 +1,16 @@
 package app.pwhs.blockads.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "dns_logs")
+@Entity(
+    tableName = "dns_logs",
+    indices = [
+        Index(value = ["timestamp"]),
+        Index(value = ["isBlocked", "domain"])
+    ]
+)
 data class DnsLogEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

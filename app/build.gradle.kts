@@ -130,6 +130,9 @@ dependencies {
     // WorkManager for auto-update
     implementation(libs.androidx.work.runtime.ktx)
 
+    // ComposeCharts
+    implementation(libs.compose.charts)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
