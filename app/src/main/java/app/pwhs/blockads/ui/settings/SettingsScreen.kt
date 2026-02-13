@@ -510,10 +510,21 @@ fun SettingsScreen(
                                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                                 )
                             )
-                            if (editUpstreamDns != upstreamDns) {
+                            if (
+                                dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT ||
+                                editUpstreamDns != upstreamDns
+                            ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(
-                                    onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
+                                    onClick = {
+                                        if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT) {
+                                            // Save DoT server hostname via a dedicated preference
+                                            viewModel.setDotServer(editUpstreamDns)
+                                        } else {
+                                            // Save Plain DNS upstream IP
+                                            viewModel.setUpstreamDns(editUpstreamDns)
+                                        }
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(
