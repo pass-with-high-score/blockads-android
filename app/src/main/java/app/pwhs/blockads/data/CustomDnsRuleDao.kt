@@ -40,7 +40,10 @@ interface CustomDnsRuleDao {
     
     @Query("DELETE FROM custom_dns_rules")
     suspend fun deleteAll()
-    
+
+    @Query("DELETE FROM custom_dns_rules WHERE domain = :domain AND ruleType = 'BLOCK'")
+    suspend fun deleteBlockRuleByDomain(domain: String)
+
     @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE ruleType != 'COMMENT'")
     suspend fun getRuleCount(): Int
 }

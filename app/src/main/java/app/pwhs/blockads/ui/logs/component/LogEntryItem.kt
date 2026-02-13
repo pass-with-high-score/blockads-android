@@ -18,9 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,18 +39,42 @@ import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.ui.theme.WhitelistAmber
 import app.pwhs.blockads.util.formatTimestamp
 
 @Composable
 fun LogEntryItem(
     entry: DnsLogEntry,
-    onLongPress: () -> Unit
+    isWhitelisted: Boolean = false,
+    isSelectionMode: Boolean = false,
+    isSelected: Boolean = false,
+    onTap: () -> Unit = {},
+    onLongPress: () -> Unit = {},
+    onToggleSelection: () -> Unit = {},
+    onQuickBlock: () -> Unit = {},
+    onQuickWhitelist: () -> Unit = {}
 ) {
     val statusColor by animateColorAsState(
-        targetValue = if (entry.isBlocked) DangerRed else NeonGreen,
+        targetValue = when {
+            isWhitelisted -> WhitelistAmber
+            entry.isBlocked -> DangerRed
+            else -> NeonGreen
+        },
         animationSpec = tween(300),
         label = "statusColor"
     )
+
+    val statusText = when {
+        isWhitelisted -> "Whitelisted"
+        entry.isBlocked -> "Blocked"
+        else -> "Allowed"
+    }
+
+    val statusIcon = when {
+        isWhitelisted -> Icons.Default.Shield
+        entry.isBlocked -> Icons.Default.Block
+        else -> Icons.Default.CheckCircle
+    }
 
     Card(
         colors = CardDefaults.cardColors(
@@ -58,12 +86,30 @@ fun LogEntryItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
-                    onClick = {},
-                    onLongClick = onLongPress
+                    onClick = {
+                        if (isSelectionMode) onToggleSelection() else onTap()
+                    },
+                    onLongClick = {
+                        if (!isSelectionMode) onLongPress()
+                    }
                 )
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Selection checkbox
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onToggleSelection() },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = TextSecondary
+                    ),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             // Status indicator
             Box(
                 modifier = Modifier
@@ -73,8 +119,7 @@ fun LogEntryItem(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (entry.isBlocked) Icons.Default.Block
-                    else Icons.Default.CheckCircle,
+                    imageVector = statusIcon,
                     contentDescription = null,
                     tint = statusColor,
                     modifier = Modifier.size(18.dp)
@@ -134,14 +179,47 @@ fun LogEntryItem(
                 }
             }
 
-            // Status label
-            Text(
-                text = if (entry.isBlocked) "Blocked" else "Allowed",
-                style = MaterialTheme.typography.labelSmall,
-                color = statusColor,
-                fontWeight = FontWeight.SemiBold
-            )
+            // Quick action button + status label
+            if (!isSelectionMode) {
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = statusColor,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    // Quick action: Block (for allowed) or Whitelist (for blocked)
+                    if (entry.isBlocked && !isWhitelisted) {
+                        IconButton(
+                            onClick = onQuickWhitelist,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Unblock",
+                                tint = NeonGreen.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    } else if (!entry.isBlocked && !isWhitelisted) {
+                        IconButton(
+                            onClick = onQuickBlock,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Block,
+                                contentDescription = "Block",
+                                tint = DangerRed.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
 
