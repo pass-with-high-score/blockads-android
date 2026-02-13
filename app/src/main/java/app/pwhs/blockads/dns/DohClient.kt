@@ -15,6 +15,14 @@ import java.util.Base64
 /**
  * DNS-over-HTTPS (DoH) client implementation following RFC 8484
  * Supports both GET and POST methods for DNS queries
+ * 
+ * WARNING: Potential VPN routing loop
+ * The HttpClient used for DoH queries may create sockets that need VPN protection.
+ * Without VpnService.protect() on underlying sockets, DoH queries may route through
+ * the VPN tunnel itself, causing routing loops. This needs testing and may require:
+ * 1. Custom Ktor engine with socket protection
+ * 2. Binding to specific network interface
+ * 3. Using OkHttp engine with custom socket factory
  */
 class DohClient(private val httpClient: HttpClient) {
 

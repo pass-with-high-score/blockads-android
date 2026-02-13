@@ -45,7 +45,10 @@ class DotClient {
     private fun performDotQuery(dotServer: String, dnsPayload: ByteArray): ByteArray? {
         var sslSocket: SSLSocket? = null
         try {
-            // Resolve server address
+            // WARNING: DNS resolution circular dependency risk
+            // InetAddress.getByName() may trigger DNS query through VPN if hostname is provided
+            // To avoid this, users should prefer using IP addresses for DoT servers
+            // Or the socket must be protected with VpnService.protect() (not currently implemented)
             val serverAddress = InetAddress.getByName(dotServer)
             Log.d(TAG, "Connecting to DoT server: $dotServer:$DOT_PORT")
 
