@@ -13,6 +13,7 @@ import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
+import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -80,6 +81,12 @@ val appModule = module {
         DnsProviderViewModel(
             appPrefs = get(),
             application = androidApplication()
+        )
+    }
+    viewModel {
+      AppManagementViewModel(
+            appPrefs = get(),
+            dnsLogDao = get(),
         )
     }
     viewModel {

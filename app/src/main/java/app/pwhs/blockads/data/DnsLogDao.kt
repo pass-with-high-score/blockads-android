@@ -87,6 +87,16 @@ interface DnsLogDao {
 
     @Query(
         """
+        SELECT appName,
+               COUNT(*) AS totalQueries,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
+        FROM dns_logs
+        WHERE appName != ''
+          AND (:since IS NULL OR timestamp > :since)
+        GROUP BY appName
+    """
+    )
+    fun getPerAppStats(since: Long? = null): Flow<List<AppStat>>
         SELECT strftime('%Y-W%W', timestamp / 1000, 'unixepoch', 'localtime') AS week,
                COUNT(*) AS total,
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
