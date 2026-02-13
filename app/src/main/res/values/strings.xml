@@ -96,6 +96,7 @@
     <string name="home_chart_24h">24 Hours</string>
     <string name="home_chart_7d">7 Days</string>
     <string name="home_top_blocked">Top Blocked Domains</string>
+    <string name="home_chart_no_data">No data available</string>
     <string name="settings_language">Language</string>
 
     <!-- Settings Screen -->

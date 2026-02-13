@@ -25,8 +25,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val hourFormat = SimpleDateFormat("HH", Locale.getDefault())
-private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
+private val hourFormat = ThreadLocal.withInitial {
+    SimpleDateFormat("HH", Locale.getDefault())
+}
+private val dayFormat = ThreadLocal.withInitial {
+    SimpleDateFormat("EEE", Locale.getDefault())
+}
 
 @Composable
 fun StatsChart(
@@ -35,9 +39,10 @@ fun StatsChart(
 ) {
     val textColor = TextSecondary
     val chartData = remember(stats) {
+        val fmt = hourFormat.get()!!
         stats.map { stat ->
             Bars(
-                label = hourFormat.format(Date(stat.hour)),
+                label = fmt.format(Date(stat.hour)),
                 values = listOf(
                     Bars.Data(
                         label = "Total",
@@ -83,9 +88,10 @@ fun DailyStatsChart(
 ) {
     val textColor = TextSecondary
     val chartData = remember(stats) {
+        val fmt = dayFormat.get()!!
         stats.map { stat ->
             Bars(
-                label = dayFormat.format(Date(stat.day)),
+                label = fmt.format(Date(stat.day)),
                 values = listOf(
                     Bars.Data(
                         label = "Total",

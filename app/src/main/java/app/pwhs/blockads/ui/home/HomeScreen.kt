@@ -244,9 +244,7 @@ fun HomeScreen(
 
             // Block rate + Data saved + Uptime card
             val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
-            // Estimate data saved: average blocked ad is ~50KB (images, scripts, tracking pixels)
-            val avgAdSizeKb = 50L
-            val dataSavedKb = blockedCount * avgAdSizeKb
+            val dataSavedKb = blockedCount * AVG_AD_SIZE_KB
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -379,6 +377,19 @@ fun HomeScreen(
                                         .height(180.dp)
                                         .padding(16.dp)
                                 )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.home_chart_no_data),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextSecondary
+                                    )
+                                }
                             }
                         }
                         1 -> {
@@ -390,6 +401,19 @@ fun HomeScreen(
                                         .height(180.dp)
                                         .padding(16.dp)
                                 )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.home_chart_no_data),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextSecondary
+                                    )
+                                }
                             }
                         }
                     }
@@ -511,6 +535,13 @@ fun HomeScreen(
         }
     }
 }
+
+/**
+ * Industry-standard estimate for average blocked ad content size in KB.
+ * Includes typical ad images, scripts, and tracking pixels.
+ * Source: Common ad-blocker data savings estimates (Google Ads avg ~50-100KB per request).
+ */
+private const val AVG_AD_SIZE_KB = 50L
 
 private fun formatDataSize(kilobytes: Long): String = when {
     kilobytes < 1024 -> "${kilobytes} KB"

@@ -96,6 +96,7 @@
     <string name="home_chart_24h">24 Giờ</string>
     <string name="home_chart_7d">7 Ngày</string>
     <string name="home_top_blocked">Domain bị chặn nhiều nhất</string>
+    <string name="home_chart_no_data">Chưa có dữ liệu</string>
     <string name="settings_language">Ngôn ngữ</string>
 
     <!-- Settings Screen -->
