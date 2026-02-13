@@ -1,5 +1,6 @@
 package app.pwhs.blockads.dns
 
+import android.util.Base64
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -10,7 +11,6 @@ import io.ktor.client.statement.readBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.withTimeout
-import java.util.Base64
 
 /**
  * DNS-over-HTTPS (DoH) client implementation following RFC 8484
@@ -42,9 +42,11 @@ class DohClient(private val httpClient: HttpClient) {
         return try {
             withTimeout(QUERY_TIMEOUT_MS) {
                 // Encode DNS payload to base64url (RFC 4648 Section 5)
-                val base64Dns = Base64.getUrlEncoder()
-                    .withoutPadding()
-                    .encodeToString(dnsPayload)
+                // Using android.util.Base64 for API 24+ compatibility
+                val base64Dns = Base64.encodeToString(
+                    dnsPayload,
+                    Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+                )
 
                 Log.d(TAG, "DoH GET query to $dohUrl")
                 val response = httpClient.get("$dohUrl?dns=$base64Dns") {
