@@ -135,14 +135,22 @@
     <string name="settings_dns_protocol_doh">DoH</string>
     <string name="settings_dns_protocol_dot">DoT</string>
     <string name="settings_doh_server_url">DoH Server URL</string>
-    <string name="settings_doh_url_placeholder">https://dns.google/dns-query</string>
+    <string name="settings_doh_url_placeholder" translatable="false">https://dns.google/dns-query</string>
     <string name="settings_save_doh_url">Save DoH URL</string>
     <string name="settings_dot_server">DoT Server (hostname or IP)</string>
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Upstream DNS Server</string>
-    <string name="settings_upstream_dns_placeholder">8.8.8.8</string>
+    <string name="settings_upstream_dns_placeholder" translatable="false">8.8.8.8</string>
     <string name="settings_fallback_dns">Fallback DNS Server</string>
-    <string name="settings_fallback_dns_placeholder">1.1.1.1</string>
+    <string name="settings_fallback_dns_placeholder" translatable="false">1.1.1.1</string>
+    <string name="settings_dns_response_type">DNS response type</string>
+    <string name="settings_dns_response_type_desc">Response type for blocked domains</string>
+    <string name="dns_response_nxdomain" translatable="false">NXDOMAIN</string>
+    <string name="dns_response_nxdomain_desc">Domain does not exist (standard)</string>
+    <string name="dns_response_refused" translatable="false">REFUSED</string>
+    <string name="dns_response_refused_desc">Query refused (better compatibility)</string>
+    <string name="dns_response_custom_ip">Custom IP (0.0.0.0)</string>
+    <string name="dns_response_custom_ip_desc">Return a null route address (default)</string>
     <string name="settings_clear_logs">Clear All Logs</string>
 
     <!-- Filter Setup Screen -->

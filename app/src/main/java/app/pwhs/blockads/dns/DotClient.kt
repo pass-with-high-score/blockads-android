@@ -99,7 +99,7 @@ class DotClient {
             val responseLength = ((lengthBytes[0].toInt() and 0xFF) shl 8) or
                     (lengthBytes[1].toInt() and 0xFF)
 
-            if (responseLength <= 0 || responseLength > MAX_DNS_RESPONSE_LENGTH) {
+            if (responseLength !in 1..MAX_DNS_RESPONSE_LENGTH) {
                 Log.e(TAG, "Invalid response length: $responseLength")
                 return null
             }

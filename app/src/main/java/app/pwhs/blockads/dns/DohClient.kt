@@ -7,7 +7,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.readBytes
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.withTimeout
@@ -53,7 +53,7 @@ class DohClient(private val httpClient: HttpClient) {
                     header("Accept", DNS_MESSAGE_CONTENT_TYPE)
                 }
 
-                val responseBytes = response.readBytes()
+                val responseBytes = response.readRawBytes()
                 Log.d(TAG, "DoH GET response received: ${responseBytes.size} bytes")
                 responseBytes
             }
@@ -79,7 +79,7 @@ class DohClient(private val httpClient: HttpClient) {
                     setBody(dnsPayload)
                 }
 
-                val responseBytes = response.readBytes()
+                val responseBytes = response.readRawBytes()
                 Log.d(TAG, "DoH POST response received: ${responseBytes.size} bytes")
                 responseBytes
             }

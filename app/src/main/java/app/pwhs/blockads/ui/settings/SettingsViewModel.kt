@@ -107,6 +107,12 @@ class SettingsViewModel(
             AppPreferences.NOTIFICATION_NORMAL
         )
 
+    val dnsResponseType: StateFlow<String> = appPrefs.dnsResponseType
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DNS_RESPONSE_CUSTOM_IP
+        )
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 

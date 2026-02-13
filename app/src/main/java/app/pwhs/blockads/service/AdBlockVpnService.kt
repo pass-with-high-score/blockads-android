@@ -303,9 +303,9 @@ class AdBlockVpnService : VpnService() {
         if (filterRepo.isBlocked(domain)) {
             // Build and write blocked response based on configured response type
             val response = when (dnsResponseType) {
-                app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_NXDOMAIN -> 
+                AppPreferences.DNS_RESPONSE_NXDOMAIN ->
                     DnsPacketParser.buildNxdomainResponse(query)
-                app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_REFUSED -> 
+                AppPreferences.DNS_RESPONSE_REFUSED ->
                     DnsPacketParser.buildRefusedResponse(query)
                 else -> // DNS_RESPONSE_CUSTOM_IP (0.0.0.0)
                     DnsPacketParser.buildBlockedResponse(query)
@@ -682,7 +682,7 @@ class AdBlockVpnService : VpnService() {
         val notification = builder
             .setContentTitle(getString(R.string.vpn_revoked_title))
             .setContentText(getString(R.string.vpn_revoked_text))
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setSmallIcon(R.drawable.ic_error)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()
@@ -727,7 +727,7 @@ class AdBlockVpnService : VpnService() {
         val notification = builder
             .setContentTitle(getString(R.string.vpn_stopped_title))
             .setContentText(getString(R.string.vpn_stopped_text))
-            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setSmallIcon(R.drawable.ic_shield_off)
             .setOngoing(false)
             .setContentIntent(pendingIntent)
             .addAction(
