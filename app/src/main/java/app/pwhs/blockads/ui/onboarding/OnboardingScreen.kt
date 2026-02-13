@@ -174,8 +174,7 @@ fun OnboardingScreen(
             // Pager content
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.weight(1f),
-                userScrollEnabled = false
+                modifier = Modifier.weight(1f)
             ) { page ->
                 when (page) {
                     // Step 1: Welcome + Privacy promise

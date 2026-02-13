@@ -40,18 +40,24 @@ class OnboardingViewModel(
             val provider = _selectedDnsProvider.value
             appPrefs.setDnsProviderId(provider.id)
             appPrefs.setUpstreamDns(provider.ipAddress)
-            // Set fallback DNS
-            val fallbackProvider = when (provider.id) {
-                DnsProviders.GOOGLE.id -> DnsProviders.CLOUDFLARE
-                DnsProviders.CLOUDFLARE.id -> DnsProviders.GOOGLE
-                else -> DnsProviders.ALL_PROVIDERS.firstOrNull {
-                    it.id != provider.id
-                } ?: DnsProviders.CLOUDFLARE
-            }
-            appPrefs.setFallbackDns(fallbackProvider.ipAddress)
+            appPrefs.setFallbackDns(selectFallbackDns(provider).ipAddress)
 
             // Mark onboarding as completed
             appPrefs.setOnboardingCompleted(true)
+        }
+    }
+
+    /**
+     * Select a fallback DNS provider different from the primary one.
+     * Uses Google ↔ Cloudflare pairing for standard fallbacks.
+     */
+    private fun selectFallbackDns(primary: DnsProvider): DnsProvider {
+        return when (primary.id) {
+            DnsProviders.GOOGLE.id -> DnsProviders.CLOUDFLARE
+            DnsProviders.CLOUDFLARE.id -> DnsProviders.GOOGLE
+            else -> DnsProviders.ALL_PROVIDERS.firstOrNull {
+                it.id != primary.id
+            } ?: DnsProviders.CLOUDFLARE
         }
     }
 }
