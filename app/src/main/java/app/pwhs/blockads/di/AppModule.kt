@@ -43,18 +43,20 @@ val appModule = module {
     single { get<AppDatabase>().filterListDao() }
     single { get<AppDatabase>().whitelistDomainDao() }
     single { get<AppDatabase>().dnsErrorDao() }
+    single { get<AppDatabase>().customDnsRuleDao() }
 
     // Preferences
     single { AppPreferences(androidContext()) }
 
     // Repository
-    single { FilterListRepository(androidContext(), get(), get(), get()) }
+    single { FilterListRepository(androidContext(), get(), get(), get(), get()) }
 
     // ViewModels
     viewModel { HomeViewModel(get(), get()) }
-    viewModel { LogViewModel(get(), get()) }
+    viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
         SettingsViewModel(
+            get(),
             get(),
             get(),
             get(),
@@ -70,6 +72,7 @@ val appModule = module {
             application = androidApplication()
         )
     }
+    viewModel { app.pwhs.blockads.ui.customrules.CustomRulesViewModel(get(), get()) }
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),

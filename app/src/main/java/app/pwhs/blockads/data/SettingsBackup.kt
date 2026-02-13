@@ -12,7 +12,8 @@ data class SettingsBackup(
     val appLanguage: String = AppPreferences.LANGUAGE_SYSTEM,
     val filterLists: List<FilterListBackup> = emptyList(),
     val whitelistDomains: List<String> = emptyList(),
-    val whitelistedApps: List<String> = emptyList()
+    val whitelistedApps: List<String> = emptyList(),
+    val customRules: List<String> = emptyList()
 )
 
 @Serializable
