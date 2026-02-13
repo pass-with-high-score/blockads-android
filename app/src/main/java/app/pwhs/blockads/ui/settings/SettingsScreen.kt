@@ -526,15 +526,7 @@ fun SettingsScreen(
                             ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(
-                                    onClick = {
-                                        if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT) {
-                                            // Save DoT server hostname via a dedicated preference
-                                            viewModel.setDotServer(editUpstreamDns)
-                                        } else {
-                                            // Save Plain DNS upstream IP
-                                            viewModel.setUpstreamDns(editUpstreamDns)
-                                        }
-                                    },
+                                    onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(
