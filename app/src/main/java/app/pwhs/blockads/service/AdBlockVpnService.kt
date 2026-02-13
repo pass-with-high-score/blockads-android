@@ -337,8 +337,9 @@ class AdBlockVpnService : VpnService() {
         // requires blocking reads). Making this suspend would require converting the entire
         // packet processing loop to coroutines, which is not compatible with blocking I/O
         // on FileInputStream/FileOutputStream.
-        val dnsProtocol = runBlocking { appPrefs.dnsProtocol.first() }
-        val dohUrl = runBlocking { appPrefs.dohUrl.first() }
+        val (dnsProtocol, dohUrl) = runBlocking {
+            appPrefs.dnsProtocol.first() to appPrefs.dohUrl.first()
+        }
 
         // Try primary DNS server first
         var success = tryDnsQuery(query, outputStream, upstreamDns, dohUrl, dnsProtocol, false)
