@@ -5,9 +5,11 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -31,6 +33,7 @@ import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestina
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.LogScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.StatisticsScreenDestination
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.rememberNavHostEngine
 import com.ramcosta.composedestinations.spec.Direction
@@ -59,6 +62,14 @@ sealed class Screen(
         unselectedIcon = Icons.AutoMirrored.Outlined.List
     )
 
+    data object Statistics : Screen(
+        destination = StatisticsScreenDestination(),
+        route = StatisticsScreenDestination.route,
+        labelRes = R.string.nav_statistics,
+        selectedIcon = Icons.Filled.BarChart,
+        unselectedIcon = Icons.Outlined.BarChart
+    )
+
     data object FilterSetup : Screen(
         destination = FilterSetupScreenDestination(),
         route = FilterSetupScreenDestination.route,
@@ -83,13 +94,14 @@ fun BlockAdsApp(
 ) {
     val engine = rememberNavHostEngine()
     val navController = engine.rememberNavController()
-    val screens = listOf(Screen.Home, Screen.FilterSetup, Screen.Logs, Screen.Settings)
+    val screens = listOf(Screen.Home, Screen.Statistics, Screen.FilterSetup, Screen.Logs, Screen.Settings)
     val newBackStackEntry by navController.currentBackStackEntryAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val route = newBackStackEntry?.destination?.route
     val showBottomBar = route in listOf(
         HomeScreenDestination.route,
+        StatisticsScreenDestination.route,
         LogScreenDestination.route,
         SettingsScreenDestination.route,
         FilterSetupScreenDestination.route

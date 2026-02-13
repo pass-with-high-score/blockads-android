@@ -235,4 +235,18 @@
     <string name="ok">OK</string>
     <string name="block_this_domain">Chặn tên miền này</string>
     <string name="add_to_custom_rules">Thêm vào quy tắc tùy chỉnh</string>
+
+    <!-- Statistics Screen -->
+    <string name="nav_statistics">Thống kê</string>
+    <string name="stats_title">Thống kê</string>
+    <string name="stats_overview">Tổng quan</string>
+    <string name="stats_all_time_queries">Tổng truy vấn</string>
+    <string name="stats_all_time_blocked">Tổng đã chặn</string>
+    <string name="stats_today_queries">Hôm nay truy vấn</string>
+    <string name="stats_today_blocked">Hôm nay đã chặn</string>
+    <string name="stats_charts">Biểu đồ hoạt động</string>
+    <string name="stats_chart_4w">4 Tuần</string>
+    <string name="stats_chart_12m">12 Tháng</string>
+    <string name="stats_per_app">Thống kê theo ứng dụng</string>
+    <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 </resources>

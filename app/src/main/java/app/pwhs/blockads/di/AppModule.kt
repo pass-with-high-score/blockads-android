@@ -10,6 +10,7 @@ import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
+import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -53,6 +54,7 @@ val appModule = module {
 
     // ViewModels
     viewModel { HomeViewModel(get(), get()) }
+    viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
         SettingsViewModel(
