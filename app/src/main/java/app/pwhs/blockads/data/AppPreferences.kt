@@ -34,6 +34,11 @@ class AppPreferences(private val context: Context) {
         private val KEY_AUTO_UPDATE_WIFI_ONLY = booleanPreferencesKey("auto_update_wifi_only")
         private val KEY_AUTO_UPDATE_NOTIFICATION = stringPreferencesKey("auto_update_notification")
         private val KEY_DNS_RESPONSE_TYPE = stringPreferencesKey("dns_response_type")
+        private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
+
+        const val PROTECTION_BASIC = "BASIC"
+        const val PROTECTION_STANDARD = "STANDARD"
+        const val PROTECTION_STRICT = "STRICT"
 
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
@@ -135,6 +140,10 @@ class AppPreferences(private val context: Context) {
 
     val dnsResponseType: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_DNS_RESPONSE_TYPE] ?: DNS_RESPONSE_CUSTOM_IP
+    }
+
+    val protectionLevel: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_PROTECTION_LEVEL] ?: PROTECTION_STANDARD
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -251,6 +260,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setDnsResponseType(responseType: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_DNS_RESPONSE_TYPE] = responseType
+        }
+    }
+
+    suspend fun setProtectionLevel(level: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_PROTECTION_LEVEL] = level
         }
     }
 

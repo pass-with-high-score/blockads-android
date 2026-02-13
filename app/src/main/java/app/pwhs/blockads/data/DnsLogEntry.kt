@@ -8,7 +8,8 @@ import androidx.room.PrimaryKey
     tableName = "dns_logs",
     indices = [
         Index(value = ["timestamp"]),
-        Index(value = ["isBlocked", "domain"])
+        Index(value = ["isBlocked", "domain"]),
+        Index(value = ["appName"])
     ]
 )
 data class DnsLogEntry(

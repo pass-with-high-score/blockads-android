@@ -106,6 +106,7 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE dns_logs ADD COLUMN resolvedIp TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE dns_logs ADD COLUMN blockedBy TEXT NOT NULL DEFAULT ''")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_dns_logs_appName` ON `dns_logs` (`appName`)")
             }
         }
 
