@@ -99,7 +99,7 @@ fun OnboardingScreen(
     var vpnPermissionGranted by remember { mutableStateOf(VpnService.prepare(context) == null) }
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
+    ) { _ ->
         vpnPermissionGranted = VpnService.prepare(context) == null
     }
 
