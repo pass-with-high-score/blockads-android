@@ -111,7 +111,6 @@ dependencies {
     // Ktor HTTP Client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
 
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
