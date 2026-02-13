@@ -184,8 +184,8 @@ fun SettingsScreen(
                 placeholder = { Text(stringResource(R.string.settings_search_hint)) },
                 leadingIcon = {
                     Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
+                        imageVector = Icons.Default.Search,
+                        contentDescription = stringResource(R.string.settings_search_hint),
                         tint = TextSecondary
                     )
                 },
