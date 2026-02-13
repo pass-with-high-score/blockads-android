@@ -139,6 +139,20 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>
+    <string name="settings_search_hint">Tìm kiếm cài đặt…</string>
+    <string name="settings_search_clear">Xóa tìm kiếm</string>
+    <string name="settings_category_protection">Bảo vệ</string>
+    <string name="settings_category_protection_desc">Máy chủ DNS, giao thức, tự động kết nối lại</string>
+    <string name="settings_category_interface">Giao diện</string>
+    <string name="settings_category_interface_desc">Chủ đề, ngôn ngữ</string>
+    <string name="settings_category_apps">Ứng dụng</string>
+    <string name="settings_category_apps_desc">Danh sách cho phép, cài đặt theo ứng dụng</string>
+    <string name="settings_category_filters">Bộ lọc</string>
+    <string name="settings_category_filters_desc">Quản lý bộ lọc, tự động cập nhật, quy tắc tùy chỉnh</string>
+    <string name="settings_category_data">Dữ liệu</string>
+    <string name="settings_category_data_desc">Xuất/Nhập, xóa nhật ký</string>
+    <string name="settings_category_info">Thông tin</string>
+    <string name="settings_category_info_desc">Giới thiệu, chính sách bảo mật, mã nguồn</string>
     <string name="settings_appearance">Giao diện</string>
     <string name="settings_theme">Chủ đề</string>
     <string name="settings_theme_system">Hệ thống</string>
