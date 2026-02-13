@@ -22,8 +22,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+enum class TimeRange(val millis: Long) {
+    ALL(0L),
+    HOUR_1(3_600_000L),
+    HOUR_6(21_600_000L),
+    HOUR_24(86_400_000L),
+    DAY_7(604_800_000L)
+}
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
@@ -41,16 +50,55 @@ class LogViewModel(
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
+    private val _timeRange = MutableStateFlow(TimeRange.ALL)
+    val timeRange: StateFlow<TimeRange> = _timeRange.asStateFlow()
+
+    private val _appFilter = MutableStateFlow("")
+    val appFilter: StateFlow<String> = _appFilter.asStateFlow()
+
+    private val _realTimeMode = MutableStateFlow(false)
+    val realTimeMode: StateFlow<Boolean> = _realTimeMode.asStateFlow()
+
+    private val _selectionMode = MutableStateFlow(false)
+    val selectionMode: StateFlow<Boolean> = _selectionMode.asStateFlow()
+
+    private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedIds: StateFlow<Set<Long>> = _selectedIds.asStateFlow()
+
+    val whitelistedDomains: StateFlow<Set<String>> = whitelistDomainDao.getAll()
+        .map { list -> list.map { it.domain.lowercase() }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val appNames: StateFlow<List<String>> = dnsLogDao.getDistinctAppNames()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val logs: StateFlow<List<DnsLogEntry>> = _showBlockedOnly.flatMapLatest { blockedOnly ->
-        if (blockedOnly) dnsLogDao.getBlockedOnly() else dnsLogDao.getAll()
-    }.combine(_searchQuery) { logs, query ->
-        if (query.isBlank()) logs
-        else logs.filter {
-            it.domain.contains(query.trim(), ignoreCase = true) ||
-                    it.appName.contains(query.trim(), ignoreCase = true)
+    val logs: StateFlow<List<DnsLogEntry>> = combine(
+        _showBlockedOnly,
+        _timeRange
+    ) { blockedOnly, range -> Pair(blockedOnly, range) }
+        .flatMapLatest { (blockedOnly, range) ->
+            val since = if (range == TimeRange.ALL) 0L
+            else System.currentTimeMillis() - range.millis
+            when {
+                blockedOnly && since > 0 -> dnsLogDao.getBlockedOnlySince(since)
+                blockedOnly -> dnsLogDao.getBlockedOnly()
+                since > 0 -> dnsLogDao.getAllSince(since)
+                else -> dnsLogDao.getAll()
+            }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .combine(_searchQuery) { logs, query ->
+            if (query.isBlank()) logs
+            else logs.filter {
+                it.domain.contains(query.trim(), ignoreCase = true) ||
+                        it.appName.contains(query.trim(), ignoreCase = true)
+            }
+        }
+        .combine(_appFilter) { logs, app ->
+            if (app.isBlank()) logs
+            else logs.filter { it.appName.equals(app, ignoreCase = true) }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun toggleFilter() {
         _showBlockedOnly.value = !_showBlockedOnly.value
@@ -58,6 +106,31 @@ class LogViewModel(
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
+    }
+
+    fun setTimeRange(range: TimeRange) {
+        _timeRange.value = range
+    }
+
+    fun setAppFilter(app: String) {
+        _appFilter.value = app
+    }
+
+    fun toggleRealTimeMode() {
+        _realTimeMode.value = !_realTimeMode.value
+    }
+
+    fun toggleSelectionMode() {
+        _selectionMode.value = !_selectionMode.value
+        if (!_selectionMode.value) {
+            _selectedIds.value = emptySet()
+        }
+    }
+
+    fun toggleSelection(id: Long) {
+        val current = _selectedIds.value.toMutableSet()
+        if (current.contains(id)) current.remove(id) else current.add(id)
+        _selectedIds.value = current
     }
 
     fun clearLogs() {
@@ -72,6 +145,7 @@ class LogViewModel(
             val exists = whitelistDomainDao.exists(cleanDomain)
             if (exists == 0) {
                 whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
+                filterListRepository.loadWhitelist()
                 _events.toast(R.string.log_whitelisted, listOf(": $cleanDomain"))
             } else {
                 _events.toast(R.string.log_already_whitelisted)
@@ -88,6 +162,61 @@ class LogViewModel(
                 filterListRepository.loadCustomRules()
                 _events.toast(R.string.rule_added)
             }
+        }
+    }
+
+    fun unblockDomain(domain: String) {
+        viewModelScope.launch {
+            val cleanDomain = domain.trim().lowercase()
+            // Remove from custom block rules
+            customDnsRuleDao.deleteBlockRuleByDomain(cleanDomain)
+            // Add to whitelist to ensure it's not blocked by filter lists
+            val exists = whitelistDomainDao.exists(cleanDomain)
+            if (exists == 0) {
+                whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
+            }
+            filterListRepository.loadCustomRules()
+            filterListRepository.loadWhitelist()
+            _events.toast(R.string.log_domain_unblocked, listOf(cleanDomain))
+        }
+    }
+
+    fun bulkBlock() {
+        viewModelScope.launch {
+            val currentLogs = logs.value
+            val ids = _selectedIds.value
+            val domains = currentLogs.filter { ids.contains(it.id) }.map { it.domain }.distinct()
+            domains.forEach { domain ->
+                val cleanDomain = domain.trim().lowercase()
+                val rule =
+                    CustomRuleParser.parseRule(CustomRuleParser.formatBlockRule(cleanDomain))
+                if (rule != null) {
+                    customDnsRuleDao.insert(rule)
+                }
+            }
+            filterListRepository.loadCustomRules()
+            _selectedIds.value = emptySet()
+            _selectionMode.value = false
+            _events.toast(R.string.rule_added)
+        }
+    }
+
+    fun bulkWhitelist() {
+        viewModelScope.launch {
+            val currentLogs = logs.value
+            val ids = _selectedIds.value
+            val domains = currentLogs.filter { ids.contains(it.id) }.map { it.domain }.distinct()
+            domains.forEach { domain ->
+                val cleanDomain = domain.trim().lowercase()
+                val exists = whitelistDomainDao.exists(cleanDomain)
+                if (exists == 0) {
+                    whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
+                }
+            }
+            filterListRepository.loadWhitelist()
+            _selectedIds.value = emptySet()
+            _selectionMode.value = false
+            _events.toast(R.string.log_whitelisted, listOf(""))
         }
     }
 }

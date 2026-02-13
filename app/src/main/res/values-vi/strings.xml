@@ -288,6 +288,39 @@
     <string name="block_this_domain">Chặn tên miền này</string>
     <string name="add_to_custom_rules">Thêm vào quy tắc tùy chỉnh</string>
 
+    <!-- Improved DNS Log Screen -->
+    <string name="log_status_blocked">Đã chặn</string>
+    <string name="log_status_allowed">Cho phép</string>
+    <string name="log_status_whitelisted">Trong danh sách trắng</string>
+    <string name="log_detail_title">Chi tiết tên miền</string>
+    <string name="log_detail_query_type">Loại truy vấn</string>
+    <string name="log_detail_response_time">Thời gian phản hồi</string>
+    <string name="log_detail_status">Trạng thái</string>
+    <string name="log_detail_app">Ứng dụng</string>
+    <string name="log_detail_resolved_ip">IP đã phân giải</string>
+    <string name="log_detail_blocked_by">Bị chặn bởi</string>
+    <string name="log_detail_timestamp">Thời gian</string>
+    <string name="log_detail_unknown">Không rõ</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_realtime_on">Thời gian thực: BẬT</string>
+    <string name="log_realtime_off">Thời gian thực: TẮT</string>
+    <string name="log_time_range_all">Tất cả</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7d</string>
+    <string name="log_filter_all_apps">Tất cả ứng dụng</string>
+    <string name="log_bulk_mode">Chọn</string>
+    <string name="log_bulk_selected">Đã chọn %d</string>
+    <string name="log_bulk_block">Chặn tất cả</string>
+    <string name="log_bulk_whitelist">Cho phép tất cả</string>
+    <string name="log_bulk_done">Xong</string>
+    <string name="log_unblock_domain">Bỏ chặn tên miền này</string>
+    <string name="log_domain_unblocked">Đã bỏ chặn tên miền: %s</string>
+    <string name="log_action_unblock">Bỏ chặn</string>
+    <string name="log_action_block">Chặn</string>
+    <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
+    <string name="block_reason_filter_list">Danh sách bộ lọc</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
     <string name="stats_title">Thống kê</string>

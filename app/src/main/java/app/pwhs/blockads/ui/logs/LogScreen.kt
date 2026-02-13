@@ -8,7 +8,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,16 +18,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -42,6 +48,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,10 +65,12 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.ui.event.UiEventEffect
-import app.pwhs.blockads.ui.logs.component.LogEntryBottomSheet
+import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
 import app.pwhs.blockads.ui.theme.DangerRed
+import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.ui.theme.WhitelistAmber
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
@@ -75,43 +84,133 @@ fun LogScreen(
     val logs by viewModel.logs.collectAsState()
     val showBlockedOnly by viewModel.showBlockedOnly.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val timeRange by viewModel.timeRange.collectAsState()
+    val appFilter by viewModel.appFilter.collectAsState()
+    val appNames by viewModel.appNames.collectAsState()
+    val realTimeMode by viewModel.realTimeMode.collectAsState()
+    val selectionMode by viewModel.selectionMode.collectAsState()
+    val selectedIds by viewModel.selectedIds.collectAsState()
+    val whitelistedDomains by viewModel.whitelistedDomains.collectAsState()
     var isSearchVisible by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
     val context = LocalContext.current
     val resource = LocalResources.current
+    val listState = rememberLazyListState()
 
     UiEventEffect(viewModel.events)
+
+    // Real-time auto-scroll
+    LaunchedEffect(logs.size, realTimeMode) {
+        if (realTimeMode && logs.isNotEmpty()) {
+            listState.animateScrollToItem(0)
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        stringResource(R.string.nav_logs),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
-                        Icon(
-                            if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = TextSecondary
+                    if (selectionMode) {
+                        Text(
+                            stringResource(R.string.log_bulk_selected, selectedIds.size),
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            stringResource(R.string.nav_logs),
+                            fontWeight = FontWeight.Bold
                         )
                     }
-                    IconButton(onClick = { viewModel.clearLogs() }) {
-                        Icon(
-                            Icons.Default.DeleteSweep,
-                            contentDescription = "Clear logs",
-                            tint = TextSecondary
-                        )
+                },
+                actions = {
+                    if (selectionMode) {
+                        IconButton(onClick = { viewModel.toggleSelectionMode() }) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Exit selection",
+                                tint = TextSecondary
+                            )
+                        }
+                    } else {
+                        // Real-time toggle
+                        IconButton(onClick = { viewModel.toggleRealTimeMode() }) {
+                            Icon(
+                                Icons.Default.SyncAlt,
+                                contentDescription = "Real-time",
+                                tint = if (realTimeMode) NeonGreen else TextSecondary
+                            )
+                        }
+                        IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
+                            Icon(
+                                if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = TextSecondary
+                            )
+                        }
+                        // Bulk select mode
+                        IconButton(onClick = { viewModel.toggleSelectionMode() }) {
+                            Icon(
+                                Icons.Default.Checklist,
+                                contentDescription = "Select",
+                                tint = TextSecondary
+                            )
+                        }
+                        IconButton(onClick = { viewModel.clearLogs() }) {
+                            Icon(
+                                Icons.Default.DeleteSweep,
+                                contentDescription = "Clear logs",
+                                tint = TextSecondary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
+        },
+        bottomBar = {
+            // Bulk action bar
+            if (selectionMode && selectedIds.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = { viewModel.bulkBlock() },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = DangerRed
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Block,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(R.string.log_bulk_block))
+                    }
+                    Button(
+                        onClick = { viewModel.bulkWhitelist() },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = WhitelistAmber
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Dns,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(stringResource(R.string.log_bulk_whitelist))
+                    }
+                }
+            }
         }
     ) { innerPadding ->
         Column(
@@ -167,7 +266,7 @@ fun LogScreen(
                 )
             }
 
-            // Filter chips
+            // Filter chips row: status + time range
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -208,6 +307,78 @@ fun LogScreen(
                 )
             }
 
+            // Time range filter chips
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                val timeRanges = listOf(
+                    TimeRange.ALL to R.string.log_time_range_all,
+                    TimeRange.HOUR_1 to R.string.log_time_range_1h,
+                    TimeRange.HOUR_6 to R.string.log_time_range_6h,
+                    TimeRange.HOUR_24 to R.string.log_time_range_24h,
+                    TimeRange.DAY_7 to R.string.log_time_range_7d
+                )
+                items(timeRanges) { (range, labelRes) ->
+                    FilterChip(
+                        selected = timeRange == range,
+                        onClick = { viewModel.setTimeRange(range) },
+                        label = {
+                            Text(
+                                stringResource(labelRes),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+
+                // App filter chips
+                if (appNames.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    item {
+                        FilterChip(
+                            selected = appFilter.isEmpty(),
+                            onClick = { viewModel.setAppFilter("") },
+                            label = {
+                                Text(
+                                    stringResource(R.string.log_filter_all_apps),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = WhitelistAmber.copy(alpha = 0.15f),
+                                selectedLabelColor = WhitelistAmber
+                            )
+                        )
+                    }
+                    items(appNames) { name ->
+                        FilterChip(
+                            selected = appFilter == name,
+                            onClick = { viewModel.setAppFilter(name) },
+                            label = {
+                                Text(
+                                    name,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = WhitelistAmber.copy(alpha = 0.15f),
+                                selectedLabelColor = WhitelistAmber
+                            )
+                        )
+                    }
+                }
+            }
+
             if (logs.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -233,6 +404,7 @@ fun LogScreen(
                 }
             } else {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
@@ -240,9 +412,19 @@ fun LogScreen(
                 ) {
                     item { Spacer(modifier = Modifier.height(4.dp)) }
                     items(logs, key = { it.id }) { entry ->
+                        val isDomainWhitelisted = whitelistedDomains.contains(
+                            entry.domain.lowercase()
+                        )
                         LogEntryItem(
                             entry = entry,
-                            onLongPress = { selectedEntry = entry }
+                            isWhitelisted = isDomainWhitelisted,
+                            isSelectionMode = selectionMode,
+                            isSelected = selectedIds.contains(entry.id),
+                            onTap = { selectedEntry = entry },
+                            onLongPress = { selectedEntry = entry },
+                            onToggleSelection = { viewModel.toggleSelection(entry.id) },
+                            onQuickBlock = { viewModel.addToCustomBlockRules(entry.domain) },
+                            onQuickWhitelist = { viewModel.unblockDomain(entry.domain) }
                         )
                     }
                     item { Spacer(modifier = Modifier.height(200.dp)) }
@@ -250,10 +432,12 @@ fun LogScreen(
             }
         }
 
-        // Bottom sheet for log entry actions
+        // Domain detail bottom sheet
         selectedEntry?.let { entry ->
-            LogEntryBottomSheet(
+            val isDomainWhitelisted = whitelistedDomains.contains(entry.domain.lowercase())
+            DomainDetailBottomSheet(
                 entry = entry,
+                isWhitelisted = isDomainWhitelisted,
                 onDismiss = { selectedEntry = null },
                 onAddToWhiteList = {
                     viewModel.addToWhitelist(entry.domain)
@@ -272,6 +456,10 @@ fun LogScreen(
                 },
                 onAddToCustomBlockRules = {
                     viewModel.addToCustomBlockRules(entry.domain)
+                    selectedEntry = null
+                },
+                onUnblock = {
+                    viewModel.unblockDomain(entry.domain)
                     selectedEntry = null
                 }
             )
