@@ -711,7 +711,7 @@ fun SettingsScreen(
                     SectionHeader(
                         title = stringResource(R.string.settings_category_filters),
                         icon = Icons.Default.FilterList,
-                        description = stringResource(R.string.settings_category_filters_desc)
+                        description = "Manage filter lists, auto-update, and custom rules via Filter setup"
                     )
                     Card(
                         onClick = { navigator.navigate(FilterSetupScreenDestination) },
