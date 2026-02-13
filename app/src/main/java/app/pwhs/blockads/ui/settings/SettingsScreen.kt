@@ -558,6 +558,7 @@ fun SettingsScreen(
                                 ) { Text(stringResource(R.string.settings_save_dns)) }
                             }
                         }
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
