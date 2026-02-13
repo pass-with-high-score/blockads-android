@@ -18,15 +18,12 @@ class StatisticsViewModel(
     dnsLogDao: DnsLogDao
 ) : ViewModel() {
 
-    private val todayStart: Long
-        get() {
-            val cal = Calendar.getInstance()
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            return cal.timeInMillis
-        }
+    private val todayStart: Long = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     val totalCount: StateFlow<Int> = dnsLogDao.getTotalCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
