@@ -270,4 +270,8 @@
     <string name="log_bulk_done">Done</string>
     <string name="log_unblock_domain">Unblock this domain</string>
     <string name="log_domain_unblocked">Domain unblocked: %s</string>
+    <string name="log_action_unblock">Unblock</string>
+    <string name="log_action_block">Block</string>
+    <string name="block_reason_custom_rule">Custom Block Rule</string>
+    <string name="block_reason_filter_list">Filter List</string>
 </resources>

@@ -265,4 +265,8 @@
     <string name="log_bulk_done">Xong</string>
     <string name="log_unblock_domain">Bỏ chặn tên miền này</string>
     <string name="log_domain_unblocked">Đã bỏ chặn tên miền: %s</string>
+    <string name="log_action_unblock">Bỏ chặn</string>
+    <string name="log_action_block">Chặn</string>
+    <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
+    <string name="block_reason_filter_list">Danh sách bộ lọc</string>
 </resources>

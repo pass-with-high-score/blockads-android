@@ -35,6 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
@@ -65,9 +67,9 @@ fun LogEntryItem(
     )
 
     val statusText = when {
-        isWhitelisted -> "Whitelisted"
-        entry.isBlocked -> "Blocked"
-        else -> "Allowed"
+        isWhitelisted -> stringResource(R.string.log_status_whitelisted)
+        entry.isBlocked -> stringResource(R.string.log_status_blocked)
+        else -> stringResource(R.string.log_status_allowed)
     }
 
     val statusIcon = when {
@@ -198,7 +200,7 @@ fun LogEntryItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Unblock",
+                                contentDescription = stringResource(R.string.log_action_unblock),
                                 tint = NeonGreen.copy(alpha = 0.7f),
                                 modifier = Modifier.size(16.dp)
                             )
@@ -210,7 +212,7 @@ fun LogEntryItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Block,
-                                contentDescription = "Block",
+                                contentDescription = stringResource(R.string.log_action_block),
                                 tint = DangerRed.copy(alpha = 0.7f),
                                 modifier = Modifier.size(16.dp)
                             )

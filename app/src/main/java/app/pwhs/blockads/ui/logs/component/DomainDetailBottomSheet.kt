@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogEntry
+import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -132,9 +133,16 @@ fun DomainDetailBottomSheet(
                     }
                     if (entry.blockedBy.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        val blockedByText = when (entry.blockedBy) {
+                            FilterListRepository.BLOCK_REASON_CUSTOM_RULE ->
+                                stringResource(R.string.block_reason_custom_rule)
+                            FilterListRepository.BLOCK_REASON_FILTER_LIST ->
+                                stringResource(R.string.block_reason_filter_list)
+                            else -> entry.blockedBy
+                        }
                         DetailRow(
                             label = stringResource(R.string.log_detail_blocked_by),
-                            value = entry.blockedBy
+                            value = blockedByText
                         )
                     }
                 }
