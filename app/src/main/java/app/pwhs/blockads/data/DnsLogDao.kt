@@ -83,8 +83,9 @@ interface DnsLogDao {
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
         FROM dns_logs
         WHERE appName != ''
+          AND (:since IS NULL OR timestamp > :since)
         GROUP BY appName
     """
     )
-    fun getPerAppStats(): Flow<List<AppStat>>
+    fun getPerAppStats(since: Long? = null): Flow<List<AppStat>>
 }
