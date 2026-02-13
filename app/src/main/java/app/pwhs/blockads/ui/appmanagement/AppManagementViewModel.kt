@@ -30,9 +30,6 @@ class AppManagementViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    val whitelistedApps: StateFlow<Set<String>> = appPrefs.whitelistedApps
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
-
     private val _installedApps = MutableStateFlow<List<AppManagementData>>(emptyList())
 
     private val _isLoading = MutableStateFlow(true)
@@ -51,10 +48,11 @@ class AppManagementViewModel(
         _searchQuery,
         _sortOption
     ) { installedApps, whitelisted, stats, query, sort ->
-        val statsMap = stats.associateBy { it.appName }
+        val statsByName = stats.associateBy { it.appName }
 
         var result = installedApps.map { app ->
-            val stat = statsMap[app.label]
+            // AppNameResolver stores label (e.g. "Chrome"), fallback to package name
+            val stat = statsByName[app.label] ?: statsByName[app.packageName]
             app.copy(
                 totalQueries = stat?.totalQueries ?: 0,
                 blockedQueries = stat?.blockedQueries ?: 0,
