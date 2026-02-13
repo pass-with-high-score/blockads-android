@@ -141,7 +141,7 @@ fun WeeklyStatsChart(
     val chartData = remember(stats) {
         stats.map { stat ->
             Bars(
-                label = "W${stat.week.substringAfterLast("W")}",
+                label = if (stat.week.contains("W")) "W${stat.week.substringAfterLast("W")}" else stat.week,
                 values = listOf(
                     Bars.Data(
                         label = "Total",
@@ -189,7 +189,7 @@ fun MonthlyStatsChart(
     val chartData = remember(stats) {
         stats.map { stat ->
             Bars(
-                label = stat.month.substringAfterLast("-"),
+                label = if (stat.month.contains("-")) stat.month.substringAfterLast("-") else stat.month,
                 values = listOf(
                     Bars.Data(
                         label = "Total",
