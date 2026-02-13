@@ -245,7 +245,9 @@ fun OnboardingScreen(
                             val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                                 data = android.net.Uri.parse("package:${context.packageName}")
                             }
-                            batteryOptLauncher.launch(intent)
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                batteryOptLauncher.launch(intent)
+                            }
                         }
                     )
                     // Completion
