@@ -37,7 +37,7 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Block Ads Smartly</string>
-    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.</string>
+    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.\n\n🔒 Privacy promise: We never collect, store, or transmit your browsing data. All processing happens on your device only.</string>
     <string name="onboarding_title_2">Your Privacy, Protected</string>
     <string name="onboarding_desc_2">No data collection. No tracking. All DNS logs stay on your device only. We never see your browsing activity.</string>
     <string name="onboarding_title_3">Free &amp; Open Source</string>
@@ -45,6 +45,44 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_recommended">★ Recommended</string>
+
+    <!-- Onboarding: Protection Level -->
+    <string name="onboarding_protection_title">Choose Protection Level</string>
+    <string name="onboarding_protection_desc">Select how aggressively you want to block ads and trackers</string>
+    <string name="onboarding_protection_basic">Basic</string>
+    <string name="onboarding_protection_basic_desc">Block major ad networks. Minimal impact on website functionality.</string>
+    <string name="onboarding_protection_standard">Standard</string>
+    <string name="onboarding_protection_standard_desc">Block ads, trackers, and analytics. Good balance of protection and compatibility.</string>
+    <string name="onboarding_protection_strict">Strict</string>
+    <string name="onboarding_protection_strict_desc">Maximum blocking. May affect some website functionality but provides the strongest protection.</string>
+
+    <!-- Onboarding: DNS Server -->
+    <string name="onboarding_dns_title">Choose DNS Server</string>
+    <string name="onboarding_dns_desc">Select a DNS server for resolving domain names. You can change this later in Settings.</string>
+
+    <!-- Onboarding: VPN Permission -->
+    <string name="onboarding_vpn_title">VPN Permission Required</string>
+    <string name="onboarding_vpn_desc">BlockAds uses a local VPN to filter DNS queries and block ads. No data leaves your device — this VPN only works locally to intercept and filter DNS requests.</string>
+    <string name="onboarding_vpn_grant">Grant VPN Permission</string>
+
+    <!-- Onboarding: Notification Permission -->
+    <string name="onboarding_notification_title">Stay Informed</string>
+    <string name="onboarding_notification_desc">Allow notifications to see real-time blocking statistics and know when your protection is active. Required for the persistent VPN notification on Android 13+.</string>
+    <string name="onboarding_notification_grant">Allow Notifications</string>
+
+    <!-- Onboarding: Battery Optimization -->
+    <string name="onboarding_battery_title">Keep Protection Running</string>
+    <string name="onboarding_battery_desc">Exclude BlockAds from battery optimization so the VPN service stays active in the background and doesn\'t get killed by the system.</string>
+    <string name="onboarding_battery_grant">Disable Battery Optimization</string>
+
+    <!-- Onboarding: Permission Granted -->
+    <string name="onboarding_permission_granted">✓ Permission granted</string>
+
+    <!-- Onboarding: Completion -->
+    <string name="onboarding_complete_title">You\'re Now Protected!</string>
+    <string name="onboarding_complete_desc">Congratulations! BlockAds is configured and ready to protect your device from ads and trackers.</string>
+    <string name="onboarding_complete_stats">Tap \"Get Started\" to enable protection</string>
 
     <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Whitelisted Apps</string>

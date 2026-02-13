@@ -9,6 +9,7 @@ import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
 import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
+import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
@@ -77,6 +78,12 @@ val appModule = module {
     viewModel { app.pwhs.blockads.ui.customrules.CustomRulesViewModel(get(), get()) }
     viewModel {
         DnsProviderViewModel(
+            appPrefs = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
+        OnboardingViewModel(
             appPrefs = get(),
             application = androidApplication()
         )
