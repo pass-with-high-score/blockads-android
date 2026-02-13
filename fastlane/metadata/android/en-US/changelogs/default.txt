@@ -1,8 +1,6 @@
-v2.0.0
-- DNS-over-HTTPS (DoH) and DNS-over-TLS (DoT) support
-- DNS provider presets (Google, Cloudflare, AdGuard, Quad9, and more)
-- Custom DNS rules (block/allow domains with AdBlock syntax)
-- DNS response customization (NXDOMAIN, REFUSED, or 0.0.0.0)
-- Automatic filter list updates via WorkManager
-- Improved Vietnamese localization
-- Performance and stability improvements
+- Encrypted DNS (DoH/DoT)
+- DNS provider presets
+- Custom DNS rules
+- DNS response customization
+- Auto-update filter lists
+- Performance improvements
