@@ -235,4 +235,18 @@
     <string name="ok">OK</string>
     <string name="block_this_domain">Chặn tên miền này</string>
     <string name="add_to_custom_rules">Thêm vào quy tắc tùy chỉnh</string>
+
+    <!-- App Management -->
+    <string name="app_management_title">Quản lý ứng dụng</string>
+    <string name="app_management_subtitle">%d ứng dụng</string>
+    <string name="app_management_desc">Quản lý VPN theo ứng dụng và xem thống kê</string>
+    <string name="app_management_search">Tìm ứng dụng…</string>
+    <string name="app_management_loading">Đang tải ứng dụng…</string>
+    <string name="app_management_sort">Sắp xếp</string>
+    <string name="app_management_sort_name">Sắp xếp theo tên</string>
+    <string name="app_management_sort_queries">Sắp xếp theo truy vấn</string>
+    <string name="app_management_sort_blocked">Sắp xếp theo bị chặn</string>
+    <string name="app_management_queries">Truy vấn: %d</string>
+    <string name="app_management_blocked">Bị chặn: %d</string>
+    <string name="app_management_system">Hệ thống</string>
 </resources>

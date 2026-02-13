@@ -240,4 +240,18 @@
     <string name="ok">OK</string>
     <string name="block_this_domain">Block this domain</string>
     <string name="add_to_custom_rules">Add to custom rules</string>
+
+    <!-- App Management -->
+    <string name="app_management_title">App Management</string>
+    <string name="app_management_subtitle">%d apps</string>
+    <string name="app_management_desc">Manage per-app VPN routing and view stats</string>
+    <string name="app_management_search">Search apps…</string>
+    <string name="app_management_loading">Loading apps…</string>
+    <string name="app_management_sort">Sort</string>
+    <string name="app_management_sort_name">Sort by Name</string>
+    <string name="app_management_sort_queries">Sort by Queries</string>
+    <string name="app_management_sort_blocked">Sort by Blocked</string>
+    <string name="app_management_queries">Queries: %d</string>
+    <string name="app_management_blocked">Blocked: %d</string>
+    <string name="app_management_system">System</string>
 </resources>

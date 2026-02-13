@@ -75,4 +75,16 @@ interface DnsLogDao {
     """
     )
     fun getTopBlockedDomains(limit: Int = 10): Flow<List<TopBlockedDomain>>
+
+    @Query(
+        """
+        SELECT appName,
+               COUNT(*) AS totalQueries,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
+        FROM dns_logs
+        WHERE appName != ''
+        GROUP BY appName
+    """
+    )
+    fun getPerAppStats(): Flow<List<AppStat>>
 }
