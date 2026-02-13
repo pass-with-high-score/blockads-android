@@ -20,14 +20,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.DataSaverOn
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +43,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
 import app.pwhs.blockads.ui.home.component.StatsChart
@@ -78,6 +86,9 @@ fun HomeScreen(
     val filterLoadFailed by viewModel.filterLoadFailed.collectAsState()
     val recentBlocked by viewModel.recentBlocked.collectAsState()
     val hourlyStats by viewModel.hourlyStats.collectAsState()
+    val dailyStats by viewModel.dailyStats.collectAsState()
+    val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
+    val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -231,8 +242,10 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Block rate card
+            // Block rate + Data saved + Uptime card
             val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
+            // Estimate data saved: ~50KB average per blocked ad request
+            val dataSavedKb = blockedCount * 50L
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -282,12 +295,112 @@ fun HomeScreen(
                 }
             }
 
-            // 24h Activity Chart
-            if (hourlyStats.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Data saved + Protection uptime row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.DataSaverOn,
+                    label = stringResource(R.string.home_data_saved),
+                    value = formatDataSize(dataSavedKb),
+                    color = NeonGreen
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Timer,
+                    label = stringResource(R.string.home_protection_uptime),
+                    value = formatUptimeShort(protectionUptimeMs),
+                    color = AccentBlue
+                )
+            }
+
+            // Activity Chart with time range selector
+            if (hourlyStats.isNotEmpty() || dailyStats.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                var selectedChartTab by rememberSaveable { mutableIntStateOf(0) }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = selectedChartTab == 0,
+                        onClick = { selectedChartTab = 0 },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.home_chart_24h),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = AccentBlue.copy(alpha = 0.2f),
+                            selectedLabelColor = AccentBlue
+                        )
+                    )
+                    FilterChip(
+                        selected = selectedChartTab == 1,
+                        onClick = { selectedChartTab = 1 },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.home_chart_7d),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = AccentBlue.copy(alpha = 0.2f),
+                            selectedLabelColor = AccentBlue
+                        )
+                    )
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    when (selectedChartTab) {
+                        0 -> {
+                            if (hourlyStats.isNotEmpty()) {
+                                StatsChart(
+                                    stats = hourlyStats,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                        1 -> {
+                            if (dailyStats.isNotEmpty()) {
+                                DailyStatsChart(
+                                    stats = dailyStats,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Top blocked domains
+            if (topBlockedDomains.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "24-HOUR ACTIVITY",
+                    text = stringResource(R.string.home_top_blocked),
                     style = MaterialTheme.typography.labelMedium,
                     color = TextSecondary,
                     fontWeight = FontWeight.SemiBold,
@@ -303,13 +416,38 @@ fun HomeScreen(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    StatsChart(
-                        stats = hourlyStats,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(140.dp)
-                            .padding(16.dp)
-                    )
+                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                        topBlockedDomains.forEachIndexed { index, entry ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = TextSecondary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.width(24.dp)
+                                )
+                                Text(
+                                    text = entry.domain,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = formatCount(entry.count),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = DangerRed,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -370,5 +508,23 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(200.dp))
         }
+    }
+}
+
+private fun formatDataSize(kilobytes: Long): String = when {
+    kilobytes < 1024 -> "${kilobytes} KB"
+    kilobytes < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f MB", kilobytes / 1024f)
+    else -> String.format(Locale.getDefault(), "%.1f GB", kilobytes / (1024f * 1024f))
+}
+
+private fun formatUptimeShort(ms: Long): String {
+    if (ms <= 0) return "—"
+    val totalSeconds = ms / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m"
+        else -> "<1m"
     }
 }

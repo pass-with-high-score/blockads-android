@@ -91,6 +91,11 @@
     <string name="home_block_rate">Tỷ lệ chặn</string>
     <string name="home_filter_rules">Quy tắc lọc</string>
     <string name="home_recent_blocked">Chặn gần đây</string>
+    <string name="home_data_saved">Dữ liệu tiết kiệm</string>
+    <string name="home_protection_uptime">Thời gian bảo vệ</string>
+    <string name="home_chart_24h">24 Giờ</string>
+    <string name="home_chart_7d">7 Ngày</string>
+    <string name="home_top_blocked">Domain bị chặn nhiều nhất</string>
     <string name="settings_language">Ngôn ngữ</string>
 
     <!-- Settings Screen -->

@@ -91,6 +91,11 @@
     <string name="home_block_rate">Block Rate</string>
     <string name="home_filter_rules">Filter Rules</string>
     <string name="home_recent_blocked">Recently Blocked</string>
+    <string name="home_data_saved">Data Saved</string>
+    <string name="home_protection_uptime">Uptime</string>
+    <string name="home_chart_24h">24 Hours</string>
+    <string name="home_chart_7d">7 Days</string>
+    <string name="home_top_blocked">Top Blocked Domains</string>
     <string name="settings_language">Language</string>
 
     <!-- Settings Screen -->
