@@ -193,8 +193,8 @@ fun SettingsScreen(
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
                             Icon(
-                                Icons.Default.Close,
-                                contentDescription = null,
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear search",
                                 tint = TextSecondary
                             )
                         }
