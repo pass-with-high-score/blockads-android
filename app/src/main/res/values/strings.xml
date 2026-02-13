@@ -101,6 +101,19 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
+    <string name="settings_search_hint">Search settings…</string>
+    <string name="settings_category_protection">Protection</string>
+    <string name="settings_category_protection_desc">DNS server, protocol, auto-reconnect</string>
+    <string name="settings_category_interface">Interface</string>
+    <string name="settings_category_interface_desc">Theme, language</string>
+    <string name="settings_category_apps">Applications</string>
+    <string name="settings_category_apps_desc">App whitelist, per-app settings</string>
+    <string name="settings_category_filters">Filters</string>
+    <string name="settings_category_filters_desc">Filter management, auto-update, custom rules</string>
+    <string name="settings_category_data">Data</string>
+    <string name="settings_category_data_desc">Export/Import, clear logs</string>
+    <string name="settings_category_info">Information</string>
+    <string name="settings_category_info_desc">About, privacy policy, source code</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">System</string>
