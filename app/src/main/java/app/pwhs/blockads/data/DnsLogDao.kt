@@ -78,7 +78,7 @@ interface DnsLogDao {
 
     @Query(
         """
-        SELECT (timestamp / 604800000) * 604800000 AS week,
+        SELECT strftime('%Y-W%W', timestamp / 1000, 'unixepoch', 'localtime') AS week,
                COUNT(*) AS total,
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
         FROM dns_logs
@@ -93,7 +93,7 @@ interface DnsLogDao {
 
     @Query(
         """
-        SELECT (timestamp / 2592000000) * 2592000000 AS month,
+        SELECT strftime('%Y-%m', timestamp / 1000, 'unixepoch', 'localtime') AS month,
                COUNT(*) AS total,
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
         FROM dns_logs

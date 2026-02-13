@@ -33,12 +33,6 @@ private val hourFormat = ThreadLocal.withInitial {
 private val dayFormat = ThreadLocal.withInitial {
     SimpleDateFormat("EEE", Locale.getDefault())
 }
-private val weekFormat = ThreadLocal.withInitial {
-    SimpleDateFormat("MM/dd", Locale.getDefault())
-}
-private val monthFormat = ThreadLocal.withInitial {
-    SimpleDateFormat("MMM", Locale.getDefault())
-}
 
 @Composable
 fun StatsChart(
@@ -145,10 +139,9 @@ fun WeeklyStatsChart(
 ) {
     val textColor = TextSecondary
     val chartData = remember(stats) {
-        val fmt = weekFormat.get()!!
         stats.map { stat ->
             Bars(
-                label = fmt.format(Date(stat.week)),
+                label = "W${stat.week.substringAfterLast("W")}",
                 values = listOf(
                     Bars.Data(
                         label = "Total",
@@ -194,10 +187,9 @@ fun MonthlyStatsChart(
 ) {
     val textColor = TextSecondary
     val chartData = remember(stats) {
-        val fmt = monthFormat.get()!!
         stats.map { stat ->
             Bars(
-                label = fmt.format(Date(stat.month)),
+                label = stat.month.substringAfterLast("-"),
                 values = listOf(
                     Bars.Data(
                         label = "Total",

@@ -12,6 +12,7 @@ import app.pwhs.blockads.data.WeeklyStat
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import java.util.Calendar
 
 class StatisticsViewModel(
     dnsLogDao: DnsLogDao
@@ -19,8 +20,12 @@ class StatisticsViewModel(
 
     private val todayStart: Long
         get() {
-            val now = System.currentTimeMillis()
-            return (now / 86_400_000L) * 86_400_000L
+            val cal = Calendar.getInstance()
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            return cal.timeInMillis
         }
 
     val totalCount: StateFlow<Int> = dnsLogDao.getTotalCount()
