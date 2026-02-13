@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -99,7 +101,7 @@ fun OnboardingScreen(
     var vpnPermissionGranted by remember { mutableStateOf(VpnService.prepare(context) == null) }
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
+    ) { _ ->
         vpnPermissionGranted = VpnService.prepare(context) == null
     }
 
@@ -107,7 +109,7 @@ fun OnboardingScreen(
     var notificationPermissionGranted by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
                         android.content.pm.PackageManager.PERMISSION_GRANTED
             } else true
         )
@@ -119,15 +121,14 @@ fun OnboardingScreen(
     }
 
     // Battery optimization
+    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
     var batteryOptimizationExcluded by remember {
-        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        mutableStateOf(pm.isIgnoringBatteryOptimizations(context.packageName))
+        mutableStateOf(powerManager.isIgnoringBatteryOptimizations(context.packageName))
     }
     val batteryOptLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        batteryOptimizationExcluded = pm.isIgnoringBatteryOptimizations(context.packageName)
+        batteryOptimizationExcluded = powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     fun skipToHome() {
@@ -180,7 +181,7 @@ fun OnboardingScreen(
                     // Step 1: Welcome + Privacy promise
                     0 -> OnboardingPageContent(
                         OnboardingPage(
-                            icon = Icons.Filled.VpnKey,
+                            icon = Icons.Filled.Shield,
                             title = stringResource(R.string.onboarding_title_1),
                             description = stringResource(R.string.onboarding_desc_1)
                         )
