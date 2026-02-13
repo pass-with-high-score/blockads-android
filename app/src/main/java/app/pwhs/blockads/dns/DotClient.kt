@@ -58,9 +58,14 @@ class DotClient {
             sslSocket.connect(InetSocketAddress(serverAddress, DOT_PORT), CONNECTION_TIMEOUT_MS)
             sslSocket.soTimeout = QUERY_TIMEOUT_MS.toInt()
 
-            // Enable SNI (Server Name Indication) for proper TLS handshake
+            // Enable SNI (Server Name Indication) for proper TLS handshake when using hostnames
+            // SNIHostName does not accept IP address literals, so skip SNI if an IP was provided
+            val hostAddress = serverAddress.hostAddress
+            val isIpLiteral = dotServer == hostAddress || dotServer == "[$hostAddress]"
             val sslParams = sslSocket.sslParameters
-            sslParams.serverNames = listOf(javax.net.ssl.SNIHostName(dotServer))
+            if (!isIpLiteral) {
+                sslParams.serverNames = listOf(javax.net.ssl.SNIHostName(dotServer))
+            }
             sslSocket.sslParameters = sslParams
 
             // Start TLS handshake
