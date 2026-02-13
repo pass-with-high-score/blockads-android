@@ -132,9 +132,10 @@ class AdBlockVpnService : VpnService() {
                 val result = filterRepo.loadAllEnabledFilters()
                 Log.d(TAG, "Filters loaded: ${result.getOrDefault(0)} unique domains")
 
-                // Get upstream DNS, fallback DNS, and whitelisted apps
+                // Get upstream DNS, fallback DNS, DNS response type, and whitelisted apps
                 val upstreamDns = appPrefs.upstreamDns.first()
                 val fallbackDns = appPrefs.fallbackDns.first()
+                val dnsResponseType = appPrefs.dnsResponseType.first()
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
 
                 // Try to establish VPN with retry logic
@@ -184,7 +185,7 @@ class AdBlockVpnService : VpnService() {
                 startNotificationUpdates()
 
                 // Start processing packets
-                processPackets(upstreamDns, fallbackDns)
+                processPackets(upstreamDns, fallbackDns, dnsResponseType)
 
             } catch (e: Exception) {
                 Log.e(TAG, "VPN startup failed", e)
@@ -240,7 +241,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun processPackets(upstreamDns: String, fallbackDns: String) {
+    private fun processPackets(upstreamDns: String, fallbackDns: String, dnsResponseType: String) {
         isProcessing = true
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
@@ -261,7 +262,7 @@ class AdBlockVpnService : VpnService() {
                 val query = DnsPacketParser.parseIpPacket(buffer, length)
 
                 if (query != null) {
-                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns)
+                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns, dnsResponseType)
                 }
                 // Non-DNS packets are silently dropped (they'll go through the normal
                 // network stack since we only handle DNS via VPN routing)
@@ -286,7 +287,8 @@ class AdBlockVpnService : VpnService() {
         query: DnsPacketParser.DnsQuery,
         outputStream: FileOutputStream,
         upstreamDns: String,
-        fallbackDns: String
+        fallbackDns: String,
+        dnsResponseType: String
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
@@ -295,8 +297,7 @@ class AdBlockVpnService : VpnService() {
 
         if (filterRepo.isBlocked(domain)) {
             // Build and write blocked response based on configured response type
-            val responseType = runBlocking { appPrefs.dnsResponseType.first() }
-            val response = when (responseType) {
+            val response = when (dnsResponseType) {
                 app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_NXDOMAIN -> 
                     DnsPacketParser.buildNxdomainResponse(query)
                 app.pwhs.blockads.data.AppPreferences.DNS_RESPONSE_REFUSED -> 
