@@ -167,6 +167,9 @@ class AppPreferences(private val context: Context) {
     suspend fun setDohUrl(url: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_DOH_URL] = url
+        }
+    }
+
     suspend fun setDnsProviderId(providerId: String?) {
         context.dataStore.edit { prefs ->
             if (providerId == null) {
