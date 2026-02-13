@@ -64,6 +64,8 @@ class AdBlockVpnService : VpnService() {
     private lateinit var appPrefs: AppPreferences
     private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
     private lateinit var dnsErrorDao: DnsErrorDao
+    private lateinit var dohClient: app.pwhs.blockads.dns.DohClient
+    private lateinit var dotClient: app.pwhs.blockads.dns.DotClient
     private var networkMonitor: NetworkMonitor? = null
     private val retryManager =
         VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
@@ -89,6 +91,8 @@ class AdBlockVpnService : VpnService() {
         appPrefs = koin.get()
         dnsLogDao = koin.get()
         dnsErrorDao = koin.get()
+        dohClient = koin.get()
+        dotClient = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
 
@@ -327,16 +331,33 @@ class AdBlockVpnService : VpnService() {
         upstreamDns: String,
         fallbackDns: String
     ) {
-        // Try primary DNS server first
-        var success = tryDnsQuery(query, outputStream, upstreamDns, false)
+        // Note: Using runBlocking here is intentional and necessary. This method is called
+        // from processPackets(), which is a blocking I/O loop reading from a FileInputStream.
+        // The entire packet processing pipeline is synchronous by design (VPN TUN interface
+        // requires blocking reads). Making this suspend would require converting the entire
+        // packet processing loop to coroutines, which is not compatible with blocking I/O
+        // on FileInputStream/FileOutputStream.
+        val (dnsProtocol, dohUrl) = runBlocking {
+            appPrefs.dnsProtocol.first() to appPrefs.dohUrl.first()
+        }
 
-        // If primary fails and fallback is different, try fallback
+        // Try primary DNS server first
+        var success = tryDnsQuery(query, outputStream, upstreamDns, dohUrl, dnsProtocol, false)
+
+        // If primary fails and fallback is different, try fallback (with PLAIN protocol as fallback)
         if (!success && fallbackDns != upstreamDns) {
             Log.w(
                 TAG,
-                "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns)"
+                "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns) with PLAIN protocol"
             )
-            success = tryDnsQuery(query, outputStream, fallbackDns, true)
+            success = tryDnsQuery(
+                query,
+                outputStream,
+                fallbackDns,
+                dohUrl,
+                app.pwhs.blockads.data.DnsProtocol.PLAIN,
+                true
+            )
         }
 
         // If both failed, return SERVFAIL
@@ -359,30 +380,45 @@ class AdBlockVpnService : VpnService() {
         query: DnsPacketParser.DnsQuery,
         outputStream: FileOutputStream,
         dnsServer: String,
+        dohUrl: String,
+        protocol: app.pwhs.blockads.data.DnsProtocol,
         isFallback: Boolean
     ): Boolean {
-        var socket: DatagramSocket? = null
         try {
-            socket = DatagramSocket()
-            protect(socket) // Prevent VPN loop
+            // Get DNS response based on protocol
+            // Note: Using runBlocking for suspend functions is necessary here because
+            // we're in a blocking I/O context (processPackets loop). The VPN TUN interface
+            // requires synchronous packet processing with FileInputStream/FileOutputStream.
+            val dnsResponseData = when (protocol) {
+                app.pwhs.blockads.data.DnsProtocol.DOH -> {
+                    Log.d(TAG, "Using DoH for ${query.domain} to $dohUrl")
+                    runBlocking { dohClient.query(dohUrl, query.rawDnsPayload) }
+                }
 
-            val serverAddress = InetAddress.getByName(dnsServer)
-            val requestPacket = DatagramPacket(
-                query.rawDnsPayload,
-                query.rawDnsPayload.size,
-                serverAddress,
-                53
-            )
-            socket.soTimeout = 5000 // 5 second timeout
-            socket.send(requestPacket)
+                app.pwhs.blockads.data.DnsProtocol.DOT -> {
+                    Log.d(TAG, "Using DoT for ${query.domain} to $dnsServer")
+                    runBlocking { dotClient.query(dnsServer, query.rawDnsPayload) }
+                }
 
-            // Receive response
-            val responseBuffer = ByteArray(1024)
-            val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
-            socket.receive(responsePacket)
+                app.pwhs.blockads.data.DnsProtocol.PLAIN -> {
+                    Log.d(TAG, "Using plain DNS for ${query.domain} to $dnsServer")
+                    tryPlainDnsQuery(query, dnsServer)
+                }
+            }
+
+            if (dnsResponseData == null) {
+                Log.w(TAG, "DNS query failed for ${query.domain} using $protocol")
+                logDnsError(
+                    query.domain,
+                    "QUERY_FAILED",
+                    "Failed to get response using $protocol",
+                    dnsServer,
+                    isFallback
+                )
+                return false
+            }
 
             // Build IP+UDP wrapper for the DNS response
-            val dnsResponseData = responseBuffer.copyOf(responsePacket.length)
             val fullResponse = DnsPacketParser.buildIpUdpPacket(
                 sourceIp = query.destIp,
                 destIp = query.sourceIp,
@@ -416,15 +452,44 @@ class AdBlockVpnService : VpnService() {
             )
             return false
         } catch (e: Exception) {
-            Log.e(TAG, "DNS error for ${query.domain} on $dnsServer", e)
+            Log.w(TAG, "DNS query failed for ${query.domain} on $dnsServer", e)
             logDnsError(
                 query.domain,
-                "UNKNOWN",
+                "QUERY_ERROR",
                 e.message ?: "Unknown error",
                 dnsServer,
                 isFallback
             )
             return false
+        }
+    }
+
+    private fun tryPlainDnsQuery(query: DnsPacketParser.DnsQuery, dnsServer: String): ByteArray? {
+        var socket: DatagramSocket? = null
+        try {
+            socket = DatagramSocket()
+            protect(socket) // Prevent VPN loop
+
+            val serverAddress = InetAddress.getByName(dnsServer)
+            val requestPacket = DatagramPacket(
+                query.rawDnsPayload,
+                query.rawDnsPayload.size,
+                serverAddress,
+                53
+            )
+            socket.soTimeout = 5000 // 5 second timeout
+            socket.send(requestPacket)
+
+            // Receive response
+            val responseBuffer = ByteArray(1024)
+            val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
+            socket.receive(responsePacket)
+
+            return responseBuffer.copyOf(responsePacket.length)
+
+        } catch (e: Exception) {
+            Log.w(TAG, "Plain DNS query failed", e)
+            return null
         } finally {
             socket?.close()
         }
