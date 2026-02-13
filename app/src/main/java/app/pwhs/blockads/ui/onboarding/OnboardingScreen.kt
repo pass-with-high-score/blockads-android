@@ -119,15 +119,17 @@ fun OnboardingScreen(
     }
 
     // Battery optimization
+    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+    val initialBatteryOptimizationExcluded =
+        powerManager.isIgnoringBatteryOptimizations(context.packageName)
     var batteryOptimizationExcluded by remember {
-        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        mutableStateOf(pm.isIgnoringBatteryOptimizations(context.packageName))
+        mutableStateOf(initialBatteryOptimizationExcluded)
     }
     val batteryOptLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        batteryOptimizationExcluded = pm.isIgnoringBatteryOptimizations(context.packageName)
+        batteryOptimizationExcluded =
+            powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
     fun skipToHome() {
