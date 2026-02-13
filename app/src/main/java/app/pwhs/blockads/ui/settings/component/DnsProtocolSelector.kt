@@ -9,7 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsProtocol
 
 @Composable
@@ -29,9 +31,9 @@ fun DnsProtocolSelector(
                 label = {
                     Text(
                         when (protocol) {
-                            DnsProtocol.PLAIN -> "Plain DNS"
-                            DnsProtocol.DOH -> "DoH"
-                            DnsProtocol.DOT -> "DoT"
+                            DnsProtocol.PLAIN -> stringResource(R.string.settings_dns_protocol_plain)
+                            DnsProtocol.DOH -> stringResource(R.string.settings_dns_protocol_doh)
+                            DnsProtocol.DOT -> stringResource(R.string.settings_dns_protocol_dot)
                         }
                     )
                 },

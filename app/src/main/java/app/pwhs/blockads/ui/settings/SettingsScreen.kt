@@ -445,19 +445,29 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Spacer(modifier = Modifier.height(12.dp))
+                            
+                            // Validate DoH URL
+                            val isValidDohUrl = editDohUrl.isNotBlank() && 
+                                editDohUrl.startsWith("https://", ignoreCase = true)
+                            val showDohError = editDohUrl.isNotBlank() && !isValidDohUrl
+                            
                             OutlinedTextField(
                                 value = editDohUrl,
                                 onValueChange = { editDohUrl = it },
                                 modifier = Modifier.fillMaxWidth(),
                                 placeholder = { Text(stringResource(R.string.settings_doh_url_placeholder)) },
                                 singleLine = true,
+                                isError = showDohError,
+                                supportingText = if (showDohError) {
+                                    { Text("DoH URL must start with https://") }
+                                } else null,
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                                 )
                             )
-                            if (editDohUrl != dohUrl) {
+                            if (editDohUrl != dohUrl && isValidDohUrl) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(
                                     onClick = { viewModel.setDohUrl(editDohUrl) },
