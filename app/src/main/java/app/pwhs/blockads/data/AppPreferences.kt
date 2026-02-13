@@ -24,6 +24,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_FALLBACK_DNS = stringPreferencesKey("fallback_dns")
         private val KEY_DNS_PROTOCOL = stringPreferencesKey("dns_protocol")
         private val KEY_DOH_URL = stringPreferencesKey("doh_url")
+        private val KEY_DNS_PROVIDER_ID = stringPreferencesKey("dns_provider_id")
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
@@ -123,6 +124,10 @@ class AppPreferences(private val context: Context) {
         prefs[KEY_AUTO_UPDATE_NOTIFICATION] ?: NOTIFICATION_NORMAL
     }
 
+    val dnsProviderId: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DNS_PROVIDER_ID]
+    }
+
     suspend fun setVpnEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_VPN_ENABLED] = enabled
@@ -162,6 +167,13 @@ class AppPreferences(private val context: Context) {
     suspend fun setDohUrl(url: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_DOH_URL] = url
+    suspend fun setDnsProviderId(providerId: String?) {
+        context.dataStore.edit { prefs ->
+            if (providerId == null) {
+                prefs.remove(KEY_DNS_PROVIDER_ID)
+            } else {
+                prefs[KEY_DNS_PROVIDER_ID] = providerId
+            }
         }
     }
 

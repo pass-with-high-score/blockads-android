@@ -170,6 +170,19 @@
     <string name="filter_update_notification_channel">Cập nhật bộ lọc</string>
     <string name="filter_update_notification_channel_desc">Thông báo về cập nhật danh sách bộ lọc</string>
 
+    <!-- DNS Provider -->
+    <string name="dns_provider_title">Máy chủ DNS</string>
+    <string name="dns_category_standard">Tiêu chuẩn</string>
+    <string name="dns_category_privacy">Tập trung bảo mật</string>
+    <string name="dns_category_family">An toàn cho gia đình</string>
+    <string name="dns_category_custom">Tùy chỉnh</string>
+    <string name="dns_custom_title">DNS tùy chỉnh</string>
+    <string name="dns_custom_description">Nhập địa chỉ máy chủ DNS của riêng bạn</string>
+    <string name="dns_custom_save">Lưu</string>
+    <string name="dns_custom_cancel">Hủy</string>
+    <string name="dns_select_server">Chọn máy chủ DNS</string>
+    <string name="dns_doh_badge">DoH</string>
+
     <!-- Widget -->
     <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
