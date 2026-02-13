@@ -22,6 +22,9 @@ class AppPreferences(private val context: Context) {
         private val KEY_FILTER_URL = stringPreferencesKey("filter_url")
         private val KEY_UPSTREAM_DNS = stringPreferencesKey("upstream_dns")
         private val KEY_FALLBACK_DNS = stringPreferencesKey("fallback_dns")
+        private val KEY_DNS_PROTOCOL = stringPreferencesKey("dns_protocol")
+        private val KEY_DOH_URL = stringPreferencesKey("doh_url")
+        private val KEY_DNS_PROVIDER_ID = stringPreferencesKey("dns_provider_id")
         private val KEY_ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
@@ -57,6 +60,8 @@ class AppPreferences(private val context: Context) {
         const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
         const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
         const val DEFAULT_FALLBACK_DNS = "1.1.1.1"
+        const val DEFAULT_DNS_PROTOCOL = "PLAIN"
+        const val DEFAULT_DOH_URL = "https://dns.google/dns-query"
     }
 
     val vpnEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -77,6 +82,19 @@ class AppPreferences(private val context: Context) {
 
     val fallbackDns: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_FALLBACK_DNS] ?: DEFAULT_FALLBACK_DNS
+    }
+
+    val dnsProtocol: Flow<DnsProtocol> = context.dataStore.data.map { prefs ->
+        val protocolString = prefs[KEY_DNS_PROTOCOL] ?: DEFAULT_DNS_PROTOCOL
+        try {
+            DnsProtocol.valueOf(protocolString)
+        } catch (e: IllegalArgumentException) {
+            DnsProtocol.PLAIN
+        }
+    }
+
+    val dohUrl: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DOH_URL] ?: DEFAULT_DOH_URL
     }
 
     val onboardingCompleted: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -111,6 +129,10 @@ class AppPreferences(private val context: Context) {
         prefs[KEY_AUTO_UPDATE_NOTIFICATION] ?: NOTIFICATION_NORMAL
     }
 
+    val dnsProviderId: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DNS_PROVIDER_ID]
+    }
+
     val dnsResponseType: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_DNS_RESPONSE_TYPE] ?: DNS_RESPONSE_CUSTOM_IP
     }
@@ -142,6 +164,28 @@ class AppPreferences(private val context: Context) {
     suspend fun setFallbackDns(dns: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_FALLBACK_DNS] = dns
+        }
+    }
+
+    suspend fun setDnsProtocol(protocol: DnsProtocol) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DNS_PROTOCOL] = protocol.name
+        }
+    }
+
+    suspend fun setDohUrl(url: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DOH_URL] = url
+        }
+    }
+
+    suspend fun setDnsProviderId(providerId: String?) {
+        context.dataStore.edit { prefs ->
+            if (providerId == null) {
+                prefs.remove(KEY_DNS_PROVIDER_ID)
+            } else {
+                prefs[KEY_DNS_PROVIDER_ID] = providerId
+            }
         }
     }
 

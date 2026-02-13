@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.CustomDnsRuleDao
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListBackup
@@ -18,6 +19,7 @@ import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.util.CustomRuleParser
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +36,7 @@ class SettingsViewModel(
     private val dnsLogDao: DnsLogDao,
     private val whitelistDomainDao: WhitelistDomainDao,
     private val filterListDao: FilterListDao,
+    private val customDnsRuleDao: CustomDnsRuleDao,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -52,6 +55,20 @@ class SettingsViewModel(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             AppPreferences.DEFAULT_FALLBACK_DNS
+        )
+
+    val dnsProtocol: StateFlow<app.pwhs.blockads.data.DnsProtocol> = appPrefs.dnsProtocol
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            app.pwhs.blockads.data.DnsProtocol.PLAIN
+        )
+
+    val dohUrl: StateFlow<String> = appPrefs.dohUrl
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DEFAULT_DOH_URL
         )
 
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
@@ -90,13 +107,6 @@ class SettingsViewModel(
             AppPreferences.NOTIFICATION_NORMAL
         )
 
-    val dnsResponseType: StateFlow<String> = appPrefs.dnsResponseType
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            AppPreferences.DNS_RESPONSE_CUSTOM_IP
-        )
-
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -116,6 +126,14 @@ class SettingsViewModel(
 
     fun setFallbackDns(dns: String) {
         viewModelScope.launch { appPrefs.setFallbackDns(dns) }
+    }
+
+    fun setDnsProtocol(protocol: app.pwhs.blockads.data.DnsProtocol) {
+        viewModelScope.launch { appPrefs.setDnsProtocol(protocol) }
+    }
+
+    fun setDohUrl(url: String) {
+        viewModelScope.launch { appPrefs.setDohUrl(url) }
     }
 
     fun setThemeMode(mode: String) {
@@ -213,12 +231,12 @@ class SettingsViewModel(
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
-                    dnsResponseType = appPrefs.dnsResponseType.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
                     whitelistDomains = whitelistDomains.value.map { it.domain },
-                    whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList()
+                    whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList(),
+                    customRules = customDnsRuleDao.getAll().map { it.rule }
                 )
 
                 val jsonFormat = kotlinx.serialization.json.Json { prettyPrint = true }
@@ -256,7 +274,6 @@ class SettingsViewModel(
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
-                appPrefs.setDnsResponseType(backup.dnsResponseType)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->
@@ -281,6 +298,18 @@ class SettingsViewModel(
                 // Whitelisted apps — merge
                 val current = appPrefs.getWhitelistedAppsSnapshot()
                 appPrefs.setWhitelistedApps(current + backup.whitelistedApps.toSet())
+
+                // Custom rules — parse and add (avoid duplicates)
+                val existingRules = customDnsRuleDao.getAll().map { it.rule }.toSet()
+                backup.customRules.forEach { ruleText ->
+                    if (ruleText !in existingRules) {
+                        val rule = CustomRuleParser.parseRule(ruleText)
+                        if (rule != null) {
+                            customDnsRuleDao.insert(rule)
+                        }
+                    }
+                }
+
                 _events.toast(R.string.filter_settings_imported)
             } catch (e: Exception) {
                 _events.toast(R.string.filter_import_failed, listOf("${e.message}"))

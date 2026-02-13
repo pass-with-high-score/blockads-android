@@ -219,6 +219,22 @@ object DnsPacketParser {
     }
 
     /**
+     * Build a DNS SERVFAIL response for when DNS resolution fails.
+     * This creates the full IP+UDP+DNS packet to write back to the TUN.
+     */
+    fun buildServfailResponse(query: DnsQuery): ByteArray {
+        val dnsResponse = buildServfailDnsResponse(query)
+
+        return buildIpUdpPacket(
+            sourceIp = query.destIp,   // Swap: original dest becomes source
+            destIp = query.sourceIp,   // Swap: original source becomes dest
+            sourcePort = query.destPort,
+            destPort = query.sourcePort,
+            payload = dnsResponse
+        )
+    }
+
+    /**
      * Build a DNS NXDOMAIN response for a blocked domain.
      * This creates the full IP+UDP+DNS packet to write back to the TUN.
      */
@@ -240,22 +256,6 @@ object DnsPacketParser {
      */
     fun buildRefusedResponse(query: DnsQuery): ByteArray {
         val dnsResponse = buildRefusedDnsResponse(query)
-
-        return buildIpUdpPacket(
-            sourceIp = query.destIp,   // Swap: original dest becomes source
-            destIp = query.sourceIp,   // Swap: original source becomes dest
-            sourcePort = query.destPort,
-            destPort = query.sourcePort,
-            payload = dnsResponse
-        )
-    }
-
-    /**
-     * Build a DNS SERVFAIL response for when DNS resolution fails.
-     * This creates the full IP+UDP+DNS packet to write back to the TUN.
-     */
-    fun buildServfailResponse(query: DnsQuery): ByteArray {
-        val dnsResponse = buildServfailDnsResponse(query)
 
         return buildIpUdpPacket(
             sourceIp = query.destIp,   // Swap: original dest becomes source

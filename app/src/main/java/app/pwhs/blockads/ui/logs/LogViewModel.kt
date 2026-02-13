@@ -3,12 +3,15 @@ package app.pwhs.blockads.ui.logs
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.CustomDnsRuleDao
 import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.DnsLogEntry
+import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.util.CustomRuleParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +28,8 @@ import kotlinx.coroutines.launch
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
     private val whitelistDomainDao: WhitelistDomainDao,
+    private val customDnsRuleDao: CustomDnsRuleDao,
+    private val filterListRepository: FilterListRepository,
 ) : ViewModel() {
 
     private val _showBlockedOnly = MutableStateFlow(false)
@@ -70,6 +75,18 @@ class LogViewModel(
                 _events.toast(R.string.log_whitelisted, listOf(": $cleanDomain"))
             } else {
                 _events.toast(R.string.log_already_whitelisted)
+            }
+        }
+    }
+
+    fun addToCustomBlockRules(domain: String) {
+        viewModelScope.launch {
+            val cleanDomain = domain.trim().lowercase()
+            val rule = CustomRuleParser.parseRule(CustomRuleParser.formatBlockRule(cleanDomain))
+            if (rule != null) {
+                customDnsRuleDao.insert(rule)
+                filterListRepository.loadCustomRules()
+                _events.toast(R.string.rule_added)
             }
         }
     }

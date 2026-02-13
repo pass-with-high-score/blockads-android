@@ -109,12 +109,12 @@
   - Custom URL input
 - **Impact**: Privacy tốt hơn nhiều, ISP không thể theo dõi DNS queries
 
-#### 2.2 DNS Server Presets
+#### 2.2 DNS Server Presets ✅ **COMPLETED**
 - **Hiện trạng**: Chỉ có 1 text field nhập IP thủ công
-- **Cần làm**:
-  - Tạo danh sách DNS presets với logo, mô tả, tốc độ
-  - Nhóm theo category: Standard / Privacy-focused / Family-safe / Custom
-  - Danh sách gợi ý:
+- **Đã hoàn thành**:
+  - ✅ Tạo danh sách DNS presets với mô tả
+  - ✅ Nhóm theo category: Standard / Privacy-focused / Family-safe / Custom
+  - ✅ Danh sách đã implement:
     | Provider | IP | DoH | Đặc điểm |
     |----------|-----|-----|-----------|
     | Google | 8.8.8.8 | ✅ | Nhanh, phổ biến |
@@ -122,10 +122,17 @@
     | AdGuard DNS | 94.140.14.14 | ✅ | Block ads built-in |
     | Quad9 | 9.9.9.9 | ✅ | Security-focused |
     | OpenDNS | 208.67.222.222 | ❌ | Family option |
-    | NextDNS | — | ✅ | Customizable |
-  - DNS speed test (ping) để recommend server nhanh nhất
-  - Cho phép nhập custom DNS server
+    | OpenDNS Family | 208.67.222.123 | ❌ | Family-safe |
+    | Cloudflare Family | 1.1.1.3 | ✅ | Family-safe + malware blocking |
+  - ✅ Cho phép nhập custom DNS server
+  - ✅ Auto-detect provider từ IP hiện tại (backward compatibility)
+  - ✅ Smart fallback DNS selection
+  - ✅ Full localization (EN/VI)
+- **Chưa làm** (có thể thêm sau):
+  - ⏳ Logo cho từng provider
+  - ⏳ DNS speed test (ping) để recommend server nhanh nhất
 - **Impact**: UX tốt hơn nhiều, user không cần biết IP để chọn DNS
+
 
 #### 2.3 Custom DNS Rules (User Rules)
 - **Hiện trạng**: Chỉ có whitelist domain, không có custom block rules
