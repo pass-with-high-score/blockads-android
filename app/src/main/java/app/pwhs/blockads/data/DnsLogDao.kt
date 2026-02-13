@@ -60,7 +60,9 @@ interface DnsLogDao {
         ORDER BY day ASC
     """
     )
-    fun getDailyStats(since: Long = System.currentTimeMillis() - 604800000): Flow<List<DailyStat>>
+    fun getDailyStats(
+        since: Long = System.currentTimeMillis() - 7 * 86_400_000L // 7 days in ms
+    ): Flow<List<DailyStat>>
 
     @Query(
         """

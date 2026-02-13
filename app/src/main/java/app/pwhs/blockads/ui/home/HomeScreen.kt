@@ -244,8 +244,9 @@ fun HomeScreen(
 
             // Block rate + Data saved + Uptime card
             val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
-            // Estimate data saved: ~50KB average per blocked ad request
-            val dataSavedKb = blockedCount * 50L
+            // Estimate data saved: average blocked ad is ~50KB (images, scripts, tracking pixels)
+            val avgAdSizeKb = 50L
+            val dataSavedKb = blockedCount * avgAdSizeKb
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
