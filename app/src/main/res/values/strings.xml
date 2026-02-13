@@ -130,8 +130,19 @@
     <string name="settings_add_domain_hint">Domain (e.g. example.com)</string>
     <string name="settings_auto_reconnect">Auto-reconnect</string>
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
+    <string name="settings_dns_protocol">DNS Protocol</string>
+    <string name="settings_dns_protocol_plain">Plain DNS</string>
+    <string name="settings_dns_protocol_doh">DoH</string>
+    <string name="settings_dns_protocol_dot">DoT</string>
+    <string name="settings_doh_server_url">DoH Server URL</string>
+    <string name="settings_doh_url_placeholder">https://dns.google/dns-query</string>
+    <string name="settings_save_doh_url">Save DoH URL</string>
+    <string name="settings_dot_server">DoT Server (hostname or IP)</string>
+    <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Upstream DNS Server</string>
+    <string name="settings_upstream_dns_placeholder">8.8.8.8</string>
     <string name="settings_fallback_dns">Fallback DNS Server</string>
+    <string name="settings_fallback_dns_placeholder">1.1.1.1</string>
     <string name="settings_clear_logs">Clear All Logs</string>
 
     <!-- Filter Setup Screen -->
@@ -169,6 +180,19 @@
     <string name="filter_update_failed_message">Failed to update filter lists</string>
     <string name="filter_update_notification_channel">Filter Updates</string>
     <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
+
+    <!-- DNS Provider -->
+    <string name="dns_provider_title">DNS Server</string>
+    <string name="dns_category_standard">Standard</string>
+    <string name="dns_category_privacy">Privacy-focused</string>
+    <string name="dns_category_family">Family-safe</string>
+    <string name="dns_category_custom">Custom</string>
+    <string name="dns_custom_title">Custom DNS</string>
+    <string name="dns_custom_description">Enter your own DNS server addresses</string>
+    <string name="dns_custom_save">Save</string>
+    <string name="dns_custom_cancel">Cancel</string>
+    <string name="dns_select_server">Select DNS Server</string>
+    <string name="dns_doh_badge">DoH</string>
 
     <!-- Widget -->
     <string name="widget_name">BlockAds Toggle</string>

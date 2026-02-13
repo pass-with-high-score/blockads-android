@@ -57,6 +57,20 @@ class SettingsViewModel(
             AppPreferences.DEFAULT_FALLBACK_DNS
         )
 
+    val dnsProtocol: StateFlow<app.pwhs.blockads.data.DnsProtocol> = appPrefs.dnsProtocol
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            app.pwhs.blockads.data.DnsProtocol.PLAIN
+        )
+
+    val dohUrl: StateFlow<String> = appPrefs.dohUrl
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AppPreferences.DEFAULT_DOH_URL
+        )
+
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -112,6 +126,14 @@ class SettingsViewModel(
 
     fun setFallbackDns(dns: String) {
         viewModelScope.launch { appPrefs.setFallbackDns(dns) }
+    }
+
+    fun setDnsProtocol(protocol: app.pwhs.blockads.data.DnsProtocol) {
+        viewModelScope.launch { appPrefs.setDnsProtocol(protocol) }
+    }
+
+    fun setDohUrl(url: String) {
+        viewModelScope.launch { appPrefs.setDohUrl(url) }
     }
 
     fun setThemeMode(mode: String) {

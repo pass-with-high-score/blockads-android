@@ -3,6 +3,9 @@ package app.pwhs.blockads.di
 import app.pwhs.blockads.data.AppDatabase
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.dns.DohClient
+import app.pwhs.blockads.dns.DotClient
+import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
 import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
@@ -29,6 +32,10 @@ val appModule = module {
             }
         }
     }
+
+    // DNS Clients
+    single { DohClient(get()) }
+    single { DotClient() }
 
     // Database
     single { AppDatabase.getInstance(androidContext()) }
@@ -66,5 +73,11 @@ val appModule = module {
         )
     }
     viewModel { app.pwhs.blockads.ui.customrules.CustomRulesViewModel(get(), get()) }
+    viewModel {
+        DnsProviderViewModel(
+            appPrefs = get(),
+            application = androidApplication()
+        )
+    }
 }
 

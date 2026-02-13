@@ -130,8 +130,19 @@
     <string name="settings_add_domain_hint">Tên miền (vd: example.com)</string>
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
+    <string name="settings_dns_protocol">Giao thức DNS</string>
+    <string name="settings_dns_protocol_plain">DNS thường</string>
+    <string name="settings_dns_protocol_doh">DoH</string>
+    <string name="settings_dns_protocol_dot">DoT</string>
+    <string name="settings_doh_server_url">URL máy chủ DoH</string>
+    <string name="settings_doh_url_placeholder">https://dns.google/dns-query</string>
+    <string name="settings_save_doh_url">Lưu URL DoH</string>
+    <string name="settings_dot_server">Máy chủ DoT (hostname hoặc IP)</string>
+    <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Máy chủ DNS</string>
+    <string name="settings_upstream_dns_placeholder">8.8.8.8</string>
     <string name="settings_fallback_dns">Máy chủ DNS dự phòng</string>
+    <string name="settings_fallback_dns_placeholder">1.1.1.1</string>
     <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
 
     <!-- Filter Setup Screen -->
@@ -169,6 +180,19 @@
     <string name="filter_update_failed_message">Không thể cập nhật danh sách bộ lọc</string>
     <string name="filter_update_notification_channel">Cập nhật bộ lọc</string>
     <string name="filter_update_notification_channel_desc">Thông báo về cập nhật danh sách bộ lọc</string>
+
+    <!-- DNS Provider -->
+    <string name="dns_provider_title">Máy chủ DNS</string>
+    <string name="dns_category_standard">Tiêu chuẩn</string>
+    <string name="dns_category_privacy">Tập trung bảo mật</string>
+    <string name="dns_category_family">An toàn cho gia đình</string>
+    <string name="dns_category_custom">Tùy chỉnh</string>
+    <string name="dns_custom_title">DNS tùy chỉnh</string>
+    <string name="dns_custom_description">Nhập địa chỉ máy chủ DNS của riêng bạn</string>
+    <string name="dns_custom_save">Lưu</string>
+    <string name="dns_custom_cancel">Hủy</string>
+    <string name="dns_select_server">Chọn máy chủ DNS</string>
+    <string name="dns_doh_badge">DoH</string>
 
     <!-- Widget -->
     <string name="widget_name">Bật/Tắt BlockAds</string>
