@@ -1,0 +1,57 @@
+package app.pwhs.blockads.ui.onboarding
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.DnsProvider
+import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.ui.onboarding.data.ProtectionLevel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+class OnboardingViewModel(
+    private val appPrefs: AppPreferences,
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val _selectedProtectionLevel = MutableStateFlow(ProtectionLevel.STANDARD)
+    val selectedProtectionLevel: StateFlow<ProtectionLevel> = _selectedProtectionLevel.asStateFlow()
+
+    private val _selectedDnsProvider = MutableStateFlow<DnsProvider>(DnsProviders.CLOUDFLARE)
+    val selectedDnsProvider: StateFlow<DnsProvider> = _selectedDnsProvider.asStateFlow()
+
+    fun selectProtectionLevel(level: ProtectionLevel) {
+        _selectedProtectionLevel.value = level
+    }
+
+    fun selectDnsProvider(provider: DnsProvider) {
+        _selectedDnsProvider.value = provider
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            // Save protection level
+            appPrefs.setProtectionLevel(_selectedProtectionLevel.value.name)
+
+            // Save DNS provider
+            val provider = _selectedDnsProvider.value
+            appPrefs.setDnsProviderId(provider.id)
+            appPrefs.setUpstreamDns(provider.ipAddress)
+            // Set fallback DNS
+            val fallbackProvider = when (provider.id) {
+                DnsProviders.GOOGLE.id -> DnsProviders.CLOUDFLARE
+                DnsProviders.CLOUDFLARE.id -> DnsProviders.GOOGLE
+                else -> DnsProviders.ALL_PROVIDERS.firstOrNull {
+                    it.id != provider.id
+                } ?: DnsProviders.CLOUDFLARE
+            }
+            appPrefs.setFallbackDns(fallbackProvider.ipAddress)
+
+            // Mark onboarding as completed
+            appPrefs.setOnboardingCompleted(true)
+        }
+    }
+}
