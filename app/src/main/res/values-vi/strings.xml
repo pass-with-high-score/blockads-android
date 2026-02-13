@@ -130,8 +130,19 @@
     <string name="settings_add_domain_hint">Tên miền (vd: example.com)</string>
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
+    <string name="settings_dns_protocol">Giao thức DNS</string>
+    <string name="settings_dns_protocol_plain">DNS thường</string>
+    <string name="settings_dns_protocol_doh">DoH</string>
+    <string name="settings_dns_protocol_dot">DoT</string>
+    <string name="settings_doh_server_url">URL máy chủ DoH</string>
+    <string name="settings_doh_url_placeholder">https://dns.google/dns-query</string>
+    <string name="settings_save_doh_url">Lưu URL DoH</string>
+    <string name="settings_dot_server">Máy chủ DoT (hostname hoặc IP)</string>
+    <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Máy chủ DNS</string>
+    <string name="settings_upstream_dns_placeholder">8.8.8.8</string>
     <string name="settings_fallback_dns">Máy chủ DNS dự phòng</string>
+    <string name="settings_fallback_dns_placeholder">1.1.1.1</string>
     <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
 
     <!-- Filter Setup Screen -->
