@@ -24,6 +24,8 @@ class FilterListRepository(
     companion object {
         private const val TAG = "FilterListRepo"
         private const val CACHE_DIR = "filter_cache"
+        const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
+        const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
 
         val DEFAULT_LISTS = listOf(
             FilterList(
@@ -234,6 +236,32 @@ class FilterListRepository(
 
         // Check exact blocklist (only if Bloom filter suggested possibility)
         return checkDomainAndParents(domain) { blockedDomains.contains(it) }
+    }
+
+    /**
+     * Returns a key identifying the reason a domain is blocked.
+     * Returns empty string if the domain is not blocked.
+     * Use BlockReason constants; resolve to localized strings in UI.
+     */
+    fun getBlockReason(domain: String): String {
+        if (checkDomainAndParents(domain) { customAllowDomains.contains(it) }) {
+            return ""
+        }
+        if (checkDomainAndParents(domain) { customBlockDomains.contains(it) }) {
+            return BLOCK_REASON_CUSTOM_RULE
+        }
+        if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
+            return ""
+        }
+        val bloomFilter = blockedDomainsBloomFilter
+        if (bloomFilter != null) {
+            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
+            if (!possiblyBlocked) return ""
+        }
+        if (checkDomainAndParents(domain) { blockedDomains.contains(it) }) {
+            return BLOCK_REASON_FILTER_LIST
+        }
+        return ""
     }
     
     suspend fun loadCustomRules() {

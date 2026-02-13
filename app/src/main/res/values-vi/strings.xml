@@ -37,7 +37,7 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Chặn quảng cáo thông minh</string>
-    <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.</string>
+    <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.\n\n🔒 Cam kết bảo mật: Chúng tôi không bao giờ thu thập, lưu trữ hoặc truyền dữ liệu duyệt web của bạn. Mọi xử lý đều diễn ra trên thiết bị của bạn.</string>
     <string name="onboarding_title_2">Quyền riêng tư của bạn, được bảo vệ</string>
     <string name="onboarding_desc_2">Không thu thập dữ liệu. Không theo dõi. Tất cả nhật ký DNS chỉ lưu trên thiết bị của bạn. Chúng tôi không bao giờ xem hoạt động duyệt web của bạn.</string>
     <string name="onboarding_title_3">Miễn phí &amp; Mã nguồn mở</string>
@@ -45,6 +45,44 @@
     <string name="onboarding_skip">Bỏ qua</string>
     <string name="onboarding_next">Tiếp theo</string>
     <string name="onboarding_get_started">Bắt đầu</string>
+    <string name="onboarding_recommended">★ Khuyến nghị</string>
+
+    <!-- Onboarding: Protection Level -->
+    <string name="onboarding_protection_title">Chọn mức độ bảo vệ</string>
+    <string name="onboarding_protection_desc">Chọn mức độ chặn quảng cáo và trình theo dõi</string>
+    <string name="onboarding_protection_basic">Cơ bản</string>
+    <string name="onboarding_protection_basic_desc">Chặn các mạng quảng cáo lớn. Ít ảnh hưởng đến chức năng trang web.</string>
+    <string name="onboarding_protection_standard">Tiêu chuẩn</string>
+    <string name="onboarding_protection_standard_desc">Chặn quảng cáo, trình theo dõi và phân tích. Cân bằng tốt giữa bảo vệ và tương thích.</string>
+    <string name="onboarding_protection_strict">Nghiêm ngặt</string>
+    <string name="onboarding_protection_strict_desc">Chặn tối đa. Có thể ảnh hưởng một số chức năng trang web nhưng bảo vệ mạnh nhất.</string>
+
+    <!-- Onboarding: DNS Server -->
+    <string name="onboarding_dns_title">Chọn máy chủ DNS</string>
+    <string name="onboarding_dns_desc">Chọn máy chủ DNS để phân giải tên miền. Bạn có thể thay đổi sau trong Cài đặt.</string>
+
+    <!-- Onboarding: VPN Permission -->
+    <string name="onboarding_vpn_title">Cần quyền VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds sử dụng VPN cục bộ để lọc truy vấn DNS và chặn quảng cáo. Không có dữ liệu nào rời khỏi thiết bị — VPN này chỉ hoạt động cục bộ để chặn và lọc các yêu cầu DNS.</string>
+    <string name="onboarding_vpn_grant">Cấp quyền VPN</string>
+
+    <!-- Onboarding: Notification Permission -->
+    <string name="onboarding_notification_title">Luôn cập nhật</string>
+    <string name="onboarding_notification_desc">Cho phép thông báo để xem thống kê chặn theo thời gian thực và biết khi nào bảo vệ đang hoạt động. Cần thiết cho thông báo VPN trên Android 13+.</string>
+    <string name="onboarding_notification_grant">Cho phép thông báo</string>
+
+    <!-- Onboarding: Battery Optimization -->
+    <string name="onboarding_battery_title">Duy trì bảo vệ</string>
+    <string name="onboarding_battery_desc">Loại trừ BlockAds khỏi tối ưu hóa pin để dịch vụ VPN luôn hoạt động trong nền và không bị hệ thống tắt.</string>
+    <string name="onboarding_battery_grant">Tắt tối ưu hóa pin</string>
+
+    <!-- Onboarding: Permission Granted -->
+    <string name="onboarding_permission_granted">✓ Đã cấp quyền</string>
+
+    <!-- Onboarding: Completion -->
+    <string name="onboarding_complete_title">Bạn đã được bảo vệ!</string>
+    <string name="onboarding_complete_desc">Chúc mừng! BlockAds đã được cấu hình và sẵn sàng bảo vệ thiết bị của bạn khỏi quảng cáo và trình theo dõi.</string>
+    <string name="onboarding_complete_stats">Nhấn \"Bắt đầu\" để bật bảo vệ</string>
 
     <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Ứng dụng được phép</string>
@@ -101,6 +139,20 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>
+    <string name="settings_search_hint">Tìm kiếm cài đặt…</string>
+    <string name="settings_search_clear">Xóa tìm kiếm</string>
+    <string name="settings_category_protection">Bảo vệ</string>
+    <string name="settings_category_protection_desc">Máy chủ DNS, giao thức, tự động kết nối lại</string>
+    <string name="settings_category_interface">Giao diện</string>
+    <string name="settings_category_interface_desc">Chủ đề, ngôn ngữ</string>
+    <string name="settings_category_apps">Ứng dụng</string>
+    <string name="settings_category_apps_desc">Danh sách cho phép, cài đặt theo ứng dụng</string>
+    <string name="settings_category_filters">Bộ lọc</string>
+    <string name="settings_category_filters_desc">Quản lý bộ lọc, tự động cập nhật, quy tắc tùy chỉnh</string>
+    <string name="settings_category_data">Dữ liệu</string>
+    <string name="settings_category_data_desc">Xuất/Nhập, xóa nhật ký</string>
+    <string name="settings_category_info">Thông tin</string>
+    <string name="settings_category_info_desc">Giới thiệu, chính sách bảo mật, mã nguồn</string>
     <string name="settings_appearance">Giao diện</string>
     <string name="settings_theme">Chủ đề</string>
     <string name="settings_theme_system">Hệ thống</string>
@@ -251,4 +303,50 @@
     <string name="app_management_blocked">Bị chặn: %d</string>
     <string name="app_management_system">Hệ thống</string>
     <string name="app_management_vpn_toggle">Định tuyến VPN cho %s</string>
+    <!-- Improved DNS Log Screen -->
+    <string name="log_status_blocked">Đã chặn</string>
+    <string name="log_status_allowed">Cho phép</string>
+    <string name="log_status_whitelisted">Trong danh sách trắng</string>
+    <string name="log_detail_title">Chi tiết tên miền</string>
+    <string name="log_detail_query_type">Loại truy vấn</string>
+    <string name="log_detail_response_time">Thời gian phản hồi</string>
+    <string name="log_detail_status">Trạng thái</string>
+    <string name="log_detail_app">Ứng dụng</string>
+    <string name="log_detail_resolved_ip">IP đã phân giải</string>
+    <string name="log_detail_blocked_by">Bị chặn bởi</string>
+    <string name="log_detail_timestamp">Thời gian</string>
+    <string name="log_detail_unknown">Không rõ</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_realtime_on">Thời gian thực: BẬT</string>
+    <string name="log_realtime_off">Thời gian thực: TẮT</string>
+    <string name="log_time_range_all">Tất cả</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7d</string>
+    <string name="log_filter_all_apps">Tất cả ứng dụng</string>
+    <string name="log_bulk_mode">Chọn</string>
+    <string name="log_bulk_selected">Đã chọn %d</string>
+    <string name="log_bulk_block">Chặn tất cả</string>
+    <string name="log_bulk_whitelist">Cho phép tất cả</string>
+    <string name="log_bulk_done">Xong</string>
+    <string name="log_unblock_domain">Bỏ chặn tên miền này</string>
+    <string name="log_domain_unblocked">Đã bỏ chặn tên miền: %s</string>
+    <string name="log_action_unblock">Bỏ chặn</string>
+    <string name="log_action_block">Chặn</string>
+    <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
+    <string name="block_reason_filter_list">Danh sách bộ lọc</string>
+    <!-- Statistics Screen -->
+    <string name="nav_statistics">Thống kê</string>
+    <string name="stats_title">Thống kê</string>
+    <string name="stats_overview">Tổng quan</string>
+    <string name="stats_all_time_queries">Tổng truy vấn</string>
+    <string name="stats_all_time_blocked">Tổng đã chặn</string>
+    <string name="stats_today_queries">Hôm nay truy vấn</string>
+    <string name="stats_today_blocked">Hôm nay đã chặn</string>
+    <string name="stats_charts">Biểu đồ hoạt động</string>
+    <string name="stats_chart_4w">4 Tuần</string>
+    <string name="stats_chart_12m">12 Tháng</string>
+    <string name="stats_per_app">Thống kê theo ứng dụng</string>
+    <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 </resources>

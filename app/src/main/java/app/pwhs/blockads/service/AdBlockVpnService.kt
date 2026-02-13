@@ -306,6 +306,7 @@ class AdBlockVpnService : VpnService() {
             appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         if (filterRepo.isBlocked(domain)) {
+            val blockedBy = filterRepo.getBlockReason(domain)
             // Build and write blocked response based on configured response type
             val response = when (dnsResponseType) {
                 AppPreferences.DNS_RESPONSE_NXDOMAIN ->
@@ -323,12 +324,10 @@ class AdBlockVpnService : VpnService() {
             }
 
             val elapsed = System.currentTimeMillis() - startTime
-            logDnsQuery(domain, true, query.queryType, elapsed, appName)
+            logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = blockedBy)
             Log.d(TAG, "BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
-            logDnsQuery(domain, true, query.queryType, elapsed)
-            Log.d(TAG, "BLOCKED: $domain")
         } else {
             // Forward to upstream DNS
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -336,7 +335,6 @@ class AdBlockVpnService : VpnService() {
             val elapsed = System.currentTimeMillis() - startTime
             logDnsQuery(domain, false, query.queryType, elapsed, appName)
             totalQueries.incrementAndGet()
-            logDnsQuery(domain, false, query.queryType, elapsed)
         }
     }
 
@@ -539,7 +537,9 @@ class AdBlockVpnService : VpnService() {
         isBlocked: Boolean,
         queryType: Int,
         responseTimeMs: Long,
-        appName: String = ""
+        appName: String = "",
+        resolvedIp: String = "",
+        blockedBy: String = ""
     ) {
         serviceScope.launch {
             try {
@@ -555,7 +555,9 @@ class AdBlockVpnService : VpnService() {
                         isBlocked = isBlocked,
                         queryType = typeStr,
                         responseTimeMs = responseTimeMs,
-                        appName = appName
+                        appName = appName,
+                        resolvedIp = resolvedIp,
+                        blockedBy = blockedBy
                     )
                 )
             } catch (e: Exception) {

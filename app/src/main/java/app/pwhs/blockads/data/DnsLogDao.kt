@@ -18,6 +18,15 @@ interface DnsLogDao {
     @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 ORDER BY timestamp DESC")
     fun getBlockedOnly(): Flow<List<DnsLogEntry>>
 
+    @Query("SELECT * FROM dns_logs WHERE timestamp > :since ORDER BY timestamp DESC")
+    fun getAllSince(since: Long): Flow<List<DnsLogEntry>>
+
+    @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since ORDER BY timestamp DESC")
+    fun getBlockedOnlySince(since: Long): Flow<List<DnsLogEntry>>
+
+    @Query("SELECT DISTINCT appName FROM dns_logs WHERE appName != '' ORDER BY appName ASC")
+    fun getDistinctAppNames(): Flow<List<String>>
+
     @Query("SELECT * FROM dns_logs ORDER BY timestamp DESC LIMIT :limit")
     fun getRecentLogs(limit: Int): Flow<List<DnsLogEntry>>
 
@@ -88,4 +97,50 @@ interface DnsLogDao {
     """
     )
     fun getPerAppStats(since: Long? = null): Flow<List<AppStat>>
+        SELECT strftime('%Y-W%W', timestamp / 1000, 'unixepoch', 'localtime') AS week,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY week
+        ORDER BY week ASC
+    """
+    )
+    fun getWeeklyStats(
+        since: Long = System.currentTimeMillis() - 28 * 86_400_000L
+    ): Flow<List<WeeklyStat>>
+
+    @Query(
+        """
+        SELECT strftime('%Y-%m', timestamp / 1000, 'unixepoch', 'localtime') AS month,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY month
+        ORDER BY month ASC
+    """
+    )
+    fun getMonthlyStats(
+        since: Long = System.currentTimeMillis() - 365 * 86_400_000L
+    ): Flow<List<MonthlyStat>>
+
+    @Query(
+        """
+        SELECT appName, COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE appName != ''
+        GROUP BY appName
+        ORDER BY total DESC
+        LIMIT :limit
+    """
+    )
+    fun getTopApps(limit: Int = 15): Flow<List<AppStat>>
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE timestamp > :since")
+    fun getTotalCountSince(since: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since")
+    fun getBlockedCountSince(since: Long): Flow<Int>
 }

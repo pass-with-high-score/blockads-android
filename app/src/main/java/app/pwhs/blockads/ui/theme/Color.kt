@@ -37,3 +37,4 @@ val LightTextSecondary = Color(0xFF656D76)
 // Status colors
 val StatusBlocked = Color(0xFFFF6B6B)
 val StatusAllowed = Color(0xFF39D353)
+val WhitelistAmber = Color(0xFFFFC107)

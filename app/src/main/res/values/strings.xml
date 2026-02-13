@@ -37,7 +37,7 @@
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Block Ads Smartly</string>
-    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.</string>
+    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.\n\n🔒 Privacy promise: We never collect, store, or transmit your browsing data. All processing happens on your device only.</string>
     <string name="onboarding_title_2">Your Privacy, Protected</string>
     <string name="onboarding_desc_2">No data collection. No tracking. All DNS logs stay on your device only. We never see your browsing activity.</string>
     <string name="onboarding_title_3">Free &amp; Open Source</string>
@@ -45,6 +45,44 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_recommended">★ Recommended</string>
+
+    <!-- Onboarding: Protection Level -->
+    <string name="onboarding_protection_title">Choose Protection Level</string>
+    <string name="onboarding_protection_desc">Select how aggressively you want to block ads and trackers</string>
+    <string name="onboarding_protection_basic">Basic</string>
+    <string name="onboarding_protection_basic_desc">Block major ad networks. Minimal impact on website functionality.</string>
+    <string name="onboarding_protection_standard">Standard</string>
+    <string name="onboarding_protection_standard_desc">Block ads, trackers, and analytics. Good balance of protection and compatibility.</string>
+    <string name="onboarding_protection_strict">Strict</string>
+    <string name="onboarding_protection_strict_desc">Maximum blocking. May affect some website functionality but provides the strongest protection.</string>
+
+    <!-- Onboarding: DNS Server -->
+    <string name="onboarding_dns_title">Choose DNS Server</string>
+    <string name="onboarding_dns_desc">Select a DNS server for resolving domain names. You can change this later in Settings.</string>
+
+    <!-- Onboarding: VPN Permission -->
+    <string name="onboarding_vpn_title">VPN Permission Required</string>
+    <string name="onboarding_vpn_desc">BlockAds uses a local VPN to filter DNS queries and block ads. No data leaves your device — this VPN only works locally to intercept and filter DNS requests.</string>
+    <string name="onboarding_vpn_grant">Grant VPN Permission</string>
+
+    <!-- Onboarding: Notification Permission -->
+    <string name="onboarding_notification_title">Stay Informed</string>
+    <string name="onboarding_notification_desc">Allow notifications to see real-time blocking statistics and know when your protection is active. Required for the persistent VPN notification on Android 13+.</string>
+    <string name="onboarding_notification_grant">Allow Notifications</string>
+
+    <!-- Onboarding: Battery Optimization -->
+    <string name="onboarding_battery_title">Keep Protection Running</string>
+    <string name="onboarding_battery_desc">Exclude BlockAds from battery optimization so the VPN service stays active in the background and doesn\'t get killed by the system.</string>
+    <string name="onboarding_battery_grant">Disable Battery Optimization</string>
+
+    <!-- Onboarding: Permission Granted -->
+    <string name="onboarding_permission_granted">✓ Permission granted</string>
+
+    <!-- Onboarding: Completion -->
+    <string name="onboarding_complete_title">You\'re Now Protected!</string>
+    <string name="onboarding_complete_desc">Congratulations! BlockAds is configured and ready to protect your device from ads and trackers.</string>
+    <string name="onboarding_complete_stats">Tap \"Get Started\" to enable protection</string>
 
     <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Whitelisted Apps</string>
@@ -101,6 +139,20 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
+    <string name="settings_search_hint">Search settings…</string>
+    <string name="settings_search_clear">Clear search</string>
+    <string name="settings_category_protection">Protection</string>
+    <string name="settings_category_protection_desc">DNS server, protocol, auto-reconnect</string>
+    <string name="settings_category_interface">Interface</string>
+    <string name="settings_category_interface_desc">Theme, language</string>
+    <string name="settings_category_apps">Applications</string>
+    <string name="settings_category_apps_desc">App whitelist, per-app settings</string>
+    <string name="settings_category_filters">Filters</string>
+    <string name="settings_category_filters_desc">Filter management, auto-update, custom rules</string>
+    <string name="settings_category_data">Data</string>
+    <string name="settings_category_data_desc">Export/Import, clear logs</string>
+    <string name="settings_category_info">Information</string>
+    <string name="settings_category_info_desc">About, privacy policy, source code</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">System</string>
@@ -256,4 +308,50 @@
     <string name="app_management_blocked">Blocked: %d</string>
     <string name="app_management_system">System</string>
     <string name="app_management_vpn_toggle">VPN routing for %s</string>
+    <!-- Improved DNS Log Screen -->
+    <string name="log_status_blocked">Blocked</string>
+    <string name="log_status_allowed">Allowed</string>
+    <string name="log_status_whitelisted">Whitelisted</string>
+    <string name="log_detail_title">Domain Details</string>
+    <string name="log_detail_query_type">Query Type</string>
+    <string name="log_detail_response_time">Response Time</string>
+    <string name="log_detail_status">Status</string>
+    <string name="log_detail_app">App</string>
+    <string name="log_detail_resolved_ip">Resolved IP</string>
+    <string name="log_detail_blocked_by">Blocked By</string>
+    <string name="log_detail_timestamp">Time</string>
+    <string name="log_detail_unknown">Unknown</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_realtime_on">Real-time: ON</string>
+    <string name="log_realtime_off">Real-time: OFF</string>
+    <string name="log_time_range_all">All Time</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7d</string>
+    <string name="log_filter_all_apps">All Apps</string>
+    <string name="log_bulk_mode">Select</string>
+    <string name="log_bulk_selected">%d selected</string>
+    <string name="log_bulk_block">Block All</string>
+    <string name="log_bulk_whitelist">Whitelist All</string>
+    <string name="log_bulk_done">Done</string>
+    <string name="log_unblock_domain">Unblock this domain</string>
+    <string name="log_domain_unblocked">Domain unblocked: %s</string>
+    <string name="log_action_unblock">Unblock</string>
+    <string name="log_action_block">Block</string>
+    <string name="block_reason_custom_rule">Custom Block Rule</string>
+    <string name="block_reason_filter_list">Filter List</string>
+    <!-- Statistics Screen -->
+    <string name="nav_statistics">Stats</string>
+    <string name="stats_title">Statistics</string>
+    <string name="stats_overview">Overview</string>
+    <string name="stats_all_time_queries">All Time Queries</string>
+    <string name="stats_all_time_blocked">All Time Blocked</string>
+    <string name="stats_today_queries">Today Queries</string>
+    <string name="stats_today_blocked">Today Blocked</string>
+    <string name="stats_charts">Activity Charts</string>
+    <string name="stats_chart_4w">4 Weeks</string>
+    <string name="stats_chart_12m">12 Months</string>
+    <string name="stats_per_app">Per-App Statistics</string>
+    <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 </resources>

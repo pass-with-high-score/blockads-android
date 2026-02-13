@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.data.DailyStat
 import app.pwhs.blockads.data.HourlyStat
+import app.pwhs.blockads.data.MonthlyStat
+import app.pwhs.blockads.data.WeeklyStat
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -121,6 +123,102 @@ fun DailyStatsChart(
         labelProperties = LabelProperties(
             enabled = true,
             textStyle = TextStyle(color = textColor, fontSize = 10.sp),
+        ),
+        indicatorProperties = HorizontalIndicatorProperties(enabled = false),
+        gridProperties = GridProperties(enabled = false),
+        dividerProperties = DividerProperties(enabled = false),
+        labelHelperProperties = LabelHelperProperties(enabled = false),
+        animationDelay = 0,
+    )
+}
+
+@Composable
+fun WeeklyStatsChart(
+    stats: List<WeeklyStat>,
+    modifier: Modifier = Modifier
+) {
+    val textColor = TextSecondary
+    val chartData = remember(stats) {
+        stats.map { stat ->
+            Bars(
+                label = if (stat.week.contains("W")) "W${stat.week.substringAfterLast("W")}" else stat.week,
+                values = listOf(
+                    Bars.Data(
+                        label = "Total",
+                        value = stat.total.toDouble(),
+                        color = SolidColor(AccentBlue.copy(alpha = 0.5f)),
+                    ),
+                    Bars.Data(
+                        label = "Blocked",
+                        value = stat.blocked.toDouble(),
+                        color = SolidColor(DangerRed.copy(alpha = 0.8f)),
+                    )
+                )
+            )
+        }
+    }
+
+    if (chartData.isEmpty()) return
+
+    ColumnChart(
+        modifier = modifier.fillMaxSize(),
+        data = chartData,
+        barProperties = BarProperties(
+            cornerRadius = Bars.Data.Radius.Rectangle(topLeft = 4.dp, topRight = 4.dp),
+            spacing = 2.dp,
+            thickness = 24.dp,
+        ),
+        labelProperties = LabelProperties(
+            enabled = true,
+            textStyle = TextStyle(color = textColor, fontSize = 10.sp),
+        ),
+        indicatorProperties = HorizontalIndicatorProperties(enabled = false),
+        gridProperties = GridProperties(enabled = false),
+        dividerProperties = DividerProperties(enabled = false),
+        labelHelperProperties = LabelHelperProperties(enabled = false),
+        animationDelay = 0,
+    )
+}
+
+@Composable
+fun MonthlyStatsChart(
+    stats: List<MonthlyStat>,
+    modifier: Modifier = Modifier
+) {
+    val textColor = TextSecondary
+    val chartData = remember(stats) {
+        stats.map { stat ->
+            Bars(
+                label = if (stat.month.contains("-")) stat.month.substringAfterLast("-") else stat.month,
+                values = listOf(
+                    Bars.Data(
+                        label = "Total",
+                        value = stat.total.toDouble(),
+                        color = SolidColor(AccentBlue.copy(alpha = 0.5f)),
+                    ),
+                    Bars.Data(
+                        label = "Blocked",
+                        value = stat.blocked.toDouble(),
+                        color = SolidColor(DangerRed.copy(alpha = 0.8f)),
+                    )
+                )
+            )
+        }
+    }
+
+    if (chartData.isEmpty()) return
+
+    ColumnChart(
+        modifier = modifier.fillMaxSize(),
+        data = chartData,
+        barProperties = BarProperties(
+            cornerRadius = Bars.Data.Radius.Rectangle(topLeft = 4.dp, topRight = 4.dp),
+            spacing = 2.dp,
+            thickness = 20.dp,
+        ),
+        labelProperties = LabelProperties(
+            enabled = true,
+            textStyle = TextStyle(color = textColor, fontSize = 9.sp),
         ),
         indicatorProperties = HorizontalIndicatorProperties(enabled = false),
         gridProperties = GridProperties(enabled = false),

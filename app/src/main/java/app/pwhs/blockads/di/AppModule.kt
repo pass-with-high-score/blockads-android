@@ -9,7 +9,9 @@ import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
 import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
+import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
+import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
 import io.ktor.client.HttpClient
@@ -54,6 +56,7 @@ val appModule = module {
 
     // ViewModels
     viewModel { HomeViewModel(get(), get()) }
+    viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
         SettingsViewModel(
@@ -81,9 +84,14 @@ val appModule = module {
         )
     }
     viewModel {
-        AppManagementViewModel(
+      AppManagementViewModel(
             appPrefs = get(),
             dnsLogDao = get(),
+        )
+    }
+    viewModel {
+        OnboardingViewModel(
+            appPrefs = get(),
             application = androidApplication()
         )
     }
