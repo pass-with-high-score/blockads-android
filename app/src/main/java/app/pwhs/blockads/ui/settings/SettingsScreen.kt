@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Replay
@@ -121,6 +122,9 @@ fun SettingsScreen(
     val dnsResponseType by viewModel.dnsResponseType.collectAsState()
     var showDnsResponseTypeDialog by remember { mutableStateOf(false) }
 
+    val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsState()
+    val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
+
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
     var editDohUrl by remember(dohUrl) { mutableStateOf(dohUrl) }
@@ -132,7 +136,7 @@ fun SettingsScreen(
     fun matchesSearch(keywords: List<String>): Boolean =
         searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
 
-    val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi") }
+    val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "safesearch", "safe search", "youtube", "restricted", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi", "tìm kiếm an toàn", "hạn chế") }
     val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
     val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
@@ -234,6 +238,36 @@ fun SettingsScreen(
                             subtitle = stringResource(R.string.settings_auto_reconnect_desc),
                             isChecked = autoReconnect,
                             onCheckedChange = { viewModel.setAutoReconnect(it) }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        SettingsToggleItem(
+                            icon = Icons.Default.Search,
+                            title = stringResource(R.string.settings_safe_search),
+                            subtitle = stringResource(R.string.settings_safe_search_desc),
+                            isChecked = safeSearchEnabled,
+                            onCheckedChange = { viewModel.setSafeSearchEnabled(it) }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        SettingsToggleItem(
+                            icon = Icons.Default.OndemandVideo,
+                            title = stringResource(R.string.settings_youtube_restricted),
+                            subtitle = stringResource(R.string.settings_youtube_restricted_desc),
+                            isChecked = youtubeRestrictedMode,
+                            onCheckedChange = { viewModel.setYoutubeRestrictedMode(it) }
                         )
                     }
 

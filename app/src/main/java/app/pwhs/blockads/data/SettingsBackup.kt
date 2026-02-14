@@ -11,6 +11,8 @@ data class SettingsBackup(
     val themeMode: String = AppPreferences.THEME_SYSTEM,
     val appLanguage: String = AppPreferences.LANGUAGE_SYSTEM,
     val dnsResponseType: String = AppPreferences.DNS_RESPONSE_CUSTOM_IP,
+    val safeSearchEnabled: Boolean = false,
+    val youtubeRestrictedMode: Boolean = false,
     val filterLists: List<FilterListBackup> = emptyList(),
     val whitelistDomains: List<String> = emptyList(),
     val whitelistedApps: List<String> = emptyList(),
