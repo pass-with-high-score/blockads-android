@@ -41,17 +41,29 @@ class SafeSearchManagerTest {
     }
 
     @Test
-    fun `check returns REDIRECT for youtube domains`() {
+    fun `check returns NONE for youtube domains (handled by YouTube Restricted Mode)`() {
         val result = SafeSearchManager.check("www.youtube.com")
-        assertEquals(SafeSearchManager.SafeSearchResult.Action.REDIRECT, result.action)
-        assertEquals("restrict.youtube.com", result.redirectDomain)
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
     }
 
     @Test
-    fun `check returns REDIRECT for youtube subdomain`() {
+    fun `check returns NONE for youtube subdomain (handled by YouTube Restricted Mode)`() {
         val result = SafeSearchManager.check("m.youtube.com")
-        assertEquals(SafeSearchManager.SafeSearchResult.Action.REDIRECT, result.action)
-        assertEquals("restrict.youtube.com", result.redirectDomain)
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
+    }
+
+    @Test
+    fun `isYoutubeDomain returns true for youtube domains`() {
+        assertTrue(SafeSearchManager.isYoutubeDomain("youtube.com"))
+        assertTrue(SafeSearchManager.isYoutubeDomain("www.youtube.com"))
+        assertTrue(SafeSearchManager.isYoutubeDomain("m.youtube.com"))
+    }
+
+    @Test
+    fun `isYoutubeDomain returns false for non-youtube domains`() {
+        assertFalse(SafeSearchManager.isYoutubeDomain("google.com"))
+        assertFalse(SafeSearchManager.isYoutubeDomain("notyoutube.com"))
+        assertFalse(SafeSearchManager.isYoutubeDomain("example.com"))
     }
 
     @Test

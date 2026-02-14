@@ -147,11 +147,16 @@ class AdBlockVpnService : VpnService() {
                 val dnsResponseType = appPrefs.dnsResponseType.first()
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
                 val safeSearchEnabled = appPrefs.safeSearchEnabled.first()
+                val youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first()
 
                 // Resolve SafeSearch IPs if enabled
                 val safeSearchIpCache = mutableMapOf<String, ByteArray>()
                 if (safeSearchEnabled) {
                     resolveSafeSearchIps(upstreamDns, safeSearchIpCache)
+                }
+                // Resolve YouTube Restricted Mode IP if enabled (and not already resolved by SafeSearch)
+                if (youtubeRestrictedMode && SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN !in safeSearchIpCache) {
+                    resolveYoutubeRestrictIp(upstreamDns, safeSearchIpCache)
                 }
 
                 // Try to establish VPN with retry logic
@@ -202,7 +207,7 @@ class AdBlockVpnService : VpnService() {
                 startNotificationUpdates()
 
                 // Start processing packets
-                processPackets(upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, safeSearchIpCache)
+                processPackets(upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, youtubeRestrictedMode, safeSearchIpCache)
 
             } catch (e: Exception) {
                 Log.e(TAG, "VPN startup failed", e)
@@ -258,7 +263,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun processPackets(upstreamDns: String, fallbackDns: String, dnsResponseType: String, safeSearchEnabled: Boolean, safeSearchIpCache: Map<String, ByteArray>) {
+    private fun processPackets(upstreamDns: String, fallbackDns: String, dnsResponseType: String, safeSearchEnabled: Boolean, youtubeRestrictedMode: Boolean, safeSearchIpCache: Map<String, ByteArray>) {
         isProcessing = true
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
@@ -279,7 +284,7 @@ class AdBlockVpnService : VpnService() {
                 val query = DnsPacketParser.parseIpPacket(buffer, length)
 
                 if (query != null) {
-                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, safeSearchIpCache)
+                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, youtubeRestrictedMode, safeSearchIpCache)
                 }
                 // Non-DNS packets are silently dropped (they'll go through the normal
                 // network stack since we only handle DNS via VPN routing)
@@ -307,6 +312,7 @@ class AdBlockVpnService : VpnService() {
         fallbackDns: String,
         dnsResponseType: String,
         safeSearchEnabled: Boolean,
+        youtubeRestrictedMode: Boolean,
         safeSearchIpCache: Map<String, ByteArray>
     ) {
         val domain = query.domain.lowercase()
@@ -363,6 +369,26 @@ class AdBlockVpnService : VpnService() {
                 }
                 SafeSearchManager.SafeSearchResult.Action.NONE -> { /* proceed normally */ }
             }
+        }
+
+        // YouTube Restricted Mode: redirect YouTube domains to restrict.youtube.com
+        if (youtubeRestrictedMode && SafeSearchManager.isYoutubeDomain(domain)) {
+            val cachedIp = safeSearchIpCache[SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN]
+            if (cachedIp != null) {
+                val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
+                try {
+                    outputStream.write(response)
+                    outputStream.flush()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error writing YouTube restricted redirect response", e)
+                }
+                val elapsed = System.currentTimeMillis() - startTime
+                logDnsQuery(domain, false, query.queryType, elapsed, appName, resolvedIp = formatIp(cachedIp))
+                Log.d(TAG, "YOUTUBE RESTRICTED: $domain → ${SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN} (${formatIp(cachedIp)})")
+                totalQueries.incrementAndGet()
+                return
+            }
+            // If no cached IP, fall through to normal resolution
         }
 
         if (filterRepo.isBlocked(domain)) {
@@ -633,8 +659,7 @@ class AdBlockVpnService : VpnService() {
     private fun resolveSafeSearchIps(upstreamDns: String, cache: MutableMap<String, ByteArray>) {
         val safeSearchDomains = listOf(
             "forcesafesearch.google.com",
-            "strict.bing.com",
-            "restrict.youtube.com"
+            "strict.bing.com"
         )
         for (domain in safeSearchDomains) {
             try {
@@ -673,6 +698,47 @@ class AdBlockVpnService : VpnService() {
             }
         }
         Log.d(TAG, "SafeSearch IPs resolved: ${cache.size}/${safeSearchDomains.size}")
+    }
+
+    /**
+     * Resolve restrict.youtube.com IP at VPN startup for YouTube Restricted Mode.
+     */
+    private fun resolveYoutubeRestrictIp(upstreamDns: String, cache: MutableMap<String, ByteArray>) {
+        val domain = SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN
+        try {
+            val transactionId = (System.nanoTime() and 0xFFFF).toInt()
+            val queryPayload = DnsPacketParser.buildDnsQueryPayload(domain, 1, transactionId)
+
+            var socket: DatagramSocket? = null
+            try {
+                socket = DatagramSocket()
+                protect(socket)
+
+                val serverAddress = InetAddress.getByName(upstreamDns)
+                val requestPacket = DatagramPacket(
+                    queryPayload, queryPayload.size, serverAddress, 53
+                )
+                socket.soTimeout = 5000
+                socket.send(requestPacket)
+
+                val responseBuffer = ByteArray(1024)
+                val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
+                socket.receive(responsePacket)
+
+                val responseData = responseBuffer.copyOf(responsePacket.length)
+                val ip = DnsPacketParser.parseFirstARecord(responseData)
+                if (ip != null) {
+                    cache[domain] = ip
+                    Log.d(TAG, "YouTube Restricted Mode resolved: $domain → ${formatIp(ip)}")
+                } else {
+                    Log.w(TAG, "YouTube Restricted Mode: No A record for $domain")
+                }
+            } finally {
+                socket?.close()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "YouTube Restricted Mode: Failed to resolve $domain", e)
+        }
     }
 
     private fun formatIp(ip: ByteArray): String {

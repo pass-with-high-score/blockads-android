@@ -10,8 +10,8 @@ import android.util.Log
  * redirected to their SafeSearch-enforced domains:
  * - Google → forcesafesearch.google.com
  * - Bing → strict.bing.com
- * - YouTube → restrict.youtube.com
  *
+ * YouTube Restricted Mode is handled separately via its own toggle.
  * Search engines that don't support DNS-level SafeSearch are blocked.
  */
 object SafeSearchManager {
@@ -26,7 +26,6 @@ object SafeSearchManager {
     private val safeSearchRedirects = listOf(
         SearchRedirect("google.", "forcesafesearch.google.com"),
         SearchRedirect("bing.com", "strict.bing.com"),
-        SearchRedirect("youtube.com", "restrict.youtube.com"),
     )
 
     /**
@@ -81,6 +80,19 @@ object SafeSearchManager {
 
         return SafeSearchResult(action = SafeSearchResult.Action.NONE)
     }
+
+    /**
+     * Check if a domain should be redirected for YouTube Restricted Mode.
+     *
+     * @param domain The queried domain name (lowercase)
+     * @return true if the domain is a YouTube domain that should be redirected
+     */
+    fun isYoutubeDomain(domain: String): Boolean {
+        return domain == "youtube.com" || domain.endsWith(".youtube.com")
+    }
+
+    /** The CNAME target for YouTube Restricted Mode. */
+    const val YOUTUBE_RESTRICT_DOMAIN = "restrict.youtube.com"
 
     /**
      * Match a domain against a pattern. Supports both exact and subdomain matching.

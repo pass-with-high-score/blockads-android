@@ -116,6 +116,9 @@ class SettingsViewModel(
 
     val safeSearchEnabled: StateFlow<Boolean> = appPrefs.safeSearchEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val youtubeRestrictedMode: StateFlow<Boolean> = appPrefs.youtubeRestrictedMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -208,6 +211,12 @@ class SettingsViewModel(
         }
     }
 
+    fun setYoutubeRestrictedMode(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setYoutubeRestrictedMode(enabled)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
@@ -247,6 +256,7 @@ class SettingsViewModel(
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
+                    youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -291,6 +301,7 @@ class SettingsViewModel(
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
+                appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->
