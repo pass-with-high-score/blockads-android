@@ -189,7 +189,7 @@
     <string name="settings_auto_reconnect">Auto-reconnect</string>
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
     <string name="settings_safe_search">SafeSearch</string>
-    <string name="settings_safe_search_desc">Force safe search on Google, Bing and block unsupported search engines</string>
+    <string name="settings_safe_search_desc">Force safe search on supported search engines (Google, Bing)</string>
     <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
     <string name="settings_youtube_restricted_desc">Filter out mature videos on YouTube, block embedded mature videos on other sites, and hide all comments</string>
     <string name="settings_dns_protocol">DNS Protocol</string>

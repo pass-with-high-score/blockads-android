@@ -12,7 +12,7 @@ import android.util.Log
  * - Bing → strict.bing.com
  *
  * YouTube Restricted Mode is handled separately via its own toggle.
- * Search engines that don't support DNS-level SafeSearch are blocked.
+ * Search engines that don't support DNS-level SafeSearch are left unchanged.
  */
 object SafeSearchManager {
 
@@ -28,14 +28,6 @@ object SafeSearchManager {
         SearchRedirect("bing.com", "strict.bing.com"),
     )
 
-    /**
-     * Search engine domains to block when SafeSearch is enabled,
-     * because they don't support DNS-level SafeSearch enforcement.
-     */
-    private val unsupportedSearchEngines = setOf(
-        "duckduckgo.com",
-    )
-
     data class SearchRedirect(
         val domainPattern: String,
         val safeSearchDomain: String
@@ -48,7 +40,6 @@ object SafeSearchManager {
         enum class Action {
             NONE,       // Not a search engine, proceed normally
             REDIRECT,   // Redirect to SafeSearch domain
-            BLOCK       // Block unsupported search engine
         }
     }
 
@@ -67,14 +58,6 @@ object SafeSearchManager {
                     action = SafeSearchResult.Action.REDIRECT,
                     redirectDomain = redirect.safeSearchDomain
                 )
-            }
-        }
-
-        // Check if domain is an unsupported search engine that should be blocked
-        for (engine in unsupportedSearchEngines) {
-            if (domain == engine || domain.endsWith(".$engine")) {
-                Log.d(TAG, "SafeSearch block (unsupported): $domain")
-                return SafeSearchResult(action = SafeSearchResult.Action.BLOCK)
             }
         }
 

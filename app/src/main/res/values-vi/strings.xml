@@ -189,7 +189,7 @@
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
     <string name="settings_safe_search">Tìm kiếm an toàn</string>
-    <string name="settings_safe_search_desc">Bật tìm kiếm an toàn trên Google, Bing và chặn công cụ tìm kiếm không hỗ trợ</string>
+    <string name="settings_safe_search_desc">Bật tìm kiếm an toàn trên các công cụ tìm kiếm hỗ trợ (Google, Bing)</string>
     <string name="settings_youtube_restricted">Chế độ hạn chế YouTube</string>
     <string name="settings_youtube_restricted_desc">Lọc video người lớn trên YouTube, chặn video nhúng người lớn trên các trang khác và ẩn tất cả bình luận</string>
     <string name="settings_dns_protocol">Giao thức DNS</string>

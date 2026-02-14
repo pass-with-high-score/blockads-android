@@ -67,15 +67,15 @@ class SafeSearchManagerTest {
     }
 
     @Test
-    fun `check returns BLOCK for duckduckgo`() {
+    fun `check returns NONE for duckduckgo (unsupported engines are not blocked)`() {
         val result = SafeSearchManager.check("duckduckgo.com")
-        assertEquals(SafeSearchManager.SafeSearchResult.Action.BLOCK, result.action)
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
     }
 
     @Test
-    fun `check returns BLOCK for duckduckgo subdomain`() {
+    fun `check returns NONE for duckduckgo subdomain (unsupported engines are not blocked)`() {
         val result = SafeSearchManager.check("www.duckduckgo.com")
-        assertEquals(SafeSearchManager.SafeSearchResult.Action.BLOCK, result.action)
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
     }
 
     @Test

@@ -320,7 +320,7 @@ class AdBlockVpnService : VpnService() {
         val appName =
             appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
-        // SafeSearch enforcement: redirect or block search engines
+        // SafeSearch enforcement: redirect supported search engines
         if (safeSearchEnabled) {
             val result = SafeSearchManager.check(domain)
             when (result.action) {
@@ -344,28 +344,6 @@ class AdBlockVpnService : VpnService() {
                         }
                     }
                     // If no cached IP or no redirect domain, fall through to normal resolution
-                }
-                SafeSearchManager.SafeSearchResult.Action.BLOCK -> {
-                    val response = when (dnsResponseType) {
-                        AppPreferences.DNS_RESPONSE_NXDOMAIN ->
-                            DnsPacketParser.buildNxdomainResponse(query)
-                        AppPreferences.DNS_RESPONSE_REFUSED ->
-                            DnsPacketParser.buildRefusedResponse(query)
-                        else ->
-                            DnsPacketParser.buildBlockedResponse(query)
-                    }
-                    try {
-                        outputStream.write(response)
-                        outputStream.flush()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error writing SafeSearch block response", e)
-                    }
-                    val elapsed = System.currentTimeMillis() - startTime
-                    logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = "SafeSearch")
-                    Log.d(TAG, "SAFESEARCH BLOCKED: $domain (app: $appName)")
-                    totalQueries.incrementAndGet()
-                    blockedQueries.incrementAndGet()
-                    return
                 }
                 SafeSearchManager.SafeSearchResult.Action.NONE -> { /* proceed normally */ }
             }
