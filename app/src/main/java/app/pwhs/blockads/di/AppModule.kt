@@ -14,6 +14,7 @@ import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
+import app.pwhs.blockads.ui.customrules.CustomRulesViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -76,7 +77,7 @@ val appModule = module {
             application = androidApplication()
         )
     }
-    viewModel { app.pwhs.blockads.ui.customrules.CustomRulesViewModel(get(), get()) }
+    viewModel { CustomRulesViewModel(get(), get()) }
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),
@@ -85,9 +86,10 @@ val appModule = module {
     }
     viewModel {
       AppManagementViewModel(
-            appPrefs = get(),
-            dnsLogDao = get(),
-        )
+          appPrefs = get(),
+          dnsLogDao = get(),
+          application = androidApplication(),
+      )
     }
     viewModel {
         OnboardingViewModel(
