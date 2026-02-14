@@ -246,6 +246,7 @@ class SettingsViewModel(
                     autoReconnect = appPrefs.autoReconnect.first(),
                     themeMode = appPrefs.themeMode.first(),
                     appLanguage = appPrefs.appLanguage.first(),
+                    safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -289,6 +290,7 @@ class SettingsViewModel(
                 appPrefs.setAutoReconnect(backup.autoReconnect)
                 appPrefs.setThemeMode(backup.themeMode)
                 appPrefs.setAppLanguage(backup.appLanguage)
+                appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->

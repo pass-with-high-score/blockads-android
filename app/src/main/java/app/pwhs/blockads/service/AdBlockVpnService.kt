@@ -319,23 +319,25 @@ class AdBlockVpnService : VpnService() {
             val result = SafeSearchManager.check(domain)
             when (result.action) {
                 SafeSearchManager.SafeSearchResult.Action.REDIRECT -> {
-                    val redirectDomain = result.redirectDomain!!
-                    val cachedIp = safeSearchIpCache[redirectDomain]
-                    if (cachedIp != null) {
-                        val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
-                        try {
-                            outputStream.write(response)
-                            outputStream.flush()
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error writing SafeSearch redirect response", e)
+                    val redirectDomain = result.redirectDomain
+                    if (redirectDomain != null) {
+                        val cachedIp = safeSearchIpCache[redirectDomain]
+                        if (cachedIp != null) {
+                            val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
+                            try {
+                                outputStream.write(response)
+                                outputStream.flush()
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error writing SafeSearch redirect response", e)
+                            }
+                            val elapsed = System.currentTimeMillis() - startTime
+                            logDnsQuery(domain, false, query.queryType, elapsed, appName, resolvedIp = formatIp(cachedIp))
+                            Log.d(TAG, "SAFESEARCH: $domain → $redirectDomain (${formatIp(cachedIp)})")
+                            totalQueries.incrementAndGet()
+                            return
                         }
-                        val elapsed = System.currentTimeMillis() - startTime
-                        logDnsQuery(domain, false, query.queryType, elapsed, appName, resolvedIp = formatIp(cachedIp))
-                        Log.d(TAG, "SAFESEARCH: $domain → $redirectDomain (${formatIp(cachedIp)})")
-                        totalQueries.incrementAndGet()
-                        return
                     }
-                    // If no cached IP, fall through to normal resolution
+                    // If no cached IP or no redirect domain, fall through to normal resolution
                 }
                 SafeSearchManager.SafeSearchResult.Action.BLOCK -> {
                     val response = when (dnsResponseType) {

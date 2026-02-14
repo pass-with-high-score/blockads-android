@@ -342,7 +342,7 @@ object DnsPacketParser {
 
         // Skip question section
         for (i in 0 until qdCount) {
-            skipDomainName(buffer) ?: return null
+            if (!skipDomainName(buffer)) return null
             if (buffer.remaining() < 4) return null
             buffer.short // query type
             buffer.short // query class
@@ -350,7 +350,7 @@ object DnsPacketParser {
 
         // Parse answer section
         for (i in 0 until anCount) {
-            skipDomainName(buffer) ?: return null
+            if (!skipDomainName(buffer)) return null
             if (buffer.remaining() < 10) return null
 
             val type = buffer.short.toInt() and 0xFFFF
@@ -374,7 +374,7 @@ object DnsPacketParser {
         return null
     }
 
-    private fun skipDomainName(buffer: ByteBuffer): Boolean? {
+    private fun skipDomainName(buffer: ByteBuffer): Boolean {
         var safety = 0
         while (buffer.hasRemaining() && safety < 128) {
             val labelLength = buffer.get().toInt() and 0xFF
@@ -382,16 +382,16 @@ object DnsPacketParser {
 
             if ((labelLength and 0xC0) == 0xC0) {
                 // Compression pointer
-                if (!buffer.hasRemaining()) return null
+                if (!buffer.hasRemaining()) return false
                 buffer.get() // skip offset byte
                 return true
             }
 
-            if (buffer.remaining() < labelLength) return null
+            if (buffer.remaining() < labelLength) return false
             buffer.position(buffer.position() + labelLength)
             safety++
         }
-        return if (safety < 128) true else null
+        return safety < 128
     }
 
     private fun buildDnsResponse(query: DnsQuery): ByteArray {
