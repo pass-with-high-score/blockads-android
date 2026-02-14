@@ -266,6 +266,134 @@ object DnsPacketParser {
         )
     }
 
+    /**
+     * Build a DNS response that redirects to a specific IPv4 address.
+     * Used for SafeSearch enforcement to redirect search engines to their
+     * SafeSearch equivalents.
+     * For AAAA queries, returns an empty response (no AAAA record) to force IPv4.
+     */
+    fun buildRedirectResponse(query: DnsQuery, ipv4Address: ByteArray): ByteArray {
+        val dnsResponse = buildRedirectDnsResponse(query, ipv4Address)
+
+        return buildIpUdpPacket(
+            sourceIp = query.destIp,
+            destIp = query.sourceIp,
+            sourcePort = query.destPort,
+            destPort = query.sourcePort,
+            payload = dnsResponse
+        )
+    }
+
+    /**
+     * Build a raw DNS query payload for resolving a domain.
+     * Used internally for SafeSearch domain resolution.
+     */
+    fun buildDnsQueryPayload(domain: String, queryType: Int, transactionId: Int): ByteArray {
+        val out = ByteArrayOutputStream()
+
+        // Transaction ID
+        out.write(transactionId shr 8)
+        out.write(transactionId and 0xFF)
+
+        // Flags: RD=1 (recursion desired)
+        out.write(0x01)
+        out.write(0x00)
+
+        // QDCOUNT = 1
+        out.write(0x00)
+        out.write(0x01)
+        // ANCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+        // NSCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+        // ARCOUNT = 0
+        out.write(0x00)
+        out.write(0x00)
+
+        // Question section
+        out.write(encodeDomainName(domain))
+        // Query type
+        out.write(queryType shr 8)
+        out.write(queryType and 0xFF)
+        // Query class IN (1)
+        out.write(0x00)
+        out.write(0x01)
+
+        return out.toByteArray()
+    }
+
+    /**
+     * Parse the first A record (IPv4 address) from a DNS response payload.
+     * Returns the 4-byte IPv4 address, or null if no A record is found.
+     */
+    fun parseFirstARecord(dnsResponse: ByteArray): ByteArray? {
+        if (dnsResponse.size < DNS_HEADER_SIZE) return null
+
+        val buffer = ByteBuffer.wrap(dnsResponse)
+
+        buffer.short // transaction ID
+        buffer.short // flags
+        val qdCount = buffer.short.toInt() and 0xFFFF
+        val anCount = buffer.short.toInt() and 0xFFFF
+        buffer.short // nsCount
+        buffer.short // arCount
+
+        // Skip question section
+        for (i in 0 until qdCount) {
+            skipDomainName(buffer) ?: return null
+            if (buffer.remaining() < 4) return null
+            buffer.short // query type
+            buffer.short // query class
+        }
+
+        // Parse answer section
+        for (i in 0 until anCount) {
+            skipDomainName(buffer) ?: return null
+            if (buffer.remaining() < 10) return null
+
+            val type = buffer.short.toInt() and 0xFFFF
+            buffer.short // class
+            buffer.int   // TTL
+            val rdLength = buffer.short.toInt() and 0xFFFF
+
+            if (buffer.remaining() < rdLength) return null
+
+            if (type == 1 && rdLength == 4) {
+                // A record - IPv4 address
+                val ip = ByteArray(4)
+                buffer.get(ip)
+                return ip
+            } else {
+                // Skip this record's data
+                buffer.position(buffer.position() + rdLength)
+            }
+        }
+
+        return null
+    }
+
+    private fun skipDomainName(buffer: ByteBuffer): Boolean? {
+        var safety = 0
+        while (buffer.hasRemaining() && safety < 128) {
+            val labelLength = buffer.get().toInt() and 0xFF
+            if (labelLength == 0) return true
+
+            if ((labelLength and 0xC0) == 0xC0) {
+                // Compression pointer
+                if (!buffer.hasRemaining()) return null
+                buffer.get() // skip offset byte
+                return true
+            }
+
+            if (buffer.remaining() < labelLength) return null
+            buffer.position(buffer.position() + labelLength)
+            safety++
+        }
+        return if (safety < 128) true else null
+    }
+
     private fun buildDnsResponse(query: DnsQuery): ByteArray {
         val out = ByteArrayOutputStream()
 
@@ -471,6 +599,90 @@ object DnsPacketParser {
         // Query class
         out.write(query.queryClass shr 8)
         out.write(query.queryClass and 0xFF)
+
+        return out.toByteArray()
+    }
+
+    private fun buildRedirectDnsResponse(query: DnsQuery, ipv4Address: ByteArray): ByteArray {
+        val out = ByteArrayOutputStream()
+
+        // Transaction ID
+        out.write(query.transactionId shr 8)
+        out.write(query.transactionId and 0xFF)
+
+        if (query.queryType == 28) {
+            // AAAA query — return empty response (no AAAA record) to force IPv4 path
+            // Flags: QR=1 (response), AA=1 (authoritative), RD=1, RA=1
+            out.write(0x81)
+            out.write(0x80)
+
+            // QDCOUNT = 1
+            out.write(0x00)
+            out.write(0x01)
+            // ANCOUNT = 0 (no IPv6 answer)
+            out.write(0x00)
+            out.write(0x00)
+            // NSCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+            // ARCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+
+            // Question section
+            val domainBytes = encodeDomainName(query.domain)
+            out.write(domainBytes)
+            out.write(query.queryType shr 8)
+            out.write(query.queryType and 0xFF)
+            out.write(query.queryClass shr 8)
+            out.write(query.queryClass and 0xFF)
+        } else {
+            // A query — return the redirect IPv4 address
+            // Flags: QR=1 (response), AA=1 (authoritative), RD=1, RA=1
+            out.write(0x81)
+            out.write(0x80)
+
+            // QDCOUNT = 1
+            out.write(0x00)
+            out.write(0x01)
+            // ANCOUNT = 1
+            out.write(0x00)
+            out.write(0x01)
+            // NSCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+            // ARCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+
+            // Question section
+            val domainBytes = encodeDomainName(query.domain)
+            out.write(domainBytes)
+            out.write(query.queryType shr 8)
+            out.write(query.queryType and 0xFF)
+            out.write(query.queryClass shr 8)
+            out.write(query.queryClass and 0xFF)
+
+            // Answer section
+            out.write(0xC0) // Name pointer
+            out.write(0x0C)
+            // Type A (1)
+            out.write(0x00)
+            out.write(0x01)
+            // Class IN (1)
+            out.write(0x00)
+            out.write(0x01)
+            // TTL = 300 seconds
+            out.write(0x00)
+            out.write(0x00)
+            out.write(0x01)
+            out.write(0x2C)
+            // RDLENGTH = 4
+            out.write(0x00)
+            out.write(0x04)
+            // RDATA = redirect IP
+            out.write(ipv4Address)
+        }
 
         return out.toByteArray()
     }

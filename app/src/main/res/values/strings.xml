@@ -188,6 +188,8 @@
     <string name="settings_add_domain_hint">Domain (e.g. example.com)</string>
     <string name="settings_auto_reconnect">Auto-reconnect</string>
     <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
+    <string name="settings_safe_search">SafeSearch</string>
+    <string name="settings_safe_search_desc">Force safe search on Google, Bing, YouTube and block unsupported search engines</string>
     <string name="settings_dns_protocol">DNS Protocol</string>
     <string name="settings_dns_protocol_plain">Plain DNS</string>
     <string name="settings_dns_protocol_doh">DoH</string>

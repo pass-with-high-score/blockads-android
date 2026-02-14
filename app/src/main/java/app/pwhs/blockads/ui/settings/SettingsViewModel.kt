@@ -113,6 +113,9 @@ class SettingsViewModel(
             SharingStarted.WhileSubscribed(5000),
             AppPreferences.DNS_RESPONSE_CUSTOM_IP
         )
+
+    val safeSearchEnabled: StateFlow<Boolean> = appPrefs.safeSearchEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -196,6 +199,12 @@ class SettingsViewModel(
     fun setDnsResponseType(responseType: String) {
         viewModelScope.launch {
             appPrefs.setDnsResponseType(responseType)
+        }
+    }
+
+    fun setSafeSearchEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setSafeSearchEnabled(enabled)
         }
     }
 

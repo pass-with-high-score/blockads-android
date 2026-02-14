@@ -35,6 +35,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_AUTO_UPDATE_NOTIFICATION = stringPreferencesKey("auto_update_notification")
         private val KEY_DNS_RESPONSE_TYPE = stringPreferencesKey("dns_response_type")
         private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
+        private val KEY_SAFE_SEARCH_ENABLED = booleanPreferencesKey("safe_search_enabled")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -144,6 +145,10 @@ class AppPreferences(private val context: Context) {
 
     val protectionLevel: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[KEY_PROTECTION_LEVEL] ?: PROTECTION_STANDARD
+    }
+
+    val safeSearchEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_SAFE_SEARCH_ENABLED] ?: false
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -266,6 +271,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setProtectionLevel(level: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_PROTECTION_LEVEL] = level
+        }
+    }
+
+    suspend fun setSafeSearchEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_SAFE_SEARCH_ENABLED] = enabled
         }
     }
 

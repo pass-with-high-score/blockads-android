@@ -188,6 +188,8 @@
     <string name="settings_add_domain_hint">Tên miền (vd: example.com)</string>
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
     <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
+    <string name="settings_safe_search">Tìm kiếm an toàn</string>
+    <string name="settings_safe_search_desc">Bật tìm kiếm an toàn trên Google, Bing, YouTube và chặn công cụ tìm kiếm không hỗ trợ</string>
     <string name="settings_dns_protocol">Giao thức DNS</string>
     <string name="settings_dns_protocol_plain">DNS thường</string>
     <string name="settings_dns_protocol_doh">DoH</string>

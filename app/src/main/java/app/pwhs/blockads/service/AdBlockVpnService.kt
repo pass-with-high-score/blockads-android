@@ -146,6 +146,13 @@ class AdBlockVpnService : VpnService() {
                 val fallbackDns = appPrefs.fallbackDns.first()
                 val dnsResponseType = appPrefs.dnsResponseType.first()
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
+                val safeSearchEnabled = appPrefs.safeSearchEnabled.first()
+
+                // Resolve SafeSearch IPs if enabled
+                val safeSearchIpCache = mutableMapOf<String, ByteArray>()
+                if (safeSearchEnabled) {
+                    resolveSafeSearchIps(upstreamDns, safeSearchIpCache)
+                }
 
                 // Try to establish VPN with retry logic
                 var vpnEstablished = false
@@ -195,7 +202,7 @@ class AdBlockVpnService : VpnService() {
                 startNotificationUpdates()
 
                 // Start processing packets
-                processPackets(upstreamDns, fallbackDns, dnsResponseType)
+                processPackets(upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, safeSearchIpCache)
 
             } catch (e: Exception) {
                 Log.e(TAG, "VPN startup failed", e)
@@ -251,7 +258,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun processPackets(upstreamDns: String, fallbackDns: String, dnsResponseType: String) {
+    private fun processPackets(upstreamDns: String, fallbackDns: String, dnsResponseType: String, safeSearchEnabled: Boolean, safeSearchIpCache: Map<String, ByteArray>) {
         isProcessing = true
         val fd = vpnInterface?.fileDescriptor ?: return
         val inputStream = FileInputStream(fd)
@@ -272,7 +279,7 @@ class AdBlockVpnService : VpnService() {
                 val query = DnsPacketParser.parseIpPacket(buffer, length)
 
                 if (query != null) {
-                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns, dnsResponseType)
+                    handleDnsQuery(query, outputStream, upstreamDns, fallbackDns, dnsResponseType, safeSearchEnabled, safeSearchIpCache)
                 }
                 // Non-DNS packets are silently dropped (they'll go through the normal
                 // network stack since we only handle DNS via VPN routing)
@@ -298,12 +305,63 @@ class AdBlockVpnService : VpnService() {
         outputStream: FileOutputStream,
         upstreamDns: String,
         fallbackDns: String,
-        dnsResponseType: String
+        dnsResponseType: String,
+        safeSearchEnabled: Boolean,
+        safeSearchIpCache: Map<String, ByteArray>
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
         val appName =
             appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+
+        // SafeSearch enforcement: redirect or block search engines
+        if (safeSearchEnabled) {
+            val result = SafeSearchManager.check(domain)
+            when (result.action) {
+                SafeSearchManager.SafeSearchResult.Action.REDIRECT -> {
+                    val redirectDomain = result.redirectDomain!!
+                    val cachedIp = safeSearchIpCache[redirectDomain]
+                    if (cachedIp != null) {
+                        val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
+                        try {
+                            outputStream.write(response)
+                            outputStream.flush()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error writing SafeSearch redirect response", e)
+                        }
+                        val elapsed = System.currentTimeMillis() - startTime
+                        logDnsQuery(domain, false, query.queryType, elapsed, appName, resolvedIp = formatIp(cachedIp))
+                        Log.d(TAG, "SAFESEARCH: $domain → $redirectDomain (${formatIp(cachedIp)})")
+                        totalQueries.incrementAndGet()
+                        return
+                    }
+                    // If no cached IP, fall through to normal resolution
+                }
+                SafeSearchManager.SafeSearchResult.Action.BLOCK -> {
+                    val response = when (dnsResponseType) {
+                        AppPreferences.DNS_RESPONSE_NXDOMAIN ->
+                            DnsPacketParser.buildNxdomainResponse(query)
+                        AppPreferences.DNS_RESPONSE_REFUSED ->
+                            DnsPacketParser.buildRefusedResponse(query)
+                        else ->
+                            DnsPacketParser.buildBlockedResponse(query)
+                    }
+                    try {
+                        outputStream.write(response)
+                        outputStream.flush()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error writing SafeSearch block response", e)
+                    }
+                    val elapsed = System.currentTimeMillis() - startTime
+                    logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = "SafeSearch")
+                    Log.d(TAG, "SAFESEARCH BLOCKED: $domain (app: $appName)")
+                    totalQueries.incrementAndGet()
+                    blockedQueries.incrementAndGet()
+                    return
+                }
+                SafeSearchManager.SafeSearchResult.Action.NONE -> { /* proceed normally */ }
+            }
+        }
 
         if (filterRepo.isBlocked(domain)) {
             val blockedBy = filterRepo.getBlockReason(domain)
@@ -564,6 +622,59 @@ class AdBlockVpnService : VpnService() {
                 Log.e(TAG, "Failed to log DNS query", e)
             }
         }
+    }
+
+    /**
+     * Resolve SafeSearch domain IPs at VPN startup using a protected socket.
+     * Caches the resolved IPv4 addresses for use during DNS query handling.
+     */
+    private fun resolveSafeSearchIps(upstreamDns: String, cache: MutableMap<String, ByteArray>) {
+        val safeSearchDomains = listOf(
+            "forcesafesearch.google.com",
+            "strict.bing.com",
+            "restrict.youtube.com"
+        )
+        for (domain in safeSearchDomains) {
+            try {
+                val transactionId = (System.nanoTime() and 0xFFFF).toInt()
+                val queryPayload = DnsPacketParser.buildDnsQueryPayload(domain, 1, transactionId)
+
+                var socket: DatagramSocket? = null
+                try {
+                    socket = DatagramSocket()
+                    protect(socket)
+
+                    val serverAddress = InetAddress.getByName(upstreamDns)
+                    val requestPacket = DatagramPacket(
+                        queryPayload, queryPayload.size, serverAddress, 53
+                    )
+                    socket.soTimeout = 5000
+                    socket.send(requestPacket)
+
+                    val responseBuffer = ByteArray(1024)
+                    val responsePacket = DatagramPacket(responseBuffer, responseBuffer.size)
+                    socket.receive(responsePacket)
+
+                    val responseData = responseBuffer.copyOf(responsePacket.length)
+                    val ip = DnsPacketParser.parseFirstARecord(responseData)
+                    if (ip != null) {
+                        cache[domain] = ip
+                        Log.d(TAG, "SafeSearch resolved: $domain → ${formatIp(ip)}")
+                    } else {
+                        Log.w(TAG, "SafeSearch: No A record for $domain")
+                    }
+                } finally {
+                    socket?.close()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "SafeSearch: Failed to resolve $domain", e)
+            }
+        }
+        Log.d(TAG, "SafeSearch IPs resolved: ${cache.size}/${safeSearchDomains.size}")
+    }
+
+    private fun formatIp(ip: ByteArray): String {
+        return ip.joinToString(".") { (it.toInt() and 0xFF).toString() }
     }
 
     private fun stopVpn(showStoppedNotification: Boolean = true) {
