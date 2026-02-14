@@ -84,6 +84,12 @@ class SafeSearchManagerTest {
     }
 
     @Test
+    fun `isYoutubeDomain returns true for youtube-nocookie domains`() {
+        assertTrue(SafeSearchManager.isYoutubeDomain("youtube-nocookie.com"))
+        assertTrue(SafeSearchManager.isYoutubeDomain("www.youtube-nocookie.com"))
+    }
+
+    @Test
     fun `isYoutubeDomain returns false for non-youtube domains`() {
         assertFalse(SafeSearchManager.isYoutubeDomain("google.com"))
         assertFalse(SafeSearchManager.isYoutubeDomain("notyoutube.com"))

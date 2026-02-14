@@ -72,6 +72,7 @@ object SafeSearchManager {
      */
     fun isYoutubeDomain(domain: String): Boolean {
         return domain == "youtube.com" || domain.endsWith(".youtube.com")
+            || domain == "youtube-nocookie.com" || domain.endsWith(".youtube-nocookie.com")
     }
 
     /** The CNAME target for YouTube Restricted Mode. */
