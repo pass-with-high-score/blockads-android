@@ -371,8 +371,8 @@ fun StatisticsScreen(
                                     Text(
                                         text = stringResource(
                                             R.string.stats_app_queries_blocked,
-                                            formatCount(app.total),
-                                            formatCount(app.blocked)
+                                            formatCount(app.totalQueries),
+                                            formatCount(app.blockedQueries)
                                         ),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = TextSecondary

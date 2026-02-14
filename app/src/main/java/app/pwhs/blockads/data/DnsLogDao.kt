@@ -127,12 +127,12 @@ interface DnsLogDao {
 
     @Query(
         """
-        SELECT appName, COUNT(*) AS total,
-               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        SELECT appName, COUNT(*) AS totalQueries,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
         FROM dns_logs
         WHERE appName != ''
         GROUP BY appName
-        ORDER BY total DESC
+        ORDER BY totalQueries DESC
         LIMIT :limit
     """
     )
