@@ -80,13 +80,21 @@ object SafeSearchManager {
     /**
      * Match a domain against a pattern. Supports both exact and subdomain matching.
      * For example, pattern "google." matches "google.com", "www.google.com",
-     * "www.google.co.uk", etc.
+     * "www.google.co.uk", etc., but not "accounts.google.com" or "mail.google.com".
      * Pattern "bing.com" matches "bing.com" and "www.bing.com".
      */
     private fun matchesDomain(domain: String, pattern: String): Boolean {
         if (pattern.endsWith(".")) {
-            // Pattern like "google." matches any domain containing ".google." or starting with "google."
-            return domain.contains(".$pattern") || domain.startsWith(pattern)
+            // Pattern like "google." is treated specially: it matches only search hostnames
+            // where the base label is the left-most label, optionally prefixed by "www".
+            // Examples that match: google.com, www.google.com, google.co.uk, www.google.co.uk
+            // Examples that do NOT match: accounts.google.com, mail.google.com, play.google.com
+            val baseLabel = pattern.removeSuffix(".") // e.g., "google"
+            val parts = domain.split('.')
+            if (parts.isEmpty()) return false
+            val idx = parts.indexOf(baseLabel)
+            if (idx == -1) return false
+            return idx == 0 || (idx == 1 && parts[0] == "www")
         }
         // Exact domain or subdomain match
         return domain == pattern || domain.endsWith(".$pattern")

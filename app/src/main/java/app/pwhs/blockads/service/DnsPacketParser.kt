@@ -273,6 +273,9 @@ object DnsPacketParser {
      * For AAAA queries, returns an empty response (no AAAA record) to force IPv4.
      */
     fun buildRedirectResponse(query: DnsQuery, ipv4Address: ByteArray): ByteArray {
+        require(ipv4Address.size == 4) {
+            "ipv4Address must contain exactly 4 bytes for an A record"
+        }
         val dnsResponse = buildRedirectDnsResponse(query, ipv4Address)
 
         return buildIpUdpPacket(
@@ -610,37 +613,16 @@ object DnsPacketParser {
         out.write(query.transactionId shr 8)
         out.write(query.transactionId and 0xFF)
 
-        if (query.queryType == 28) {
-            // AAAA query — return empty response (no AAAA record) to force IPv4 path
-            // Flags: QR=1 (response), AA=1 (authoritative), RD=1, RA=1
-            out.write(0x81)
-            out.write(0x80)
+        // Mirror RD flag from the incoming query (consistent with NXDOMAIN/REFUSED builders)
+        val originalFlagsByte1 = query.rawDnsPayload.getOrNull(2)?.toInt() ?: 0
+        val rdSet = (originalFlagsByte1 and 0x01) == 0x01
 
-            // QDCOUNT = 1
-            out.write(0x00)
-            out.write(0x01)
-            // ANCOUNT = 0 (no IPv6 answer)
-            out.write(0x00)
-            out.write(0x00)
-            // NSCOUNT = 0
-            out.write(0x00)
-            out.write(0x00)
-            // ARCOUNT = 0
-            out.write(0x00)
-            out.write(0x00)
-
-            // Question section
-            val domainBytes = encodeDomainName(query.domain)
-            out.write(domainBytes)
-            out.write(query.queryType shr 8)
-            out.write(query.queryType and 0xFF)
-            out.write(query.queryClass shr 8)
-            out.write(query.queryClass and 0xFF)
-        } else {
+        if (query.queryType == 1) {
             // A query — return the redirect IPv4 address
-            // Flags: QR=1 (response), AA=1 (authoritative), RD=1, RA=1
-            out.write(0x81)
-            out.write(0x80)
+            // Flags: QR=1 (response), AA=1 (authoritative), RD=mirror, RA=1
+            val responseFlagsByte1 = 0x84 or if (rdSet) 0x01 else 0x00
+            out.write(responseFlagsByte1)
+            out.write(0x80) // RA=1, RCODE=0 (NOERROR)
 
             // QDCOUNT = 1
             out.write(0x00)
@@ -682,6 +664,34 @@ object DnsPacketParser {
             out.write(0x04)
             // RDATA = redirect IP
             out.write(ipv4Address)
+        } else {
+            // Non-A query (AAAA, HTTPS, TXT, etc): return a NOERROR response with no answers,
+            // echoing the original question type/class.
+            // Flags: QR=1 (response), AA=1 (authoritative), RD=mirror, RA=1
+            val responseFlagsByte1 = 0x84 or if (rdSet) 0x01 else 0x00
+            out.write(responseFlagsByte1)
+            out.write(0x80) // RA=1, RCODE=0 (NOERROR)
+
+            // QDCOUNT = 1
+            out.write(0x00)
+            out.write(0x01)
+            // ANCOUNT = 0 (no answers)
+            out.write(0x00)
+            out.write(0x00)
+            // NSCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+            // ARCOUNT = 0
+            out.write(0x00)
+            out.write(0x00)
+
+            // Question section
+            val domainBytes = encodeDomainName(query.domain)
+            out.write(domainBytes)
+            out.write(query.queryType shr 8)
+            out.write(query.queryType and 0xFF)
+            out.write(query.queryClass shr 8)
+            out.write(query.queryClass and 0xFF)
         }
 
         return out.toByteArray()

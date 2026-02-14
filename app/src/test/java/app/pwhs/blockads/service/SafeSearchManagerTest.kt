@@ -27,6 +27,30 @@ class SafeSearchManagerTest {
     }
 
     @Test
+    fun `check returns NONE for accounts google (non-search subdomain)`() {
+        val result = SafeSearchManager.check("accounts.google.com")
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
+    }
+
+    @Test
+    fun `check returns NONE for mail google (non-search subdomain)`() {
+        val result = SafeSearchManager.check("mail.google.com")
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
+    }
+
+    @Test
+    fun `check returns NONE for play google (non-search subdomain)`() {
+        val result = SafeSearchManager.check("play.google.com")
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
+    }
+
+    @Test
+    fun `check returns NONE for drive google (non-search subdomain)`() {
+        val result = SafeSearchManager.check("drive.google.com")
+        assertEquals(SafeSearchManager.SafeSearchResult.Action.NONE, result.action)
+    }
+
+    @Test
     fun `check returns REDIRECT for bing domains`() {
         val result = SafeSearchManager.check("www.bing.com")
         assertEquals(SafeSearchManager.SafeSearchResult.Action.REDIRECT, result.action)

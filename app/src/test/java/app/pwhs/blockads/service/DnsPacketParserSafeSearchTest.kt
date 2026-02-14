@@ -112,4 +112,45 @@ class DnsPacketParserSafeSearchTest {
         assertEquals(0, dnsPayload[6].toInt() and 0xFF)
         assertEquals(0, dnsPayload[7].toInt() and 0xFF)
     }
+
+    @Test
+    fun `buildRedirectResponse creates empty response for HTTPS query`() {
+        val query = DnsPacketParser.DnsQuery(
+            transactionId = 0x9999,
+            domain = "www.google.com",
+            queryType = 65, // HTTPS record
+            queryClass = 1,
+            rawDnsPayload = ByteArray(12),
+            sourceIp = byteArrayOf(10, 0, 0, 2),
+            destIp = byteArrayOf(10, 0, 0, 1),
+            sourcePort = 54321,
+            destPort = 53
+        )
+
+        val redirectIp = byteArrayOf(1, 2, 3, 4)
+        val response = DnsPacketParser.buildRedirectResponse(query, redirectIp)
+
+        // Extract DNS payload - HTTPS response should have ANCOUNT = 0 (no answer)
+        val dnsPayload = response.copyOfRange(28, response.size)
+        assertEquals(0, dnsPayload[6].toInt() and 0xFF)
+        assertEquals(0, dnsPayload[7].toInt() and 0xFF)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `buildRedirectResponse rejects non-4-byte address`() {
+        val query = DnsPacketParser.DnsQuery(
+            transactionId = 0x1111,
+            domain = "example.com",
+            queryType = 1,
+            queryClass = 1,
+            rawDnsPayload = ByteArray(12),
+            sourceIp = byteArrayOf(10, 0, 0, 2),
+            destIp = byteArrayOf(10, 0, 0, 1),
+            sourcePort = 12345,
+            destPort = 53
+        )
+
+        // Pass a 16-byte IPv6 address — should throw
+        DnsPacketParser.buildRedirectResponse(query, ByteArray(16))
+    }
 }
