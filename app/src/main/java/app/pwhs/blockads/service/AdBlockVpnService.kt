@@ -349,8 +349,9 @@ class AdBlockVpnService : VpnService() {
             }
         }
 
-        // YouTube Restricted Mode: redirect YouTube domains to restrict.youtube.com (only for A/AAAA queries)
-        if (youtubeRestrictedMode && (query.queryType == 1 || query.queryType == 28) && SafeSearchManager.isYoutubeDomain(domain)) {
+        // YouTube Restricted Mode: redirect YouTube domains to restrict.youtube.com
+        // Intercept ALL query types (A, AAAA, HTTPS, etc.) to prevent bypass via HTTPS/SVCB records
+        if (youtubeRestrictedMode && SafeSearchManager.isYoutubeDomain(domain)) {
             val cachedIp = safeSearchIpCache[SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN]
             if (cachedIp != null) {
                 val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
