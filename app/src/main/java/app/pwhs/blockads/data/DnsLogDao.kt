@@ -97,6 +97,7 @@ interface DnsLogDao {
     """
     )
     fun getPerAppStats(since: Long? = null): Flow<List<AppStat>>
+    @Query("""
         SELECT strftime('%Y-W%W', timestamp / 1000, 'unixepoch', 'localtime') AS week,
                COUNT(*) AS total,
                SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
