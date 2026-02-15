@@ -144,4 +144,10 @@ interface DnsLogDao {
 
     @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since")
     fun getBlockedCountSince(since: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since")
+    suspend fun getBlockedCountSinceSync(since: Long): Int
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1")
+    suspend fun getBlockedCountSync(): Int
 }

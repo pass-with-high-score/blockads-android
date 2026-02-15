@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -124,6 +125,8 @@ fun SettingsScreen(
 
     val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsState()
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
+    val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsState()
+    val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -141,6 +144,7 @@ fun SettingsScreen(
     val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
     val dataKeywords = remember { listOf("export", "import", "backup", "clear", "log", "data", "xuất", "nhập", "sao lưu", "xóa", "nhật ký", "dữ liệu") }
+    val notificationsKeywords = remember { listOf("notification", "daily", "summary", "milestone", "thông báo", "tóm tắt", "cột mốc", "hàng ngày") }
     val infoKeywords = remember { listOf("about", "version", "privacy", "source", "information", "giới thiệu", "phiên bản", "bảo mật", "mã nguồn", "thông tin") }
 
     val showProtection by remember(searchQuery) { derivedStateOf { matchesSearch(protectionKeywords) } }
@@ -148,6 +152,7 @@ fun SettingsScreen(
     val showApps by remember(searchQuery) { derivedStateOf { matchesSearch(appsKeywords) } }
     val showFilters by remember(searchQuery) { derivedStateOf { matchesSearch(filtersKeywords) } }
     val showData by remember(searchQuery) { derivedStateOf { matchesSearch(dataKeywords) } }
+    val showNotifications by remember(searchQuery) { derivedStateOf { matchesSearch(notificationsKeywords) } }
     val showInfo by remember(searchQuery) { derivedStateOf { matchesSearch(infoKeywords) } }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -1012,6 +1017,38 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.settings_clear_logs))
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Notifications: Daily summary, milestones
+                if (showNotifications) {
+                    SectionHeader(
+                        title = stringResource(R.string.settings_category_notifications),
+                        icon = Icons.Default.Notifications,
+                        description = stringResource(R.string.settings_category_notifications_desc)
+                    )
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        SettingsToggleItem(
+                            icon = Icons.Default.Notifications,
+                            title = stringResource(R.string.settings_daily_summary),
+                            subtitle = stringResource(R.string.settings_daily_summary_desc),
+                            isChecked = dailySummaryEnabled,
+                            onCheckedChange = { viewModel.setDailySummaryEnabled(it) }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        SettingsToggleItem(
+                            icon = Icons.Default.Notifications,
+                            title = stringResource(R.string.settings_milestone_notifications),
+                            subtitle = stringResource(R.string.settings_milestone_notifications_desc),
+                            isChecked = milestoneNotificationsEnabled,
+                            onCheckedChange = { viewModel.setMilestoneNotificationsEnabled(it) }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

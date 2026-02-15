@@ -3,6 +3,7 @@ package app.pwhs.blockads
 import android.app.Application
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.di.appModule
+import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,5 +30,8 @@ class BlockAdsApplication : Application() {
         applicationScope.launch {
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
         }
+
+        // Schedule daily summary notification
+        DailySummaryScheduler.scheduleDailySummary(this)
     }
 }

@@ -37,6 +37,9 @@ class AppPreferences(private val context: Context) {
         private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
         private val KEY_SAFE_SEARCH_ENABLED = booleanPreferencesKey("safe_search_enabled")
         private val KEY_YOUTUBE_RESTRICTED_MODE = booleanPreferencesKey("youtube_restricted_mode")
+        private val KEY_DAILY_SUMMARY_ENABLED = booleanPreferencesKey("daily_summary_enabled")
+        private val KEY_MILESTONE_NOTIFICATIONS_ENABLED = booleanPreferencesKey("milestone_notifications_enabled")
+        private val KEY_LAST_MILESTONE_BLOCKED = stringPreferencesKey("last_milestone_blocked")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -154,6 +157,18 @@ class AppPreferences(private val context: Context) {
 
     val youtubeRestrictedMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_YOUTUBE_RESTRICTED_MODE] ?: false
+    }
+
+    val dailySummaryEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DAILY_SUMMARY_ENABLED] ?: true
+    }
+
+    val milestoneNotificationsEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] ?: true
+    }
+
+    val lastMilestoneBlocked: Flow<Long> = context.dataStore.data.map { prefs ->
+        (prefs[KEY_LAST_MILESTONE_BLOCKED] ?: "0").toLongOrNull() ?: 0L
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -288,6 +303,24 @@ class AppPreferences(private val context: Context) {
     suspend fun setYoutubeRestrictedMode(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_YOUTUBE_RESTRICTED_MODE] = enabled
+        }
+    }
+
+    suspend fun setDailySummaryEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DAILY_SUMMARY_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLastMilestoneBlocked(count: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_MILESTONE_BLOCKED] = count.toString()
         }
     }
 

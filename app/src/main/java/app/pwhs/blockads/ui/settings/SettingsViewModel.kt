@@ -119,6 +119,13 @@ class SettingsViewModel(
 
     val youtubeRestrictedMode: StateFlow<Boolean> = appPrefs.youtubeRestrictedMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val dailySummaryEnabled: StateFlow<Boolean> = appPrefs.dailySummaryEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val milestoneNotificationsEnabled: StateFlow<Boolean> = appPrefs.milestoneNotificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -217,6 +224,27 @@ class SettingsViewModel(
         }
     }
 
+    fun setDailySummaryEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setDailySummaryEnabled(enabled)
+            if (enabled) {
+                app.pwhs.blockads.worker.DailySummaryScheduler.scheduleDailySummary(
+                    getApplication<Application>().applicationContext
+                )
+            } else {
+                app.pwhs.blockads.worker.DailySummaryScheduler.cancelDailySummary(
+                    getApplication<Application>().applicationContext
+                )
+            }
+        }
+    }
+
+    fun setMilestoneNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setMilestoneNotificationsEnabled(enabled)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
@@ -257,6 +285,8 @@ class SettingsViewModel(
                     appLanguage = appPrefs.appLanguage.first(),
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
+                    dailySummaryEnabled = appPrefs.dailySummaryEnabled.first(),
+                    milestoneNotificationsEnabled = appPrefs.milestoneNotificationsEnabled.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -302,6 +332,8 @@ class SettingsViewModel(
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
+                appPrefs.setDailySummaryEnabled(backup.dailySummaryEnabled)
+                appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->

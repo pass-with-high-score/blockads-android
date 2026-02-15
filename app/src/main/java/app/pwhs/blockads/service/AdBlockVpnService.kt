@@ -19,6 +19,9 @@ import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.util.BatteryMonitor
 import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.util.AppNameResolver
+import app.pwhs.blockads.worker.VpnResumeWorker
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -34,6 +37,8 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.Locale
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
@@ -48,6 +53,7 @@ class AdBlockVpnService : VpnService() {
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
+        const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
 
         @Volatile
         var isRunning = false
@@ -75,12 +81,15 @@ class AdBlockVpnService : VpnService() {
         VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private lateinit var appNameResolver: AppNameResolver
+    private lateinit var notificationHelper: NotificationHelper
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
     private var notificationUpdateJob: kotlinx.coroutines.Job? = null
 
     private val totalQueries = AtomicLong(0)
     private val blockedQueries = AtomicLong(0)
     private var vpnStartTime: Long = 0L
+    @Volatile
+    private var todayBlockedCount: Int = 0
 
     @Volatile
     private var isProcessing = false
@@ -99,6 +108,7 @@ class AdBlockVpnService : VpnService() {
         dotClient = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
+        notificationHelper = NotificationHelper(this, appPrefs, dnsLogDao)
 
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -112,6 +122,11 @@ class AdBlockVpnService : VpnService() {
         when (intent?.action) {
             ACTION_STOP -> {
                 stopVpn()
+                return START_NOT_STICKY
+            }
+
+            ACTION_PAUSE_1H -> {
+                pauseVpn()
                 return START_NOT_STICKY
             }
 
@@ -441,6 +456,15 @@ class AdBlockVpnService : VpnService() {
             Log.d(TAG, "BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
+
+            // Check for milestone achievements
+            serviceScope.launch {
+                try {
+                    notificationHelper.checkAndNotifyMilestone()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error checking milestone", e)
+                }
+            }
         } else {
             // Forward to upstream DNS
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -760,6 +784,74 @@ class AdBlockVpnService : VpnService() {
         return ip.joinToString(".") { (it.toInt() and 0xFF).toString() }
     }
 
+    private fun pauseVpn() {
+        Log.d(TAG, "Pausing VPN for 1 hour")
+
+        // Schedule resume after 1 hour
+        val resumeWork = OneTimeWorkRequestBuilder<VpnResumeWorker>()
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .build()
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            VpnResumeWorker.WORK_NAME,
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            resumeWork
+        )
+
+        // Stop VPN but show paused notification
+        stopVpn(showStoppedNotification = false)
+        showPausedNotification()
+    }
+
+    private fun showPausedNotification() {
+        createNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val startIntent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = ACTION_START
+        }
+        val startPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.vpn_paused_title))
+            .setContentText(getString(R.string.vpn_paused_text))
+            .setSmallIcon(R.drawable.ic_shield_off)
+            .setOngoing(false)
+            .setContentIntent(pendingIntent)
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_stopped_action_enable), startPendingIntent
+                ).build()
+            )
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun stopVpn(showStoppedNotification: Boolean = true) {
         isProcessing = false
         isConnecting = false
@@ -961,6 +1053,14 @@ class AdBlockVpnService : VpnService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val pauseIntent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = ACTION_PAUSE_1H
+        }
+        val pausePendingIntent = PendingIntent.getService(
+            this, 4, pauseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
         } else {
@@ -983,10 +1083,9 @@ class AdBlockVpnService : VpnService() {
             )
 
             isRunning -> {
-                val blocked = blockedQueries.get()
-                val total = totalQueries.get()
                 val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
-                getString(R.string.vpn_notification_stats_text, blocked, total, uptimeStr)
+                val todayBlocked = todayBlockedCount
+                getString(R.string.vpn_notification_stats_today, todayBlocked, uptimeStr)
             }
 
             else -> getString(R.string.vpn_notification_text)
@@ -1000,7 +1099,12 @@ class AdBlockVpnService : VpnService() {
             .setContentIntent(pendingIntent)
             .addAction(
                 Notification.Action.Builder(
-                    null, "Stop", stopPendingIntent
+                    null, getString(R.string.vpn_notification_action_pause), pausePendingIntent
+                ).build()
+            )
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_notification_action_stop), stopPendingIntent
                 ).build()
             )
             .build()
@@ -1081,6 +1185,15 @@ class AdBlockVpnService : VpnService() {
         notificationUpdateJob = serviceScope.launch {
             while (isRunning) {
                 try {
+                    // Refresh today's blocked count from database
+                    val startOfDay = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                    todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDay)
+
                     delay(30_000L) // Update every 30 seconds
                     if (isRunning) {
                         updateNotification()
