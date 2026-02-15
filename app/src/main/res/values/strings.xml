@@ -381,6 +381,26 @@
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 
+    <!-- Notification Improvements -->
+    <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
+    <string name="vpn_notification_action_pause">Pause 1h</string>
+    <string name="vpn_notification_action_stop">Stop</string>
+    <string name="vpn_paused_title">BlockAds paused</string>
+    <string name="vpn_paused_text">Ad blocking paused for 1 hour. Will resume automatically.</string>
+    <string name="daily_summary_channel_name">Daily Summary</string>
+    <string name="daily_summary_channel_description">End-of-day ad blocking summary</string>
+    <string name="daily_summary_title">Daily Protection Summary</string>
+    <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
+    <string name="milestone_channel_name">Milestones</string>
+    <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
+    <string name="milestone_title">🎉 Milestone reached!</string>
+    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="settings_category_notifications">Notifications</string>
+    <string name="settings_category_notifications_desc">Daily summary, milestones</string>
+    <string name="settings_daily_summary">Daily summary</string>
+    <string name="settings_daily_summary_desc">Show end-of-day blocking summary</string>
+    <string name="settings_milestone_notifications">Milestone notifications</string>
+    <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
     <!-- Protection Profiles -->
     <string name="profile_title">Protection Profiles</string>
     <string name="profile_section_profiles">Profiles</string>

@@ -21,6 +21,10 @@ import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.util.BatteryMonitor
 import app.pwhs.blockads.widget.AdBlockGlanceWidget
 import app.pwhs.blockads.util.AppNameResolver
+import app.pwhs.blockads.util.startOfDayMillis
+import app.pwhs.blockads.worker.VpnResumeWorker
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -36,6 +40,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
@@ -53,6 +58,7 @@ class AdBlockVpnService : VpnService() {
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
+        const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
 
         /**
@@ -98,6 +104,7 @@ class AdBlockVpnService : VpnService() {
         VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private lateinit var appNameResolver: AppNameResolver
+    private lateinit var notificationHelper: NotificationHelper
     private var firewallManager: FirewallManager? = null
     private lateinit var firewallRuleDao: FirewallRuleDao
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
@@ -106,6 +113,13 @@ class AdBlockVpnService : VpnService() {
     private val totalQueries = AtomicLong(0)
     private val blockedQueries = AtomicLong(0)
     private var vpnStartTime: Long = 0L
+    @Volatile
+    private var todayBlockedCount: Int = 0
+
+    // Cached all-time blocked count for milestone checks (avoids DB queries on hot path)
+    private val allTimeBlockedCount = AtomicLong(0)
+    @Volatile
+    private var nextMilestoneThreshold: Long? = null
 
     @Volatile
     private var isProcessing = false
@@ -125,6 +139,7 @@ class AdBlockVpnService : VpnService() {
         firewallRuleDao = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
+        notificationHelper = NotificationHelper(this, appPrefs)
 
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -141,6 +156,9 @@ class AdBlockVpnService : VpnService() {
                 return START_NOT_STICKY
             }
 
+            ACTION_PAUSE_1H -> {
+                pauseVpn()
+                return START_NOT_STICKY
             ACTION_RESTART -> {
                 restartVpn()
                 return START_STICKY
@@ -313,6 +331,13 @@ class AdBlockVpnService : VpnService() {
                 blockedQueries.set(0)
                 vpnStartTime = System.currentTimeMillis()
                 startTimestamp = vpnStartTime
+
+                // Initialize cached all-time blocked count for milestone checks
+                val cachedTotal = dnsLogDao.getBlockedCountSync().toLong()
+                allTimeBlockedCount.set(cachedTotal)
+                val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+                nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
+
                 updateNotification() // Update to normal notification
                 AdBlockGlanceWidget.requestUpdate(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
@@ -590,6 +615,26 @@ class AdBlockVpnService : VpnService() {
             Log.d(TAG, "BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
+
+            // Check for milestone achievements using in-memory counter
+            val currentTotal = allTimeBlockedCount.incrementAndGet()
+            val threshold = nextMilestoneThreshold
+            if (threshold != null && currentTotal >= threshold) {
+                // Prevent redundant coroutine launches while check is in progress
+                nextMilestoneThreshold = null
+                serviceScope.launch {
+                    try {
+                        notificationHelper.checkAndNotifyMilestone(currentTotal)
+                        // Update next threshold after check
+                        val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+                        nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error checking milestone", e)
+                        // Restore threshold so checks resume
+                        nextMilestoneThreshold = threshold
+                    }
+                }
+            }
         } else {
             // Forward to upstream DNS
             forwardDnsQuery(query, outputStream, upstreamDns, fallbackDns)
@@ -909,6 +954,74 @@ class AdBlockVpnService : VpnService() {
         return ip.joinToString(".") { (it.toInt() and 0xFF).toString() }
     }
 
+    private fun pauseVpn() {
+        Log.d(TAG, "Pausing VPN for 1 hour")
+
+        // Schedule resume after 1 hour
+        val resumeWork = OneTimeWorkRequestBuilder<VpnResumeWorker>()
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .build()
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            VpnResumeWorker.WORK_NAME,
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            resumeWork
+        )
+
+        // Stop VPN but show paused notification
+        stopVpn(showStoppedNotification = false)
+        showPausedNotification()
+    }
+
+    private fun showPausedNotification() {
+        createNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val startIntent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = ACTION_START
+        }
+        val startPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getService(
+                this, 3, startIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.vpn_paused_title))
+            .setContentText(getString(R.string.vpn_paused_text))
+            .setSmallIcon(R.drawable.ic_shield_off)
+            .setOngoing(false)
+            .setContentIntent(pendingIntent)
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_stopped_action_enable), startPendingIntent
+                ).build()
+            )
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun stopVpn(showStoppedNotification: Boolean = true) {
         isProcessing = false
         isConnecting = false
@@ -1162,6 +1275,14 @@ class AdBlockVpnService : VpnService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val pauseIntent = Intent(this, AdBlockVpnService::class.java).apply {
+            action = ACTION_PAUSE_1H
+        }
+        val pausePendingIntent = PendingIntent.getService(
+            this, 4, pauseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
         } else {
@@ -1184,10 +1305,9 @@ class AdBlockVpnService : VpnService() {
             )
 
             isRunning -> {
-                val blocked = blockedQueries.get()
-                val total = totalQueries.get()
                 val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
-                getString(R.string.vpn_notification_stats_text, blocked, total, uptimeStr)
+                val todayBlocked = todayBlockedCount
+                getString(R.string.vpn_notification_stats_today, todayBlocked, uptimeStr)
             }
 
             else -> getString(R.string.vpn_notification_text)
@@ -1201,7 +1321,12 @@ class AdBlockVpnService : VpnService() {
             .setContentIntent(pendingIntent)
             .addAction(
                 Notification.Action.Builder(
-                    null, "Stop", stopPendingIntent
+                    null, getString(R.string.vpn_notification_action_pause), pausePendingIntent
+                ).build()
+            )
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_notification_action_stop), stopPendingIntent
                 ).build()
             )
             .build()
@@ -1282,6 +1407,9 @@ class AdBlockVpnService : VpnService() {
         notificationUpdateJob = serviceScope.launch {
             while (isRunning) {
                 try {
+                    // Refresh today's blocked count from database
+                    todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
+
                     delay(30_000L) // Update every 30 seconds
                     if (isRunning) {
                         updateNotification()

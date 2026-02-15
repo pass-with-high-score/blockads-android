@@ -26,6 +26,7 @@ import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.util.CustomRuleParser
+import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -128,6 +129,12 @@ class SettingsViewModel(
 
     val youtubeRestrictedMode: StateFlow<Boolean> = appPrefs.youtubeRestrictedMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val dailySummaryEnabled: StateFlow<Boolean> = appPrefs.dailySummaryEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val milestoneNotificationsEnabled: StateFlow<Boolean> = appPrefs.milestoneNotificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val highContrast: StateFlow<Boolean> = appPrefs.highContrast
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -244,6 +251,27 @@ class SettingsViewModel(
         }
     }
 
+    fun setDailySummaryEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setDailySummaryEnabled(enabled)
+            if (enabled) {
+                DailySummaryScheduler.scheduleDailySummary(
+                    getApplication<Application>().applicationContext
+                )
+            } else {
+                DailySummaryScheduler.cancelDailySummary(
+                    getApplication<Application>().applicationContext
+                )
+            }
+        }
+    }
+
+    fun setMilestoneNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setMilestoneNotificationsEnabled(enabled)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
@@ -287,6 +315,8 @@ class SettingsViewModel(
                     appLanguage = appPrefs.appLanguage.first(),
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
+                    dailySummaryEnabled = appPrefs.dailySummaryEnabled.first(),
+                    milestoneNotificationsEnabled = appPrefs.milestoneNotificationsEnabled.first(),
                     activeProfileType = activeProfile?.profileType ?: "",
                     highContrast = appPrefs.highContrast.first(),
                     firewallEnabled = appPrefs.firewallEnabled.first(),
@@ -348,6 +378,13 @@ class SettingsViewModel(
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
+                appPrefs.setDailySummaryEnabled(backup.dailySummaryEnabled)
+                if (backup.dailySummaryEnabled) {
+                    DailySummaryScheduler.scheduleDailySummary(getApplication())
+                } else {
+                    DailySummaryScheduler.cancelDailySummary(getApplication())
+                }
+                appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
                 appPrefs.setHighContrast(backup.highContrast)
                 appPrefs.setFirewallEnabled(backup.firewallEnabled)
 

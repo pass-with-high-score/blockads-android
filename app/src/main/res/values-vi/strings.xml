@@ -376,6 +376,26 @@
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 
+    <!-- Notification Improvements -->
+    <string name="vpn_notification_stats_today">Đã chặn %1$d quảng cáo hôm nay | Uptime %2$s</string>
+    <string name="vpn_notification_action_pause">Tạm dừng 1h</string>
+    <string name="vpn_notification_action_stop">Dừng</string>
+    <string name="vpn_paused_title">BlockAds đã tạm dừng</string>
+    <string name="vpn_paused_text">Chặn quảng cáo tạm dừng 1 giờ. Sẽ tự động tiếp tục.</string>
+    <string name="daily_summary_channel_name">Tóm tắt hàng ngày</string>
+    <string name="daily_summary_channel_description">Tóm tắt chặn quảng cáo cuối ngày</string>
+    <string name="daily_summary_title">Bảo vệ hôm nay</string>
+    <string name="daily_summary_text">Hôm nay chúng tôi đã chặn %1$d quảng cáo cho bạn!</string>
+    <string name="milestone_channel_name">Cột mốc</string>
+    <string name="milestone_channel_description">Thông báo khi đạt cột mốc chặn quảng cáo</string>
+    <string name="milestone_title">🎉 Đạt cột mốc!</string>
+    <string name="milestone_text">Bạn đã chặn %1$s quảng cáo! Tiếp tục nhé!</string>
+    <string name="settings_category_notifications">Thông báo</string>
+    <string name="settings_category_notifications_desc">Tóm tắt hàng ngày, cột mốc</string>
+    <string name="settings_daily_summary">Tóm tắt hàng ngày</string>
+    <string name="settings_daily_summary_desc">Hiển thị tóm tắt chặn cuối ngày</string>
+    <string name="settings_milestone_notifications">Thông báo cột mốc</string>
+    <string name="settings_milestone_notifications_desc">Thông báo khi đạt cột mốc chặn</string>
     <!-- Protection Profiles -->
     <string name="profile_title">Hồ sơ bảo vệ</string>
     <string name="profile_section_profiles">Hồ sơ</string>
