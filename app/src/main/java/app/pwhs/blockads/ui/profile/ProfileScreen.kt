@@ -177,15 +177,18 @@ fun ProfileScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        allSchedules.forEachIndexed { index, schedule ->
-                            val profileName = profiles.find { it.id == schedule.profileId }?.name ?: "?"
+                        val schedulesWithProfiles = allSchedules.mapNotNull { schedule ->
+                            val profileName = profiles.find { it.id == schedule.profileId }?.name
+                            profileName?.let { schedule to it }
+                        }
+                        schedulesWithProfiles.forEachIndexed { index, (schedule, profileName) ->
                             ScheduleItem(
                                 schedule = schedule,
                                 profileName = profileName,
                                 onToggle = { viewModel.toggleSchedule(schedule) },
                                 onDelete = { viewModel.deleteSchedule(schedule) }
                             )
-                            if (index < allSchedules.lastIndex) {
+                            if (index < schedulesWithProfiles.lastIndex) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
