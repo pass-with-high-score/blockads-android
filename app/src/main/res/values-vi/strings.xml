@@ -340,6 +340,11 @@
     <string name="log_action_block">Chặn</string>
     <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
     <string name="block_reason_filter_list">Danh sách bộ lọc</string>
+    <string name="block_reason_security">Website nguy hiểm</string>
+    <!-- Security Stats -->
+    <string name="home_security_threats">Mối đe dọa đã chặn</string>
+    <string name="filter_category_ad">Chặn quảng cáo</string>
+    <string name="filter_category_security">Bảo mật</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
     <string name="stats_title">Thống kê</string>
@@ -348,6 +353,7 @@
     <string name="stats_all_time_blocked">Tổng đã chặn</string>
     <string name="stats_today_queries">Hôm nay truy vấn</string>
     <string name="stats_today_blocked">Hôm nay đã chặn</string>
+    <string name="stats_today_security">Hôm nay mối đe dọa</string>
     <string name="stats_charts">Biểu đồ hoạt động</string>
     <string name="stats_chart_4w">4 Tuần</string>
     <string name="stats_chart_12m">12 Tháng</string>

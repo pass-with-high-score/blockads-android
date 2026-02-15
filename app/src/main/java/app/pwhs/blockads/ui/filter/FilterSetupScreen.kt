@@ -97,23 +97,52 @@ fun FilterSetupScreen(
             ) {
                 // Built-in filters section
                 val builtInFilters = filterLists.filter { it.isBuiltIn }
+                val adFilters = builtInFilters.filter { it.category != app.pwhs.blockads.data.FilterList.CATEGORY_SECURITY }
+                val securityFilters = builtInFilters.filter { it.category == app.pwhs.blockads.data.FilterList.CATEGORY_SECURITY }
                 val customFilters = filterLists.filter { !it.isBuiltIn }
 
-                if (builtInFilters.isNotEmpty()) {
-                    SectionHeader(stringResource(R.string.filter_built_in))
+                if (adFilters.isNotEmpty()) {
+                    SectionHeader(stringResource(R.string.filter_category_ad))
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.animateContentSize()
                     ) {
                         Column {
-                            builtInFilters.forEachIndexed { index, filter ->
+                            adFilters.forEachIndexed { index, filter ->
                                 FilterItem(
                                     filter = filter,
                                     onToggle = { viewModel.toggleFilterList(filter) },
                                     onDelete = null // built-in cannot be deleted
                                 )
-                                if (index < builtInFilters.lastIndex) {
+                                if (index < adFilters.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                if (securityFilters.isNotEmpty()) {
+                    SectionHeader(stringResource(R.string.filter_category_security))
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.animateContentSize()
+                    ) {
+                        Column {
+                            securityFilters.forEachIndexed { index, filter ->
+                                FilterItem(
+                                    filter = filter,
+                                    onToggle = { viewModel.toggleFilterList(filter) },
+                                    onDelete = null // built-in cannot be deleted
+                                )
+                                if (index < securityFilters.lastIndex) {
                                     HorizontalDivider(
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)

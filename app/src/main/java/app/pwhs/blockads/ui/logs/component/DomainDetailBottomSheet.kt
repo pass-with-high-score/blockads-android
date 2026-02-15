@@ -138,6 +138,8 @@ fun DomainDetailBottomSheet(
                                 stringResource(R.string.block_reason_custom_rule)
                             FilterListRepository.BLOCK_REASON_FILTER_LIST ->
                                 stringResource(R.string.block_reason_filter_list)
+                            FilterListRepository.BLOCK_REASON_SECURITY ->
+                                stringResource(R.string.block_reason_security)
                             else -> entry.blockedBy
                         }
                         DetailRow(
