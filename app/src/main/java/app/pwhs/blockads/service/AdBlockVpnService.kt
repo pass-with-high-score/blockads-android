@@ -152,7 +152,7 @@ class AdBlockVpnService : VpnService() {
         isProcessing = false
         isRunning = false
         isConnecting = false
-        isReconnecting = false
+        isReconnecting = true
 
         // Stop monitoring
         networkMonitor?.stopMonitoring()
