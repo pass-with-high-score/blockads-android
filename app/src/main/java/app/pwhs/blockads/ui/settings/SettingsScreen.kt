@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Shield
@@ -91,6 +92,7 @@ import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestin
 import com.ramcosta.composedestinations.generated.destinations.AppManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FirewallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -138,7 +140,7 @@ fun SettingsScreen(
 
     val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "safesearch", "safe search", "youtube", "restricted", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi", "tìm kiếm an toàn", "hạn chế") }
     val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
-    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
+    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "firewall", "block", "tường lửa", "chặn", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
     val dataKeywords = remember { listOf("export", "import", "backup", "clear", "log", "data", "xuất", "nhập", "sao lưu", "xóa", "nhật ký", "dữ liệu") }
     val infoKeywords = remember { listOf("about", "version", "privacy", "source", "information", "giới thiệu", "phiên bản", "bảo mật", "mã nguồn", "thông tin") }
@@ -642,6 +644,46 @@ fun SettingsScreen(
                                 )
                                 Text(
                                     stringResource(R.string.settings_whitelist_apps_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Firewall (Per-App Internet Control)
+                    Card(
+                        onClick = { navigator.navigate(FirewallScreenDestination) },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Security, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_firewall),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    stringResource(R.string.settings_firewall_desc),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextSecondary
                                 )

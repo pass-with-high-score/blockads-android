@@ -26,6 +26,7 @@ class FilterListRepository(
         private const val CACHE_DIR = "filter_cache"
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
+        const val BLOCK_REASON_FIREWALL = "FIREWALL"
 
         val DEFAULT_LISTS = listOf(
             FilterList(

@@ -37,6 +37,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
         private val KEY_SAFE_SEARCH_ENABLED = booleanPreferencesKey("safe_search_enabled")
         private val KEY_YOUTUBE_RESTRICTED_MODE = booleanPreferencesKey("youtube_restricted_mode")
+        private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -154,6 +155,10 @@ class AppPreferences(private val context: Context) {
 
     val youtubeRestrictedMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_YOUTUBE_RESTRICTED_MODE] ?: false
+    }
+
+    val firewallEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FIREWALL_ENABLED] ?: false
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -288,6 +293,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setYoutubeRestrictedMode(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_YOUTUBE_RESTRICTED_MODE] = enabled
+        }
+    }
+
+    suspend fun setFirewallEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FIREWALL_ENABLED] = enabled
         }
     }
 
