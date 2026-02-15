@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterDialog
 import app.pwhs.blockads.ui.filter.component.FilterItem
@@ -97,8 +98,8 @@ fun FilterSetupScreen(
             ) {
                 // Built-in filters section
                 val builtInFilters = filterLists.filter { it.isBuiltIn }
-                val adFilters = builtInFilters.filter { it.category != app.pwhs.blockads.data.FilterList.CATEGORY_SECURITY }
-                val securityFilters = builtInFilters.filter { it.category == app.pwhs.blockads.data.FilterList.CATEGORY_SECURITY }
+                val adFilters = builtInFilters.filter { it.category != FilterList.CATEGORY_SECURITY }
+                val securityFilters = builtInFilters.filter { it.category == FilterList.CATEGORY_SECURITY }
                 val customFilters = filterLists.filter { !it.isBuiltIn }
 
                 if (adFilters.isNotEmpty()) {

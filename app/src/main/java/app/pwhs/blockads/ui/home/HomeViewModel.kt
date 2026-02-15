@@ -39,8 +39,9 @@ class HomeViewModel(
     val totalCount: StateFlow<Int> = dnsLogDao.getTotalCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val securityThreatsBlocked: StateFlow<Int> = dnsLogDao.getSecurityBlockedCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val securityThreatsBlocked: StateFlow<Int> = dnsLogDao.getBlockedCountByReason(
+        FilterListRepository.BLOCK_REASON_SECURITY
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val recentBlocked: StateFlow<List<DnsLogEntry>> =
         dnsLogDao.getRecentBlocked()
