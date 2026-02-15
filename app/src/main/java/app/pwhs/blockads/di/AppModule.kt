@@ -3,6 +3,7 @@ package app.pwhs.blockads.di
 import app.pwhs.blockads.data.AppDatabase
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.dns.DohClient
 import app.pwhs.blockads.dns.DotClient
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
@@ -10,11 +11,13 @@ import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
 import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
+import app.pwhs.blockads.ui.profile.ProfileViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
 import app.pwhs.blockads.ui.customrules.CustomRulesViewModel
+import app.pwhs.blockads.ui.firewall.FirewallViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -48,6 +51,8 @@ val appModule = module {
     single { get<AppDatabase>().whitelistDomainDao() }
     single { get<AppDatabase>().dnsErrorDao() }
     single { get<AppDatabase>().customDnsRuleDao() }
+    single { get<AppDatabase>().protectionProfileDao() }
+    single { get<AppDatabase>().firewallRuleDao() }
 
     // Preferences
     single { AppPreferences(androidContext()) }
@@ -55,8 +60,11 @@ val appModule = module {
     // Repository
     single { FilterListRepository(androidContext(), get(), get(), get(), get()) }
 
+    // Profile Manager
+    single { ProfileManager(get(), get(), get(), get()) }
+
     // ViewModels
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
@@ -67,17 +75,19 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             application = androidApplication()
         )
     }
-    viewModel { FilterSetupViewModel(get(), get()) }
+    viewModel { FilterSetupViewModel(get(), get(), androidApplication()) }
     viewModel {
         AppWhitelistViewModel(
             appPrefs = get(),
             application = androidApplication()
         )
     }
-    viewModel { CustomRulesViewModel(get(), get()) }
+    viewModel { CustomRulesViewModel(get(), get(), androidApplication()) }
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),
@@ -94,6 +104,17 @@ val appModule = module {
     viewModel {
         OnboardingViewModel(
             appPrefs = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
+        ProfileViewModel(
+            profileManager = get(),
+            profileDao = get(),
+            filterListDao = get(),
+        FirewallViewModel(
+            appPrefs = get(),
+            firewallRuleDao = get(),
             application = androidApplication()
         )
     }

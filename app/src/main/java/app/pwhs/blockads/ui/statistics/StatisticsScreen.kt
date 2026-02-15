@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
@@ -51,6 +52,7 @@ import app.pwhs.blockads.ui.home.component.WeeklyStatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
+import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
 import com.ramcosta.composedestinations.annotation.Destination
@@ -68,6 +70,8 @@ fun StatisticsScreen(
     val blockedCount by viewModel.blockedCount.collectAsState()
     val todayTotal by viewModel.todayTotal.collectAsState()
     val todayBlocked by viewModel.todayBlocked.collectAsState()
+    val securityBlockedCount by viewModel.securityBlockedCount.collectAsState()
+    val todaySecurityBlocked by viewModel.todaySecurityBlocked.collectAsState()
     val hourlyStats by viewModel.hourlyStats.collectAsState()
     val dailyStats by viewModel.dailyStats.collectAsState()
     val weeklyStats by viewModel.weeklyStats.collectAsState()
@@ -149,6 +153,29 @@ fun StatisticsScreen(
                     label = stringResource(R.string.stats_today_blocked),
                     value = formatCount(todayBlocked),
                     color = NeonGreen
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Security stats row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.GppGood,
+                    label = stringResource(R.string.home_security_threats),
+                    value = formatCount(securityBlockedCount),
+                    color = SecurityOrange
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.GppGood,
+                    label = stringResource(R.string.stats_today_security),
+                    value = formatCount(todaySecurityBlocked),
+                    color = SecurityOrange
                 )
             }
 

@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.DataSaverOn
+import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
@@ -30,8 +31,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.ProtectionProfile
+import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
@@ -63,6 +64,7 @@ import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
+import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
 import app.pwhs.blockads.util.formatTimeSince
@@ -82,6 +84,7 @@ fun HomeScreen(
     val vpnConnecting by viewModel.vpnConnecting.collectAsState()
     val blockedCount by viewModel.blockedCount.collectAsState()
     val totalCount by viewModel.totalCount.collectAsState()
+    val securityThreatsBlocked by viewModel.securityThreatsBlocked.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val filterLoadFailed by viewModel.filterLoadFailed.collectAsState()
     val recentBlocked by viewModel.recentBlocked.collectAsState()
@@ -89,6 +92,7 @@ fun HomeScreen(
     val dailyStats by viewModel.dailyStats.collectAsState()
     val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
+    val activeProfile by viewModel.activeProfile.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -200,6 +204,31 @@ fun HomeScreen(
                 color = TextSecondary
             )
 
+            // Active profile indicator
+            activeProfile?.let { profile ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(NeonGreen.copy(alpha = 0.15f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = NeonGreen,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = profileDisplayName(profile),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = NeonGreen
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(48.dp))
 
             // Power button — never blocked by filter loading
@@ -238,6 +267,13 @@ fun HomeScreen(
                     value = formatCount(blockedCount),
                     color = DangerRed
                 )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.GppGood,
+                    label = stringResource(R.string.home_security_threats),
+                    value = formatCount(securityThreatsBlocked),
+                    color = SecurityOrange
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -260,7 +296,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.home_block_rate),
                         tint = NeonGreen,
                         modifier = Modifier.size(32.dp)
                     )
@@ -499,6 +535,8 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                         recentBlocked.forEach { entry ->
+                            val dotColor = if (entry.blockedBy == FilterListRepository.BLOCK_REASON_SECURITY)
+                                SecurityOrange else DangerRed
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -509,7 +547,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(DangerRed)
+                                        .background(dotColor)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
@@ -559,4 +597,13 @@ private fun formatUptimeShort(ms: Long): String {
         minutes > 0 -> "${minutes}m"
         else -> "<1m"
     }
+}
+
+@Composable
+private fun profileDisplayName(profile: ProtectionProfile): String = when (profile.profileType) {
+    ProtectionProfile.TYPE_DEFAULT -> stringResource(R.string.profile_name_default)
+    ProtectionProfile.TYPE_STRICT -> stringResource(R.string.profile_name_strict)
+    ProtectionProfile.TYPE_FAMILY -> stringResource(R.string.profile_name_family)
+    ProtectionProfile.TYPE_GAMING -> stringResource(R.string.profile_name_gaming)
+    else -> profile.name
 }

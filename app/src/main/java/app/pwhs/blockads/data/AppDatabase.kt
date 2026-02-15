@@ -8,8 +8,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [DnsLogEntry::class, FilterList::class, WhitelistDomain::class, DnsErrorEntry::class, CustomDnsRule::class],
-    version = 9,
+    entities = [DnsLogEntry::class, FilterList::class, WhitelistDomain::class, DnsErrorEntry::class, CustomDnsRule::class, FirewallRule::class, ProtectionProfile::class, ProfileSchedule::class],
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -19,6 +19,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun whitelistDomainDao(): WhitelistDomainDao
     abstract fun dnsErrorDao(): DnsErrorDao
     abstract fun customDnsRuleDao(): CustomDnsRuleDao
+    abstract fun protectionProfileDao(): ProtectionProfileDao
+    abstract fun firewallRuleDao(): FirewallRuleDao
 
     companion object {
         @Volatile
@@ -110,6 +112,53 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `protection_profiles` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `profileType` TEXT NOT NULL,
+                        `enabledFilterUrls` TEXT NOT NULL DEFAULT '',
+                        `safeSearchEnabled` INTEGER NOT NULL DEFAULT 0,
+                        `youtubeRestrictedMode` INTEGER NOT NULL DEFAULT 0,
+                        `isActive` INTEGER NOT NULL DEFAULT 0,
+                        `createdAt` INTEGER NOT NULL DEFAULT 0
+                    )"""
+                )
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `profile_schedules` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `profileId` INTEGER NOT NULL,
+                        `startHour` INTEGER NOT NULL,
+                        `startMinute` INTEGER NOT NULL,
+                        `endHour` INTEGER NOT NULL,
+                        `endMinute` INTEGER NOT NULL,
+                        `isEnabled` INTEGER NOT NULL DEFAULT 1,
+                        `daysOfWeek` TEXT NOT NULL DEFAULT '1,2,3,4,5,6,7',
+                        FOREIGN KEY(`profileId`) REFERENCES `protection_profiles`(`id`) ON DELETE CASCADE
+                    )"""
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_profile_schedules_profileId` ON `profile_schedules` (`profileId`)")
+                db.execSQL("ALTER TABLE filter_lists ADD COLUMN category TEXT NOT NULL DEFAULT 'AD'")
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `firewall_rules` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `packageName` TEXT NOT NULL,
+                        `blockWifi` INTEGER NOT NULL DEFAULT 1,
+                        `blockMobileData` INTEGER NOT NULL DEFAULT 1,
+                        `scheduleEnabled` INTEGER NOT NULL DEFAULT 0,
+                        `scheduleStartHour` INTEGER NOT NULL DEFAULT 22,
+                        `scheduleStartMinute` INTEGER NOT NULL DEFAULT 0,
+                        `scheduleEndHour` INTEGER NOT NULL DEFAULT 6,
+                        `scheduleEndMinute` INTEGER NOT NULL DEFAULT 0,
+                        `isEnabled` INTEGER NOT NULL DEFAULT 1
+                    )"""
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_firewall_rules_packageName` ON `firewall_rules` (`packageName`)")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -125,7 +174,8 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_5_6,
                         MIGRATION_6_7,
                         MIGRATION_7_8,
-                        MIGRATION_8_9
+                        MIGRATION_8_9,
+                        MIGRATION_9_10
                     )
                     .fallbackToDestructiveMigration(false)
                     .build()

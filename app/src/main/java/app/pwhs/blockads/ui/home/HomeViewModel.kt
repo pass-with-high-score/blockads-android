@@ -10,6 +10,8 @@ import app.pwhs.blockads.data.DnsLogDao
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.HourlyStat
+import app.pwhs.blockads.data.ProtectionProfile
+import app.pwhs.blockads.data.ProtectionProfileDao
 import app.pwhs.blockads.data.TopBlockedDomain
 import app.pwhs.blockads.service.AdBlockVpnService
 import kotlinx.coroutines.delay
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
+    profileDao: ProtectionProfileDao,
 ) : ViewModel() {
 
     // Poll AdBlockVpnService.isRunning for immediate state updates
@@ -39,6 +42,10 @@ class HomeViewModel(
     val totalCount: StateFlow<Int> = dnsLogDao.getTotalCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val securityThreatsBlocked: StateFlow<Int> = dnsLogDao.getBlockedCountByReason(
+        FilterListRepository.BLOCK_REASON_SECURITY
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val recentBlocked: StateFlow<List<DnsLogEntry>> =
         dnsLogDao.getRecentBlocked()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -51,6 +58,9 @@ class HomeViewModel(
 
     val topBlockedDomains: StateFlow<List<TopBlockedDomain>> = dnsLogDao.getTopBlockedDomains()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val activeProfile: StateFlow<ProtectionProfile?> = profileDao.getActiveFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()

@@ -41,6 +41,9 @@ class AppPreferences(private val context: Context) {
         private val KEY_DAILY_SUMMARY_ENABLED = booleanPreferencesKey("daily_summary_enabled")
         private val KEY_MILESTONE_NOTIFICATIONS_ENABLED = booleanPreferencesKey("milestone_notifications_enabled")
         private val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
+        private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
+        private val KEY_HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
+        private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -53,6 +56,11 @@ class AppPreferences(private val context: Context) {
         const val LANGUAGE_SYSTEM = "system"
         const val LANGUAGE_EN = "en"
         const val LANGUAGE_VI = "vi"
+        const val LANGUAGE_JA = "ja"
+        const val LANGUAGE_KO = "ko"
+        const val LANGUAGE_ZH = "zh"
+        const val LANGUAGE_TH = "th"
+        const val LANGUAGE_ES = "es"
 
         const val UPDATE_FREQUENCY_6H = "6h"
         const val UPDATE_FREQUENCY_12H = "12h"
@@ -170,6 +178,12 @@ class AppPreferences(private val context: Context) {
 
     val lastMilestoneBlocked: Flow<Long> = context.dataStore.data.map { prefs ->
         prefs[KEY_LAST_MILESTONE_BLOCKED] ?: 0L
+    val activeProfileId: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_ACTIVE_PROFILE_ID] ?: -1L
+    val highContrast: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_HIGH_CONTRAST] ?: false
+    val firewallEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FIREWALL_ENABLED] ?: false
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -322,6 +336,15 @@ class AppPreferences(private val context: Context) {
     suspend fun setLastMilestoneBlocked(count: Long) {
         context.dataStore.edit { prefs ->
             prefs[KEY_LAST_MILESTONE_BLOCKED] = count
+    suspend fun setActiveProfileId(id: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACTIVE_PROFILE_ID] = id
+    suspend fun setHighContrast(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_HIGH_CONTRAST] = enabled
+    suspend fun setFirewallEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FIREWALL_ENABLED] = enabled
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Shield
@@ -92,6 +95,7 @@ import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestin
 import com.ramcosta.composedestinations.generated.destinations.AppManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FirewallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -127,6 +131,7 @@ fun SettingsScreen(
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
     val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsState()
     val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsState()
+    val highContrast by viewModel.highContrast.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -140,8 +145,10 @@ fun SettingsScreen(
         searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
 
     val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "safesearch", "safe search", "youtube", "restricted", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi", "tìm kiếm an toàn", "hạn chế") }
-    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
+    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "contrast", "high contrast", "accessibility", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối", "tương phản") }
     val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
+    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
+    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "firewall", "block", "tường lửa", "chặn", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
     val dataKeywords = remember { listOf("export", "import", "backup", "clear", "log", "data", "xuất", "nhập", "sao lưu", "xóa", "nhật ký", "dữ liệu") }
     val notificationsKeywords = remember { listOf("notification", "daily", "summary", "milestone", "thông báo", "tóm tắt", "cột mốc", "hàng ngày") }
@@ -274,6 +281,46 @@ fun SettingsScreen(
                             isChecked = youtubeRestrictedMode,
                             onCheckedChange = { viewModel.setYoutubeRestrictedMode(it) }
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Card(
+                        onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.ProfileScreenDestination) },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Shield,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_profiles),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    stringResource(R.string.settings_profiles_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -584,9 +631,10 @@ fun SettingsScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.height(12.dp))
-                            Row(
+                            FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 ThemeModeChip(
                                     label = stringResource(R.string.settings_lang_system),
@@ -609,7 +657,52 @@ fun SettingsScreen(
                                     onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
                                     modifier = Modifier.weight(1f)
                                 )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_ja),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_JA,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_JA) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_ko),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_KO,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_KO) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_zh),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_ZH,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ZH) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_th),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_TH,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_TH) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_es),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_ES,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ES) },
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            SettingsToggleItem(
+                                icon = Icons.Default.Contrast,
+                                title = stringResource(R.string.settings_high_contrast),
+                                description = stringResource(R.string.settings_high_contrast_desc),
+                                checked = highContrast,
+                                onCheckedChange = { viewModel.setHighContrast(it) }
+                            )
                         }
                     }
 
@@ -647,6 +740,46 @@ fun SettingsScreen(
                                 )
                                 Text(
                                     stringResource(R.string.settings_whitelist_apps_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Firewall (Per-App Internet Control)
+                    Card(
+                        onClick = { navigator.navigate(FirewallScreenDestination) },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Security, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    stringResource(R.string.settings_firewall),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    stringResource(R.string.settings_firewall_desc),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = TextSecondary
                                 )
