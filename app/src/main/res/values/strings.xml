@@ -381,6 +381,13 @@
     <string name="firewall_channel_description">Notifications when apps are blocked by firewall</string>
     <string name="firewall_notification_title">App blocked by firewall</string>
     <string name="firewall_notification_text">%s was blocked from accessing the internet</string>
+    <string name="firewall_network_wifi">Wi-Fi</string>
+    <string name="firewall_network_mobile">Mobile</string>
+    <string name="firewall_network_all">All</string>
+    <string name="firewall_status_schedule"> · %1$02d:%2$02d–%3$02d:%4$02d</string>
+    <string name="firewall_schedule_hour_plus">Hour +</string>
+    <string name="firewall_schedule_minute_plus">Min +</string>
+    <string name="block_reason_firewall">Firewall</string>
     <string name="settings_firewall">Firewall</string>
     <string name="settings_firewall_desc">Block internet access per app</string>
 </resources>

@@ -117,10 +117,10 @@ fun FirewallRuleDialog(
                             Row {
                                 TextButton(onClick = {
                                     startHour = (startHour + 1) % 24
-                                }) { Text("H+") }
+                                }) { Text(stringResource(R.string.firewall_schedule_hour_plus)) }
                                 TextButton(onClick = {
                                     startMinute = (startMinute + 30) % 60
-                                }) { Text("M+") }
+                                }) { Text(stringResource(R.string.firewall_schedule_minute_plus)) }
                             }
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -138,10 +138,10 @@ fun FirewallRuleDialog(
                             Row {
                                 TextButton(onClick = {
                                     endHour = (endHour + 1) % 24
-                                }) { Text("H+") }
+                                }) { Text(stringResource(R.string.firewall_schedule_hour_plus)) }
                                 TextButton(onClick = {
                                     endMinute = (endMinute + 30) % 60
-                                }) { Text("M+") }
+                                }) { Text(stringResource(R.string.firewall_schedule_minute_plus)) }
                             }
                         }
                     }

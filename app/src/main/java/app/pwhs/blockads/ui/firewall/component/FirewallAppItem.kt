@@ -43,7 +43,7 @@ fun FirewallAppItem(
     onToggle: () -> Unit,
     onConfigure: () -> Unit
 ) {
-    val isBlocked = rule != null
+    val isBlocked = rule?.isEnabled == true
     val backgroundColor by animateColorAsState(
         targetValue = if (isBlocked)
             MaterialTheme.colorScheme.error.copy(alpha = 0.08f)

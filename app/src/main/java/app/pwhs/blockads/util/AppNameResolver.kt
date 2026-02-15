@@ -28,6 +28,11 @@ class AppNameResolver(private val context: Context) {
     private val uidToAppNameCache = ConcurrentHashMap<Int, String>()
 
     /**
+     * Resolved app identity containing both display name and package name.
+     */
+    data class AppIdentity(val appName: String, val packageName: String)
+
+    /**
      * Resolve the app name that owns the given DNS query connection.
      * Returns the app label (e.g. "Chrome") or empty string if not found.
      *
@@ -40,6 +45,19 @@ class AppNameResolver(private val context: Context) {
         val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
         if (uid < 0) return ""
         return getAppNameForUid(uid)
+    }
+
+    /**
+     * Resolve both app name and package name in a single UID lookup.
+     * Avoids duplicate UID resolution on the hot path.
+     */
+    fun resolveIdentity(sourcePort: Int, sourceIp: ByteArray, destIp: ByteArray, destPort: Int): AppIdentity {
+        val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
+        if (uid < 0) return AppIdentity("", "")
+        return AppIdentity(
+            appName = getAppNameForUid(uid),
+            packageName = getPackageNameForUid(uid)
+        )
     }
 
     /**

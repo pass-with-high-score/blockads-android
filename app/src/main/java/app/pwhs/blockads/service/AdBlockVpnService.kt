@@ -398,15 +398,20 @@ class AdBlockVpnService : VpnService() {
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
-        val appName =
-            appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+
+        // Resolve UID once to get both app name and package name (avoids duplicate UID lookup)
+        val fwManager = firewallManager
+        val identity = if (fwManager != null) {
+            appNameResolver.resolveIdentity(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+        } else {
+            null
+        }
+        val appName = identity?.appName
+            ?: appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
 
         // Firewall: block DNS for apps with active firewall rules
-        val fwManager = firewallManager
-        if (fwManager != null) {
-            val appPackage = appNameResolver.resolvePackageName(
-                query.sourcePort, query.sourceIp, query.destIp, query.destPort
-            )
+        if (fwManager != null && identity != null) {
+            val appPackage = identity.packageName
             if (fwManager.shouldBlock(appPackage)) {
                 val response = DnsPacketParser.buildRefusedResponse(query)
                 try {
@@ -416,7 +421,7 @@ class AdBlockVpnService : VpnService() {
                     Log.e(TAG, "Error writing firewall blocked response", e)
                 }
                 val elapsed = System.currentTimeMillis() - startTime
-                logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = "Firewall")
+                logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = FilterListRepository.BLOCK_REASON_FIREWALL)
                 Log.d(TAG, "FIREWALL BLOCKED: $domain (app: $appName / $appPackage)")
                 totalQueries.incrementAndGet()
                 blockedQueries.incrementAndGet()
@@ -967,7 +972,7 @@ class AdBlockVpnService : VpnService() {
     private val FIREWALL_NOTIFICATION_ID_BASE = 1000
 
     private fun sendFirewallNotification(appName: String, packageName: String) {
-        if (appName.isEmpty() && packageName.isEmpty()) return
+        if (packageName.isEmpty()) return
 
         val now = System.currentTimeMillis()
         val lastTime = lastFirewallNotificationTime[packageName]
