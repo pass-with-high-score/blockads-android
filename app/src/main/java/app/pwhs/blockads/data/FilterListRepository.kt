@@ -180,7 +180,7 @@ class FilterListRepository(
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
     private val securityDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
-    
+
     // Custom rules - higher priority than filter lists
     private val customBlockDomains = ConcurrentHashMap.newKeySet<String>()
     private val customAllowDomains = ConcurrentHashMap.newKeySet<String>()
@@ -241,12 +241,12 @@ class FilterListRepository(
         if (checkDomainAndParents(domain) { customAllowDomains.contains(it) }) {
             return false
         }
-        
+
         // Priority 2: Check custom block rules (||example.com^)
         if (checkDomainAndParents(domain) { customBlockDomains.contains(it) }) {
             return true
         }
-        
+
         // Priority 3: Check whitelist — whitelisted domains are always allowed
         if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
             return false
@@ -299,18 +299,21 @@ class FilterListRepository(
         }
         return ""
     }
-    
+
     suspend fun loadCustomRules() {
         val blockDomains = customDnsRuleDao.getBlockDomains()
         val allowDomains = customDnsRuleDao.getAllowDomains()
-        
+
         customBlockDomains.clear()
         customBlockDomains.addAll(blockDomains.map { it.lowercase() })
-        
+
         customAllowDomains.clear()
         customAllowDomains.addAll(allowDomains.map { it.lowercase() })
-        
-        Log.d(TAG, "Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules")
+
+        Log.d(
+            TAG,
+            "Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules"
+        )
     }
 
     suspend fun loadWhitelist() {
@@ -365,7 +368,10 @@ class FilterListRepository(
                         count = domains.size,
                         timestamp = System.currentTimeMillis()
                     )
-                    Log.d(TAG, "Loaded ${domains.size} domains from ${filter.name} (${filter.category})")
+                    Log.d(
+                        TAG,
+                        "Loaded ${domains.size} domains from ${filter.name} (${filter.category})"
+                    )
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to load filter: ${filter.name}", e)
                 }
