@@ -49,6 +49,7 @@ import app.pwhs.blockads.data.WidgetStats
 import app.pwhs.blockads.service.AdBlockVpnService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import java.util.Calendar
@@ -58,13 +59,17 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
 
     companion object {
         private const val TAG = "AdBlockGlanceWidget"
+        private const val MILLIS_PER_DAY = 86_400_000L
+        private const val MAX_BAR_HEIGHT_DP = 32
 
         val SMALL = DpSize(110.dp, 48.dp)
         val MEDIUM = DpSize(250.dp, 120.dp)
         val LARGE = DpSize(250.dp, 250.dp)
 
+        private val updateScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
         fun requestUpdate(context: Context) {
-            CoroutineScope(Dispatchers.IO).launch {
+            updateScope.launch {
                 try {
                     AdBlockGlanceWidget().updateAll(context)
                 } catch (e: Exception) {
@@ -94,7 +99,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
             val todayStart = getTodayStartMillis()
             todayStats = dnsLogDao.getWidgetStatsSince(todayStart)
 
-            val oneDayAgo = System.currentTimeMillis() - 86_400_000L
+            val oneDayAgo = System.currentTimeMillis() - MILLIS_PER_DAY
             hourlyStats = dnsLogDao.getHourlyStatsForWidget(oneDayAgo)
 
             topDomains = dnsLogDao.getTopBlockedDomainsForWidget(5)
@@ -568,7 +573,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
         ) {
             hourlyStats.takeLast(12).forEach { stat ->
                 val fraction = stat.blocked.toFloat() / maxValue
-                val barHeight = maxOf((fraction * 32).toInt(), 2)
+                val barHeight = maxOf((fraction * MAX_BAR_HEIGHT_DP).toInt(), 2)
                 Column(
                     modifier = GlanceModifier
                         .defaultWeight()

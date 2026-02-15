@@ -1,11 +1,13 @@
 package app.pwhs.blockads.widget
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class WidgetUpdateWorker(
@@ -14,6 +16,7 @@ class WidgetUpdateWorker(
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
+        private const val TAG = "WidgetUpdateWorker"
         private const val WORK_NAME = "widget_update"
 
         fun enqueue(context: Context) {
@@ -37,8 +40,12 @@ class WidgetUpdateWorker(
         return try {
             AdBlockGlanceWidget().updateAll(applicationContext)
             Result.success()
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            Log.w(TAG, "Transient error updating widget, will retry", e)
             Result.retry()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating widget", e)
+            Result.failure()
         }
     }
 }
