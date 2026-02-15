@@ -27,6 +27,7 @@ class FilterListRepository(
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
         const val BLOCK_REASON_SECURITY = "SECURITY"
+        const val BLOCK_REASON_FIREWALL = "FIREWALL"
 
         val DEFAULT_LISTS = listOf(
             FilterList(

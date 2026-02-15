@@ -1,4 +1,4 @@
-package app.pwhs.blockads.ui.whitelist
+package app.pwhs.blockads.ui.firewall
 
 import android.app.Application
 import android.content.Intent
@@ -7,7 +7,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.data.FirewallRule
+import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.ui.whitelist.data.AppInfoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,14 +19,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
-class AppWhitelistViewModel(
+class FirewallViewModel(
     private val appPrefs: AppPreferences,
+    private val firewallRuleDao: FirewallRuleDao,
     application: Application
 ) : AndroidViewModel(application) {
 
-    val whitelistedApps: StateFlow<Set<String>> = appPrefs.whitelistedApps
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    val firewallEnabled: StateFlow<Boolean> = appPrefs.firewallEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val firewallRules: StateFlow<List<FirewallRule>> = firewallRuleDao.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val enabledCount: StateFlow<Int> = firewallRuleDao.getEnabledCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _installedApps = MutableStateFlow<List<AppInfoData>>(emptyList())
     val installedApps: StateFlow<List<AppInfoData>> = _installedApps.asStateFlow()
@@ -66,11 +73,34 @@ class AppWhitelistViewModel(
         }
     }
 
-    fun toggleApp(packageName: String) {
+    fun setFirewallEnabled(enabled: Boolean) {
         viewModelScope.launch {
-            appPrefs.toggleWhitelistedApp(packageName)
-            AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
+            appPrefs.setFirewallEnabled(enabled)
+        }
+    }
+
+    fun toggleAppFirewall(packageName: String) {
+        viewModelScope.launch {
+            val existing = firewallRuleDao.getByPackageName(packageName)
+            if (existing != null) {
+                firewallRuleDao.deleteByPackageName(packageName)
+            } else {
+                firewallRuleDao.insert(
+                    FirewallRule(packageName = packageName)
+                )
+            }
+        }
+    }
+
+    fun saveRule(rule: FirewallRule) {
+        viewModelScope.launch {
+            firewallRuleDao.insert(rule)
+        }
+    }
+
+    fun deleteRule(packageName: String) {
+        viewModelScope.launch {
+            firewallRuleDao.deleteByPackageName(packageName)
         }
     }
 }
-
