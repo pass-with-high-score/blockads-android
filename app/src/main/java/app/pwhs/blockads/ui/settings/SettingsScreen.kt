@@ -6,6 +6,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -126,6 +128,7 @@ fun SettingsScreen(
 
     val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsState()
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
+    val highContrast by viewModel.highContrast.collectAsState()
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -139,6 +142,8 @@ fun SettingsScreen(
         searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
 
     val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "safesearch", "safe search", "youtube", "restricted", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi", "tìm kiếm an toàn", "hạn chế") }
+    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "contrast", "high contrast", "accessibility", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối", "tương phản") }
+    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
     val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "firewall", "block", "tường lửa", "chặn", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
@@ -581,9 +586,10 @@ fun SettingsScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.height(12.dp))
-                            Row(
+                            FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 ThemeModeChip(
                                     label = stringResource(R.string.settings_lang_system),
@@ -606,7 +612,52 @@ fun SettingsScreen(
                                     onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
                                     modifier = Modifier.weight(1f)
                                 )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_ja),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_JA,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_JA) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_ko),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_KO,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_KO) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_zh),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_ZH,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ZH) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_th),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_TH,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_TH) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                ThemeModeChip(
+                                    label = stringResource(R.string.settings_lang_es),
+                                    icon = Icons.Default.Language,
+                                    selected = appLanguage == AppPreferences.LANGUAGE_ES,
+                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ES) },
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            SettingsToggleItem(
+                                icon = Icons.Default.Contrast,
+                                title = stringResource(R.string.settings_high_contrast),
+                                description = stringResource(R.string.settings_high_contrast_desc),
+                                checked = highContrast,
+                                onCheckedChange = { viewModel.setHighContrast(it) }
+                            )
                         }
                     }
 

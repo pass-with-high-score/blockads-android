@@ -124,6 +124,9 @@ class SettingsViewModel(
 
     val youtubeRestrictedMode: StateFlow<Boolean> = appPrefs.youtubeRestrictedMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val highContrast: StateFlow<Boolean> = appPrefs.highContrast
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -231,6 +234,12 @@ class SettingsViewModel(
         }
     }
 
+    fun setHighContrast(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setHighContrast(enabled)
+        }
+    }
+
     fun clearLogs() {
         viewModelScope.launch {
             dnsLogDao.clearAll()
@@ -273,6 +282,7 @@ class SettingsViewModel(
                     appLanguage = appPrefs.appLanguage.first(),
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
+                    highContrast = appPrefs.highContrast.first(),
                     firewallEnabled = appPrefs.firewallEnabled.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
@@ -332,6 +342,7 @@ class SettingsViewModel(
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
+                appPrefs.setHighContrast(backup.highContrast)
                 appPrefs.setFirewallEnabled(backup.firewallEnabled)
 
                 // Filter lists — only add new

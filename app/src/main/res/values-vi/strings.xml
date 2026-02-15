@@ -161,6 +161,13 @@
     <string name="settings_lang_system">Hệ thống</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">Tương phản cao</string>
+    <string name="settings_high_contrast_desc">Tăng độ tương phản để dễ nhìn hơn</string>
     <string name="settings_connection">Kết nối</string>
     <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
     <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>
@@ -369,6 +376,14 @@
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Bật/tắt bảo vệ VPN</string>
+    <string name="accessibility_vpn_active">Bảo vệ VPN đang hoạt động</string>
+    <string name="accessibility_vpn_inactive">Bảo vệ VPN không hoạt động</string>
+    <string name="accessibility_vpn_connecting">VPN đang kết nối</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Tỷ lệ chặn %1$s phần trăm</string>
+    <string name="accessibility_navigate_back">Quay lại</string>
     <!-- Firewall -->
     <string name="firewall_title">Tường lửa</string>
     <string name="firewall_subtitle">Kiểm soát internet theo ứng dụng</string>

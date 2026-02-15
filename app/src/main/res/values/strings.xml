@@ -161,6 +161,13 @@
     <string name="settings_lang_system">System</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">High Contrast</string>
+    <string name="settings_high_contrast_desc">Increase contrast for better visibility</string>
     <string name="settings_connection">Connection</string>
     <string name="settings_filter_lists">Filter Lists (%d active)</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>
@@ -374,6 +381,14 @@
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Toggle VPN protection</string>
+    <string name="accessibility_vpn_active">VPN protection is active</string>
+    <string name="accessibility_vpn_inactive">VPN protection is inactive</string>
+    <string name="accessibility_vpn_connecting">VPN is connecting</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Block rate %1$s percent</string>
+    <string name="accessibility_navigate_back">Navigate back</string>
     <!-- Firewall -->
     <string name="firewall_title">Firewall</string>
     <string name="firewall_subtitle">Per-app internet control</string>

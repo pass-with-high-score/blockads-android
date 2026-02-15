@@ -15,8 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
@@ -27,8 +31,9 @@ fun StatCard(
     value: String,
     color: Color
 ) {
+    val cardDescription = stringResource(R.string.accessibility_stat_card, label, value)
     Card(
-        modifier = modifier,
+        modifier = modifier.semantics { contentDescription = cardDescription },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),

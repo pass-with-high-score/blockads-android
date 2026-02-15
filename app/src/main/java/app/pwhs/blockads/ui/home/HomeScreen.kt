@@ -271,7 +271,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.home_block_rate),
                         tint = NeonGreen,
                         modifier = Modifier.size(32.dp)
                     )

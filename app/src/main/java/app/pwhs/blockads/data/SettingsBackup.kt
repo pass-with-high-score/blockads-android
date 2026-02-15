@@ -13,6 +13,7 @@ data class SettingsBackup(
     val dnsResponseType: String = AppPreferences.DNS_RESPONSE_CUSTOM_IP,
     val safeSearchEnabled: Boolean = false,
     val youtubeRestrictedMode: Boolean = false,
+    val highContrast: Boolean = false,
     val firewallEnabled: Boolean = false,
     val filterLists: List<FilterListBackup> = emptyList(),
     val whitelistDomains: List<String> = emptyList(),
