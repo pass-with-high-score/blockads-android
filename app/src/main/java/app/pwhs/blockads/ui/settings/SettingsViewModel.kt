@@ -334,6 +334,11 @@ class SettingsViewModel(
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
                 appPrefs.setDailySummaryEnabled(backup.dailySummaryEnabled)
+                if (backup.dailySummaryEnabled) {
+                    DailySummaryScheduler.scheduleDailySummary(getApplication())
+                } else {
+                    DailySummaryScheduler.cancelDailySummary(getApplication())
+                }
                 appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
 
                 // Filter lists — only add new
