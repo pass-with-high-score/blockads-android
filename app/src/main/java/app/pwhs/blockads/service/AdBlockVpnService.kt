@@ -46,6 +46,7 @@ class AdBlockVpnService : VpnService() {
         private const val CHANNEL_ID = "blockads_vpn_channel"
         private const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val RESTART_CLEANUP_DELAY_MS = 500L
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
@@ -169,9 +170,9 @@ class AdBlockVpnService : VpnService() {
         // Reset retry manager for fresh start
         retryManager.reset()
 
-        // Small delay to let old resources clean up, then start fresh
+        // Brief delay to let old VPN resources (file descriptors, sockets) clean up
         serviceScope.launch {
-            delay(500)
+            delay(RESTART_CLEANUP_DELAY_MS)
             startVpn()
         }
     }
