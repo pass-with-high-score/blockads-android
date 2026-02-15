@@ -361,7 +361,7 @@
     <string name="profile_desc_default">Chặn quảng cáo &amp; trình theo dõi cơ bản</string>
     <string name="profile_desc_strict">Chặn tất cả quảng cáo, trình theo dõi, phân tích</string>
     <string name="profile_desc_family">Chặn quảng cáo + nội dung người lớn + cờ bạc</string>
-    <string name="profile_desc_gaming">Chặn quảng cáo nhưng cho phép máy chủ game</string>
+    <string name="profile_desc_gaming">Chặn quảng cáo với cấu hình tối ưu cho chơi game</string>
     <string name="profile_desc_custom">Cấu hình hồ sơ tùy chỉnh</string>
     <string name="profile_active">Đang hoạt động</string>
     <string name="profile_switched">Đã chuyển hồ sơ</string>
