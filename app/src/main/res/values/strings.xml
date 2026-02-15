@@ -366,7 +366,7 @@
     <string name="profile_desc_default">Block ads &amp; basic trackers</string>
     <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
     <string name="profile_desc_family">Block ads + adult content + gambling</string>
-    <string name="profile_desc_gaming">Block ads but whitelist game servers</string>
+    <string name="profile_desc_gaming">Block ads with optimized settings for gaming</string>
     <string name="profile_desc_custom">Custom profile configuration</string>
     <string name="profile_active">Active</string>
     <string name="profile_switched">Profile switched</string>
