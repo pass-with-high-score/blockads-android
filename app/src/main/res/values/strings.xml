@@ -345,6 +345,11 @@
     <string name="log_action_block">Block</string>
     <string name="block_reason_custom_rule">Custom Block Rule</string>
     <string name="block_reason_filter_list">Filter List</string>
+    <string name="block_reason_security">Dangerous Website</string>
+    <!-- Security Stats -->
+    <string name="home_security_threats">Threats Blocked</string>
+    <string name="filter_category_ad">Ad Blocking</string>
+    <string name="filter_category_security">Security</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Stats</string>
     <string name="stats_title">Statistics</string>
@@ -353,6 +358,7 @@
     <string name="stats_all_time_blocked">All Time Blocked</string>
     <string name="stats_today_queries">Today Queries</string>
     <string name="stats_today_blocked">Today Blocked</string>
+    <string name="stats_today_security">Today Threats</string>
     <string name="stats_charts">Activity Charts</string>
     <string name="stats_chart_4w">4 Weeks</string>
     <string name="stats_chart_12m">12 Months</string>

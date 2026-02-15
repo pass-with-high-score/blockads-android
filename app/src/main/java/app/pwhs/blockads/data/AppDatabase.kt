@@ -113,6 +113,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_9_10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE filter_lists ADD COLUMN category TEXT NOT NULL DEFAULT 'AD'")
                 db.execSQL(
                     """CREATE TABLE IF NOT EXISTS `firewall_rules` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

@@ -13,5 +13,11 @@ data class FilterList(
     val isEnabled: Boolean = true,
     val isBuiltIn: Boolean = false,
     val domainCount: Int = 0,
-    val lastUpdated: Long = 0
-)
+    val lastUpdated: Long = 0,
+    val category: String = CATEGORY_AD
+) {
+    companion object {
+        const val CATEGORY_AD = "AD"
+        const val CATEGORY_SECURITY = "SECURITY"
+    }
+}
