@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppStat
 import app.pwhs.blockads.data.DailyStat
 import app.pwhs.blockads.data.DnsLogDao
+import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.HourlyStat
 import app.pwhs.blockads.data.MonthlyStat
 import app.pwhs.blockads.data.TopBlockedDomain
@@ -36,6 +37,14 @@ class StatisticsViewModel(
 
     val todayBlocked: StateFlow<Int> = dnsLogDao.getBlockedCountSince(todayStart)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val securityBlockedCount: StateFlow<Int> = dnsLogDao.getBlockedCountByReason(
+        FilterListRepository.BLOCK_REASON_SECURITY
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val todaySecurityBlocked: StateFlow<Int> = dnsLogDao.getBlockedCountByReasonSince(
+        FilterListRepository.BLOCK_REASON_SECURITY, todayStart
+    ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val hourlyStats: StateFlow<List<HourlyStat>> = dnsLogDao.getHourlyStats()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

@@ -26,6 +26,7 @@ class FilterListRepository(
         private const val CACHE_DIR = "filter_cache"
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
+        const val BLOCK_REASON_SECURITY = "SECURITY"
         const val BLOCK_REASON_FIREWALL = "FIREWALL"
 
         val DEFAULT_LISTS = listOf(
@@ -148,10 +149,36 @@ class FilterListRepository(
                 isEnabled = false,
                 isBuiltIn = true
             ),
+            // ── Security / Phishing / Malware ───────────────────────────
+            FilterList(
+                name = "URLhaus Malicious URL Blocklist",
+                url = "https://urlhaus.abuse.ch/downloads/hostfile/",
+                description = "Blocks malware distribution sites — updated frequently by abuse.ch",
+                isEnabled = true,
+                isBuiltIn = true,
+                category = FilterList.CATEGORY_SECURITY
+            ),
+            FilterList(
+                name = "PhishTank Blocklist",
+                url = "https://raw.githubusercontent.com/ArmynC/phishing-list/main/hosts.txt",
+                description = "Blocks known phishing websites that steal personal information",
+                isEnabled = true,
+                isBuiltIn = true,
+                category = FilterList.CATEGORY_SECURITY
+            ),
+            FilterList(
+                name = "Malware Domain List",
+                url = "https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/malware",
+                description = "Community-curated list of domains distributing malware",
+                isEnabled = true,
+                isBuiltIn = true,
+                category = FilterList.CATEGORY_SECURITY
+            ),
         )
     }
 
     private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
+    private val securityDomains = ConcurrentHashMap.newKeySet<String>()
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
     
     // Custom rules - higher priority than filter lists
@@ -225,7 +252,12 @@ class FilterListRepository(
             return false
         }
 
-        // Priority 4: Check filter lists using Bloom filter for fast negative check
+        // Priority 4: Check security domains (malware/phishing)
+        if (checkDomainAndParents(domain) { securityDomains.contains(it) }) {
+            return true
+        }
+
+        // Priority 5: Check filter lists using Bloom filter for fast negative check
         // If Bloom filter says "definitely not present", skip exact lookup
         val bloomFilter = blockedDomainsBloomFilter
         if (bloomFilter != null) {
@@ -253,6 +285,9 @@ class FilterListRepository(
         }
         if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
             return ""
+        }
+        if (checkDomainAndParents(domain) { securityDomains.contains(it) }) {
+            return BLOCK_REASON_SECURITY
         }
         val bloomFilter = blockedDomainsBloomFilter
         if (bloomFilter != null) {
@@ -306,17 +341,23 @@ class FilterListRepository(
             val enabledLists = filterListDao.getEnabled()
             if (enabledLists.isEmpty()) {
                 blockedDomains.clear()
+                securityDomains.clear()
                 blockedDomainsBloomFilter = null
                 return@withContext Result.success(0)
             }
 
             val newDomains = ConcurrentHashMap.newKeySet<String>()
+            val newSecurityDomains = ConcurrentHashMap.newKeySet<String>()
             var totalLoaded = 0
 
             for (filter in enabledLists) {
                 try {
                     val domains = loadSingleFilter(filter)
-                    newDomains.addAll(domains)
+                    if (filter.category == FilterList.CATEGORY_SECURITY) {
+                        newSecurityDomains.addAll(domains)
+                    } else {
+                        newDomains.addAll(domains)
+                    }
                     totalLoaded += domains.size
 
                     filterListDao.updateStats(
@@ -324,7 +365,7 @@ class FilterListRepository(
                         count = domains.size,
                         timestamp = System.currentTimeMillis()
                     )
-                    Log.d(TAG, "Loaded ${domains.size} domains from ${filter.name}")
+                    Log.d(TAG, "Loaded ${domains.size} domains from ${filter.name} (${filter.category})")
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to load filter: ${filter.name}", e)
                 }
@@ -333,12 +374,16 @@ class FilterListRepository(
             blockedDomains.clear()
             blockedDomains.addAll(newDomains)
 
-            // Build Bloom filter for fast negative lookups
+            securityDomains.clear()
+            securityDomains.addAll(newSecurityDomains)
+
+            // Build Bloom filter for ad domains (fast negative lookups)
             buildBloomFilter(newDomains)
 
-            Log.d(TAG, "Total unique domains loaded: ${blockedDomains.size}")
+            Log.d(TAG, "Total unique ad domains loaded: ${blockedDomains.size}")
+            Log.d(TAG, "Total unique security domains loaded: ${securityDomains.size}")
 
-            Result.success(blockedDomains.size)
+            Result.success(blockedDomains.size + securityDomains.size)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load filters", e)
             Result.failure(e)
@@ -466,6 +511,7 @@ class FilterListRepository(
 
     fun clearCache() {
         blockedDomains.clear()
+        securityDomains.clear()
         blockedDomainsBloomFilter = null
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }

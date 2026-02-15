@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.DataSaverOn
+import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
@@ -63,6 +65,7 @@ import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
+import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
 import app.pwhs.blockads.util.formatTimeSince
@@ -82,6 +85,7 @@ fun HomeScreen(
     val vpnConnecting by viewModel.vpnConnecting.collectAsState()
     val blockedCount by viewModel.blockedCount.collectAsState()
     val totalCount by viewModel.totalCount.collectAsState()
+    val securityThreatsBlocked by viewModel.securityThreatsBlocked.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val filterLoadFailed by viewModel.filterLoadFailed.collectAsState()
     val recentBlocked by viewModel.recentBlocked.collectAsState()
@@ -237,6 +241,13 @@ fun HomeScreen(
                     label = stringResource(R.string.blocked_queries),
                     value = formatCount(blockedCount),
                     color = DangerRed
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.GppGood,
+                    label = stringResource(R.string.home_security_threats),
+                    value = formatCount(securityThreatsBlocked),
+                    color = SecurityOrange
                 )
             }
 
@@ -499,6 +510,8 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                         recentBlocked.forEach { entry ->
+                            val dotColor = if (entry.blockedBy == FilterListRepository.BLOCK_REASON_SECURITY)
+                                SecurityOrange else DangerRed
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -509,7 +522,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(DangerRed)
+                                        .background(dotColor)
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(

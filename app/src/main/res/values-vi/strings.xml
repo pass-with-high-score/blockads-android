@@ -270,6 +270,15 @@
     <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
     <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
+    <string name="widget_blocked_today">Đã chặn hôm nay: %s</string>
+    <string name="widget_blocked_label">Đã chặn</string>
+    <string name="widget_total_label">Tổng</string>
+    <string name="widget_today_stats">Hôm nay</string>
+    <string name="widget_alltime_stats">Toàn bộ</string>
+    <string name="widget_activity_24h">Hoạt động 24h</string>
+    <string name="widget_top_blocked">Chặn nhiều nhất</string>
+    <string name="widget_no_blocked_domains">Chưa có tên miền bị chặn</string>
+    <string name="widget_no_data">Chưa có dữ liệu</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Quy Tắc Tùy Chỉnh</string>
@@ -347,6 +356,11 @@
     <string name="log_action_block">Chặn</string>
     <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
     <string name="block_reason_filter_list">Danh sách bộ lọc</string>
+    <string name="block_reason_security">Website nguy hiểm</string>
+    <!-- Security Stats -->
+    <string name="home_security_threats">Mối đe dọa đã chặn</string>
+    <string name="filter_category_ad">Chặn quảng cáo</string>
+    <string name="filter_category_security">Bảo mật</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
     <string name="stats_title">Thống kê</string>
@@ -355,6 +369,7 @@
     <string name="stats_all_time_blocked">Tổng đã chặn</string>
     <string name="stats_today_queries">Hôm nay truy vấn</string>
     <string name="stats_today_blocked">Hôm nay đã chặn</string>
+    <string name="stats_today_security">Hôm nay mối đe dọa</string>
     <string name="stats_charts">Biểu đồ hoạt động</string>
     <string name="stats_chart_4w">4 Tuần</string>
     <string name="stats_chart_12m">12 Tháng</string>

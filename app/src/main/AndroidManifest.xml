@@ -73,7 +73,7 @@
         </service>
 
         <receiver
-            android:name=".widget.AdBlockWidgetProvider"
+            android:name=".widget.AdBlockGlanceWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_name">
             <intent-filter>

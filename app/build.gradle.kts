@@ -133,6 +133,10 @@ dependencies {
     // ComposeCharts
     implementation(libs.compose.charts)
 
+    // Glance (Jetpack Compose for widgets)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)

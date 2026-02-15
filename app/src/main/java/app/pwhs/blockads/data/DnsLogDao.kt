@@ -39,6 +39,34 @@ interface DnsLogDao {
     @Query("SELECT COALESCE(SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END), 0) AS blocked, COUNT(*) AS total FROM dns_logs")
     suspend fun getWidgetStats(): WidgetStats
 
+    @Query("SELECT COALESCE(SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END), 0) AS blocked, COUNT(*) AS total FROM dns_logs WHERE timestamp > :since")
+    suspend fun getWidgetStatsSince(since: Long): WidgetStats
+
+    @Query(
+        """
+        SELECT (timestamp / 3600000) * 3600000 AS hour,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY hour
+        ORDER BY hour ASC
+    """
+    )
+    suspend fun getHourlyStatsForWidget(since: Long): List<HourlyStat>
+
+    @Query(
+        """
+        SELECT domain, COUNT(*) AS count
+        FROM dns_logs
+        WHERE isBlocked = 1
+        GROUP BY domain
+        ORDER BY count DESC
+        LIMIT :limit
+    """
+    )
+    suspend fun getTopBlockedDomainsForWidget(limit: Int = 5): List<TopBlockedDomain>
+
     @Query("DELETE FROM dns_logs")
     suspend fun clearAll()
 
@@ -144,4 +172,10 @@ interface DnsLogDao {
 
     @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since")
     fun getBlockedCountSince(since: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND blockedBy = :reason")
+    fun getBlockedCountByReason(reason: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM dns_logs WHERE isBlocked = 1 AND blockedBy = :reason AND timestamp > :since")
+    fun getBlockedCountByReasonSince(reason: String, since: Long): Flow<Int>
 }
