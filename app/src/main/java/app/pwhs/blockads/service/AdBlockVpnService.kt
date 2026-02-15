@@ -473,6 +473,8 @@ class AdBlockVpnService : VpnService() {
             val currentTotal = allTimeBlockedCount.incrementAndGet()
             val threshold = nextMilestoneThreshold
             if (threshold != null && currentTotal >= threshold) {
+                // Prevent redundant coroutine launches while check is in progress
+                nextMilestoneThreshold = null
                 serviceScope.launch {
                     try {
                         notificationHelper.checkAndNotifyMilestone(currentTotal)
@@ -481,6 +483,8 @@ class AdBlockVpnService : VpnService() {
                         nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error checking milestone", e)
+                        // Restore threshold so checks resume
+                        nextMilestoneThreshold = threshold
                     }
                 }
             }
