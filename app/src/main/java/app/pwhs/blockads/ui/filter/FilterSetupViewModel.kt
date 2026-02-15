@@ -1,11 +1,13 @@
 package app.pwhs.blockads.ui.filter
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,6 +23,7 @@ import kotlinx.coroutines.launch
 class FilterSetupViewModel(
     private val filterRepo: FilterListRepository,
     private val filterListDao: FilterListDao,
+    private val application: Application,
 ) : ViewModel() {
 
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
@@ -41,6 +44,7 @@ class FilterSetupViewModel(
     fun toggleFilterList(filter: FilterList) {
         viewModelScope.launch {
             filterListDao.setEnabled(filter.id, !filter.isEnabled)
+            AdBlockVpnService.requestRestart(application.applicationContext)
         }
     }
 
@@ -50,6 +54,7 @@ class FilterSetupViewModel(
                 FilterList(name = name, url = url, isEnabled = true, isBuiltIn = false)
             )
             _events.toast(R.string.settings_add, listOf(": $name"))
+            AdBlockVpnService.requestRestart(application.applicationContext)
         }
     }
 
@@ -57,6 +62,7 @@ class FilterSetupViewModel(
         if (filter.isBuiltIn) return
         viewModelScope.launch {
             filterListDao.delete(filter)
+            AdBlockVpnService.requestRestart(application.applicationContext)
         }
     }
 
