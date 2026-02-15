@@ -28,6 +28,11 @@ class AppNameResolver(private val context: Context) {
     private val uidToAppNameCache = ConcurrentHashMap<Int, String>()
 
     /**
+     * Resolved app identity containing both display name and package name.
+     */
+    data class AppIdentity(val appName: String, val packageName: String)
+
+    /**
      * Resolve the app name that owns the given DNS query connection.
      * Returns the app label (e.g. "Chrome") or empty string if not found.
      *
@@ -40,6 +45,29 @@ class AppNameResolver(private val context: Context) {
         val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
         if (uid < 0) return ""
         return getAppNameForUid(uid)
+    }
+
+    /**
+     * Resolve both app name and package name in a single UID lookup.
+     * Avoids duplicate UID resolution on the hot path.
+     */
+    fun resolveIdentity(sourcePort: Int, sourceIp: ByteArray, destIp: ByteArray, destPort: Int): AppIdentity {
+        val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
+        if (uid < 0) return AppIdentity("", "")
+        return AppIdentity(
+            appName = getAppNameForUid(uid),
+            packageName = getPackageNameForUid(uid)
+        )
+    }
+
+    /**
+     * Resolve the package name that owns the given DNS query connection.
+     * Returns the package name (e.g. "com.android.chrome") or empty string if not found.
+     */
+    fun resolvePackageName(sourcePort: Int, sourceIp: ByteArray, destIp: ByteArray, destPort: Int): String {
+        val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
+        if (uid < 0) return ""
+        return getPackageNameForUid(uid)
     }
 
     /**
@@ -140,5 +168,20 @@ class AppNameResolver(private val context: Context) {
 
         uidToAppNameCache[uid] = appName
         return appName
+    }
+
+    // Cache UID -> package name
+    private val uidToPackageNameCache = ConcurrentHashMap<Int, String>()
+
+    private fun getPackageNameForUid(uid: Int): String {
+        uidToPackageNameCache[uid]?.let { return it }
+
+        val pm = context.packageManager
+        val packages = pm.getPackagesForUid(uid)
+        if (packages.isNullOrEmpty()) return ""
+
+        val packageName = packages[0]
+        uidToPackageNameCache[uid] = packageName
+        return packageName
     }
 }
