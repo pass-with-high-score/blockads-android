@@ -26,9 +26,6 @@ interface FilterListDao {
     @Query("SELECT * FROM filter_lists WHERE isEnabled = 1")
     suspend fun getEnabled(): List<FilterList>
 
-    @Query("SELECT * FROM filter_lists WHERE isEnabled = 1 AND category = :category")
-    suspend fun getEnabledByCategory(category: String): List<FilterList>
-
     @Query("SELECT COUNT(*) FROM filter_lists")
     suspend fun count(): Int
 
