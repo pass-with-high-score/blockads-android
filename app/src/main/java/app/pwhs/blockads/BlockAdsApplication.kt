@@ -8,6 +8,7 @@ import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -29,9 +30,11 @@ class BlockAdsApplication : Application() {
         val appPreferences: AppPreferences by inject()
         applicationScope.launch {
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
-        }
 
-        // Schedule daily summary notification
-        DailySummaryScheduler.scheduleDailySummary(this)
+            // Schedule daily summary only if enabled
+            if (appPreferences.dailySummaryEnabled.first()) {
+                DailySummaryScheduler.scheduleDailySummary(this@BlockAdsApplication)
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -27,6 +28,7 @@ class DailySummaryWorker(
     private val appPreferences: AppPreferences by inject()
 
     companion object {
+        private const val TAG = "DailySummaryWorker"
         const val WORK_NAME = "daily_summary_work"
         const val CHANNEL_ID = "blockads_daily_summary_channel"
         private const val NOTIFICATION_ID = 2001
@@ -43,9 +45,13 @@ class DailySummaryWorker(
                 showDailySummaryNotification(blockedToday)
             }
 
+            // Reschedule next run for tomorrow at 21:00
+            DailySummaryScheduler.scheduleDailySummary(applicationContext)
+
             Result.success()
         } catch (e: Exception) {
-            Result.failure()
+            Log.e(TAG, "Daily summary worker failed", e)
+            Result.retry()
         }
     }
 

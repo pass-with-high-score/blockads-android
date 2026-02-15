@@ -1,14 +1,19 @@
 package app.pwhs.blockads.worker
 
 import android.content.Context
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 object DailySummaryScheduler {
 
+    /**
+     * Schedules a one-time daily summary work for the next 21:00.
+     * The worker itself reschedules the next run after completion,
+     * avoiding drift issues with periodic work.
+     */
     fun scheduleDailySummary(context: Context) {
         val now = Calendar.getInstance()
         val target = Calendar.getInstance().apply {
@@ -23,15 +28,13 @@ object DailySummaryScheduler {
 
         val initialDelayMs = target.timeInMillis - now.timeInMillis
 
-        val workRequest = PeriodicWorkRequestBuilder<DailySummaryWorker>(
-            24, TimeUnit.HOURS
-        )
+        val workRequest = OneTimeWorkRequestBuilder<DailySummaryWorker>()
             .setInitialDelay(initialDelayMs, TimeUnit.MILLISECONDS)
             .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        WorkManager.getInstance(context).enqueueUniqueWork(
             DailySummaryWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingWorkPolicy.REPLACE,
             workRequest
         )
     }

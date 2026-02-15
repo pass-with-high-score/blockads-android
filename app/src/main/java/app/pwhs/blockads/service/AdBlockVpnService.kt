@@ -91,6 +91,11 @@ class AdBlockVpnService : VpnService() {
     @Volatile
     private var todayBlockedCount: Int = 0
 
+    // Cached all-time blocked count for milestone checks (avoids DB queries on hot path)
+    private val allTimeBlockedCount = AtomicLong(0)
+    @Volatile
+    private var nextMilestoneThreshold: Long? = null
+
     @Volatile
     private var isProcessing = false
 
@@ -108,7 +113,7 @@ class AdBlockVpnService : VpnService() {
         dotClient = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
-        notificationHelper = NotificationHelper(this, appPrefs, dnsLogDao)
+        notificationHelper = NotificationHelper(this, appPrefs)
 
         // Initialize network monitor
         networkMonitor = NetworkMonitor(
@@ -208,6 +213,13 @@ class AdBlockVpnService : VpnService() {
                 blockedQueries.set(0)
                 vpnStartTime = System.currentTimeMillis()
                 startTimestamp = vpnStartTime
+
+                // Initialize cached all-time blocked count for milestone checks
+                val cachedTotal = dnsLogDao.getBlockedCountSync().toLong()
+                allTimeBlockedCount.set(cachedTotal)
+                val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+                nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
+
                 updateNotification() // Update to normal notification
                 AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
@@ -457,12 +469,19 @@ class AdBlockVpnService : VpnService() {
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
 
-            // Check for milestone achievements
-            serviceScope.launch {
-                try {
-                    notificationHelper.checkAndNotifyMilestone()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error checking milestone", e)
+            // Check for milestone achievements using in-memory counter
+            val currentTotal = allTimeBlockedCount.incrementAndGet()
+            val threshold = nextMilestoneThreshold
+            if (threshold != null && currentTotal >= threshold) {
+                serviceScope.launch {
+                    try {
+                        notificationHelper.checkAndNotifyMilestone(currentTotal)
+                        // Update next threshold after check
+                        val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+                        nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error checking milestone", e)
+                    }
                 }
             }
         } else {

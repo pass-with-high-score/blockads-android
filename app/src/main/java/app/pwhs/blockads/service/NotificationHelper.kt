@@ -10,15 +10,15 @@ import androidx.core.app.NotificationCompat
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsLogDao
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.NumberFormat
 import java.util.Locale
 
 class NotificationHelper(
     private val context: Context,
-    private val appPrefs: AppPreferences,
-    private val dnsLogDao: DnsLogDao
+    private val appPrefs: AppPreferences
 ) {
     companion object {
         const val MILESTONE_CHANNEL_ID = "blockads_milestone_channel"
@@ -26,16 +26,33 @@ class NotificationHelper(
         val MILESTONES = longArrayOf(100, 500, 1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000)
     }
 
-    suspend fun checkAndNotifyMilestone(totalBlocked: Long) {
-        val enabled = appPrefs.milestoneNotificationsEnabled.first()
-        if (!enabled) return
-        val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+    private val milestoneMutex = Mutex()
 
-        // Determine the highest milestone that has been reached given the current total.
-        val reachedMilestone = MILESTONES.filter { it <= totalBlocked }.maxOrNull()
-        if (reachedMilestone != null && reachedMilestone > lastMilestone) {
-            appPrefs.setLastMilestoneBlocked(reachedMilestone)
-            showMilestoneNotification(reachedMilestone)
+    /**
+     * Returns the next milestone threshold above [lastMilestone], or null if all milestones
+     * have been reached. Used to avoid DB queries until the in-memory count crosses a threshold.
+     */
+    fun nextMilestoneThreshold(lastMilestone: Long): Long? {
+        return MILESTONES.firstOrNull { it > lastMilestone }
+    }
+
+    /**
+     * Thread-safe milestone check. Uses a Mutex to prevent concurrent calls from producing
+     * duplicate notifications. Caller passes the cached in-memory total so no DB query is needed.
+     */
+    suspend fun checkAndNotifyMilestone(totalBlocked: Long) {
+        milestoneMutex.withLock {
+            val enabled = appPrefs.milestoneNotificationsEnabled.first()
+            if (!enabled) return
+
+            val lastMilestone = appPrefs.lastMilestoneBlocked.first()
+
+            // Advance to the highest milestone <= totalBlocked in one step to avoid spam
+            val reachedMilestone = MILESTONES.filter { it <= totalBlocked }.maxOrNull()
+            if (reachedMilestone != null && reachedMilestone > lastMilestone) {
+                appPrefs.setLastMilestoneBlocked(reachedMilestone)
+                showMilestoneNotification(reachedMilestone)
+            }
         }
     }
 
