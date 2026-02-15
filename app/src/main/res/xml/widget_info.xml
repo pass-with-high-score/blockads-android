@@ -10,9 +10,6 @@
     android:maxResizeHeight="530dp"
     android:previewLayout="@layout/widget_collapsed"
     android:resizeMode="horizontal|vertical"
-    <!-- targetCellWidth and targetCellHeight require Android 12 (API 31);
-         they are safely ignored on older devices. This is intentional
-         even though minSdk is 24. -->
     android:targetCellWidth="2"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"

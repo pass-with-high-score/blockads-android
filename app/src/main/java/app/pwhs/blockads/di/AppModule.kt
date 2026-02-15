@@ -77,6 +77,7 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
             application = androidApplication()
         )
     }
@@ -95,11 +96,11 @@ val appModule = module {
         )
     }
     viewModel {
-      AppManagementViewModel(
-          appPrefs = get(),
-          dnsLogDao = get(),
-          application = androidApplication(),
-      )
+        AppManagementViewModel(
+            appPrefs = get(),
+            dnsLogDao = get(),
+            application = androidApplication(),
+        )
     }
     viewModel {
         OnboardingViewModel(
@@ -112,6 +113,10 @@ val appModule = module {
             profileManager = get(),
             profileDao = get(),
             filterListDao = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
         FirewallViewModel(
             appPrefs = get(),
             firewallRuleDao = get(),

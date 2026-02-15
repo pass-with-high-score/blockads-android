@@ -145,8 +145,6 @@ fun SettingsScreen(
         searchQuery.isBlank() || keywords.any { it.contains(searchQuery.lowercase()) }
 
     val protectionKeywords = remember { listOf("dns", "protocol", "reconnect", "doh", "dot", "upstream", "fallback", "server", "response", "nxdomain", "shield", "protection", "safesearch", "safe search", "youtube", "restricted", "bảo vệ", "giao thức", "kết nối", "máy chủ", "phản hồi", "tìm kiếm an toàn", "hạn chế") }
-    val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "contrast", "high contrast", "accessibility", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối", "tương phản") }
-    val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val interfaceKeywords = remember { listOf("theme", "language", "appearance", "dark", "light", "interface", "giao diện", "chủ đề", "ngôn ngữ", "sáng", "tối") }
     val appsKeywords = remember { listOf("app", "whitelist", "domain", "application", "exclude", "firewall", "block", "tường lửa", "chặn", "ứng dụng", "cho phép", "tên miền", "loại trừ") }
     val filtersKeywords = remember { listOf("filter", "update", "auto-update", "frequency", "wifi", "notification", "list", "rule", "bộ lọc", "cập nhật", "tần suất", "quy tắc", "thông báo") }
@@ -699,8 +697,8 @@ fun SettingsScreen(
                             SettingsToggleItem(
                                 icon = Icons.Default.Contrast,
                                 title = stringResource(R.string.settings_high_contrast),
-                                description = stringResource(R.string.settings_high_contrast_desc),
-                                checked = highContrast,
+                                subtitle = stringResource(R.string.settings_high_contrast_desc),
+                                isChecked = highContrast,
                                 onCheckedChange = { viewModel.setHighContrast(it) }
                             )
                         }

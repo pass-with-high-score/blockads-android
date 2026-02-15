@@ -2,6 +2,7 @@ package app.pwhs.blockads.widget
 
 import android.content.Context
 import android.util.Log
+import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder

@@ -15,14 +15,16 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.actionSendBroadcast
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.updateAll
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -113,8 +115,10 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
                 when {
                     size.height >= LARGE.height && size.width >= LARGE.width ->
                         LargeWidget(isRunning, allStats, todayStats, hourlyStats, topDomains)
+
                     size.height >= MEDIUM.height && size.width >= MEDIUM.width ->
                         MediumWidget(isRunning, allStats, todayStats, hourlyStats)
+
                     else ->
                         SmallWidget(isRunning, todayStats)
                 }
@@ -144,7 +148,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(16.dp)
-                .background(R.drawable.widget_background)
+                .background(Color.White)
                 .padding(8.dp)
                 .clickable(actionStartActivity<MainActivity>()),
             verticalAlignment = Alignment.CenterVertically
@@ -211,7 +215,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(16.dp)
-                .background(R.drawable.widget_background)
+                .background(Color.White)
                 .padding(12.dp)
                 .clickable(actionStartActivity<MainActivity>())
         ) {
@@ -321,7 +325,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .cornerRadius(16.dp)
-                .background(R.drawable.widget_background)
+                .background(Color.White)
                 .padding(12.dp)
                 .clickable(actionStartActivity<MainActivity>())
         ) {
@@ -645,11 +649,42 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
 }
 
 // Color constants for the widget
-private val colorGreen = ColorProvider(Color(0xFF00E676))
-private val colorGray = ColorProvider(Color(0xFFBDBDBD))
-private val colorBlue = ColorProvider(Color(0xFF2196F3))
-private val colorOrange = ColorProvider(Color(0xFFFF9800))
-private val colorTextPrimary = ColorProvider(Color(0xFF212121))
-private val colorTextSecondary = ColorProvider(Color(0xFF757575))
-private val colorDivider = ColorProvider(Color(0xFFE0E0E0))
-private val colorChartBg = ColorProvider(Color(0xFFEEEEEE))
+private val colorGreen = ColorProvider(
+    day = Color(0xFF00E676),
+    night = Color(0xFF00C853)
+)
+
+private val colorGray = ColorProvider(
+    day = Color(0xFFBDBDBD),
+    night = Color(0xFF757575)
+)
+
+private val colorBlue = ColorProvider(
+    day = Color(0xFF2196F3),
+    night = Color(0xFF90CAF9)
+)
+
+private val colorOrange = ColorProvider(
+    day = Color(0xFFFF9800),
+    night = Color(0xFFFFB74D)
+)
+
+private val colorTextPrimary = ColorProvider(
+    day = Color(0xFF212121),
+    night = Color(0xFFE0E0E0)
+)
+
+private val colorTextSecondary = ColorProvider(
+    day = Color(0xFF757575),
+    night = Color(0xFFB0B0B0)
+)
+
+private val colorDivider = ColorProvider(
+    day = Color(0xFFE0E0E0),
+    night = Color(0xFF3A3A3A)
+)
+
+private val colorChartBg = ColorProvider(
+    day = Color(0xFFEEEEEE),
+    night = Color(0xFF1E1E1E)
+)

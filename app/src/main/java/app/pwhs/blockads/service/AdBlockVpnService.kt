@@ -113,11 +113,13 @@ class AdBlockVpnService : VpnService() {
     private val totalQueries = AtomicLong(0)
     private val blockedQueries = AtomicLong(0)
     private var vpnStartTime: Long = 0L
+
     @Volatile
     private var todayBlockedCount: Int = 0
 
     // Cached all-time blocked count for milestone checks (avoids DB queries on hot path)
     private val allTimeBlockedCount = AtomicLong(0)
+
     @Volatile
     private var nextMilestoneThreshold: Long? = null
 
@@ -159,6 +161,8 @@ class AdBlockVpnService : VpnService() {
             ACTION_PAUSE_1H -> {
                 pauseVpn()
                 return START_NOT_STICKY
+            }
+
             ACTION_RESTART -> {
                 restartVpn()
                 return START_STICKY
@@ -258,7 +262,8 @@ class AdBlockVpnService : VpnService() {
                             if (currentEnabled) {
                                 // If firewall has just been enabled or manager is missing, (re)create and load rules.
                                 if (!lastEnabled || firewallManager == null) {
-                                    val fwManager = FirewallManager(this@AdBlockVpnService, firewallRuleDao)
+                                    val fwManager =
+                                        FirewallManager(this@AdBlockVpnService, firewallRuleDao)
                                     fwManager.loadRules()
                                     firewallManager = fwManager
                                     Log.d(TAG, "Firewall enabled or re-enabled, rules loaded")
@@ -489,12 +494,22 @@ class AdBlockVpnService : VpnService() {
         // Resolve UID once to get both app name and package name (avoids duplicate UID lookup)
         val fwManager = firewallManager
         val identity = if (fwManager != null) {
-            appNameResolver.resolveIdentity(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+            appNameResolver.resolveIdentity(
+                query.sourcePort,
+                query.sourceIp,
+                query.destIp,
+                query.destPort
+            )
         } else {
             null
         }
         val appName = identity?.appName
-            ?: appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+            ?: appNameResolver.resolve(
+                query.sourcePort,
+                query.sourceIp,
+                query.destIp,
+                query.destPort
+            )
 
         // Firewall: block DNS for apps with active firewall rules
         if (fwManager != null && identity != null) {
@@ -508,7 +523,14 @@ class AdBlockVpnService : VpnService() {
                     Log.e(TAG, "Error writing firewall blocked response", e)
                 }
                 val elapsed = System.currentTimeMillis() - startTime
-                logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = FilterListRepository.BLOCK_REASON_FIREWALL)
+                logDnsQuery(
+                    domain,
+                    true,
+                    query.queryType,
+                    elapsed,
+                    appName,
+                    blockedBy = FilterListRepository.BLOCK_REASON_FIREWALL
+                )
                 Log.d(TAG, "FIREWALL BLOCKED: $domain (app: $appName / $appPackage)")
                 totalQueries.incrementAndGet()
                 blockedQueries.incrementAndGet()
@@ -559,7 +581,10 @@ class AdBlockVpnService : VpnService() {
         }
 
         // YouTube Restricted Mode: redirect YouTube domains to restrict.youtube.com (only for A/AAAA queries)
-        if (youtubeRestrictedMode && (query.queryType == 1 || query.queryType == 28) && SafeSearchManager.isYoutubeDomain(domain)) {
+        if (youtubeRestrictedMode && (query.queryType == 1 || query.queryType == 28) && SafeSearchManager.isYoutubeDomain(
+                domain
+            )
+        ) {
             val cachedIp = safeSearchIpCache[SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN]
             if (cachedIp != null) {
                 val response = DnsPacketParser.buildRedirectResponse(query, cachedIp)
@@ -627,7 +652,8 @@ class AdBlockVpnService : VpnService() {
                         notificationHelper.checkAndNotifyMilestone(currentTotal)
                         // Update next threshold after check
                         val lastMilestone = appPrefs.lastMilestoneBlocked.first()
-                        nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
+                        nextMilestoneThreshold =
+                            notificationHelper.nextMilestoneThreshold(lastMilestone)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error checking milestone", e)
                         // Restore threshold so checks resume
@@ -1173,7 +1199,8 @@ class AdBlockVpnService : VpnService() {
             .setAutoCancel(true)
             .build()
 
-        val notificationId = FIREWALL_NOTIFICATION_ID_BASE + (packageName.hashCode() and 0x7FFFFFFF) % 500
+        val notificationId =
+            FIREWALL_NOTIFICATION_ID_BASE + (packageName.hashCode() and 0x7FFFFFFF) % 500
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.notify(notificationId, notification)
     }
