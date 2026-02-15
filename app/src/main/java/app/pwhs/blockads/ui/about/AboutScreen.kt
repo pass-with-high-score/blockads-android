@@ -209,7 +209,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 onClick = {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        "https://github.com/pass-with-high-score/blockads-android/blob/main/LICENSE".toUri()
+                        "https://github.com/pass-with-high-score/blockads-android?tab=GPL-3.0-1-ov-file".toUri()
                     )
                     context.startActivity(intent)
                 }
