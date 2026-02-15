@@ -13,12 +13,16 @@ import app.pwhs.blockads.data.FilterList
 import app.pwhs.blockads.data.FilterListBackup
 import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.FirewallRule
+import app.pwhs.blockads.data.FirewallRuleBackup
+import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.data.ProtectionProfileDao
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
+import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.util.CustomRuleParser
@@ -41,6 +45,7 @@ class SettingsViewModel(
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val profileDao: ProtectionProfileDao,
     private val profileManager: ProfileManager,
+    private val firewallRuleDao: FirewallRuleDao,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -123,6 +128,9 @@ class SettingsViewModel(
 
     val youtubeRestrictedMode: StateFlow<Boolean> = appPrefs.youtubeRestrictedMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val highContrast: StateFlow<Boolean> = appPrefs.highContrast
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -137,11 +145,17 @@ class SettingsViewModel(
     }
 
     fun setUpstreamDns(dns: String) {
-        viewModelScope.launch { appPrefs.setUpstreamDns(dns) }
+        viewModelScope.launch {
+            appPrefs.setUpstreamDns(dns)
+            requestVpnRestart()
+        }
     }
 
     fun setFallbackDns(dns: String) {
-        viewModelScope.launch { appPrefs.setFallbackDns(dns) }
+        viewModelScope.launch {
+            appPrefs.setFallbackDns(dns)
+            requestVpnRestart()
+        }
     }
 
     fun setDnsProtocol(protocol: app.pwhs.blockads.data.DnsProtocol) {
@@ -206,18 +220,27 @@ class SettingsViewModel(
     fun setDnsResponseType(responseType: String) {
         viewModelScope.launch {
             appPrefs.setDnsResponseType(responseType)
+            requestVpnRestart()
         }
     }
 
     fun setSafeSearchEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setSafeSearchEnabled(enabled)
+            requestVpnRestart()
         }
     }
 
     fun setYoutubeRestrictedMode(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setYoutubeRestrictedMode(enabled)
+            requestVpnRestart()
+        }
+    }
+
+    fun setHighContrast(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setHighContrast(enabled)
         }
     }
 
@@ -236,6 +259,7 @@ class SettingsViewModel(
                 if (exists == 0) {
                     whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
                     _events.toast(R.string.filter_domain_whitelisted, listOf(cleanDomain))
+                    requestVpnRestart()
                 } else {
                     _events.toast(R.string.filter_domain_already_whitelisted)
                 }
@@ -246,6 +270,7 @@ class SettingsViewModel(
     fun removeWhitelistDomain(domain: WhitelistDomain) {
         viewModelScope.launch {
             whitelistDomainDao.delete(domain)
+            requestVpnRestart()
         }
     }
 
@@ -263,12 +288,27 @@ class SettingsViewModel(
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
                     activeProfileType = activeProfile?.profileType ?: "",
+                    highContrast = appPrefs.highContrast.first(),
+                    firewallEnabled = appPrefs.firewallEnabled.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
                     whitelistDomains = whitelistDomains.value.map { it.domain },
                     whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList(),
-                    customRules = customDnsRuleDao.getAll().map { it.rule }
+                    customRules = customDnsRuleDao.getAll().map { it.rule },
+                    firewallRules = firewallRuleDao.getEnabledRules().map { r ->
+                        FirewallRuleBackup(
+                            packageName = r.packageName,
+                            blockWifi = r.blockWifi,
+                            blockMobileData = r.blockMobileData,
+                            scheduleEnabled = r.scheduleEnabled,
+                            scheduleStartHour = r.scheduleStartHour,
+                            scheduleStartMinute = r.scheduleStartMinute,
+                            scheduleEndHour = r.scheduleEndHour,
+                            scheduleEndMinute = r.scheduleEndMinute,
+                            isEnabled = r.isEnabled
+                        )
+                    }
                 )
 
                 val jsonFormat = kotlinx.serialization.json.Json { prettyPrint = true }
@@ -308,6 +348,8 @@ class SettingsViewModel(
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
+                appPrefs.setHighContrast(backup.highContrast)
+                appPrefs.setFirewallEnabled(backup.firewallEnabled)
 
                 // Restore active profile by type (applies filter config + prefs atomically)
                 if (backup.activeProfileType.isNotBlank()) {
@@ -352,11 +394,34 @@ class SettingsViewModel(
                     }
                 }
 
+                // Firewall rules — only add new
+                backup.firewallRules.forEach { r ->
+                    if (firewallRuleDao.getByPackageName(r.packageName) == null) {
+                        firewallRuleDao.insert(
+                            FirewallRule(
+                                packageName = r.packageName,
+                                blockWifi = r.blockWifi,
+                                blockMobileData = r.blockMobileData,
+                                scheduleEnabled = r.scheduleEnabled,
+                                scheduleStartHour = r.scheduleStartHour,
+                                scheduleStartMinute = r.scheduleStartMinute,
+                                scheduleEndHour = r.scheduleEndHour,
+                                scheduleEndMinute = r.scheduleEndMinute,
+                                isEnabled = r.isEnabled
+                            )
+                        )
+                    }
+                }
+
                 _events.toast(R.string.filter_settings_imported)
+                requestVpnRestart()
             } catch (e: Exception) {
                 _events.toast(R.string.filter_import_failed, listOf("${e.message}"))
-
             }
         }
+    }
+
+    private fun requestVpnRestart() {
+        AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
     }
 }

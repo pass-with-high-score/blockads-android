@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsProvider
 import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.service.AdBlockVpnService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -69,6 +70,7 @@ class DnsProviderViewModel(
                 }
             }
             appPrefs.setFallbackDns(fallbackProvider.ipAddress)
+            AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
         }
     }
 
@@ -77,6 +79,7 @@ class DnsProviderViewModel(
             appPrefs.setDnsProviderId(null)
             appPrefs.setUpstreamDns(upstream)
             appPrefs.setFallbackDns(fallback)
+            AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
         }
     }
 }

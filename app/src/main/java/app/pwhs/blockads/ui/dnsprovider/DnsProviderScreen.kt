@@ -56,7 +56,7 @@ fun DnsProviderScreen(
                 title = { Text(stringResource(R.string.dns_provider_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.accessibility_navigate_back))
                     }
                 }
             )

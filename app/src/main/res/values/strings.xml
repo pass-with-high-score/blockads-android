@@ -161,6 +161,13 @@
     <string name="settings_lang_system">System</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">High Contrast</string>
+    <string name="settings_high_contrast_desc">Increase contrast for better visibility</string>
     <string name="settings_connection">Connection</string>
     <string name="settings_filter_lists">Filter Lists (%d active)</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>
@@ -268,6 +275,15 @@
     <string name="widget_name">BlockAds Toggle</string>
     <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
     <string name="widget_toggle_description">Toggle ad blocking</string>
+    <string name="widget_blocked_today">Blocked today: %s</string>
+    <string name="widget_blocked_label">Blocked</string>
+    <string name="widget_total_label">Total</string>
+    <string name="widget_today_stats">Today</string>
+    <string name="widget_alltime_stats">All Time</string>
+    <string name="widget_activity_24h">24h Activity</string>
+    <string name="widget_top_blocked">Top Blocked</string>
+    <string name="widget_no_blocked_domains">No blocked domains yet</string>
+    <string name="widget_no_data">No data yet</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Custom Rules</string>
@@ -345,6 +361,11 @@
     <string name="log_action_block">Block</string>
     <string name="block_reason_custom_rule">Custom Block Rule</string>
     <string name="block_reason_filter_list">Filter List</string>
+    <string name="block_reason_security">Dangerous Website</string>
+    <!-- Security Stats -->
+    <string name="home_security_threats">Threats Blocked</string>
+    <string name="filter_category_ad">Ad Blocking</string>
+    <string name="filter_category_security">Security</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Stats</string>
     <string name="stats_title">Statistics</string>
@@ -353,6 +374,7 @@
     <string name="stats_all_time_blocked">All Time Blocked</string>
     <string name="stats_today_queries">Today Queries</string>
     <string name="stats_today_blocked">Today Blocked</string>
+    <string name="stats_today_security">Today Threats</string>
     <string name="stats_charts">Activity Charts</string>
     <string name="stats_chart_4w">4 Weeks</string>
     <string name="stats_chart_12m">12 Months</string>
@@ -394,4 +416,43 @@
     <string name="profile_day_sun">Sun</string>
     <string name="settings_profiles">Protection Profiles</string>
     <string name="settings_profiles_desc">Preset configurations for different use cases</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Toggle VPN protection</string>
+    <string name="accessibility_vpn_active">VPN protection is active</string>
+    <string name="accessibility_vpn_inactive">VPN protection is inactive</string>
+    <string name="accessibility_vpn_connecting">VPN is connecting</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Block rate %1$s percent</string>
+    <string name="accessibility_navigate_back">Navigate back</string>
+    <!-- Firewall -->
+    <string name="firewall_title">Firewall</string>
+    <string name="firewall_subtitle">Per-app internet control</string>
+    <string name="firewall_count">%d apps blocked</string>
+    <string name="firewall_search">Search apps…</string>
+    <string name="firewall_enable">Enable Firewall</string>
+    <string name="firewall_enable_desc">Block internet access for selected apps via DNS</string>
+    <string name="firewall_block_wifi">Block Wi-Fi</string>
+    <string name="firewall_block_mobile">Block Mobile Data</string>
+    <string name="firewall_schedule">Schedule</string>
+    <string name="firewall_schedule_desc">Block only during specific hours</string>
+    <string name="firewall_schedule_from">From</string>
+    <string name="firewall_schedule_to">To</string>
+    <string name="firewall_app_blocked">Internet blocked</string>
+    <string name="firewall_app_not_blocked">Internet allowed</string>
+    <string name="firewall_rule_saved">Firewall rule saved</string>
+    <string name="firewall_rule_removed">Firewall rule removed</string>
+    <string name="firewall_configure">Configure Rule</string>
+    <string name="firewall_channel_name">Firewall Alerts</string>
+    <string name="firewall_channel_description">Notifications when apps are blocked by firewall</string>
+    <string name="firewall_notification_title">App blocked by firewall</string>
+    <string name="firewall_notification_text">%s was blocked from accessing the internet</string>
+    <string name="firewall_network_wifi">Wi-Fi</string>
+    <string name="firewall_network_mobile">Mobile</string>
+    <string name="firewall_network_all">All</string>
+    <string name="firewall_status_schedule"> · %1$02d:%2$02d–%3$02d:%4$02d</string>
+    <string name="firewall_schedule_hour_plus">Hour +</string>
+    <string name="firewall_schedule_minute_plus">Min +</string>
+    <string name="block_reason_firewall">Firewall</string>
+    <string name="settings_firewall">Firewall</string>
+    <string name="settings_firewall_desc">Block internet access per app</string>
 </resources>

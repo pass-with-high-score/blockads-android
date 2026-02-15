@@ -161,6 +161,13 @@
     <string name="settings_lang_system">Hệ thống</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">Tương phản cao</string>
+    <string name="settings_high_contrast_desc">Tăng độ tương phản để dễ nhìn hơn</string>
     <string name="settings_connection">Kết nối</string>
     <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
     <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>
@@ -263,6 +270,15 @@
     <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
     <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
+    <string name="widget_blocked_today">Đã chặn hôm nay: %s</string>
+    <string name="widget_blocked_label">Đã chặn</string>
+    <string name="widget_total_label">Tổng</string>
+    <string name="widget_today_stats">Hôm nay</string>
+    <string name="widget_alltime_stats">Toàn bộ</string>
+    <string name="widget_activity_24h">Hoạt động 24h</string>
+    <string name="widget_top_blocked">Chặn nhiều nhất</string>
+    <string name="widget_no_blocked_domains">Chưa có tên miền bị chặn</string>
+    <string name="widget_no_data">Chưa có dữ liệu</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Quy Tắc Tùy Chỉnh</string>
@@ -340,6 +356,11 @@
     <string name="log_action_block">Chặn</string>
     <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
     <string name="block_reason_filter_list">Danh sách bộ lọc</string>
+    <string name="block_reason_security">Website nguy hiểm</string>
+    <!-- Security Stats -->
+    <string name="home_security_threats">Mối đe dọa đã chặn</string>
+    <string name="filter_category_ad">Chặn quảng cáo</string>
+    <string name="filter_category_security">Bảo mật</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
     <string name="stats_title">Thống kê</string>
@@ -348,6 +369,7 @@
     <string name="stats_all_time_blocked">Tổng đã chặn</string>
     <string name="stats_today_queries">Hôm nay truy vấn</string>
     <string name="stats_today_blocked">Hôm nay đã chặn</string>
+    <string name="stats_today_security">Hôm nay mối đe dọa</string>
     <string name="stats_charts">Biểu đồ hoạt động</string>
     <string name="stats_chart_4w">4 Tuần</string>
     <string name="stats_chart_12m">12 Tháng</string>
@@ -389,4 +411,43 @@
     <string name="profile_day_sun">CN</string>
     <string name="settings_profiles">Hồ sơ bảo vệ</string>
     <string name="settings_profiles_desc">Cấu hình sẵn cho từng trường hợp sử dụng</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Bật/tắt bảo vệ VPN</string>
+    <string name="accessibility_vpn_active">Bảo vệ VPN đang hoạt động</string>
+    <string name="accessibility_vpn_inactive">Bảo vệ VPN không hoạt động</string>
+    <string name="accessibility_vpn_connecting">VPN đang kết nối</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Tỷ lệ chặn %1$s phần trăm</string>
+    <string name="accessibility_navigate_back">Quay lại</string>
+    <!-- Firewall -->
+    <string name="firewall_title">Tường lửa</string>
+    <string name="firewall_subtitle">Kiểm soát internet theo ứng dụng</string>
+    <string name="firewall_count">%d ứng dụng bị chặn</string>
+    <string name="firewall_search">Tìm ứng dụng…</string>
+    <string name="firewall_enable">Bật tường lửa</string>
+    <string name="firewall_enable_desc">Chặn truy cập internet cho các ứng dụng đã chọn qua DNS</string>
+    <string name="firewall_block_wifi">Chặn Wi-Fi</string>
+    <string name="firewall_block_mobile">Chặn dữ liệu di động</string>
+    <string name="firewall_schedule">Lịch trình</string>
+    <string name="firewall_schedule_desc">Chỉ chặn trong khoảng thời gian cụ thể</string>
+    <string name="firewall_schedule_from">Từ</string>
+    <string name="firewall_schedule_to">Đến</string>
+    <string name="firewall_app_blocked">Internet bị chặn</string>
+    <string name="firewall_app_not_blocked">Internet được phép</string>
+    <string name="firewall_rule_saved">Đã lưu quy tắc tường lửa</string>
+    <string name="firewall_rule_removed">Đã xóa quy tắc tường lửa</string>
+    <string name="firewall_configure">Cấu hình quy tắc</string>
+    <string name="firewall_channel_name">Cảnh báo tường lửa</string>
+    <string name="firewall_channel_description">Thông báo khi ứng dụng bị chặn bởi tường lửa</string>
+    <string name="firewall_notification_title">Ứng dụng bị chặn bởi tường lửa</string>
+    <string name="firewall_notification_text">%s đã bị chặn truy cập internet</string>
+    <string name="firewall_network_wifi">Wi-Fi</string>
+    <string name="firewall_network_mobile">Di động</string>
+    <string name="firewall_network_all">Tất cả</string>
+    <string name="firewall_status_schedule"> · %1$02d:%2$02d–%3$02d:%4$02d</string>
+    <string name="firewall_schedule_hour_plus">Giờ +</string>
+    <string name="firewall_schedule_minute_plus">Phút +</string>
+    <string name="block_reason_firewall">Tường lửa</string>
+    <string name="settings_firewall">Tường lửa</string>
+    <string name="settings_firewall_desc">Chặn truy cập internet theo ứng dụng</string>
 </resources>

@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
@@ -16,8 +17,9 @@ import app.pwhs.blockads.data.DnsErrorDao
 import app.pwhs.blockads.data.DnsErrorEntry
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.util.BatteryMonitor
-import app.pwhs.blockads.widget.AdBlockWidgetProvider
+import app.pwhs.blockads.widget.AdBlockGlanceWidget
 import app.pwhs.blockads.util.AppNameResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +36,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
@@ -44,10 +47,30 @@ class AdBlockVpnService : VpnService() {
         private const val REVOKED_NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "blockads_vpn_channel"
         private const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
+        private const val FIREWALL_CHANNEL_ID = "blockads_firewall_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val RESTART_CLEANUP_DELAY_MS = 1000L
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
+        const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
+
+        /**
+         * Request a VPN restart to apply new settings.
+         * Only restarts if the VPN is currently running.
+         */
+        fun requestRestart(context: Context) {
+            if (isRunning || isRestarting) {
+                val intent = Intent(context, AdBlockVpnService::class.java).apply {
+                    action = ACTION_RESTART
+                }
+                context.startService(intent)
+            }
+        }
+
+        @Volatile
+        var isRestarting = false
+            private set
 
         @Volatile
         var isRunning = false
@@ -75,6 +98,8 @@ class AdBlockVpnService : VpnService() {
         VpnRetryManager(maxRetries = 5, initialDelayMs = 1000L, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private lateinit var appNameResolver: AppNameResolver
+    private var firewallManager: FirewallManager? = null
+    private lateinit var firewallRuleDao: FirewallRuleDao
     private var batteryMonitoringJob: kotlinx.coroutines.Job? = null
     private var notificationUpdateJob: kotlinx.coroutines.Job? = null
 
@@ -97,6 +122,7 @@ class AdBlockVpnService : VpnService() {
         dnsErrorDao = koin.get()
         dohClient = koin.get()
         dotClient = koin.get()
+        firewallRuleDao = koin.get()
         batteryMonitor = BatteryMonitor(this)
         appNameResolver = AppNameResolver(this)
 
@@ -115,10 +141,52 @@ class AdBlockVpnService : VpnService() {
                 return START_NOT_STICKY
             }
 
+            ACTION_RESTART -> {
+                restartVpn()
+                return START_STICKY
+            }
+
             else -> {
                 startVpn()
                 return START_STICKY
             }
+        }
+    }
+
+    private fun restartVpn() {
+        if (isRestarting) return
+        if (!isRunning && !isConnecting) return
+
+        isRestarting = true
+        Log.d(TAG, "Restarting VPN to apply new settings")
+
+        // Stop packet processing
+        isProcessing = false
+        isRunning = false
+        isConnecting = false
+        isReconnecting = true
+
+        // Stop monitoring
+        networkMonitor?.stopMonitoring()
+        stopBatteryMonitoring()
+        stopNotificationUpdates()
+
+        // Close current VPN interface (causes IOException in blocking read, ending processPackets)
+        try {
+            vpnInterface?.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing VPN interface during restart", e)
+        }
+        vpnInterface = null
+
+        // Reset retry manager for fresh start
+        retryManager.reset()
+
+        // Brief delay to let old VPN resources (file descriptors, sockets) clean up
+        serviceScope.launch {
+            delay(RESTART_CLEANUP_DELAY_MS)
+            isRestarting = false
+            startVpn()
         }
     }
 
@@ -148,7 +216,59 @@ class AdBlockVpnService : VpnService() {
                 val whitelistedApps = appPrefs.getWhitelistedAppsSnapshot()
                 val safeSearchEnabled = appPrefs.safeSearchEnabled.first()
                 val youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first()
+                val firewallEnabled = appPrefs.firewallEnabled.first()
 
+                // Load firewall rules if enabled
+                if (firewallEnabled) {
+                    val fwManager = FirewallManager(this@AdBlockVpnService, firewallRuleDao)
+                    fwManager.loadRules()
+                    firewallManager = fwManager
+                    Log.d(TAG, "Firewall enabled, rules loaded")
+                } else {
+                    firewallManager = null
+                }
+
+                // Periodically refresh firewall rules and enabled state while the VPN coroutine is running.
+                // This ensures that changes made via the UI (add/update/delete rules or toggling the
+                // firewall preference) take effect without requiring a VPN restart.
+                launch {
+                    var lastEnabled = firewallEnabled
+                    while (true) {
+                        try {
+                            val currentEnabled = appPrefs.firewallEnabled.first()
+
+                            if (currentEnabled) {
+                                // If firewall has just been enabled or manager is missing, (re)create and load rules.
+                                if (!lastEnabled || firewallManager == null) {
+                                    val fwManager = FirewallManager(this@AdBlockVpnService, firewallRuleDao)
+                                    fwManager.loadRules()
+                                    firewallManager = fwManager
+                                    Log.d(TAG, "Firewall enabled or re-enabled, rules loaded")
+                                } else {
+                                    // Firewall remains enabled: reload rules to pick up rule changes.
+                                    try {
+                                        firewallManager?.loadRules()
+                                        Log.d(TAG, "Firewall rules reloaded")
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Error reloading firewall rules", e)
+                                    }
+                                }
+                            } else if (lastEnabled) {
+                                // Firewall has just been disabled via preference change.
+                                firewallManager = null
+                                Log.d(TAG, "Firewall disabled via preference change")
+                            }
+
+                            lastEnabled = currentEnabled
+                        } catch (e: Exception) {
+                            // Log and continue; do not cancel the whole VPN coroutine due to a transient error.
+                            Log.e(TAG, "Error while monitoring firewall preference", e)
+                        }
+
+                        // Poll at a modest interval to balance responsiveness and resource usage.
+                        delay(5_000)
+                    }
+                }
                 // Resolve SafeSearch IPs if enabled
                 val safeSearchIpCache = mutableMapOf<String, ByteArray>()
                 if (safeSearchEnabled) {
@@ -194,7 +314,7 @@ class AdBlockVpnService : VpnService() {
                 vpnStartTime = System.currentTimeMillis()
                 startTimestamp = vpnStartTime
                 updateNotification() // Update to normal notification
-                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
+                AdBlockGlanceWidget.requestUpdate(this@AdBlockVpnService)
                 Log.d(TAG, "VPN established successfully")
 
                 // Log initial battery state
@@ -340,8 +460,37 @@ class AdBlockVpnService : VpnService() {
     ) {
         val domain = query.domain.lowercase()
         val startTime = System.currentTimeMillis()
-        val appName =
-            appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+
+        // Resolve UID once to get both app name and package name (avoids duplicate UID lookup)
+        val fwManager = firewallManager
+        val identity = if (fwManager != null) {
+            appNameResolver.resolveIdentity(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+        } else {
+            null
+        }
+        val appName = identity?.appName
+            ?: appNameResolver.resolve(query.sourcePort, query.sourceIp, query.destIp, query.destPort)
+
+        // Firewall: block DNS for apps with active firewall rules
+        if (fwManager != null && identity != null) {
+            val appPackage = identity.packageName
+            if (fwManager.shouldBlock(appPackage)) {
+                val response = DnsPacketParser.buildRefusedResponse(query)
+                try {
+                    outputStream.write(response)
+                    outputStream.flush()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error writing firewall blocked response", e)
+                }
+                val elapsed = System.currentTimeMillis() - startTime
+                logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = FilterListRepository.BLOCK_REASON_FIREWALL)
+                Log.d(TAG, "FIREWALL BLOCKED: $domain (app: $appName / $appPackage)")
+                totalQueries.incrementAndGet()
+                blockedQueries.incrementAndGet()
+                sendFirewallNotification(appName, appPackage)
+                return
+            }
+        }
 
         // SafeSearch enforcement: redirect supported search engines (only for A/AAAA queries)
         if (safeSearchEnabled && (query.queryType == 1 || query.queryType == 28)) {
@@ -765,6 +914,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
@@ -786,7 +936,7 @@ class AdBlockVpnService : VpnService() {
             Log.e(TAG, "Error closing VPN interface", e)
         }
         vpnInterface = null
-        AdBlockWidgetProvider.sendUpdateBroadcast(this)
+        AdBlockGlanceWidget.requestUpdate(this)
         stopForeground(STOP_FOREGROUND_REMOVE)
         if (showStoppedNotification) {
             stopForeground(STOP_FOREGROUND_DETACH)
@@ -815,6 +965,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
@@ -862,6 +1013,56 @@ class AdBlockVpnService : VpnService() {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createFirewallNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                FIREWALL_CHANNEL_ID,
+                getString(R.string.firewall_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.firewall_channel_description)
+                setShowBadge(false)
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    // Rate-limit firewall notifications to avoid flooding
+    private val lastFirewallNotificationTime = ConcurrentHashMap<String, Long>()
+    private val FIREWALL_NOTIFICATION_COOLDOWN_MS = 60_000L // 1 minute per app
+    private val FIREWALL_NOTIFICATION_ID_BASE = 1000
+
+    private fun sendFirewallNotification(appName: String, packageName: String) {
+        if (packageName.isEmpty()) return
+
+        val now = System.currentTimeMillis()
+        val lastTime = lastFirewallNotificationTime[packageName]
+        if (lastTime != null && (now - lastTime) < FIREWALL_NOTIFICATION_COOLDOWN_MS) return
+        lastFirewallNotificationTime[packageName] = now
+
+        createFirewallNotificationChannel()
+
+        val displayName = appName.ifEmpty { packageName }
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, FIREWALL_CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.firewall_notification_title))
+            .setContentText(getString(R.string.firewall_notification_text, displayName))
+            .setSmallIcon(R.drawable.ic_shield_on)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationId = FIREWALL_NOTIFICATION_ID_BASE + (packageName.hashCode() and 0x7FFFFFFF) % 500
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(notificationId, notification)
     }
 
     private fun showRevokedNotification() {
