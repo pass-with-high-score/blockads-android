@@ -316,4 +316,12 @@
     <string name="stats_chart_12m">12개월</string>
     <string name="stats_per_app">앱별 통계</string>
     <string name="stats_app_queries_blocked">%1$s 쿼리 · %2$s 차단</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">VPN 보호 전환</string>
+    <string name="accessibility_vpn_active">VPN 보호가 활성화되었습니다</string>
+    <string name="accessibility_vpn_inactive">VPN 보호가 비활성화되었습니다</string>
+    <string name="accessibility_vpn_connecting">VPN 연결 중</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">차단율 %1$s 퍼센트</string>
+    <string name="accessibility_navigate_back">뒤로 가기</string>
 </resources>

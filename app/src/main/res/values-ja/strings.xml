@@ -316,4 +316,12 @@
     <string name="stats_chart_12m">12か月</string>
     <string name="stats_per_app">アプリごとの統計</string>
     <string name="stats_app_queries_blocked">%1$s クエリ · %2$s ブロック</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">VPN保護の切り替え</string>
+    <string name="accessibility_vpn_active">VPN保護が有効です</string>
+    <string name="accessibility_vpn_inactive">VPN保護が無効です</string>
+    <string name="accessibility_vpn_connecting">VPNに接続中</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">ブロック率 %1$s パーセント</string>
+    <string name="accessibility_navigate_back">戻る</string>
 </resources>

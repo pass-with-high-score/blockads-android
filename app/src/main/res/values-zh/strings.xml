@@ -316,4 +316,12 @@
     <string name="stats_chart_12m">12个月</string>
     <string name="stats_per_app">各应用统计</string>
     <string name="stats_app_queries_blocked">%1$s 次查询 · %2$s 次拦截</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">切换VPN保护</string>
+    <string name="accessibility_vpn_active">VPN保护已激活</string>
+    <string name="accessibility_vpn_inactive">VPN保护已停用</string>
+    <string name="accessibility_vpn_connecting">VPN正在连接</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">拦截率 %1$s 百分比</string>
+    <string name="accessibility_navigate_back">返回</string>
 </resources>

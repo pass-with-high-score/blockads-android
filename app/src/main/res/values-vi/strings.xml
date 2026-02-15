@@ -360,4 +360,13 @@
     <string name="stats_chart_12m">12 Tháng</string>
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Bật/tắt bảo vệ VPN</string>
+    <string name="accessibility_vpn_active">Bảo vệ VPN đang hoạt động</string>
+    <string name="accessibility_vpn_inactive">Bảo vệ VPN không hoạt động</string>
+    <string name="accessibility_vpn_connecting">VPN đang kết nối</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Tỷ lệ chặn %1$s phần trăm</string>
+    <string name="accessibility_navigate_back">Quay lại</string>
 </resources>

@@ -31,7 +31,14 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.NeonGreen
@@ -42,6 +49,13 @@ fun PowerButton(
     isConnecting: Boolean,
     onClick: () -> Unit
 ) {
+    val vpnStateDescription = when {
+        isConnecting -> stringResource(R.string.accessibility_vpn_connecting)
+        isActive -> stringResource(R.string.accessibility_vpn_active)
+        else -> stringResource(R.string.accessibility_vpn_inactive)
+    }
+    val toggleDescription = stringResource(R.string.accessibility_toggle_vpn)
+
     val buttonColor by animateColorAsState(
         targetValue = when {
             isConnecting -> AccentBlue
@@ -147,6 +161,11 @@ fun PowerButton(
                     indication = null,
                     enabled = !isConnecting
                 ) { onClick() }
+                .semantics {
+                    contentDescription = toggleDescription
+                    stateDescription = vpnStateDescription
+                    role = Role.Button
+                }
         ) {
             if (isConnecting) {
                 CircularProgressIndicator(
@@ -157,7 +176,7 @@ fun PowerButton(
             } else {
                 Icon(
                     imageVector = Icons.Default.PowerSettingsNew,
-                    contentDescription = "Toggle VPN",
+                    contentDescription = null,
                     tint = buttonColor,
                     modifier = Modifier.size(64.dp)
                 )

@@ -365,4 +365,13 @@
     <string name="stats_chart_12m">12 Months</string>
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Toggle VPN protection</string>
+    <string name="accessibility_vpn_active">VPN protection is active</string>
+    <string name="accessibility_vpn_inactive">VPN protection is inactive</string>
+    <string name="accessibility_vpn_connecting">VPN is connecting</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Block rate %1$s percent</string>
+    <string name="accessibility_navigate_back">Navigate back</string>
 </resources>

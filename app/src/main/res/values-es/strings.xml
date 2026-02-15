@@ -316,4 +316,12 @@
     <string name="stats_chart_12m">12 meses</string>
     <string name="stats_per_app">Estadísticas por aplicación</string>
     <string name="stats_app_queries_blocked">%1$s consultas · %2$s bloqueados</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">Alternar protección VPN</string>
+    <string name="accessibility_vpn_active">La protección VPN está activa</string>
+    <string name="accessibility_vpn_inactive">La protección VPN está inactiva</string>
+    <string name="accessibility_vpn_connecting">VPN conectando</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">Tasa de bloqueo %1$s por ciento</string>
+    <string name="accessibility_navigate_back">Volver</string>
 </resources>

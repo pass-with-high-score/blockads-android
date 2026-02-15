@@ -316,4 +316,12 @@
     <string name="stats_chart_12m">12 เดือน</string>
     <string name="stats_per_app">สถิติแต่ละแอป</string>
     <string name="stats_app_queries_blocked">%1$s คิวรี · %2$s ถูกบล็อก</string>
+    <!-- Accessibility -->
+    <string name="accessibility_toggle_vpn">สลับการป้องกัน VPN</string>
+    <string name="accessibility_vpn_active">การป้องกัน VPN เปิดใช้งานอยู่</string>
+    <string name="accessibility_vpn_inactive">การป้องกัน VPN ปิดใช้งานอยู่</string>
+    <string name="accessibility_vpn_connecting">VPN กำลังเชื่อมต่อ</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_block_rate_value">อัตราการบล็อก %1$s เปอร์เซ็นต์</string>
+    <string name="accessibility_navigate_back">ย้อนกลับ</string>
 </resources>
