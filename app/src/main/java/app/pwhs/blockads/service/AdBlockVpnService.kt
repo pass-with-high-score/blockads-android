@@ -57,13 +57,17 @@ class AdBlockVpnService : VpnService() {
          * Only restarts if the VPN is currently running.
          */
         fun requestRestart(context: Context) {
-            if (isRunning) {
+            if (isRunning || isRestarting) {
                 val intent = Intent(context, AdBlockVpnService::class.java).apply {
                     action = ACTION_RESTART
                 }
                 context.startService(intent)
             }
         }
+
+        @Volatile
+        var isRestarting = false
+            private set
 
         @Volatile
         var isRunning = false
@@ -144,8 +148,10 @@ class AdBlockVpnService : VpnService() {
     }
 
     private fun restartVpn() {
+        if (isRestarting) return
         if (!isRunning && !isConnecting) return
 
+        isRestarting = true
         Log.d(TAG, "Restarting VPN to apply new settings")
 
         // Stop packet processing
@@ -173,6 +179,7 @@ class AdBlockVpnService : VpnService() {
         // Brief delay to let old VPN resources (file descriptors, sockets) clean up
         serviceScope.launch {
             delay(RESTART_CLEANUP_DELAY_MS)
+            isRestarting = false
             startVpn()
         }
     }
@@ -820,6 +827,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
@@ -870,6 +878,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
