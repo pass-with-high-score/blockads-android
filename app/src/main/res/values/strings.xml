@@ -363,6 +363,10 @@
     <string name="profile_title">Protection Profiles</string>
     <string name="profile_section_profiles">Profiles</string>
     <string name="profile_section_schedules">Schedules</string>
+    <string name="profile_name_default">Default</string>
+    <string name="profile_name_strict">Strict</string>
+    <string name="profile_name_family">Family</string>
+    <string name="profile_name_gaming">Gaming</string>
     <string name="profile_desc_default">Block ads &amp; basic trackers</string>
     <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
     <string name="profile_desc_family">Block ads + adult content + gambling</string>

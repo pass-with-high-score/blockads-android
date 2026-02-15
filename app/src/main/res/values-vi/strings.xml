@@ -358,6 +358,10 @@
     <string name="profile_title">Hồ sơ bảo vệ</string>
     <string name="profile_section_profiles">Hồ sơ</string>
     <string name="profile_section_schedules">Lịch trình</string>
+    <string name="profile_name_default">Mặc định</string>
+    <string name="profile_name_strict">Nghiêm ngặt</string>
+    <string name="profile_name_family">Gia đình</string>
+    <string name="profile_name_gaming">Chơi game</string>
     <string name="profile_desc_default">Chặn quảng cáo &amp; trình theo dõi cơ bản</string>
     <string name="profile_desc_strict">Chặn tất cả quảng cáo, trình theo dõi, phân tích</string>
     <string name="profile_desc_family">Chặn quảng cáo + nội dung người lớn + cờ bạc</string>

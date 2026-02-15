@@ -30,8 +30,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.ProtectionProfile
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
@@ -204,28 +203,26 @@ fun HomeScreen(
             // Active profile indicator
             activeProfile?.let { profile ->
                 Spacer(modifier = Modifier.height(8.dp))
-                FilterChip(
-                    selected = true,
-                    onClick = { },
-                    label = {
-                        Text(
-                            text = profile.name,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = NeonGreen.copy(alpha = 0.15f),
-                        selectedLabelColor = NeonGreen,
-                        selectedLeadingIconColor = NeonGreen
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(NeonGreen.copy(alpha = 0.15f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = NeonGreen,
+                        modifier = Modifier.size(16.dp)
                     )
-                )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = profileDisplayName(profile),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = NeonGreen
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -587,4 +584,13 @@ private fun formatUptimeShort(ms: Long): String {
         minutes > 0 -> "${minutes}m"
         else -> "<1m"
     }
+}
+
+@Composable
+private fun profileDisplayName(profile: ProtectionProfile): String = when (profile.profileType) {
+    ProtectionProfile.TYPE_DEFAULT -> stringResource(R.string.profile_name_default)
+    ProtectionProfile.TYPE_STRICT -> stringResource(R.string.profile_name_strict)
+    ProtectionProfile.TYPE_FAMILY -> stringResource(R.string.profile_name_family)
+    ProtectionProfile.TYPE_GAMING -> stringResource(R.string.profile_name_gaming)
+    else -> profile.name
 }

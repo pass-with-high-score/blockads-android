@@ -178,13 +178,13 @@ fun ProfileScreen(
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                         val schedulesWithProfiles = allSchedules.mapNotNull { schedule ->
-                            val profileName = profiles.find { it.id == schedule.profileId }?.name
-                            profileName?.let { schedule to it }
+                            val profile = profiles.find { it.id == schedule.profileId }
+                            profile?.let { schedule to it }
                         }
-                        schedulesWithProfiles.forEachIndexed { index, (schedule, profileName) ->
+                        schedulesWithProfiles.forEachIndexed { index, (schedule, profile) ->
                             ScheduleItem(
                                 schedule = schedule,
-                                profileName = profileName,
+                                profileName = profileDisplayName(profile),
                                 onToggle = { viewModel.toggleSchedule(schedule) },
                                 onDelete = { viewModel.deleteSchedule(schedule) }
                             )
@@ -209,7 +209,6 @@ fun ProfileScreen(
             onCreate = { name, safeSearch, youtubeRestricted ->
                 viewModel.createCustomProfile(
                     name = name,
-                    enabledFilterUrls = emptySet(),
                     safeSearchEnabled = safeSearch,
                     youtubeRestrictedMode = youtubeRestricted
                 )
@@ -266,7 +265,7 @@ private fun ProfileItem(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = profile.name,
+                text = profileDisplayName(profile),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                 color = if (isActive) NeonGreen else MaterialTheme.colorScheme.onSurface
@@ -431,7 +430,17 @@ private fun AddScheduleDialog(
     var startMinute by rememberSaveable { mutableIntStateOf(0) }
     var endHour by rememberSaveable { mutableIntStateOf(8) }
     var endMinute by rememberSaveable { mutableIntStateOf(0) }
-    var daysOfWeek by rememberSaveable { mutableStateOf("1,2,3,4,5,6,7") }
+    var selectedDays by rememberSaveable { mutableStateOf(setOf(1, 2, 3, 4, 5, 6, 7)) }
+
+    val dayLabels = listOf(
+        1 to stringResource(R.string.profile_day_mon),
+        2 to stringResource(R.string.profile_day_tue),
+        3 to stringResource(R.string.profile_day_wed),
+        4 to stringResource(R.string.profile_day_thu),
+        5 to stringResource(R.string.profile_day_fri),
+        6 to stringResource(R.string.profile_day_sat),
+        7 to stringResource(R.string.profile_day_sun)
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -491,15 +500,46 @@ private fun AddScheduleDialog(
                     style = MaterialTheme.typography.labelMedium,
                     color = TextSecondary
                 )
-                Text(
-                    text = formatDays(daysOfWeek),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    dayLabels.forEach { (dayNum, label) ->
+                        val isSelected = dayNum in selectedDays
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isSelected) NeonGreen.copy(alpha = 0.2f)
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                )
+                                .clickable {
+                                    selectedDays = if (isSelected) selectedDays - dayNum
+                                    else selectedDays + dayNum
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (isSelected) NeonGreen
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onAdd(startHour, startMinute, endHour, endMinute, daysOfWeek) }) {
+            TextButton(
+                onClick = {
+                    val days = selectedDays.sorted().joinToString(",")
+                    onAdd(startHour, startMinute, endHour, endMinute, days)
+                },
+                enabled = selectedDays.isNotEmpty()
+            ) {
                 Text(stringResource(R.string.settings_add))
             }
         },
@@ -526,6 +566,15 @@ private fun profileDescription(type: String): String = when (type) {
     ProtectionProfile.TYPE_FAMILY -> stringResource(R.string.profile_desc_family)
     ProtectionProfile.TYPE_GAMING -> stringResource(R.string.profile_desc_gaming)
     else -> stringResource(R.string.profile_desc_custom)
+}
+
+@Composable
+private fun profileDisplayName(profile: ProtectionProfile): String = when (profile.profileType) {
+    ProtectionProfile.TYPE_DEFAULT -> stringResource(R.string.profile_name_default)
+    ProtectionProfile.TYPE_STRICT -> stringResource(R.string.profile_name_strict)
+    ProtectionProfile.TYPE_FAMILY -> stringResource(R.string.profile_name_family)
+    ProtectionProfile.TYPE_GAMING -> stringResource(R.string.profile_name_gaming)
+    else -> profile.name
 }
 
 private fun formatTime(hour: Int, minute: Int): String =

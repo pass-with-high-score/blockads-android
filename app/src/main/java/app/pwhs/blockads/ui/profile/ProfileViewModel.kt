@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.data.ProfileSchedule
@@ -25,7 +24,6 @@ class ProfileViewModel(
     private val profileManager: ProfileManager,
     private val profileDao: ProtectionProfileDao,
     private val filterListDao: FilterListDao,
-    private val appPrefs: AppPreferences,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -56,15 +54,19 @@ class ProfileViewModel(
 
     fun createCustomProfile(
         name: String,
-        enabledFilterUrls: Set<String>,
         safeSearchEnabled: Boolean,
         youtubeRestrictedMode: Boolean
     ) {
         viewModelScope.launch {
+            // Seed with currently enabled filter list URLs so the profile
+            // starts with the user's current configuration
+            val currentUrls = filterListDao.getEnabled()
+                .map { it.url }
+                .toSet()
             val profile = ProtectionProfile(
                 name = name,
                 profileType = ProtectionProfile.TYPE_CUSTOM,
-                enabledFilterUrls = enabledFilterUrls.joinToString(","),
+                enabledFilterUrls = currentUrls.joinToString(","),
                 safeSearchEnabled = safeSearchEnabled,
                 youtubeRestrictedMode = youtubeRestrictedMode
             )

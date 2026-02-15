@@ -14,6 +14,7 @@ import app.pwhs.blockads.data.FilterListBackup
 import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.LocaleHelper
+import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.data.ProtectionProfileDao
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
@@ -39,6 +40,7 @@ class SettingsViewModel(
     private val filterListDao: FilterListDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val profileDao: ProtectionProfileDao,
+    private val profileManager: ProfileManager,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -307,13 +309,11 @@ class SettingsViewModel(
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
 
-                // Restore active profile by type
+                // Restore active profile by type (applies filter config + prefs atomically)
                 if (backup.activeProfileType.isNotBlank()) {
                     val profile = profileDao.getByType(backup.activeProfileType)
                     if (profile != null) {
-                        profileDao.deactivateAll()
-                        profileDao.activate(profile.id)
-                        appPrefs.setActiveProfileId(profile.id)
+                        profileManager.switchToProfile(profile.id)
                     }
                 }
 

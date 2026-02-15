@@ -74,6 +74,7 @@ val appModule = module {
             get(),
             get(),
             get(),
+            get(),
             application = androidApplication()
         )
     }
@@ -109,7 +110,6 @@ val appModule = module {
             profileManager = get(),
             profileDao = get(),
             filterListDao = get(),
-            appPrefs = get(),
             application = androidApplication()
         )
     }

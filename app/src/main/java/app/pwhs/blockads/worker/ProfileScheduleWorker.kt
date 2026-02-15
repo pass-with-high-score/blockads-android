@@ -45,6 +45,8 @@ class ProfileScheduleWorker(
 
     override suspend fun doWork(): Result {
         return try {
+            // Schedules are ordered by startHour, startMinute, id (deterministic precedence).
+            // The first matching in-range schedule wins when multiple overlap.
             val schedules = profileDao.getEnabledSchedules()
             if (schedules.isEmpty()) return Result.success()
 
