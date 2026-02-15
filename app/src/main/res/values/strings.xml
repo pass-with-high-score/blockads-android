@@ -358,4 +358,29 @@
     <string name="stats_chart_12m">12 Months</string>
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
+
+    <!-- Firewall -->
+    <string name="firewall_title">Firewall</string>
+    <string name="firewall_subtitle">Per-app internet control</string>
+    <string name="firewall_count">%d apps blocked</string>
+    <string name="firewall_search">Search apps…</string>
+    <string name="firewall_enable">Enable Firewall</string>
+    <string name="firewall_enable_desc">Block internet access for selected apps via DNS</string>
+    <string name="firewall_block_wifi">Block Wi-Fi</string>
+    <string name="firewall_block_mobile">Block Mobile Data</string>
+    <string name="firewall_schedule">Schedule</string>
+    <string name="firewall_schedule_desc">Block only during specific hours</string>
+    <string name="firewall_schedule_from">From</string>
+    <string name="firewall_schedule_to">To</string>
+    <string name="firewall_app_blocked">Internet blocked</string>
+    <string name="firewall_app_not_blocked">Internet allowed</string>
+    <string name="firewall_rule_saved">Firewall rule saved</string>
+    <string name="firewall_rule_removed">Firewall rule removed</string>
+    <string name="firewall_configure">Configure Rule</string>
+    <string name="firewall_channel_name">Firewall Alerts</string>
+    <string name="firewall_channel_description">Notifications when apps are blocked by firewall</string>
+    <string name="firewall_notification_title">App blocked by firewall</string>
+    <string name="firewall_notification_text">%s was blocked from accessing the internet</string>
+    <string name="settings_firewall">Firewall</string>
+    <string name="settings_firewall_desc">Block internet access per app</string>
 </resources>

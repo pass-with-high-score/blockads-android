@@ -353,4 +353,29 @@
     <string name="stats_chart_12m">12 Tháng</string>
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
+
+    <!-- Firewall -->
+    <string name="firewall_title">Tường lửa</string>
+    <string name="firewall_subtitle">Kiểm soát internet theo ứng dụng</string>
+    <string name="firewall_count">%d ứng dụng bị chặn</string>
+    <string name="firewall_search">Tìm ứng dụng…</string>
+    <string name="firewall_enable">Bật tường lửa</string>
+    <string name="firewall_enable_desc">Chặn truy cập internet cho các ứng dụng đã chọn qua DNS</string>
+    <string name="firewall_block_wifi">Chặn Wi-Fi</string>
+    <string name="firewall_block_mobile">Chặn dữ liệu di động</string>
+    <string name="firewall_schedule">Lịch trình</string>
+    <string name="firewall_schedule_desc">Chỉ chặn trong khoảng thời gian cụ thể</string>
+    <string name="firewall_schedule_from">Từ</string>
+    <string name="firewall_schedule_to">Đến</string>
+    <string name="firewall_app_blocked">Internet bị chặn</string>
+    <string name="firewall_app_not_blocked">Internet được phép</string>
+    <string name="firewall_rule_saved">Đã lưu quy tắc tường lửa</string>
+    <string name="firewall_rule_removed">Đã xóa quy tắc tường lửa</string>
+    <string name="firewall_configure">Cấu hình quy tắc</string>
+    <string name="firewall_channel_name">Cảnh báo tường lửa</string>
+    <string name="firewall_channel_description">Thông báo khi ứng dụng bị chặn bởi tường lửa</string>
+    <string name="firewall_notification_title">Ứng dụng bị chặn bởi tường lửa</string>
+    <string name="firewall_notification_text">%s đã bị chặn truy cập internet</string>
+    <string name="settings_firewall">Tường lửa</string>
+    <string name="settings_firewall_desc">Chặn truy cập internet theo ứng dụng</string>
 </resources>

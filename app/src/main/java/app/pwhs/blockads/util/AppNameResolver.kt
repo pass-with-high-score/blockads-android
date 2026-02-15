@@ -43,6 +43,16 @@ class AppNameResolver(private val context: Context) {
     }
 
     /**
+     * Resolve the package name that owns the given DNS query connection.
+     * Returns the package name (e.g. "com.android.chrome") or empty string if not found.
+     */
+    fun resolvePackageName(sourcePort: Int, sourceIp: ByteArray, destIp: ByteArray, destPort: Int): String {
+        val uid = findUidForConnection(sourcePort, sourceIp, destIp, destPort)
+        if (uid < 0) return ""
+        return getPackageNameForUid(uid)
+    }
+
+    /**
      * Find the UID owning the connection.
      * Uses official API on Android 10+, falls back to /proc/net/udp on older versions.
      */
@@ -140,5 +150,20 @@ class AppNameResolver(private val context: Context) {
 
         uidToAppNameCache[uid] = appName
         return appName
+    }
+
+    // Cache UID -> package name
+    private val uidToPackageNameCache = ConcurrentHashMap<Int, String>()
+
+    private fun getPackageNameForUid(uid: Int): String {
+        uidToPackageNameCache[uid]?.let { return it }
+
+        val pm = context.packageManager
+        val packages = pm.getPackagesForUid(uid)
+        if (packages.isNullOrEmpty()) return ""
+
+        val packageName = packages[0]
+        uidToPackageNameCache[uid] = packageName
+        return packageName
     }
 }
