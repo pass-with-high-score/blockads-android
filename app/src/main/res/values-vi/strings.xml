@@ -263,6 +263,15 @@
     <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
     <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
+    <string name="widget_blocked_today">Đã chặn hôm nay: %s</string>
+    <string name="widget_blocked_label">Đã chặn</string>
+    <string name="widget_total_label">Tổng</string>
+    <string name="widget_today_stats">Hôm nay</string>
+    <string name="widget_alltime_stats">Toàn bộ</string>
+    <string name="widget_activity_24h">Hoạt động 24h</string>
+    <string name="widget_top_blocked">Chặn nhiều nhất</string>
+    <string name="widget_no_blocked_domains">Chưa có tên miền bị chặn</string>
+    <string name="widget_no_data">Chưa có dữ liệu</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Quy Tắc Tùy Chỉnh</string>

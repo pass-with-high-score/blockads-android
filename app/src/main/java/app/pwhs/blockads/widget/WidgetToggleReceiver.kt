@@ -27,7 +27,7 @@ class WidgetToggleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_TOGGLE_VPN) {
             toggleVpn(context)
-            AdBlockWidgetProvider.sendUpdateBroadcast(context)
+            AdBlockGlanceWidget.requestUpdate(context)
         }
     }
 
