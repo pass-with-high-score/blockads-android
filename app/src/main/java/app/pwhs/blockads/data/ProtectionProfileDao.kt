@@ -57,7 +57,7 @@ interface ProtectionProfileDao {
     @Query("SELECT * FROM profile_schedules WHERE profileId = :profileId")
     fun getSchedulesForProfile(profileId: Long): Flow<List<ProfileSchedule>>
 
-    @Query("SELECT * FROM profile_schedules WHERE isEnabled = 1")
+    @Query("SELECT * FROM profile_schedules WHERE isEnabled = 1 ORDER BY startHour, startMinute, id")
     suspend fun getEnabledSchedules(): List<ProfileSchedule>
 
     @Query("SELECT * FROM profile_schedules")
