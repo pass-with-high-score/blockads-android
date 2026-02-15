@@ -528,9 +528,18 @@ private fun profileDescription(type: String): String = when (type) {
 private fun formatTime(hour: Int, minute: Int): String =
     "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
 
+@Composable
 private fun formatDays(daysOfWeek: String): String {
-    val dayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val dayNames = listOf(
+        stringResource(R.string.profile_day_mon),
+        stringResource(R.string.profile_day_tue),
+        stringResource(R.string.profile_day_wed),
+        stringResource(R.string.profile_day_thu),
+        stringResource(R.string.profile_day_fri),
+        stringResource(R.string.profile_day_sat),
+        stringResource(R.string.profile_day_sun)
+    )
     val days = daysOfWeek.split(",").mapNotNull { it.trim().toIntOrNull() }
-    return if (days.size == 7) "Every day"
+    return if (days.size == 7) stringResource(R.string.profile_schedule_every_day)
     else days.mapNotNull { if (it in 1..7) dayNames[it - 1] else null }.joinToString(", ")
 }

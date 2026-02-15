@@ -380,6 +380,14 @@
     <string name="profile_schedule_days">Days</string>
     <string name="profile_schedule_added">Schedule added</string>
     <string name="profile_schedule_deleted">Schedule deleted</string>
+    <string name="profile_schedule_every_day">Every day</string>
+    <string name="profile_day_mon">Mon</string>
+    <string name="profile_day_tue">Tue</string>
+    <string name="profile_day_wed">Wed</string>
+    <string name="profile_day_thu">Thu</string>
+    <string name="profile_day_fri">Fri</string>
+    <string name="profile_day_sat">Sat</string>
+    <string name="profile_day_sun">Sun</string>
     <string name="settings_profiles">Protection Profiles</string>
     <string name="settings_profiles_desc">Preset configurations for different use cases</string>
 </resources>
