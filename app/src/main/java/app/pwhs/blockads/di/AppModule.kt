@@ -3,6 +3,7 @@ package app.pwhs.blockads.di
 import app.pwhs.blockads.data.AppDatabase
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.dns.DohClient
 import app.pwhs.blockads.dns.DotClient
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
@@ -10,6 +11,7 @@ import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
 import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
+import app.pwhs.blockads.ui.profile.ProfileViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
@@ -49,6 +51,7 @@ val appModule = module {
     single { get<AppDatabase>().whitelistDomainDao() }
     single { get<AppDatabase>().dnsErrorDao() }
     single { get<AppDatabase>().customDnsRuleDao() }
+    single { get<AppDatabase>().protectionProfileDao() }
     single { get<AppDatabase>().firewallRuleDao() }
 
     // Preferences
@@ -57,12 +60,16 @@ val appModule = module {
     // Repository
     single { FilterListRepository(androidContext(), get(), get(), get(), get()) }
 
+    // Profile Manager
+    single { ProfileManager(get(), get(), get(), get()) }
+
     // ViewModels
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
         SettingsViewModel(
+            get(),
             get(),
             get(),
             get(),
@@ -101,6 +108,10 @@ val appModule = module {
         )
     }
     viewModel {
+        ProfileViewModel(
+            profileManager = get(),
+            profileDao = get(),
+            filterListDao = get(),
         FirewallViewModel(
             appPrefs = get(),
             firewallRuleDao = get(),

@@ -37,4 +37,7 @@ interface FilterListDao {
 
     @Query("SELECT * FROM filter_lists WHERE url = :url LIMIT 1")
     suspend fun getByUrl(url: String): FilterList?
+
+    @Query("SELECT * FROM filter_lists ORDER BY name ASC")
+    suspend fun getAllSync(): List<FilterList>
 }

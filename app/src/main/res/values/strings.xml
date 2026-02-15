@@ -381,6 +381,41 @@
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 
+    <!-- Protection Profiles -->
+    <string name="profile_title">Protection Profiles</string>
+    <string name="profile_section_profiles">Profiles</string>
+    <string name="profile_section_schedules">Schedules</string>
+    <string name="profile_name_default">Default</string>
+    <string name="profile_name_strict">Strict</string>
+    <string name="profile_name_family">Family</string>
+    <string name="profile_name_gaming">Gaming</string>
+    <string name="profile_desc_default">Block ads &amp; basic trackers</string>
+    <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
+    <string name="profile_desc_family">Block ads + adult content + gambling</string>
+    <string name="profile_desc_gaming">Block ads with optimized settings for gaming</string>
+    <string name="profile_desc_custom">Custom profile configuration</string>
+    <string name="profile_active">Active</string>
+    <string name="profile_switched">Profile switched</string>
+    <string name="profile_created">Profile created</string>
+    <string name="profile_deleted">Profile deleted</string>
+    <string name="profile_create_custom">Create Custom Profile</string>
+    <string name="profile_name_label">Profile Name</string>
+    <string name="profile_add_schedule">Add Schedule</string>
+    <string name="profile_schedule_start">Start Time</string>
+    <string name="profile_schedule_end">End Time</string>
+    <string name="profile_schedule_days">Days</string>
+    <string name="profile_schedule_added">Schedule added</string>
+    <string name="profile_schedule_deleted">Schedule deleted</string>
+    <string name="profile_schedule_every_day">Every day</string>
+    <string name="profile_day_mon">Mon</string>
+    <string name="profile_day_tue">Tue</string>
+    <string name="profile_day_wed">Wed</string>
+    <string name="profile_day_thu">Thu</string>
+    <string name="profile_day_fri">Fri</string>
+    <string name="profile_day_sat">Sat</string>
+    <string name="profile_day_sun">Sun</string>
+    <string name="settings_profiles">Protection Profiles</string>
+    <string name="settings_profiles_desc">Preset configurations for different use cases</string>
     <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Toggle VPN protection</string>
     <string name="accessibility_vpn_active">VPN protection is active</string>

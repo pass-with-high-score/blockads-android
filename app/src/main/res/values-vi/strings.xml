@@ -376,6 +376,41 @@
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 
+    <!-- Protection Profiles -->
+    <string name="profile_title">Hồ sơ bảo vệ</string>
+    <string name="profile_section_profiles">Hồ sơ</string>
+    <string name="profile_section_schedules">Lịch trình</string>
+    <string name="profile_name_default">Mặc định</string>
+    <string name="profile_name_strict">Nghiêm ngặt</string>
+    <string name="profile_name_family">Gia đình</string>
+    <string name="profile_name_gaming">Chơi game</string>
+    <string name="profile_desc_default">Chặn quảng cáo &amp; trình theo dõi cơ bản</string>
+    <string name="profile_desc_strict">Chặn tất cả quảng cáo, trình theo dõi, phân tích</string>
+    <string name="profile_desc_family">Chặn quảng cáo + nội dung người lớn + cờ bạc</string>
+    <string name="profile_desc_gaming">Chặn quảng cáo với cấu hình tối ưu cho chơi game</string>
+    <string name="profile_desc_custom">Cấu hình hồ sơ tùy chỉnh</string>
+    <string name="profile_active">Đang hoạt động</string>
+    <string name="profile_switched">Đã chuyển hồ sơ</string>
+    <string name="profile_created">Đã tạo hồ sơ</string>
+    <string name="profile_deleted">Đã xóa hồ sơ</string>
+    <string name="profile_create_custom">Tạo hồ sơ tùy chỉnh</string>
+    <string name="profile_name_label">Tên hồ sơ</string>
+    <string name="profile_add_schedule">Thêm lịch trình</string>
+    <string name="profile_schedule_start">Thời gian bắt đầu</string>
+    <string name="profile_schedule_end">Thời gian kết thúc</string>
+    <string name="profile_schedule_days">Ngày</string>
+    <string name="profile_schedule_added">Đã thêm lịch trình</string>
+    <string name="profile_schedule_deleted">Đã xóa lịch trình</string>
+    <string name="profile_schedule_every_day">Hàng ngày</string>
+    <string name="profile_day_mon">T2</string>
+    <string name="profile_day_tue">T3</string>
+    <string name="profile_day_wed">T4</string>
+    <string name="profile_day_thu">T5</string>
+    <string name="profile_day_fri">T6</string>
+    <string name="profile_day_sat">T7</string>
+    <string name="profile_day_sun">CN</string>
+    <string name="settings_profiles">Hồ sơ bảo vệ</string>
+    <string name="settings_profiles_desc">Cấu hình sẵn cho từng trường hợp sử dụng</string>
     <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Bật/tắt bảo vệ VPN</string>
     <string name="accessibility_vpn_active">Bảo vệ VPN đang hoạt động</string>

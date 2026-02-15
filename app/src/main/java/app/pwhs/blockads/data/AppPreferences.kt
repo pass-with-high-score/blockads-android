@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -37,6 +38,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
         private val KEY_SAFE_SEARCH_ENABLED = booleanPreferencesKey("safe_search_enabled")
         private val KEY_YOUTUBE_RESTRICTED_MODE = booleanPreferencesKey("youtube_restricted_mode")
+        private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
         private val KEY_HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
         private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
 
@@ -163,6 +165,8 @@ class AppPreferences(private val context: Context) {
         prefs[KEY_YOUTUBE_RESTRICTED_MODE] ?: false
     }
 
+    val activeProfileId: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_ACTIVE_PROFILE_ID] ?: -1L
     val highContrast: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_HIGH_CONTRAST] ?: false
     val firewallEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -304,6 +308,9 @@ class AppPreferences(private val context: Context) {
         }
     }
 
+    suspend fun setActiveProfileId(id: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACTIVE_PROFILE_ID] = id
     suspend fun setHighContrast(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_HIGH_CONTRAST] = enabled
