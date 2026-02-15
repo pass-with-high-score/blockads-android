@@ -161,6 +161,13 @@
     <string name="settings_lang_system">Hệ thống</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">Tương phản cao</string>
+    <string name="settings_high_contrast_desc">Tăng độ tương phản để dễ nhìn hơn</string>
     <string name="settings_connection">Kết nối</string>
     <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
     <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>

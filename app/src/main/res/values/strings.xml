@@ -161,6 +161,13 @@
     <string name="settings_lang_system">System</string>
     <string name="settings_lang_en">English</string>
     <string name="settings_lang_vi">Tiếng Việt</string>
+    <string name="settings_lang_ja">日本語</string>
+    <string name="settings_lang_ko">한국어</string>
+    <string name="settings_lang_zh">中文</string>
+    <string name="settings_lang_th">ไทย</string>
+    <string name="settings_lang_es">Español</string>
+    <string name="settings_high_contrast">High Contrast</string>
+    <string name="settings_high_contrast_desc">Increase contrast for better visibility</string>
     <string name="settings_connection">Connection</string>
     <string name="settings_filter_lists">Filter Lists (%d active)</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>

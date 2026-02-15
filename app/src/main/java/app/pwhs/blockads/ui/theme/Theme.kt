@@ -49,9 +49,31 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White
 )
 
+private val HighContrastColorScheme = darkColorScheme(
+    primary = HighContrastPrimary,
+    onPrimary = Color.Black,
+    primaryContainer = HighContrastPrimaryDim,
+    onPrimaryContainer = Color.White,
+    secondary = HighContrastSecondary,
+    onSecondary = Color.Black,
+    secondaryContainer = HighContrastSecondary,
+    onSecondaryContainer = Color.Black,
+    tertiary = HighContrastError,
+    background = HighContrastBackground,
+    onBackground = HighContrastTextPrimary,
+    surface = HighContrastSurface,
+    onSurface = HighContrastTextPrimary,
+    surfaceVariant = HighContrastSurfaceVariant,
+    onSurfaceVariant = HighContrastTextSecondary,
+    outline = HighContrastTextSecondary,
+    error = HighContrastError,
+    onError = Color.White
+)
+
 @Composable
 fun BlockadsTheme(
     themeMode: String = "system",
+    highContrast: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {
@@ -59,7 +81,11 @@ fun BlockadsTheme(
         "light" -> false
         else -> isSystemInDarkTheme()
     }
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = when {
+        highContrast -> HighContrastColorScheme
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
