@@ -87,6 +87,16 @@ class ProfileManager(
 
         presets.forEach { profileDao.insert(it) }
         Log.d(TAG, "Seeded ${presets.size} preset profiles")
+
+        // Ensure the Default profile is fully activated via the standard switch logic
+        val allProfiles = profileDao.getAllSync()
+        val defaultProfile = allProfiles.firstOrNull {
+            it.profileType == ProtectionProfile.TYPE_DEFAULT
+        }
+        if (defaultProfile != null) {
+            // Use switchToProfile so filters and preferences are consistent
+            switchToProfile(defaultProfile.id)
+        }
     }
 
     /**
