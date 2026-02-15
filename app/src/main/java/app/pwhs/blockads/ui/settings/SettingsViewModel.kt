@@ -14,6 +14,7 @@ import app.pwhs.blockads.data.FilterListBackup
 import app.pwhs.blockads.data.FilterListDao
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.LocaleHelper
+import app.pwhs.blockads.data.ProtectionProfileDao
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
@@ -37,6 +38,7 @@ class SettingsViewModel(
     private val whitelistDomainDao: WhitelistDomainDao,
     private val filterListDao: FilterListDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
+    private val profileDao: ProtectionProfileDao,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -249,6 +251,7 @@ class SettingsViewModel(
     fun exportSettings(uri: Uri) {
         viewModelScope.launch {
             try {
+                val activeProfile = profileDao.getActive()
                 val backup = SettingsBackup(
                     upstreamDns = appPrefs.upstreamDns.first(),
                     fallbackDns = appPrefs.fallbackDns.first(),
@@ -257,6 +260,7 @@ class SettingsViewModel(
                     appLanguage = appPrefs.appLanguage.first(),
                     safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
                     youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
+                    activeProfileType = activeProfile?.profileType ?: "",
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
@@ -302,6 +306,16 @@ class SettingsViewModel(
                 appPrefs.setAppLanguage(backup.appLanguage)
                 appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
                 appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
+
+                // Restore active profile by type
+                if (backup.activeProfileType.isNotBlank()) {
+                    val profile = profileDao.getByType(backup.activeProfileType)
+                    if (profile != null) {
+                        profileDao.deactivateAll()
+                        profileDao.activate(profile.id)
+                        appPrefs.setActiveProfileId(profile.id)
+                    }
+                }
 
                 // Filter lists — only add new
                 backup.filterLists.forEach { f ->

@@ -358,4 +358,28 @@
     <string name="stats_chart_12m">12 Months</string>
     <string name="stats_per_app">Per-App Statistics</string>
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
+
+    <!-- Protection Profiles -->
+    <string name="profile_title">Protection Profiles</string>
+    <string name="profile_section_profiles">Profiles</string>
+    <string name="profile_section_schedules">Schedules</string>
+    <string name="profile_desc_default">Block ads &amp; basic trackers</string>
+    <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
+    <string name="profile_desc_family">Block ads + adult content + gambling</string>
+    <string name="profile_desc_gaming">Block ads but whitelist game servers</string>
+    <string name="profile_desc_custom">Custom profile configuration</string>
+    <string name="profile_active">Active</string>
+    <string name="profile_switched">Profile switched</string>
+    <string name="profile_created">Profile created</string>
+    <string name="profile_deleted">Profile deleted</string>
+    <string name="profile_create_custom">Create Custom Profile</string>
+    <string name="profile_name_label">Profile Name</string>
+    <string name="profile_add_schedule">Add Schedule</string>
+    <string name="profile_schedule_start">Start Time</string>
+    <string name="profile_schedule_end">End Time</string>
+    <string name="profile_schedule_days">Days</string>
+    <string name="profile_schedule_added">Schedule added</string>
+    <string name="profile_schedule_deleted">Schedule deleted</string>
+    <string name="settings_profiles">Protection Profiles</string>
+    <string name="settings_profiles_desc">Preset configurations for different use cases</string>
 </resources>

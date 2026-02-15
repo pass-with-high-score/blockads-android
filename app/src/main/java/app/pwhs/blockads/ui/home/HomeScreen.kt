@@ -89,6 +89,7 @@ fun HomeScreen(
     val dailyStats by viewModel.dailyStats.collectAsState()
     val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
+    val activeProfile by viewModel.activeProfile.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -199,6 +200,33 @@ fun HomeScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary
             )
+
+            // Active profile indicator
+            activeProfile?.let { profile ->
+                Spacer(modifier = Modifier.height(8.dp))
+                FilterChip(
+                    selected = true,
+                    onClick = { },
+                    label = {
+                        Text(
+                            text = profile.name,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = NeonGreen.copy(alpha = 0.15f),
+                        selectedLabelColor = NeonGreen,
+                        selectedLeadingIconColor = NeonGreen
+                    )
+                )
+            }
 
             Spacer(modifier = Modifier.height(48.dp))
 

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -37,6 +38,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_PROTECTION_LEVEL = stringPreferencesKey("protection_level")
         private val KEY_SAFE_SEARCH_ENABLED = booleanPreferencesKey("safe_search_enabled")
         private val KEY_YOUTUBE_RESTRICTED_MODE = booleanPreferencesKey("youtube_restricted_mode")
+        private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -154,6 +156,10 @@ class AppPreferences(private val context: Context) {
 
     val youtubeRestrictedMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_YOUTUBE_RESTRICTED_MODE] ?: false
+    }
+
+    val activeProfileId: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_ACTIVE_PROFILE_ID] ?: -1L
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -288,6 +294,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setYoutubeRestrictedMode(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_YOUTUBE_RESTRICTED_MODE] = enabled
+        }
+    }
+
+    suspend fun setActiveProfileId(id: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACTIVE_PROFILE_ID] = id
         }
     }
 
