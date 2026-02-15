@@ -26,11 +26,9 @@ class NotificationHelper(
         val MILESTONES = longArrayOf(100, 500, 1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000)
     }
 
-    suspend fun checkAndNotifyMilestone() {
+    suspend fun checkAndNotifyMilestone(totalBlocked: Long) {
         val enabled = appPrefs.milestoneNotificationsEnabled.first()
         if (!enabled) return
-
-        val totalBlocked = dnsLogDao.getBlockedCountSync().toLong()
         val lastMilestone = appPrefs.lastMilestoneBlocked.first()
 
         // Determine the highest milestone that has been reached given the current total.
