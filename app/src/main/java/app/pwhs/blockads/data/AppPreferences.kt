@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -39,7 +40,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_YOUTUBE_RESTRICTED_MODE = booleanPreferencesKey("youtube_restricted_mode")
         private val KEY_DAILY_SUMMARY_ENABLED = booleanPreferencesKey("daily_summary_enabled")
         private val KEY_MILESTONE_NOTIFICATIONS_ENABLED = booleanPreferencesKey("milestone_notifications_enabled")
-        private val KEY_LAST_MILESTONE_BLOCKED = stringPreferencesKey("last_milestone_blocked")
+        private val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -168,7 +169,7 @@ class AppPreferences(private val context: Context) {
     }
 
     val lastMilestoneBlocked: Flow<Long> = context.dataStore.data.map { prefs ->
-        (prefs[KEY_LAST_MILESTONE_BLOCKED] ?: "0").toLongOrNull() ?: 0L
+        prefs[KEY_LAST_MILESTONE_BLOCKED] ?: 0L
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -320,7 +321,7 @@ class AppPreferences(private val context: Context) {
 
     suspend fun setLastMilestoneBlocked(count: Long) {
         context.dataStore.edit { prefs ->
-            prefs[KEY_LAST_MILESTONE_BLOCKED] = count.toString()
+            prefs[KEY_LAST_MILESTONE_BLOCKED] = count
         }
     }
 

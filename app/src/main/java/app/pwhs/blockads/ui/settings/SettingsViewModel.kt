@@ -20,6 +20,7 @@ import app.pwhs.blockads.data.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.util.CustomRuleParser
+import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -228,11 +229,11 @@ class SettingsViewModel(
         viewModelScope.launch {
             appPrefs.setDailySummaryEnabled(enabled)
             if (enabled) {
-                app.pwhs.blockads.worker.DailySummaryScheduler.scheduleDailySummary(
+                DailySummaryScheduler.scheduleDailySummary(
                     getApplication<Application>().applicationContext
                 )
             } else {
-                app.pwhs.blockads.worker.DailySummaryScheduler.cancelDailySummary(
+                DailySummaryScheduler.cancelDailySummary(
                     getApplication<Application>().applicationContext
                 )
             }

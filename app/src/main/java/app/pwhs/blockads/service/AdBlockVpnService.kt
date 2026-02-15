@@ -19,6 +19,7 @@ import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.util.BatteryMonitor
 import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.util.AppNameResolver
+import app.pwhs.blockads.util.startOfDayMillis
 import app.pwhs.blockads.worker.VpnResumeWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -37,7 +38,6 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.Locale
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
@@ -1186,13 +1186,7 @@ class AdBlockVpnService : VpnService() {
             while (isRunning) {
                 try {
                     // Refresh today's blocked count from database
-                    val startOfDay = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }.timeInMillis
-                    todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDay)
+                    todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
 
                     delay(30_000L) // Update every 30 seconds
                     if (isRunning) {

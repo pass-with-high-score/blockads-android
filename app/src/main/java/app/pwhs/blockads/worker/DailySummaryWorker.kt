@@ -13,10 +13,10 @@ import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsLogDao
+import app.pwhs.blockads.util.startOfDayMillis
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.Calendar
 
 class DailySummaryWorker(
     context: Context,
@@ -37,14 +37,7 @@ class DailySummaryWorker(
             val enabled = appPreferences.dailySummaryEnabled.first()
             if (!enabled) return Result.success()
 
-            val startOfDay = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-
-            val blockedToday = dnsLogDao.getBlockedCountSinceSync(startOfDay)
+            val blockedToday = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
 
             if (blockedToday > 0) {
                 showDailySummaryNotification(blockedToday)
