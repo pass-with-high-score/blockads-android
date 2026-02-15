@@ -166,6 +166,47 @@ class AdBlockVpnService : VpnService() {
                     firewallManager = null
                 }
 
+                // Periodically refresh firewall rules and enabled state while the VPN coroutine is running.
+                // This ensures that changes made via the UI (add/update/delete rules or toggling the
+                // firewall preference) take effect without requiring a VPN restart.
+                launch {
+                    var lastEnabled = firewallEnabled
+                    while (true) {
+                        try {
+                            val currentEnabled = appPrefs.firewallEnabled.first()
+
+                            if (currentEnabled) {
+                                // If firewall has just been enabled or manager is missing, (re)create and load rules.
+                                if (!lastEnabled || firewallManager == null) {
+                                    val fwManager = FirewallManager(this@AdBlockVpnService, firewallRuleDao)
+                                    fwManager.loadRules()
+                                    firewallManager = fwManager
+                                    Log.d(TAG, "Firewall enabled or re-enabled, rules loaded")
+                                } else {
+                                    // Firewall remains enabled: reload rules to pick up rule changes.
+                                    try {
+                                        firewallManager?.loadRules()
+                                        Log.d(TAG, "Firewall rules reloaded")
+                                    } catch (e: Exception) {
+                                        Log.e(TAG, "Error reloading firewall rules", e)
+                                    }
+                                }
+                            } else if (lastEnabled) {
+                                // Firewall has just been disabled via preference change.
+                                firewallManager = null
+                                Log.d(TAG, "Firewall disabled via preference change")
+                            }
+
+                            lastEnabled = currentEnabled
+                        } catch (e: Exception) {
+                            // Log and continue; do not cancel the whole VPN coroutine due to a transient error.
+                            Log.e(TAG, "Error while monitoring firewall preference", e)
+                        }
+
+                        // Poll at a modest interval to balance responsiveness and resource usage.
+                        delay(5_000)
+                    }
+                }
                 // Resolve SafeSearch IPs if enabled
                 val safeSearchIpCache = mutableMapOf<String, ByteArray>()
                 if (safeSearchEnabled) {
