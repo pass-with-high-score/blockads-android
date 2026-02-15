@@ -90,14 +90,24 @@ fun FirewallAppItem(
                 )
                 if (isBlocked && rule != null) {
                     val statusParts = mutableListOf<String>()
-                    if (rule.blockWifi) statusParts.add("Wi-Fi")
-                    if (rule.blockMobileData) statusParts.add("Mobile")
-                    val networkText = if (statusParts.size == 2) "All" else statusParts.joinToString()
+                    if (rule.blockWifi) statusParts.add(stringResource(R.string.firewall_network_wifi))
+                    if (rule.blockMobileData) statusParts.add(stringResource(R.string.firewall_network_mobile))
+                    val networkText = if (statusParts.size == 2) {
+                        stringResource(R.string.firewall_network_all)
+                    } else {
+                        statusParts.joinToString()
+                    }
                     val scheduleText = if (rule.scheduleEnabled) {
-                        String.format(" · %02d:%02d–%02d:%02d",
-                            rule.scheduleStartHour, rule.scheduleStartMinute,
-                            rule.scheduleEndHour, rule.scheduleEndMinute)
-                    } else ""
+                        stringResource(
+                            R.string.firewall_status_schedule,
+                            rule.scheduleStartHour,
+                            rule.scheduleStartMinute,
+                            rule.scheduleEndHour,
+                            rule.scheduleEndMinute
+                        )
+                    } else {
+                        ""
+                    }
                     Text(
                         text = stringResource(R.string.firewall_app_blocked) + " ($networkText$scheduleText)",
                         style = MaterialTheme.typography.bodySmall,
