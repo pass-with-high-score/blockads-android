@@ -70,14 +70,14 @@ val appModule = module {
             application = androidApplication()
         )
     }
-    viewModel { FilterSetupViewModel(get(), get()) }
+    viewModel { FilterSetupViewModel(get(), get(), androidApplication()) }
     viewModel {
         AppWhitelistViewModel(
             appPrefs = get(),
             application = androidApplication()
         )
     }
-    viewModel { CustomRulesViewModel(get(), get()) }
+    viewModel { CustomRulesViewModel(get(), get(), androidApplication()) }
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),

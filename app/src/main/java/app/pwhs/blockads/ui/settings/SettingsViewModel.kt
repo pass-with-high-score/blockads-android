@@ -17,6 +17,7 @@ import app.pwhs.blockads.data.LocaleHelper
 import app.pwhs.blockads.data.SettingsBackup
 import app.pwhs.blockads.data.WhitelistDomain
 import app.pwhs.blockads.data.WhitelistDomainDao
+import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.util.CustomRuleParser
@@ -133,11 +134,17 @@ class SettingsViewModel(
     }
 
     fun setUpstreamDns(dns: String) {
-        viewModelScope.launch { appPrefs.setUpstreamDns(dns) }
+        viewModelScope.launch {
+            appPrefs.setUpstreamDns(dns)
+            requestVpnRestart()
+        }
     }
 
     fun setFallbackDns(dns: String) {
-        viewModelScope.launch { appPrefs.setFallbackDns(dns) }
+        viewModelScope.launch {
+            appPrefs.setFallbackDns(dns)
+            requestVpnRestart()
+        }
     }
 
     fun setDnsProtocol(protocol: app.pwhs.blockads.data.DnsProtocol) {
@@ -202,18 +209,21 @@ class SettingsViewModel(
     fun setDnsResponseType(responseType: String) {
         viewModelScope.launch {
             appPrefs.setDnsResponseType(responseType)
+            requestVpnRestart()
         }
     }
 
     fun setSafeSearchEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setSafeSearchEnabled(enabled)
+            requestVpnRestart()
         }
     }
 
     fun setYoutubeRestrictedMode(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setYoutubeRestrictedMode(enabled)
+            requestVpnRestart()
         }
     }
 
@@ -232,6 +242,7 @@ class SettingsViewModel(
                 if (exists == 0) {
                     whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
                     _events.toast(R.string.filter_domain_whitelisted, listOf(cleanDomain))
+                    requestVpnRestart()
                 } else {
                     _events.toast(R.string.filter_domain_already_whitelisted)
                 }
@@ -242,6 +253,7 @@ class SettingsViewModel(
     fun removeWhitelistDomain(domain: WhitelistDomain) {
         viewModelScope.launch {
             whitelistDomainDao.delete(domain)
+            requestVpnRestart()
         }
     }
 
@@ -339,10 +351,14 @@ class SettingsViewModel(
                 }
 
                 _events.toast(R.string.filter_settings_imported)
+                requestVpnRestart()
             } catch (e: Exception) {
                 _events.toast(R.string.filter_import_failed, listOf("${e.message}"))
-
             }
         }
+    }
+
+    private fun requestVpnRestart() {
+        AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
     }
 }

@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
@@ -45,9 +46,28 @@ class AdBlockVpnService : VpnService() {
         private const val CHANNEL_ID = "blockads_vpn_channel"
         private const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val RESTART_CLEANUP_DELAY_MS = 1000L
         private const val MAX_PACKET_SIZE = 32767 // Maximum DNS packet size per RFC 1035
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
+        const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
+
+        /**
+         * Request a VPN restart to apply new settings.
+         * Only restarts if the VPN is currently running.
+         */
+        fun requestRestart(context: Context) {
+            if (isRunning || isRestarting) {
+                val intent = Intent(context, AdBlockVpnService::class.java).apply {
+                    action = ACTION_RESTART
+                }
+                context.startService(intent)
+            }
+        }
+
+        @Volatile
+        var isRestarting = false
+            private set
 
         @Volatile
         var isRunning = false
@@ -115,10 +135,52 @@ class AdBlockVpnService : VpnService() {
                 return START_NOT_STICKY
             }
 
+            ACTION_RESTART -> {
+                restartVpn()
+                return START_STICKY
+            }
+
             else -> {
                 startVpn()
                 return START_STICKY
             }
+        }
+    }
+
+    private fun restartVpn() {
+        if (isRestarting) return
+        if (!isRunning && !isConnecting) return
+
+        isRestarting = true
+        Log.d(TAG, "Restarting VPN to apply new settings")
+
+        // Stop packet processing
+        isProcessing = false
+        isRunning = false
+        isConnecting = false
+        isReconnecting = true
+
+        // Stop monitoring
+        networkMonitor?.stopMonitoring()
+        stopBatteryMonitoring()
+        stopNotificationUpdates()
+
+        // Close current VPN interface (causes IOException in blocking read, ending processPackets)
+        try {
+            vpnInterface?.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing VPN interface during restart", e)
+        }
+        vpnInterface = null
+
+        // Reset retry manager for fresh start
+        retryManager.reset()
+
+        // Brief delay to let old VPN resources (file descriptors, sockets) clean up
+        serviceScope.launch {
+            delay(RESTART_CLEANUP_DELAY_MS)
+            isRestarting = false
+            startVpn()
         }
     }
 
@@ -765,6 +827,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
@@ -815,6 +878,7 @@ class AdBlockVpnService : VpnService() {
         isConnecting = false
         isRunning = false
         isReconnecting = false
+        isRestarting = false
         startTimestamp = 0L
 
         // Stop network monitoring
