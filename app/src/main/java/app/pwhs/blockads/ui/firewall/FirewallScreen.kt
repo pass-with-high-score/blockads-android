@@ -224,7 +224,7 @@ fun FirewallScreen(
                         )
                         Spacer(modifier = Modifier.size(12.dp))
                         Text(
-                            text = "Loading apps…",
+                            text = stringResource(R.string.app_management_loading),
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )

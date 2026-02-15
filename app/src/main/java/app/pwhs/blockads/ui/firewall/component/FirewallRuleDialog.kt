@@ -177,7 +177,7 @@ fun FirewallRuleDialog(
                 if (existingRule != null) {
                     TextButton(onClick = onDelete) {
                         Text(
-                            stringResource(R.string.firewall_rule_removed),
+                            stringResource(R.string.delete),
                             color = MaterialTheme.colorScheme.error
                         )
                     }

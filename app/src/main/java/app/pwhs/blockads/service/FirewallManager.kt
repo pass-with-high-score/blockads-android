@@ -83,10 +83,10 @@ class FirewallManager(
 
         return if (startTime <= endTime) {
             // Same day schedule (e.g., 08:00 - 17:00)
-            currentTime in startTime until endTime
+            currentTime in startTime..endTime
         } else {
             // Overnight schedule (e.g., 22:00 - 06:00)
-            currentTime >= startTime || currentTime < endTime
+            currentTime >= startTime || currentTime <= endTime
         }
     }
 }
