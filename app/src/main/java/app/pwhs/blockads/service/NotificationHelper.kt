@@ -33,10 +33,11 @@ class NotificationHelper(
         val totalBlocked = dnsLogDao.getBlockedCountSync().toLong()
         val lastMilestone = appPrefs.lastMilestoneBlocked.first()
 
-        val nextMilestone = MILESTONES.firstOrNull { it > lastMilestone && it <= totalBlocked }
-        if (nextMilestone != null) {
-            appPrefs.setLastMilestoneBlocked(nextMilestone)
-            showMilestoneNotification(nextMilestone)
+        // Determine the highest milestone that has been reached given the current total.
+        val reachedMilestone = MILESTONES.filter { it <= totalBlocked }.maxOrNull()
+        if (reachedMilestone != null && reachedMilestone > lastMilestone) {
+            appPrefs.setLastMilestoneBlocked(reachedMilestone)
+            showMilestoneNotification(reachedMilestone)
         }
     }
 
