@@ -1,5 +1,6 @@
 package app.pwhs.blockads.di
 
+import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.data.AppDatabase
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.FilterListRepository
@@ -21,10 +22,15 @@ import app.pwhs.blockads.ui.firewall.FirewallViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import timber.log.Timber
 
 val appModule = module {
 
@@ -36,6 +42,21 @@ val appModule = module {
                 endpoint {
                     connectTimeout = 30_000
                 }
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.d(message)
+                    }
+                }
+                val logLevel = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
+                level = logLevel
+            }
+
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60_000
+                connectTimeoutMillis = 30_000
             }
         }
     }

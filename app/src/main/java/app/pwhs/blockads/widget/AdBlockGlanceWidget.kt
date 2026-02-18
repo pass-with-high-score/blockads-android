@@ -329,7 +329,7 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
                 .padding(12.dp)
                 .clickable(actionStartActivity<MainActivity>())
         ) {
-            // Header row
+            // ── Section 1: Header row ──
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -377,125 +377,127 @@ class AdBlockGlanceWidget : GlanceAppWidget() {
 
             Spacer(modifier = GlanceModifier.height(8.dp))
 
-            // Today stats row
-            Text(
-                text = context.getString(R.string.widget_today_stats),
-                style = TextStyle(
-                    color = colorTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+            // ── Section 2: Today stats (grouped) ──
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Text(
+                    text = context.getString(R.string.widget_today_stats),
+                    style = TextStyle(
+                        color = colorTextPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
-            )
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatColumn(
-                    value = formatCount(todayStats.blocked),
-                    label = context.getString(R.string.widget_blocked_label),
-                    color = colorGreen,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                VerticalDivider()
-                StatColumn(
-                    value = formatCount(todayStats.total),
-                    label = context.getString(R.string.widget_total_label),
-                    color = colorBlue,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                VerticalDivider()
-                StatColumn(
-                    value = formatBlockRate(todayStats),
-                    label = context.getString(R.string.home_block_rate),
-                    color = colorOrange,
-                    modifier = GlanceModifier.defaultWeight()
-                )
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    StatColumn(
+                        value = formatCount(todayStats.blocked),
+                        label = context.getString(R.string.widget_blocked_label),
+                        color = colorGreen,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    VerticalDivider()
+                    StatColumn(
+                        value = formatCount(todayStats.total),
+                        label = context.getString(R.string.widget_total_label),
+                        color = colorBlue,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    VerticalDivider()
+                    StatColumn(
+                        value = formatBlockRate(todayStats),
+                        label = context.getString(R.string.home_block_rate),
+                        color = colorOrange,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                }
             }
 
             Spacer(modifier = GlanceModifier.height(6.dp))
 
-            // All-time stats row
-            Text(
-                text = context.getString(R.string.widget_alltime_stats),
-                style = TextStyle(
-                    color = colorTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+            // ── Section 3: All-time stats (grouped) ──
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Text(
+                    text = context.getString(R.string.widget_alltime_stats),
+                    style = TextStyle(
+                        color = colorTextPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
-            )
-            Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    StatColumn(
+                        value = formatCount(allStats.blocked),
+                        label = context.getString(R.string.widget_blocked_label),
+                        color = colorGreen,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    VerticalDivider()
+                    StatColumn(
+                        value = formatCount(allStats.total),
+                        label = context.getString(R.string.widget_total_label),
+                        color = colorBlue,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    VerticalDivider()
+                    StatColumn(
+                        value = formatBlockRate(allStats),
+                        label = context.getString(R.string.home_block_rate),
+                        color = colorOrange,
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                }
+            }
 
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                StatColumn(
-                    value = formatCount(allStats.blocked),
-                    label = context.getString(R.string.widget_blocked_label),
-                    color = colorGreen,
-                    modifier = GlanceModifier.defaultWeight()
+            Spacer(modifier = GlanceModifier.height(8.dp))
+
+            // ── Section 4: 24h Activity chart (grouped) ──
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Text(
+                    text = context.getString(R.string.widget_activity_24h),
+                    style = TextStyle(
+                        color = colorTextPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
-                VerticalDivider()
-                StatColumn(
-                    value = formatCount(allStats.total),
-                    label = context.getString(R.string.widget_total_label),
-                    color = colorBlue,
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                VerticalDivider()
-                StatColumn(
-                    value = formatBlockRate(allStats),
-                    label = context.getString(R.string.home_block_rate),
-                    color = colorOrange,
-                    modifier = GlanceModifier.defaultWeight()
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                MiniBarChart(
+                    hourlyStats = hourlyStats,
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .height(48.dp)
                 )
             }
 
             Spacer(modifier = GlanceModifier.height(8.dp))
 
-            // 24h Activity chart
-            Text(
-                text = context.getString(R.string.widget_activity_24h),
-                style = TextStyle(
-                    color = colorTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
-            MiniBarChart(
-                hourlyStats = hourlyStats,
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            )
-
-            Spacer(modifier = GlanceModifier.height(8.dp))
-
-            // Top blocked domains
-            Text(
-                text = context.getString(R.string.widget_top_blocked),
-                style = TextStyle(
-                    color = colorTextPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
-            if (topDomains.isEmpty()) {
+            // ── Section 5: Top blocked domains (grouped) ──
+            Column(modifier = GlanceModifier.fillMaxWidth()) {
                 Text(
-                    text = context.getString(R.string.widget_no_blocked_domains),
+                    text = context.getString(R.string.widget_top_blocked),
                     style = TextStyle(
-                        color = colorTextSecondary,
-                        fontSize = 10.sp
+                        color = colorTextPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 )
-            } else {
-                Column(modifier = GlanceModifier.fillMaxWidth()) {
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                if (topDomains.isEmpty()) {
+                    Text(
+                        text = context.getString(R.string.widget_no_blocked_domains),
+                        style = TextStyle(
+                            color = colorTextSecondary,
+                            fontSize = 10.sp
+                        )
+                    )
+                } else {
                     topDomains.take(5).forEach { domain ->
                         DomainRow(domain)
                     }

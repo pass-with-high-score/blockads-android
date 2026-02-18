@@ -14,6 +14,9 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
+import timber.log.Timber
+import timber.log.Timber.DebugTree
+
 
 class BlockAdsApplication : Application() {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -24,6 +27,10 @@ class BlockAdsApplication : Application() {
             androidLogger()
             androidContext(this@BlockAdsApplication)
             modules(appModule)
+        }
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(DebugTree())
         }
 
         // Schedule auto-update for filter lists after Koin is initialized

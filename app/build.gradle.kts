@@ -111,7 +111,8 @@ dependencies {
     // Ktor HTTP Client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
-
+    implementation(libs.ktor.client.logging)
+    implementation("com.jakewharton.timber:timber:5.0.1")
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
 

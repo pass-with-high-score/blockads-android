@@ -1,14 +1,16 @@
 package app.pwhs.blockads.data
 
 import android.content.Context
-import android.util.Log
 import com.google.common.hash.BloomFilter
 import com.google.common.hash.Funnels
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.io.BufferedReader
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
@@ -22,7 +24,6 @@ class FilterListRepository(
 ) {
 
     companion object {
-        private const val TAG = "FilterListRepo"
         private const val CACHE_DIR = "filter_cache"
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
@@ -310,17 +311,14 @@ class FilterListRepository(
         customAllowDomains.clear()
         customAllowDomains.addAll(allowDomains.map { it.lowercase() })
 
-        Log.d(
-            TAG,
-            "Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules"
-        )
+        Timber.e("Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules")
     }
 
     suspend fun loadWhitelist() {
         val domains = whitelistDomainDao.getAllDomains()
         whitelistedDomains.clear()
         whitelistedDomains.addAll(domains.map { it.lowercase() })
-        Log.d(TAG, "Loaded ${whitelistedDomains.size} whitelisted domains")
+        Timber.d("Loaded ${whitelistedDomains.size} whitelisted domains")
     }
 
     /**
@@ -331,7 +329,7 @@ class FilterListRepository(
         for (filter in DEFAULT_LISTS) {
             if (filterListDao.getByUrl(filter.url) == null) {
                 filterListDao.insert(filter)
-                Log.d(TAG, "Seeded filter: ${filter.name}")
+                Timber.d("Seeded filter: ${filter.name}")
             }
         }
     }
@@ -368,12 +366,9 @@ class FilterListRepository(
                         count = domains.size,
                         timestamp = System.currentTimeMillis()
                     )
-                    Log.d(
-                        TAG,
-                        "Loaded ${domains.size} domains from ${filter.name} (${filter.category})"
-                    )
+                    Timber.d("Loaded ${domains.size} domains from ${filter.name} (${filter.category})")
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load filter: ${filter.name}", e)
+                    Timber.d("Failed to load filter: ${filter.name}: $e")
                 }
             }
 
@@ -386,12 +381,12 @@ class FilterListRepository(
             // Build Bloom filter for ad domains (fast negative lookups)
             buildBloomFilter(newDomains)
 
-            Log.d(TAG, "Total unique ad domains loaded: ${blockedDomains.size}")
-            Log.d(TAG, "Total unique security domains loaded: ${securityDomains.size}")
+            Timber.d("Total unique ad domains loaded: ${blockedDomains.size}")
+            Timber.d("Total unique security domains loaded: ${securityDomains.size}")
 
             Result.success(blockedDomains.size + securityDomains.size)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to load filters", e)
+            Timber.d("Failed to load filters: $e")
             Result.failure(e)
         }
     }
@@ -419,34 +414,46 @@ class FilterListRepository(
 
             blockedDomainsBloomFilter = filter
             val elapsed = System.currentTimeMillis() - startTime
-            Log.d(TAG, "Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
+
+            Timber.d("Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to build Bloom filter, falling back to direct lookup", e)
+            Timber.d("Failed to build Bloom filter, falling back to direct lookup: $e")
             blockedDomainsBloomFilter = null
         }
     }
 
     /**
      * Load a single filter list, using cache with fallback to network.
+     * Streams download directly to disk to avoid loading entire file into memory.
      */
     private suspend fun loadSingleFilter(filter: FilterList): Set<String> {
         val cacheFile = getCacheFile(filter)
         val domains = mutableSetOf<String>()
 
-        // Try network first
+        // Try network first — stream directly to cache file
         try {
-            val body = client.get(filter.url).bodyAsText()
             cacheFile.parentFile?.mkdirs()
-            cacheFile.writeText(body)
-            parseHostsFile(body, domains)
+            val channel = client.get(filter.url).bodyAsChannel()
+            cacheFile.outputStream().buffered().use { output ->
+                val buffer = ByteArray(8192)
+                while (!channel.isClosedForRead) {
+                    val bytesRead = channel.readAvailable(buffer)
+                    if (bytesRead > 0) output.write(buffer, 0, bytesRead)
+                }
+            }
+            cacheFile.bufferedReader().use { reader ->
+                parseHostsFile(reader, domains)
+            }
             return domains
         } catch (e: Exception) {
-            Log.w(TAG, "Network failed for ${filter.name}, trying cache", e)
+            Timber.d("Network failed for ${filter.name}, trying cache: $e")
         }
 
         // Fallback to cache
         if (cacheFile.exists()) {
-            parseHostsFile(cacheFile.readText(), domains)
+            cacheFile.bufferedReader().use { reader ->
+                parseHostsFile(reader, domains)
+            }
         }
 
         return domains
@@ -454,17 +461,28 @@ class FilterListRepository(
 
     /**
      * Force update a single filter list from network.
+     * Streams download directly to disk to avoid loading entire file into memory.
      */
     suspend fun updateSingleFilter(filter: FilterList): Result<Int> = withContext(Dispatchers.IO) {
         try {
-            val body = client.get(filter.url).bodyAsText()
-
             val cacheFile = getCacheFile(filter)
             cacheFile.parentFile?.mkdirs()
-            cacheFile.writeText(body)
 
+            // Stream download to cache file
+            val channel = client.get(filter.url).bodyAsChannel()
+            cacheFile.outputStream().buffered().use { output ->
+                val buffer = ByteArray(8192)
+                while (!channel.isClosedForRead) {
+                    val bytesRead = channel.readAvailable(buffer)
+                    if (bytesRead > 0) output.write(buffer, 0, bytesRead)
+                }
+            }
+
+            // Parse from cache file using streaming reader
             val domains = mutableSetOf<String>()
-            parseHostsFile(body, domains)
+            cacheFile.bufferedReader().use { reader ->
+                parseHostsFile(reader, domains)
+            }
 
             filterListDao.updateStats(
                 id = filter.id,
@@ -477,7 +495,7 @@ class FilterListRepository(
 
             Result.success(domains.size)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update ${filter.name}", e)
+            Timber.d("Failed to update ${filter.name}: $e")
             Result.failure(e)
         }
     }
@@ -487,8 +505,8 @@ class FilterListRepository(
         return File(context.filesDir, "$CACHE_DIR/$safeName.txt")
     }
 
-    private fun parseHostsFile(content: String, output: MutableSet<String>) {
-        content.lineSequence()
+    private fun parseHostsFile(reader: BufferedReader, output: MutableSet<String>) {
+        reader.lineSequence()
             .map { it.trim() }
             .filter { it.isNotEmpty() && !it.startsWith('#') && !it.startsWith('!') }
             .forEach { line ->
