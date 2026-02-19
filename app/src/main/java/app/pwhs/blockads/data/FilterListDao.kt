@@ -40,4 +40,7 @@ interface FilterListDao {
 
     @Query("SELECT * FROM filter_lists ORDER BY name ASC")
     suspend fun getAllSync(): List<FilterList>
+
+    @Query("SELECT url FROM filter_lists")
+    suspend fun getAllUrls(): List<String>
 }

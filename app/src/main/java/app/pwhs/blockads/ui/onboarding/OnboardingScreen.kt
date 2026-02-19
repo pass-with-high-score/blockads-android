@@ -78,6 +78,7 @@ import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestina
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import androidx.core.net.toUri
 
 private const val TOTAL_PAGES = 7
 
@@ -247,7 +248,7 @@ fun OnboardingScreen(
                         onRequestPermission = {
                             @Suppress("BatteryLife")
                             val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                                data = android.net.Uri.parse("package:${context.packageName}")
+                                data = "package:${context.packageName}".toUri()
                             }
                             if (intent.resolveActivity(context.packageManager) != null) {
                                 batteryOptLauncher.launch(intent)

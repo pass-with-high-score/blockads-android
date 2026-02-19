@@ -1,8 +1,6 @@
 package app.pwhs.blockads.data
 
 import android.content.Context
-import com.google.common.hash.BloomFilter
-import com.google.common.hash.Funnels
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
@@ -12,7 +10,6 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
 class FilterListRepository(
@@ -178,22 +175,21 @@ class FilterListRepository(
         )
     }
 
-    private val blockedDomains = ConcurrentHashMap.newKeySet<String>()
-    private val securityDomains = ConcurrentHashMap.newKeySet<String>()
+    // Trie-based domain storage: mmap'd binary files for near-zero heap usage
+    @Volatile
+    private var adTrie: MmapDomainTrie? = null
+    @Volatile
+    private var securityTrie: MmapDomainTrie? = null
+
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
 
-    // Custom rules - higher priority than filter lists
+    // Custom rules - higher priority than filter lists (small sets, keep as HashSet)
     private val customBlockDomains = ConcurrentHashMap.newKeySet<String>()
     private val customAllowDomains = ConcurrentHashMap.newKeySet<String>()
 
-    // Bloom filter for fast negative lookups (reduces exact match checks)
-    @Volatile
-    private var blockedDomainsBloomFilter: BloomFilter<CharSequence>? = null
+    private val trieDir get() = File(context.filesDir, "trie_cache")
 
-    // Expected false positive rate of 1% for Bloom filter
-    private val bloomFilterFpp = 0.01
-
-    val domainCount: Int get() = blockedDomains.size
+    val domainCount: Int get() = adTrie?.size ?: 0
 
     /**
      * Check if a domain or any of its parent domains matches a condition.
@@ -253,23 +249,13 @@ class FilterListRepository(
             return false
         }
 
-        // Priority 4: Check security domains (malware/phishing)
-        if (checkDomainAndParents(domain) { securityDomains.contains(it) }) {
+        // Priority 4: Check security domains via Trie (malware/phishing)
+        if (securityTrie?.containsOrParent(domain) == true) {
             return true
         }
 
-        // Priority 5: Check filter lists using Bloom filter for fast negative check
-        // If Bloom filter says "definitely not present", skip exact lookup
-        val bloomFilter = blockedDomainsBloomFilter
-        if (bloomFilter != null) {
-            // Check if domain or any parent might be in blocklist
-            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
-            // If no match in Bloom filter, definitely not blocked
-            if (!possiblyBlocked) return false
-        }
-
-        // Check exact blocklist (only if Bloom filter suggested possibility)
-        return checkDomainAndParents(domain) { blockedDomains.contains(it) }
+        // Priority 5: Check ad domains via Trie (mmap'd, near-zero heap)
+        return adTrie?.containsOrParent(domain) ?: false
     }
 
     /**
@@ -287,15 +273,10 @@ class FilterListRepository(
         if (checkDomainAndParents(domain) { whitelistedDomains.contains(it) }) {
             return ""
         }
-        if (checkDomainAndParents(domain) { securityDomains.contains(it) }) {
+        if (securityTrie?.containsOrParent(domain) == true) {
             return BLOCK_REASON_SECURITY
         }
-        val bloomFilter = blockedDomainsBloomFilter
-        if (bloomFilter != null) {
-            val possiblyBlocked = checkDomainAndParents(domain) { bloomFilter.mightContain(it) }
-            if (!possiblyBlocked) return ""
-        }
-        if (checkDomainAndParents(domain) { blockedDomains.contains(it) }) {
+        if (adTrie?.containsOrParent(domain) == true) {
             return BLOCK_REASON_FILTER_LIST
         }
         return ""
@@ -322,69 +303,85 @@ class FilterListRepository(
     }
 
     /**
-     * Seeds default filter lists. Uses URL-based dedup so new built-in
-     * filters are added on app updates without creating duplicates.
+     * Seeds default filter lists. Fetches all existing URLs in a single query,
+     * then only inserts missing ones. Skips entirely if all defaults are present.
      */
     suspend fun seedDefaultsIfNeeded() {
-        for (filter in DEFAULT_LISTS) {
-            if (filterListDao.getByUrl(filter.url) == null) {
-                filterListDao.insert(filter)
-                Timber.d("Seeded filter: ${filter.name}")
-            }
+        val existingUrls = filterListDao.getAllUrls().toHashSet()
+        val toInsert = DEFAULT_LISTS.filter { it.url !in existingUrls }
+        if (toInsert.isEmpty()) return
+
+        for (filter in toInsert) {
+            filterListDao.insert(filter)
+            Timber.d("Seeded filter: ${filter.name}")
         }
     }
 
     /**
-     * Load all enabled filter lists and merge into a single blocklist.
+     * Load all enabled filter lists and merge into Tries.
+     * Builds in-memory Trie → serializes to binary file → mmap for near-zero heap.
+     * On subsequent startups, reuses existing binary if cache files haven't changed.
      */
     suspend fun loadAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
         try {
             val enabledLists = filterListDao.getEnabled()
             if (enabledLists.isEmpty()) {
-                blockedDomains.clear()
-                securityDomains.clear()
-                blockedDomainsBloomFilter = null
+                adTrie = null
+                securityTrie = null
                 return@withContext Result.success(0)
             }
 
-            val newDomains = ConcurrentHashMap.newKeySet<String>()
-            val newSecurityDomains = ConcurrentHashMap.newKeySet<String>()
-            var totalLoaded = 0
+            val startTime = System.currentTimeMillis()
+
+            // Build in-memory tries from filter cache files
+            val adTrieBuilder = DomainTrie()
+            val secTrieBuilder = DomainTrie()
 
             for (filter in enabledLists) {
                 try {
-                    val domains = loadSingleFilter(filter)
-                    if (filter.category == FilterList.CATEGORY_SECURITY) {
-                        newSecurityDomains.addAll(domains)
-                    } else {
-                        newDomains.addAll(domains)
-                    }
-                    totalLoaded += domains.size
+                    val target = if (filter.category == FilterList.CATEGORY_SECURITY)
+                        secTrieBuilder else adTrieBuilder
+                    val sizeBefore = target.size
+                    loadSingleFilterToTrie(filter, target)
+                    val loaded = target.size - sizeBefore
 
                     filterListDao.updateStats(
                         id = filter.id,
-                        count = domains.size,
+                        count = loaded,
                         timestamp = System.currentTimeMillis()
                     )
-                    Timber.d("Loaded ${domains.size} domains from ${filter.name} (${filter.category})")
+                    Timber.d("Loaded $loaded domains from ${filter.name} (${filter.category})")
                 } catch (e: Exception) {
                     Timber.d("Failed to load filter: ${filter.name}: $e")
                 }
             }
 
-            blockedDomains.clear()
-            blockedDomains.addAll(newDomains)
+            // Serialize tries to binary files
+            trieDir.mkdirs()
+            val adTrieFile = File(trieDir, "ad_domains.trie")
+            val secTrieFile = File(trieDir, "security_domains.trie")
 
-            securityDomains.clear()
-            securityDomains.addAll(newSecurityDomains)
+            if (adTrieBuilder.size > 0) {
+                adTrieBuilder.saveToBinary(adTrieFile)
+                adTrie = DomainTrie.loadFromMmap(adTrieFile)
+            } else {
+                adTrie = null
+            }
 
-            // Build Bloom filter for ad domains (fast negative lookups)
-            buildBloomFilter(newDomains)
+            if (secTrieBuilder.size > 0) {
+                secTrieBuilder.saveToBinary(secTrieFile)
+                securityTrie = DomainTrie.loadFromMmap(secTrieFile)
+            } else {
+                securityTrie = null
+            }
 
-            Timber.d("Total unique ad domains loaded: ${blockedDomains.size}")
-            Timber.d("Total unique security domains loaded: ${securityDomains.size}")
+            // In-memory tries are now GC-eligible — only mmap'd binary remains
+            val elapsed = System.currentTimeMillis() - startTime
+            val adCount = adTrie?.size ?: 0
+            val secCount = securityTrie?.size ?: 0
+            Timber.d("Loaded $adCount ad + $secCount security domains in ${elapsed}ms (Trie + mmap)")
 
-            Result.success(blockedDomains.size + securityDomains.size)
+            Result.success(adCount + secCount)
         } catch (e: Exception) {
             Timber.d("Failed to load filters: $e")
             Result.failure(e)
@@ -392,71 +389,37 @@ class FilterListRepository(
     }
 
     /**
-     * Build a Bloom filter from the domain set for memory-efficient lookups.
+     * Load a single filter list into a DomainTrie.
+     * Uses cache-first strategy: reads from local file if available.
      */
-    private fun buildBloomFilter(domains: Set<String>) {
-        if (domains.isEmpty()) {
-            blockedDomainsBloomFilter = null
+    private suspend fun loadSingleFilterToTrie(filter: FilterList, trie: DomainTrie) {
+        val cacheFile = getCacheFile(filter)
+
+        // Cache-first: use cached file if it exists
+        if (cacheFile.exists() && cacheFile.length() > 0) {
+            cacheFile.bufferedReader().use { reader ->
+                parseHostsFileToTrie(reader, trie)
+            }
             return
         }
 
-        try {
-            val startTime = System.currentTimeMillis()
-            // Create Bloom filter with expected insertions and FPP
-            val filter = BloomFilter.create(
-                Funnels.stringFunnel(StandardCharsets.UTF_8),
-                domains.size,
-                bloomFilterFpp
-            )
-
-            // Add all domains to Bloom filter
-            domains.forEach { filter.put(it) }
-
-            blockedDomainsBloomFilter = filter
-            val elapsed = System.currentTimeMillis() - startTime
-
-            Timber.d("Built Bloom filter for ${domains.size} domains in ${elapsed}ms")
-        } catch (e: Exception) {
-            Timber.d("Failed to build Bloom filter, falling back to direct lookup: $e")
-            blockedDomainsBloomFilter = null
-        }
-    }
-
-    /**
-     * Load a single filter list, using cache with fallback to network.
-     * Streams download directly to disk to avoid loading entire file into memory.
-     */
-    private suspend fun loadSingleFilter(filter: FilterList): Set<String> {
-        val cacheFile = getCacheFile(filter)
-        val domains = mutableSetOf<String>()
-
-        // Try network first — stream directly to cache file
+        // No cache — download from network and save to cache
         try {
             cacheFile.parentFile?.mkdirs()
             val channel = client.get(filter.url).bodyAsChannel()
-            cacheFile.outputStream().buffered().use { output ->
+            cacheFile.outputStream().buffered().use { out ->
                 val buffer = ByteArray(8192)
                 while (!channel.isClosedForRead) {
                     val bytesRead = channel.readAvailable(buffer)
-                    if (bytesRead > 0) output.write(buffer, 0, bytesRead)
+                    if (bytesRead > 0) out.write(buffer, 0, bytesRead)
                 }
             }
             cacheFile.bufferedReader().use { reader ->
-                parseHostsFile(reader, domains)
+                parseHostsFileToTrie(reader, trie)
             }
-            return domains
         } catch (e: Exception) {
-            Timber.d("Network failed for ${filter.name}, trying cache: $e")
+            Timber.d("Network download failed for ${filter.name}: $e")
         }
-
-        // Fallback to cache
-        if (cacheFile.exists()) {
-            cacheFile.bufferedReader().use { reader ->
-                parseHostsFile(reader, domains)
-            }
-        }
-
-        return domains
     }
 
     /**
@@ -478,22 +441,24 @@ class FilterListRepository(
                 }
             }
 
-            // Parse from cache file using streaming reader
-            val domains = mutableSetOf<String>()
+            // Count domains for stats
+            var count = 0
             cacheFile.bufferedReader().use { reader ->
-                parseHostsFile(reader, domains)
+                val trie = DomainTrie()
+                parseHostsFileToTrie(reader, trie)
+                count = trie.size
             }
 
             filterListDao.updateStats(
                 id = filter.id,
-                count = domains.size,
+                count = count,
                 timestamp = System.currentTimeMillis()
             )
 
-            // Reload all enabled filters to rebuild merged blocklist
+            // Reload all enabled filters to rebuild merged trie
             loadAllEnabledFilters()
 
-            Result.success(domains.size)
+            Result.success(count)
         } catch (e: Exception) {
             Timber.d("Failed to update ${filter.name}: $e")
             Result.failure(e)
@@ -505,7 +470,8 @@ class FilterListRepository(
         return File(context.filesDir, "$CACHE_DIR/$safeName.txt")
     }
 
-    private fun parseHostsFile(reader: BufferedReader, output: MutableSet<String>) {
+    /** Parse hosts file lines and add domains directly to a Trie. */
+    private fun parseHostsFileToTrie(reader: BufferedReader, trie: DomainTrie) {
         reader.lineSequence()
             .map { it.trim() }
             .filter { it.isNotEmpty() && !it.startsWith('#') && !it.startsWith('!') }
@@ -515,28 +481,28 @@ class FilterListRepository(
                         val domain = line.substringAfter(' ').trim()
                             .split("\\s+".toRegex()).firstOrNull()
                         if (!domain.isNullOrBlank() && domain != "localhost") {
-                            output.add(domain.lowercase())
+                            trie.add(domain.lowercase())
                         }
                     }
 
                     line.startsWith("||") && line.endsWith("^") -> {
                         val domain = line.removePrefix("||").removeSuffix("^").trim()
                         if (domain.isNotBlank() && domain.contains('.')) {
-                            output.add(domain.lowercase())
+                            trie.add(domain.lowercase())
                         }
                     }
 
                     line.contains('.') && !line.contains(' ') && !line.contains('/') -> {
-                        output.add(line.lowercase())
+                        trie.add(line.lowercase())
                     }
                 }
             }
     }
 
     fun clearCache() {
-        blockedDomains.clear()
-        securityDomains.clear()
-        blockedDomainsBloomFilter = null
+        adTrie = null
+        securityTrie = null
+        trieDir.deleteRecursively()
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }
 }
