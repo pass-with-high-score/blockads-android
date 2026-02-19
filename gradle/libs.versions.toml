@@ -19,6 +19,7 @@ accompanist = "0.37.3"
 kotlinxSerialization = "1.10.0"
 guava = "33.5.0-android"
 coroutinesTest = "1.10.2"
+timber = "5.0.1"
 workManager = "2.11.1"
 composeCharts = "0.2.0"
 glance = "1.1.1"
@@ -61,6 +62,7 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 compose-charts = { group = "io.github.ehsannarmani", name = "compose-charts", version.ref = "composeCharts" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -19,8 +19,8 @@ android {
         applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "2.0.0"
+        versionCode = 6
+        versionName = "4.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -112,7 +112,7 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.logging)
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(libs.timber)
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
 
