@@ -13,6 +13,7 @@ import app.pwhs.blockads.data.FilterListRepository
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 class FilterUpdateWorker(
     context: Context,
@@ -83,6 +84,7 @@ class FilterUpdateWorker(
                 }
             )
         } catch (e: Exception) {
+            Timber.e(e, "Filter update failed")
             Result.failure()
         }
     }

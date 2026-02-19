@@ -1,6 +1,5 @@
 package app.pwhs.blockads.ui
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -14,6 +13,7 @@ import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -24,6 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import app.pwhs.blockads.R
@@ -37,6 +40,7 @@ import com.ramcosta.composedestinations.generated.destinations.StatisticsScreenD
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.rememberNavHostEngine
 import com.ramcosta.composedestinations.spec.Direction
+import timber.log.Timber
 
 sealed class Screen(
     val destination: Direction,
@@ -94,7 +98,8 @@ fun BlockAdsApp(
 ) {
     val engine = rememberNavHostEngine()
     val navController = engine.rememberNavController()
-    val screens = listOf(Screen.Home, Screen.Statistics, Screen.FilterSetup, Screen.Logs, Screen.Settings)
+    val screens =
+        listOf(Screen.Home, Screen.Statistics, Screen.FilterSetup, Screen.Logs, Screen.Settings)
     val newBackStackEntry by navController.currentBackStackEntryAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -134,7 +139,17 @@ fun BlockAdsApp(
                                     contentDescription = stringResource(screen.labelRes)
                                 )
                             },
-                            label = { Text(stringResource(screen.labelRes)) },
+                            label = {
+                                Text(
+                                    text = stringResource(screen.labelRes),
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = LocalTextStyle.current.copy(
+                                        fontSize = 12.sp
+                                    )
+                                )
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -146,7 +161,7 @@ fun BlockAdsApp(
             }
         }
     ) { paddingValues ->
-        Log.d("BlockAdsApp", "$paddingValues")
+        Timber.d("$paddingValues")
         DestinationsNavHost(
             navGraph = NavGraphs.root,
             engine = engine,

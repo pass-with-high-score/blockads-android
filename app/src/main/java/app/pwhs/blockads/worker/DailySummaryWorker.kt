@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -18,6 +17,7 @@ import app.pwhs.blockads.util.startOfDayMillis
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 class DailySummaryWorker(
     context: Context,
@@ -28,7 +28,6 @@ class DailySummaryWorker(
     private val appPreferences: AppPreferences by inject()
 
     companion object {
-        private const val TAG = "DailySummaryWorker"
         const val WORK_NAME = "daily_summary_work"
         const val CHANNEL_ID = "blockads_daily_summary_channel"
         private const val NOTIFICATION_ID = 2001
@@ -50,7 +49,7 @@ class DailySummaryWorker(
 
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Daily summary worker failed", e)
+            Timber.e(e, "Daily summary worker failed")
             Result.retry()
         }
     }

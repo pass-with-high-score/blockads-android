@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -53,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -203,7 +206,8 @@ fun HomeScreen(
                     else -> stringResource(R.string.home_unprotected_desc)
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
             )
 
             // Active profile indicator
@@ -252,25 +256,33 @@ fun HomeScreen(
 
             // Stats cards
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     icon = Icons.Default.QueryStats,
                     label = stringResource(R.string.total_queries),
                     value = formatCount(totalCount),
                     color = MaterialTheme.colorScheme.secondary
                 )
                 StatCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     icon = Icons.Default.Block,
                     label = stringResource(R.string.blocked_queries),
                     value = formatCount(blockedCount),
                     color = DangerRed
                 )
                 StatCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     icon = Icons.Default.GppGood,
                     label = stringResource(R.string.home_security_threats),
                     value = formatCount(securityThreatsBlocked),
@@ -430,6 +442,7 @@ fun HomeScreen(
                                 }
                             }
                         }
+
                         1 -> {
                             if (dailyStats.isNotEmpty()) {
                                 DailyStatsChart(
@@ -537,8 +550,9 @@ fun HomeScreen(
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                         recentBlocked.forEach { entry ->
-                            val dotColor = if (entry.blockedBy == FilterListRepository.BLOCK_REASON_SECURITY)
-                                SecurityOrange else DangerRed
+                            val dotColor =
+                                if (entry.blockedBy == FilterListRepository.BLOCK_REASON_SECURITY)
+                                    SecurityOrange else DangerRed
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -584,7 +598,7 @@ fun HomeScreen(
 private const val AVG_AD_SIZE_KB = 50L
 
 private fun formatDataSize(kilobytes: Long): String = when {
-    kilobytes < 1024 -> "${kilobytes} KB"
+    kilobytes < 1024 -> "$kilobytes KB"
     kilobytes < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f MB", kilobytes / 1024f)
     else -> String.format(Locale.getDefault(), "%.1f GB", kilobytes / (1024f * 1024f))
 }

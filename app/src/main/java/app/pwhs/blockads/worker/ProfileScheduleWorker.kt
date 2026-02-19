@@ -1,7 +1,6 @@
 package app.pwhs.blockads.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -11,6 +10,7 @@ import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.data.ProtectionProfileDao
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
@@ -24,7 +24,6 @@ class ProfileScheduleWorker(
 
     companion object {
         const val WORK_NAME = "profile_schedule_work"
-        private const val TAG = "ProfileScheduleWorker"
 
         fun schedule(context: Context) {
             val workRequest = PeriodicWorkRequestBuilder<ProfileScheduleWorker>(
@@ -67,13 +66,14 @@ class ProfileScheduleWorker(
                     currentMinutes in startMinutes until endMinutes
                 } else {
                     // Overnight schedule (e.g., 18:00 – 08:00)
-                    currentMinutes >= startMinutes || currentMinutes < endMinutes
+                    currentMinutes !in endMinutes..<startMinutes
                 }
 
                 if (isInRange) {
                     val activeProfile = profileDao.getActive()
                     if (activeProfile?.id != schedule.profileId) {
-                        Log.d(TAG, "Schedule triggered: switching to profile ${schedule.profileId}")
+                        Timber
+                            .d("Schedule triggered: switching to profile ${schedule.profileId}")
                         profileManager.switchToProfile(schedule.profileId)
                     }
                     return Result.success()
@@ -82,7 +82,7 @@ class ProfileScheduleWorker(
 
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Schedule check failed", e)
+            Timber.e(e, "Schedule check failed")
             Result.retry()
         }
     }

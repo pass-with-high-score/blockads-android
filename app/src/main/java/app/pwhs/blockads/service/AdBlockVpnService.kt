@@ -9,7 +9,6 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
@@ -34,6 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.DatagramPacket
@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicLong
 class AdBlockVpnService : VpnService() {
 
     companion object {
-        private const val TAG = "AdBlockVpnService"
         private const val NOTIFICATION_ID = 1
         private const val REVOKED_NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "blockads_vpn_channel"
@@ -60,6 +59,8 @@ class AdBlockVpnService : VpnService() {
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
+        private const val FIREWALL_NOTIFICATION_COOLDOWN_MS = 60_000L // 1 minute per app
+        private const val FIREWALL_NOTIFICATION_ID_BASE = 1000
 
         /**
          * Request a VPN restart to apply new settings.
@@ -180,7 +181,7 @@ class AdBlockVpnService : VpnService() {
         if (!isRunning && !isConnecting) return
 
         isRestarting = true
-        Log.d(TAG, "Restarting VPN to apply new settings")
+        Timber.d("Restarting VPN to apply new settings")
 
         // Stop packet processing
         isProcessing = false
@@ -197,7 +198,7 @@ class AdBlockVpnService : VpnService() {
         try {
             vpnInterface?.close()
         } catch (e: Exception) {
-            Log.e(TAG, "Error closing VPN interface during restart", e)
+            Timber.e(e, "Error closing VPN interface during restart")
         }
         vpnInterface = null
 
@@ -229,7 +230,7 @@ class AdBlockVpnService : VpnService() {
                 filterRepo.loadWhitelist()
                 filterRepo.loadCustomRules()
                 val result = filterRepo.loadAllEnabledFilters()
-                Log.d(TAG, "Filters loaded: ${result.getOrDefault(0)} unique domains")
+                Timber.d("Filters loaded: ${result.getOrDefault(0)} unique domains")
 
                 // Get upstream DNS, fallback DNS, DNS response type, and whitelisted apps
                 val upstreamDns = appPrefs.upstreamDns.first()
@@ -245,7 +246,7 @@ class AdBlockVpnService : VpnService() {
                     val fwManager = FirewallManager(this@AdBlockVpnService, firewallRuleDao)
                     fwManager.loadRules()
                     firewallManager = fwManager
-                    Log.d(TAG, "Firewall enabled, rules loaded")
+                    Timber.d("Firewall enabled, rules loaded")
                 } else {
                     firewallManager = null
                 }
@@ -266,26 +267,26 @@ class AdBlockVpnService : VpnService() {
                                         FirewallManager(this@AdBlockVpnService, firewallRuleDao)
                                     fwManager.loadRules()
                                     firewallManager = fwManager
-                                    Log.d(TAG, "Firewall enabled or re-enabled, rules loaded")
+                                    Timber.d("Firewall enabled or re-enabled, rules loaded")
                                 } else {
                                     // Firewall remains enabled: reload rules to pick up rule changes.
                                     try {
                                         firewallManager?.loadRules()
-                                        Log.d(TAG, "Firewall rules reloaded")
+                                        Timber.d("Firewall rules reloaded")
                                     } catch (e: Exception) {
-                                        Log.e(TAG, "Error reloading firewall rules", e)
+                                        Timber.e("Error reloading firewall rules: $e")
                                     }
                                 }
                             } else if (lastEnabled) {
                                 // Firewall has just been disabled via preference change.
                                 firewallManager = null
-                                Log.d(TAG, "Firewall disabled via preference change")
+                                Timber.d("Firewall disabled via preference change")
                             }
 
                             lastEnabled = currentEnabled
                         } catch (e: Exception) {
                             // Log and continue; do not cancel the whole VPN coroutine due to a transient error.
-                            Log.e(TAG, "Error while monitoring firewall preference", e)
+                            Timber.e(e, "Error while monitoring firewall preference")
                         }
 
                         // Poll at a modest interval to balance responsiveness and resource usage.
@@ -308,20 +309,16 @@ class AdBlockVpnService : VpnService() {
                     vpnEstablished = establishVpn(upstreamDns, whitelistedApps)
 
                     if (!vpnEstablished && retryManager.shouldRetry()) {
-                        Log.w(
-                            TAG,
-                            "VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})"
-                        )
+                        Timber
+                            .w("VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
                         updateNotification()
                         retryManager.waitForRetry()
                     }
                 }
 
                 if (!vpnEstablished) {
-                    Log.e(
-                        TAG,
-                        "Failed to establish VPN after ${retryManager.getMaxRetries()} attempts"
-                    )
+                    Timber
+                        .e("Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
                     isConnecting = false
                     stopVpn()
                     return@launch
@@ -345,7 +342,7 @@ class AdBlockVpnService : VpnService() {
 
                 updateNotification() // Update to normal notification
                 AdBlockGlanceWidget.requestUpdate(this@AdBlockVpnService)
-                Log.d(TAG, "VPN established successfully")
+                Timber.d("VPN established successfully")
 
                 // Log initial battery state
                 batteryMonitor.logBatteryStatus()
@@ -367,7 +364,7 @@ class AdBlockVpnService : VpnService() {
                 )
 
             } catch (e: Exception) {
-                Log.e(TAG, "VPN startup failed", e)
+                Timber.e(e, "VPN startup failed")
                 isConnecting = false
                 stopVpn()
             }
@@ -394,28 +391,28 @@ class AdBlockVpnService : VpnService() {
             try {
                 builder.addDisallowedApplication(packageName)
             } catch (e: Exception) {
-                Log.w(TAG, "Could not exclude self from VPN", e)
+                Timber.w(e, "Could not exclude self from VPN")
             }
 
             // Exclude whitelisted apps from VPN
             for (appPackage in whitelistedApps) {
                 try {
                     builder.addDisallowedApplication(appPackage)
-                    Log.d(TAG, "Excluded from VPN: $appPackage")
+                    Timber.d("Excluded from VPN: $appPackage")
                 } catch (e: Exception) {
-                    Log.w(TAG, "Could not exclude $appPackage from VPN", e)
+                    Timber.w(e, "Could not exclude $appPackage from VPN")
                 }
             }
 
             vpnInterface = builder.establish()
             if (vpnInterface == null) {
-                Log.e(TAG, "Failed to establish VPN interface")
+                Timber.e("Failed to establish VPN interface")
                 return false
             }
 
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Error establishing VPN", e)
+            Timber.e(e, "Error establishing VPN")
             false
         }
     }
@@ -464,7 +461,7 @@ class AdBlockVpnService : VpnService() {
             }
         } catch (e: Exception) {
             if (isProcessing) {
-                Log.e(TAG, "Packet processing error", e)
+                Timber.e(e, "Packet processing error")
             }
         } finally {
             try {
@@ -520,7 +517,7 @@ class AdBlockVpnService : VpnService() {
                     outputStream.write(response)
                     outputStream.flush()
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error writing firewall blocked response", e)
+                    Timber.e(e, "Error writing firewall blocked response")
                 }
                 val elapsed = System.currentTimeMillis() - startTime
                 logDnsQuery(
@@ -531,7 +528,7 @@ class AdBlockVpnService : VpnService() {
                     appName,
                     blockedBy = FilterListRepository.BLOCK_REASON_FIREWALL
                 )
-                Log.d(TAG, "FIREWALL BLOCKED: $domain (app: $appName / $appPackage)")
+                Timber.d("FIREWALL BLOCKED: $domain (app: $appName / $appPackage)")
                 totalQueries.incrementAndGet()
                 blockedQueries.incrementAndGet()
                 sendFirewallNotification(appName, appPackage)
@@ -553,7 +550,7 @@ class AdBlockVpnService : VpnService() {
                                 outputStream.write(response)
                                 outputStream.flush()
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error writing SafeSearch redirect response", e)
+                                Timber.e(e, "Error writing SafeSearch redirect response")
                             }
                             val elapsed = System.currentTimeMillis() - startTime
                             logDnsQuery(
@@ -564,10 +561,8 @@ class AdBlockVpnService : VpnService() {
                                 appName,
                                 resolvedIp = formatIp(cachedIp)
                             )
-                            Log.d(
-                                TAG,
-                                "SAFESEARCH: $domain → $redirectDomain (${formatIp(cachedIp)})"
-                            )
+                            Timber
+                                .d("SAFESEARCH: $domain → $redirectDomain (${formatIp(cachedIp)})")
                             totalQueries.incrementAndGet()
                             return
                         }
@@ -592,7 +587,7 @@ class AdBlockVpnService : VpnService() {
                     outputStream.write(response)
                     outputStream.flush()
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error writing YouTube restricted redirect response", e)
+                    Timber.e(e, "Error writing YouTube restricted redirect response")
                 }
                 val elapsed = System.currentTimeMillis() - startTime
                 logDnsQuery(
@@ -603,8 +598,7 @@ class AdBlockVpnService : VpnService() {
                     appName,
                     resolvedIp = formatIp(cachedIp)
                 )
-                Log.d(
-                    TAG,
+                Timber.d(
                     "YOUTUBE RESTRICTED: $domain → ${SafeSearchManager.YOUTUBE_RESTRICT_DOMAIN} (${
                         formatIp(cachedIp)
                     })"
@@ -632,12 +626,12 @@ class AdBlockVpnService : VpnService() {
                 outputStream.write(response)
                 outputStream.flush()
             } catch (e: Exception) {
-                Log.e(TAG, "Error writing blocked response", e)
+                Timber.e(e, "Error writing blocked response")
             }
 
             val elapsed = System.currentTimeMillis() - startTime
             logDnsQuery(domain, true, query.queryType, elapsed, appName, blockedBy = blockedBy)
-            Log.d(TAG, "BLOCKED: $domain (app: $appName)")
+            Timber.d("BLOCKED: $domain (app: $appName)")
             totalQueries.incrementAndGet()
             blockedQueries.incrementAndGet()
 
@@ -655,7 +649,7 @@ class AdBlockVpnService : VpnService() {
                         nextMilestoneThreshold =
                             notificationHelper.nextMilestoneThreshold(lastMilestone)
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error checking milestone", e)
+                        Timber.e(e, "Error checking milestone")
                         // Restore threshold so checks resume
                         nextMilestoneThreshold = threshold
                     }
@@ -692,10 +686,8 @@ class AdBlockVpnService : VpnService() {
 
         // If primary fails and fallback is different, try fallback (with PLAIN protocol as fallback)
         if (!success && fallbackDns != upstreamDns) {
-            Log.w(
-                TAG,
-                "Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns) with PLAIN protocol"
-            )
+            Timber
+                .w("Primary DNS ($upstreamDns) failed for ${query.domain}, trying fallback ($fallbackDns) with PLAIN protocol")
             success = tryDnsQuery(
                 query,
                 outputStream,
@@ -708,16 +700,14 @@ class AdBlockVpnService : VpnService() {
 
         // If both failed, return SERVFAIL
         if (!success) {
-            Log.e(
-                TAG,
-                "Both primary and fallback DNS failed for ${query.domain}, returning SERVFAIL"
-            )
+            Timber
+                .e("Both primary and fallback DNS failed for ${query.domain}, returning SERVFAIL")
             try {
                 val servfailResponse = DnsPacketParser.buildServfailResponse(query)
                 outputStream.write(servfailResponse)
                 outputStream.flush()
             } catch (e: Exception) {
-                Log.e(TAG, "Error writing SERVFAIL response", e)
+                Timber.e(e, "Error writing SERVFAIL response")
             }
         }
     }
@@ -737,23 +727,23 @@ class AdBlockVpnService : VpnService() {
             // requires synchronous packet processing with FileInputStream/FileOutputStream.
             val dnsResponseData = when (protocol) {
                 app.pwhs.blockads.data.DnsProtocol.DOH -> {
-                    Log.d(TAG, "Using DoH for ${query.domain} to $dohUrl")
+                    Timber.d("Using DoH for ${query.domain} to $dohUrl")
                     runBlocking { dohClient.query(dohUrl, query.rawDnsPayload) }
                 }
 
                 app.pwhs.blockads.data.DnsProtocol.DOT -> {
-                    Log.d(TAG, "Using DoT for ${query.domain} to $dnsServer")
+                    Timber.d("Using DoT for ${query.domain} to $dnsServer")
                     runBlocking { dotClient.query(dnsServer, query.rawDnsPayload) }
                 }
 
                 app.pwhs.blockads.data.DnsProtocol.PLAIN -> {
-                    Log.d(TAG, "Using plain DNS for ${query.domain} to $dnsServer")
+                    Timber.d("Using plain DNS for ${query.domain} to $dnsServer")
                     tryPlainDnsQuery(query, dnsServer)
                 }
             }
 
             if (dnsResponseData == null) {
-                Log.w(TAG, "DNS query failed for ${query.domain} using $protocol")
+                Timber.w("DNS query failed for ${query.domain} using $protocol")
                 logDnsError(
                     query.domain,
                     "QUERY_FAILED",
@@ -778,7 +768,7 @@ class AdBlockVpnService : VpnService() {
             return true
 
         } catch (e: java.net.SocketTimeoutException) {
-            Log.w(TAG, "DNS timeout for ${query.domain} on $dnsServer", e)
+            Timber.w(e, "DNS timeout for ${query.domain} on $dnsServer")
             logDnsError(
                 query.domain,
                 "TIMEOUT",
@@ -788,7 +778,7 @@ class AdBlockVpnService : VpnService() {
             )
             return false
         } catch (e: java.io.IOException) {
-            Log.w(TAG, "DNS IO error for ${query.domain} on $dnsServer", e)
+            Timber.w(e, "DNS IO error for ${query.domain} on $dnsServer")
             logDnsError(
                 query.domain,
                 "IO_ERROR",
@@ -798,7 +788,7 @@ class AdBlockVpnService : VpnService() {
             )
             return false
         } catch (e: Exception) {
-            Log.w(TAG, "DNS query failed for ${query.domain} on $dnsServer", e)
+            Timber.w(e, "DNS query failed for ${query.domain} on $dnsServer")
             logDnsError(
                 query.domain,
                 "QUERY_ERROR",
@@ -834,7 +824,7 @@ class AdBlockVpnService : VpnService() {
             return responseBuffer.copyOf(responsePacket.length)
 
         } catch (e: Exception) {
-            Log.w(TAG, "Plain DNS query failed", e)
+            Timber.w("Plain DNS query failed: $e")
             return null
         } finally {
             socket?.close()
@@ -860,7 +850,7 @@ class AdBlockVpnService : VpnService() {
                     )
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to log DNS error", e)
+                Timber.e("Failed to log DNS error: $e")
             }
         }
     }
@@ -894,7 +884,7 @@ class AdBlockVpnService : VpnService() {
                     )
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to log DNS query", e)
+                Timber.e("Failed to log DNS query: $e")
             }
         }
     }
@@ -944,15 +934,15 @@ class AdBlockVpnService : VpnService() {
                 val ip = resolveARecordViaUdp(upstreamDns, domain)
                 if (ip != null) {
                     cache[domain] = ip
-                    Log.d(TAG, "SafeSearch resolved: $domain → ${formatIp(ip)}")
+                    Timber.d("SafeSearch resolved: $domain → ${formatIp(ip)}")
                 } else {
-                    Log.w(TAG, "SafeSearch: No A record for $domain")
+                    Timber.w("SafeSearch: No A record for $domain")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "SafeSearch: Failed to resolve $domain", e)
+                Timber.e("SafeSearch: Failed to resolve $domain: $e")
             }
         }
-        Log.d(TAG, "SafeSearch IPs resolved: ${cache.size}/${safeSearchDomains.size}")
+        Timber.e("SafeSearch IPs resolved: ${cache.size}/${safeSearchDomains.size}")
     }
 
     /**
@@ -967,12 +957,12 @@ class AdBlockVpnService : VpnService() {
             val ip = resolveARecordViaUdp(upstreamDns, domain)
             if (ip != null) {
                 cache[domain] = ip
-                Log.d(TAG, "YouTube Restricted Mode resolved: $domain → ${formatIp(ip)}")
+                Timber.d("YouTube Restricted Mode resolved: $domain → ${formatIp(ip)}")
             } else {
-                Log.w(TAG, "YouTube Restricted Mode: No A record for $domain")
+                Timber.w("YouTube Restricted Mode: No A record for $domain")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "YouTube Restricted Mode: Failed to resolve $domain", e)
+            Timber.e(e, "YouTube Restricted Mode: Failed to resolve $domain")
         }
     }
 
@@ -981,7 +971,7 @@ class AdBlockVpnService : VpnService() {
     }
 
     private fun pauseVpn() {
-        Log.d(TAG, "Pausing VPN for 1 hour")
+        Timber.d("Pausing VPN for 1 hour")
 
         // Schedule resume after 1 hour
         val resumeWork = OneTimeWorkRequestBuilder<VpnResumeWorker>()
@@ -1072,7 +1062,7 @@ class AdBlockVpnService : VpnService() {
         try {
             vpnInterface?.close()
         } catch (e: Exception) {
-            Log.e(TAG, "Error closing VPN interface", e)
+            Timber.e("Error closing VPN interface: $e")
         }
         vpnInterface = null
         AdBlockGlanceWidget.requestUpdate(this)
@@ -1084,11 +1074,11 @@ class AdBlockVpnService : VpnService() {
             stopForeground(STOP_FOREGROUND_REMOVE)
         }
         stopSelf()
-        Log.d(TAG, "VPN stopped")
+        Timber.d("VPN stopped")
     }
 
     override fun onRevoke() {
-        Log.w(TAG, "VPN revoked by system or user")
+        Timber.w("VPN revoked by system or user")
         // Update preferences to reflect VPN is no longer enabled
         // Use a non-cancellable context to ensure preference is updated
         serviceScope.launch(NonCancellable) {
@@ -1171,9 +1161,6 @@ class AdBlockVpnService : VpnService() {
 
     // Rate-limit firewall notifications to avoid flooding
     private val lastFirewallNotificationTime = ConcurrentHashMap<String, Long>()
-    private val FIREWALL_NOTIFICATION_COOLDOWN_MS = 60_000L // 1 minute per app
-    private val FIREWALL_NOTIFICATION_ID_BASE = 1000
-
     private fun sendFirewallNotification(appName: String, packageName: String) {
         if (packageName.isEmpty()) return
 
@@ -1366,7 +1353,7 @@ class AdBlockVpnService : VpnService() {
     }
 
     private fun onNetworkAvailable() {
-        Log.d(TAG, "Network available - checking VPN status")
+        Timber.d("Network available - checking VPN status")
 
         // Use serviceScope to avoid blocking the callback thread
         serviceScope.launch {
@@ -1375,7 +1362,7 @@ class AdBlockVpnService : VpnService() {
 
             // If VPN should be running but isn't, try to reconnect
             if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isReconnecting) {
-                Log.d(TAG, "Auto-reconnecting VPN after network became available")
+                Timber.d("Auto-reconnecting VPN after network became available")
                 isReconnecting = true
 
                 // Wait a bit for network to stabilize
@@ -1391,7 +1378,7 @@ class AdBlockVpnService : VpnService() {
     }
 
     private fun onNetworkLost() {
-        Log.d(TAG, "Network lost")
+        Timber.d("Network lost")
         // Note: We don't stop the VPN when network is lost, as it may come back
         // The VPN will automatically reconnect when network is available again
     }
@@ -1412,7 +1399,7 @@ class AdBlockVpnService : VpnService() {
                         batteryMonitor.logBatteryStatus()
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error monitoring battery", e)
+                    Timber.e("Error monitoring battery: $e")
                     break
                 }
             }
@@ -1442,7 +1429,7 @@ class AdBlockVpnService : VpnService() {
                         updateNotification()
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Error updating notification", e)
+                    Timber.e(e, "Error updating notification")
                     break
                 }
             }

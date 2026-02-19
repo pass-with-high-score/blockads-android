@@ -3,10 +3,10 @@ package app.pwhs.blockads.worker
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import app.pwhs.blockads.service.AdBlockVpnService
+import timber.log.Timber
 
 class VpnResumeWorker(
     context: Context,
@@ -14,7 +14,6 @@ class VpnResumeWorker(
 ) : CoroutineWorker(context, params) {
 
     companion object {
-        private const val TAG = "VpnResumeWorker"
         const val WORK_NAME = "vpn_resume_work"
     }
 
@@ -30,7 +29,7 @@ class VpnResumeWorker(
             }
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to resume VPN", e)
+            Timber.e(e, "Failed to resume VPN")
             Result.retry()
         }
     }

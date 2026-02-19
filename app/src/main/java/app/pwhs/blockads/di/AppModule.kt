@@ -50,7 +50,7 @@ val appModule = module {
                         Timber.d(message)
                     }
                 }
-                val logLevel = if (BuildConfig.DEBUG) LogLevel.ALL else LogLevel.NONE
+                val logLevel = if (BuildConfig.DEBUG) LogLevel.INFO else LogLevel.NONE
                 level = logLevel
             }
 
