@@ -348,18 +348,24 @@ fun HomeScreen(
 
             // Data saved + Protection uptime row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     icon = Icons.Default.DataSaverOn,
                     label = stringResource(R.string.home_data_saved),
                     value = formatDataSize(dataSavedKb),
                     color = NeonGreen
                 )
                 StatCard(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     icon = Icons.Default.Timer,
                     label = stringResource(R.string.home_protection_uptime),
                     value = formatUptimeShort(protectionUptimeMs),

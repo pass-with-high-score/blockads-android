@@ -39,8 +39,8 @@ fun UiEventEffect(
 
 fun MutableSharedFlow<UiEvent>.toast(
     @StringRes resId: Int,
-    vararg args: Any
+    args: List<Any> = emptyList()
 ) {
-    tryEmit(UiEvent.ToastRes(resId, args.toList()))
+    tryEmit(UiEvent.ToastRes(resId, args))
 }
 

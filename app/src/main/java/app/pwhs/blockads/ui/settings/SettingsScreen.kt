@@ -6,7 +6,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,16 +24,12 @@ import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material.icons.filled.Palette
@@ -42,7 +37,6 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Upload
@@ -86,12 +80,12 @@ import app.pwhs.blockads.ui.settings.component.FrequencyDialog
 import app.pwhs.blockads.ui.settings.component.NotificationDialog
 import app.pwhs.blockads.ui.settings.component.SectionHeader
 import app.pwhs.blockads.ui.settings.component.SettingsToggleItem
-import app.pwhs.blockads.ui.settings.component.ThemeModeChip
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.AppearanceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
@@ -113,8 +107,7 @@ fun SettingsScreen(
     val dohUrl by viewModel.dohUrl.collectAsState()
     val filterLists by viewModel.filterLists.collectAsState()
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
-    val themeMode by viewModel.themeMode.collectAsState()
-    val appLanguage by viewModel.appLanguage.collectAsState()
+
 
     // Auto-update Filter Lists
     val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsState()
@@ -131,7 +124,7 @@ fun SettingsScreen(
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
     val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsState()
     val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsState()
-    val highContrast by viewModel.highContrast.collectAsState()
+
 
     var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
@@ -570,136 +563,38 @@ fun SettingsScreen(
                         description = stringResource(R.string.settings_category_interface_desc)
                     )
                     Card(
+                        onClick = { navigator.navigate(AppearanceScreenDestination) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.DarkMode, contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Palette, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    stringResource(R.string.settings_theme),
+                                    stringResource(R.string.settings_category_interface),
                                     style = MaterialTheme.typography.titleSmall
                                 )
-                            }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_theme_system),
-                                    icon = Icons.Default.SettingsBrightness,
-                                    selected = themeMode == AppPreferences.THEME_SYSTEM,
-                                    onClick = { viewModel.setThemeMode(AppPreferences.THEME_SYSTEM) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_theme_light),
-                                    icon = Icons.Default.LightMode,
-                                    selected = themeMode == AppPreferences.THEME_LIGHT,
-                                    onClick = { viewModel.setThemeMode(AppPreferences.THEME_LIGHT) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_theme_dark),
-                                    icon = Icons.Default.DarkMode,
-                                    selected = themeMode == AppPreferences.THEME_DARK,
-                                    onClick = { viewModel.setThemeMode(AppPreferences.THEME_DARK) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Language, contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
                                 Text(
-                                    stringResource(R.string.settings_language),
-                                    style = MaterialTheme.typography.titleSmall
+                                    stringResource(R.string.settings_category_interface_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
                                 )
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_system),
-                                    icon = Icons.Default.SettingsBrightness,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_SYSTEM,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_SYSTEM) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_en),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_EN,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_EN) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_vi),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_VI,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_VI) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_ja),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_JA,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_JA) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_ko),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_KO,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_KO) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_zh),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_ZH,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ZH) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_th),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_TH,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_TH) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                ThemeModeChip(
-                                    label = stringResource(R.string.settings_lang_es),
-                                    icon = Icons.Default.Language,
-                                    selected = appLanguage == AppPreferences.LANGUAGE_ES,
-                                    onClick = { viewModel.setAppLanguage(AppPreferences.LANGUAGE_ES) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                            Spacer(modifier = Modifier.height(16.dp))
-                            SettingsToggleItem(
-                                icon = Icons.Default.Contrast,
-                                title = stringResource(R.string.settings_high_contrast),
-                                subtitle = stringResource(R.string.settings_high_contrast_desc),
-                                isChecked = highContrast,
-                                onCheckedChange = { viewModel.setHighContrast(it) }
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }

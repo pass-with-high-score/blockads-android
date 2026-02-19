@@ -332,53 +332,71 @@ class FilterListRepository(
             }
 
             val startTime = System.currentTimeMillis()
-
-            // Build in-memory tries from filter cache files
-            val adTrieBuilder = DomainTrie()
-            val secTrieBuilder = DomainTrie()
-
-            for (filter in enabledLists) {
-                try {
-                    val target = if (filter.category == FilterList.CATEGORY_SECURITY)
-                        secTrieBuilder else adTrieBuilder
-                    val sizeBefore = target.size
-                    loadSingleFilterToTrie(filter, target)
-                    val loaded = target.size - sizeBefore
-
-                    filterListDao.updateStats(
-                        id = filter.id,
-                        count = loaded,
-                        timestamp = System.currentTimeMillis()
-                    )
-                    Timber.d("Loaded $loaded domains from ${filter.name} (${filter.category})")
-                } catch (e: Exception) {
-                    Timber.d("Failed to load filter: ${filter.name}: $e")
-                }
-            }
-
-            // Serialize tries to binary files
             trieDir.mkdirs()
             val adTrieFile = File(trieDir, "ad_domains.trie")
             val secTrieFile = File(trieDir, "security_domains.trie")
 
-            if (adTrieBuilder.size > 0) {
-                adTrieBuilder.saveToBinary(adTrieFile)
-                adTrie = DomainTrie.loadFromMmap(adTrieFile)
-            } else {
-                adTrie = null
+            // ── Phase 1: Ad domains ──────────────────────────────────
+            // Build, serialize, then RELEASE the in-memory trie before
+            // starting security domains. This halves peak heap usage.
+            val adFilters = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+            var adCount = 0
+            if (adFilters.isNotEmpty()) {
+                val adTrieBuilder = DomainTrie()
+                for (filter in adFilters) {
+                    try {
+                        val sizeBefore = adTrieBuilder.size
+                        loadSingleFilterToTrie(filter, adTrieBuilder)
+                        val loaded = adTrieBuilder.size - sizeBefore
+                        filterListDao.updateStats(
+                            id = filter.id,
+                            count = loaded,
+                            timestamp = System.currentTimeMillis()
+                        )
+                        Timber.d("Loaded $loaded domains from ${filter.name}")
+                    } catch (e: Exception) {
+                        Timber.d("Failed to load filter: ${filter.name}: $e")
+                    }
+                }
+                adCount = adTrieBuilder.size
+                if (adCount > 0) {
+                    adTrieBuilder.saveToBinary(adTrieFile)
+                }
+                adTrieBuilder.clear() // Release heap before phase 2
             }
 
-            if (secTrieBuilder.size > 0) {
-                secTrieBuilder.saveToBinary(secTrieFile)
-                securityTrie = DomainTrie.loadFromMmap(secTrieFile)
-            } else {
-                securityTrie = null
+            // ── Phase 2: Security domains ────────────────────────────
+            val secFilters = enabledLists.filter { it.category == FilterList.CATEGORY_SECURITY }
+            var secCount = 0
+            if (secFilters.isNotEmpty()) {
+                val secTrieBuilder = DomainTrie()
+                for (filter in secFilters) {
+                    try {
+                        val sizeBefore = secTrieBuilder.size
+                        loadSingleFilterToTrie(filter, secTrieBuilder)
+                        val loaded = secTrieBuilder.size - sizeBefore
+                        filterListDao.updateStats(
+                            id = filter.id,
+                            count = loaded,
+                            timestamp = System.currentTimeMillis()
+                        )
+                        Timber.d("Loaded $loaded domains from ${filter.name} (security)")
+                    } catch (e: Exception) {
+                        Timber.d("Failed to load filter: ${filter.name}: $e")
+                    }
+                }
+                secCount = secTrieBuilder.size
+                if (secCount > 0) {
+                    secTrieBuilder.saveToBinary(secTrieFile)
+                }
+                secTrieBuilder.clear()
             }
 
-            // In-memory tries are now GC-eligible — only mmap'd binary remains
+            // ── Phase 3: Mmap the binary files (near-zero heap) ──────
+            adTrie = if (adCount > 0) DomainTrie.loadFromMmap(adTrieFile) else null
+            securityTrie = if (secCount > 0) DomainTrie.loadFromMmap(secTrieFile) else null
+
             val elapsed = System.currentTimeMillis() - startTime
-            val adCount = adTrie?.size ?: 0
-            val secCount = securityTrie?.size ?: 0
             Timber.d("Loaded $adCount ad + $secCount security domains in ${elapsed}ms (Trie + mmap)")
 
             Result.success(adCount + secCount)

@@ -13,6 +13,7 @@ import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
 import app.pwhs.blockads.ui.onboarding.OnboardingViewModel
 import app.pwhs.blockads.ui.profile.ProfileViewModel
+import app.pwhs.blockads.ui.appearance.AppearanceViewModel
 import app.pwhs.blockads.ui.settings.SettingsViewModel
 import app.pwhs.blockads.ui.statistics.StatisticsViewModel
 import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
@@ -141,6 +142,12 @@ val appModule = module {
         FirewallViewModel(
             appPrefs = get(),
             firewallRuleDao = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
+        AppearanceViewModel(
+            appPrefs = get(),
             application = androidApplication()
         )
     }

@@ -1,11 +1,10 @@
 package app.pwhs.blockads.data
 
-import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import java.nio.file.StandardOpenOption
 
 /**
  * A memory-efficient reversed-label Trie for domain matching.
@@ -27,6 +26,7 @@ class DomainTrie {
     private class TrieNode {
         var isTerminal: Boolean = false
         var children: HashMap<String, TrieNode>? = null
+        @JvmField var bfsOffset: Int = 0 // transient, used only during serialization
 
         fun getOrCreateChild(label: String): TrieNode {
             val map = children ?: HashMap<String, TrieNode>(4).also { children = it }
@@ -116,9 +116,11 @@ class DomainTrie {
         fun loadFromMmap(file: File): MmapDomainTrie? {
             if (!file.exists() || file.length() < 16) return null
             return try {
-                val channel = FileChannel.open(file.toPath(), StandardOpenOption.READ)
+                val raf = RandomAccessFile(file, "r")
+                val channel = raf.channel
                 val buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length())
                 channel.close()
+                raf.close()
 
                 val magic = buffer.getInt()
                 val version = buffer.getInt()
@@ -136,6 +138,8 @@ class DomainTrie {
 
     /**
      * Serialize the trie to a compact binary file.
+     * Memory-efficient: uses BFS order with offsets embedded in TrieNode
+     * to avoid creating a large HashMap<TrieNode, Int>.
      *
      * Format (all big-endian):
      * ┌─────────────────────────────────────┐
@@ -148,42 +152,39 @@ class DomainTrie {
      * └─────────────────────────────────────┘
      */
     fun saveToBinary(file: File) {
-        // Step 1: Assign BFS order indices to all nodes
-        val nodeList = mutableListOf<TrieNode>()
-        val nodeIndex = HashMap<TrieNode, Int>()
+        // Two-pass BFS: no ArrayList or HashMap — only the BFS queue exists,
+        // which holds at most one "level" of the tree at a time.
+
+        // Pass 1: BFS to calculate byte offsets and count nodes.
+        // Offsets are stored directly in TrieNode.bfsOffset.
         val queue = ArrayDeque<TrieNode>()
+        var nodeCount = 0
 
         queue.add(root)
+        var offset = 16 // header size
         while (queue.isNotEmpty()) {
             val node = queue.removeFirst()
-            nodeIndex[node] = nodeList.size
-            nodeList.add(node)
-            node.children?.values?.forEach { queue.add(it) }
-        }
+            node.bfsOffset = offset
+            nodeCount++
 
-        // Step 2: Calculate byte offsets for each node
-        val nodeOffsets = IntArray(nodeList.size)
-        var offset = 16 // header size
-        for (i in nodeList.indices) {
-            nodeOffsets[i] = offset
-            val node = nodeList[i]
             offset += 3 // isTerminal(1) + childCount(2)
-            node.children?.forEach { (label, _) ->
-                offset += 2 + label.toByteArray(Charsets.UTF_8).size + 4 // labelLen + label + childOffset
+            node.children?.forEach { (label, child) ->
+                offset += 2 + label.toByteArray(Charsets.UTF_8).size + 4
+                queue.add(child)
             }
         }
 
-        // Step 3: Write binary file
+        // Pass 2: BFS again to write bytes — read offsets from TrieNode.bfsOffset.
         file.parentFile?.mkdirs()
         DataOutputStream(file.outputStream().buffered()).use { out ->
-            // Header
             out.writeInt(MAGIC)
             out.writeInt(VERSION)
-            out.writeInt(nodeList.size)
+            out.writeInt(nodeCount)
             out.writeInt(_size)
 
-            // Nodes
-            for (node in nodeList) {
+            queue.add(root)
+            while (queue.isNotEmpty()) {
+                val node = queue.removeFirst()
                 out.writeByte(if (node.isTerminal) 1 else 0)
                 val childCount = node.children?.size ?: 0
                 out.writeShort(childCount)
@@ -192,8 +193,12 @@ class DomainTrie {
                     val labelBytes = label.toByteArray(Charsets.UTF_8)
                     out.writeShort(labelBytes.size)
                     out.write(labelBytes)
-                    out.writeInt(nodeOffsets[nodeIndex[child]!!])
+                    out.writeInt(child.bfsOffset)
+                    queue.add(child)
                 }
+
+                // Clear offset after writing to free the int slot
+                node.bfsOffset = 0
             }
         }
     }
