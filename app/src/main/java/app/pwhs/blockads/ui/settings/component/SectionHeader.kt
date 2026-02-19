@@ -20,7 +20,7 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 @Composable
 fun SectionHeader(title: String, icon: ImageVector? = null, description: String? = null) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
     ) {
         if (icon != null) {
@@ -28,7 +28,7 @@ fun SectionHeader(title: String, icon: ImageVector? = null, description: String?
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
