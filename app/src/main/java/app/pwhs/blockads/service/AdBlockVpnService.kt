@@ -18,7 +18,6 @@ import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.util.BatteryMonitor
-import app.pwhs.blockads.widget.AdBlockGlanceWidget
 import app.pwhs.blockads.util.AppNameResolver
 import app.pwhs.blockads.util.startOfDayMillis
 import app.pwhs.blockads.worker.VpnResumeWorker
@@ -341,7 +340,6 @@ class AdBlockVpnService : VpnService() {
                 nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
 
                 updateNotification() // Update to normal notification
-                AdBlockGlanceWidget.requestUpdate(this@AdBlockVpnService)
                 Timber.d("VPN established successfully")
 
                 // Log initial battery state
@@ -1065,7 +1063,6 @@ class AdBlockVpnService : VpnService() {
             Timber.e("Error closing VPN interface: $e")
         }
         vpnInterface = null
-        AdBlockGlanceWidget.requestUpdate(this)
         stopForeground(STOP_FOREGROUND_REMOVE)
         if (showStoppedNotification) {
             stopForeground(STOP_FOREGROUND_DETACH)
