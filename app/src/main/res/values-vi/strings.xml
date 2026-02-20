@@ -470,4 +470,12 @@
     <string name="block_reason_firewall">Tường lửa</string>
     <string name="settings_firewall">Tường lửa</string>
     <string name="settings_firewall_desc">Chặn truy cập internet theo ứng dụng</string>
+
+    <!-- Share & Rate -->
+    <string name="settings_share_app">Chia sẻ ứng dụng</string>
+    <string name="settings_share_app_desc">Chia sẻ BlockAds với bạn bè và gia đình</string>
+    <string name="settings_share_app_message">Hãy thử BlockAds — ứng dụng chặn quảng cáo miễn phí, mã nguồn mở cho Android! Chặn quảng cáo trên mọi ứng dụng chỉ với một chạm. Tải tại đây: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
+    <string name="settings_rate_app">Đánh giá ứng dụng</string>
+    <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
+
 </resources>

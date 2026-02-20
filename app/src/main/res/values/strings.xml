@@ -475,4 +475,11 @@
     <string name="block_reason_firewall">Firewall</string>
     <string name="settings_firewall">Firewall</string>
     <string name="settings_firewall_desc">Block internet access per app</string>
+
+    <!-- Share & Rate -->
+    <string name="settings_share_app">Share App</string>
+    <string name="settings_share_app_desc">Share BlockAds with friends and family</string>
+    <string name="settings_share_app_message">Check out BlockAds — a free, open-source ad blocker for Android! Block ads across all apps with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
+    <string name="settings_rate_app">Rate App</string>
+    <string name="settings_rate_app_desc">Leave a review on Google Play</string>
 </resources>
