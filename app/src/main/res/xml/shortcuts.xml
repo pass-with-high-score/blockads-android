@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_shield"
+        android:shortcutId="toggle_vpn"
+        android:shortcutLongLabel="@string/shortcut_toggle_vpn"
+        android:shortcutShortLabel="@string/shortcut_toggle_vpn_short">
+        <intent
+            android:action="app.pwhs.blockads.ACTION_TOGGLE_SHORTCUT"
+            android:targetClass="app.pwhs.blockads.MainActivity"
+            android:targetPackage="app.pwhs.blockads" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

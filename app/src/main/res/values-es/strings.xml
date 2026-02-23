@@ -232,15 +232,7 @@
     <string name="widget_name">Control de BlockAds</string>
     <string name="widget_description">Activa o desactiva el bloqueo de anuncios y consulta las estadísticas</string>
     <string name="widget_toggle_description">Alternar bloqueo de anuncios</string>
-    <string name="widget_blocked_today">Blocked today: %s</string>
-    <string name="widget_blocked_label">Blocked</string>
-    <string name="widget_total_label">Total</string>
-    <string name="widget_today_stats">Today</string>
-    <string name="widget_alltime_stats">All Time</string>
-    <string name="widget_activity_24h">24h Activity</string>
-    <string name="widget_top_blocked">Top Blocked</string>
-    <string name="widget_no_blocked_domains">No blocked domains yet</string>
-    <string name="widget_no_data">No data yet</string>
+    <string name="widget_blocked_today">Blocked today</string>
     <string name="custom_rules">Reglas personalizadas</string>
     <string name="add_custom_rule">Añadir regla personalizada</string>
     <string name="import_rules">Importar reglas</string>
@@ -431,4 +423,11 @@
     <string name="settings_share_app_message">Check out BlockAds — a free, open-source ad blocker for Android! Block ads across all apps with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Rate App</string>
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
+    <string name="widget_protected">Protected</string>
+    <string name="widget_unprotected">Off</string>
+
+    <!-- Shortcuts -->
+    <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
+    <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
+    <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
 </resources>

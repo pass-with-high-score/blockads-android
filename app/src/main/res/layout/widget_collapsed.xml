@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/widget_background"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/widget_toggle_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/widget_toggle_off"
+        android:contentDescription="@string/widget_toggle_description"
+        android:padding="10dp"
+        android:src="@drawable/ic_shortcut_shield" />
+
+    <TextView
+        android:id="@+id/widget_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/widget_unprotected"
+        android:textColor="#757575"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

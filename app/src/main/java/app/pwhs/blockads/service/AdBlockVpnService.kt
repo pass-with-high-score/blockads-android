@@ -20,6 +20,7 @@ import app.pwhs.blockads.data.FirewallRuleDao
 import app.pwhs.blockads.util.BatteryMonitor
 import app.pwhs.blockads.util.AppNameResolver
 import app.pwhs.blockads.util.startOfDayMillis
+import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.worker.VpnResumeWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -341,6 +342,9 @@ class AdBlockVpnService : VpnService() {
 
                 updateNotification() // Update to normal notification
                 Timber.d("VPN established successfully")
+
+                // Update home screen widgets
+                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
 
                 // Log initial battery state
                 batteryMonitor.logBatteryStatus()
@@ -1072,6 +1076,9 @@ class AdBlockVpnService : VpnService() {
         }
         stopSelf()
         Timber.d("VPN stopped")
+
+        // Update home screen widgets
+        AdBlockWidgetProvider.sendUpdateBroadcast(this)
     }
 
     override fun onRevoke() {

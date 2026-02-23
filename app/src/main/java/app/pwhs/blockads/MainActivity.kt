@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_START_VPN = "extra_start_vpn"
+        const val ACTION_TOGGLE_SHORTCUT = "app.pwhs.blockads.ACTION_TOGGLE_SHORTCUT"
     }
 
     private var widgetIntentHandled = false
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         handleWidgetIntent(intent)
+        handleShortcutIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -107,6 +109,7 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         widgetIntentHandled = false
         handleWidgetIntent(intent)
+        handleShortcutIntent(intent)
     }
 
     private fun handleWidgetIntent(intent: Intent?) {
@@ -115,6 +118,22 @@ class MainActivity : ComponentActivity() {
             if (!AdBlockVpnService.isRunning) {
                 handleVpnToggle()
             }
+        }
+    }
+
+    private fun handleShortcutIntent(intent: Intent?) {
+        if (intent?.action == ACTION_TOGGLE_SHORTCUT) {
+            if (AdBlockVpnService.isRunning) {
+                // Stop VPN
+                val stopIntent = Intent(this, AdBlockVpnService::class.java).apply {
+                    action = AdBlockVpnService.ACTION_STOP
+                }
+                startService(stopIntent)
+            } else {
+                handleVpnToggle()
+            }
+            // Clear the action so it doesn't re-trigger
+            intent.action = null
         }
     }
 

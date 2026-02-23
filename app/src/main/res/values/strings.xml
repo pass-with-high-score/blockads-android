@@ -275,15 +275,14 @@
     <string name="widget_name">BlockAds Toggle</string>
     <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
     <string name="widget_toggle_description">Toggle ad blocking</string>
-    <string name="widget_blocked_today">Blocked today: %s</string>
-    <string name="widget_blocked_label">Blocked</string>
-    <string name="widget_total_label">Total</string>
-    <string name="widget_today_stats">Today</string>
-    <string name="widget_alltime_stats">All Time</string>
-    <string name="widget_activity_24h">24h Activity</string>
-    <string name="widget_top_blocked">Top Blocked</string>
-    <string name="widget_no_blocked_domains">No blocked domains yet</string>
-    <string name="widget_no_data">No data yet</string>
+    <string name="widget_blocked_today">Blocked today</string>
+    <string name="widget_protected">Protected</string>
+    <string name="widget_unprotected">Off</string>
+
+    <!-- Shortcuts -->
+    <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
+    <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
+    <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Custom Rules</string>
