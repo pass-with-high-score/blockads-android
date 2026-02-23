@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.splash
 
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.theme.NeonGreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -32,9 +34,8 @@ import org.koin.compose.koinInject
 @Composable
 fun SplashScreen(
     navigator: DestinationsNavigator,
-    appPrefs: AppPreferences = koinInject()
+    viewModel: SplashViewModel = koinInject()
 ) {
-    val onboardingCompleted by appPrefs.onboardingCompleted.collectAsState(initial = false)
     var startAnimation by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
@@ -46,18 +47,24 @@ fun SplashScreen(
         label = "scale_animation"
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.events) {
         startAnimation = true
-        delay(1500) // Show splash for 1.5 seconds
+        viewModel.events.collect { event ->
+            when (event) {
+                is SplashEvent.Home -> {
+                    delay(500) // Allow animation to finish
+                    navigator.navigate(HomeScreenDestination) {
+                        popUpTo(NavGraphs.root) { inclusive = true }
+                    }
+                }
 
-        // Navigate based on onboarding status
-        if (onboardingCompleted) {
-            navigator.navigate(HomeScreenDestination) {
-                popUpTo(NavGraphs.root) { inclusive = true }
-            }
-        } else {
-            navigator.navigate(OnboardingScreenDestination) {
-                popUpTo(NavGraphs.root) { inclusive = true }
+                is SplashEvent.Onboarding -> {
+                    delay(500) // Allow animation to finish
+                    navigator.navigate(OnboardingScreenDestination) {
+                        popUpTo(NavGraphs.root) { inclusive = true }
+                    }
+                }
+
             }
         }
     }

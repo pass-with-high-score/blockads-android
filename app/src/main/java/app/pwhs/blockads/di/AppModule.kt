@@ -20,6 +20,7 @@ import app.pwhs.blockads.ui.whitelist.AppWhitelistViewModel
 import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
 import app.pwhs.blockads.ui.customrules.CustomRulesViewModel
 import app.pwhs.blockads.ui.firewall.FirewallViewModel
+import app.pwhs.blockads.ui.splash.SplashViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -149,6 +150,11 @@ val appModule = module {
         AppearanceViewModel(
             appPrefs = get(),
             application = androidApplication()
+        )
+    }
+    viewModel {
+        SplashViewModel(
+            appPrefs = get(),
         )
     }
 }

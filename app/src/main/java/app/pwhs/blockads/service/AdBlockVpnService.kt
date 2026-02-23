@@ -1354,6 +1354,8 @@ class AdBlockVpnService : VpnService() {
         val notification = buildNotification()
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.notify(NOTIFICATION_ID, notification)
+        // update home screen widgets as well
+        AdBlockWidgetProvider.sendUpdateBroadcast(this)
     }
 
     private fun onNetworkAvailable() {
