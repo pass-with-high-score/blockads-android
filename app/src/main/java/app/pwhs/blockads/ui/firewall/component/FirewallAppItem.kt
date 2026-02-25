@@ -87,7 +87,7 @@ fun FirewallAppItem(
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                if (isBlocked && rule != null) {
+                if (isBlocked) {
                     val statusParts = mutableListOf<String>()
                     if (rule.blockWifi) statusParts.add(stringResource(R.string.firewall_network_wifi))
                     if (rule.blockMobileData) statusParts.add(stringResource(R.string.firewall_network_mobile))

@@ -199,6 +199,7 @@
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">업스트림 DNS 서버</string>
     <string name="settings_fallback_dns">대체 DNS 서버</string>
+    <string name="settings_save_custom_dns">Save DNS</string>
     <string name="settings_dns_response_type">DNS 응답 유형</string>
     <string name="settings_dns_response_type_desc">차단된 도메인에 대한 응답 유형</string>
     <string name="dns_response_nxdomain_desc">도메인이 존재하지 않음 (표준)</string>
@@ -452,4 +453,14 @@
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
     <string name="copied_url">Copied URL</string>
+    <string name="settings_custom_dns_server">Custom DNS Server</string>
+    <string name="settings_custom_dns_hint">Enter IP for Plain DNS, https:// for DoH, or tls:// for DoT</string>
+    <string name="filter_error_invalid_url">Please enter a valid URL (http:// or https://)</string>
+    <string name="filter_error_duplicate_url">This filter list already exists</string>
+    <string name="filter_error_invalid_content">URL does not contain a valid filter list</string>
+    <string name="settings_detected_plain">Plain DNS</string>
+    <string name="settings_detected_protocol">Detected: %s</string>
+    <string name="settings_invalid_dns_input">Invalid DNS server address</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
 </resources>
