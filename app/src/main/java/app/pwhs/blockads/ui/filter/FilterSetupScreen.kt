@@ -16,8 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,6 +49,7 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.CustomRulesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FilterDetailScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -138,7 +137,8 @@ fun FilterSetupScreen(
                                 FilterItem(
                                     filter = filter,
                                     onToggle = { viewModel.toggleFilterList(filter) },
-                                    onDelete = null // built-in cannot be deleted
+                                    onDelete = null,
+                                    onClick = { navigator.navigate(FilterDetailScreenDestination(filterId = filter.id)) }
                                 )
                                 if (index < adFilters.lastIndex) {
                                     HorizontalDivider(
@@ -165,7 +165,8 @@ fun FilterSetupScreen(
                                 FilterItem(
                                     filter = filter,
                                     onToggle = { viewModel.toggleFilterList(filter) },
-                                    onDelete = null // built-in cannot be deleted
+                                    onDelete = null,
+                                    onClick = { navigator.navigate(FilterDetailScreenDestination(filterId = filter.id)) }
                                 )
                                 if (index < securityFilters.lastIndex) {
                                     HorizontalDivider(
@@ -200,7 +201,8 @@ fun FilterSetupScreen(
                                 FilterItem(
                                     filter = filter,
                                     onToggle = { viewModel.toggleFilterList(filter) },
-                                    onDelete = { viewModel.deleteFilterList(filter) }
+                                    onDelete = { viewModel.deleteFilterList(filter) },
+                                    onClick = { navigator.navigate(FilterDetailScreenDestination(filterId = filter.id)) }
                                 )
                                 if (index < customFilters.lastIndex) {
                                     HorizontalDivider(

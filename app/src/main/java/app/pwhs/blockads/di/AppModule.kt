@@ -8,6 +8,7 @@ import app.pwhs.blockads.data.ProfileManager
 import app.pwhs.blockads.dns.DohClient
 import app.pwhs.blockads.dns.DotClient
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
+import app.pwhs.blockads.ui.filter.detail.FilterDetailViewModel
 import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
@@ -105,6 +106,9 @@ val appModule = module {
         )
     }
     viewModel { FilterSetupViewModel(get(), get(), androidApplication()) }
+    viewModel { (filterId: Long) ->
+        FilterDetailViewModel(filterId, get(), get(), androidApplication())
+    }
     viewModel {
         AppWhitelistViewModel(
             appPrefs = get(),

@@ -31,6 +31,14 @@
     <string name="filter_updating">Đang cập nhật danh sách bộ lọc…</string>
     <string name="filter_updated">Đã cập nhật bộ lọc: %d tên miền</string>
     <string name="filter_update_failed">Không thể cập nhật danh sách bộ lọc</string>
+    <string name="filter_detail_enabled">Đã bật</string>
+    <string name="filter_detail_rules">Quy tắc</string>
+    <string name="filter_detail_last_updated">Cập nhật lần cuối</string>
+    <string name="filter_detail_update">Cập nhật</string>
+    <string name="filter_detail_delete">Xóa</string>
+    <string name="filter_detail_domain_preview">Xem trước tên miền bị chặn</string>
+    <string name="filter_detail_no_domains">Chưa có dữ liệu. Hãy thử cập nhật bộ lọc này trước.</string>
+    <string name="filter_detail_more_domains">… và %s tên miền khác</string>
     <string name="logs_empty">Chưa có truy vấn DNS nào được ghi lại</string>
     <string name="logs_filter_all">Tất cả</string>
     <string name="logs_filter_blocked">Đã chặn</string>
@@ -497,5 +505,6 @@
     <string name="settings_rate_app">Đánh giá ứng dụng</string>
     <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 
 </resources>

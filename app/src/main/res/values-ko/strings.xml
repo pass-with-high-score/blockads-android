@@ -31,6 +31,14 @@
     <string name="filter_updating">필터 목록 업데이트 중…</string>
     <string name="filter_updated">필터 목록 업데이트 완료: %d개 도메인</string>
     <string name="filter_update_failed">필터 목록 업데이트 실패</string>
+    <string name="filter_detail_enabled">활성화</string>
+    <string name="filter_detail_rules">규칙</string>
+    <string name="filter_detail_last_updated">마지막 업데이트</string>
+    <string name="filter_detail_update">업데이트</string>
+    <string name="filter_detail_delete">삭제</string>
+    <string name="filter_detail_domain_preview">차단된 도메인 미리보기</string>
+    <string name="filter_detail_no_domains">캐시된 도메인이 없습니다. 먼저 이 필터를 업데이트해 보세요.</string>
+    <string name="filter_detail_more_domains">… 외 %s개 도메인</string>
     <string name="logs_empty">아직 기록된 DNS 쿼리가 없습니다</string>
     <string name="logs_filter_all">전체</string>
     <string name="logs_filter_blocked">차단됨</string>
@@ -443,4 +451,5 @@
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

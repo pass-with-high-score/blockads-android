@@ -31,6 +31,14 @@
     <string name="filter_updating">Actualizando lista de filtros…</string>
     <string name="filter_updated">Lista de filtros actualizada: %d dominios</string>
     <string name="filter_update_failed">Error al actualizar la lista de filtros</string>
+    <string name="filter_detail_enabled">Activado</string>
+    <string name="filter_detail_rules">Reglas</string>
+    <string name="filter_detail_last_updated">Última actualización</string>
+    <string name="filter_detail_update">Actualizar</string>
+    <string name="filter_detail_delete">Eliminar</string>
+    <string name="filter_detail_domain_preview">Vista previa de dominios bloqueados</string>
+    <string name="filter_detail_no_domains">Sin dominios en caché. Intenta actualizar este filtro primero.</string>
+    <string name="filter_detail_more_domains">… y %s dominios más</string>
     <string name="logs_empty">Aún no se han registrado consultas DNS</string>
     <string name="logs_filter_all">Todas</string>
     <string name="logs_filter_blocked">Bloqueadas</string>
@@ -451,4 +459,5 @@
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

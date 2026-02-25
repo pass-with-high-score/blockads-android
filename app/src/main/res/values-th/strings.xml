@@ -31,6 +31,14 @@
     <string name="filter_updating">กำลังอัปเดตรายการตัวกรอง…</string>
     <string name="filter_updated">อัปเดตรายการตัวกรองแล้ว: %d โดเมน</string>
     <string name="filter_update_failed">อัปเดตรายการตัวกรองไม่สำเร็จ</string>
+    <string name="filter_detail_enabled">เปิดใช้งาน</string>
+    <string name="filter_detail_rules">กฎ</string>
+    <string name="filter_detail_last_updated">อัปเดตล่าสุด</string>
+    <string name="filter_detail_update">อัปเดต</string>
+    <string name="filter_detail_delete">ลบ</string>
+    <string name="filter_detail_domain_preview">ตัวอย่างโดเมนที่ถูกบล็อก</string>
+    <string name="filter_detail_no_domains">ไม่มีโดเมนในแคช ลองอัปเดตตัวกรองนี้ก่อน</string>
+    <string name="filter_detail_more_domains">… และอีก %s โดเมน</string>
     <string name="logs_empty">ยังไม่มีการบันทึกคิวรี DNS</string>
     <string name="logs_filter_all">ทั้งหมด</string>
     <string name="logs_filter_blocked">ถูกบล็อก</string>
@@ -451,4 +459,5 @@
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

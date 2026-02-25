@@ -31,6 +31,14 @@
     <string name="filter_updating">フィルターリストを更新中…</string>
     <string name="filter_updated">フィルターリストを更新しました: %d ドメイン</string>
     <string name="filter_update_failed">フィルターリストの更新に失敗しました</string>
+    <string name="filter_detail_enabled">有効</string>
+    <string name="filter_detail_rules">ルール</string>
+    <string name="filter_detail_last_updated">最終更新</string>
+    <string name="filter_detail_update">更新</string>
+    <string name="filter_detail_delete">削除</string>
+    <string name="filter_detail_domain_preview">ブロックドメインのプレビュー</string>
+    <string name="filter_detail_no_domains">キャッシュされたドメインがありません。先にこのフィルターを更新してください。</string>
+    <string name="filter_detail_more_domains">… 他 %s ドメイン</string>
     <string name="logs_empty">DNSクエリはまだ記録されていません</string>
     <string name="logs_filter_all">すべて</string>
     <string name="logs_filter_blocked">ブロック済み</string>
@@ -451,4 +459,5 @@
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

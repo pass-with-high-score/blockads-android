@@ -31,6 +31,14 @@
     <string name="filter_updating">正在更新过滤列表…</string>
     <string name="filter_updated">过滤列表已更新：%d 个域名</string>
     <string name="filter_update_failed">过滤列表更新失败</string>
+    <string name="filter_detail_enabled">已启用</string>
+    <string name="filter_detail_rules">规则</string>
+    <string name="filter_detail_last_updated">最后更新</string>
+    <string name="filter_detail_update">更新</string>
+    <string name="filter_detail_delete">删除</string>
+    <string name="filter_detail_domain_preview">已拦截域名预览</string>
+    <string name="filter_detail_no_domains">无缓存域名。请先尝试更新此过滤器。</string>
+    <string name="filter_detail_more_domains">… 还有 %s 个域名</string>
     <string name="logs_empty">尚无DNS查询记录</string>
     <string name="logs_filter_all">全部</string>
     <string name="logs_filter_blocked">已拦截</string>
@@ -443,4 +451,5 @@
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

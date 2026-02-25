@@ -158,7 +158,7 @@ class FilterListRepository(
             ),
             FilterList(
                 name = "PhishTank Blocklist",
-                url = "https://raw.githubusercontent.com/ArmynC/phishing-list/main/hosts.txt",
+                url = "https://phishing.army/download/phishing_army_blocklist.txt",
                 description = "Blocks known phishing websites that steal personal information",
                 isEnabled = true,
                 isBuiltIn = true,
@@ -517,6 +517,43 @@ class FilterListRepository(
             }
     }
 
+    /**
+     * Get a preview list of domains from a filter's cached file.
+     * Returns up to [limit] domains parsed from the hosts file.
+     */
+    suspend fun getDomainPreview(filter: FilterList, limit: Int = 100): List<String> =
+        withContext(Dispatchers.IO) {
+            val cacheFile = getCacheFile(filter)
+            if (!cacheFile.exists()) return@withContext emptyList()
+
+            val domains = mutableListOf<String>()
+            cacheFile.bufferedReader().use { reader ->
+                reader.lineSequence()
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() && !it.startsWith('#') && !it.startsWith('!') }
+                    .forEach { line ->
+                        if (domains.size >= limit) return@forEach
+                        val domain = when {
+                            line.startsWith("0.0.0.0 ") || line.startsWith("127.0.0.1 ") -> {
+                                line.substringAfter(' ').trim()
+                                    .split("\\s+".toRegex()).firstOrNull()
+                                    ?.takeIf { it.isNotBlank() && it != "localhost" }
+                            }
+                            line.startsWith("||") && line.endsWith("^") -> {
+                                line.removePrefix("||").removeSuffix("^").trim()
+                                    .takeIf { it.isNotBlank() && it.contains('.') }
+                            }
+                            line.contains('.') && !line.contains(' ') && !line.contains('/') -> {
+                                line.lowercase()
+                            }
+                            else -> null
+                        }
+                        if (domain != null) domains.add(domain.lowercase())
+                    }
+            }
+            domains
+        }
+
     fun clearCache() {
         adTrie = null
         securityTrie = null
@@ -524,3 +561,4 @@ class FilterListRepository(
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }
 }
+

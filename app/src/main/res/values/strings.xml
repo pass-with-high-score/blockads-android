@@ -31,6 +31,14 @@
     <string name="filter_updating">Updating filter list…</string>
     <string name="filter_updated">Filter list updated: %d domains</string>
     <string name="filter_update_failed">Failed to update filter list</string>
+    <string name="filter_detail_enabled">Enabled</string>
+    <string name="filter_detail_rules">Rules</string>
+    <string name="filter_detail_last_updated">Last updated</string>
+    <string name="filter_detail_update">Update</string>
+    <string name="filter_detail_delete">Delete</string>
+    <string name="filter_detail_domain_preview">Blocked Domains Preview</string>
+    <string name="filter_detail_no_domains">No cached domains. Try updating this filter first.</string>
+    <string name="filter_detail_more_domains">… and %s more domains</string>
     <string name="logs_empty">No DNS queries logged yet</string>
     <string name="logs_filter_all">All</string>
     <string name="logs_filter_blocked">Blocked</string>
@@ -503,4 +511,5 @@
     <string name="settings_rate_app">Rate App</string>
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="filter_setup_active_count">%1$d active</string>
+    <string name="copied_url">Copied URL</string>
 </resources>

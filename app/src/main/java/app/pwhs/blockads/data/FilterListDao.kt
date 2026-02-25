@@ -43,4 +43,10 @@ interface FilterListDao {
 
     @Query("SELECT url FROM filter_lists")
     suspend fun getAllUrls(): List<String>
+
+    @Query("SELECT * FROM filter_lists WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): FilterList?
+
+    @Query("SELECT * FROM filter_lists WHERE id = :id")
+    fun getByIdFlow(id: Long): Flow<FilterList?>
 }
