@@ -1,0 +1,6 @@
+- Fixed bug show onboarding screen even user has already seen it
+- Fixed validation custom filter
+- Enhanced UI for custom filter
+- Enhanced UI for whitelist and firewall
+- Improved custom DNS input
+- Added accent color for UI
