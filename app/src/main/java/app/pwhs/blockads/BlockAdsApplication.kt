@@ -37,6 +37,7 @@ class BlockAdsApplication : Application() {
         val appPreferences: AppPreferences by inject()
         applicationScope.launch {
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
+            FilterUpdateScheduler.scheduleUpdateCheck(this@BlockAdsApplication)
 
             // Schedule daily summary only if enabled
             if (appPreferences.dailySummaryEnabled.first()) {

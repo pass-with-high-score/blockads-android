@@ -52,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import androidx.core.net.toUri
 import app.pwhs.blockads.ui.about.component.AboutLinkItem
+import app.pwhs.blockads.ui.theme.DarkBackground
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +111,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                        .background(DarkBackground),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(

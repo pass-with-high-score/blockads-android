@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material3.Card
@@ -37,9 +38,11 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -101,6 +104,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.preloadFilter()
+        viewModel.checkForUpdate(context)
     }
 
     Scaffold(
@@ -252,6 +256,76 @@ fun HomeScreen(
             )
 
             Spacer(modifier = Modifier.height(36.dp))
+
+            // Update available banner
+            val availableUpdate by viewModel.availableUpdate.collectAsState()
+            availableUpdate?.let { update ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = AccentBlue.copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SystemUpdate,
+                            contentDescription = null,
+                            tint = AccentBlue,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.update_available_title, update.version),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            if (update.changelog.isNotBlank()) {
+                                Text(
+                                    text = update.changelog.lines().take(2).joinToString("\n"),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { viewModel.dismissUpdate() }) {
+                            Text(
+                                text = stringResource(R.string.update_dismiss),
+                                color = TextSecondary
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, update.url.toUri())
+                                    context.startActivity(intent)
+                                } catch (_: Exception) { }
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.update_now))
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             // Stats cards
             Row(

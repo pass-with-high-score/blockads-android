@@ -45,6 +45,11 @@ class AppPreferences(private val context: Context) {
         private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
         private val KEY_ACCENT_COLOR = stringPreferencesKey("accent_color")
         private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
+        private val KEY_UPDATE_CHECK_ENABLED = booleanPreferencesKey("update_check_enabled")
+        private val KEY_DISMISSED_UPDATE_VERSION = stringPreferencesKey("dismissed_update_version")
+        private val KEY_AVAILABLE_UPDATE_VERSION = stringPreferencesKey("available_update_version")
+        private val KEY_AVAILABLE_UPDATE_CHANGELOG = stringPreferencesKey("available_update_changelog")
+        private val KEY_AVAILABLE_UPDATE_URL = stringPreferencesKey("available_update_url")
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -202,6 +207,31 @@ class AppPreferences(private val context: Context) {
     val firewallEnabled: Flow<Boolean> =
         context.dataStore.data.map { prefs ->
             prefs[KEY_FIREWALL_ENABLED] ?: false
+        }
+
+    val updateCheckEnabled: Flow<Boolean> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_UPDATE_CHECK_ENABLED] ?: true
+        }
+
+    val dismissedUpdateVersion: Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_DISMISSED_UPDATE_VERSION] ?: ""
+        }
+
+    val availableUpdateVersion: Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_VERSION] ?: ""
+        }
+
+    val availableUpdateChangelog: Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_CHANGELOG] ?: ""
+        }
+
+    val availableUpdateUrl: Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_URL] ?: ""
         }
 
 
@@ -378,5 +408,43 @@ class AppPreferences(private val context: Context) {
 
     suspend fun getWhitelistedAppsSnapshot(): Set<String> {
         return whitelistedApps.first()
+    }
+
+    suspend fun setUpdateCheckEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_UPDATE_CHECK_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setDismissedUpdateVersion(version: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DISMISSED_UPDATE_VERSION] = version
+        }
+    }
+
+    suspend fun setAvailableUpdateVersion(version: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_VERSION] = version
+        }
+    }
+
+    suspend fun setAvailableUpdateChangelog(changelog: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_CHANGELOG] = changelog
+        }
+    }
+
+    suspend fun setAvailableUpdateUrl(url: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AVAILABLE_UPDATE_URL] = url
+        }
+    }
+
+    suspend fun clearAvailableUpdate() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(KEY_AVAILABLE_UPDATE_VERSION)
+            prefs.remove(KEY_AVAILABLE_UPDATE_CHANGELOG)
+            prefs.remove(KEY_AVAILABLE_UPDATE_URL)
+        }
     }
 }

@@ -58,4 +58,27 @@ object FilterUpdateScheduler {
     fun cancelFilterUpdate(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork(FilterUpdateWorker.WORK_NAME)
     }
+
+    fun scheduleUpdateCheck(context: Context) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = PeriodicWorkRequestBuilder<UpdateCheckWorker>(
+            24, TimeUnit.HOURS
+        )
+            .setConstraints(constraints)
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            UpdateCheckWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    fun cancelUpdateCheck(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork(UpdateCheckWorker.WORK_NAME)
+    }
 }

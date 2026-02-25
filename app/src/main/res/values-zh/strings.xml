@@ -463,4 +463,12 @@
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_protocol">Detected: %s</string>
     <string name="settings_invalid_dns_input">Invalid DNS server address</string>
+
+    <!-- Update notification -->
+    <string name="update_available_title">Version %1$s available</string>
+    <string name="update_available_text">A new version of BlockAds is available</string>
+    <string name="update_now">Update</string>
+    <string name="update_dismiss">Later</string>
+    <string name="update_channel_name">App updates</string>
+    <string name="update_channel_desc">Notifications about new app versions</string>
 </resources>
