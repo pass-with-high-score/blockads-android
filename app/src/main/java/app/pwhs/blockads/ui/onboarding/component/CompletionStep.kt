@@ -33,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.ui.theme.NeonGreen
 
 @Composable
 fun CompletionStep() {
@@ -65,8 +64,8 @@ fun CompletionStep() {
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            NeonGreen.copy(alpha = 0.3f),
-                            NeonGreen.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                             Color.Transparent
                         )
                     )
@@ -77,14 +76,14 @@ fun CompletionStep() {
                 modifier = Modifier
                     .size(110.dp)
                     .clip(CircleShape)
-                    .background(NeonGreen.copy(alpha = 0.15f)),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
                     modifier = Modifier.size(72.dp),
-                    tint = NeonGreen
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -95,7 +94,7 @@ fun CompletionStep() {
             text = stringResource(R.string.onboarding_complete_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = NeonGreen,
+            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center
         )
 

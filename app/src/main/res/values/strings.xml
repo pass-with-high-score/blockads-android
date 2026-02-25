@@ -168,6 +168,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">High Contrast</string>
     <string name="settings_high_contrast_desc">Increase contrast for better visibility</string>
+    <string name="settings_accent_color">Accent Color</string>
+    <string name="settings_accent_color_desc">Customize the app\'s primary color</string>
+    <string name="accent_green">Green</string>
+    <string name="accent_blue">Blue</string>
+    <string name="accent_purple">Purple</string>
+    <string name="accent_orange">Orange</string>
+    <string name="accent_pink">Pink</string>
+    <string name="accent_teal">Teal</string>
+    <string name="accent_dynamic">Dynamic (Material You)</string>
+    <string name="accent_dynamic_desc">Uses your wallpaper colors</string>
     <string name="settings_connection">Connection</string>
     <string name="settings_filter_lists">Filter Lists (%d active)</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>

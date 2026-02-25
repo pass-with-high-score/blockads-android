@@ -44,6 +44,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
         private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
         private val KEY_HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
+        private val KEY_ACCENT_COLOR = stringPreferencesKey("accent_color")
         private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
 
         const val PROTECTION_BASIC = "BASIC"
@@ -53,6 +54,14 @@ class AppPreferences(private val context: Context) {
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
         const val THEME_LIGHT = "light"
+
+        const val ACCENT_GREEN = "green"
+        const val ACCENT_BLUE = "blue"
+        const val ACCENT_PURPLE = "purple"
+        const val ACCENT_ORANGE = "orange"
+        const val ACCENT_PINK = "pink"
+        const val ACCENT_TEAL = "teal"
+        const val ACCENT_DYNAMIC = "dynamic"
 
         const val LANGUAGE_SYSTEM = "system"
         const val LANGUAGE_EN = "en"
@@ -189,6 +198,11 @@ class AppPreferences(private val context: Context) {
     val highContrast: Flow<Boolean> =
         context.dataStore.data.map { prefs ->
             prefs[KEY_HIGH_CONTRAST] ?: false
+        }
+
+    val accentColor: Flow<String> =
+        context.dataStore.data.map { prefs ->
+            prefs[KEY_ACCENT_COLOR] ?: ACCENT_GREEN
         }
 
     val firewallEnabled: Flow<Boolean> =
@@ -359,6 +373,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setHighContrast(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_HIGH_CONTRAST] = enabled
+        }
+    }
+
+    suspend fun setAccentColor(color: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ACCENT_COLOR] = color
         }
     }
 

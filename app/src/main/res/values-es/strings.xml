@@ -138,6 +138,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">Alto contraste</string>
     <string name="settings_high_contrast_desc">Aumenta el contraste para mejorar la visibilidad</string>
+    <string name="settings_accent_color">Color de acento</string>
+    <string name="settings_accent_color_desc">Personaliza el color principal de la app</string>
+    <string name="accent_green">Verde</string>
+    <string name="accent_blue">Azul</string>
+    <string name="accent_purple">Morado</string>
+    <string name="accent_orange">Naranja</string>
+    <string name="accent_pink">Rosa</string>
+    <string name="accent_teal">Verde azulado</string>
+    <string name="accent_dynamic">Dinámico (Material You)</string>
+    <string name="accent_dynamic_desc">Usa los colores de tu fondo de pantalla</string>
     <string name="settings_connection">Conexión</string>
     <string name="settings_filter_lists">Listas de filtros (%d activas)</string>
     <string name="settings_add_custom_filter">Añadir lista de filtros personalizada</string>

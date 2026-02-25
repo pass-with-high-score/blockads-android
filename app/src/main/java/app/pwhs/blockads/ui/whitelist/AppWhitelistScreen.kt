@@ -38,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.whitelist.component.AppListItem
 import com.ramcosta.composedestinations.annotation.Destination
@@ -139,7 +138,7 @@ fun AppWhitelistScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(
-                            color = NeonGreen,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(40.dp),
                             strokeWidth = 3.dp
                         )

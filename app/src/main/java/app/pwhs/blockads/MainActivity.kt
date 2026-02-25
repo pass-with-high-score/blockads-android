@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
             val appPrefs: AppPreferences = getKoin().get()
             val themeMode by appPrefs.themeMode.collectAsState(initial = AppPreferences.THEME_SYSTEM)
             val highContrast by appPrefs.highContrast.collectAsState(initial = false)
+            val accentColor by appPrefs.accentColor.collectAsState(initial = AppPreferences.ACCENT_GREEN)
 
             val isDark = when (themeMode) {
                 AppPreferences.THEME_DARK -> true
@@ -94,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
 
-            BlockadsTheme(themeMode = themeMode, highContrast = highContrast) {
+            BlockadsTheme(themeMode = themeMode, highContrast = highContrast, accentColor = accentColor) {
                 BlockAdsApp(
                     onRequestVpnPermission = { handleVpnToggle() }
                 )

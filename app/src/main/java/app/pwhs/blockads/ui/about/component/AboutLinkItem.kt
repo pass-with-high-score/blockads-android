@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import app.pwhs.blockads.ui.theme.NeonGreen
 
 @Composable
 fun AboutLinkItem(
@@ -44,7 +43,7 @@ fun AboutLinkItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = NeonGreen,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
             Text(

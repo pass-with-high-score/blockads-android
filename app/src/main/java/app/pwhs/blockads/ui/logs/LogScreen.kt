@@ -68,7 +68,6 @@ import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber
 import com.ramcosta.composedestinations.annotation.Destination
@@ -138,7 +137,7 @@ fun LogScreen(
                             Icon(
                                 Icons.Default.SyncAlt,
                                 contentDescription = "Real-time",
-                                tint = if (realTimeMode) NeonGreen else TextSecondary
+                                tint = if (realTimeMode) MaterialTheme.colorScheme.primary else TextSecondary
                             )
                         }
                         IconButton(onClick = { isSearchVisible = !isSearchVisible }) {

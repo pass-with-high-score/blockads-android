@@ -138,6 +138,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">高对比度</string>
     <string name="settings_high_contrast_desc">增强对比度以提高可读性</string>
+    <string name="settings_accent_color">强调色</string>
+    <string name="settings_accent_color_desc">自定义应用的主题色</string>
+    <string name="accent_green">绿色</string>
+    <string name="accent_blue">蓝色</string>
+    <string name="accent_purple">紫色</string>
+    <string name="accent_orange">橙色</string>
+    <string name="accent_pink">粉色</string>
+    <string name="accent_teal">青色</string>
+    <string name="accent_dynamic">动态 (Material You)</string>
+    <string name="accent_dynamic_desc">使用您的壁纸颜色</string>
     <string name="settings_connection">连接</string>
     <string name="settings_filter_lists">过滤列表（%d 个已启用）</string>
     <string name="settings_add_custom_filter">添加自定义过滤列表</string>

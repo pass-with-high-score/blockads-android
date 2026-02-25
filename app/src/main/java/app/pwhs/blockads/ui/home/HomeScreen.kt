@@ -68,7 +68,6 @@ import app.pwhs.blockads.ui.home.component.StatCard
 import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
@@ -113,7 +112,7 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             CircularProgressIndicator(
-                                color = NeonGreen,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp),
                                 strokeWidth = 2.dp
                             )
@@ -191,7 +190,7 @@ fun HomeScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 color = when {
                     vpnConnecting -> AccentBlue
-                    vpnEnabled -> NeonGreen
+                    vpnEnabled -> MaterialTheme.colorScheme.primary
                     else -> DangerRed
                 },
                 fontWeight = FontWeight.Bold
@@ -216,21 +215,21 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(NeonGreen.copy(alpha = 0.15f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = null,
-                        tint = NeonGreen,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = profileDisplayName(profile),
                         style = MaterialTheme.typography.labelMedium,
-                        color = NeonGreen
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -311,7 +310,7 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Default.Shield,
                         contentDescription = stringResource(R.string.home_block_rate),
-                        tint = NeonGreen,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -338,7 +337,7 @@ fun HomeScreen(
                             text = formatCount(viewModel.domainCount),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = NeonGreen
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -360,7 +359,7 @@ fun HomeScreen(
                     icon = Icons.Default.DataSaverOn,
                     label = stringResource(R.string.home_data_saved),
                     value = formatDataSize(dataSavedKb),
-                    color = NeonGreen
+                    color = MaterialTheme.colorScheme.primary
                 )
                 StatCard(
                     modifier = Modifier

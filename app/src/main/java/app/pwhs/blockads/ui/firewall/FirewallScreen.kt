@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallRuleDialog
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -142,7 +141,7 @@ fun FirewallScreen(
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = if (firewallEnabled)
-                        NeonGreen.copy(alpha = 0.1f)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                     else
                         MaterialTheme.colorScheme.surfaceVariant
                 ),
@@ -175,7 +174,7 @@ fun FirewallScreen(
                         onCheckedChange = { viewModel.setFirewallEnabled(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
-                            checkedTrackColor = NeonGreen
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -218,7 +217,7 @@ fun FirewallScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(
-                            color = NeonGreen,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(40.dp),
                             strokeWidth = 3.dp
                         )

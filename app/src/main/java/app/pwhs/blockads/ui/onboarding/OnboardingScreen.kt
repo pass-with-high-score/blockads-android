@@ -70,7 +70,6 @@ import app.pwhs.blockads.ui.onboarding.component.PermissionStep
 import app.pwhs.blockads.ui.onboarding.component.ProtectionLevelStep
 import app.pwhs.blockads.ui.onboarding.data.OnboardingPage
 import app.pwhs.blockads.ui.theme.AccentBlue
-import app.pwhs.blockads.ui.theme.NeonGreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
@@ -242,7 +241,7 @@ fun OnboardingScreen(
                         title = stringResource(R.string.onboarding_battery_title),
                         description = stringResource(R.string.onboarding_battery_desc),
                         buttonText = stringResource(R.string.onboarding_battery_grant),
-                        accentColor = NeonGreen,
+                        accentColor = MaterialTheme.colorScheme.primary,
                         isGranted = batteryOptimizationExcluded,
                         grantedText = stringResource(R.string.onboarding_permission_granted),
                         onRequestPermission = {
@@ -273,7 +272,7 @@ fun OnboardingScreen(
                         animationSpec = tween(300), label = "indicator_width"
                     )
                     val color by animateColorAsState(
-                        targetValue = if (isSelected) NeonGreen else MaterialTheme.colorScheme.surfaceVariant,
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                         animationSpec = tween(300), label = "indicator_color"
                     )
                     Box(
@@ -303,7 +302,7 @@ fun OnboardingScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = NeonGreen,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.Black
                 )
             ) {

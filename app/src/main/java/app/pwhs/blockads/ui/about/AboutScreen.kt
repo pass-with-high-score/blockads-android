@@ -44,7 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -98,7 +97,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                NeonGreen.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                                 Color.Transparent
                             )
                         )
@@ -109,14 +108,14 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape)
-                        .background(NeonGreen.copy(alpha = 0.15f)),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Shield,
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
-                        tint = NeonGreen
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -151,7 +150,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = NeonGreen.copy(alpha = 0.1f)
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -163,7 +162,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
-                    color = NeonGreen
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 

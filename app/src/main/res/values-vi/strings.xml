@@ -168,6 +168,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">Tương phản cao</string>
     <string name="settings_high_contrast_desc">Tăng độ tương phản để dễ nhìn hơn</string>
+    <string name="settings_accent_color">Màu nhấn</string>
+    <string name="settings_accent_color_desc">Tùy chỉnh màu chủ đạo của ứng dụng</string>
+    <string name="accent_green">Xanh lá</string>
+    <string name="accent_blue">Xanh dương</string>
+    <string name="accent_purple">Tím</string>
+    <string name="accent_orange">Cam</string>
+    <string name="accent_pink">Hồng</string>
+    <string name="accent_teal">Xanh ngọc</string>
+    <string name="accent_dynamic">Động (Material You)</string>
+    <string name="accent_dynamic_desc">Sử dụng màu từ hình nền của bạn</string>
     <string name="settings_connection">Kết nối</string>
     <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
     <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>

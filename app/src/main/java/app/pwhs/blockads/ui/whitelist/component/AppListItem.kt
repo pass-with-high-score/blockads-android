@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.whitelist.data.AppInfoData
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -40,7 +39,7 @@ fun AppListItem(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (isWhitelisted)
-            NeonGreen.copy(alpha = 0.08f)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
         else
             Color.Transparent,
         animationSpec = tween(300),
@@ -96,7 +95,7 @@ fun AppListItem(
                 onCheckedChange = { onToggle() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = NeonGreen
+                    checkedTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
         }

@@ -52,7 +52,6 @@ import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.home.component.WeeklyStatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
@@ -153,7 +152,7 @@ fun StatisticsScreen(
                     icon = Icons.Default.Dns,
                     label = stringResource(R.string.stats_today_blocked),
                     value = formatCount(todayBlocked),
-                    color = NeonGreen
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 

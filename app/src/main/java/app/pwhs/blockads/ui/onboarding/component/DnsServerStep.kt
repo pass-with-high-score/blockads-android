@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsProvider
 import app.pwhs.blockads.data.DnsProviders
-import app.pwhs.blockads.ui.theme.NeonGreen
 
 private val ONBOARDING_DNS_PROVIDERS = listOf(
     DnsProviders.CLOUDFLARE,
@@ -102,11 +101,11 @@ private fun DnsProviderCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
-                NeonGreen.copy(alpha = 0.12f)
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
             else
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        border = if (isSelected) BorderStroke(2.dp, NeonGreen) else null
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Row(
             modifier = Modifier
@@ -119,7 +118,7 @@ private fun DnsProviderCard(
                 imageVector = Icons.Filled.Dns,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = if (isSelected) NeonGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Column(modifier = Modifier.weight(1f)) {
@@ -130,13 +129,13 @@ private fun DnsProviderCard(
                         text = provider.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSelected) NeonGreen else MaterialTheme.colorScheme.onSurface
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
                     if (isRecommended) {
                         Text(
                             text = stringResource(R.string.onboarding_recommended),
                             style = MaterialTheme.typography.labelSmall,
-                            color = NeonGreen,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -154,7 +153,7 @@ private fun DnsProviderCard(
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = NeonGreen,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }

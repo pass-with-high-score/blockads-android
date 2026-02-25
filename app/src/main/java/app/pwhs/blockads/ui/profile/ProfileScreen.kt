@@ -2,7 +2,6 @@ package app.pwhs.blockads.ui.profile
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,7 +51,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,7 +65,6 @@ import app.pwhs.blockads.data.ProfileSchedule
 import app.pwhs.blockads.data.ProtectionProfile
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.SectionHeader
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -248,7 +245,7 @@ private fun ProfileItem(
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(
-                    if (isActive) NeonGreen.copy(alpha = 0.15f)
+                    if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     else MaterialTheme.colorScheme.surfaceVariant
                 ),
             contentAlignment = Alignment.Center
@@ -256,7 +253,7 @@ private fun ProfileItem(
             Icon(
                 imageVector = profileIcon(profile.profileType),
                 contentDescription = null,
-                tint = if (isActive) NeonGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -268,7 +265,7 @@ private fun ProfileItem(
                 text = profileDisplayName(profile),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                color = if (isActive) NeonGreen else MaterialTheme.colorScheme.onSurface
+                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = profileDescription(profile.profileType),
@@ -301,7 +298,7 @@ private fun ProfileItem(
             Icon(
                 Icons.Default.CheckCircle,
                 contentDescription = stringResource(R.string.profile_active),
-                tint = NeonGreen,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -344,7 +341,7 @@ private fun ScheduleItem(
             onCheckedChange = { onToggle() },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = NeonGreen
+                checkedTrackColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -511,7 +508,7 @@ private fun AddScheduleDialog(
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) NeonGreen.copy(alpha = 0.2f)
+                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                                     else MaterialTheme.colorScheme.surfaceVariant
                                 )
                                 .clickable {
@@ -523,7 +520,7 @@ private fun AddScheduleDialog(
                             Text(
                                 text = label,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (isSelected) NeonGreen
+                                color = if (isSelected) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )

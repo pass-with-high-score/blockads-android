@@ -45,7 +45,7 @@ fun OnboardingPageContent(page: OnboardingPage) {
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            page.accentColor.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                             Color.Transparent
                         )
                     )
@@ -56,14 +56,14 @@ fun OnboardingPageContent(page: OnboardingPage) {
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(page.accentColor.copy(alpha = 0.12f)),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = page.icon,
                     contentDescription = null,
                     modifier = Modifier.size(56.dp),
-                    tint = page.accentColor
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }

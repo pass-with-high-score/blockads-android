@@ -138,6 +138,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">ハイコントラスト</string>
     <string name="settings_high_contrast_desc">視認性を向上させるためにコントラストを高めます</string>
+    <string name="settings_accent_color">アクセントカラー</string>
+    <string name="settings_accent_color_desc">アプリのメインカラーをカスタマイズ</string>
+    <string name="accent_green">グリーン</string>
+    <string name="accent_blue">ブルー</string>
+    <string name="accent_purple">パープル</string>
+    <string name="accent_orange">オレンジ</string>
+    <string name="accent_pink">ピンク</string>
+    <string name="accent_teal">ティール</string>
+    <string name="accent_dynamic">ダイナミック (Material You)</string>
+    <string name="accent_dynamic_desc">壁紙の色を使用します</string>
     <string name="settings_connection">接続</string>
     <string name="settings_filter_lists">フィルターリスト (%d 件有効)</string>
     <string name="settings_add_custom_filter">カスタムフィルターリストを追加</string>

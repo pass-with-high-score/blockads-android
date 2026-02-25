@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 
 @Composable
 fun PowerButton(
@@ -59,7 +58,7 @@ fun PowerButton(
     val buttonColor by animateColorAsState(
         targetValue = when {
             isConnecting -> AccentBlue
-            isActive -> NeonGreen
+            isActive -> MaterialTheme.colorScheme.primary
             else -> DangerRed
         },
         animationSpec = tween(500),

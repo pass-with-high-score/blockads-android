@@ -35,7 +35,6 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.DnsLogEntry
 import app.pwhs.blockads.data.FilterListRepository
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber
 import app.pwhs.blockads.util.formatTimestamp
@@ -54,7 +53,7 @@ fun DomainDetailBottomSheet(
     val statusColor = when {
         isWhitelisted -> WhitelistAmber
         entry.isBlocked -> DangerRed
-        else -> NeonGreen
+        else -> MaterialTheme.colorScheme.primary
     }
     val statusText = when {
         isWhitelisted -> stringResource(R.string.log_status_whitelisted)
@@ -175,7 +174,7 @@ fun DomainDetailBottomSheet(
                         Icon(
                             Icons.Default.LockOpen,
                             contentDescription = null,
-                            tint = NeonGreen,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                         Text(

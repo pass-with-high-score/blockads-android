@@ -138,6 +138,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">고대비</string>
     <string name="settings_high_contrast_desc">가시성 향상을 위해 대비를 높입니다</string>
+    <string name="settings_accent_color">강조 색상</string>
+    <string name="settings_accent_color_desc">앱의 기본 색상을 사용자 정의합니다</string>
+    <string name="accent_green">초록</string>
+    <string name="accent_blue">파랑</string>
+    <string name="accent_purple">보라</string>
+    <string name="accent_orange">주황</string>
+    <string name="accent_pink">분홍</string>
+    <string name="accent_teal">청록</string>
+    <string name="accent_dynamic">다이나믹 (Material You)</string>
+    <string name="accent_dynamic_desc">배경화면에서 색상을 가져옵니다</string>
     <string name="settings_connection">연결</string>
     <string name="settings_filter_lists">필터 목록 (활성 %d개)</string>
     <string name="settings_add_custom_filter">사용자 정의 필터 목록 추가</string>

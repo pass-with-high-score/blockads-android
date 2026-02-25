@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.FirewallRule
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
@@ -112,7 +111,7 @@ fun FirewallRuleDialog(
                                 text = String.format("%02d:%02d", startHour, startMinute),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = NeonGreen
+                                color = MaterialTheme.colorScheme.primary
                             )
                             Row {
                                 TextButton(onClick = {
@@ -133,7 +132,7 @@ fun FirewallRuleDialog(
                                 text = String.format("%02d:%02d", endHour, endMinute),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = NeonGreen
+                                color = MaterialTheme.colorScheme.primary
                             )
                             Row {
                                 TextButton(onClick = {
@@ -167,7 +166,7 @@ fun FirewallRuleDialog(
             }) {
                 Text(
                     stringResource(android.R.string.ok),
-                    color = NeonGreen,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -222,7 +221,7 @@ private fun SwitchRow(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = NeonGreen
+                checkedTrackColor = MaterialTheme.colorScheme.primary
             )
         )
     }

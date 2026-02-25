@@ -138,6 +138,16 @@
     <string name="settings_lang_es">Español</string>
     <string name="settings_high_contrast">คอนทราสต์สูง</string>
     <string name="settings_high_contrast_desc">เพิ่มคอนทราสต์เพื่อการมองเห็นที่ดีขึ้น</string>
+    <string name="settings_accent_color">สีเน้น</string>
+    <string name="settings_accent_color_desc">ปรับแต่งสีหลักของแอป</string>
+    <string name="accent_green">เขียว</string>
+    <string name="accent_blue">น้ำเงิน</string>
+    <string name="accent_purple">ม่วง</string>
+    <string name="accent_orange">ส้ม</string>
+    <string name="accent_pink">ชมพู</string>
+    <string name="accent_teal">น้ำเงินเขียว</string>
+    <string name="accent_dynamic">ไดนามิก (Material You)</string>
+    <string name="accent_dynamic_desc">ใช้สีจากวอลเปเปอร์ของคุณ</string>
     <string name="settings_connection">การเชื่อมต่อ</string>
     <string name="settings_filter_lists">รายการตัวกรอง (%d รายการเปิดใช้งาน)</string>
     <string name="settings_add_custom_filter">เพิ่มรายการตัวกรองที่กำหนดเอง</string>

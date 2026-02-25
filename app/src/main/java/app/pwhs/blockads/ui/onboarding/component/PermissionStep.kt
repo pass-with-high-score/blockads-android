@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.pwhs.blockads.ui.theme.NeonGreen
 
 @Composable
 fun PermissionStep(
@@ -38,7 +37,7 @@ fun PermissionStep(
     title: String,
     description: String,
     buttonText: String,
-    accentColor: Color = NeonGreen,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
     isGranted: Boolean = false,
     grantedText: String = "",
     onRequestPermission: () -> Unit
@@ -109,7 +108,7 @@ fun PermissionStep(
                 text = grantedText,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = NeonGreen,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         } else {

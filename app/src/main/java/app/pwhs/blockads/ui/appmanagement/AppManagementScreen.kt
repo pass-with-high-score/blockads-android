@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.appmanagement.data.AppManagementData
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.NeonGreen
 import app.pwhs.blockads.ui.theme.TextSecondary
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.ramcosta.composedestinations.annotation.Destination
@@ -206,7 +205,7 @@ fun AppManagementScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(
-                            color = NeonGreen,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(40.dp),
                             strokeWidth = 3.dp
                         )
@@ -242,7 +241,7 @@ private fun AppManagementItem(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (app.isWhitelisted)
-            NeonGreen.copy(alpha = 0.08f)
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
         else
             Color.Transparent,
         animationSpec = tween(300),
@@ -328,7 +327,7 @@ private fun AppManagementItem(
                 modifier = Modifier.semantics { contentDescription = vpnToggleDescription },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = NeonGreen
+                    checkedTrackColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
