@@ -2,7 +2,6 @@ package app.pwhs.blockads.ui.onboarding
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.data.DnsProvider
 import app.pwhs.blockads.data.DnsProviders
@@ -10,7 +9,6 @@ import app.pwhs.blockads.ui.onboarding.data.ProtectionLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class OnboardingViewModel(
     private val appPrefs: AppPreferences,
@@ -31,20 +29,18 @@ class OnboardingViewModel(
         _selectedDnsProvider.value = provider
     }
 
-    fun completeOnboarding() {
-        viewModelScope.launch {
-            // Save protection level
-            appPrefs.setProtectionLevel(_selectedProtectionLevel.value.name)
+    suspend fun completeOnboarding() {
+        // Save protection level
+        appPrefs.setProtectionLevel(_selectedProtectionLevel.value.name)
 
-            // Save DNS provider
-            val provider = _selectedDnsProvider.value
-            appPrefs.setDnsProviderId(provider.id)
-            appPrefs.setUpstreamDns(provider.ipAddress)
-            appPrefs.setFallbackDns(selectFallbackDns(provider).ipAddress)
+        // Save DNS provider
+        val provider = _selectedDnsProvider.value
+        appPrefs.setDnsProviderId(provider.id)
+        appPrefs.setUpstreamDns(provider.ipAddress)
+        appPrefs.setFallbackDns(selectFallbackDns(provider).ipAddress)
 
-            // Mark onboarding as completed
-            appPrefs.setOnboardingCompleted(true)
-        }
+        // Mark onboarding as completed
+        appPrefs.setOnboardingCompleted(true)
     }
 
     /**
