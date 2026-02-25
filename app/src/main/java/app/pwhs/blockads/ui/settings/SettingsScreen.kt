@@ -79,7 +79,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.AppPreferences
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.AddDomainDialog
-import app.pwhs.blockads.ui.settings.component.DnsProtocolSelector
+
 import app.pwhs.blockads.ui.settings.component.DnsResponseTypeDialog
 import app.pwhs.blockads.ui.settings.component.FrequencyDialog
 import app.pwhs.blockads.ui.settings.component.NotificationDialog
@@ -109,7 +109,7 @@ fun SettingsScreen(
     val upstreamDns by viewModel.upstreamDns.collectAsState()
     val fallbackDns by viewModel.fallbackDns.collectAsState()
     val dnsProtocol by viewModel.dnsProtocol.collectAsState()
-    val dohUrl by viewModel.dohUrl.collectAsState()
+    val customDnsDisplay by viewModel.customDnsDisplay.collectAsState()
     val filterLists by viewModel.filterLists.collectAsState()
     val whitelistDomains by viewModel.whitelistDomains.collectAsState()
 
@@ -131,9 +131,8 @@ fun SettingsScreen(
     val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsState()
 
 
-    var editUpstreamDns by remember(upstreamDns) { mutableStateOf(upstreamDns) }
+    var editCustomDns by remember(customDnsDisplay) { mutableStateOf(customDnsDisplay) }
     var editFallbackDns by remember(fallbackDns) { mutableStateOf(fallbackDns) }
-    var editDohUrl by remember(dohUrl) { mutableStateOf(dohUrl) }
     var showAddDomainDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -267,130 +266,130 @@ fun SettingsScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        // DNS Protocol Selector
-                        Text(
-                            stringResource(R.string.settings_dns_protocol),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        DnsProtocolSelector(
-                            selectedProtocol = dnsProtocol,
-                            onProtocolSelected = { viewModel.setDnsProtocol(it) }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Show DoH URL input when DoH is selected
-                        if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOH) {
+                        // Unified Custom DNS Input
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Dns,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                stringResource(R.string.settings_doh_server_url),
+                                stringResource(R.string.settings_custom_dns_server),
                                 style = MaterialTheme.typography.titleSmall
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            stringResource(R.string.settings_custom_dns_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                            // Validate DoH URL
-                            val isValidDohUrl = editDohUrl.isNotBlank() &&
-                                    editDohUrl.startsWith("https://", ignoreCase = true)
-                            val showDohError = editDohUrl.isNotBlank() && !isValidDohUrl
-
-                            OutlinedTextField(
-                                value = editDohUrl,
-                                onValueChange = { editDohUrl = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text(stringResource(R.string.settings_doh_url_placeholder)) },
-                                singleLine = true,
-                                isError = showDohError,
-                                supportingText = if (showDohError) {
-                                    { Text("DoH URL must start with https://") }
-                                } else null,
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
-                                        alpha = 0.3f
-                                    )
-                                )
-                            )
-                            if (editDohUrl != dohUrl && isValidDohUrl) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(
-                                    onClick = { viewModel.setDohUrl(editDohUrl) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(
-                                            alpha = 0.15f
-                                        ),
-                                        contentColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) { Text(stringResource(R.string.settings_save_doh_url)) }
+                        // Detect protocol from current input
+                        val detectedProtocol by remember {
+                            derivedStateOf {
+                                val input = editCustomDns.trim()
+                                when {
+                                    input.startsWith("https://", ignoreCase = true) -> app.pwhs.blockads.data.DnsProtocol.DOH
+                                    input.startsWith("tls://", ignoreCase = true) -> app.pwhs.blockads.data.DnsProtocol.DOT
+                                    input.isNotBlank() -> app.pwhs.blockads.data.DnsProtocol.PLAIN
+                                    else -> null
+                                }
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
 
-                        // Show DNS server inputs for Plain DNS and DoT
-                        if (dnsProtocol != app.pwhs.blockads.data.DnsProtocol.DOH) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Dns,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT)
-                                        stringResource(R.string.settings_dot_server)
-                                    else
-                                        stringResource(R.string.settings_upstream_dns),
-                                    style = MaterialTheme.typography.titleSmall
-                                )
+                        val isValidInput by remember {
+                            derivedStateOf {
+                                val input = editCustomDns.trim()
+                                when {
+                                    input.isBlank() -> false
+                                    input.startsWith("https://", ignoreCase = true) -> input.length > 8
+                                    input.startsWith("tls://", ignoreCase = true) -> input.length > 6
+                                    else -> input.matches(Regex("^[\\d.]+$")) || input.matches(Regex("^[a-zA-Z0-9.-]+$"))
+                                }
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
-                            OutlinedTextField(
-                                value = editUpstreamDns,
-                                onValueChange = { editUpstreamDns = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                placeholder = {
-                                    Text(
-                                        if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT)
-                                            stringResource(R.string.settings_dot_server_placeholder)
-                                        else
-                                            stringResource(R.string.settings_upstream_dns_placeholder)
-                                    )
-                                },
-                                singleLine = true,
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
-                                        alpha = 0.3f
-                                    )
+                        }
+
+                        OutlinedTextField(
+                            value = editCustomDns,
+                            onValueChange = { editCustomDns = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.settings_custom_dns_placeholder)) },
+                            singleLine = true,
+                            isError = editCustomDns.isNotBlank() && !isValidInput,
+                            supportingText = if (editCustomDns.isNotBlank() && !isValidInput) {
+                                { Text(stringResource(R.string.settings_invalid_dns_input)) }
+                            } else null,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(
+                                    alpha = 0.3f
                                 )
                             )
-                            if (
-                                dnsProtocol == app.pwhs.blockads.data.DnsProtocol.DOT ||
-                                editUpstreamDns != upstreamDns
-                            ) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(
-                                    onClick = { viewModel.setUpstreamDns(editUpstreamDns) },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(
-                                            alpha = 0.15f
-                                        ),
-                                        contentColor = MaterialTheme.colorScheme.primary
-                                    )
-                                ) { Text(stringResource(R.string.settings_save_dns)) }
-                            }
+                        )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                        // Protocol detection badge
+                        if (detectedProtocol != null && editCustomDns.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                val (icon, label, color) = when (detectedProtocol) {
+                                    app.pwhs.blockads.data.DnsProtocol.DOH -> Triple(
+                                        Icons.Default.Security,
+                                        stringResource(R.string.settings_detected_doh),
+                                        MaterialTheme.colorScheme.primary
+                                    )
+                                    app.pwhs.blockads.data.DnsProtocol.DOT -> Triple(
+                                        Icons.Default.Security,
+                                        stringResource(R.string.settings_detected_dot),
+                                        MaterialTheme.colorScheme.tertiary
+                                    )
+                                    else -> Triple(
+                                        Icons.Default.Wifi,
+                                        stringResource(R.string.settings_detected_plain),
+                                        TextSecondary
+                                    )
+                                }
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = color,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = color
+                                )
+                            }
+                        }
+
+                        // Save button when input has changed
+                        if (editCustomDns != customDnsDisplay && isValidInput) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { viewModel.setCustomDnsServer(editCustomDns) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(
+                                        alpha = 0.15f
+                                    ),
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) { Text(stringResource(R.string.settings_save_custom_dns)) }
                         }
 
                         // Fallback DNS (only for Plain DNS)
                         if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.PLAIN) {
+                            Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 stringResource(R.string.settings_fallback_dns),
                                 style = MaterialTheme.typography.titleSmall

@@ -189,6 +189,14 @@
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">เซิร์ฟเวอร์ DNS ต้นทาง</string>
     <string name="settings_fallback_dns">เซิร์ฟเวอร์ DNS สำรอง</string>
+    <string name="settings_custom_dns_server">เซิร์ฟเวอร์ DNS ที่กำหนดเอง</string>
+    <string name="settings_custom_dns_hint">ป้อน IP สำหรับ DNS ธรรมดา, https:// สำหรับ DoH หรือ tls:// สำหรับ DoT</string>
+    <string name="settings_detected_plain">DNS ธรรมดา</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_protocol">ตรวจพบ: %s</string>
+    <string name="settings_invalid_dns_input">ที่อยู่เซิร์ฟเวอร์ DNS ไม่ถูกต้อง</string>
+    <string name="settings_save_custom_dns">บันทึก DNS</string>
     <string name="settings_dns_response_type">ประเภทการตอบกลับ DNS</string>
     <string name="settings_dns_response_type_desc">ประเภทการตอบกลับสำหรับโดเมนที่ถูกบล็อก</string>
     <string name="dns_response_nxdomain_desc">ไม่มีโดเมน (มาตรฐาน)</string>

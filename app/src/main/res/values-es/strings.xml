@@ -189,6 +189,14 @@
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Servidor DNS principal</string>
     <string name="settings_fallback_dns">Servidor DNS de respaldo</string>
+    <string name="settings_custom_dns_server">Servidor DNS personalizado</string>
+    <string name="settings_custom_dns_hint">Introduce IP para DNS simple, https:// para DoH o tls:// para DoT</string>
+    <string name="settings_detected_plain">DNS simple</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_protocol">Detectado: %s</string>
+    <string name="settings_invalid_dns_input">Dirección de servidor DNS no válida</string>
+    <string name="settings_save_custom_dns">Guardar DNS</string>
     <string name="settings_dns_response_type">Tipo de respuesta DNS</string>
     <string name="settings_dns_response_type_desc">Tipo de respuesta para dominios bloqueados</string>
     <string name="dns_response_nxdomain_desc">El dominio no existe (estándar)</string>

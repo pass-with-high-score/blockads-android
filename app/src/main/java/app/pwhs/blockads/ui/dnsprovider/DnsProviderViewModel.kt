@@ -75,9 +75,23 @@ class DnsProviderViewModel(
     }
 
     fun setCustomDns(upstream: String, fallback: String) {
+        val trimmed = upstream.trim()
         viewModelScope.launch {
             appPrefs.setDnsProviderId(null)
-            appPrefs.setUpstreamDns(upstream)
+            when {
+                trimmed.startsWith("https://", ignoreCase = true) -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOH)
+                    appPrefs.setDohUrl(trimmed)
+                }
+                trimmed.startsWith("tls://", ignoreCase = true) -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOT)
+                    appPrefs.setUpstreamDns(trimmed.removePrefix("tls://").removePrefix("TLS://"))
+                }
+                else -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.PLAIN)
+                    appPrefs.setUpstreamDns(trimmed)
+                }
+            }
             appPrefs.setFallbackDns(fallback)
             AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
         }

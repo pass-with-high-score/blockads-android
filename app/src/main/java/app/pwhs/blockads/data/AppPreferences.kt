@@ -43,7 +43,6 @@ class AppPreferences(private val context: Context) {
             booleanPreferencesKey("milestone_notifications_enabled")
         private val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
         private val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
-        private val KEY_HIGH_CONTRAST = booleanPreferencesKey("high_contrast")
         private val KEY_ACCENT_COLOR = stringPreferencesKey("accent_color")
         private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
 
@@ -193,11 +192,6 @@ class AppPreferences(private val context: Context) {
     val activeProfileId: Flow<Long> =
         context.dataStore.data.map { prefs ->
             prefs[KEY_ACTIVE_PROFILE_ID] ?: -1L
-        }
-
-    val highContrast: Flow<Boolean> =
-        context.dataStore.data.map { prefs ->
-            prefs[KEY_HIGH_CONTRAST] ?: false
         }
 
     val accentColor: Flow<String> =
@@ -367,12 +361,6 @@ class AppPreferences(private val context: Context) {
     suspend fun setActiveProfileId(id: Long) {
         context.dataStore.edit { prefs ->
             prefs[KEY_ACTIVE_PROFILE_ID] = id
-        }
-    }
-
-    suspend fun setHighContrast(enabled: Boolean) {
-        context.dataStore.edit { prefs ->
-            prefs[KEY_HIGH_CONTRAST] = enabled
         }
     }
 

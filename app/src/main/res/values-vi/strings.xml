@@ -219,6 +219,14 @@
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">Máy chủ DNS</string>
     <string name="settings_fallback_dns">Máy chủ DNS dự phòng</string>
+    <string name="settings_custom_dns_server">Máy chủ DNS tùy chỉnh</string>
+    <string name="settings_custom_dns_hint">Nhập IP cho DNS thường, https:// cho DoH, hoặc tls:// cho DoT</string>
+    <string name="settings_detected_plain">DNS thường</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_protocol">Đã phát hiện: %s</string>
+    <string name="settings_invalid_dns_input">Địa chỉ máy chủ DNS không hợp lệ</string>
+    <string name="settings_save_custom_dns">Lưu DNS</string>
     <string name="settings_dns_response_type">Loại phản hồi DNS</string>
     <string name="settings_dns_response_type_desc">Loại phản hồi cho tên miền bị chặn</string>
     <string name="dns_response_nxdomain_desc">Tên miền không tồn tại (chuẩn)</string>

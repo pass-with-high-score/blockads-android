@@ -26,9 +26,6 @@ class AppearanceViewModel(
             AppPreferences.LANGUAGE_SYSTEM
         )
 
-    val highContrast: StateFlow<Boolean> = appPrefs.highContrast
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
     val accentColor: StateFlow<String> = appPrefs.accentColor
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.ACCENT_GREEN)
 
@@ -44,10 +41,6 @@ class AppearanceViewModel(
                 (getApplication<Application>().applicationContext as? Activity)?.recreate()
             }
         }
-    }
-
-    fun setHighContrast(enabled: Boolean) {
-        viewModelScope.launch { appPrefs.setHighContrast(enabled) }
     }
 
     fun setAccentColor(color: String) {

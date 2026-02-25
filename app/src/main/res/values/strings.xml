@@ -222,6 +222,15 @@
     <string name="settings_upstream_dns_placeholder" translatable="false">8.8.8.8</string>
     <string name="settings_fallback_dns">Fallback DNS Server</string>
     <string name="settings_fallback_dns_placeholder" translatable="false">1.1.1.1</string>
+    <string name="settings_custom_dns_server">Custom DNS Server</string>
+    <string name="settings_custom_dns_placeholder" translatable="false">8.8.8.8, https://…, tls://…</string>
+    <string name="settings_custom_dns_hint">Enter IP for Plain DNS, https:// for DoH, or tls:// for DoT</string>
+    <string name="settings_detected_plain">Plain DNS</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_protocol">Detected: %s</string>
+    <string name="settings_invalid_dns_input">Invalid DNS server address</string>
+    <string name="settings_save_custom_dns">Save DNS</string>
     <string name="settings_dns_response_type">DNS response type</string>
     <string name="settings_dns_response_type_desc">Response type for blocked domains</string>
     <string name="dns_response_nxdomain" translatable="false">NXDOMAIN</string>

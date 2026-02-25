@@ -75,7 +75,6 @@ fun AppearanceScreen(
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
-    val highContrast by viewModel.highContrast.collectAsState()
     val accentColor by viewModel.accentColor.collectAsState()
 
     Scaffold(
@@ -350,26 +349,6 @@ fun AppearanceScreen(
                         }
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Accessibility ──────────────────────────────────────
-            SectionHeader(
-                title = stringResource(R.string.settings_high_contrast),
-                icon = Icons.Default.Contrast
-            )
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                SettingsToggleItem(
-                    icon = Icons.Default.Contrast,
-                    title = stringResource(R.string.settings_high_contrast),
-                    subtitle = stringResource(R.string.settings_high_contrast_desc),
-                    isChecked = highContrast,
-                    onCheckedChange = { viewModel.setHighContrast(it) }
-                )
             }
 
             Spacer(modifier = Modifier.height(200.dp))

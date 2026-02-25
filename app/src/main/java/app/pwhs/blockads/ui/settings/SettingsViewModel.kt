@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -80,6 +81,29 @@ class SettingsViewModel(
             SharingStarted.WhileSubscribed(5000),
             AppPreferences.DEFAULT_DOH_URL
         )
+
+    /**
+     * Unified display value for the custom DNS input.
+     * Shows the current DNS server in the format the user originally entered:
+     * - Plain DNS: IP address (e.g., "8.8.8.8")
+     * - DoH: full URL (e.g., "https://dns.google/dns-query")
+     * - DoT: tls:// prefix + server (e.g., "tls://dns.google")
+     */
+    val customDnsDisplay: StateFlow<String> = combine(
+        appPrefs.dnsProtocol,
+        appPrefs.upstreamDns,
+        appPrefs.dohUrl
+    ) { protocol, upstream, doh ->
+        when (protocol) {
+            app.pwhs.blockads.data.DnsProtocol.DOH -> doh
+            app.pwhs.blockads.data.DnsProtocol.DOT -> "tls://$upstream"
+            app.pwhs.blockads.data.DnsProtocol.PLAIN -> upstream
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        AppPreferences.DEFAULT_UPSTREAM_DNS
+    )
 
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -136,8 +160,6 @@ class SettingsViewModel(
     val milestoneNotificationsEnabled: StateFlow<Boolean> = appPrefs.milestoneNotificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    val highContrast: StateFlow<Boolean> = appPrefs.highContrast
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -171,6 +193,33 @@ class SettingsViewModel(
 
     fun setDohUrl(url: String) {
         viewModelScope.launch { appPrefs.setDohUrl(url) }
+    }
+
+    /**
+     * Set custom DNS server from unified input. Auto-detects protocol:
+     * - https://... → DoH
+     * - tls://...   → DoT
+     * - otherwise   → Plain DNS (IP address)
+     */
+    fun setCustomDnsServer(input: String) {
+        val trimmed = input.trim()
+        viewModelScope.launch {
+            when {
+                trimmed.startsWith("https://", ignoreCase = true) -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOH)
+                    appPrefs.setDohUrl(trimmed)
+                }
+                trimmed.startsWith("tls://", ignoreCase = true) -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOT)
+                    appPrefs.setUpstreamDns(trimmed.removePrefix("tls://").removePrefix("TLS://"))
+                }
+                else -> {
+                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.PLAIN)
+                    appPrefs.setUpstreamDns(trimmed)
+                }
+            }
+            requestVpnRestart()
+        }
     }
 
     fun setThemeMode(mode: String) {
@@ -245,12 +294,6 @@ class SettingsViewModel(
         }
     }
 
-    fun setHighContrast(enabled: Boolean) {
-        viewModelScope.launch {
-            appPrefs.setHighContrast(enabled)
-        }
-    }
-
     fun setDailySummaryEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setDailySummaryEnabled(enabled)
@@ -318,7 +361,6 @@ class SettingsViewModel(
                     dailySummaryEnabled = appPrefs.dailySummaryEnabled.first(),
                     milestoneNotificationsEnabled = appPrefs.milestoneNotificationsEnabled.first(),
                     activeProfileType = activeProfile?.profileType ?: "",
-                    highContrast = appPrefs.highContrast.first(),
                     firewallEnabled = appPrefs.firewallEnabled.first(),
                     filterLists = filterLists.value.map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
@@ -385,7 +427,6 @@ class SettingsViewModel(
                     DailySummaryScheduler.cancelDailySummary(getApplication())
                 }
                 appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
-                appPrefs.setHighContrast(backup.highContrast)
                 appPrefs.setFirewallEnabled(backup.firewallEnabled)
 
                 // Restore active profile by type (applies filter config + prefs atomically)

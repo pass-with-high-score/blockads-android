@@ -54,27 +54,6 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White
 )
 
-private val HighContrastColorScheme = darkColorScheme(
-    primary = HighContrastPrimary,
-    onPrimary = Color.Black,
-    primaryContainer = HighContrastPrimaryDim,
-    onPrimaryContainer = Color.White,
-    secondary = HighContrastSecondary,
-    onSecondary = Color.Black,
-    secondaryContainer = HighContrastSecondary,
-    onSecondaryContainer = Color.Black,
-    tertiary = HighContrastError,
-    background = HighContrastBackground,
-    onBackground = HighContrastTextPrimary,
-    surface = HighContrastSurface,
-    onSurface = HighContrastTextPrimary,
-    surfaceVariant = HighContrastSurfaceVariant,
-    onSurfaceVariant = HighContrastTextSecondary,
-    outline = HighContrastTextSecondary,
-    error = HighContrastError,
-    onError = Color.White
-)
-
 /**
  * Returns a pair of (primary, primaryDim) colors for the given accent color key.
  */
@@ -92,7 +71,6 @@ private fun getAccentColors(accentColor: String): Pair<Color, Color> {
 @Composable
 fun BlockadsTheme(
     themeMode: String = "system",
-    highContrast: Boolean = false,
     accentColor: String = AppPreferences.ACCENT_GREEN,
     content: @Composable () -> Unit
 ) {
@@ -102,7 +80,6 @@ fun BlockadsTheme(
         else -> isSystemInDarkTheme()
     }
     val colorScheme = when {
-        highContrast -> HighContrastColorScheme
         // Dynamic Color (Material You) — Android 12+
         accentColor == AppPreferences.ACCENT_DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

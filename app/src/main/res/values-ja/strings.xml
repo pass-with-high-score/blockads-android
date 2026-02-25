@@ -189,6 +189,14 @@
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_upstream_dns">上流DNSサーバー</string>
     <string name="settings_fallback_dns">フォールバックDNSサーバー</string>
+    <string name="settings_custom_dns_server">カスタムDNSサーバー</string>
+    <string name="settings_custom_dns_hint">プレーンDNSにはIP、DoHにはhttps://、DoTにはtls://を入力</string>
+    <string name="settings_detected_plain">プレーンDNS</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_protocol">検出: %s</string>
+    <string name="settings_invalid_dns_input">無効なDNSサーバーアドレス</string>
+    <string name="settings_save_custom_dns">DNSを保存</string>
     <string name="settings_dns_response_type">DNS応答タイプ</string>
     <string name="settings_dns_response_type_desc">ブロックされたドメインの応答タイプ</string>
     <string name="dns_response_nxdomain_desc">ドメインが存在しません (標準)</string>
