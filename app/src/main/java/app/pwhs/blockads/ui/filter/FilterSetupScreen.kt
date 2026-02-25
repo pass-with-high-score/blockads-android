@@ -80,7 +80,31 @@ fun FilterSetupScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
-                )
+                ),
+                actions = {
+                    TextButton(
+                        onClick = { viewModel.updateAllFilters() },
+                        enabled = !isUpdatingFilter
+                    ) {
+                        if (isUpdatingFilter) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.settings_updating))
+                        } else {
+                            Icon(
+                                Icons.Default.CloudDownload,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.settings_update_all))
+                        }
+                    }
+                }
             )
 
         }
@@ -103,7 +127,7 @@ fun FilterSetupScreen(
                 val customFilters = filterLists.filter { !it.isBuiltIn }
 
                 if (adFilters.isNotEmpty()) {
-                    SectionHeader(stringResource(R.string.filter_category_ad))
+                    SectionHeader(stringResource(R.string.filter_category_ad), activeCount = adFilters.count { it.isEnabled })
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(16.dp),
@@ -130,7 +154,7 @@ fun FilterSetupScreen(
                 }
 
                 if (securityFilters.isNotEmpty()) {
-                    SectionHeader(stringResource(R.string.filter_category_security))
+                    SectionHeader(stringResource(R.string.filter_category_security), activeCount = securityFilters.count { it.isEnabled })
                     Card(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(16.dp),
@@ -157,7 +181,7 @@ fun FilterSetupScreen(
                 }
 
                 // Custom filters section
-                SectionHeader(stringResource(R.string.filter_custom))
+                SectionHeader(stringResource(R.string.filter_custom), activeCount = customFilters.count { it.isEnabled })
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp),
@@ -220,35 +244,6 @@ fun FilterSetupScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.custom_rules))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Update all button
-                Button(
-                    onClick = { viewModel.updateAllFilters() },
-                    enabled = !isUpdatingFilter,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    if (isUpdatingFilter) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_updating))
-                    } else {
-                        Icon(
-                            Icons.Default.CloudDownload,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.settings_update_all))
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(200.dp))

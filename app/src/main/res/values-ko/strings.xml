@@ -442,4 +442,5 @@
     <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
+    <string name="filter_setup_active_count">%1$d active</string>
 </resources>
