@@ -32,6 +32,12 @@ class FilterSetupViewModel(
     private val _isUpdatingFilter = MutableStateFlow(false)
     val isUpdatingFilter: StateFlow<Boolean> = _isUpdatingFilter.asStateFlow()
 
+    private val _isValidatingUrl = MutableStateFlow(false)
+    val isValidatingUrl: StateFlow<Boolean> = _isValidatingUrl.asStateFlow()
+
+    private val _filterAddedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val filterAddedEvent: SharedFlow<Unit> = _filterAddedEvent.asSharedFlow()
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -50,10 +56,33 @@ class FilterSetupViewModel(
 
     fun addFilterList(name: String, url: String) {
         viewModelScope.launch {
+            val trimmedUrl = url.trim()
+
+            // Check duplicate
+            val existing = filterListDao.getByUrl(trimmedUrl)
+            if (existing != null) {
+                _events.toast(R.string.filter_error_duplicate_url)
+                return@launch
+            }
+
+            // Validate URL content is a valid filter list
+            _isValidatingUrl.value = true
+            val validation = filterRepo.validateFilterUrl(trimmedUrl)
+            _isValidatingUrl.value = false
+
+            if (validation.isFailure) {
+                _events.toast(R.string.filter_error_invalid_content)
+                return@launch
+            }
+
             filterListDao.insert(
-                FilterList(name = name, url = url, isEnabled = true, isBuiltIn = false)
+                FilterList(name = name, url = trimmedUrl, isEnabled = true, isBuiltIn = false)
             )
             _events.toast(R.string.settings_add, listOf(": $name"))
+            _filterAddedEvent.tryEmit(Unit)
+
+            // Immediately load/update all filters to fetch content from the new URL
+            filterRepo.loadAllEnabledFilters()
             AdBlockVpnService.requestRestart(application.applicationContext)
         }
     }

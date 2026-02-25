@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +67,12 @@ fun FilterSetupScreen(
     var showAddDialog by remember { mutableStateOf(false) }
 
     UiEventEffect(viewModel.events)
+
+    LaunchedEffect(Unit) {
+        viewModel.filterAddedEvent.collect {
+            showAddDialog = false
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -253,13 +260,15 @@ fun FilterSetupScreen(
         }
 
         // Add filter dialog
+        val isValidatingUrl by viewModel.isValidatingUrl.collectAsState()
         if (showAddDialog) {
             AddFilterDialog(
-                onDismiss = { showAddDialog = false },
+                onDismiss = { if (!isValidatingUrl) showAddDialog = false },
                 onAdd = { name, url ->
                     viewModel.addFilterList(name, url)
-                    showAddDialog = false
-                }
+                },
+                existingUrls = filterLists.map { it.url },
+                isValidating = isValidatingUrl
             )
         }
     }

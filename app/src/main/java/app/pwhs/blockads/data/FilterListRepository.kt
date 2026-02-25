@@ -560,5 +560,58 @@ class FilterListRepository(
         trieDir.deleteRecursively()
         File(context.filesDir, CACHE_DIR).deleteRecursively()
     }
+
+    /**
+     * Validate that a URL points to a valid filter/hosts file.
+     * Downloads a small sample (up to 16KB) and checks if it contains
+     * enough valid filter lines.
+     *
+     * @return Result.success(true) if valid, Result.failure with an appropriate exception otherwise.
+     */
+    suspend fun validateFilterUrl(url: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val channel = client.get(url).bodyAsChannel()
+            val buffer = ByteArray(16_384) // Read at most 16KB for validation
+            var totalRead = 0
+            val outputStream = java.io.ByteArrayOutputStream()
+
+            while (!channel.isClosedForRead && totalRead < buffer.size) {
+                val bytesRead = channel.readAvailable(buffer, totalRead, buffer.size - totalRead)
+                if (bytesRead <= 0) break
+                outputStream.write(buffer, totalRead, bytesRead)
+                totalRead += bytesRead
+            }
+
+            val sample = outputStream.toString(Charsets.UTF_8.name())
+            val lines = sample.lines()
+
+            var validFilterLines = 0
+            val minValidLines = 3
+
+            for (line in lines) {
+                val trimmed = line.trim()
+                if (trimmed.isEmpty() || trimmed.startsWith('#') || trimmed.startsWith('!')) continue
+
+                val isValidLine = when {
+                    trimmed.startsWith("0.0.0.0 ") || trimmed.startsWith("127.0.0.1 ") -> true
+                    trimmed.startsWith("||") && trimmed.endsWith("^") -> true
+                    trimmed.contains('.') && !trimmed.contains(' ') && !trimmed.contains('/') 
+                        && !trimmed.contains('<') && !trimmed.contains('>') -> true
+                    else -> false
+                }
+
+                if (isValidLine) {
+                    validFilterLines++
+                    if (validFilterLines >= minValidLines) {
+                        return@withContext Result.success(true)
+                    }
+                }
+            }
+
+            Result.failure(IllegalArgumentException("Not a valid filter list"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 

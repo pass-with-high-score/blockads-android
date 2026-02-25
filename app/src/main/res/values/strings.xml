@@ -512,4 +512,7 @@
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="filter_setup_active_count">%1$d active</string>
     <string name="copied_url">Copied URL</string>
+    <string name="filter_error_invalid_url">Please enter a valid URL (http:// or https://)</string>
+    <string name="filter_error_duplicate_url">This filter list already exists</string>
+    <string name="filter_error_invalid_content">URL does not contain a valid filter list</string>
 </resources>

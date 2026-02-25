@@ -505,6 +505,9 @@
     <string name="settings_rate_app">Đánh giá ứng dụng</string>
     <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
     <string name="filter_setup_active_count">%1$d active</string>
-    <string name="copied_url">Copied URL</string>
+    <string name="copied_url">Đã sao chép URL</string>
+    <string name="filter_error_invalid_url">Vui lòng nhập URL hợp lệ (http:// hoặc https://)</string>
+    <string name="filter_error_duplicate_url">Danh sách bộ lọc này đã tồn tại</string>
+    <string name="filter_error_invalid_content">URL không chứa danh sách bộ lọc hợp lệ</string>
 
 </resources>
