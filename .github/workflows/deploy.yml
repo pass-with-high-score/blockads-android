@@ -69,9 +69,6 @@ jobs:
       - name: Deploy to internal track
         run: bundle exec fastlane internal
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease
-
       # Artifacts
       - name: Upload release AAB & APK
         uses: actions/upload-artifact@v4
