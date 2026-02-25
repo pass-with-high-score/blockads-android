@@ -72,6 +72,8 @@
     <string name="whitelist_apps_search">アプリを検索…</string>
     <string name="whitelist_apps_empty">インストール済みアプリはありません</string>
     <string name="whitelist_apps_count">%d 個のアプリがホワイトリストに登録済み</string>
+    <string name="whitelist_tab_user">ユーザーアプリ</string>
+    <string name="whitelist_tab_system">システムアプリ</string>
     <string name="whitelist_domains_title">ホワイトリスト登録済みドメイン</string>
     <string name="whitelist_domains_subtitle">これらのドメインはブロックされません</string>
     <string name="whitelist_domains_add">ドメインを追加</string>

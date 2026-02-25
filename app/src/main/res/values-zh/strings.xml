@@ -72,6 +72,8 @@
     <string name="whitelist_apps_search">搜索应用…</string>
     <string name="whitelist_apps_empty">没有已安装的应用</string>
     <string name="whitelist_apps_count">%d 个应用已加入白名单</string>
+    <string name="whitelist_tab_user">用户应用</string>
+    <string name="whitelist_tab_system">系统应用</string>
     <string name="whitelist_domains_title">已加入白名单的域名</string>
     <string name="whitelist_domains_subtitle">这些域名不会被拦截</string>
     <string name="whitelist_domains_add">添加域名</string>

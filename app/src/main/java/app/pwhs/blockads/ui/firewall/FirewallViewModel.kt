@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.firewall
 
 import android.app.Application
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
@@ -60,10 +61,12 @@ class FirewallViewModel(
                     .filter { it.packageName in launchablePackages }
                     .filter { it.packageName != application.applicationContext.packageName }
                     .map { appInfo ->
+                        val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                         AppInfoData(
                             packageName = appInfo.packageName,
                             label = appInfo.loadLabel(pm).toString(),
-                            icon = appInfo.loadIcon(pm)
+                            icon = appInfo.loadIcon(pm),
+                            isSystemApp = isSystem
                         )
                     }
                     .sortedBy { it.label.lowercase() }

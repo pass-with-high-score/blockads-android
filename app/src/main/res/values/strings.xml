@@ -90,6 +90,8 @@
     <string name="whitelist_apps_search">Search apps…</string>
     <string name="whitelist_apps_empty">No apps installed</string>
     <string name="whitelist_apps_count">%d apps whitelisted</string>
+    <string name="whitelist_tab_user">User Apps</string>
+    <string name="whitelist_tab_system">System Apps</string>
 
     <!-- Whitelist Domains -->
     <string name="whitelist_domains_title">Whitelisted Domains</string>

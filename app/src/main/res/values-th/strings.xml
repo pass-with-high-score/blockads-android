@@ -72,6 +72,8 @@
     <string name="whitelist_apps_search">ค้นหาแอป…</string>
     <string name="whitelist_apps_empty">ไม่มีแอปที่ติดตั้ง</string>
     <string name="whitelist_apps_count">%d แอปอยู่ในไวท์ลิสต์</string>
+    <string name="whitelist_tab_user">แอปผู้ใช้</string>
+    <string name="whitelist_tab_system">แอประบบ</string>
     <string name="whitelist_domains_title">โดเมนในไวท์ลิสต์</string>
     <string name="whitelist_domains_subtitle">โดเมนเหล่านี้จะไม่ถูกบล็อก</string>
     <string name="whitelist_domains_add">เพิ่มโดเมน</string>

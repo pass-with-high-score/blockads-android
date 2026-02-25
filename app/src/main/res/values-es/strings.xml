@@ -72,6 +72,8 @@
     <string name="whitelist_apps_search">Buscar aplicaciones…</string>
     <string name="whitelist_apps_empty">No hay aplicaciones instaladas</string>
     <string name="whitelist_apps_count">%d aplicaciones en lista blanca</string>
+    <string name="whitelist_tab_user">Apps de usuario</string>
+    <string name="whitelist_tab_system">Apps del sistema</string>
     <string name="whitelist_domains_title">Dominios en lista blanca</string>
     <string name="whitelist_domains_subtitle">Estos dominios no serán bloqueados</string>
     <string name="whitelist_domains_add">Añadir dominio</string>

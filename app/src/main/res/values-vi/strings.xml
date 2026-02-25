@@ -90,6 +90,8 @@
     <string name="whitelist_apps_search">Tìm ứng dụng…</string>
     <string name="whitelist_apps_empty">Không có ứng dụng nào</string>
     <string name="whitelist_apps_count">%d ứng dụng được phép</string>
+    <string name="whitelist_tab_user">Ứng dụng người dùng</string>
+    <string name="whitelist_tab_system">Ứng dụng hệ thống</string>
 
     <!-- Whitelist Domains -->
     <string name="whitelist_domains_title">Tên miền được phép</string>

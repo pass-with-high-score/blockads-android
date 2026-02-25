@@ -72,6 +72,8 @@
     <string name="whitelist_apps_search">앱 검색…</string>
     <string name="whitelist_apps_empty">설치된 앱이 없습니다</string>
     <string name="whitelist_apps_count">%d개 앱이 허용 목록에 있습니다</string>
+    <string name="whitelist_tab_user">사용자 앱</string>
+    <string name="whitelist_tab_system">시스템 앱</string>
     <string name="whitelist_domains_title">허용 목록 도메인</string>
     <string name="whitelist_domains_subtitle">이 도메인은 절대 차단되지 않습니다</string>
     <string name="whitelist_domains_add">도메인 추가</string>

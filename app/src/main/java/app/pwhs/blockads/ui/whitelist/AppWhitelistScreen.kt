@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +22,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -30,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +51,7 @@ import app.pwhs.blockads.ui.whitelist.component.AppListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Destination<RootGraph>
@@ -57,13 +66,20 @@ fun AppWhitelistScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredApps = remember(searchQuery, installedApps) {
-        if (searchQuery.isBlank()) installedApps
-        else installedApps.filter {
-            it.label.contains(searchQuery, ignoreCase = true) ||
-                    it.packageName.contains(searchQuery, ignoreCase = true)
-        }
+    val userApps = remember(installedApps) {
+        installedApps.filter { !it.isSystemApp }
     }
+    val systemApps = remember(installedApps) {
+        installedApps.filter { it.isSystemApp }
+    }
+
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val coroutineScope = rememberCoroutineScope()
+
+    val tabs = listOf(
+        stringResource(R.string.whitelist_tab_user),
+        stringResource(R.string.whitelist_tab_system)
+    )
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -131,6 +147,35 @@ fun AppWhitelistScreen(
                 singleLine = true
             )
 
+            // Tabs
+            SecondaryTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.primary,
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    val count = when (index) {
+                        0 -> userApps.size
+                        else -> systemApps.size
+                    }
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        text = {
+                            Text(
+                                "$title ($count)",
+                                fontWeight = if (pagerState.currentPage == index)
+                                    FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    )
+                }
+            }
+
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -151,23 +196,51 @@ fun AppWhitelistScreen(
                     }
                 }
             } else {
-                // App list
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    items(filteredApps, key = { it.packageName }) { app ->
-                        val isWhitelisted = app.packageName in whitelistedApps
-                        AppListItem(
-                            app = app,
-                            isWhitelisted = isWhitelisted,
-                            onToggle = { viewModel.toggleApp(app.packageName) }
-                        )
+                // Pager content
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    val appsForPage = when (page) {
+                        0 -> userApps
+                        else -> systemApps
+                    }
+                    val filteredApps = remember(searchQuery, appsForPage) {
+                        if (searchQuery.isBlank()) appsForPage
+                        else appsForPage.filter {
+                            it.label.contains(searchQuery, ignoreCase = true) ||
+                                    it.packageName.contains(searchQuery, ignoreCase = true)
+                        }
+                    }
+
+                    if (filteredApps.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                stringResource(R.string.whitelist_apps_empty),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            items(filteredApps, key = { it.packageName }) { app ->
+                                val isWhitelisted = app.packageName in whitelistedApps
+                                AppListItem(
+                                    app = app,
+                                    isWhitelisted = isWhitelisted,
+                                    onToggle = { viewModel.toggleApp(app.packageName) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
-
