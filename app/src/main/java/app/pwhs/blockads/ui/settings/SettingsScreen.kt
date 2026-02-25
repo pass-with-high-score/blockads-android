@@ -293,8 +293,16 @@ fun SettingsScreen(
                             derivedStateOf {
                                 val input = editCustomDns.trim()
                                 when {
-                                    input.startsWith("https://", ignoreCase = true) -> app.pwhs.blockads.data.DnsProtocol.DOH
-                                    input.startsWith("tls://", ignoreCase = true) -> app.pwhs.blockads.data.DnsProtocol.DOT
+                                    input.startsWith(
+                                        "https://",
+                                        ignoreCase = true
+                                    ) -> app.pwhs.blockads.data.DnsProtocol.DOH
+
+                                    input.startsWith(
+                                        "tls://",
+                                        ignoreCase = true
+                                    ) -> app.pwhs.blockads.data.DnsProtocol.DOT
+
                                     input.isNotBlank() -> app.pwhs.blockads.data.DnsProtocol.PLAIN
                                     else -> null
                                 }
@@ -306,9 +314,21 @@ fun SettingsScreen(
                                 val input = editCustomDns.trim()
                                 when {
                                     input.isBlank() -> false
-                                    input.startsWith("https://", ignoreCase = true) -> input.length > 8
-                                    input.startsWith("tls://", ignoreCase = true) -> input.length > 6
-                                    else -> input.matches(Regex("^[\\d.]+$")) || input.matches(Regex("^[a-zA-Z0-9.-]+$"))
+                                    input.startsWith(
+                                        "https://",
+                                        ignoreCase = true
+                                    ) -> input.length > 8
+
+                                    input.startsWith(
+                                        "tls://",
+                                        ignoreCase = true
+                                    ) -> input.length > 6
+
+                                    else -> input.matches(Regex("^[\\d.]+$")) || input.matches(
+                                        Regex(
+                                            "^[a-zA-Z0-9.-]+$"
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -345,11 +365,13 @@ fun SettingsScreen(
                                         stringResource(R.string.settings_detected_doh),
                                         MaterialTheme.colorScheme.primary
                                     )
+
                                     app.pwhs.blockads.data.DnsProtocol.DOT -> Triple(
                                         Icons.Default.Security,
                                         stringResource(R.string.settings_detected_dot),
                                         MaterialTheme.colorScheme.tertiary
                                     )
+
                                     else -> Triple(
                                         Icons.Default.Wifi,
                                         stringResource(R.string.settings_detected_plain),
@@ -956,27 +978,6 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { viewModel.clearLogs() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = DangerRed.copy(alpha = 0.1f),
-                    contentColor = DangerRed
-                )
-            ) {
-                Icon(
-                    Icons.Default.DeleteForever,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.settings_clear_logs))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             // Notifications: Daily summary, milestones
             SectionHeader(
@@ -1054,6 +1055,24 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(stringResource(R.string.settings_import))
                 }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = { viewModel.clearLogs() },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = DangerRed.copy(alpha = 0.1f),
+                    contentColor = DangerRed
+                )
+            ) {
+                Icon(
+                    Icons.Default.DeleteForever,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_clear_logs))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -1160,7 +1179,8 @@ fun SettingsScreen(
                     try {
                         context.startActivity(intent)
                     } catch (_: Exception) {
-                        val webUri = Uri.parse("https://play.google.com/store/apps/details?id=app.pwhs.blockads")
+                        val webUri =
+                            Uri.parse("https://play.google.com/store/apps/details?id=app.pwhs.blockads")
                         context.startActivity(Intent(Intent.ACTION_VIEW, webUri))
                     }
                 },
