@@ -1,1 +1,1 @@
-Block ads & trackers system-wide. DNS filtering, no root. Free & open source!
+Block ads & trackers system-wide. Firewall, SafeSearch, profiles. 100% free!

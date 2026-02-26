@@ -1,4 +1,4 @@
-BlockAds — Smart Ad Blocker for Android
+BlockAds — Smart Ad Blocker & Firewall for Android
 
 Tired of intrusive ads slowing down your phone?
 BlockAds blocks ads across all your apps and browsers with just one tap — no root required.
@@ -7,64 +7,74 @@ BlockAds blocks ads across all your apps and browsers with just one tap — no r
 KEY FEATURES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-SYSTEM-WIDE AD BLOCKING
+🚫 SYSTEM-WIDE AD BLOCKING
 
 Block ads in every app and browser
-
 Smart DNS-based filtering technology
-
 No root access required
 
-PRIVACY PROTECTION
+🔒 PRIVACY PROTECTION
 
 Block trackers and spyware
-
 All data is stored locally on your device
-
 Zero data collection — we do not track you
 
-DETAILED STATISTICS
+🔥 APP FIREWALL
+
+Block internet access for specific apps
+Set rules by network type (Wi-Fi or Mobile Data)
+Schedule blocking with custom time ranges
+
+🛡️ PROTECTION PROFILES
+
+4 built-in profiles: Default, Strict, Family, and Gaming
+Family profile enables SafeSearch and YouTube Restricted Mode
+Switch profiles instantly with one tap
+Create the perfect setup for every use case
+
+👨‍👩‍👧 PARENTAL CONTROLS
+
+SafeSearch enforcement for Google and Bing
+YouTube Restricted Mode to filter inappropriate content
+Family-safe DNS providers (OpenDNS Family Shield, Cloudflare Family)
+
+📊 DETAILED STATISTICS
 
 Real-time blocked ad counter
-
 24-hour activity chart
-
 Detailed DNS query logs so you can see exactly what is blocked
+Daily summary notifications
+Milestone alerts (1K, 10K, 100K ads blocked!)
 
-FULLY CUSTOMIZABLE
+⚙️ FULLY CUSTOMIZABLE
 
-Multiple built-in filter lists (ABPVN, AdGuard DNS, EasyList, and more)
-
+Multiple built-in filter lists (ABPVN, AdGuard DNS, EasyList, HostsVN, and more)
 Add custom filter lists via URL
-
-Choose your DNS server (Google, Cloudflare, or custom)
-
-Whitelist specific apps or domains
-
+Create your own allow/block rules for specific domains
+Choose your DNS provider (Google, Cloudflare, AdGuard, Quad9, OpenDNS, or custom)
+DNS-over-HTTPS (DoH) support for encrypted queries
 Auto-reconnect on device boot
+Auto-update filter lists on schedule (daily, weekly, Wi-Fi only)
 
-MODERN AND CLEAN UI
+🎨 MODERN AND CLEAN UI
 
-Material 3 design built with Jetpack Compose
-
+Material 3 design with Jetpack Compose
 Dark, Light, and System theme modes
-
+Customizable accent color
+Multi-language support
 Quick Settings tile for instant on/off control
+Home screen widget with toggle and live stats
 
-BACKUP AND RESTORE
+📦 BACKUP AND RESTORE
 
 Export all settings to JSON
-
 Import settings on a new device
-
 Never lose your configuration
 
-BATTERY AND DATA FRIENDLY
+🔋 BATTERY AND DATA FRIENDLY
 
 Filters only DNS traffic for minimal performance impact
-
 Reduces unnecessary ad data downloads
-
 Runs quietly in the background
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -72,14 +82,10 @@ HOW TO USE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Open BlockAds
-
 Tap the power button to start blocking
-
 Allow the VPN connection
-
 Enjoy an ad-free internet experience
-
-You can also toggle protection directly from the Quick Settings tile.
+You can also toggle protection directly from the Quick Settings tile or the home screen widget.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FAQ
@@ -92,7 +98,7 @@ Why does it need VPN permission?
 BlockAds creates a local VPN tunnel on your device to filter DNS requests. No data is sent to external servers — everything stays on your phone.
 
 Does it work with all apps?
-Yes. BlockAds works system-wide across all apps, browsers, and games. You can also whitelist specific apps if needed.
+Yes. BlockAds works system-wide across all apps, browsers, and games. You can also whitelist specific apps or use the firewall to manage internet access per app.
 
 Is it really free?
 Yes. BlockAds is 100% free, with no ads inside the app, no in-app purchases, and it is open source.
