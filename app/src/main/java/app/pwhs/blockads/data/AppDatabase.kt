@@ -6,6 +6,21 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import app.pwhs.blockads.data.dao.CustomDnsRuleDao
+import app.pwhs.blockads.data.dao.DnsErrorDao
+import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.dao.FirewallRuleDao
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
+import app.pwhs.blockads.data.dao.WhitelistDomainDao
+import app.pwhs.blockads.data.entities.CustomDnsRule
+import app.pwhs.blockads.data.entities.DnsErrorEntry
+import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.data.entities.FilterList
+import app.pwhs.blockads.data.entities.FirewallRule
+import app.pwhs.blockads.data.entities.ProfileSchedule
+import app.pwhs.blockads.data.entities.ProtectionProfile
+import app.pwhs.blockads.data.entities.WhitelistDomain
 
 @Database(
     entities = [DnsLogEntry::class, FilterList::class, WhitelistDomain::class, DnsErrorEntry::class, CustomDnsRule::class, FirewallRule::class, ProtectionProfile::class, ProfileSchedule::class],

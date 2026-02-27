@@ -11,8 +11,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsLogDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.util.startOfDayMillis
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent

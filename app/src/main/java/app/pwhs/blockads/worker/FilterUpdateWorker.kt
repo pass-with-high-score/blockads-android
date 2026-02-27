@@ -8,8 +8,8 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.repository.FilterListRepository
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

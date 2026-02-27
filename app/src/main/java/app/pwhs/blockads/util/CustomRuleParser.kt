@@ -1,7 +1,7 @@
 package app.pwhs.blockads.util
 
-import app.pwhs.blockads.data.CustomDnsRule
-import app.pwhs.blockads.data.RuleType
+import app.pwhs.blockads.data.entities.CustomDnsRule
+import app.pwhs.blockads.data.entities.RuleType
 
 object CustomRuleParser {
     

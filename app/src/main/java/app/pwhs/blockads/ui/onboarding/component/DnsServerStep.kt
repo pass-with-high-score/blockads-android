@@ -30,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsProvider
-import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.data.entities.DnsProvider
+import app.pwhs.blockads.data.entities.DnsProviders
 
 private val ONBOARDING_DNS_PROVIDERS = listOf(
     DnsProviders.CLOUDFLARE,

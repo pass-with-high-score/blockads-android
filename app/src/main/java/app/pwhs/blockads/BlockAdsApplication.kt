@@ -1,7 +1,7 @@
 package app.pwhs.blockads
 
 import android.app.Application
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.di.appModule
 import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler

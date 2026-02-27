@@ -8,8 +8,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsLogDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.appmanagement.data.AppManagementData
 import kotlinx.coroutines.Dispatchers

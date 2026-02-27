@@ -7,7 +7,7 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.whitelist.data.AppInfoData
 import kotlinx.coroutines.Dispatchers

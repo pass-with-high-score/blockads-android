@@ -23,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
@@ -52,9 +51,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.settings.component.SectionHeader
-import app.pwhs.blockads.ui.settings.component.SettingsToggleItem
 import app.pwhs.blockads.ui.theme.AccentBluePreset
 import app.pwhs.blockads.ui.theme.AccentGreen
 import app.pwhs.blockads.ui.theme.AccentOrange

@@ -2,9 +2,9 @@ package app.pwhs.blockads.di
 
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.data.AppDatabase
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.FilterListRepository
-import app.pwhs.blockads.data.ProfileManager
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.dns.DohClient
 import app.pwhs.blockads.dns.DotClient
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel

@@ -3,9 +3,11 @@ package app.pwhs.blockads.ui.dnsprovider
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsProvider
-import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsCategory
+import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.entities.DnsProvider
+import app.pwhs.blockads.data.entities.DnsProviders
 import app.pwhs.blockads.service.AdBlockVpnService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +67,7 @@ class DnsProviderViewModel(
                 else -> {
                     // Find first standard provider different from selected
                     DnsProviders.ALL_PROVIDERS.firstOrNull {
-                        it.id != provider.id && it.category == app.pwhs.blockads.data.DnsCategory.STANDARD
+                        it.id != provider.id && it.category == DnsCategory.STANDARD
                     } ?: DnsProviders.CLOUDFLARE
                 }
             }
@@ -80,15 +82,15 @@ class DnsProviderViewModel(
             appPrefs.setDnsProviderId(null)
             when {
                 trimmed.startsWith("https://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOH)
+                    appPrefs.setDnsProtocol(DnsProtocol.DOH)
                     appPrefs.setDohUrl(trimmed)
                 }
                 trimmed.startsWith("tls://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOT)
+                    appPrefs.setDnsProtocol(DnsProtocol.DOT)
                     appPrefs.setUpstreamDns(trimmed.removePrefix("tls://").removePrefix("TLS://"))
                 }
                 else -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.PLAIN)
+                    appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
                     appPrefs.setUpstreamDns(trimmed)
                 }
             }

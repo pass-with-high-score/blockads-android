@@ -63,7 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsLogEntry
+import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem

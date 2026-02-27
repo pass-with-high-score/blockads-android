@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.FilterList
-import app.pwhs.blockads.data.FilterListDao
-import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.entities.FilterList
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast

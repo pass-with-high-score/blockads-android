@@ -6,7 +6,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 

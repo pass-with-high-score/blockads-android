@@ -9,7 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

@@ -41,7 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.FilterList
+import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterDialog
 import app.pwhs.blockads.ui.filter.component.FilterItem

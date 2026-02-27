@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsProvider
+import app.pwhs.blockads.data.entities.DnsProvider
 
 @Composable
 fun DnsProviderCard(

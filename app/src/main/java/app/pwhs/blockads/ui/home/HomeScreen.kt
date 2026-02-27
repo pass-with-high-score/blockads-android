@@ -65,8 +65,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.ProtectionProfile
-import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.entities.ProtectionProfile
+import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard

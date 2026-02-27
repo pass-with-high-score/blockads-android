@@ -4,8 +4,8 @@ import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.LocaleHelper
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.util.LocaleHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

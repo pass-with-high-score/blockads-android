@@ -11,12 +11,11 @@ import android.os.Bundle
 import android.widget.RemoteViews
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsLogDao
+import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.util.startOfDayMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 

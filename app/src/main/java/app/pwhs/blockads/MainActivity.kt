@@ -17,8 +17,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.LocaleHelper
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.util.LocaleHelper
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.BlockAdsApp
 import app.pwhs.blockads.ui.theme.BlockadsTheme

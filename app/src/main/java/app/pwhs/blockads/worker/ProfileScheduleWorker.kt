@@ -6,8 +6,8 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import app.pwhs.blockads.data.ProfileManager
-import app.pwhs.blockads.data.ProtectionProfileDao
+import app.pwhs.blockads.data.entities.ProfileManager
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber

@@ -11,7 +11,7 @@ import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.update.UpdateChecker
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent

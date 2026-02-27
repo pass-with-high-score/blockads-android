@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsLogEntry
+import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber

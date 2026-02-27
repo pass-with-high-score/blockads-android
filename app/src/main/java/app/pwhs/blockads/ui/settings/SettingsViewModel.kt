@@ -6,22 +6,23 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.CustomDnsRuleDao
-import app.pwhs.blockads.data.DnsLogDao
-import app.pwhs.blockads.data.FilterList
-import app.pwhs.blockads.data.FilterListBackup
-import app.pwhs.blockads.data.FilterListDao
-import app.pwhs.blockads.data.FilterListRepository
-import app.pwhs.blockads.data.FirewallRule
-import app.pwhs.blockads.data.FirewallRuleBackup
-import app.pwhs.blockads.data.FirewallRuleDao
-import app.pwhs.blockads.data.LocaleHelper
-import app.pwhs.blockads.data.ProfileManager
-import app.pwhs.blockads.data.ProtectionProfileDao
-import app.pwhs.blockads.data.SettingsBackup
-import app.pwhs.blockads.data.WhitelistDomain
-import app.pwhs.blockads.data.WhitelistDomainDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.dao.CustomDnsRuleDao
+import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.entities.FilterList
+import app.pwhs.blockads.data.entities.FilterListBackup
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.data.entities.FirewallRule
+import app.pwhs.blockads.data.entities.FirewallRuleBackup
+import app.pwhs.blockads.data.dao.FirewallRuleDao
+import app.pwhs.blockads.util.LocaleHelper
+import app.pwhs.blockads.data.entities.ProfileManager
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
+import app.pwhs.blockads.data.entities.SettingsBackup
+import app.pwhs.blockads.data.entities.WhitelistDomain
+import app.pwhs.blockads.data.dao.WhitelistDomainDao
+import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
@@ -68,11 +69,11 @@ class SettingsViewModel(
             AppPreferences.DEFAULT_FALLBACK_DNS
         )
 
-    val dnsProtocol: StateFlow<app.pwhs.blockads.data.DnsProtocol> = appPrefs.dnsProtocol
+    val dnsProtocol: StateFlow<DnsProtocol> = appPrefs.dnsProtocol
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            app.pwhs.blockads.data.DnsProtocol.PLAIN
+            DnsProtocol.PLAIN
         )
 
     val dohUrl: StateFlow<String> = appPrefs.dohUrl
@@ -95,9 +96,9 @@ class SettingsViewModel(
         appPrefs.dohUrl
     ) { protocol, upstream, doh ->
         when (protocol) {
-            app.pwhs.blockads.data.DnsProtocol.DOH -> doh
-            app.pwhs.blockads.data.DnsProtocol.DOT -> "tls://$upstream"
-            app.pwhs.blockads.data.DnsProtocol.PLAIN -> upstream
+            DnsProtocol.DOH -> doh
+            DnsProtocol.DOT -> "tls://$upstream"
+            DnsProtocol.PLAIN -> upstream
         }
     }.stateIn(
         viewModelScope,
@@ -187,7 +188,7 @@ class SettingsViewModel(
         }
     }
 
-    fun setDnsProtocol(protocol: app.pwhs.blockads.data.DnsProtocol) {
+    fun setDnsProtocol(protocol: DnsProtocol) {
         viewModelScope.launch { appPrefs.setDnsProtocol(protocol) }
     }
 
@@ -206,15 +207,15 @@ class SettingsViewModel(
         viewModelScope.launch {
             when {
                 trimmed.startsWith("https://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOH)
+                    appPrefs.setDnsProtocol(DnsProtocol.DOH)
                     appPrefs.setDohUrl(trimmed)
                 }
                 trimmed.startsWith("tls://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.DOT)
+                    appPrefs.setDnsProtocol(DnsProtocol.DOT)
                     appPrefs.setUpstreamDns(trimmed.removePrefix("tls://").removePrefix("TLS://"))
                 }
                 else -> {
-                    appPrefs.setDnsProtocol(app.pwhs.blockads.data.DnsProtocol.PLAIN)
+                    appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
                     appPrefs.setUpstreamDns(trimmed)
                 }
             }

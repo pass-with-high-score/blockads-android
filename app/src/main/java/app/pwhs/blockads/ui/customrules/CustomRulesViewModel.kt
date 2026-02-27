@@ -3,9 +3,9 @@ package app.pwhs.blockads.ui.customrules
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.CustomDnsRule
-import app.pwhs.blockads.data.CustomDnsRuleDao
-import app.pwhs.blockads.data.FilterListRepository
+import app.pwhs.blockads.data.entities.CustomDnsRule
+import app.pwhs.blockads.data.dao.CustomDnsRuleDao
+import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.util.CustomRuleParser
 import kotlinx.coroutines.flow.MutableStateFlow

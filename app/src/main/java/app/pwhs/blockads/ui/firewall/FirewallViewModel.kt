@@ -7,9 +7,9 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.FirewallRule
-import app.pwhs.blockads.data.FirewallRuleDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.FirewallRule
+import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.ui.whitelist.data.AppInfoData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

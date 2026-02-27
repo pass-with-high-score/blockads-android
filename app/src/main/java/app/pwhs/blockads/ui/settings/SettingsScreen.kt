@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Dns
@@ -65,7 +64,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import android.content.Intent
 import android.net.Uri
@@ -76,7 +74,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.AddDomainDialog
 
@@ -296,14 +295,14 @@ fun SettingsScreen(
                                     input.startsWith(
                                         "https://",
                                         ignoreCase = true
-                                    ) -> app.pwhs.blockads.data.DnsProtocol.DOH
+                                    ) -> DnsProtocol.DOH
 
                                     input.startsWith(
                                         "tls://",
                                         ignoreCase = true
-                                    ) -> app.pwhs.blockads.data.DnsProtocol.DOT
+                                    ) -> DnsProtocol.DOT
 
-                                    input.isNotBlank() -> app.pwhs.blockads.data.DnsProtocol.PLAIN
+                                    input.isNotBlank() -> DnsProtocol.PLAIN
                                     else -> null
                                 }
                             }
@@ -360,13 +359,13 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 val (icon, label, color) = when (detectedProtocol) {
-                                    app.pwhs.blockads.data.DnsProtocol.DOH -> Triple(
+                                    DnsProtocol.DOH -> Triple(
                                         Icons.Default.Security,
                                         stringResource(R.string.settings_detected_doh),
                                         MaterialTheme.colorScheme.primary
                                     )
 
-                                    app.pwhs.blockads.data.DnsProtocol.DOT -> Triple(
+                                    DnsProtocol.DOT -> Triple(
                                         Icons.Default.Security,
                                         stringResource(R.string.settings_detected_dot),
                                         MaterialTheme.colorScheme.tertiary
@@ -410,7 +409,7 @@ fun SettingsScreen(
                         }
 
                         // Fallback DNS (only for Plain DNS)
-                        if (dnsProtocol == app.pwhs.blockads.data.DnsProtocol.PLAIN) {
+                        if (dnsProtocol == DnsProtocol.PLAIN) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 stringResource(R.string.settings_fallback_dns),

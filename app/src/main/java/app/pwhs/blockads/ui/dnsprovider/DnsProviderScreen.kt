@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.DnsCategory
-import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.data.entities.DnsCategory
+import app.pwhs.blockads.data.entities.DnsProviders
 import app.pwhs.blockads.ui.dnsprovider.component.CategoryHeader
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsCard
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsDialog

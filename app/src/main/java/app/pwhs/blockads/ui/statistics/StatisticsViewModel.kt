@@ -2,14 +2,14 @@ package app.pwhs.blockads.ui.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.data.AppStat
-import app.pwhs.blockads.data.DailyStat
-import app.pwhs.blockads.data.DnsLogDao
-import app.pwhs.blockads.data.FilterListRepository
-import app.pwhs.blockads.data.HourlyStat
-import app.pwhs.blockads.data.MonthlyStat
-import app.pwhs.blockads.data.TopBlockedDomain
-import app.pwhs.blockads.data.WeeklyStat
+import app.pwhs.blockads.data.entities.AppStat
+import app.pwhs.blockads.data.entities.DailyStat
+import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.data.entities.HourlyStat
+import app.pwhs.blockads.data.entities.MonthlyStat
+import app.pwhs.blockads.data.entities.TopBlockedDomain
+import app.pwhs.blockads.data.entities.WeeklyStat
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

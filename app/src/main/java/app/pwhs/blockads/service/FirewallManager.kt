@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
-import app.pwhs.blockads.data.FirewallRule
-import app.pwhs.blockads.data.FirewallRuleDao
+import app.pwhs.blockads.data.entities.FirewallRule
+import app.pwhs.blockads.data.dao.FirewallRuleDao
 import java.util.Calendar
 import java.util.concurrent.ConcurrentHashMap
 

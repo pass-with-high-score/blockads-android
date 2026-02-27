@@ -4,11 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.FilterListDao
-import app.pwhs.blockads.data.ProfileManager
-import app.pwhs.blockads.data.ProfileSchedule
-import app.pwhs.blockads.data.ProtectionProfile
-import app.pwhs.blockads.data.ProtectionProfileDao
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.entities.ProfileManager
+import app.pwhs.blockads.data.entities.ProfileSchedule
+import app.pwhs.blockads.data.entities.ProtectionProfile
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.worker.ProfileScheduleWorker

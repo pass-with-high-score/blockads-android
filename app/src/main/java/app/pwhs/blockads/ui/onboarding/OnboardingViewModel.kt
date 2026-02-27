@@ -2,9 +2,9 @@ package app.pwhs.blockads.ui.onboarding
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsProvider
-import app.pwhs.blockads.data.DnsProviders
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsProvider
+import app.pwhs.blockads.data.entities.DnsProviders
 import app.pwhs.blockads.ui.onboarding.data.ProtectionLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

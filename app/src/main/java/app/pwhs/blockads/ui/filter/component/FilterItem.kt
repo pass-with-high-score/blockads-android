@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.FilterList
+import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.util.formatCount
 import app.pwhs.blockads.util.formatDate

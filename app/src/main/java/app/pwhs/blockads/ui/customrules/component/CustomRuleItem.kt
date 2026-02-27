@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import app.pwhs.blockads.data.CustomDnsRule
-import app.pwhs.blockads.data.RuleType
+import app.pwhs.blockads.data.entities.CustomDnsRule
+import app.pwhs.blockads.data.entities.RuleType
 
 @Composable
 fun CustomRuleItem(

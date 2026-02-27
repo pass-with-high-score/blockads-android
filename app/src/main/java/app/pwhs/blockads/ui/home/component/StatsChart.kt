@@ -9,10 +9,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.pwhs.blockads.data.DailyStat
-import app.pwhs.blockads.data.HourlyStat
-import app.pwhs.blockads.data.MonthlyStat
-import app.pwhs.blockads.data.WeeklyStat
+import app.pwhs.blockads.data.entities.DailyStat
+import app.pwhs.blockads.data.entities.HourlyStat
+import app.pwhs.blockads.data.entities.MonthlyStat
+import app.pwhs.blockads.data.entities.WeeklyStat
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary

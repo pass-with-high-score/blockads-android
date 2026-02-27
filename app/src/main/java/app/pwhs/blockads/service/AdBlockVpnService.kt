@@ -11,12 +11,12 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.AppPreferences
-import app.pwhs.blockads.data.DnsErrorDao
-import app.pwhs.blockads.data.DnsErrorEntry
-import app.pwhs.blockads.data.DnsLogEntry
-import app.pwhs.blockads.data.FilterListRepository
-import app.pwhs.blockads.data.FirewallRuleDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.dao.DnsErrorDao
+import app.pwhs.blockads.data.entities.DnsErrorEntry
+import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.util.BatteryMonitor
 import app.pwhs.blockads.util.AppNameResolver
 import app.pwhs.blockads.util.startOfDayMillis
@@ -24,6 +24,8 @@ import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.worker.VpnResumeWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.entities.DnsProtocol
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -96,7 +98,7 @@ class AdBlockVpnService : VpnService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
-    private lateinit var dnsLogDao: app.pwhs.blockads.data.DnsLogDao
+    private lateinit var dnsLogDao: DnsLogDao
     private lateinit var dnsErrorDao: DnsErrorDao
     private lateinit var dohClient: app.pwhs.blockads.dns.DohClient
     private lateinit var dotClient: app.pwhs.blockads.dns.DotClient
@@ -695,7 +697,7 @@ class AdBlockVpnService : VpnService() {
                 outputStream,
                 fallbackDns,
                 dohUrl,
-                app.pwhs.blockads.data.DnsProtocol.PLAIN,
+                DnsProtocol.PLAIN,
                 true
             )
         }
@@ -719,7 +721,7 @@ class AdBlockVpnService : VpnService() {
         outputStream: FileOutputStream,
         dnsServer: String,
         dohUrl: String,
-        protocol: app.pwhs.blockads.data.DnsProtocol,
+        protocol: DnsProtocol,
         isFallback: Boolean
     ): Boolean {
         try {
@@ -728,17 +730,17 @@ class AdBlockVpnService : VpnService() {
             // we're in a blocking I/O context (processPackets loop). The VPN TUN interface
             // requires synchronous packet processing with FileInputStream/FileOutputStream.
             val dnsResponseData = when (protocol) {
-                app.pwhs.blockads.data.DnsProtocol.DOH -> {
+                DnsProtocol.DOH -> {
                     Timber.d("Using DoH for ${query.domain} to $dohUrl")
                     runBlocking { dohClient.query(dohUrl, query.rawDnsPayload) }
                 }
 
-                app.pwhs.blockads.data.DnsProtocol.DOT -> {
+                DnsProtocol.DOT -> {
                     Timber.d("Using DoT for ${query.domain} to $dnsServer")
                     runBlocking { dotClient.query(dnsServer, query.rawDnsPayload) }
                 }
 
-                app.pwhs.blockads.data.DnsProtocol.PLAIN -> {
+                DnsProtocol.PLAIN -> {
                     Timber.d("Using plain DNS for ${query.domain} to $dnsServer")
                     tryPlainDnsQuery(query, dnsServer)
                 }

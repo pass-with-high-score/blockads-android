@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.FirewallRule
+import app.pwhs.blockads.data.entities.FirewallRule
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
