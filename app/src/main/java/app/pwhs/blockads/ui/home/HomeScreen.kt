@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -257,60 +259,50 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Update available banner
+            // Update available dialog
             val availableUpdate by viewModel.availableUpdate.collectAsState()
             availableUpdate?.let { update ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = AccentBlue.copy(alpha = 0.1f)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.dismissUpdate() },
+                    icon = {
                         Icon(
                             imageVector = Icons.Default.SystemUpdate,
                             contentDescription = null,
                             tint = AccentBlue,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(32.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.update_available_title, update.version),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            if (update.changelog.isNotBlank()) {
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.update_available_title, update.version),
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    text = {
+                        if (update.changelog.isNotBlank()) {
+                            Column(
+                                modifier = Modifier
+                                    .heightIn(max = 300.dp)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
                                 Text(
-                                    text = update.changelog.lines().take(2).joinToString("\n"),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
+                                    text = update.changelog,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = TextSecondary
                                 )
                             }
                         }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
+                    },
+                    dismissButton = {
                         TextButton(onClick = { viewModel.dismissUpdate() }) {
                             Text(
                                 text = stringResource(R.string.update_dismiss),
                                 color = TextSecondary
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                    },
+                    confirmButton = {
                         Button(
                             onClick = {
                                 try {
@@ -323,8 +315,7 @@ fun HomeScreen(
                             Text(stringResource(R.string.update_now))
                         }
                     }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
+                )
             }
 
             // Stats cards

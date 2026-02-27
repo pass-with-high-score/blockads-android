@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
@@ -178,6 +179,18 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
                         "https://github.com/pass-with-high-score/blockads-android".toUri()
+                    )
+                    context.startActivity(intent)
+                }
+            )
+
+            AboutLinkItem(
+                icon = Icons.Filled.Language,
+                title = stringResource(R.string.about_website),
+                onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://blockads.pwhs.app/".toUri()
                     )
                     context.startActivity(intent)
                 }
