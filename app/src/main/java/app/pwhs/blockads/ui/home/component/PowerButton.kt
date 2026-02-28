@@ -2,7 +2,6 @@ package app.pwhs.blockads.ui.home.component
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -91,17 +90,6 @@ fun PowerButton(
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
-    )
-
-    // Spinning animation when connecting
-    val connectingRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = if (isConnecting) 360f else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "connectingRotation"
     )
 
     Box(

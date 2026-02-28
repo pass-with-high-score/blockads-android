@@ -16,6 +16,8 @@ import app.pwhs.blockads.data.entities.WeeklyStat
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.util.dayFormat
+import app.pwhs.blockads.util.hourFormat
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
@@ -24,16 +26,7 @@ import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
-
-private val hourFormat = ThreadLocal.withInitial {
-    SimpleDateFormat("HH", Locale.getDefault())
-}
-private val dayFormat = ThreadLocal.withInitial {
-    SimpleDateFormat("EEE", Locale.getDefault())
-}
 
 @Composable
 fun StatsChart(

@@ -1,28 +1,26 @@
 package app.pwhs.blockads.ui.settings
 
-import android.app.Activity
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.dao.FirewallRuleDao
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
+import app.pwhs.blockads.data.dao.WhitelistDomainDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.entities.FilterListBackup
-import app.pwhs.blockads.data.dao.FilterListDao
-import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.entities.FirewallRule
 import app.pwhs.blockads.data.entities.FirewallRuleBackup
-import app.pwhs.blockads.data.dao.FirewallRuleDao
-import app.pwhs.blockads.util.LocaleHelper
 import app.pwhs.blockads.data.entities.ProfileManager
-import app.pwhs.blockads.data.dao.ProtectionProfileDao
 import app.pwhs.blockads.data.entities.SettingsBackup
 import app.pwhs.blockads.data.entities.WhitelistDomain
-import app.pwhs.blockads.data.dao.WhitelistDomainDao
-import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
@@ -76,13 +74,6 @@ class SettingsViewModel(
             DnsProtocol.PLAIN
         )
 
-    val dohUrl: StateFlow<String> = appPrefs.dohUrl
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            AppPreferences.DEFAULT_DOH_URL
-        )
-
     /**
      * Unified display value for the custom DNS input.
      * Shows the current DNS server in the format the user originally entered:
@@ -112,15 +103,6 @@ class SettingsViewModel(
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val themeMode: StateFlow<String> = appPrefs.themeMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.THEME_SYSTEM)
-
-    val appLanguage: StateFlow<String> = appPrefs.appLanguage
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            AppPreferences.LANGUAGE_SYSTEM
-        )
 
     val autoUpdateEnabled: StateFlow<Boolean> = appPrefs.autoUpdateEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -174,13 +156,6 @@ class SettingsViewModel(
         viewModelScope.launch { appPrefs.setAutoReconnect(enabled) }
     }
 
-    fun setUpstreamDns(dns: String) {
-        viewModelScope.launch {
-            appPrefs.setUpstreamDns(dns)
-            requestVpnRestart()
-        }
-    }
-
     fun setFallbackDns(dns: String) {
         viewModelScope.launch {
             appPrefs.setFallbackDns(dns)
@@ -188,13 +163,6 @@ class SettingsViewModel(
         }
     }
 
-    fun setDnsProtocol(protocol: DnsProtocol) {
-        viewModelScope.launch { appPrefs.setDnsProtocol(protocol) }
-    }
-
-    fun setDohUrl(url: String) {
-        viewModelScope.launch { appPrefs.setDohUrl(url) }
-    }
 
     /**
      * Set custom DNS server from unified input. Auto-detects protocol:
@@ -220,21 +188,6 @@ class SettingsViewModel(
                 }
             }
             requestVpnRestart()
-        }
-    }
-
-    fun setThemeMode(mode: String) {
-        viewModelScope.launch { appPrefs.setThemeMode(mode) }
-    }
-
-    fun setAppLanguage(language: String) {
-        viewModelScope.launch {
-            appPrefs.setAppLanguage(language)
-            LocaleHelper.setLocale(getApplication<Application>().applicationContext, language)
-            // On pre-API 33, we need to recreate the activity
-            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-                (getApplication<Application>().applicationContext as? Activity)?.recreate()
-            }
         }
     }
 

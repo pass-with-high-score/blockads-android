@@ -64,6 +64,7 @@ import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
+import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber

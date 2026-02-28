@@ -2,7 +2,6 @@ package app.pwhs.blockads.ui.home
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.BuildConfig
@@ -16,6 +15,7 @@ import app.pwhs.blockads.data.entities.ProtectionProfile
 import app.pwhs.blockads.data.dao.ProtectionProfileDao
 import app.pwhs.blockads.data.entities.TopBlockedDomain
 import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.ui.home.data.AvailableUpdate
 import app.pwhs.blockads.update.UpdateChecker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,12 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-
-data class AvailableUpdate(
-    val version: String,
-    val changelog: String,
-    val url: String
-)
 
 class HomeViewModel(
     dnsLogDao: DnsLogDao,
@@ -111,17 +105,6 @@ class HomeViewModel(
                 }
                 delay(500)
             }
-        }
-    }
-
-    fun startVpn(context: Context) {
-        val intent = Intent(context, AdBlockVpnService::class.java).apply {
-            action = AdBlockVpnService.ACTION_START
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
         }
     }
 

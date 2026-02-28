@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,10 +27,8 @@ import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,11 +37,9 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -71,12 +66,16 @@ import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
 import app.pwhs.blockads.ui.home.component.StatsChart
+import app.pwhs.blockads.ui.home.component.UpdateDialog
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.util.AppConstants.AVG_AD_SIZE_KB
 import app.pwhs.blockads.util.formatCount
+import app.pwhs.blockads.util.formatDataSize
 import app.pwhs.blockads.util.formatTimeSince
+import app.pwhs.blockads.util.formatUptimeShort
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import org.koin.androidx.compose.koinViewModel
@@ -102,6 +101,7 @@ fun HomeScreen(
     val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
     val activeProfile by viewModel.activeProfile.collectAsState()
+    val availableUpdate by viewModel.availableUpdate.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -259,64 +259,6 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Update available dialog
-            val availableUpdate by viewModel.availableUpdate.collectAsState()
-            availableUpdate?.let { update ->
-                AlertDialog(
-                    onDismissRequest = { viewModel.dismissUpdate() },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.SystemUpdate,
-                            contentDescription = null,
-                            tint = AccentBlue,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    },
-                    title = {
-                        Text(
-                            text = stringResource(R.string.update_available_title, update.version),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    },
-                    text = {
-                        if (update.changelog.isNotBlank()) {
-                            Column(
-                                modifier = Modifier
-                                    .heightIn(max = 300.dp)
-                                    .verticalScroll(rememberScrollState())
-                            ) {
-                                Text(
-                                    text = update.changelog,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { viewModel.dismissUpdate() }) {
-                            Text(
-                                text = stringResource(R.string.update_dismiss),
-                                color = TextSecondary
-                            )
-                        }
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                try {
-                                    val intent = Intent(Intent.ACTION_VIEW, update.url.toUri())
-                                    context.startActivity(intent)
-                                } catch (_: Exception) { }
-                            },
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(stringResource(R.string.update_now))
-                        }
-                    }
-                )
-            }
 
             // Stats cards
             Row(
@@ -657,33 +599,16 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(200.dp))
         }
+
+    }
+    availableUpdate?.let { update ->
+        UpdateDialog(
+            update = update,
+            onDismissUpdate = { viewModel.dismissUpdate() }
+        )
     }
 }
 
-/**
- * Industry-standard estimate for average blocked ad content size in KB.
- * Includes typical ad images, scripts, and tracking pixels.
- * Source: Common ad-blocker data savings estimates (Google Ads avg ~50-100KB per request).
- */
-private const val AVG_AD_SIZE_KB = 50L
-
-private fun formatDataSize(kilobytes: Long): String = when {
-    kilobytes < 1024 -> "$kilobytes KB"
-    kilobytes < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f MB", kilobytes / 1024f)
-    else -> String.format(Locale.getDefault(), "%.1f GB", kilobytes / (1024f * 1024f))
-}
-
-private fun formatUptimeShort(ms: Long): String {
-    if (ms <= 0) return "—"
-    val totalSeconds = ms / 1000
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    return when {
-        hours > 0 -> "${hours}h ${minutes}m"
-        minutes > 0 -> "${minutes}m"
-        else -> "<1m"
-    }
-}
 
 @Composable
 private fun profileDisplayName(profile: ProtectionProfile): String = when (profile.profileType) {

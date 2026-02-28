@@ -67,7 +67,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,7 +79,6 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.settings.component.AddDomainDialog
-
 import app.pwhs.blockads.ui.settings.component.DnsResponseTypeDialog
 import app.pwhs.blockads.ui.settings.component.FrequencyDialog
 import app.pwhs.blockads.ui.settings.component.NotificationDialog
@@ -98,6 +96,7 @@ import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreen
 import com.ramcosta.composedestinations.generated.destinations.FirewallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
+import androidx.core.net.toUri
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1175,13 +1174,13 @@ fun SettingsScreen(
             // Rate App
             Card(
                 onClick = {
-                    val uri = Uri.parse("market://details?id=app.pwhs.blockads")
+                    val uri = "market://details?id=app.pwhs.blockads".toUri()
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     try {
                         context.startActivity(intent)
                     } catch (_: Exception) {
                         val webUri =
-                            Uri.parse("https://play.google.com/store/apps/details?id=app.pwhs.blockads")
+                            "https://play.google.com/store/apps/details?id=app.pwhs.blockads".toUri()
                         context.startActivity(Intent(Intent.ACTION_VIEW, webUri))
                     }
                 },
@@ -1225,7 +1224,7 @@ fun SettingsScreen(
             // Sponsor
             Card(
                 onClick = {
-                    val uri = Uri.parse("https://github.com/sponsors/pass-with-high-score")
+                    val uri = "https://github.com/sponsors/pass-with-high-score".toUri()
                     context.startActivity(Intent(Intent.ACTION_VIEW, uri))
                 },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

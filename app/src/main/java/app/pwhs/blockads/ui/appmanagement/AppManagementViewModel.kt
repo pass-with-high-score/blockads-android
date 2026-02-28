@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
@@ -12,6 +11,7 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.appmanagement.data.AppManagementData
+import app.pwhs.blockads.ui.appmanagement.data.AppSortOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,14 +22,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
-enum class AppSortOption {
-    NAME, QUERIES, BLOCKED
-}
 
 class AppManagementViewModel(
     private val appPrefs: AppPreferences,
-    private val dnsLogDao: DnsLogDao,
+    dnsLogDao: DnsLogDao,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -113,7 +111,7 @@ class AppManagementViewModel(
                 _installedApps.value = apps
                 _totalAppCount.value = apps.size
             } catch (e: Exception) {
-                Log.e("AppManagementVM", "Failed to load apps", e)
+                Timber.e(e, "Failed to load apps")
                 _installedApps.value = emptyList()
                 _totalAppCount.value = 0
             } finally {

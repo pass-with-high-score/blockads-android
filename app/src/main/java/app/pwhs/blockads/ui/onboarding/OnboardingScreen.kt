@@ -78,8 +78,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import androidx.core.net.toUri
-
-private const val TOTAL_PAGES = 7
+import app.pwhs.blockads.util.AppConstants.TOTAL_PAGES
 
 @Destination<RootGraph>
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)

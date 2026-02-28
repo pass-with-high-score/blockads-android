@@ -11,6 +11,7 @@ import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.util.CustomRuleParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,14 +26,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-enum class TimeRange(val millis: Long) {
-    ALL(0L),
-    HOUR_1(3_600_000L),
-    HOUR_6(21_600_000L),
-    HOUR_24(86_400_000L),
-    DAY_7(604_800_000L)
-}
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,

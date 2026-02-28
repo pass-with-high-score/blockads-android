@@ -39,12 +39,8 @@ class DnsProviderViewModel(
         appPrefs.upstreamDns
     ) { providerId, upstreamDns ->
         // If provider ID is set, use it
-        if (providerId != null) {
-            providerId
-        } else {
-            // Otherwise, try to detect provider from current upstream DNS
-            DnsProviders.getByIp(upstreamDns)?.id
-        }
+        providerId ?: // Otherwise, try to detect provider from current upstream DNS
+        DnsProviders.getByIp(upstreamDns)?.id
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val customDnsEnabled: StateFlow<Boolean> = combine(

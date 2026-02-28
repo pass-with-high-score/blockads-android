@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.FirewallRule
 import app.pwhs.blockads.ui.theme.TextSecondary
+import java.util.Locale
 
 @Composable
 fun FirewallRuleDialog(
@@ -48,6 +49,7 @@ fun FirewallRuleDialog(
     var endMinute by remember { mutableIntStateOf(existingRule?.scheduleEndMinute ?: 0) }
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(20.dp),
         title = {
@@ -108,7 +110,12 @@ fun FirewallRuleDialog(
                                 color = TextSecondary
                             )
                             Text(
-                                text = String.format("%02d:%02d", startHour, startMinute),
+                                text = String.format(
+                                    Locale.US,
+                                    "%02d:%02d",
+                                    startHour,
+                                    startMinute
+                                ),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -129,7 +136,12 @@ fun FirewallRuleDialog(
                                 color = TextSecondary
                             )
                             Text(
-                                text = String.format("%02d:%02d", endHour, endMinute),
+                                text = String.format(
+                                    Locale.US,
+                                    "%02d:%02d",
+                                    endHour,
+                                    endMinute
+                                ),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary

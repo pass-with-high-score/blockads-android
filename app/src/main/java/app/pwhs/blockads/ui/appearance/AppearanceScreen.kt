@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.ui.appearance.component.AccentColorCircle
 import app.pwhs.blockads.ui.settings.component.SectionHeader
 import app.pwhs.blockads.ui.theme.AccentBluePreset
 import app.pwhs.blockads.ui.theme.AccentGreen
@@ -356,46 +357,3 @@ fun AppearanceScreen(
     }
 }
 
-@Composable
-private fun AccentColorCircle(
-    color: Color,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.onSurface
-        else Color.Transparent,
-        label = "borderColor"
-    )
-
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .border(
-                width = if (isSelected) 3.dp else 0.dp,
-                color = borderColor,
-                shape = CircleShape
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(if (isSelected) 34.dp else 40.dp)
-                .clip(CircleShape)
-                .background(color),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isSelected) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
-}

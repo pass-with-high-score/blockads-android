@@ -1,6 +1,5 @@
 package app.pwhs.blockads.ui.splash
 
-import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
