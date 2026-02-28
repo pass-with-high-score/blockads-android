@@ -505,6 +505,8 @@
     <string name="settings_share_app_message">Hãy thử BlockAds — ứng dụng chặn quảng cáo miễn phí, mã nguồn mở cho Android! Chặn quảng cáo trên mọi ứng dụng chỉ với một chạm. Tải tại đây: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Đánh giá ứng dụng</string>
     <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
+    <string name="settings_sponsor">Tài trợ</string>
+    <string name="settings_sponsor_desc">Hỗ trợ phát triển BlockAds trên GitHub</string>
     <string name="filter_setup_active_count">%1$d active</string>
     <string name="copied_url">Đã sao chép URL</string>
     <string name="filter_error_invalid_url">Vui lòng nhập URL hợp lệ (http:// hoặc https://)</string>

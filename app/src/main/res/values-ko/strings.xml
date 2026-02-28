@@ -445,6 +445,8 @@
     <string name="settings_share_app_message">Check out BlockAds — a free, open-source ad blocker for Android! Block ads across all apps with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Rate App</string>
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
+    <string name="settings_sponsor">Sponsor Us</string>
+    <string name="settings_sponsor_desc">Support BlockAds development on GitHub</string>
     <string name="widget_protected">Protected</string>
     <string name="widget_unprotected">Off</string>
 
