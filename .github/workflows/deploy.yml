@@ -84,7 +84,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ env.VERSION_NAME }}
+          name: ${{ env.VERSION_NAME }}
           draft: false
           prerelease: false
           files: app/build/outputs/apk/release/app-release.apk
