@@ -45,6 +45,10 @@ val AccentPinkDim = Color(0xFFDB2777)
 val AccentTeal = Color(0xFF14B8A6)
 val AccentTealDim = Color(0xFF0D9488)
 
+// Grey preset — monochrome accent for light themes
+val AccentGrey = Color(0xFF78858F)
+val AccentGreyDim = Color(0xFF5D6B75)
+
 // Text colors
 val TextPrimary = Color(0xFFF0F6FC)
 val TextSecondary = Color(0xFF8B949E)

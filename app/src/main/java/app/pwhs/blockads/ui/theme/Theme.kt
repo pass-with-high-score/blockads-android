@@ -64,6 +64,7 @@ private fun getAccentColors(accentColor: String): Pair<Color, Color> {
         AppPreferences.ACCENT_ORANGE -> AccentOrange to AccentOrangeDim
         AppPreferences.ACCENT_PINK -> AccentPink to AccentPinkDim
         AppPreferences.ACCENT_TEAL -> AccentTeal to AccentTealDim
+        AppPreferences.ACCENT_GREY -> AccentGrey to AccentGreyDim
         else -> AccentGreen to AccentGreenDim // default green
     }
 }

@@ -67,6 +67,7 @@ class AppPreferences(private val context: Context) {
         const val ACCENT_ORANGE = "orange"
         const val ACCENT_PINK = "pink"
         const val ACCENT_TEAL = "teal"
+        const val ACCENT_GREY = "grey"
         const val ACCENT_DYNAMIC = "dynamic"
 
         const val LANGUAGE_SYSTEM = "system"

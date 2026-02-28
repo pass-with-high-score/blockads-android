@@ -58,6 +58,7 @@ import app.pwhs.blockads.ui.theme.AccentGreen
 import app.pwhs.blockads.ui.theme.AccentOrange
 import app.pwhs.blockads.ui.theme.AccentPink
 import app.pwhs.blockads.ui.theme.AccentPurple
+import app.pwhs.blockads.ui.theme.AccentGrey
 import app.pwhs.blockads.ui.theme.AccentTeal
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -192,6 +193,7 @@ fun AppearanceScreen(
                         AppPreferences.ACCENT_ORANGE to AccentOrange,
                         AppPreferences.ACCENT_PINK to AccentPink,
                         AppPreferences.ACCENT_TEAL to AccentTeal,
+                        AppPreferences.ACCENT_GREY to AccentGrey,
                     )
 
                     Row(
