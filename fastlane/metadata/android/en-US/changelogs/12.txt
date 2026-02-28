@@ -1,0 +1,5 @@
+- Added search filters
+- Reduced notification display time
+- Enhanced gray color palette
+- Removed bulk actions from the logs screen
+- Added project sponsorship option
