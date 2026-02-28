@@ -258,6 +258,8 @@
     <string name="filter_built_in">Built-in</string>
     <string name="filter_custom">Custom</string>
     <string name="filter_custom_empty">No custom filters added yet</string>
+    <string name="filter_search_hint">Search filters…</string>
+    <string name="filter_search_no_results">No filters found for \"%s\"</string>
     <string name="filter_log_cleared">Log cleared</string>
     <string name="filter_domain_whitelisted">Domain whitelisted: %s</string>
     <string name="filter_domain_already_whitelisted">Domain already whitelisted</string>

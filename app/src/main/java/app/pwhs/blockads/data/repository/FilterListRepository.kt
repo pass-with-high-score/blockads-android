@@ -15,6 +15,7 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 class FilterListRepository(
@@ -183,6 +184,7 @@ class FilterListRepository(
     // Trie-based domain storage: mmap'd binary files for near-zero heap usage
     @Volatile
     private var adTrie: MmapDomainTrie? = null
+
     @Volatile
     private var securityTrie: MmapDomainTrie? = null
 
@@ -297,14 +299,14 @@ class FilterListRepository(
         customAllowDomains.clear()
         customAllowDomains.addAll(allowDomains.map { it.lowercase() })
 
-        Timber.Forest.e("Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules")
+        Timber.e("Loaded ${customBlockDomains.size} custom block rules and ${customAllowDomains.size} custom allow rules")
     }
 
     suspend fun loadWhitelist() {
         val domains = whitelistDomainDao.getAllDomains()
         whitelistedDomains.clear()
         whitelistedDomains.addAll(domains.map { it.lowercase() })
-        Timber.Forest.d("Loaded ${whitelistedDomains.size} whitelisted domains")
+        Timber.d("Loaded ${whitelistedDomains.size} whitelisted domains")
     }
 
     /**
@@ -345,7 +347,7 @@ class FilterListRepository(
             // Build, serialize, then RELEASE the in-memory trie before
             // starting security domains. This halves peak heap usage.
             val adFilters =
-                enabledLists.filter { it.category != FilterList.Companion.CATEGORY_SECURITY }
+                enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
             var adCount = 0
             if (adFilters.isNotEmpty()) {
                 val adTrieBuilder = DomainTrie()
@@ -359,9 +361,9 @@ class FilterListRepository(
                             count = loaded,
                             timestamp = System.currentTimeMillis()
                         )
-                        Timber.Forest.d("Loaded $loaded domains from ${filter.name}")
+                        Timber.d("Loaded $loaded domains from ${filter.name}")
                     } catch (e: Exception) {
-                        Timber.Forest.d("Failed to load filter: ${filter.name}: $e")
+                        Timber.d("Failed to load filter: ${filter.name}: $e")
                     }
                 }
                 adCount = adTrieBuilder.size
@@ -373,7 +375,7 @@ class FilterListRepository(
 
             // ── Phase 2: Security domains ────────────────────────────
             val secFilters =
-                enabledLists.filter { it.category == FilterList.Companion.CATEGORY_SECURITY }
+                enabledLists.filter { it.category == FilterList.CATEGORY_SECURITY }
             var secCount = 0
             if (secFilters.isNotEmpty()) {
                 val secTrieBuilder = DomainTrie()
@@ -387,9 +389,9 @@ class FilterListRepository(
                             count = loaded,
                             timestamp = System.currentTimeMillis()
                         )
-                        Timber.Forest.d("Loaded $loaded domains from ${filter.name} (security)")
+                        Timber.d("Loaded $loaded domains from ${filter.name} (security)")
                     } catch (e: Exception) {
-                        Timber.Forest.d("Failed to load filter: ${filter.name}: $e")
+                        Timber.d("Failed to load filter: ${filter.name}: $e")
                     }
                 }
                 secCount = secTrieBuilder.size
@@ -400,16 +402,16 @@ class FilterListRepository(
             }
 
             // ── Phase 3: Mmap the binary files (near-zero heap) ──────
-            adTrie = if (adCount > 0) DomainTrie.Companion.loadFromMmap(adTrieFile) else null
+            adTrie = if (adCount > 0) DomainTrie.loadFromMmap(adTrieFile) else null
             securityTrie =
-                if (secCount > 0) DomainTrie.Companion.loadFromMmap(secTrieFile) else null
+                if (secCount > 0) DomainTrie.loadFromMmap(secTrieFile) else null
 
             val elapsed = System.currentTimeMillis() - startTime
-            Timber.Forest.d("Loaded $adCount ad + $secCount security domains in ${elapsed}ms (Trie + mmap)")
+            Timber.d("Loaded $adCount ad + $secCount security domains in ${elapsed}ms (Trie + mmap)")
 
             Result.success(adCount + secCount)
         } catch (e: Exception) {
-            Timber.Forest.d("Failed to load filters: $e")
+            Timber.d("Failed to load filters: $e")
             Result.failure(e)
         }
     }
@@ -444,7 +446,7 @@ class FilterListRepository(
                 parseHostsFileToTrie(reader, trie)
             }
         } catch (e: Exception) {
-            Timber.Forest.d("Network download failed for ${filter.name}: $e")
+            Timber.d("Network download failed for ${filter.name}: $e")
         }
     }
 
@@ -486,7 +488,7 @@ class FilterListRepository(
 
             Result.success(count)
         } catch (e: Exception) {
-            Timber.Forest.d("Failed to update ${filter.name}: $e")
+            Timber.d("Failed to update ${filter.name}: $e")
             Result.failure(e)
         }
     }
@@ -564,13 +566,6 @@ class FilterListRepository(
             }
             domains
         }
-
-    fun clearCache() {
-        adTrie = null
-        securityTrie = null
-        trieDir.deleteRecursively()
-        File(context.filesDir, CACHE_DIR).deleteRecursively()
-    }
 
     /**
      * Validate that a URL points to a valid filter/hosts file.

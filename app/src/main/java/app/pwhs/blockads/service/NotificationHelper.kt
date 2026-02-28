@@ -23,7 +23,7 @@ class NotificationHelper(
     companion object {
         const val MILESTONE_CHANNEL_ID = "blockads_milestone_channel"
         private const val MILESTONE_NOTIFICATION_ID = 3001
-        val MILESTONES = longArrayOf(100, 500, 1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000)
+        val MILESTONES = longArrayOf(1_000, 10_000, 50_000, 100_000, 1_000_000)
     }
 
     private val milestoneMutex = Mutex()
@@ -64,7 +64,7 @@ class NotificationHelper(
             val channel = NotificationChannel(
                 MILESTONE_CHANNEL_ID,
                 context.getString(R.string.milestone_channel_name),
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = context.getString(R.string.milestone_channel_description)
             }
@@ -84,7 +84,7 @@ class NotificationHelper(
             .setContentTitle(context.getString(R.string.milestone_title))
             .setContentText(context.getString(R.string.milestone_text, formattedCount))
             .setSmallIcon(R.drawable.ic_shield_on)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

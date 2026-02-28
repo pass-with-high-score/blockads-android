@@ -52,7 +52,6 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallRuleDialog
 import app.pwhs.blockads.ui.theme.TextSecondary
-import app.pwhs.blockads.ui.whitelist.component.AppListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator

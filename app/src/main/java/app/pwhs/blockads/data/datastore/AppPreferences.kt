@@ -162,7 +162,7 @@ class AppPreferences(private val context: Context) {
     }
 
     val autoUpdateNotification: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[KEY_AUTO_UPDATE_NOTIFICATION] ?: NOTIFICATION_NORMAL
+        prefs[KEY_AUTO_UPDATE_NOTIFICATION] ?: NOTIFICATION_SILENT
     }
 
     val dnsProviderId: Flow<String?> = context.dataStore.data.map { prefs ->
@@ -186,11 +186,11 @@ class AppPreferences(private val context: Context) {
     }
 
     val dailySummaryEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[KEY_DAILY_SUMMARY_ENABLED] ?: true
+        prefs[KEY_DAILY_SUMMARY_ENABLED] ?: false
     }
 
     val milestoneNotificationsEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] ?: true
+        prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] ?: false
     }
 
     val lastMilestoneBlocked: Flow<Long> = context.dataStore.data.map { prefs ->

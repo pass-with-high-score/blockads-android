@@ -220,6 +220,8 @@
     <string name="filter_built_in">組み込み</string>
     <string name="filter_custom">カスタム</string>
     <string name="filter_custom_empty">カスタムフィルターはまだ追加されていません</string>
+    <string name="filter_search_hint">フィルターを検索…</string>
+    <string name="filter_search_no_results">\"%s\" に一致するフィルターが見つかりません</string>
     <string name="filter_log_cleared">ログを消去しました</string>
     <string name="filter_domain_whitelisted">ホワイトリストに追加しました: %s</string>
     <string name="filter_domain_already_whitelisted">すでにホワイトリストに登録済みです</string>

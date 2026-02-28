@@ -213,6 +213,8 @@
     <string name="filter_built_in">内置</string>
     <string name="filter_custom">自定义</string>
     <string name="filter_custom_empty">尚未添加自定义过滤器</string>
+    <string name="filter_search_hint">搜索过滤器…</string>
+    <string name="filter_search_no_results">未找到与\"%s\"匹配的过滤器</string>
     <string name="filter_log_cleared">日志已清除</string>
     <string name="filter_domain_whitelisted">已添加到白名单：%s</string>
     <string name="filter_domain_already_whitelisted">已在白名单中</string>

@@ -213,6 +213,8 @@
     <string name="filter_built_in">내장</string>
     <string name="filter_custom">사용자 정의</string>
     <string name="filter_custom_empty">아직 추가된 사용자 정의 필터가 없습니다</string>
+    <string name="filter_search_hint">필터 검색…</string>
+    <string name="filter_search_no_results">\"%s\"에 대한 필터를 찾을 수 없습니다</string>
     <string name="filter_log_cleared">로그가 지워졌습니다</string>
     <string name="filter_domain_whitelisted">도메인이 허용 목록에 추가됨: %s</string>
     <string name="filter_domain_already_whitelisted">도메인이 이미 허용 목록에 있습니다</string>

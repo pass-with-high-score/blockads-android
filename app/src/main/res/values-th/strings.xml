@@ -220,6 +220,8 @@
     <string name="filter_built_in">ในตัว</string>
     <string name="filter_custom">กำหนดเอง</string>
     <string name="filter_custom_empty">ยังไม่มีตัวกรองที่กำหนดเอง</string>
+    <string name="filter_search_hint">ค้นหาตัวกรอง…</string>
+    <string name="filter_search_no_results">ไม่พบตัวกรองสำหรับ \"%s\"</string>
     <string name="filter_log_cleared">ล้างบันทึกแล้ว</string>
     <string name="filter_domain_whitelisted">เพิ่มในไวท์ลิสต์แล้ว: %s</string>
     <string name="filter_domain_already_whitelisted">อยู่ในไวท์ลิสต์แล้ว</string>

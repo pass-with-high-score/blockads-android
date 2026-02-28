@@ -220,6 +220,8 @@
     <string name="filter_built_in">Integrados</string>
     <string name="filter_custom">Personalizados</string>
     <string name="filter_custom_empty">Aún no se han añadido filtros personalizados</string>
+    <string name="filter_search_hint">Buscar filtros…</string>
+    <string name="filter_search_no_results">No se encontraron filtros para \"%s\"</string>
     <string name="filter_log_cleared">Registros borrados</string>
     <string name="filter_domain_whitelisted">Añadido a la lista blanca: %s</string>
     <string name="filter_domain_already_whitelisted">Ya está en la lista blanca</string>

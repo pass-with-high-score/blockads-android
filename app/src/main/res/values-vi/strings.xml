@@ -252,6 +252,8 @@
     <string name="filter_built_in">Tích hợp</string>
     <string name="filter_custom">Tùy chỉnh</string>
     <string name="filter_custom_empty">Chưa thêm bộ lọc tùy chỉnh nào</string>
+    <string name="filter_search_hint">Tìm kiếm bộ lọc…</string>
+    <string name="filter_search_no_results">Không tìm thấy bộ lọc cho \"%s\"</string>
     <string name="filter_log_cleared">Đã xóa nhật ký</string>
     <string name="filter_domain_whitelisted">Tên miền đã được thêm vào danh sách cho phép: %s</string>
     <string name="filter_domain_already_whitelisted">Tên miền đã tồn tại trong danh sách cho phép</string>

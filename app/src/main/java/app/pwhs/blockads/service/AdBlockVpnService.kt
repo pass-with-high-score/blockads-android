@@ -308,7 +308,7 @@ class AdBlockVpnService : VpnService() {
                 // Try to establish VPN with retry logic
                 var vpnEstablished = false
                 while (!vpnEstablished && retryManager.shouldRetry()) {
-                    vpnEstablished = establishVpn(upstreamDns, whitelistedApps)
+                    vpnEstablished = establishVpn(whitelistedApps)
 
                     if (!vpnEstablished && retryManager.shouldRetry()) {
                         Timber
@@ -375,7 +375,7 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private fun establishVpn(upstreamDns: String, whitelistedApps: Set<String>): Boolean {
+    private fun establishVpn(whitelistedApps: Set<String>): Boolean {
         return try {
             // Establish VPN — only route DNS traffic, NOT all traffic
             // We use a fake DNS server IP (10.0.0.1) and only route that IP
