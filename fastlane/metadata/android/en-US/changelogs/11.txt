@@ -1,0 +1,3 @@
+- Enhanced update notifications
+- Added website link in the app
+- Added new grey accent color

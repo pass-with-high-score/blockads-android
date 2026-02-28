@@ -93,6 +93,7 @@
     <string name="about_description">ตัวบล็อกโฆษณาโอเพนซอร์สฟรี\nไม่เก็บข้อมูล ไม่ติดตาม</string>
     <string name="about_version">เวอร์ชัน %s</string>
     <string name="about_github">ซอร์สโค้ด (GitHub)</string>
+    <string name="about_website">Website</string>
     <string name="about_privacy_policy">นโยบายความเป็นส่วนตัว</string>
     <string name="about_contact">ติดต่อเรา</string>
     <string name="about_licenses">สัญญาอนุญาตโอเพนซอร์ส</string>

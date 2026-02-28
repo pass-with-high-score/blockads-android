@@ -93,6 +93,7 @@
     <string name="about_description">무료 오픈 소스 광고 차단기.\n데이터 수집 없음. 추적 없음.</string>
     <string name="about_version">버전 %s</string>
     <string name="about_github">소스 코드 (GitHub)</string>
+    <string name="about_website">Website</string>
     <string name="about_privacy_policy">개인정보 처리방침</string>
     <string name="about_contact">문의하기</string>
     <string name="about_licenses">오픈 소스 라이선스</string>

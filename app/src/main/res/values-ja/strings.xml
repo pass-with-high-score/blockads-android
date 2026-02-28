@@ -93,6 +93,7 @@
     <string name="about_description">無料のオープンソース広告ブロッカー。\nデータ収集なし。トラッキングなし。</string>
     <string name="about_version">バージョン %s</string>
     <string name="about_github">ソースコード (GitHub)</string>
+    <string name="about_website">Website</string>
     <string name="about_privacy_policy">プライバシーポリシー</string>
     <string name="about_contact">お問い合わせ</string>
     <string name="about_licenses">オープンソースライセンス</string>
