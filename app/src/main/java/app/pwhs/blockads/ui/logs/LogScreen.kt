@@ -26,15 +26,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -123,45 +120,27 @@ fun LogScreen(
                     }
                 },
                 actions = {
-                    if (selectionMode) {
-                        IconButton(onClick = { viewModel.toggleSelectionMode() }) {
-                            Icon(
-                                Icons.Default.Close,
-                                contentDescription = "Exit selection",
-                                tint = TextSecondary
-                            )
-                        }
-                    } else {
-                        // Real-time toggle
-                        IconButton(onClick = { viewModel.toggleRealTimeMode() }) {
-                            Icon(
-                                Icons.Default.SyncAlt,
-                                contentDescription = "Real-time",
-                                tint = if (realTimeMode) MaterialTheme.colorScheme.primary else TextSecondary
-                            )
-                        }
-                        IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
-                            Icon(
-                                if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = TextSecondary
-                            )
-                        }
-                        // Bulk select mode
-                        IconButton(onClick = { viewModel.toggleSelectionMode() }) {
-                            Icon(
-                                Icons.Default.Checklist,
-                                contentDescription = "Select",
-                                tint = TextSecondary
-                            )
-                        }
-                        IconButton(onClick = { viewModel.clearLogs() }) {
-                            Icon(
-                                Icons.Default.DeleteSweep,
-                                contentDescription = "Clear logs",
-                                tint = TextSecondary
-                            )
-                        }
+                    // Real-time toggle
+                    IconButton(onClick = { viewModel.toggleRealTimeMode() }) {
+                        Icon(
+                            Icons.Default.SyncAlt,
+                            contentDescription = "Real-time",
+                            tint = if (realTimeMode) MaterialTheme.colorScheme.primary else TextSecondary
+                        )
+                    }
+                    IconButton(onClick = { isSearchVisible = !isSearchVisible }) {
+                        Icon(
+                            if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = TextSecondary
+                        )
+                    }
+                    IconButton(onClick = { viewModel.clearLogs() }) {
+                        Icon(
+                            Icons.Default.DeleteSweep,
+                            contentDescription = "Clear logs",
+                            tint = TextSecondary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -169,49 +148,6 @@ fun LogScreen(
                 )
             )
         },
-        bottomBar = {
-            // Bulk action bar
-            if (selectionMode && selectedIds.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .padding(bottom = 100.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = { viewModel.bulkBlock() },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = DangerRed
-                        )
-                    ) {
-                        Icon(
-                            Icons.Default.Block,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(R.string.log_bulk_block))
-                    }
-                    Button(
-                        onClick = { viewModel.bulkWhitelist() },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = WhitelistAmber
-                        )
-                    ) {
-                        Icon(
-                            Icons.Default.Dns,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(stringResource(R.string.log_bulk_whitelist))
-                    }
-                }
-            }
-        }
     ) { innerPadding ->
         Column(
             modifier = Modifier

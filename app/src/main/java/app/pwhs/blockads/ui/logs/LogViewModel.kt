@@ -120,13 +120,6 @@ class LogViewModel(
         _realTimeMode.value = !_realTimeMode.value
     }
 
-    fun toggleSelectionMode() {
-        _selectionMode.value = !_selectionMode.value
-        if (!_selectionMode.value) {
-            _selectedIds.value = emptySet()
-        }
-    }
-
     fun toggleSelection(id: Long) {
         val current = _selectedIds.value.toMutableSet()
         if (current.contains(id)) current.remove(id) else current.add(id)
@@ -178,45 +171,6 @@ class LogViewModel(
             filterListRepository.loadCustomRules()
             filterListRepository.loadWhitelist()
             _events.toast(R.string.log_domain_unblocked, listOf(cleanDomain))
-        }
-    }
-
-    fun bulkBlock() {
-        viewModelScope.launch {
-            val currentLogs = logs.value
-            val ids = _selectedIds.value
-            val domains = currentLogs.filter { ids.contains(it.id) }.map { it.domain }.distinct()
-            domains.forEach { domain ->
-                val cleanDomain = domain.trim().lowercase()
-                val rule =
-                    CustomRuleParser.parseRule(CustomRuleParser.formatBlockRule(cleanDomain))
-                if (rule != null) {
-                    customDnsRuleDao.insert(rule)
-                }
-            }
-            filterListRepository.loadCustomRules()
-            _selectedIds.value = emptySet()
-            _selectionMode.value = false
-            _events.toast(R.string.rule_added)
-        }
-    }
-
-    fun bulkWhitelist() {
-        viewModelScope.launch {
-            val currentLogs = logs.value
-            val ids = _selectedIds.value
-            val domains = currentLogs.filter { ids.contains(it.id) }.map { it.domain }.distinct()
-            domains.forEach { domain ->
-                val cleanDomain = domain.trim().lowercase()
-                val exists = whitelistDomainDao.exists(cleanDomain)
-                if (exists == 0) {
-                    whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
-                }
-            }
-            filterListRepository.loadWhitelist()
-            _selectedIds.value = emptySet()
-            _selectionMode.value = false
-            _events.toast(R.string.log_whitelisted, listOf(""))
         }
     }
 }
