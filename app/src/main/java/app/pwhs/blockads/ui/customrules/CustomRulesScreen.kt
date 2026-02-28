@@ -91,6 +91,7 @@ fun CustomRulesScreen(
                             Icon(Icons.Default.MoreVert, contentDescription = "More")
                         }
                         DropdownMenu(
+                            containerColor = MaterialTheme.colorScheme.background,
                             expanded = showMenuDropdown,
                             onDismissRequest = { showMenuDropdown = false }
                         ) {
