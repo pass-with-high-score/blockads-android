@@ -456,6 +456,11 @@
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="settings_sponsor">Sponsor Us</string>
     <string name="settings_sponsor_desc">Support BlockAds development on GitHub</string>
+    <string name="settings_community">コミュニティ</string>
+    <string name="settings_reddit">Reddit</string>
+    <string name="settings_reddit_desc">Redditのコミュニティに参加する</string>
+    <string name="settings_telegram">Telegram</string>
+    <string name="settings_telegram_desc">Telegramのチャットに参加する</string>
     <string name="widget_protected">Protected</string>
     <string name="widget_unprotected">Off</string>
 

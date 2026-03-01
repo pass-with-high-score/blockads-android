@@ -509,6 +509,11 @@
     <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
     <string name="settings_sponsor">Tài trợ</string>
     <string name="settings_sponsor_desc">Hỗ trợ phát triển BlockAds trên GitHub</string>
+    <string name="settings_community">Cộng đồng</string>
+    <string name="settings_reddit">Reddit</string>
+    <string name="settings_reddit_desc">Tham gia cộng đồng trên Reddit</string>
+    <string name="settings_telegram">Telegram</string>
+    <string name="settings_telegram_desc">Tham gia nhóm chat trên Telegram</string>
     <string name="filter_setup_active_count">%1$d active</string>
     <string name="copied_url">Đã sao chép URL</string>
     <string name="filter_error_invalid_url">Vui lòng nhập URL hợp lệ (http:// hoặc https://)</string>

@@ -515,6 +515,11 @@
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="settings_sponsor">Sponsor Us</string>
     <string name="settings_sponsor_desc">Support BlockAds development on GitHub</string>
+    <string name="settings_community">Community</string>
+    <string name="settings_reddit">Reddit</string>
+    <string name="settings_reddit_desc">Join our community on Reddit</string>
+    <string name="settings_telegram">Telegram</string>
+    <string name="settings_telegram_desc">Join our chat on Telegram</string>
     <string name="filter_setup_active_count">%1$d active</string>
     <string name="copied_url">Copied URL</string>
     <string name="filter_error_invalid_url">Please enter a valid URL (http:// or https://)</string>
