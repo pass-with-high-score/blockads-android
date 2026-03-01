@@ -1,112 +1,40 @@
-BlockAds — Smart Ad Blocker & Firewall for Android
+Tired of intrusive ads slowing down your phone?<br>
+BlockAds blocks ads across all your apps and browsers with just one tap — no root required.<br><br>
 
-Tired of intrusive ads slowing down your phone?
-BlockAds blocks ads across all your apps and browsers with just one tap — no root required.
+<b>🔥 KEY FEATURES</b><br>
+<ul>
+<li><b>🚫 System-Wide Ad Blocking:</b> Smart DNS-based filtering for every app and browser. No root access required.</li>
+<li><b>🔒 Privacy Protection:</b> Blocks trackers and spyware. Zero data collection — everything stays locally on your device.</li>
+<li><b>🛡️ App Firewall & Profiles:</b> Block internet access for specific apps (Wi-Fi/Mobile). Switch instantly between Default, Strict, Family, and Gaming profiles.</li>
+<li><b>👨‍👩‍👧 Parental Controls:</b> Enforce SafeSearch (Google/Bing) and YouTube Restricted Mode via Family-safe DNS providers.</li>
+<li><b>📊 Detailed Statistics:</b> View real-time blocked ad counters, 24-hour activity charts, and detailed DNS query logs.</li>
+<li><b>⚙️ Fully Customizable:</b> Add custom filter lists via URL (ABPVN, AdGuard, EasyList, etc.), create allow/block rules, and use custom DoH/DoT encrypted DNS.</li>
+<li><b>🎨 Modern UI:</b> Material 3 design built with Jetpack Compose. Features Dark/Light themes, custom accent colors, Quick Settings tile, and Home screen widgets.</li>
+<li><b>📦 Backup & Restore:</b> Export your configuration to JSON and easily import it on a new device.</li>
+<li><b>🔋 Battery & Data Friendly:</b> Minimal performance impact. Filters only DNS traffic, reducing unnecessary ad data downloads.</li>
+</ul><br>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KEY FEATURES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<b>🚀 HOW TO USE</b><br>
+<ul>
+<li>Open BlockAds.</li>
+<li>Tap the power button and allow the VPN connection.</li>
+<li>Enjoy an ad-free internet experience! (You can also toggle protection via Quick Settings tile or widget).</li>
+</ul><br>
 
-🚫 SYSTEM-WIDE AD BLOCKING
+<b>❓ FAQ</b><br>
+<b>• Is BlockAds safe?</b><br>
+Yes. BlockAds only filters DNS queries locally. No personal data is intercepted or transmitted to external servers.<br><br>
 
-Block ads in every app and browser
-Smart DNS-based filtering technology
-No root access required
+<b>• Why does it need VPN permission?</b><br>
+It creates a local VPN tunnel on your device to route and filter DNS requests on-device. It is not a remote VPN service.<br><br>
 
-🔒 PRIVACY PROTECTION
+<b>• Does it work with all apps?</b><br>
+Yes, it works system-wide. You can also whitelist specific apps or use the firewall feature to manage access.<br><br>
 
-Block trackers and spyware
-All data is stored locally on your device
-Zero data collection — we do not track you
+<b>• Is it really free?</b><br>
+Yes! BlockAds is 100% free, open-source, and contains no in-app purchases or ads.<br><br>
 
-🔥 APP FIREWALL
+<b>• Will it slow down my internet?</b><br>
+No. DNS filtering is extremely lightweight. It actually speeds up your browsing and saves battery by preventing ads from loading.<br><br>
 
-Block internet access for specific apps
-Set rules by network type (Wi-Fi or Mobile Data)
-Schedule blocking with custom time ranges
-
-🛡️ PROTECTION PROFILES
-
-4 built-in profiles: Default, Strict, Family, and Gaming
-Family profile enables SafeSearch and YouTube Restricted Mode
-Switch profiles instantly with one tap
-Create the perfect setup for every use case
-
-👨‍👩‍👧 PARENTAL CONTROLS
-
-SafeSearch enforcement for Google and Bing
-YouTube Restricted Mode to filter inappropriate content
-Family-safe DNS providers (OpenDNS Family Shield, Cloudflare Family)
-
-📊 DETAILED STATISTICS
-
-Real-time blocked ad counter
-24-hour activity chart
-Detailed DNS query logs so you can see exactly what is blocked
-Daily summary notifications
-Milestone alerts (1K, 10K, 100K ads blocked!)
-
-⚙️ FULLY CUSTOMIZABLE
-
-Multiple built-in filter lists (ABPVN, AdGuard DNS, EasyList, HostsVN, and more)
-Add custom filter lists via URL
-Create your own allow/block rules for specific domains
-Choose your DNS provider (Google, Cloudflare, AdGuard, Quad9, OpenDNS, or custom)
-DNS-over-HTTPS (DoH) support for encrypted queries
-Auto-reconnect on device boot
-Auto-update filter lists on schedule (daily, weekly, Wi-Fi only)
-
-🎨 MODERN AND CLEAN UI
-
-Material 3 design with Jetpack Compose
-Dark, Light, and System theme modes
-Customizable accent color
-Multi-language support
-Quick Settings tile for instant on/off control
-Home screen widget with toggle and live stats
-
-📦 BACKUP AND RESTORE
-
-Export all settings to JSON
-Import settings on a new device
-Never lose your configuration
-
-🔋 BATTERY AND DATA FRIENDLY
-
-Filters only DNS traffic for minimal performance impact
-Reduces unnecessary ad data downloads
-Runs quietly in the background
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-HOW TO USE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Open BlockAds
-Tap the power button to start blocking
-Allow the VPN connection
-Enjoy an ad-free internet experience
-You can also toggle protection directly from the Quick Settings tile or the home screen widget.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FAQ
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Is BlockAds safe?
-Yes. BlockAds only filters DNS queries locally to block ads. No personal data is intercepted or transmitted.
-
-Why does it need VPN permission?
-BlockAds creates a local VPN tunnel on your device to filter DNS requests. No data is sent to external servers — everything stays on your phone.
-
-Does it work with all apps?
-Yes. BlockAds works system-wide across all apps, browsers, and games. You can also whitelist specific apps or use the firewall to manage internet access per app.
-
-Is it really free?
-Yes. BlockAds is 100% free, with no ads inside the app, no in-app purchases, and it is open source.
-
-Will it slow down my internet?
-No. BlockAds only processes DNS queries, which are very small, so there is virtually no impact on speed or battery life.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-BlockAds is free, open source, and built with privacy in mind.
-Download now and take back control of your Android experience.
+BlockAds is free, open source, and built with privacy in mind. Download now and take back control of your Android experience!
