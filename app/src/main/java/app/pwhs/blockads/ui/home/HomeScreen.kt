@@ -66,7 +66,6 @@ import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.StatCard
 import app.pwhs.blockads.ui.home.component.StatsChart
-import app.pwhs.blockads.ui.home.component.UpdateDialog
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.SecurityOrange
@@ -101,12 +100,10 @@ fun HomeScreen(
     val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
     val activeProfile by viewModel.activeProfile.collectAsState()
-    val availableUpdate by viewModel.availableUpdate.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.preloadFilter()
-        viewModel.checkForUpdate(context)
     }
 
     Scaffold(
@@ -600,12 +597,6 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(200.dp))
         }
 
-    }
-    availableUpdate?.let { update ->
-        UpdateDialog(
-            update = update,
-            onDismissUpdate = { viewModel.dismissUpdate() }
-        )
     }
 }
 

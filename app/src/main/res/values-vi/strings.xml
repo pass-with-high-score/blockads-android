@@ -515,12 +515,5 @@
     <string name="filter_error_duplicate_url">Danh sách bộ lọc này đã tồn tại</string>
     <string name="filter_error_invalid_content">URL không chứa danh sách bộ lọc hợp lệ</string>
 
-    <!-- Update notification -->
-    <string name="update_available_title">Phiên bản %1$s đã có</string>
-    <string name="update_available_text">Đã có phiên bản mới của BlockAds</string>
-    <string name="update_now">Cập nhật</string>
-    <string name="update_dismiss">Để sau</string>
-    <string name="update_channel_name">Cập nhật ứng dụng</string>
-    <string name="update_channel_desc">Thông báo về phiên bản ứng dụng mới</string>
 
 </resources>

@@ -4,25 +4,20 @@ import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pwhs.blockads.BuildConfig
-import app.pwhs.blockads.data.datastore.AppPreferences
-import app.pwhs.blockads.data.entities.DailyStat
 import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.dao.ProtectionProfileDao
+import app.pwhs.blockads.data.entities.DailyStat
 import app.pwhs.blockads.data.entities.DnsLogEntry
-import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.entities.HourlyStat
 import app.pwhs.blockads.data.entities.ProtectionProfile
-import app.pwhs.blockads.data.dao.ProtectionProfileDao
 import app.pwhs.blockads.data.entities.TopBlockedDomain
+import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
-import app.pwhs.blockads.ui.home.data.AvailableUpdate
-import app.pwhs.blockads.update.UpdateChecker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -31,8 +26,6 @@ class HomeViewModel(
     dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
     profileDao: ProtectionProfileDao,
-    private val appPreferences: AppPreferences,
-    private val updateChecker: UpdateChecker,
 ) : ViewModel() {
 
     // Poll AdBlockVpnService.isRunning for immediate state updates
@@ -78,18 +71,6 @@ class HomeViewModel(
     val protectionUptimeMs: StateFlow<Long> = _protectionUptimeMs.asStateFlow()
 
     val domainCount: Int get() = filterRepo.domainCount
-
-    // Update notification — combines stored update info with dismissed version
-    val availableUpdate: StateFlow<AvailableUpdate?> = combine(
-        appPreferences.availableUpdateVersion,
-        appPreferences.availableUpdateChangelog,
-        appPreferences.availableUpdateUrl,
-        appPreferences.dismissedUpdateVersion
-    ) { version, changelog, url, dismissed ->
-        if (version.isNotBlank() && version != BuildConfig.VERSION_NAME && version != dismissed) {
-            AvailableUpdate(version, changelog, url)
-        } else null
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
         // Start polling VPN state
@@ -148,21 +129,4 @@ class HomeViewModel(
         }
     }
 
-    fun dismissUpdate() {
-        val update = availableUpdate.value ?: return
-        viewModelScope.launch {
-            appPreferences.setDismissedUpdateVersion(update.version)
-        }
-    }
-
-    fun checkForUpdate(context: Context) {
-        viewModelScope.launch {
-            val update = updateChecker.checkForUpdate(context)
-            if (update != null) {
-                appPreferences.setAvailableUpdateVersion(update.latestVersion)
-                appPreferences.setAvailableUpdateChangelog(update.changelog)
-                appPreferences.setAvailableUpdateUrl(update.webUrl)
-            }
-        }
-    }
 }
