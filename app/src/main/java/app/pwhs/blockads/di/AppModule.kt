@@ -22,7 +22,6 @@ import app.pwhs.blockads.ui.appmanagement.AppManagementViewModel
 import app.pwhs.blockads.ui.customrules.CustomRulesViewModel
 import app.pwhs.blockads.ui.firewall.FirewallViewModel
 import app.pwhs.blockads.ui.splash.SplashViewModel
-import app.pwhs.blockads.update.UpdateChecker
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -88,11 +87,8 @@ val appModule = module {
     // Profile Manager
     single { ProfileManager(get(), get(), get(), get()) }
 
-    // Update Checker
-    single { UpdateChecker(get()) }
-
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get()) }
     viewModel {
