@@ -4,7 +4,7 @@
     <string name="notification_channel_name">Dịch vụ bảo vệ quyền riêng tư</string>
     <string name="notification_channel_description">Hiển thị khi VPN bảo vệ quyền riêng tư đang hoạt động</string>
     <string name="vpn_notification_title">BlockAds đang hoạt động</string>
-    <string name="vpn_notification_text">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
+    <string name="vpn_notification_text">Thiết bị của bạn đang được bảo vệ khỏi mối đe dọa</string>
     <string name="vpn_notification_reconnecting">BlockAds đang kết nối lại</string>
     <string name="vpn_notification_reconnecting_text">Mạng thay đổi, đang kết nối lại VPN…</string>
     <string name="vpn_notification_retrying">BlockAds đang thử lại</string>
@@ -59,7 +59,7 @@
     <string name="onboarding_protection_title">Chọn mức độ bảo vệ</string>
     <string name="onboarding_protection_desc">Chọn mức độ bảo vệ quyền riêng tư</string>
     <string name="onboarding_protection_basic">Cơ bản</string>
-    <string name="onboarding_protection_basic_desc">Chặn các mạng quảng cáo lớn. Ít ảnh hưởng đến chức năng trang web.</string>
+    <string name="onboarding_protection_basic_desc">Chặn các mạng theo dõi lớn. Ít ảnh hưởng đến chức năng trang web.</string>
     <string name="onboarding_protection_standard">Tiêu chuẩn</string>
     <string name="onboarding_protection_standard_desc">Chặn trình theo dõi, phân tích và mối đe dọa. Cân bằng tốt giữa bảo vệ và tương thích.</string>
     <string name="onboarding_protection_strict">Nghiêm ngặt</string>
@@ -89,7 +89,7 @@
 
     <!-- Onboarding: Completion -->
     <string name="onboarding_complete_title">Bạn đã được bảo vệ!</string>
-    <string name="onboarding_complete_desc">Chúc mừng! BlockAds đã được cấu hình và sẵn sàng bảo vệ thiết bị của bạn khỏi quảng cáo và trình theo dõi.</string>
+    <string name="onboarding_complete_desc">Chúc mừng! BlockAds đã được cấu hình và sẵn sàng bảo vệ thiết bị của bạn khỏi trình theo dõi và mối đe dọa.</string>
     <string name="onboarding_complete_stats">Nhấn \"Bắt đầu\" để bật bảo vệ</string>
 
     <!-- Whitelist Apps -->
@@ -135,7 +135,7 @@
 
     <!-- Home Screen -->
     <string name="home_connecting_desc">Đang thiết lập kết nối VPN…</string>
-    <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
+    <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi mối đe dọa</string>
     <string name="home_unprotected_desc">Nhấn nút để bật bảo vệ</string>
     <string name="home_block_rate">Tỷ lệ chặn</string>
     <string name="home_filter_rules">Quy tắc lọc</string>
@@ -407,7 +407,7 @@
     <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
 
     <!-- Notification Improvements -->
-    <string name="vpn_notification_stats_today">Đã chặn %1$d quảng cáo hôm nay | Uptime %2$s</string>
+    <string name="vpn_notification_stats_today">Đã chặn %1$d mối đe dọa hôm nay | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Tạm dừng 1h</string>
     <string name="vpn_notification_action_stop">Dừng</string>
     <string name="vpn_paused_title">BlockAds đã tạm dừng</string>
@@ -415,11 +415,11 @@
     <string name="daily_summary_channel_name">Tóm tắt hàng ngày</string>
     <string name="daily_summary_channel_description">Tóm tắt bảo vệ cuối ngày</string>
     <string name="daily_summary_title">Bảo vệ hôm nay</string>
-    <string name="daily_summary_text">Hôm nay chúng tôi đã chặn %1$d quảng cáo cho bạn!</string>
+    <string name="daily_summary_text">Hôm nay chúng tôi đã chặn %1$d mối đe dọa cho bạn!</string>
     <string name="milestone_channel_name">Cột mốc</string>
     <string name="milestone_channel_description">Thông báo khi đạt cột mốc bảo vệ</string>
     <string name="milestone_title">🎉 Đạt cột mốc!</string>
-    <string name="milestone_text">Bạn đã chặn %1$s quảng cáo! Tiếp tục nhé!</string>
+    <string name="milestone_text">Bạn đã chặn %1$s mối đe dọa! Tiếp tục nhé!</string>
     <string name="settings_category_notifications">Thông báo</string>
     <string name="settings_category_notifications_desc">Tóm tắt hàng ngày, cột mốc</string>
     <string name="settings_daily_summary">Tóm tắt hàng ngày</string>
@@ -435,7 +435,7 @@
     <string name="profile_name_family">Gia đình</string>
     <string name="profile_name_gaming">Chơi game</string>
     <string name="profile_desc_default">Chặn trình theo dõi &amp; mối đe dọa</string>
-    <string name="profile_desc_strict">Chặn tất cả quảng cáo, trình theo dõi, phân tích</string>
+    <string name="profile_desc_strict">Chặn tất cả trình theo dõi, phân tích, phần mềm độc hại</string>
     <string name="profile_desc_family">Chặn mối đe dọa + nội dung người lớn + cờ bạc</string>
     <string name="profile_desc_gaming">DNS độ trễ thấp với cấu hình tối ưu cho chơi game</string>
     <string name="profile_desc_custom">Cấu hình hồ sơ tùy chỉnh</string>

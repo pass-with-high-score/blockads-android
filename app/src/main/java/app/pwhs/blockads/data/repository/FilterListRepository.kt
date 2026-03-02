@@ -38,14 +38,14 @@ class FilterListRepository(
                 name = "ABPVN",
                 url = "https://abpvn.com/android/abpvn.txt",
                 description = "Vietnamese ad filter list",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true
             ),
             FilterList(
                 name = "HostsVN",
                 url = "https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts",
                 description = "Vietnamese hosts-based ad blocker",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true
             ),
             FilterList(
@@ -59,7 +59,7 @@ class FilterListRepository(
                 name = "StevenBlack Unified",
                 url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
                 description = "Unified hosts from multiple curated sources — ads & malware",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true
             ),
             FilterList(

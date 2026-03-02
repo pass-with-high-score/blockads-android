@@ -87,11 +87,11 @@ class AppPreferences(private val context: Context) {
         const val DNS_RESPONSE_REFUSED = "refused"
         const val DNS_RESPONSE_CUSTOM_IP = "custom_ip"
 
-        const val DEFAULT_FILTER_URL = "https://abpvn.com/android/abpvn.txt"
-        const val DEFAULT_UPSTREAM_DNS = "8.8.8.8"
-        const val DEFAULT_FALLBACK_DNS = "1.1.1.1"
+        const val DEFAULT_FILTER_URL = "https://urlhaus.abuse.ch/downloads/hostfile/"
+        const val DEFAULT_UPSTREAM_DNS = "1.1.1.2"
+        const val DEFAULT_FALLBACK_DNS = "1.0.0.2"
         const val DEFAULT_DNS_PROTOCOL = "PLAIN"
-        const val DEFAULT_DOH_URL = "https://dns.google/dns-query"
+        const val DEFAULT_DOH_URL = "https://security.cloudflare-dns.com/dns-query"
     }
 
     val vpnEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->

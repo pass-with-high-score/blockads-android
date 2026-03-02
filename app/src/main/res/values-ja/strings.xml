@@ -433,17 +433,17 @@
     <string name="daily_summary_channel_name">Daily Summary</string>
     <string name="daily_summary_channel_description">End-of-day protection summary</string>
     <string name="daily_summary_title">Daily Protection Summary</string>
-    <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
+    <string name="daily_summary_text">Today we blocked %1$d threats for you!</string>
     <string name="milestone_channel_name">Milestones</string>
     <string name="milestone_channel_description">Achievements when you reach protection milestones</string>
     <string name="milestone_title">🎉 Milestone reached!</string>
-    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="milestone_text">You\'ve blocked %1$s threats! Keep going!</string>
     <string name="settings_category_notifications">Notifications</string>
     <string name="settings_category_notifications_desc">Daily summary, milestones</string>
     <string name="settings_daily_summary">Daily summary</string>
-    <string name="settings_daily_summary_desc">Show end-of-day blocking summary</string>
+    <string name="settings_daily_summary_desc">Show end-of-day protection summary</string>
     <string name="settings_milestone_notifications">Milestone notifications</string>
-    <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
+    <string name="settings_milestone_notifications_desc">Notify when you reach protection milestones</string>
     <!-- Security Stats -->
     <string name="home_security_threats">Threats Blocked</string>
     <string name="filter_category_ad">Tracker Blocking</string>

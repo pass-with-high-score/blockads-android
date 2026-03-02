@@ -74,6 +74,15 @@ object DnsProviders {
         description = "Family-safe DNS blocking adult content"
     )
 
+    val CLOUDFLARE_SECURITY = DnsProvider(
+        id = "cloudflare_security",
+        name = "Cloudflare Security",
+        category = DnsCategory.PRIVACY,
+        ipAddress = "1.1.1.2",
+        dohUrl = "https://security.cloudflare-dns.com/dns-query",
+        description = "Cloudflare DNS with malware blocking"
+    )
+
     val CLOUDFLARE_FAMILY = DnsProvider(
         id = "cloudflare_family",
         name = "Cloudflare Family",
@@ -84,8 +93,9 @@ object DnsProviders {
     )
 
     val ALL_PROVIDERS = listOf(
-        GOOGLE,
+        CLOUDFLARE_SECURITY,
         CLOUDFLARE,
+        GOOGLE,
         ADGUARD,
         QUAD9,
         OPENDNS,

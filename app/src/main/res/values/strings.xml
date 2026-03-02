@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">BlockAds</string>
-    <string name="app_tagline">Ad-Free Browsing</string>
-    <string name="notification_channel_name">Ad Blocker Service</string>
-    <string name="notification_channel_description">Shows when VPN ad blocker is active</string>
+    <string name="app_tagline">Privacy &amp; SafeNet</string>
+    <string name="notification_channel_name">Privacy Protection Service</string>
+    <string name="notification_channel_description">Shows when VPN privacy protection is active</string>
     <string name="vpn_notification_title">BlockAds is active</string>
-    <string name="vpn_notification_text">Protecting your device from ads</string>
+    <string name="vpn_notification_text">Protecting your device from threats</string>
     <string name="vpn_notification_reconnecting">BlockAds is reconnecting</string>
     <string name="vpn_notification_reconnecting_text">Network changed, reconnecting VPN…</string>
     <string name="vpn_notification_retrying">BlockAds is retrying</string>
@@ -12,10 +12,10 @@
     <string name="vpn_notification_stats_text">Blocked %1$d | Queries %2$d | Uptime %3$s</string>
     <string name="vpn_alert_channel_name">VPN Alerts</string>
     <string name="vpn_alert_channel_description">Important alerts about VPN status changes</string>
-    <string name="vpn_revoked_title">Ad blocking stopped</string>
+    <string name="vpn_revoked_title">Protection stopped</string>
     <string name="vpn_revoked_text">Another VPN app took over the connection. Tap to re-enable BlockAds.</string>
     <string name="vpn_stopped_title">BlockAds is paused</string>
-    <string name="vpn_stopped_text">Ad blocking is disabled. Tap Enable to resume.</string>
+    <string name="vpn_stopped_text">Protection is disabled. Tap Enable to resume.</string>
     <string name="vpn_stopped_action_enable">Enable</string>
     <string name="status_protected">Protected</string>
     <string name="status_connecting">Connecting</string>
@@ -44,8 +44,8 @@
     <string name="logs_filter_blocked">Blocked</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_title_1">Block Ads Smartly</string>
-    <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.\n\n🔒 Privacy promise: We never collect, store, or transmit your browsing data. All processing happens on your device only.</string>
+    <string name="onboarding_title_1">Smart Privacy Protection</string>
+    <string name="onboarding_desc_1">Protect your device from trackers, malware, and threats across all apps with one tap. Uses DNS filtering technology — no root required.\n\n🔒 Privacy promise: We never collect, store, or transmit your browsing data. All processing happens on your device only.</string>
     <string name="onboarding_title_2">Your Privacy, Protected</string>
     <string name="onboarding_desc_2">No data collection. No tracking. All DNS logs stay on your device only. We never see your browsing activity.</string>
     <string name="onboarding_title_3">Free &amp; Open Source</string>
@@ -57,11 +57,11 @@
 
     <!-- Onboarding: Protection Level -->
     <string name="onboarding_protection_title">Choose Protection Level</string>
-    <string name="onboarding_protection_desc">Select how aggressively you want to block ads and trackers</string>
+    <string name="onboarding_protection_desc">Select how aggressively you want to block trackers and threats</string>
     <string name="onboarding_protection_basic">Basic</string>
-    <string name="onboarding_protection_basic_desc">Block major ad networks. Minimal impact on website functionality.</string>
+    <string name="onboarding_protection_basic_desc">Block major tracking networks. Minimal impact on website functionality.</string>
     <string name="onboarding_protection_standard">Standard</string>
-    <string name="onboarding_protection_standard_desc">Block ads, trackers, and analytics. Good balance of protection and compatibility.</string>
+    <string name="onboarding_protection_standard_desc">Block trackers, analytics, and known threats. Good balance of protection and compatibility.</string>
     <string name="onboarding_protection_strict">Strict</string>
     <string name="onboarding_protection_strict_desc">Maximum blocking. May affect some website functionality but provides the strongest protection.</string>
 
@@ -71,7 +71,7 @@
 
     <!-- Onboarding: VPN Permission -->
     <string name="onboarding_vpn_title">VPN Permission Required</string>
-    <string name="onboarding_vpn_desc">BlockAds uses a local VPN to filter DNS queries and block ads. No data leaves your device — this VPN only works locally to intercept and filter DNS requests.</string>
+    <string name="onboarding_vpn_desc">BlockAds uses a local VPN to filter DNS queries and block threats. No data leaves your device — this VPN only works locally to intercept and filter DNS requests.</string>
     <string name="onboarding_vpn_grant">Grant VPN Permission</string>
 
     <!-- Onboarding: Notification Permission -->
@@ -89,12 +89,12 @@
 
     <!-- Onboarding: Completion -->
     <string name="onboarding_complete_title">You\'re Now Protected!</string>
-    <string name="onboarding_complete_desc">Congratulations! BlockAds is configured and ready to protect your device from ads and trackers.</string>
+    <string name="onboarding_complete_desc">Congratulations! BlockAds is configured and ready to protect your device from trackers and threats.</string>
     <string name="onboarding_complete_stats">Tap \"Get Started\" to enable protection</string>
 
     <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Whitelisted Apps</string>
-    <string name="whitelist_apps_subtitle">These apps will bypass ad blocking</string>
+    <string name="whitelist_apps_subtitle">These apps will bypass DNS filtering</string>
     <string name="whitelist_apps_search">Search apps…</string>
     <string name="whitelist_apps_empty">No apps installed</string>
     <string name="whitelist_apps_count">%d apps whitelisted</string>
@@ -112,7 +112,7 @@
 
     <!-- About -->
     <string name="about_title">About</string>
-    <string name="about_description">Free, open-source ad blocker.\nNo data collection. No tracking.</string>
+    <string name="about_description">Free, open-source privacy tool.\nNo data collection. No tracking.</string>
     <string name="about_version">Version %s</string>
     <string name="about_github">Source Code (GitHub)</string>
     <string name="about_website">Website</string>
@@ -129,14 +129,14 @@
     <string name="log_whitelisted">Whitelisted: %s</string>
     <string name="log_already_whitelisted">Already whitelisted</string>
 
-    <!-- Test Block Ads -->
-    <string name="test_block_ads">Test Ad Blocking</string>
-    <string name="test_block_ads_title">Test Ad Blocking</string>
+    <!-- Test Protection -->
+    <string name="test_block_ads">Test Protection</string>
+    <string name="test_block_ads_title">Test Protection</string>
 
     <!-- Home Screen -->
     <string name="home_connecting_desc">Establishing VPN connection…</string>
-    <string name="home_protected_desc">Your device is protected from ads</string>
-    <string name="home_unprotected_desc">Tap the button to enable ad blocking</string>
+    <string name="home_protected_desc">Your device is protected from threats</string>
+    <string name="home_unprotected_desc">Tap the button to enable protection</string>
     <string name="home_block_rate">Block Rate</string>
     <string name="home_filter_rules">Filter Rules</string>
     <string name="home_recent_blocked">Recently Blocked</string>
@@ -198,7 +198,7 @@
     <string name="settings_save_dns">Save DNS</string>
     <string name="settings_whitelist">Whitelist</string>
     <string name="settings_whitelist_apps">Whitelisted Apps</string>
-    <string name="settings_whitelist_apps_desc">Exclude apps from ad blocking</string>
+    <string name="settings_whitelist_apps_desc">Exclude apps from DNS filtering</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_whitelist_domains_desc">These domains will never be blocked</string>
     <string name="settings_add_domain">Add Domain</string>
@@ -215,7 +215,7 @@
     <string name="settings_add_domain_title">Add Whitelisted Domain</string>
     <string name="settings_add_domain_hint">Domain (e.g. example.com)</string>
     <string name="settings_auto_reconnect">Auto-reconnect</string>
-    <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
+    <string name="settings_auto_reconnect_desc">Restart protection on device boot</string>
     <string name="settings_safe_search">SafeSearch</string>
     <string name="settings_safe_search_desc">Force safe search on supported search engines (Google, Bing)</string>
     <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
@@ -305,14 +305,14 @@
 
     <!-- Widget -->
     <string name="widget_name">BlockAds Toggle</string>
-    <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
-    <string name="widget_toggle_description">Toggle ad blocking</string>
+    <string name="widget_description">Toggle DNS protection on/off and view statistics</string>
+    <string name="widget_toggle_description">Toggle DNS protection</string>
     <string name="widget_blocked_today">Blocked today</string>
     <string name="widget_protected">Protected</string>
     <string name="widget_unprotected">Off</string>
 
     <!-- Shortcuts -->
-    <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
+    <string name="shortcut_toggle_vpn">Toggle DNS Protection</string>
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
 
@@ -395,7 +395,7 @@
     <string name="block_reason_security">Dangerous Website</string>
     <!-- Security Stats -->
     <string name="home_security_threats">Threats Blocked</string>
-    <string name="filter_category_ad">Ad Blocking</string>
+    <string name="filter_category_ad">Tracker Blocking</string>
     <string name="filter_category_security">Security</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Stats</string>
@@ -413,25 +413,25 @@
     <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
 
     <!-- Notification Improvements -->
-    <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
+    <string name="vpn_notification_stats_today">%1$d threats blocked today | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Pause 1h</string>
     <string name="vpn_notification_action_stop">Stop</string>
     <string name="vpn_paused_title">BlockAds paused</string>
-    <string name="vpn_paused_text">Ad blocking paused for 1 hour. Will resume automatically.</string>
+    <string name="vpn_paused_text">Protection paused for 1 hour. Will resume automatically.</string>
     <string name="daily_summary_channel_name">Daily Summary</string>
-    <string name="daily_summary_channel_description">End-of-day ad blocking summary</string>
+    <string name="daily_summary_channel_description">End-of-day protection summary</string>
     <string name="daily_summary_title">Daily Protection Summary</string>
-    <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
+    <string name="daily_summary_text">Today we blocked %1$d threats for you!</string>
     <string name="milestone_channel_name">Milestones</string>
-    <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
+    <string name="milestone_channel_description">Achievements when you reach protection milestones</string>
     <string name="milestone_title">🎉 Milestone reached!</string>
-    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="milestone_text">You\'ve blocked %1$s threats! Keep going!</string>
     <string name="settings_category_notifications">Notifications</string>
     <string name="settings_category_notifications_desc">Daily summary, milestones</string>
     <string name="settings_daily_summary">Daily summary</string>
-    <string name="settings_daily_summary_desc">Show end-of-day blocking summary</string>
+    <string name="settings_daily_summary_desc">Show end-of-day protection summary</string>
     <string name="settings_milestone_notifications">Milestone notifications</string>
-    <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
+    <string name="settings_milestone_notifications_desc">Notify when you reach protection milestones</string>
     <!-- Protection Profiles -->
     <string name="profile_title">Protection Profiles</string>
     <string name="profile_section_profiles">Profiles</string>
@@ -440,10 +440,10 @@
     <string name="profile_name_strict">Strict</string>
     <string name="profile_name_family">Family</string>
     <string name="profile_name_gaming">Gaming</string>
-    <string name="profile_desc_default">Block ads &amp; basic trackers</string>
-    <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
-    <string name="profile_desc_family">Block ads + adult content + gambling</string>
-    <string name="profile_desc_gaming">Block ads with optimized settings for gaming</string>
+    <string name="profile_desc_default">Block trackers &amp; known threats</string>
+    <string name="profile_desc_strict">Block all trackers, analytics, malware</string>
+    <string name="profile_desc_family">Block threats + adult content + gambling</string>
+    <string name="profile_desc_gaming">Low-latency DNS with optimized settings for gaming</string>
     <string name="profile_desc_custom">Custom profile configuration</string>
     <string name="profile_active">Active</string>
     <string name="profile_switched">Profile switched</string>
@@ -510,7 +510,7 @@
     <!-- Share & Rate -->
     <string name="settings_share_app">Share App</string>
     <string name="settings_share_app_desc">Share BlockAds with friends and family</string>
-    <string name="settings_share_app_message">Check out BlockAds — a free, open-source ad blocker for Android! Block ads across all apps with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
+    <string name="settings_share_app_message">Check out BlockAds — a free, open-source privacy &amp; family safe DNS tool for Android! Protect your device from trackers and threats with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Rate App</string>
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="settings_sponsor">Sponsor Us</string>
