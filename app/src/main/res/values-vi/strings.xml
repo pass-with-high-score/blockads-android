@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">BlockAds</string>
     <string name="app_tagline">Duyệt Web Không Quảng Cáo</string>
-    <string name="notification_channel_name">Dịch vụ chặn quảng cáo</string>
-    <string name="notification_channel_description">Hiển thị khi VPN chặn quảng cáo đang hoạt động</string>
+    <string name="notification_channel_name">Dịch vụ bảo vệ quyền riêng tư</string>
+    <string name="notification_channel_description">Hiển thị khi VPN bảo vệ quyền riêng tư đang hoạt động</string>
     <string name="vpn_notification_title">BlockAds đang hoạt động</string>
     <string name="vpn_notification_text">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
     <string name="vpn_notification_reconnecting">BlockAds đang kết nối lại</string>
@@ -12,10 +12,10 @@
     <string name="vpn_notification_stats_text">Đã chặn %1$d | Truy vấn %2$d | Uptime %3$s</string>
     <string name="vpn_alert_channel_name">Cảnh báo VPN</string>
     <string name="vpn_alert_channel_description">Cảnh báo quan trọng về thay đổi trạng thái VPN</string>
-    <string name="vpn_revoked_title">Chặn quảng cáo đã dừng</string>
+    <string name="vpn_revoked_title">Bảo vệ đã dừng</string>
     <string name="vpn_revoked_text">Ứng dụng VPN khác đã chiếm kết nối. Nhấn để bật lại BlockAds.</string>
     <string name="vpn_stopped_title">BlockAds đã tạm dừng</string>
-    <string name="vpn_stopped_text">Chặn quảng cáo đã tắt. Nhấn Bật để tiếp tục.</string>
+    <string name="vpn_stopped_text">Bảo vệ đã tắt. Nhấn Bật để tiếp tục.</string>
     <string name="vpn_stopped_action_enable">Bật</string>
     <string name="status_protected">Được bảo vệ</string>
     <string name="status_connecting">Đang kết nối</string>
@@ -44,8 +44,8 @@
     <string name="logs_filter_blocked">Đã chặn</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_title_1">Chặn quảng cáo thông minh</string>
-    <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.\n\n🔒 Cam kết bảo mật: Chúng tôi không bao giờ thu thập, lưu trữ hoặc truyền dữ liệu duyệt web của bạn. Mọi xử lý đều diễn ra trên thiết bị của bạn.</string>
+    <string name="onboarding_title_1">Bảo vệ quyền riêng tư thông minh</string>
+    <string name="onboarding_desc_1">Chặn mối đe dọa trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.\n\n🔒 Cam kết bảo mật: Chúng tôi không bao giờ thu thập, lưu trữ hoặc truyền dữ liệu duyệt web của bạn. Mọi xử lý đều diễn ra trên thiết bị của bạn.</string>
     <string name="onboarding_title_2">Quyền riêng tư của bạn, được bảo vệ</string>
     <string name="onboarding_desc_2">Không thu thập dữ liệu. Không theo dõi. Tất cả nhật ký DNS chỉ lưu trên thiết bị của bạn. Chúng tôi không bao giờ xem hoạt động duyệt web của bạn.</string>
     <string name="onboarding_title_3">Miễn phí &amp; Mã nguồn mở</string>
@@ -57,11 +57,11 @@
 
     <!-- Onboarding: Protection Level -->
     <string name="onboarding_protection_title">Chọn mức độ bảo vệ</string>
-    <string name="onboarding_protection_desc">Chọn mức độ chặn quảng cáo và trình theo dõi</string>
+    <string name="onboarding_protection_desc">Chọn mức độ bảo vệ quyền riêng tư</string>
     <string name="onboarding_protection_basic">Cơ bản</string>
     <string name="onboarding_protection_basic_desc">Chặn các mạng quảng cáo lớn. Ít ảnh hưởng đến chức năng trang web.</string>
     <string name="onboarding_protection_standard">Tiêu chuẩn</string>
-    <string name="onboarding_protection_standard_desc">Chặn quảng cáo, trình theo dõi và phân tích. Cân bằng tốt giữa bảo vệ và tương thích.</string>
+    <string name="onboarding_protection_standard_desc">Chặn trình theo dõi, phân tích và mối đe dọa. Cân bằng tốt giữa bảo vệ và tương thích.</string>
     <string name="onboarding_protection_strict">Nghiêm ngặt</string>
     <string name="onboarding_protection_strict_desc">Chặn tối đa. Có thể ảnh hưởng một số chức năng trang web nhưng bảo vệ mạnh nhất.</string>
 
@@ -71,7 +71,7 @@
 
     <!-- Onboarding: VPN Permission -->
     <string name="onboarding_vpn_title">Cần quyền VPN</string>
-    <string name="onboarding_vpn_desc">BlockAds sử dụng VPN cục bộ để lọc truy vấn DNS và chặn quảng cáo. Không có dữ liệu nào rời khỏi thiết bị — VPN này chỉ hoạt động cục bộ để chặn và lọc các yêu cầu DNS.</string>
+    <string name="onboarding_vpn_desc">BlockAds sử dụng VPN cục bộ để lọc truy vấn DNS và chặn mối đe dọa. Không có dữ liệu nào rời khỏi thiết bị — VPN này chỉ hoạt động cục bộ để chặn và lọc các yêu cầu DNS.</string>
     <string name="onboarding_vpn_grant">Cấp quyền VPN</string>
 
     <!-- Onboarding: Notification Permission -->
@@ -94,7 +94,7 @@
 
     <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Ứng dụng được phép</string>
-    <string name="whitelist_apps_subtitle">Các ứng dụng này sẽ bỏ qua chặn quảng cáo</string>
+    <string name="whitelist_apps_subtitle">Các ứng dụng này sẽ bỏ qua bảo vệ DNS</string>
     <string name="whitelist_apps_search">Tìm ứng dụng…</string>
     <string name="whitelist_apps_empty">Không có ứng dụng nào</string>
     <string name="whitelist_apps_count">%d ứng dụng được phép</string>
@@ -112,7 +112,7 @@
 
     <!-- About -->
     <string name="about_title">Giới thiệu</string>
-    <string name="about_description">Ứng dụng chặn quảng cáo miễn phí, mã nguồn mở.\nKhông thu thập dữ liệu. Không theo dõi.</string>
+    <string name="about_description">Ứng dụng bảo vệ quyền riêng tư miễn phí, mã nguồn mở.\nKhông thu thập dữ liệu. Không theo dõi.</string>
     <string name="about_version">Phiên bản %s</string>
     <string name="about_github">Mã nguồn (GitHub)</string>
     <string name="about_website">Website</string>
@@ -131,12 +131,12 @@
 
     <!-- Test Block Ads -->
     <string name="test_block_ads">Kiểm tra chặn QC</string>
-    <string name="test_block_ads_title">Kiểm tra chặn quảng cáo</string>
+    <string name="test_block_ads_title">Kiểm tra bảo vệ</string>
 
     <!-- Home Screen -->
     <string name="home_connecting_desc">Đang thiết lập kết nối VPN…</string>
     <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
-    <string name="home_unprotected_desc">Nhấn nút để bật chặn quảng cáo</string>
+    <string name="home_unprotected_desc">Nhấn nút để bật bảo vệ</string>
     <string name="home_block_rate">Tỷ lệ chặn</string>
     <string name="home_filter_rules">Quy tắc lọc</string>
     <string name="home_recent_blocked">Chặn gần đây</string>
@@ -198,7 +198,7 @@
     <string name="settings_save_dns">Lưu DNS</string>
     <string name="settings_whitelist">Danh sách cho phép</string>
     <string name="settings_whitelist_apps">Ứng dụng được phép</string>
-    <string name="settings_whitelist_apps_desc">Loại trừ ứng dụng khỏi chặn quảng cáo</string>
+    <string name="settings_whitelist_apps_desc">Loại trừ ứng dụng khỏi bảo vệ DNS</string>
     <string name="settings_whitelist_domains">Tên miền được phép</string>
     <string name="settings_whitelist_domains_desc">Các tên miền này sẽ không bao giờ bị chặn</string>
     <string name="settings_add_domain">Thêm tên miền</string>
@@ -215,7 +215,7 @@
     <string name="settings_add_domain_title">Thêm tên miền cho phép</string>
     <string name="settings_add_domain_hint">Tên miền (vd: example.com)</string>
     <string name="settings_auto_reconnect">Tự động kết nối lại</string>
-    <string name="settings_auto_reconnect_desc">Khởi động lại chặn quảng cáo khi bật thiết bị</string>
+    <string name="settings_auto_reconnect_desc">Khởi động lại bảo vệ khi bật thiết bị</string>
     <string name="settings_safe_search">Tìm kiếm an toàn</string>
     <string name="settings_safe_search_desc">Bật tìm kiếm an toàn trên các công cụ tìm kiếm hỗ trợ (Google, Bing)</string>
     <string name="settings_youtube_restricted">Chế độ hạn chế YouTube</string>
@@ -299,14 +299,14 @@
 
     <!-- Widget -->
     <string name="widget_name">Bật/Tắt BlockAds</string>
-    <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
-    <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
+    <string name="widget_description">Bật tắt bảo vệ và xem thống kê</string>
+    <string name="widget_toggle_description">Bật tắt bảo vệ DNS</string>
     <string name="widget_blocked_today">Đã chặn hôm nay</string>
     <string name="widget_protected">Đang bảo vệ</string>
     <string name="widget_unprotected">Tắt</string>
 
     <!-- Shortcuts -->
-    <string name="shortcut_toggle_vpn">Bật/Tắt chặn quảng cáo</string>
+    <string name="shortcut_toggle_vpn">Bật/Tắt bảo vệ DNS</string>
     <string name="shortcut_toggle_vpn_short">Bật/Tắt VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Không thể bật/tắt</string>
 
@@ -389,7 +389,7 @@
     <string name="block_reason_security">Website nguy hiểm</string>
     <!-- Security Stats -->
     <string name="home_security_threats">Mối đe dọa đã chặn</string>
-    <string name="filter_category_ad">Chặn quảng cáo</string>
+    <string name="filter_category_ad">Chặn trình theo dõi</string>
     <string name="filter_category_security">Bảo mật</string>
     <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
@@ -411,13 +411,13 @@
     <string name="vpn_notification_action_pause">Tạm dừng 1h</string>
     <string name="vpn_notification_action_stop">Dừng</string>
     <string name="vpn_paused_title">BlockAds đã tạm dừng</string>
-    <string name="vpn_paused_text">Chặn quảng cáo tạm dừng 1 giờ. Sẽ tự động tiếp tục.</string>
+    <string name="vpn_paused_text">Bảo vệ tạm dừng 1 giờ. Sẽ tự động tiếp tục.</string>
     <string name="daily_summary_channel_name">Tóm tắt hàng ngày</string>
-    <string name="daily_summary_channel_description">Tóm tắt chặn quảng cáo cuối ngày</string>
+    <string name="daily_summary_channel_description">Tóm tắt bảo vệ cuối ngày</string>
     <string name="daily_summary_title">Bảo vệ hôm nay</string>
     <string name="daily_summary_text">Hôm nay chúng tôi đã chặn %1$d quảng cáo cho bạn!</string>
     <string name="milestone_channel_name">Cột mốc</string>
-    <string name="milestone_channel_description">Thông báo khi đạt cột mốc chặn quảng cáo</string>
+    <string name="milestone_channel_description">Thông báo khi đạt cột mốc bảo vệ</string>
     <string name="milestone_title">🎉 Đạt cột mốc!</string>
     <string name="milestone_text">Bạn đã chặn %1$s quảng cáo! Tiếp tục nhé!</string>
     <string name="settings_category_notifications">Thông báo</string>
@@ -434,10 +434,10 @@
     <string name="profile_name_strict">Nghiêm ngặt</string>
     <string name="profile_name_family">Gia đình</string>
     <string name="profile_name_gaming">Chơi game</string>
-    <string name="profile_desc_default">Chặn quảng cáo &amp; trình theo dõi cơ bản</string>
+    <string name="profile_desc_default">Chặn trình theo dõi &amp; mối đe dọa</string>
     <string name="profile_desc_strict">Chặn tất cả quảng cáo, trình theo dõi, phân tích</string>
-    <string name="profile_desc_family">Chặn quảng cáo + nội dung người lớn + cờ bạc</string>
-    <string name="profile_desc_gaming">Chặn quảng cáo với cấu hình tối ưu cho chơi game</string>
+    <string name="profile_desc_family">Chặn mối đe dọa + nội dung người lớn + cờ bạc</string>
+    <string name="profile_desc_gaming">DNS độ trễ thấp với cấu hình tối ưu cho chơi game</string>
     <string name="profile_desc_custom">Cấu hình hồ sơ tùy chỉnh</string>
     <string name="profile_active">Đang hoạt động</string>
     <string name="profile_switched">Đã chuyển hồ sơ</string>
@@ -504,7 +504,7 @@
     <!-- Share & Rate -->
     <string name="settings_share_app">Chia sẻ ứng dụng</string>
     <string name="settings_share_app_desc">Chia sẻ BlockAds với bạn bè và gia đình</string>
-    <string name="settings_share_app_message">Hãy thử BlockAds — ứng dụng chặn quảng cáo miễn phí, mã nguồn mở cho Android! Chặn quảng cáo trên mọi ứng dụng chỉ với một chạm. Tải tại đây: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
+    <string name="settings_share_app_message">Hãy thử BlockAds — ứng dụng bảo vệ quyền riêng tư &amp; DNS an toàn cho gia đình, miễn phí, mã nguồn mở cho Android! Bảo vệ thiết bị khỏi trình theo dõi và mối đe dọa chỉ với một chạm. Tải tại đây: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Đánh giá ứng dụng</string>
     <string name="settings_rate_app_desc">Để lại đánh giá trên Google Play</string>
     <string name="settings_sponsor">Tài trợ</string>

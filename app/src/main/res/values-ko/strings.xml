@@ -390,10 +390,10 @@
     <string name="profile_name_strict">Strict</string>
     <string name="profile_name_family">Family</string>
     <string name="profile_name_gaming">Gaming</string>
-    <string name="profile_desc_default">Block ads &amp; basic trackers</string>
-    <string name="profile_desc_strict">Block all ads, trackers, analytics</string>
-    <string name="profile_desc_family">Block ads + adult content + gambling</string>
-    <string name="profile_desc_gaming">Block ads with optimized settings for gaming</string>
+    <string name="profile_desc_default">Block trackers &amp; known threats</string>
+    <string name="profile_desc_strict">Block all trackers, analytics, malware</string>
+    <string name="profile_desc_family">Block threats + adult content + gambling</string>
+    <string name="profile_desc_gaming">Low-latency DNS with optimized settings for gaming</string>
     <string name="profile_desc_custom">Custom profile configuration</string>
     <string name="profile_active">Active</string>
     <string name="profile_switched">Profile switched</string>
@@ -418,17 +418,17 @@
     <string name="settings_profiles">Protection Profiles</string>
     <string name="settings_profiles_desc">Preset configurations for different use cases</string>
     <!-- Notification Improvements -->
-    <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
+    <string name="vpn_notification_stats_today">%1$d threats blocked today | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Pause 1h</string>
     <string name="vpn_notification_action_stop">Stop</string>
     <string name="vpn_paused_title">BlockAds paused</string>
-    <string name="vpn_paused_text">Ad blocking paused for 1 hour. Will resume automatically.</string>
+    <string name="vpn_paused_text">Protection paused for 1 hour. Will resume automatically.</string>
     <string name="daily_summary_channel_name">Daily Summary</string>
-    <string name="daily_summary_channel_description">End-of-day ad blocking summary</string>
+    <string name="daily_summary_channel_description">End-of-day protection summary</string>
     <string name="daily_summary_title">Daily Protection Summary</string>
     <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
     <string name="milestone_channel_name">Milestones</string>
-    <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
+    <string name="milestone_channel_description">Achievements when you reach protection milestones</string>
     <string name="milestone_title">🎉 Milestone reached!</string>
     <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
     <string name="settings_category_notifications">Notifications</string>
@@ -439,12 +439,12 @@
     <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
     <!-- Security Stats -->
     <string name="home_security_threats">Threats Blocked</string>
-    <string name="filter_category_ad">Ad Blocking</string>
+    <string name="filter_category_ad">Tracker Blocking</string>
     <string name="filter_category_security">Security</string>
     <!-- Share & Rate -->
     <string name="settings_share_app">Share App</string>
     <string name="settings_share_app_desc">Share BlockAds with friends and family</string>
-    <string name="settings_share_app_message">Check out BlockAds — a free, open-source ad blocker for Android! Block ads across all apps with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
+    <string name="settings_share_app_message">Check out BlockAds — a free, open-source privacy &amp; family safe DNS tool for Android! Protect your device from trackers and threats with one tap. Download it here: https://play.google.com/store/apps/details?id=app.pwhs.blockads</string>
     <string name="settings_rate_app">Rate App</string>
     <string name="settings_rate_app_desc">Leave a review on Google Play</string>
     <string name="settings_sponsor">Sponsor Us</string>
@@ -458,7 +458,7 @@
     <string name="widget_unprotected">Off</string>
 
     <!-- Shortcuts -->
-    <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
+    <string name="shortcut_toggle_vpn">Toggle DNS Protection</string>
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
     <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
     <string name="filter_setup_active_count">%1$d active</string>
