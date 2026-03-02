@@ -129,8 +129,8 @@
     <string name="log_whitelisted">Đã thêm vào danh sách cho phép: %s</string>
     <string name="log_already_whitelisted">Đã có trong danh sách cho phép</string>
 
-    <!-- Test Block Ads -->
-    <string name="test_block_ads">Kiểm tra chặn QC</string>
+    <!-- Test Protection -->
+    <string name="test_block_ads">Kiểm tra bảo vệ</string>
     <string name="test_block_ads_title">Kiểm tra bảo vệ</string>
 
     <!-- Home Screen -->
