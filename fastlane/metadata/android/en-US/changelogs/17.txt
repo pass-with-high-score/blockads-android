@@ -1,0 +1,6 @@
+- Default DNS changed to Quad9 (privacy-focused)
+- Fallback DNS changed to AdGuard DNS
+- DNS provider list sorted alphabetically
+- Disabled VN-specific filters by default (ABPVN, HostsVN)
+- Enabled EasyList and EasyPrivacy by default
+- Improved privacy defaults for international users
