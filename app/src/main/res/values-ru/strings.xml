@@ -253,7 +253,7 @@
     <string name="filter_custom">Пользовательские</string>
     <string name="filter_custom_empty">Пользовательские фильтры ещё не добавлены</string>
     <string name="filter_search_hint">Поиск фильтров…</string>
-    <string name="filter_search_no_results">По запросу "%s" фильтры не найдены</string>
+    <string name="filter_search_no_results">По запросу \"%s\" фильтры не найдены</string>
     <string name="filter_log_cleared">Журнал очищен</string>
     <string name="filter_domain_whitelisted">Домен добавлен в белый список: %s</string>
     <string name="filter_domain_already_whitelisted">Домен уже в белом списке</string>
