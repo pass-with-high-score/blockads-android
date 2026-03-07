@@ -28,3 +28,6 @@ app/release/app-release.aab
 keystore.txt
 play-store-key.json
 .kotlin
+
+# Bundled filter lists (downloaded during CI build)
+app/src/main/assets/bundled_filters/

@@ -36,6 +36,14 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      # Download bundled filter lists
+      - name: Bundle filter lists
+        run: |
+          mkdir -p app/src/main/assets/bundled_filters
+          curl -sL -o "app/src/main/assets/bundled_filters/-1025149380.txt" "https://easylist.to/easylist/easylist.txt"
+          curl -sL -o "app/src/main/assets/bundled_filters/-1463595922.txt" "https://easylist.to/easylist/easyprivacy.txt"
+          curl -sL -o "app/src/main/assets/bundled_filters/320624723.txt" "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+
       - name: Grant execute permission
         run: chmod +x gradlew
 

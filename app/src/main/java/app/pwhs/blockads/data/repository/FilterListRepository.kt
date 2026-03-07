@@ -158,7 +158,7 @@ class FilterListRepository(
                 name = "URLhaus Malicious URL Blocklist",
                 url = "https://urlhaus.abuse.ch/downloads/hostfile/",
                 description = "Blocks malware distribution sites — updated frequently by abuse.ch",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true,
                 category = FilterList.Companion.CATEGORY_SECURITY
             ),
@@ -166,7 +166,7 @@ class FilterListRepository(
                 name = "PhishTank Blocklist",
                 url = "https://phishing.army/download/phishing_army_blocklist.txt",
                 description = "Blocks known phishing websites that steal personal information",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true,
                 category = FilterList.Companion.CATEGORY_SECURITY
             ),
@@ -174,7 +174,7 @@ class FilterListRepository(
                 name = "Malware Domain List",
                 url = "https://raw.githubusercontent.com/RPiList/specials/master/Blocklisten/malware",
                 description = "Community-curated list of domains distributing malware",
-                isEnabled = true,
+                isEnabled = false,
                 isBuiltIn = true,
                 category = FilterList.Companion.CATEGORY_SECURITY
             ),
@@ -325,12 +325,41 @@ class FilterListRepository(
     }
 
     /**
+     * On first launch, copies pre-bundled filter files from assets to the
+     * cache directory so that [loadSingleFilterToTrie] finds them immediately
+     * without needing a network download.
+     */
+    private fun seedBundledFiltersIfNeeded() {
+        val cacheDir = File(context.filesDir, CACHE_DIR)
+        if (cacheDir.exists() && (cacheDir.listFiles()?.isNotEmpty() == true)) return
+
+        cacheDir.mkdirs()
+        try {
+            val bundled = context.assets.list("bundled_filters") ?: return
+            for (filename in bundled) {
+                val dest = File(cacheDir, filename)
+                if (dest.exists()) continue
+                context.assets.open("bundled_filters/$filename").use { input ->
+                    dest.outputStream().buffered().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                Timber.d("Copied bundled filter: $filename")
+            }
+        } catch (e: Exception) {
+            Timber.d("Failed to seed bundled filters: $e")
+        }
+    }
+
+    /**
      * Load all enabled filter lists and merge into Tries.
      * Builds in-memory Trie → serializes to binary file → mmap for near-zero heap.
      * On subsequent startups, reuses existing binary if cache files haven't changed.
      */
     suspend fun loadAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
         try {
+            seedBundledFiltersIfNeeded()
+
             val enabledLists = filterListDao.getEnabled()
             if (enabledLists.isEmpty()) {
                 adTrie = null
