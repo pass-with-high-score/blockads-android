@@ -272,8 +272,8 @@
     <string name="settings_auto_update_frequency_24h">Каждые 24 часа</string>
     <string name="settings_auto_update_frequency_48h">Каждые 48 часов</string>
     <string name="settings_auto_update_frequency_manual">Только вручную</string>
-    <string name="settings_auto_update_wifi_only">Только по Wi‑Fi</string>
-    <string name="settings_auto_update_wifi_only_desc">Обновлять только при подключении к Wi‑Fi</string>
+    <string name="settings_auto_update_wifi_only">Только по Wi-Fi</string>
+    <string name="settings_auto_update_wifi_only_desc">Обновлять только при подключении к Wi-Fi</string>
     <string name="settings_auto_update_notification">Уведомления об обновлениях</string>
     <string name="settings_auto_update_notification_normal">Обычные</string>
     <string name="settings_auto_update_notification_silent">Без звука</string>
