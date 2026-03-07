@@ -41,6 +41,7 @@ import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.rememberNavHostEngine
 import com.ramcosta.composedestinations.spec.Direction
 import timber.log.Timber
+import androidx.compose.ui.Modifier
 
 sealed class Screen(
     val destination: Direction,
@@ -93,9 +94,7 @@ sealed class Screen(
 }
 
 @Composable
-fun BlockAdsApp(
-    onRequestVpnPermission: () -> Unit
-) {
+fun BlockAdsApp(onRequestVpnPermission: () -> Unit, modifier: Modifier = Modifier) {
     val engine = rememberNavHostEngine()
     val navController = engine.rememberNavController()
     val screens =
@@ -113,6 +112,7 @@ fun BlockAdsApp(
     )
 
     Scaffold(
+        modifier = modifier,
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(

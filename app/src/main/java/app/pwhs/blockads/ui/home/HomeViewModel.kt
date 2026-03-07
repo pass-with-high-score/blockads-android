@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class HomeViewModel(
     dnsLogDao: DnsLogDao,
@@ -106,6 +107,7 @@ class HomeViewModel(
                 filterRepo.loadAllEnabledFilters()
                 _filterLoadFailed.value = false
             } catch (e: Exception) {
+                Timber.e(e)
                 _filterLoadFailed.value = true
             } finally {
                 _isLoading.value = false

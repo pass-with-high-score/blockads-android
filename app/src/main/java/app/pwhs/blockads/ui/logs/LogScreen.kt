@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -76,18 +77,19 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogScreen(
+    modifier: Modifier = Modifier,
     viewModel: LogViewModel = koinViewModel()
 ) {
-    val logs by viewModel.logs.collectAsState()
-    val showBlockedOnly by viewModel.showBlockedOnly.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val timeRange by viewModel.timeRange.collectAsState()
-    val appFilter by viewModel.appFilter.collectAsState()
-    val appNames by viewModel.appNames.collectAsState()
-    val realTimeMode by viewModel.realTimeMode.collectAsState()
-    val selectionMode by viewModel.selectionMode.collectAsState()
-    val selectedIds by viewModel.selectedIds.collectAsState()
-    val whitelistedDomains by viewModel.whitelistedDomains.collectAsState()
+    val logs by viewModel.logs.collectAsStateWithLifecycle()
+    val showBlockedOnly by viewModel.showBlockedOnly.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
+    val appFilter by viewModel.appFilter.collectAsStateWithLifecycle()
+    val appNames by viewModel.appNames.collectAsStateWithLifecycle()
+    val realTimeMode by viewModel.realTimeMode.collectAsStateWithLifecycle()
+    val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
+    val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
+    val whitelistedDomains by viewModel.whitelistedDomains.collectAsStateWithLifecycle()
     var isSearchVisible by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
     val context = LocalContext.current
@@ -104,7 +106,7 @@ fun LogScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

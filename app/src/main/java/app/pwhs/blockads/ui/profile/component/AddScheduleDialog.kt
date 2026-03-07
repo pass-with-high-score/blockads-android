@@ -34,7 +34,8 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 @Composable
 fun AddScheduleDialog(
     onDismiss: () -> Unit,
-    onAdd: (Int, Int, Int, Int, String) -> Unit
+    onAdd: (Int, Int, Int, Int, String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var startHour by rememberSaveable { mutableIntStateOf(18) }
     var startMinute by rememberSaveable { mutableIntStateOf(0) }
@@ -53,6 +54,7 @@ fun AddScheduleDialog(
     )
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.profile_add_schedule)) },

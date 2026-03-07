@@ -1,6 +1,6 @@
 package app.pwhs.blockads.service
 
-import android.util.Log
+import timber.log.Timber
 
 /**
  * Manages SafeSearch DNS enforcement by mapping search engine domains
@@ -15,8 +15,6 @@ import android.util.Log
  * Search engines that don't support DNS-level SafeSearch are left unchanged.
  */
 object SafeSearchManager {
-
-    private const val TAG = "SafeSearchManager"
 
     /**
      * Mapping of search engine domain suffixes to their SafeSearch CNAME.
@@ -53,7 +51,7 @@ object SafeSearchManager {
         // Check if domain should be redirected to SafeSearch
         for (redirect in safeSearchRedirects) {
             if (matchesDomain(domain, redirect.domainPattern)) {
-                Log.d(TAG, "SafeSearch redirect: $domain → ${redirect.safeSearchDomain}")
+                Timber.d("SafeSearch redirect: $domain → ${redirect.safeSearchDomain}")
                 return SafeSearchResult(
                     action = SafeSearchResult.Action.REDIRECT,
                     redirectDomain = redirect.safeSearchDomain

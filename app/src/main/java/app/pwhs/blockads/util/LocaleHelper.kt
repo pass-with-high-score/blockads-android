@@ -18,7 +18,7 @@ object LocaleHelper {
     fun setLocale(context: Context, languageTag: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val localeManager = context.getSystemService(LocaleManager::class.java)
-            localeManager.applicationLocales = if (languageTag == AppPreferences.Companion.LANGUAGE_SYSTEM) {
+            localeManager.applicationLocales = if (languageTag == AppPreferences.LANGUAGE_SYSTEM) {
                 LocaleList.getEmptyLocaleList()
             } else {
                 LocaleList.forLanguageTags(languageTag)
@@ -35,7 +35,7 @@ object LocaleHelper {
      */
     fun wrapContext(context: Context, languageTag: String): Context {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return context
-        if (languageTag == AppPreferences.Companion.LANGUAGE_SYSTEM) return context
+        if (languageTag == AppPreferences.LANGUAGE_SYSTEM) return context
 
         val locale = Locale.forLanguageTag(languageTag)
         Locale.setDefault(locale)

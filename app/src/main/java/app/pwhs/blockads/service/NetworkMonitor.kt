@@ -5,11 +5,11 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.util.Log
+import timber.log.Timber
 
 /**
  * Monitors network connectivity changes and notifies when network is available or lost.
- * 
+ *
  * Note: This monitor requires NET_CAPABILITY_VALIDATED, which means it waits for the network
  * to be fully validated before triggering onNetworkAvailable(). This ensures the network is
  * actually usable but may delay reconnection by a few seconds on networks with slow validation.
@@ -19,28 +19,27 @@ class NetworkMonitor(
     private val onNetworkAvailable: () -> Unit,
     private val onNetworkLost: () -> Unit
 ) {
-    companion object {
-        private const val TAG = "NetworkMonitor"
-    }
-
-    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var isRegistered = false
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            Log.d(TAG, "Network available: $network")
+            Timber.d("Network available: $network")
             onNetworkAvailable()
         }
 
         override fun onLost(network: Network) {
-            Log.d(TAG, "Network lost: $network")
+            Timber.d("Network lost: $network")
             onNetworkLost()
         }
 
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-            val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            val hasValidated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-            Log.d(TAG, "Network capabilities changed: hasInternet=$hasInternet, validated=$hasValidated")
+            val hasInternet =
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            val hasValidated =
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            Timber.d("Network capabilities changed: hasInternet=$hasInternet, validated=$hasValidated")
         }
     }
 
@@ -49,7 +48,7 @@ class NetworkMonitor(
      */
     fun startMonitoring() {
         if (isRegistered) {
-            Log.w(TAG, "Network monitoring already started")
+            Timber.w("Network monitoring already started")
             return
         }
 
@@ -61,9 +60,9 @@ class NetworkMonitor(
 
             connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
             isRegistered = true
-            Log.d(TAG, "Network monitoring started")
+            Timber.d("Network monitoring started")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to register network callback", e)
+            Timber.e("Failed to register network callback: $e")
         }
     }
 
@@ -76,9 +75,9 @@ class NetworkMonitor(
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)
             isRegistered = false
-            Log.d(TAG, "Network monitoring stopped")
+            Timber.d("Network monitoring stopped")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to unregister network callback", e)
+            Timber.d("Failed to unregister network callback: $e")
         }
     }
 

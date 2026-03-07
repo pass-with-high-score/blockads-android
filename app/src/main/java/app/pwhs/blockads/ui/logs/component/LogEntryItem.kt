@@ -45,7 +45,7 @@ import app.pwhs.blockads.util.formatTimestamp
 
 @Composable
 fun LogEntryItem(
-    entry: DnsLogEntry,
+    entry: DnsLogEntry, modifier: Modifier = Modifier,
     isWhitelisted: Boolean = false,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -78,6 +78,7 @@ fun LogEntryItem(
     }
 
     Card(
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),

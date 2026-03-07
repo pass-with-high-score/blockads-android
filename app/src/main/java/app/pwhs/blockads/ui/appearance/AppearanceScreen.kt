@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.appearance
 
 import android.os.Build
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.appearance.component.AccentColorCircle
@@ -71,13 +70,15 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppearanceScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: AppearanceViewModel = koinViewModel()
 ) {
-    val themeMode by viewModel.themeMode.collectAsState()
-    val appLanguage by viewModel.appLanguage.collectAsState()
-    val accentColor by viewModel.accentColor.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
+    val accentColor by viewModel.accentColor.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

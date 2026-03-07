@@ -37,13 +37,14 @@ fun PermissionStep(
     title: String,
     description: String,
     buttonText: String,
+    onRequestPermission: () -> Unit,
+    modifier: Modifier = Modifier,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     isGranted: Boolean = false,
-    grantedText: String = "",
-    onRequestPermission: () -> Unit
+    grantedText: String = ""
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),

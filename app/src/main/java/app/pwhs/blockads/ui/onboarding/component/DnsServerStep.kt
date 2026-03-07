@@ -43,10 +43,11 @@ private val ONBOARDING_DNS_PROVIDERS = listOf(
 @Composable
 fun DnsServerStep(
     selectedProvider: DnsProvider,
-    onProviderSelected: (DnsProvider) -> Unit
+    onProviderSelect: (DnsProvider) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -79,7 +80,7 @@ fun DnsServerStep(
                 provider = provider,
                 isSelected = selectedProvider.id == provider.id,
                 isRecommended = isRecommended,
-                onClick = { onProviderSelected(provider) }
+                onClick = { onProviderSelect(provider) }
             )
             if (index < ONBOARDING_DNS_PROVIDERS.size - 1) {
                 Spacer(modifier = Modifier.height(12.dp))

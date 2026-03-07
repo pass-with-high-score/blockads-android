@@ -1,7 +1,6 @@
 package app.pwhs.blockads.dns
 
 import android.util.Base64
-import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -11,11 +10,12 @@ import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.withTimeout
+import timber.log.Timber
 
 /**
  * DNS-over-HTTPS (DoH) client implementation following RFC 8484
  * Supports both GET and POST methods for DNS queries
- * 
+ *
  * WARNING: Potential VPN routing loop
  * The HttpClient used for DoH queries may create sockets that need VPN protection.
  * Without VpnService.protect() on underlying sockets, DoH queries may route through
@@ -27,7 +27,6 @@ import kotlinx.coroutines.withTimeout
 class DohClient(private val httpClient: HttpClient) {
 
     companion object {
-        private const val TAG = "DohClient"
         private const val DNS_MESSAGE_CONTENT_TYPE = "application/dns-message"
         private const val QUERY_TIMEOUT_MS = 5000L
     }
@@ -48,17 +47,17 @@ class DohClient(private val httpClient: HttpClient) {
                     Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
                 )
 
-                Log.d(TAG, "DoH GET query to $dohUrl")
+                Timber.d("DoH GET query to $dohUrl")
                 val response = httpClient.get("$dohUrl?dns=$base64Dns") {
                     header("Accept", DNS_MESSAGE_CONTENT_TYPE)
                 }
 
                 val responseBytes = response.readRawBytes()
-                Log.d(TAG, "DoH GET response received: ${responseBytes.size} bytes")
+                Timber.d("DoH GET response received: ${responseBytes.size} bytes")
                 responseBytes
             }
         } catch (e: Exception) {
-            Log.e(TAG, "DoH GET query failed", e)
+            Timber.e("DoH GET query failed: $e")
             null
         }
     }
@@ -72,7 +71,7 @@ class DohClient(private val httpClient: HttpClient) {
     suspend fun queryPost(dohUrl: String, dnsPayload: ByteArray): ByteArray? {
         return try {
             withTimeout(QUERY_TIMEOUT_MS) {
-                Log.d(TAG, "DoH POST query to $dohUrl")
+                Timber.d("DoH POST query to $dohUrl")
                 val response = httpClient.post(dohUrl) {
                     contentType(ContentType.parse(DNS_MESSAGE_CONTENT_TYPE))
                     header("Accept", DNS_MESSAGE_CONTENT_TYPE)
@@ -80,11 +79,11 @@ class DohClient(private val httpClient: HttpClient) {
                 }
 
                 val responseBytes = response.readRawBytes()
-                Log.d(TAG, "DoH POST response received: ${responseBytes.size} bytes")
+                Timber.d("DoH POST response received: ${responseBytes.size} bytes")
                 responseBytes
             }
         } catch (e: Exception) {
-            Log.e(TAG, "DoH POST query failed", e)
+            Timber.e("DoH POST query failed: $e")
             null
         }
     }

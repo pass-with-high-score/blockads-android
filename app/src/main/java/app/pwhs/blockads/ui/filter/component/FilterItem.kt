@@ -37,10 +37,11 @@ fun FilterItem(
     filter: FilterList,
     onToggle: () -> Unit,
     onDelete: (() -> Unit)?,
+    modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .then(
                 if (onClick != null) Modifier.clickable { onClick() }

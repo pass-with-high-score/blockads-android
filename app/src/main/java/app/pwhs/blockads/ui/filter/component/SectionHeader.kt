@@ -15,9 +15,9 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
-fun SectionHeader(title: String, activeCount: Int? = null) {
+fun SectionHeader(title: String, modifier: Modifier = Modifier, activeCount: Int? = null) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(

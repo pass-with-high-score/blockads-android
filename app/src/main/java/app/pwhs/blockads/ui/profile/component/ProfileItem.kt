@@ -39,10 +39,11 @@ fun ProfileItem(
     isActive: Boolean,
     onSelect: () -> Unit,
     onDelete: (() -> Unit)?,
-    onSchedule: () -> Unit
+    onSchedule: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onSelect() }
             .padding(16.dp),

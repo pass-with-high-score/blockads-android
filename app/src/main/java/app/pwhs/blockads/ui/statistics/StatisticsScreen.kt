@@ -32,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.MonthlyStatsChart
@@ -63,22 +63,24 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
+    modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel = koinViewModel()
 ) {
-    val totalCount by viewModel.totalCount.collectAsState()
-    val blockedCount by viewModel.blockedCount.collectAsState()
-    val todayTotal by viewModel.todayTotal.collectAsState()
-    val todayBlocked by viewModel.todayBlocked.collectAsState()
-    val securityBlockedCount by viewModel.securityBlockedCount.collectAsState()
-    val todaySecurityBlocked by viewModel.todaySecurityBlocked.collectAsState()
-    val hourlyStats by viewModel.hourlyStats.collectAsState()
-    val dailyStats by viewModel.dailyStats.collectAsState()
-    val weeklyStats by viewModel.weeklyStats.collectAsState()
-    val monthlyStats by viewModel.monthlyStats.collectAsState()
-    val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
-    val topApps by viewModel.topApps.collectAsState()
+    val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
+    val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
+    val todayTotal by viewModel.todayTotal.collectAsStateWithLifecycle()
+    val todayBlocked by viewModel.todayBlocked.collectAsStateWithLifecycle()
+    val securityBlockedCount by viewModel.securityBlockedCount.collectAsStateWithLifecycle()
+    val todaySecurityBlocked by viewModel.todaySecurityBlocked.collectAsStateWithLifecycle()
+    val hourlyStats by viewModel.hourlyStats.collectAsStateWithLifecycle()
+    val dailyStats by viewModel.dailyStats.collectAsStateWithLifecycle()
+    val weeklyStats by viewModel.weeklyStats.collectAsStateWithLifecycle()
+    val monthlyStats by viewModel.monthlyStats.collectAsStateWithLifecycle()
+    val topBlockedDomains by viewModel.topBlockedDomains.collectAsStateWithLifecycle()
+    val topApps by viewModel.topApps.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -275,6 +277,7 @@ fun StatisticsScreen(
                             ChartNoData()
                         }
                     }
+
                     1 -> {
                         if (dailyStats.isNotEmpty()) {
                             DailyStatsChart(stats = dailyStats, modifier = chartModifier)
@@ -282,6 +285,7 @@ fun StatisticsScreen(
                             ChartNoData()
                         }
                     }
+
                     2 -> {
                         if (weeklyStats.isNotEmpty()) {
                             WeeklyStatsChart(stats = weeklyStats, modifier = chartModifier)
@@ -289,6 +293,7 @@ fun StatisticsScreen(
                             ChartNoData()
                         }
                     }
+
                     3 -> {
                         if (monthlyStats.isNotEmpty()) {
                             MonthlyStatsChart(stats = monthlyStats, modifier = chartModifier)

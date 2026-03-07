@@ -8,10 +8,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import app.pwhs.blockads.R
+import androidx.compose.ui.Modifier
 
 @Composable
-fun InfoDialog(onDismiss: () -> Unit) {
+fun InfoDialog(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.custom_rules_help)) },

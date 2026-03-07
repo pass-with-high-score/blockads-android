@@ -3,7 +3,6 @@ package app.pwhs.blockads.ui.settings
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,9 +38,7 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
-
 import androidx.compose.material.icons.filled.Shield
-
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
@@ -62,7 +59,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +73,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.DnsProtocol
@@ -95,8 +92,9 @@ import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestin
 import com.ramcosta.composedestinations.generated.destinations.AppManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppearanceScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.DnsProviderScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FirewallScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ProfileScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -105,32 +103,33 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SettingsScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel()
 ) {
-    val autoReconnect by viewModel.autoReconnect.collectAsState()
-    val upstreamDns by viewModel.upstreamDns.collectAsState()
-    val fallbackDns by viewModel.fallbackDns.collectAsState()
-    val dnsProtocol by viewModel.dnsProtocol.collectAsState()
-    val customDnsDisplay by viewModel.customDnsDisplay.collectAsState()
-    val filterLists by viewModel.filterLists.collectAsState()
-    val whitelistDomains by viewModel.whitelistDomains.collectAsState()
+    val autoReconnect by viewModel.autoReconnect.collectAsStateWithLifecycle()
+    val upstreamDns by viewModel.upstreamDns.collectAsStateWithLifecycle()
+    val fallbackDns by viewModel.fallbackDns.collectAsStateWithLifecycle()
+    val dnsProtocol by viewModel.dnsProtocol.collectAsStateWithLifecycle()
+    val customDnsDisplay by viewModel.customDnsDisplay.collectAsStateWithLifecycle()
+    val filterLists by viewModel.filterLists.collectAsStateWithLifecycle()
+    val whitelistDomains by viewModel.whitelistDomains.collectAsStateWithLifecycle()
 
 
     // Auto-update Filter Lists
-    val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsState()
-    val autoUpdateFrequency by viewModel.autoUpdateFrequency.collectAsState()
-    val autoUpdateWifiOnly by viewModel.autoUpdateWifiOnly.collectAsState()
-    val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsState()
+    val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsStateWithLifecycle()
+    val autoUpdateFrequency by viewModel.autoUpdateFrequency.collectAsStateWithLifecycle()
+    val autoUpdateWifiOnly by viewModel.autoUpdateWifiOnly.collectAsStateWithLifecycle()
+    val autoUpdateNotification by viewModel.autoUpdateNotification.collectAsStateWithLifecycle()
     var showFrequencyDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
 
-    val dnsResponseType by viewModel.dnsResponseType.collectAsState()
+    val dnsResponseType by viewModel.dnsResponseType.collectAsStateWithLifecycle()
     var showDnsResponseTypeDialog by remember { mutableStateOf(false) }
 
-    val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsState()
-    val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsState()
-    val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsState()
-    val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsState()
+    val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsStateWithLifecycle()
+    val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsStateWithLifecycle()
+    val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsStateWithLifecycle()
+    val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsStateWithLifecycle()
 
 
     var editCustomDns by remember(customDnsDisplay) { mutableStateOf(customDnsDisplay) }
@@ -148,7 +147,7 @@ fun SettingsScreen(
     UiEventEffect(viewModel.events)
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -223,7 +222,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Card(
-                onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.ProfileScreenDestination) },
+                onClick = { navigator.navigate(ProfileScreenDestination) },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -259,11 +258,15 @@ fun SettingsScreen(
                     )
                 }
 
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Card(
-                    onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.DnsProviderScreenDestination) },
+                    onClick = { navigator.navigate(DnsProviderScreenDestination) },
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp)
                 ) {

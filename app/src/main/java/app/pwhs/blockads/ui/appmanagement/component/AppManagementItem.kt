@@ -40,7 +40,8 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 @Composable
 fun AppManagementItem(
     app: AppManagementData,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (app.isWhitelisted)
@@ -52,7 +53,7 @@ fun AppManagementItem(
     )
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 2.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),

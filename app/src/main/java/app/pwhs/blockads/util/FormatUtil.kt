@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.compose.runtime.remember
 
 fun formatCount(count: Int): String = when {
     count >= 1_000_000 -> String.format(Locale.getDefault(), "%.1fM", count / 1_000_000f)
@@ -69,11 +70,11 @@ fun formatUptimeShort(ms: Long): String {
     }
 }
 
-val hourFormat = ThreadLocal.withInitial {
+val hourFormat: ThreadLocal<SimpleDateFormat?> = ThreadLocal.withInitial {
     SimpleDateFormat("HH", Locale.getDefault())
 }
 
-val dayFormat = ThreadLocal.withInitial {
+val dayFormat: ThreadLocal<SimpleDateFormat?> = ThreadLocal.withInitial {
     SimpleDateFormat("EEE", Locale.getDefault())
 }
 
@@ -92,7 +93,7 @@ fun formatDays(daysOfWeek: String): String {
         stringResource(R.string.profile_day_sat),
         stringResource(R.string.profile_day_sun)
     )
-    val days = daysOfWeek.split(",").mapNotNull { it.trim().toIntOrNull() }
+    val days = remember(daysOfWeek) { daysOfWeek.split(",").mapNotNull { it.trim().toIntOrNull() } }
     return if (days.size == 7) stringResource(R.string.profile_schedule_every_day)
     else days.mapNotNull { if (it in 1..7) dayNames[it - 1] else null }.joinToString(", ")
 }

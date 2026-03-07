@@ -3,9 +3,9 @@ package app.pwhs.blockads.service
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import app.pwhs.blockads.data.entities.FirewallRule
 import app.pwhs.blockads.data.dao.FirewallRuleDao
+import timber.log.Timber
 import java.util.Calendar
 import java.util.concurrent.ConcurrentHashMap
 
@@ -17,9 +17,6 @@ class FirewallManager(
     private val context: Context,
     private val firewallRuleDao: FirewallRuleDao
 ) {
-    companion object {
-        private const val TAG = "FirewallManager"
-    }
 
     // In-memory cache of enabled firewall rules, keyed by package name
     private val rulesCache = ConcurrentHashMap<String, FirewallRule>()
@@ -34,7 +31,7 @@ class FirewallManager(
         for (rule in rules) {
             rulesCache[rule.packageName] = rule
         }
-        Log.d(TAG, "Loaded ${rulesCache.size} firewall rules")
+        Timber.d("Loaded ${rulesCache.size} firewall rules")
     }
 
     /**
@@ -86,7 +83,7 @@ class FirewallManager(
             currentTime in startTime..endTime
         } else {
             // Overnight schedule (e.g., 22:00 - 06:00)
-            currentTime >= startTime || currentTime <= endTime
+            currentTime !in (endTime + 1)..<startTime
         }
     }
 }

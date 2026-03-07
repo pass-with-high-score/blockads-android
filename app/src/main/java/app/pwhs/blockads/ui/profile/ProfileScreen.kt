@@ -29,14 +29,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.ProtectionProfile
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -50,24 +51,26 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.remember
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator, modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = koinViewModel()
 ) {
-    val profiles by viewModel.profiles.collectAsState()
-    val activeProfile by viewModel.activeProfile.collectAsState()
-    val allSchedules by viewModel.allSchedules.collectAsState()
+    val profiles by viewModel.profiles.collectAsStateWithLifecycle()
+    val activeProfile by viewModel.activeProfile.collectAsStateWithLifecycle()
+    val allSchedules by viewModel.allSchedules.collectAsStateWithLifecycle()
     var showCreateDialog by rememberSaveable { mutableStateOf(false) }
     var showScheduleDialog by rememberSaveable { mutableStateOf(false) }
-    var scheduleTargetProfileId by rememberSaveable { mutableStateOf(-1L) }
+    var scheduleTargetProfileId by rememberSaveable { mutableLongStateOf(-1L) }
 
     UiEventEffect(viewModel.events)
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.profile_title)) },
@@ -89,7 +92,10 @@ fun ProfileScreen(
                 onClick = { showCreateDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.profile_create_custom))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.profile_create_custom)
+                )
             }
         }
     ) { innerPadding ->
@@ -154,9 +160,11 @@ fun ProfileScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        val schedulesWithProfiles = allSchedules.mapNotNull { schedule ->
-                            val profile = profiles.find { it.id == schedule.profileId }
-                            profile?.let { schedule to it }
+                        val schedulesWithProfiles = remember {
+                            allSchedules.mapNotNull { schedule ->
+                                val profile = profiles.find { it.id == schedule.profileId }
+                                profile?.let { schedule to it }
+                            }
                         }
                         schedulesWithProfiles.forEachIndexed { index, (schedule, profile) ->
                             ScheduleItem(

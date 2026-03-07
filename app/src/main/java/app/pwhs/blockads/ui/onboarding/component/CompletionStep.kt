@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
 
 @Composable
-fun CompletionStep() {
+fun CompletionStep(modifier: Modifier = Modifier) {
     val scale = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
@@ -49,7 +49,7 @@ fun CompletionStep() {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -21,11 +21,13 @@ import app.pwhs.blockads.R
 @Composable
 fun AddDomainDialog(
     onDismiss: () -> Unit,
-    onAdd: (String) -> Unit
+    onAdd: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var domain by remember { mutableStateOf("") }
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_add_domain_title)) },

@@ -42,7 +42,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -72,11 +72,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun FilterSetupScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: FilterSetupViewModel = koinViewModel()
 ) {
-    val filterLists by viewModel.filteredFilterLists.collectAsState()
-    val isUpdatingFilter by viewModel.isUpdatingFilter.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filterLists by viewModel.filteredFilterLists.collectAsStateWithLifecycle()
+    val isUpdatingFilter by viewModel.isUpdatingFilter.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
     var showAddDialog by remember { mutableStateOf(false) }
     var isSearchVisible by remember { mutableStateOf(false) }
@@ -90,7 +91,7 @@ fun FilterSetupScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -400,7 +401,7 @@ fun FilterSetupScreen(
         }
 
         // Add filter dialog
-        val isValidatingUrl by viewModel.isValidatingUrl.collectAsState()
+        val isValidatingUrl by viewModel.isValidatingUrl.collectAsStateWithLifecycle()
         if (showAddDialog) {
             AddFilterDialog(
                 onDismiss = { if (!isValidatingUrl) showAddDialog = false },

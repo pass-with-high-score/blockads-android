@@ -12,11 +12,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsCategory
 import app.pwhs.blockads.data.entities.DnsProviders
@@ -41,16 +42,18 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun DnsProviderScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: DnsProviderViewModel = koinViewModel()
 ) {
-    val selectedProviderId by viewModel.selectedProviderId.collectAsState()
-    val customDnsEnabled by viewModel.customDnsEnabled.collectAsState()
-    val upstreamDns by viewModel.upstreamDns.collectAsState()
-    val fallbackDns by viewModel.fallbackDns.collectAsState()
+    val selectedProviderId by viewModel.selectedProviderId.collectAsStateWithLifecycle()
+    val customDnsEnabled by viewModel.customDnsEnabled.collectAsStateWithLifecycle()
+    val upstreamDns by viewModel.upstreamDns.collectAsStateWithLifecycle()
+    val fallbackDns by viewModel.fallbackDns.collectAsStateWithLifecycle()
 
     var showCustomDialog by remember { mutableStateOf(false) }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.dns_provider_title)) },

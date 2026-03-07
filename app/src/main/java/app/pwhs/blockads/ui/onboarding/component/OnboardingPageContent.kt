@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.ui.onboarding.data.OnboardingPage
 
 @Composable
-fun OnboardingPageContent(page: OnboardingPage) {
+fun OnboardingPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),

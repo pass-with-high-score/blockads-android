@@ -44,7 +44,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.ProtectionProfile
 import app.pwhs.blockads.data.repository.FilterListRepository
@@ -89,21 +89,22 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onRequestVpnPermission: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel()
 ) {
-    val vpnEnabled by viewModel.vpnEnabled.collectAsState()
-    val vpnConnecting by viewModel.vpnConnecting.collectAsState()
-    val blockedCount by viewModel.blockedCount.collectAsState()
-    val totalCount by viewModel.totalCount.collectAsState()
-    val securityThreatsBlocked by viewModel.securityThreatsBlocked.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val filterLoadFailed by viewModel.filterLoadFailed.collectAsState()
-    val recentBlocked by viewModel.recentBlocked.collectAsState()
-    val hourlyStats by viewModel.hourlyStats.collectAsState()
-    val dailyStats by viewModel.dailyStats.collectAsState()
-    val topBlockedDomains by viewModel.topBlockedDomains.collectAsState()
-    val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsState()
-    val activeProfile by viewModel.activeProfile.collectAsState()
+    val vpnEnabled by viewModel.vpnEnabled.collectAsStateWithLifecycle()
+    val vpnConnecting by viewModel.vpnConnecting.collectAsStateWithLifecycle()
+    val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
+    val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
+    val securityThreatsBlocked by viewModel.securityThreatsBlocked.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val filterLoadFailed by viewModel.filterLoadFailed.collectAsStateWithLifecycle()
+    val recentBlocked by viewModel.recentBlocked.collectAsStateWithLifecycle()
+    val hourlyStats by viewModel.hourlyStats.collectAsStateWithLifecycle()
+    val dailyStats by viewModel.dailyStats.collectAsStateWithLifecycle()
+    val topBlockedDomains by viewModel.topBlockedDomains.collectAsStateWithLifecycle()
+    val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsStateWithLifecycle()
+    val activeProfile by viewModel.activeProfile.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -111,6 +112,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

@@ -28,8 +28,10 @@ fun DnsResponseTypeDialog(
     dnsResponseType: String,
     onUpdateResponseType: (String) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_dns_response_type)) },

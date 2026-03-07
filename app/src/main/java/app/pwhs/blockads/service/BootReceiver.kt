@@ -4,16 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 class BootReceiver : BroadcastReceiver() {
-
-    companion object {
-        private const val TAG = "BootReceiver"
-    }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
@@ -23,7 +19,7 @@ class BootReceiver : BroadcastReceiver() {
         val wasEnabled = runBlocking { prefs.vpnEnabled.first() }
 
         if (autoReconnect && wasEnabled) {
-            Log.d(TAG, "Auto-reconnecting VPN after boot")
+            Timber.d("Auto-reconnecting VPN after boot")
             val serviceIntent = Intent(context, AdBlockVpnService::class.java).apply {
                 action = AdBlockVpnService.ACTION_START
             }

@@ -58,10 +58,14 @@ import app.pwhs.blockads.ui.theme.DarkBackground
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(navigator: DestinationsNavigator) {
+fun AboutScreen(
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

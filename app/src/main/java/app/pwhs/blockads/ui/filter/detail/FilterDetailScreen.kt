@@ -41,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -55,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -74,12 +74,13 @@ import org.koin.core.parameter.parametersOf
 fun FilterDetailScreen(
     filterId: Long,
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: FilterDetailViewModel = koinViewModel { parametersOf(filterId) }
 ) {
-    val filter by viewModel.filter.collectAsState()
-    val domainPreview by viewModel.domainPreview.collectAsState()
-    val isLoadingDomains by viewModel.isLoadingDomains.collectAsState()
-    val isUpdating by viewModel.isUpdating.collectAsState()
+    val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val domainPreview by viewModel.domainPreview.collectAsStateWithLifecycle()
+    val isLoadingDomains by viewModel.isLoadingDomains.collectAsStateWithLifecycle()
+    val isUpdating by viewModel.isUpdating.collectAsStateWithLifecycle()
 
     val clipboardManager = LocalClipboard.current
     val context = LocalContext.current
@@ -88,7 +89,7 @@ fun FilterDetailScreen(
     UiEventEffect(viewModel.events)
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

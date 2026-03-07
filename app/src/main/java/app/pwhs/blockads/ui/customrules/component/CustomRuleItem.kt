@@ -31,10 +31,11 @@ import app.pwhs.blockads.data.entities.RuleType
 fun CustomRuleItem(
     rule: CustomDnsRule,
     onToggle: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(

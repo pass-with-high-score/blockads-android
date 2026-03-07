@@ -15,7 +15,6 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 class FilterListRepository(
@@ -160,7 +159,7 @@ class FilterListRepository(
                 description = "Blocks malware distribution sites — updated frequently by abuse.ch",
                 isEnabled = false,
                 isBuiltIn = true,
-                category = FilterList.Companion.CATEGORY_SECURITY
+                category = FilterList.CATEGORY_SECURITY
             ),
             FilterList(
                 name = "PhishTank Blocklist",
@@ -168,7 +167,7 @@ class FilterListRepository(
                 description = "Blocks known phishing websites that steal personal information",
                 isEnabled = false,
                 isBuiltIn = true,
-                category = FilterList.Companion.CATEGORY_SECURITY
+                category = FilterList.CATEGORY_SECURITY
             ),
             FilterList(
                 name = "Malware Domain List",
@@ -176,7 +175,7 @@ class FilterListRepository(
                 description = "Community-curated list of domains distributing malware",
                 isEnabled = false,
                 isBuiltIn = true,
-                category = FilterList.Companion.CATEGORY_SECURITY
+                category = FilterList.CATEGORY_SECURITY
             ),
         )
     }
@@ -320,7 +319,7 @@ class FilterListRepository(
 
         for (filter in toInsert) {
             filterListDao.insert(filter)
-            Timber.Forest.d("Seeded filter: ${filter.name}")
+            Timber.d("Seeded filter: ${filter.name}")
         }
     }
 

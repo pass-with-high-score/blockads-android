@@ -47,7 +47,8 @@ fun DomainDetailBottomSheet(
     onCopyDomain: () -> Unit,
     onAddToWhiteList: () -> Unit,
     onAddToCustomBlockRules: () -> Unit,
-    onUnblock: () -> Unit
+    onUnblock: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val statusColor = when {
         isWhitelisted -> WhitelistAmber
@@ -61,6 +62,7 @@ fun DomainDetailBottomSheet(
     }
 
     ModalBottomSheet(
+        modifier = modifier,
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
         containerColor = MaterialTheme.colorScheme.background

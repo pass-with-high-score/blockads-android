@@ -27,6 +27,7 @@ import app.pwhs.blockads.R
 fun AddFilterDialog(
     onDismiss: () -> Unit,
     onAdd: (name: String, url: String) -> Unit,
+    modifier: Modifier = Modifier,
     existingUrls: List<String> = emptyList(),
     isValidating: Boolean = false
 ) {
@@ -50,6 +51,7 @@ fun AddFilterDialog(
     val isValid = nameTrimmed.isNotBlank() && urlTrimmed.isNotBlank() && urlError == null
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = { if (!isValidating) onDismiss() },
         title = { Text(stringResource(R.string.settings_add_filter_title)) },

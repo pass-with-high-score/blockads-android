@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.customrules.component.AddRuleDialog
 import app.pwhs.blockads.ui.customrules.component.CustomRuleItem
@@ -61,9 +62,8 @@ fun CustomRulesScreen(
     navigator: DestinationsNavigator,
     viewModel: CustomRulesViewModel = koinViewModel()
 ) {
-    val rules by viewModel.rules.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val rules by viewModel.rules.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resource = LocalResources.current
 

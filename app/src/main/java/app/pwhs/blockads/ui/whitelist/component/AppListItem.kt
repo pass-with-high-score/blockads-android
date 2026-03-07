@@ -35,7 +35,8 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 fun AppListItem(
     app: AppInfoData,
     isWhitelisted: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (isWhitelisted)
@@ -47,7 +48,7 @@ fun AppListItem(
     )
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 2.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),

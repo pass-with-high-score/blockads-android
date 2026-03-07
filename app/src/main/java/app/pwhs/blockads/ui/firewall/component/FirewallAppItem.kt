@@ -40,7 +40,8 @@ fun FirewallAppItem(
     app: AppInfoData,
     rule: FirewallRule?,
     onToggle: () -> Unit,
-    onConfigure: () -> Unit
+    onConfigure: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isBlocked = rule?.isEnabled == true
     val backgroundColor by animateColorAsState(
@@ -53,10 +54,10 @@ fun FirewallAppItem(
     )
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp)
-            .clickable { if (isBlocked) onConfigure() },
+            .clickable { if (isBlocked) onConfigure() }
+            .padding(horizontal = 16.dp, vertical = 2.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         shape = RoundedCornerShape(12.dp)
     ) {

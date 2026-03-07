@@ -29,7 +29,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.appmanagement.component.AppManagementItem
 import app.pwhs.blockads.ui.appmanagement.data.AppSortOption
@@ -54,17 +54,18 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun AppManagementScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: AppManagementViewModel = koinViewModel()
 ) {
-    val apps by viewModel.apps.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val sortOption by viewModel.sortOption.collectAsState()
-    val totalAppCount by viewModel.totalAppCount.collectAsState()
+    val apps by viewModel.apps.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+    val totalAppCount by viewModel.totalAppCount.collectAsStateWithLifecycle()
     var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

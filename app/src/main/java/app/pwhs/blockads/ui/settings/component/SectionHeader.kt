@@ -18,10 +18,15 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
-fun SectionHeader(title: String, icon: ImageVector? = null, description: String? = null) {
+fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    description: String? = null
+) {
     Row(
         verticalAlignment = Alignment.Top,
-        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+        modifier = modifier.padding(bottom = 8.dp, start = 4.dp)
     ) {
         if (icon != null) {
             Icon(

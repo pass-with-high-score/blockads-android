@@ -38,7 +38,8 @@ fun FirewallRuleDialog(
     packageName: String,
     onSave: (FirewallRule) -> Unit,
     onDelete: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var blockWifi by remember { mutableStateOf(existingRule?.blockWifi ?: true) }
     var blockMobileData by remember { mutableStateOf(existingRule?.blockMobileData ?: true) }
@@ -49,6 +50,7 @@ fun FirewallRuleDialog(
     var endMinute by remember { mutableIntStateOf(existingRule?.scheduleEndMinute ?: 0) }
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(20.dp),
@@ -204,9 +206,9 @@ fun FirewallRuleDialog(
 @Composable
 private fun SwitchRow(
     label: String,
-    description: String? = null,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    description: String? = null
 ) {
     Row(
         modifier = Modifier

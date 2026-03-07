@@ -1,5 +1,6 @@
 package app.pwhs.blockads.data.repository
 
+import timber.log.Timber
 import java.io.DataOutputStream
 import java.io.File
 import java.io.RandomAccessFile
@@ -131,6 +132,7 @@ class DomainTrie {
 
                 MmapDomainTrie(buffer, headerSize = 16, nodeCount, domainCount)
             } catch (e: Exception) {
+                Timber.e(e)
                 null
             }
         }

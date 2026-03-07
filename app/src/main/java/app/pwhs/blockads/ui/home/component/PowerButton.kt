@@ -26,10 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -45,7 +45,8 @@ import app.pwhs.blockads.ui.theme.DangerRed
 fun PowerButton(
     isActive: Boolean,
     isConnecting: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val vpnStateDescription = when {
         isConnecting -> stringResource(R.string.accessibility_vpn_connecting)
@@ -94,13 +95,13 @@ fun PowerButton(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.size(180.dp)
+        modifier = modifier.size(180.dp)
     ) {
         // Outer glow ring
         Box(
             modifier = Modifier
                 .size(180.dp)
-                .scale(pulseScale)
+                .graphicsLayer { scaleX = pulseScale; scaleY = pulseScale }
                 .clip(CircleShape)
                 .background(
                     Brush.radialGradient(
@@ -117,7 +118,7 @@ fun PowerButton(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(140.dp)
-                .scale(scale)
+                .graphicsLayer { scaleX = scale; scaleY = scale }
                 .shadow(
                     elevation = if (isActive || isConnecting) 20.dp else 8.dp,
                     shape = CircleShape,

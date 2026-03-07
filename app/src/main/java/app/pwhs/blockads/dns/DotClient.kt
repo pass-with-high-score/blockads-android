@@ -1,7 +1,7 @@
 package app.pwhs.blockads.dns
 
-import android.util.Log
 import kotlinx.coroutines.withTimeout
+import timber.log.Timber
 import java.io.IOException
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -15,10 +15,10 @@ import javax.net.ssl.SSLSocket
 class DotClient {
 
     companion object {
-        private const val TAG = "DotClient"
         private const val DOT_PORT = 853
         private const val QUERY_TIMEOUT_MS = 5000L
         private const val CONNECTION_TIMEOUT_MS = 3000
+
         // Maximum DNS response size for DNS-over-TLS. While UDP DNS is limited to 512 bytes
         // (RFC 1035), TCP/TLS-based DNS can handle larger responses. 4096 bytes is a common
         // practical limit that accommodates most DNS responses while preventing excessive memory use.
@@ -37,7 +37,7 @@ class DotClient {
                 performDotQuery(dotServer, dnsPayload)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "DoT query failed", e)
+            Timber.d("DoT query failed: $e")
             null
         }
     }
@@ -50,7 +50,7 @@ class DotClient {
             // To avoid this, users should prefer using IP addresses for DoT servers
             // Or the socket must be protected with VpnService.protect() (not currently implemented)
             val serverAddress = InetAddress.getByName(dotServer)
-            Log.d(TAG, "Connecting to DoT server: $dotServer:$DOT_PORT")
+            Timber.d("Connecting to DoT server: $dotServer:$DOT_PORT")
 
             // Create SSL context and socket
             val sslContext = SSLContext.getInstance("TLS")
@@ -73,7 +73,7 @@ class DotClient {
 
             // Start TLS handshake
             sslSocket.startHandshake()
-            Log.d(TAG, "TLS handshake completed")
+            Timber.d("TLS handshake completed")
 
             // Send DNS query with length prefix (RFC 7858 Section 3.3)
             val outputStream = sslSocket.outputStream
@@ -84,7 +84,7 @@ class DotClient {
             outputStream.write(lengthPrefix)
             outputStream.write(dnsPayload)
             outputStream.flush()
-            Log.d(TAG, "DoT query sent: ${dnsPayload.size} bytes")
+            Timber.d("DoT query sent: ${dnsPayload.size} bytes")
 
             // Read DNS response with length prefix
             val inputStream = sslSocket.inputStream
@@ -100,7 +100,7 @@ class DotClient {
                     (lengthBytes[1].toInt() and 0xFF)
 
             if (responseLength !in 1..MAX_DNS_RESPONSE_LENGTH) {
-                Log.e(TAG, "Invalid response length: $responseLength")
+                Timber.e("Invalid response length: $responseLength")
                 return null
             }
 
@@ -113,17 +113,17 @@ class DotClient {
                 bytesRead += read
             }
 
-            Log.d(TAG, "DoT response received: $responseLength bytes")
+            Timber.d("DoT response received: $responseLength bytes")
             return responseBuffer
 
         } catch (e: Exception) {
-            Log.e(TAG, "DoT query error", e)
+            Timber.e("DoT query error: $e")
             return null
         } finally {
             try {
                 sslSocket?.close()
             } catch (e: Exception) {
-                Log.w(TAG, "Error closing SSL socket", e)
+                Timber.w("Error closing SSL socket: $e")
             }
         }
     }

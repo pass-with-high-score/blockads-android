@@ -4,18 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
+import timber.log.Timber
 
 /**
  * Utility class for monitoring battery usage and status.
  * Provides information about battery level, charging status, and battery health.
  */
 class BatteryMonitor(private val context: Context) {
-
-    companion object {
-        private const val TAG = "BatteryMonitor"
-    }
-
     /**
      * Get current battery level as a percentage (0-100)
      */
@@ -111,10 +106,9 @@ class BatteryMonitor(private val context: Context) {
      */
     fun logBatteryStatus() {
         val info = getBatteryInfo()
-        Log.d(
-            TAG, "Battery Status: ${info.level}%, Charging: ${info.isCharging}, " +
-                    "Method: ${info.chargingMethod}, Health: ${info.health}, " +
-                    "Temp: ${info.temperature}°C, Voltage: ${info.voltage}mV"
+        Timber.d(
+            "%snull", "Battery Status: ${info.level}%, Charging: ${info.isCharging}, " +
+                    "Method: ${info.chargingMethod}, Health: ${info.health}, "
         )
     }
 

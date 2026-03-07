@@ -20,7 +20,6 @@ import java.nio.ByteBuffer
  */
 object DnsPacketParser {
 
-    private const val TAG = "DnsPacketParser"
 
     // DNS header is always 12 bytes
     private const val DNS_HEADER_SIZE = 12
@@ -534,7 +533,8 @@ object DnsPacketParser {
         // Flags: QR=1 (response), AA=1 (authoritative), RD mirrors query, RA=1, RCODE=3 (NXDOMAIN)
         val originalFlagsByte1 = query.rawDnsPayload.getOrNull(2)?.toInt() ?: 0
         val rdSet = (originalFlagsByte1 and 0x01) == 0x01
-        val responseFlagsByte1 = 0x84 or if (rdSet) 0x01 else 0x00  // QR=1, AA=1, conditionally set RD from query
+        val responseFlagsByte1 =
+            0x84 or if (rdSet) 0x01 else 0x00  // QR=1, AA=1, conditionally set RD from query
         // 0x83 = 10000011 (RA=1, RCODE=3 NXDOMAIN)
         out.write(responseFlagsByte1)
         out.write(0x83)
@@ -575,7 +575,8 @@ object DnsPacketParser {
         // Flags: QR=1 (response), RD mirrors query, RA=1, RCODE=5 (REFUSED)
         val originalFlagsByte1 = query.rawDnsPayload.getOrNull(2)?.toInt() ?: 0
         val rdSet = (originalFlagsByte1 and 0x01) == 0x01
-        val responseFlagsByte1 = 0x80 or if (rdSet) 0x01 else 0x00  // QR=1, conditionally set RD from query
+        val responseFlagsByte1 =
+            0x80 or if (rdSet) 0x01 else 0x00  // QR=1, conditionally set RD from query
         // 0x85 = 10000101 (RA=1, RCODE=5 REFUSED)
         out.write(responseFlagsByte1)
         out.write(0x85)

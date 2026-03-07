@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.compose.destinations.core)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     ksp(libs.compose.destinations.ksp)
 
     // Room

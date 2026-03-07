@@ -9,9 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +31,7 @@ import org.koin.compose.koinInject
 @Composable
 fun SplashScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: SplashViewModel = koinInject()
 ) {
     var startAnimation by remember { mutableStateOf(false) }
@@ -67,7 +68,7 @@ fun SplashScreen(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
@@ -82,7 +83,7 @@ fun SplashScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.scale(scale)
+            modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }
         ) {
             // App Logo
             Image(

@@ -25,11 +25,11 @@ import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
 fun StatCard(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
     value: String,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
     val cardDescription = stringResource(R.string.accessibility_stat_card, label, value)
     Card(

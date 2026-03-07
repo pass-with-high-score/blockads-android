@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 
 @Composable
-fun EmptyRulesState() {
+fun EmptyRulesState(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

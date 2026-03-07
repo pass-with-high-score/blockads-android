@@ -1,7 +1,7 @@
 package app.pwhs.blockads.service
 
-import android.util.Log
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 /**
  * Manages VPN connection retry logic with exponential backoff.
@@ -11,9 +11,6 @@ class VpnRetryManager(
     private val initialDelayMs: Long = 1000L,
     private val maxDelayMs: Long = 60000L
 ) {
-    companion object {
-        private const val TAG = "VpnRetryManager"
-    }
 
     private var retryCount = 0
     private var lastAttemptTime = 0L
@@ -24,7 +21,7 @@ class VpnRetryManager(
     fun reset() {
         retryCount = 0
         lastAttemptTime = 0L
-        Log.d(TAG, "Retry counter reset")
+        Timber.d("Retry counter reset")
     }
 
     /**
@@ -50,7 +47,7 @@ class VpnRetryManager(
      */
     suspend fun waitForRetry(): Boolean {
         if (!shouldRetry()) {
-            Log.w(TAG, "Max retries ($maxRetries) reached")
+            Timber.w("Max retries ($maxRetries) reached")
             return false
         }
 
@@ -63,36 +60,14 @@ class VpnRetryManager(
             maxDelayMs
         )
 
-        Log.d(TAG, "Retry attempt $retryCount/$maxRetries - waiting ${delayMs}ms before retry")
+        Timber.d("Retry attempt $retryCount/$maxRetries - waiting ${delayMs}ms before retry")
 
         try {
             delay(delayMs)
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Retry wait interrupted", e)
+            Timber.e("Retry wait interrupted: $e")
             return false
         }
-    }
-
-    /**
-     * Get time since last retry attempt in milliseconds.
-     */
-    fun getTimeSinceLastAttempt(): Long {
-        return if (lastAttemptTime > 0) {
-            System.currentTimeMillis() - lastAttemptTime
-        } else {
-            0L
-        }
-    }
-
-    /**
-     * Get next retry delay in milliseconds without incrementing counter.
-     */
-    fun getNextRetryDelay(): Long {
-        if (!shouldRetry()) return 0L
-        return minOf(
-            initialDelayMs * (1L shl retryCount),
-            maxDelayMs
-        )
     }
 }

@@ -69,12 +69,11 @@ object CustomRuleParser {
             
             // Block rule: example.com (simple format)
             else -> {
-                val domain = trimmed
-                if (domain.isEmpty() || !isValidDomain(domain)) return null
+                if (trimmed.isEmpty() || !isValidDomain(trimmed)) return null
                 CustomDnsRule(
                     rule = trimmed,
                     ruleType = RuleType.BLOCK,
-                    domain = domain.lowercase(),
+                    domain = trimmed.lowercase(),
                     isEnabled = true
                 )
             }
@@ -118,14 +117,5 @@ object CustomRuleParser {
         } else {
             domain.lowercase()
         }
-    }
-    
-    /**
-     * Format a domain into an allow rule.
-     * 
-     * @param domain The domain to allow
-     */
-    fun formatAllowRule(domain: String): String {
-        return "@@||${domain.lowercase()}^"
     }
 }

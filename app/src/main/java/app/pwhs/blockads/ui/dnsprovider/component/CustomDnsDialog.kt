@@ -36,7 +36,8 @@ fun CustomDnsDialog(
     upstreamDns: String,
     fallbackDns: String,
     onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit
+    onSave: (String, String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // Build display value from current settings
     var editDns by remember { mutableStateOf(upstreamDns) }
@@ -56,6 +57,7 @@ fun CustomDnsDialog(
     }
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dns_custom_title)) },

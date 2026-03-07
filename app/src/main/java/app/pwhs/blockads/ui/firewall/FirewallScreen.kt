@@ -36,7 +36,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallRuleDialog
@@ -62,14 +62,14 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FirewallScreen(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator, modifier: Modifier = Modifier,
     viewModel: FirewallViewModel = koinViewModel()
 ) {
-    val firewallEnabled by viewModel.firewallEnabled.collectAsState()
-    val firewallRules by viewModel.firewallRules.collectAsState()
-    val enabledCount by viewModel.enabledCount.collectAsState()
-    val installedApps by viewModel.installedApps.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val firewallEnabled by viewModel.firewallEnabled.collectAsStateWithLifecycle()
+    val firewallRules by viewModel.firewallRules.collectAsStateWithLifecycle()
+    val enabledCount by viewModel.enabledCount.collectAsStateWithLifecycle()
+    val installedApps by viewModel.installedApps.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
     var configurePackage by remember { mutableStateOf<String?>(null) }
 
@@ -116,7 +116,7 @@ fun FirewallScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {

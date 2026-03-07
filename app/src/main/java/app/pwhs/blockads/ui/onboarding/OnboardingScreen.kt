@@ -46,7 +46,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +77,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.util.AppConstants.TOTAL_PAGES
 
 @Destination<RootGraph>
@@ -85,13 +85,14 @@ import app.pwhs.blockads.util.AppConstants.TOTAL_PAGES
 @Composable
 fun OnboardingScreen(
     navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val selectedProtectionLevel by viewModel.selectedProtectionLevel.collectAsState()
-    val selectedDnsProvider by viewModel.selectedDnsProvider.collectAsState()
+    val selectedProtectionLevel by viewModel.selectedProtectionLevel.collectAsStateWithLifecycle()
+    val selectedDnsProvider by viewModel.selectedDnsProvider.collectAsStateWithLifecycle()
 
     val pagerState = rememberPagerState(pageCount = { TOTAL_PAGES })
     val isLastPage = pagerState.currentPage == TOTAL_PAGES - 1
@@ -143,7 +144,7 @@ fun OnboardingScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {},
@@ -191,12 +192,12 @@ fun OnboardingScreen(
                     // Step 2: Protection level
                     1 -> ProtectionLevelStep(
                         selectedLevel = selectedProtectionLevel,
-                        onLevelSelected = { viewModel.selectProtectionLevel(it) }
+                        onLevelSelect = { viewModel.selectProtectionLevel(it) }
                     )
                     // Step 3: DNS server
                     2 -> DnsServerStep(
                         selectedProvider = selectedDnsProvider,
-                        onProviderSelected = { viewModel.selectDnsProvider(it) }
+                        onProviderSelect = { viewModel.selectDnsProvider(it) }
                     )
                     // Step 4: VPN permission
                     3 -> PermissionStep(

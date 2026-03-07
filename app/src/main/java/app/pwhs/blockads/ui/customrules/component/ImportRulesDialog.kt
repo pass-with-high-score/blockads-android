@@ -23,11 +23,13 @@ import app.pwhs.blockads.R
 @Composable
 fun ImportRulesDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var rulesText by remember { mutableStateOf("") }
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.import_rules)) },

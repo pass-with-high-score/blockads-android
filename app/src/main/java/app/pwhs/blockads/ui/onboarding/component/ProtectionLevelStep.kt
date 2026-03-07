@@ -38,10 +38,11 @@ import app.pwhs.blockads.ui.onboarding.data.ProtectionLevel
 @Composable
 fun ProtectionLevelStep(
     selectedLevel: ProtectionLevel,
-    onLevelSelected: (ProtectionLevel) -> Unit
+    onLevelSelect: (ProtectionLevel) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
@@ -73,7 +74,7 @@ fun ProtectionLevelStep(
             title = stringResource(R.string.onboarding_protection_basic),
             description = stringResource(R.string.onboarding_protection_basic_desc),
             isSelected = selectedLevel == ProtectionLevel.BASIC,
-            onClick = { onLevelSelected(ProtectionLevel.BASIC) }
+            onClick = { onLevelSelect(ProtectionLevel.BASIC) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -84,7 +85,7 @@ fun ProtectionLevelStep(
             description = stringResource(R.string.onboarding_protection_standard_desc),
             isSelected = selectedLevel == ProtectionLevel.STANDARD,
             isRecommended = true,
-            onClick = { onLevelSelected(ProtectionLevel.STANDARD) }
+            onClick = { onLevelSelect(ProtectionLevel.STANDARD) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -94,7 +95,7 @@ fun ProtectionLevelStep(
             title = stringResource(R.string.onboarding_protection_strict),
             description = stringResource(R.string.onboarding_protection_strict_desc),
             isSelected = selectedLevel == ProtectionLevel.STRICT,
-            onClick = { onLevelSelected(ProtectionLevel.STRICT) }
+            onClick = { onLevelSelect(ProtectionLevel.STRICT) }
         )
     }
 }

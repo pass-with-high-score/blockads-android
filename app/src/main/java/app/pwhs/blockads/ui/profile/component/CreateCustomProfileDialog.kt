@@ -25,13 +25,15 @@ import app.pwhs.blockads.R
 @Composable
 fun CreateCustomProfileDialog(
     onDismiss: () -> Unit,
-    onCreate: (String, Boolean, Boolean) -> Unit
+    onCreate: (String, Boolean, Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var safeSearch by rememberSaveable { mutableStateOf(false) }
     var youtubeRestricted by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.profile_create_custom)) },
