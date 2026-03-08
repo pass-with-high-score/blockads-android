@@ -252,7 +252,10 @@ class DomainTrie {
             nodeCount++
 
             offset += 3 // isTerminal(1) + childCount(2)
-            node.children?.forEach { (label, child) ->
+            
+            // CRITICAL: Sort children to ensure deterministic mapping between Passes
+            val sortedChildren = node.children?.entries?.sortedBy { it.key }
+            sortedChildren?.forEach { (label, child) ->
                 offset += 2 + label.toByteArray(Charsets.UTF_8).size + 4
                 queue.add(child)
             }
@@ -270,10 +273,12 @@ class DomainTrie {
             while (queue.isNotEmpty()) {
                 val node = queue.removeFirst()
                 out.writeByte(if (node.isTerminal) 1 else 0)
-                val childCount = node.children?.size ?: 0
+                
+                val sortedChildren = node.children?.entries?.sortedBy { it.key }
+                val childCount = sortedChildren?.size ?: 0
                 out.writeShort(childCount)
 
-                node.children?.forEach { (label, child) ->
+                sortedChildren?.forEach { (label, child) ->
                     val labelBytes = label.toByteArray(Charsets.UTF_8)
                     out.writeShort(labelBytes.size)
                     out.write(labelBytes)

@@ -302,12 +302,14 @@ class FilterListRepository(
             if (securityTrie?.containsOrParent(domain) == true) {
                 return BLOCK_REASON_SECURITY
             }
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
         try {
             if (adTrie?.containsOrParent(domain) == true) {
                 return BLOCK_REASON_FILTER_LIST
             }
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
         return ""
     }
 
@@ -347,33 +349,6 @@ class FilterListRepository(
     }
 
     /**
-     * On first launch, copies pre-bundled filter files from assets to the
-     * cache directory so that [loadSingleFilterToTrie] finds them immediately
-     * without needing a network download.
-     */
-    private fun seedBundledFiltersIfNeeded() {
-        val cacheDir = File(context.filesDir, CACHE_DIR)
-        if (cacheDir.exists() && (cacheDir.listFiles()?.isNotEmpty() == true)) return
-
-        cacheDir.mkdirs()
-        try {
-            val bundled = context.assets.list("bundled_filters") ?: return
-            for (filename in bundled) {
-                val dest = File(cacheDir, filename)
-                if (dest.exists()) continue
-                context.assets.open("bundled_filters/$filename").use { input ->
-                    dest.outputStream().buffered().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                Timber.d("Copied bundled filter: $filename")
-            }
-        } catch (e: Exception) {
-            Timber.d("Failed to seed bundled filters: $e")
-        }
-    }
-
-    /**
      * Load all enabled filter lists and merge into Tries.
      *
      * Three loading strategies:
@@ -385,159 +360,170 @@ class FilterListRepository(
     suspend fun loadAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
         loadMutex.withLock {
             try {
-                seedBundledFiltersIfNeeded()
 
-            val enabledLists = filterListDao.getEnabled()
-            if (enabledLists.isEmpty()) {
-                adTrie = null
-                securityTrie = null
-                return@withContext Result.success(0)
-            }
+                val enabledLists = filterListDao.getEnabled()
+                if (enabledLists.isEmpty()) {
+                    adTrie = null
+                    securityTrie = null
+                    return@withContext Result.success(0)
+                }
 
-            val startTime = System.currentTimeMillis()
-            trieDir.mkdirs()
-            val adTrieFile = File(trieDir, "ad_domains.trie")
-            val secTrieFile = File(trieDir, "security_domains.trie")
-            val fingerprintFile = File(trieDir, "trie_fingerprint.txt")
+                val startTime = System.currentTimeMillis()
+                trieDir.mkdirs()
+                val adTrieFile = File(trieDir, "ad_domains.trie")
+                val secTrieFile = File(trieDir, "security_domains.trie")
+                val fingerprintFile = File(trieDir, "trie_fingerprint.txt")
 
-            // ── Build per-filter fingerprints ──
-            val currentFpMap = buildFingerprintMap(enabledLists)
-            val currentFingerprint = currentFpMap.entries
-                .sortedBy { it.key }
-                .joinToString(";") { "${it.key}:${it.value}" }
+                // ── Build per-filter fingerprints ──
+                val currentFpMap = buildFingerprintMap(enabledLists)
+                val currentFingerprint = currentFpMap.entries
+                    .sortedBy { it.key }
+                    .joinToString(";") { "${it.key}:${it.value}" }
 
-            val savedFingerprint = try {
-                if (fingerprintFile.exists()) fingerprintFile.readText() else ""
-            } catch (_: Exception) { "" }
+                val savedFingerprint = try {
+                    if (fingerprintFile.exists()) fingerprintFile.readText() else ""
+                } catch (_: Exception) {
+                    ""
+                }
 
-            // ── Strategy 1: Cache HIT — nothing changed ──
-            if (currentFingerprint == savedFingerprint
-                && adTrieFile.exists() && adTrieFile.length() > 0
-            ) {
-                adTrie = DomainTrie.loadFromMmap(adTrieFile)
-                securityTrie = if (secTrieFile.exists() && secTrieFile.length() > 0) {
-                    DomainTrie.loadFromMmap(secTrieFile)
-                } else null
+                // ── Strategy 1: Cache HIT — nothing changed ──
+                if (currentFingerprint == savedFingerprint
+                    && adTrieFile.exists() && adTrieFile.length() > 0
+                ) {
+                    adTrie = DomainTrie.loadFromMmap(adTrieFile)
+                    securityTrie = if (secTrieFile.exists() && secTrieFile.length() > 0) {
+                        DomainTrie.loadFromMmap(secTrieFile)
+                    } else null
 
-                val elapsed = System.currentTimeMillis() - startTime
-                val totalCount = (adTrie?.size ?: 0) + (securityTrie?.size ?: 0)
-                Timber.d("Trie cache HIT — loaded $totalCount domains via mmap in ${elapsed}ms")
-                return@withContext Result.success(totalCount)
-            }
+                    val elapsed = System.currentTimeMillis() - startTime
+                    val totalCount = (adTrie?.size ?: 0) + (securityTrie?.size ?: 0)
+                    Timber.d("Trie cache HIT — loaded $totalCount domains via mmap in ${elapsed}ms")
+                    return@withContext Result.success(totalCount)
+                }
 
-            // ── Determine what changed ──
-            val savedFpMap = parseFingerprintMap(savedFingerprint)
-            val currentIds = currentFpMap.keys
-            val savedIds = savedFpMap.keys
+                // ── Determine what changed ──
+                val savedFpMap = parseFingerprintMap(savedFingerprint)
+                val currentIds = currentFpMap.keys
+                val savedIds = savedFpMap.keys
 
-            val addedFilterIds = currentIds - savedIds
-            val removedFilterIds = savedIds - currentIds
-            val changedFilterIds = currentIds.intersect(savedIds)
-                .filter { currentFpMap[it] != savedFpMap[it] }
-                .toSet()
+                val addedFilterIds = currentIds - savedIds
+                val removedFilterIds = savedIds - currentIds
+                val changedFilterIds = currentIds.intersect(savedIds)
+                    .filter { currentFpMap[it] != savedFpMap[it] }
+                    .toSet()
 
-            val isAddOnly = removedFilterIds.isEmpty() && changedFilterIds.isEmpty()
-                && addedFilterIds.isNotEmpty()
-                && adTrieFile.exists() && adTrieFile.length() > 0
+                val isAddOnly = removedFilterIds.isEmpty() && changedFilterIds.isEmpty()
+                        && addedFilterIds.isNotEmpty()
+                        && adTrieFile.exists() && adTrieFile.length() > 0
 
-            if (isAddOnly) {
-                // ── Strategy 2: Incremental ADD — only new filters ──
-                Timber.d("Trie INCREMENTAL — ${addedFilterIds.size} new filter(s), loading existing + adding new")
+                if (isAddOnly) {
+                    // ── Strategy 2: Incremental ADD — only new filters ──
+                    Timber.d("Trie INCREMENTAL — ${addedFilterIds.size} new filter(s), loading existing + adding new")
 
-                val addedFilters = enabledLists.filter { it.id in addedFilterIds }
+                    val addedFilters = enabledLists.filter { it.id in addedFilterIds }
 
-                val adCount = incrementalAdd(
-                    addedFilters.filter { it.category != FilterList.CATEGORY_SECURITY },
-                    adTrieFile
-                )
-                val secCount = incrementalAdd(
-                    addedFilters.filter { it.category == FilterList.CATEGORY_SECURITY },
-                    secTrieFile
-                )
+                    val adCount = incrementalAdd(
+                        addedFilters.filter { it.category != FilterList.CATEGORY_SECURITY },
+                        adTrieFile
+                    )
+                    val secCount = incrementalAdd(
+                        addedFilters.filter { it.category == FilterList.CATEGORY_SECURITY },
+                        secTrieFile
+                    )
 
-                adTrie = if (adTrieFile.exists() && adTrieFile.length() > 0) {
-                    DomainTrie.loadFromMmap(adTrieFile)
-                } else null
-                securityTrie = if (secTrieFile.exists() && secTrieFile.length() > 0) {
-                    DomainTrie.loadFromMmap(secTrieFile)
-                } else null
+                    adTrie = if (adTrieFile.exists() && adTrieFile.length() > 0) {
+                        DomainTrie.loadFromMmap(adTrieFile)
+                    } else null
+                    securityTrie = if (secTrieFile.exists() && secTrieFile.length() > 0) {
+                        DomainTrie.loadFromMmap(secTrieFile)
+                    } else null
 
-                saveFingerprintAndLog(fingerprintFile, currentFingerprint, startTime, "INCREMENTAL")
-                return@withContext Result.success(
-                    (adTrie?.size ?: 0) + (securityTrie?.size ?: 0)
-                )
-            }
+                    saveFingerprintAndLog(
+                        fingerprintFile,
+                        currentFingerprint,
+                        startTime,
+                        "INCREMENTAL"
+                    )
+                    return@withContext Result.success(
+                        (adTrie?.size ?: 0) + (securityTrie?.size ?: 0)
+                    )
+                }
 
-            // ── Strategy 3: Full REBUILD ──
-            Timber.d("Trie FULL REBUILD — removed=${removedFilterIds.size}, changed=${changedFilterIds.size}, added=${addedFilterIds.size}")
+                // ── Strategy 3: Full REBUILD ──
+                Timber.d("Trie FULL REBUILD — removed=${removedFilterIds.size}, changed=${changedFilterIds.size}, added=${addedFilterIds.size}")
 
-            val adFilters =
-                enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
-            var adCount = 0
-            if (adFilters.isNotEmpty()) {
-                val adTrieBuilder = DomainTrie()
-                for (filter in adFilters) {
-                    try {
-                        val sizeBefore = adTrieBuilder.size
-                        loadSingleFilterToTrie(filter, adTrieBuilder)
-                        val loaded = adTrieBuilder.size - sizeBefore
-                        filterListDao.updateStats(
-                            id = filter.id,
-                            count = loaded,
-                            timestamp = System.currentTimeMillis()
-                        )
-                        Timber.d("Loaded $loaded domains from ${filter.name}")
-                    } catch (e: Exception) {
-                        Timber.d("Failed to load filter: ${filter.name}: $e")
+                val adFilters =
+                    enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+                var adCount = 0
+                if (adFilters.isNotEmpty()) {
+                    val adTrieBuilder = DomainTrie()
+                    for (filter in adFilters) {
+                        try {
+                            val sizeBefore = adTrieBuilder.size
+                            loadSingleFilterToTrie(filter, adTrieBuilder)
+                            val loaded = adTrieBuilder.size - sizeBefore
+                            filterListDao.updateStats(
+                                id = filter.id,
+                                count = loaded,
+                                timestamp = System.currentTimeMillis()
+                            )
+                            Timber.d("Loaded $loaded domains from ${filter.name}")
+                        } catch (e: Exception) {
+                            Timber.d("Failed to load filter: ${filter.name}: $e")
+                        }
                     }
-                }
-                adCount = adTrieBuilder.size
-                if (adCount > 0) {
-                    val tempFile = File(adTrieFile.parent, adTrieFile.name + ".tmp")
-                    adTrieBuilder.saveToBinary(tempFile)
-                    tempFile.renameTo(adTrieFile)
-                }
-                adTrieBuilder.clear()
-            } else {
-                adTrieFile.delete()
-            }
-
-            val secFilters =
-                enabledLists.filter { it.category == FilterList.CATEGORY_SECURITY }
-            var secCount = 0
-            if (secFilters.isNotEmpty()) {
-                val secTrieBuilder = DomainTrie()
-                for (filter in secFilters) {
-                    try {
-                        val sizeBefore = secTrieBuilder.size
-                        loadSingleFilterToTrie(filter, secTrieBuilder)
-                        val loaded = secTrieBuilder.size - sizeBefore
-                        filterListDao.updateStats(
-                            id = filter.id,
-                            count = loaded,
-                            timestamp = System.currentTimeMillis()
-                        )
-                        Timber.d("Loaded $loaded domains from ${filter.name} (security)")
-                    } catch (e: Exception) {
-                        Timber.d("Failed to load filter: ${filter.name}: $e")
+                    adCount = adTrieBuilder.size
+                    if (adCount > 0) {
+                        val tempFile = File(adTrieFile.parent, adTrieFile.name + ".tmp")
+                        adTrieBuilder.saveToBinary(tempFile)
+                        tempFile.renameTo(adTrieFile)
                     }
+                    adTrieBuilder.clear()
+                } else {
+                    adTrieFile.delete()
                 }
-                secCount = secTrieBuilder.size
-                if (secCount > 0) {
-                    val tempFile = File(secTrieFile.parent, secTrieFile.name + ".tmp")
-                    secTrieBuilder.saveToBinary(tempFile)
-                    tempFile.renameTo(secTrieFile)
+
+                val secFilters =
+                    enabledLists.filter { it.category == FilterList.CATEGORY_SECURITY }
+                var secCount = 0
+                if (secFilters.isNotEmpty()) {
+                    val secTrieBuilder = DomainTrie()
+                    for (filter in secFilters) {
+                        try {
+                            val sizeBefore = secTrieBuilder.size
+                            loadSingleFilterToTrie(filter, secTrieBuilder)
+                            val loaded = secTrieBuilder.size - sizeBefore
+                            filterListDao.updateStats(
+                                id = filter.id,
+                                count = loaded,
+                                timestamp = System.currentTimeMillis()
+                            )
+                            Timber.d("Loaded $loaded domains from ${filter.name} (security)")
+                        } catch (e: Exception) {
+                            Timber.d("Failed to load filter: ${filter.name}: $e")
+                        }
+                    }
+                    secCount = secTrieBuilder.size
+                    if (secCount > 0) {
+                        val tempFile = File(secTrieFile.parent, secTrieFile.name + ".tmp")
+                        secTrieBuilder.saveToBinary(tempFile)
+                        tempFile.renameTo(secTrieFile)
+                    }
+                    secTrieBuilder.clear()
+                } else {
+                    secTrieFile.delete()
                 }
-                secTrieBuilder.clear()
-            } else {
-                secTrieFile.delete()
-            }
 
-            adTrie = if (adCount > 0) DomainTrie.loadFromMmap(adTrieFile) else null
-            securityTrie =
-                if (secCount > 0) DomainTrie.loadFromMmap(secTrieFile) else null
+                adTrie = if (adCount > 0) DomainTrie.loadFromMmap(adTrieFile) else null
+                securityTrie =
+                    if (secCount > 0) DomainTrie.loadFromMmap(secTrieFile) else null
 
-                saveFingerprintAndLog(fingerprintFile, currentFingerprint, startTime, "FULL REBUILD")
+                saveFingerprintAndLog(
+                    fingerprintFile,
+                    currentFingerprint,
+                    startTime,
+                    "FULL REBUILD"
+                )
                 Result.success(adCount + secCount)
             } catch (e: Exception) {
                 Timber.d("Failed to load filters: $e")
@@ -722,7 +708,11 @@ class FilterListRepository(
     private fun parseHostsFileToTrie(reader: BufferedReader, trie: DomainTrie) {
         reader.lineSequence()
             .map { it.trim() }
-            .filter { it.isNotEmpty() && !it.startsWith('#') && !it.startsWith('!') }
+            .filter {
+                it.isNotEmpty() && !it.startsWith('#') && !it.startsWith('!') && !it.startsWith(
+                    "@@"
+                )
+            }
             .forEach { line ->
                 when {
                     line.startsWith("0.0.0.0 ") || line.startsWith("127.0.0.1 ") -> {
@@ -733,18 +723,25 @@ class FilterListRepository(
                         }
                     }
 
-                    line.startsWith("||") && line.endsWith("^") -> {
-                        val domain = line.removePrefix("||").removeSuffix("^").trim()
-                        if (domain.isNotBlank() && domain.contains('.')) {
+                    line.startsWith("||") -> {
+                        var domain = line.removePrefix("||").trim()
+                        if (domain.endsWith("^")) {
+                            domain = domain.removeSuffix("^")
+                        }
+                        if (domain.isNotBlank()) {
                             trie.add(domain.lowercase())
                         }
                     }
 
-                    line.contains('.') && !line.contains(' ') && !line.contains('/') -> {
-                        // Allow wildcards (e.g., *.ads.example.com) and regular domains
-                        val normalized = line.lowercase()
-                        if (normalized.all { c -> c.isLetterOrDigit() || c == '.' || c == '-' || c == '_' || c == '*' }) {
-                            trie.add(normalized)
+                    !line.contains(' ') && !line.contains('/') -> {
+                        // Allow wildcards (e.g., *.ads.example.com) and regular/short domains
+                        var domain = line.lowercase()
+                        if (domain.endsWith("^")) {
+                            domain = domain.removeSuffix("^")
+                        }
+
+                        if (domain.isNotBlank() && domain.all { c -> c.isLetterOrDigit() || c == '.' || c == '-' || c == '_' || c == '*' }) {
+                            trie.add(domain)
                         }
                     }
                 }
