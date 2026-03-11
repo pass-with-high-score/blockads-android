@@ -497,4 +497,15 @@
     <string name="profile_name_custom">مخصص</string>
     <string name="profile_name_strict_family">عائلي صارم</string>
     <string name="profile_desc_strict_family">حظر أقصى: الإعلانات، المتتبعات، محتوى البالغين والمقامرة</string>
+
+    <string name="settings_blocklist_domains">النطاقات المحظورة</string>
+    <string name="settings_blocklist_domains_desc">سيتم حظر هذه النطاقات دائماً</string>
+    <string name="blocklist_domains_title">النطاقات المحظورة</string>
+    <string name="blocklist_domains_subtitle">سيتم حظر هذه النطاقات دائماً</string>
+    <string name="blocklist_domains_add">إضافة نطاق</string>
+    <string name="blocklist_domains_hint">مثال example.com</string>
+    <string name="blocklist_domains_empty">لا توجد نطاقات محظورة</string>
+    <string name="blocklist_domain_added">تم حظر النطاق: %s</string>
+    <string name="blocklist_domain_removed">تم إزالة النطاق من قائمة الحظر</string>
+    <string name="blocklist_domain_already_exists">النطاق محظور بالفعل</string>
 </resources>

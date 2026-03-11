@@ -20,6 +20,7 @@ import app.pwhs.blockads.data.entities.FirewallRuleBackup
 import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.data.entities.SettingsBackup
 import app.pwhs.blockads.data.entities.WhitelistDomain
+import app.pwhs.blockads.data.entities.RuleType
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.ui.event.UiEvent
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -67,13 +69,6 @@ class SettingsViewModel(
             AppPreferences.DEFAULT_FALLBACK_DNS
         )
 
-    val dnsProtocol: StateFlow<DnsProtocol> = appPrefs.dnsProtocol
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            DnsProtocol.PLAIN
-        )
-
     /**
      * Unified display value for the custom DNS input.
      * Shows the current DNS server in the format the user originally entered:
@@ -105,6 +100,9 @@ class SettingsViewModel(
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val blocklistDomainsCount: StateFlow<Int> = customDnsRuleDao.getAllFlow()
+        .map { rules -> rules.count { it.ruleType == RuleType.BLOCK } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val autoUpdateEnabled: StateFlow<Boolean> = appPrefs.autoUpdateEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -156,74 +154,6 @@ class SettingsViewModel(
 
     fun setAutoReconnect(enabled: Boolean) {
         viewModelScope.launch { appPrefs.setAutoReconnect(enabled) }
-    }
-
-    fun setFallbackDns(dns: String) {
-        val trimmed = dns.trim()
-        viewModelScope.launch {
-            val currentUpstream = appPrefs.upstreamDns.first()
-            if (currentUpstream.equals(trimmed, ignoreCase = true)) {
-                _events.toast(R.string.dns_error_duplicate)
-                return@launch
-            }
-            appPrefs.setFallbackDns(trimmed)
-            requestVpnRestart()
-        }
-    }
-
-
-    /**
-     * Set custom DNS server from unified input. Auto-detects protocol:
-     * - https://... → DoH
-     * - tls://...   → DoT
-     * - otherwise   → Plain DNS (IP address)
-     */
-    fun setCustomDnsServer(input: String) {
-        val trimmed = input.trim()
-        if (trimmed.isBlank()) return // Guard against empty input
-
-        viewModelScope.launch {
-            val parsedHost = when {
-                trimmed.startsWith("https://", ignoreCase = true) -> {
-                    try { java.net.URL(trimmed).host } catch (_: Exception) { trimmed }
-                }
-                trimmed.startsWith("quic://", ignoreCase = true) -> {
-                    try { java.net.URI(trimmed).host ?: trimmed.removePrefix("quic://").removePrefix("QUIC://") } catch (_: Exception) { trimmed.removePrefix("quic://").removePrefix("QUIC://") }
-                }
-                trimmed.startsWith("tls://", ignoreCase = true) -> {
-                    trimmed.removePrefix("tls://").removePrefix("TLS://")
-                }
-                else -> trimmed
-            }
-
-            val currentFallback = appPrefs.fallbackDns.first()
-            if (currentFallback.equals(parsedHost, ignoreCase = true)) {
-                _events.toast(R.string.dns_error_duplicate)
-                return@launch
-            }
-
-            when {
-                trimmed.startsWith("https://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(DnsProtocol.DOH)
-                    appPrefs.setDohUrl(trimmed)
-                    appPrefs.setUpstreamDns(parsedHost)
-                }
-                trimmed.startsWith("quic://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(DnsProtocol.DOQ)
-                    appPrefs.setDohUrl(trimmed)
-                    appPrefs.setUpstreamDns(parsedHost)
-                }
-                trimmed.startsWith("tls://", ignoreCase = true) -> {
-                    appPrefs.setDnsProtocol(DnsProtocol.DOT)
-                    appPrefs.setUpstreamDns(parsedHost)
-                }
-                else -> {
-                    appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
-                    appPrefs.setUpstreamDns(parsedHost)
-                }
-            }
-            requestVpnRestart()
-        }
     }
 
     fun setAutoUpdateEnabled(enabled: Boolean) {
@@ -308,29 +238,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             dnsLogDao.clearAll()
             _events.toast(R.string.filter_log_cleared)
-        }
-    }
-
-    fun addWhitelistDomain(domain: String) {
-        viewModelScope.launch {
-            val cleanDomain = domain.trim().lowercase()
-            if (cleanDomain.isNotBlank()) {
-                val exists = whitelistDomainDao.exists(cleanDomain)
-                if (exists == 0) {
-                    whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
-                    _events.toast(R.string.filter_domain_whitelisted, listOf(cleanDomain))
-                    requestVpnRestart()
-                } else {
-                    _events.toast(R.string.filter_domain_already_whitelisted)
-                }
-            }
-        }
-    }
-
-    fun removeWhitelistDomain(domain: WhitelistDomain) {
-        viewModelScope.launch {
-            whitelistDomainDao.delete(domain)
-            requestVpnRestart()
         }
     }
 

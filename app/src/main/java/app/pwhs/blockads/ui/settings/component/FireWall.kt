@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Security
@@ -23,10 +21,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,28 +35,27 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FilterList
-import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.ui.theme.TextSecondary
 
 @Composable
 fun FireWall(
-    whitelistDomains: List<WhitelistDomain>,
+    modifier: Modifier = Modifier,
     filterLists: List<FilterList>,
     autoUpdateNotification: String,
     autoUpdateFrequency: String,
     autoUpdateWifiOnly: Boolean,
     autoUpdateEnabled: Boolean,
-    modifier: Modifier = Modifier,
+    whitelistCount: Int = 0,
     onNavigateToFirewall: () -> Unit = {},
     onNavigateToFilterSetup: () -> Unit = {},
-    onRemoveWhitelistDomain: (WhitelistDomain) -> Unit = {},
+    onNavigateToWhitelistDomains: () -> Unit = {},
+    blocklistCount: Int = 0,
+    onNavigateToBlocklistDomains: () -> Unit = {},
     onSetAutoUpdateWifiOnly: (Boolean) -> Unit = {},
     onSetAutoUpdateFrequency: (String) -> Unit = {},
     onSetAutoUpdateNotification: (String) -> Unit = {},
     onSetAutoUpdateEnable: (Boolean) -> Unit = {},
-    onAddWhitelistDomain: (String) -> Unit = {},
 ) {
-    var showAddDomainDialog by remember { mutableStateOf(false) }
     var showFrequencyDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
 
@@ -81,58 +76,89 @@ fun FireWall(
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
         )
         Column {
-            SettingItem(
-                icon = Icons.Default.Block,
-                desc = stringResource(R.string.settings_whitelist_domains_desc),
-                title = stringResource(R.string.settings_whitelist_domains),
-            )
-            if (whitelistDomains.isNotEmpty()) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                )
-            }
-
-            whitelistDomains.forEach { domain ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = domain.domain,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    IconButton(
-                        onClick = { onRemoveWhitelistDomain(domain) },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Remove",
-                            tint = TextSecondary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-
-            TextButton(
-                onClick = { showAddDomainDialog = true },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .clickable { onNavigateToWhitelistDomains() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    Icons.Default.Add,
+                    Icons.Default.Block,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.settings_add_domain))
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.settings_whitelist_domains),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        stringResource(R.string.settings_whitelist_domains_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                }
+                if (whitelistCount > 0) {
+                    Text(
+                        text = "$whitelistCount",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToBlocklistDomains() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.Block,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.settings_blocklist_domains),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        stringResource(R.string.settings_blocklist_domains_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                }
+                if (blocklistCount > 0) {
+                    Text(
+                        text = "$blocklistCount",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
             }
         }
         HorizontalDivider(
@@ -301,17 +327,4 @@ fun FireWall(
             onDismiss = { showNotificationDialog = false }
         )
     }
-
-
-    // Add domain whitelist dialog
-    if (showAddDomainDialog) {
-        AddDomainDialog(
-            onDismiss = { showAddDomainDialog = false },
-            onAdd = { domain ->
-                onAddWhitelistDomain(domain)
-                showAddDomainDialog = false
-            }
-        )
-    }
-
 }

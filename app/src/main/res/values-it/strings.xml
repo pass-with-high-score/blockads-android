@@ -534,4 +534,15 @@
     <string name="profile_name_custom">Personalizzato</string>
     <string name="profile_name_strict_family">Famiglia Rigorosa</string>
     <string name="profile_desc_strict_family">Blocco massimo: annunci, tracker, contenuti per adulti &amp; gioco d\'azzardo</string>
+
+    <string name="settings_blocklist_domains">Domini bloccati</string>
+    <string name="settings_blocklist_domains_desc">Questi domini saranno sempre bloccati</string>
+    <string name="blocklist_domains_title">Domini bloccati</string>
+    <string name="blocklist_domains_subtitle">Questi domini saranno sempre bloccati</string>
+    <string name="blocklist_domains_add">Aggiungi dominio</string>
+    <string name="blocklist_domains_hint">es. example.com</string>
+    <string name="blocklist_domains_empty">Nessun dominio bloccato</string>
+    <string name="blocklist_domain_added">Dominio bloccato: %s</string>
+    <string name="blocklist_domain_removed">Dominio rimosso dalla lista di blocco</string>
+    <string name="blocklist_domain_already_exists">Il dominio è già bloccato</string>
 </resources>

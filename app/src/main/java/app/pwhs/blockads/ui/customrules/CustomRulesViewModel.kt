@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
+import app.pwhs.blockads.data.entities.RuleType
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.util.CustomRuleParser
@@ -52,6 +53,18 @@ class CustomRulesViewModel(
             try {
                 val parsedRule = CustomRuleParser.parseRule(ruleText)
                 if (parsedRule != null) {
+                    val allRules = customDnsRuleDao.getAll()
+                    val isDuplicate = allRules.any {
+                        if (parsedRule.ruleType == RuleType.COMMENT) {
+                            it.rule == parsedRule.rule
+                        } else {
+                            it.ruleType == parsedRule.ruleType && it.domain == parsedRule.domain
+                        }
+                    }
+                    if (isDuplicate) {
+                        onError("Rule already exists")
+                        return@launch
+                    }
                     customDnsRuleDao.insert(parsedRule)
                     reloadFilters()
                     AdBlockVpnService.requestRestart(application.applicationContext)
@@ -70,10 +83,39 @@ class CustomRulesViewModel(
             try {
                 val parsedRules = CustomRuleParser.parseRules(rulesText)
                 if (parsedRules.isNotEmpty()) {
-                    customDnsRuleDao.insertAll(parsedRules)
-                    reloadFilters()
-                    AdBlockVpnService.requestRestart(application.applicationContext)
-                    onSuccess(parsedRules.size)
+                    val allRules = customDnsRuleDao.getAll()
+                    val existingNonComments = allRules.filter { it.ruleType != RuleType.COMMENT }
+                        .map { Pair(it.ruleType, it.domain) }.toSet()
+                    val existingComments = allRules.filter { it.ruleType == RuleType.COMMENT }
+                        .map { it.rule }.toSet()
+
+                    // Filter out duplicates (both against DB and within the new list)
+                    val newRulesToInsert = mutableListOf<CustomDnsRule>()
+                    val seenNonComments = existingNonComments.toMutableSet()
+                    val seenComments = existingComments.toMutableSet()
+
+                    for (rule in parsedRules) {
+                        val isDuplicate = if (rule.ruleType == RuleType.COMMENT) {
+                            !seenComments.add(rule.rule)
+                        } else {
+                            !seenNonComments.add(Pair(rule.ruleType, rule.domain))
+                        }
+                        if (!isDuplicate) {
+                            newRulesToInsert.add(rule)
+                        }
+                    }
+
+                    if (newRulesToInsert.isNotEmpty()) {
+                        customDnsRuleDao.insertAll(newRulesToInsert)
+                        reloadFilters()
+                        AdBlockVpnService.requestRestart(application.applicationContext)
+                        onSuccess(newRulesToInsert.size)
+                    } else if (parsedRules.size > newRulesToInsert.size) {
+                         // All parsed rules were duplicates
+                         onError("Rules already exist")
+                    } else {
+                        onError("No valid rules found")
+                    }
                 } else {
                     onError("No valid rules found")
                 }

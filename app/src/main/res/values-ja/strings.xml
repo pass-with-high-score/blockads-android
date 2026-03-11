@@ -481,4 +481,15 @@
     <string name="profile_name_custom">カスタム</string>
     <string name="profile_name_strict_family">厳格なファミリー</string>
     <string name="profile_desc_strict_family">最大限のブロック: 広告、トラッカー、アダルトコンテンツ、ギャンブル</string>
+    <string name="settings_blocklist_domains">ブロックされたドメイン</string>
+    <string name="settings_blocklist_domains_desc">これらのドメインは常にブロックされます</string>
+    <string name="blocklist_domains_title">ブロックされたドメイン</string>
+    <string name="blocklist_domains_subtitle">これらのドメインは常にブロックされます</string>
+    <string name="blocklist_domains_add">ドメインを追加</string>
+    <string name="blocklist_domains_hint">例: example.com</string>
+    <string name="blocklist_domains_empty">ブロックされたドメインはありません</string>
+    <string name="blocklist_domain_added">ドメインをブロックしました: %s</string>
+    <string name="blocklist_domain_removed">ブロックリストから削除しました</string>
+    <string name="blocklist_domain_already_exists">ドメインはすでにブロックされています</string>
+
 </resources>

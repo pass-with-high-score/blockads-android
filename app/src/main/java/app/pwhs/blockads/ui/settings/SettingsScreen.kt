@@ -82,8 +82,10 @@ import com.ramcosta.composedestinations.generated.destinations.AppWhitelistScree
 import com.ramcosta.composedestinations.generated.destinations.AppearanceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DnsProviderScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FilterSetupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.BlocklistDomainScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FirewallScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.WhitelistDomainScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
 
@@ -101,7 +103,7 @@ fun SettingsScreen(
     val customDnsDisplay by viewModel.customDnsDisplay.collectAsStateWithLifecycle()
     val filterLists by viewModel.filterLists.collectAsStateWithLifecycle()
     val whitelistDomains by viewModel.whitelistDomains.collectAsStateWithLifecycle()
-
+    val blocklistDomainsCount by viewModel.blocklistDomainsCount.collectAsStateWithLifecycle()
 
     // Auto-update Filter Lists
     val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsStateWithLifecycle()
@@ -484,15 +486,19 @@ fun SettingsScreen(
                 onNavigateToFilterSetup = {
                     navigator.navigate(FilterSetupScreenDestination)
                 },
-                whitelistDomains = whitelistDomains,
+                onNavigateToWhitelistDomains = {
+                    navigator.navigate(WhitelistDomainScreenDestination)
+                },
+                onNavigateToBlocklistDomains = {
+                    navigator.navigate(BlocklistDomainScreenDestination)
+                },
+                whitelistCount = whitelistDomains.size,
+                blocklistCount = blocklistDomainsCount,
                 filterLists = filterLists,
                 autoUpdateNotification = autoUpdateNotification,
                 autoUpdateFrequency = autoUpdateFrequency,
                 autoUpdateWifiOnly = autoUpdateWifiOnly,
                 autoUpdateEnabled = autoUpdateEnabled,
-                onRemoveWhitelistDomain = {
-                    viewModel.removeWhitelistDomain(it)
-                },
                 onSetAutoUpdateWifiOnly = {
                     viewModel.setAutoUpdateWifiOnly(it)
                 },
@@ -504,9 +510,6 @@ fun SettingsScreen(
                 },
                 onSetAutoUpdateEnable = {
                     viewModel.setAutoUpdateEnabled(it)
-                },
-                onAddWhitelistDomain = {
-                    viewModel.addWhitelistDomain(it)
                 }
             )
 

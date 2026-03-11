@@ -481,4 +481,15 @@
     <string name="profile_name_custom">사용자 지정</string>
     <string name="profile_name_strict_family">엄격한 가족</string>
     <string name="profile_desc_strict_family">최대 차단: 광고, 트래커, 성인 콘텐츠 및 도박</string>
+
+    <string name="settings_blocklist_domains">차단된 도메인</string>
+    <string name="settings_blocklist_domains_desc">이 도메인들은 항상 차단됩니다</string>
+    <string name="blocklist_domains_title">차단된 도메인</string>
+    <string name="blocklist_domains_subtitle">이 도메인들은 항상 차단됩니다</string>
+    <string name="blocklist_domains_add">도메인 추가</string>
+    <string name="blocklist_domains_hint">예: example.com</string>
+    <string name="blocklist_domains_empty">차단된 도메인 없음</string>
+    <string name="blocklist_domain_added">도메인 차단됨: %s</string>
+    <string name="blocklist_domain_removed">차단 목록에서 도메인 제거됨</string>
+    <string name="blocklist_domain_already_exists">도메인이 이미 차단되어 있습니다</string>
 </resources>
