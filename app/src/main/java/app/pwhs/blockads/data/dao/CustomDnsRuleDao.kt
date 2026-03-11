@@ -47,4 +47,7 @@ interface CustomDnsRuleDao {
 
     @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE ruleType != 'COMMENT'")
     suspend fun getRuleCount(): Int
+
+    @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE rule = :ruleText")
+    suspend fun exists(ruleText: String): Int
 }

@@ -53,7 +53,8 @@ fun DomainDetailBottomSheet(
     onCopyDomain: () -> Unit,
     onAddToWhiteList: () -> Unit,
     onAddToCustomBlockRules: () -> Unit,
-    onUnblock: () -> Unit,
+    onAddWildcardWhitelist: () -> Unit,
+    viewModel: app.pwhs.blockads.ui.logs.LogViewModel,
     modifier: Modifier = Modifier
 ) {
     val statusColor = when {
@@ -65,6 +66,17 @@ fun DomainDetailBottomSheet(
         isWhitelisted -> stringResource(R.string.log_status_whitelisted)
         entry.isBlocked -> stringResource(R.string.log_status_blocked)
         else -> stringResource(R.string.log_status_allowed)
+    }
+
+    // State for fetching specific blocking lists
+    val blockingLists = remember { androidx.compose.runtime.mutableStateOf<List<String>?>(null) }
+    
+    androidx.compose.runtime.LaunchedEffect(entry) {
+        if (entry.isBlocked && entry.blockedBy.equals(FilterListRepository.BLOCK_REASON_FILTER_LIST, ignoreCase = true)) {
+            viewModel.getBlockingFilterLists(entry.domain) { lists ->
+                blockingLists.value = lists
+            }
+        }
     }
 
     ModalBottomSheet(
@@ -164,16 +176,25 @@ fun DomainDetailBottomSheet(
                     }
                     if (entry.blockedBy.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        val blockedByText = when (entry.blockedBy) {
+                        val blockedByText = when (entry.blockedBy.uppercase()) {
                             FilterListRepository.BLOCK_REASON_CUSTOM_RULE ->
                                 stringResource(R.string.block_reason_custom_rule)
-                            FilterListRepository.BLOCK_REASON_FILTER_LIST ->
-                                stringResource(R.string.block_reason_filter_list)
+                            FilterListRepository.BLOCK_REASON_FILTER_LIST -> {
+                                val baseText = stringResource(R.string.block_reason_filter_list)
+                                val lists = blockingLists.value
+                                if (lists == null) {
+                                    "$baseText (Loading...)"
+                                } else if (lists.isEmpty()) {
+                                    baseText
+                                } else {
+                                    "$baseText (${lists.joinToString(", ")})"
+                                }
+                            }
                             FilterListRepository.BLOCK_REASON_SECURITY ->
                                 stringResource(R.string.block_reason_security)
                             FilterListRepository.BLOCK_REASON_FIREWALL ->
                                 stringResource(R.string.block_reason_firewall)
-                            FilterListRepository.BLOCK_REASON_UPSTREAM_DNS ->
+                            FilterListRepository.BLOCK_REASON_UPSTREAM_DNS.uppercase() ->
                                 stringResource(R.string.block_reason_upstream_dns)
                             else -> entry.blockedBy
                         }
@@ -188,39 +209,8 @@ fun DomainDetailBottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Actions
-            if (entry.isBlocked) {
-                // Unblock action
-                Card(
-                    onClick = onUnblock,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.LockOpen,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.log_unblock_domain),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            } else if (!isWhitelisted) {
-                // Block action
+            if (!isWhitelisted && !entry.isBlocked) {
+                // Block action showing only when allowed and not whitelisted
                 Card(
                     onClick = onAddToCustomBlockRules,
                     modifier = Modifier.fillMaxWidth(),
@@ -277,6 +267,37 @@ fun DomainDetailBottomSheet(
                         )
                         Text(
                             text = stringResource(R.string.log_action_whitelist),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Wildcard Whitelist action
+                Card(
+                    onClick = onAddWildcardWhitelist,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.PlaylistAdd,
+                            contentDescription = null,
+                            tint = WhitelistAmber,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.log_wildcard_whitelist_domain),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )

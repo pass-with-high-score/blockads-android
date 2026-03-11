@@ -834,6 +834,79 @@ class FilterListRepository(
     }
 
     /**
+     * Finds which specific filter lists a domain (or its parent domain) is currently blocked by.
+     * This scans the cached files of all currently enabled filter lists.
+     * 
+     * @param targetDomain The domain that was blocked (e.g. "ads.example.com")
+     * @return List of filter list names that contain this domain (e.g. ["EasyList", "AdGuard DNS"])
+     */
+    suspend fun findBlockingFilterLists(targetDomain: String): List<String> = withContext(Dispatchers.IO) {
+        val enabledLists = filterListDao.getEnabled()
+        if (enabledLists.isEmpty()) return@withContext emptyList()
+
+        val matchedListNames = mutableListOf<String>()
+        val domainParts = targetDomain.lowercase().split(".")
+        
+        // Generate domain variations to check (exact, parent, wildcard)
+        // For "sub.ads.example.com": 
+        // -> sub.ads.example.com
+        // -> ads.example.com, *.ads.example.com
+        // -> example.com, *.example.com
+        val domainVariations = mutableSetOf(targetDomain.lowercase())
+        for (i in 1 until domainParts.size - 1) { // Stop before TLD
+            val parentDomain = domainParts.subList(i, domainParts.size).joinToString(".")
+            domainVariations.add(parentDomain)
+            domainVariations.add("*.$parentDomain")
+        }
+
+        // Iterate through all enabled lists
+        for (filter in enabledLists) {
+            val cacheFile = getCacheFile(filter)
+            if (!cacheFile.exists() || cacheFile.length() == 0L) continue
+
+            try {
+                // Read line by line to keep memory footprint low
+                var matched = false
+                cacheFile.bufferedReader().use { reader ->
+                    for (line in reader.lineSequence()) {
+                        val trimmed = line.trim()
+                        if (trimmed.isEmpty() || trimmed.startsWith('#') || trimmed.startsWith('!')) continue
+
+                        val parsedDomain = parseSingleLineDomain(trimmed)
+                        if (parsedDomain != null && domainVariations.contains(parsedDomain)) {
+                            matched = true
+                            break // Found a match, no need to read the rest of this file
+                        }
+                    }
+                }
+                if (matched) {
+                    matchedListNames.add(filter.name)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error scanning cache file for ${filter.name}")
+            }
+        }
+        
+        return@withContext matchedListNames
+    }
+
+    /** Helper to extract domain from a hosts/adblock-formatted line */
+    private fun parseSingleLineDomain(line: String): String? {
+        return when {
+            line.startsWith("0.0.0.0") || line.startsWith("127.0.0.1") -> {
+                line.split("\\s+".toRegex()).getOrNull(1)?.trim()?.lowercase()
+            }
+            line.startsWith("||") -> {
+                line.removePrefix("||").substringBefore('^').trim().lowercase()
+            }
+            !line.contains(' ') && !line.contains('\t') && !line.contains('/') -> {
+                line.substringBefore('^').trim().lowercase()
+            }
+            else -> null
+        }
+    }
+
+    /**
      * Get a preview list of domains from a filter's cached file.
      * Returns up to [limit] domains parsed from the hosts file.
      */

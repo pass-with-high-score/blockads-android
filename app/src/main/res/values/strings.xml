@@ -414,9 +414,10 @@
     <string name="log_bulk_selected">%d selected</string>
     <string name="log_bulk_block">Block All</string>
     <string name="log_bulk_whitelist">Whitelist All</string>
-    <string name="log_bulk_done">Done</string>
     <string name="log_unblock_domain">Unblock this domain</string>
-    <string name="log_domain_unblocked">Domain unblocked: %s</string>
+    <string name="log_wildcard_whitelist_domain">Whitelist all subdomains</string>
+    <string name="log_domain_unblocked">Domain %1$s unblocked</string>
+    <string name="log_wildcard_whitelisted">Domain %1$s and all subdomains whitelisted</string>
     <string name="log_action_unblock">Unblock</string>
     <string name="log_action_block">Block</string>
     <string name="block_reason_custom_rule">Custom Block Rule</string>

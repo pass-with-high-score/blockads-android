@@ -373,7 +373,7 @@ fun LogScreen(
                             onLongPress = { selectedEntry = entry },
                             onToggleSelection = { viewModel.toggleSelection(entry.id) },
                             onQuickBlock = { viewModel.addToCustomBlockRules(entry.domain) },
-                            onQuickWhitelist = { viewModel.unblockDomain(entry.domain) }
+                            onQuickWhitelist = { viewModel.addToWhitelist(entry.domain) }
                         )
                     }
                     item { Spacer(modifier = Modifier.height(200.dp)) }
@@ -407,10 +407,11 @@ fun LogScreen(
                     viewModel.addToCustomBlockRules(entry.domain)
                     selectedEntry = null
                 },
-                onUnblock = {
-                    viewModel.unblockDomain(entry.domain)
+                onAddWildcardWhitelist = {
+                    viewModel.addWildcardWhitelist(entry.domain)
                     selectedEntry = null
-                }
+                },
+                viewModel = viewModel
             )
         }
     }

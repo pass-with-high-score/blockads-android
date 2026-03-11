@@ -142,28 +142,59 @@ class LogViewModel(
     fun addToCustomBlockRules(domain: String) {
         viewModelScope.launch {
             val cleanDomain = domain.trim().lowercase()
-            val rule = CustomRuleParser.parseRule(CustomRuleParser.formatBlockRule(cleanDomain))
+            val ruleText = CustomRuleParser.formatBlockRule(cleanDomain)
+            val rule = CustomRuleParser.parseRule(ruleText)
+            
             if (rule != null) {
-                customDnsRuleDao.insert(rule)
-                filterListRepository.loadCustomRules()
-                _events.toast(R.string.rule_added)
+                if (customDnsRuleDao.exists(rule.rule) == 0) {
+                    customDnsRuleDao.insert(rule)
+                    filterListRepository.loadCustomRules()
+                    _events.toast(R.string.rule_added)
+                } else {
+                    _events.toast(R.string.rule_added) // Or a different string for "already exists" if desired
+                }
             }
         }
     }
 
-    fun unblockDomain(domain: String) {
+    fun getBlockingFilterLists(domain: String, onResult: (List<String>) -> Unit) {
+        viewModelScope.launch {
+            val lists = filterListRepository.findBlockingFilterLists(domain)
+            onResult(lists)
+        }
+    }
+
+    fun addWildcardWhitelist(domain: String) {
         viewModelScope.launch {
             val cleanDomain = domain.trim().lowercase()
-            // Remove from custom block rules
-            customDnsRuleDao.deleteBlockRuleByDomain(cleanDomain)
-            // Add to whitelist to ensure it's not blocked by filter lists
-            val exists = whitelistDomainDao.exists(cleanDomain)
-            if (exists == 0) {
-                whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
+            
+            val domainRuleText = "@@||$cleanDomain^"
+            val wildcardRuleText = "@@||*.$cleanDomain^"
+            
+            var addedAny = false
+
+            if (customDnsRuleDao.exists(domainRuleText) == 0) {
+                val domainRule = CustomRuleParser.parseRule(domainRuleText)
+                if (domainRule != null) {
+                    customDnsRuleDao.insert(domainRule)
+                    addedAny = true
+                }
             }
-            filterListRepository.loadCustomRules()
-            filterListRepository.loadWhitelist()
-            _events.toast(R.string.log_domain_unblocked, listOf(cleanDomain))
+            
+            if (customDnsRuleDao.exists(wildcardRuleText) == 0) {
+                val wildcardRule = CustomRuleParser.parseRule(wildcardRuleText)
+                if (wildcardRule != null) {
+                    customDnsRuleDao.insert(wildcardRule)
+                    addedAny = true
+                }
+            }
+            
+            if (addedAny) {
+                filterListRepository.loadCustomRules()
+                _events.toast(R.string.log_wildcard_whitelisted, listOf(cleanDomain))
+            } else {
+                _events.toast(R.string.log_wildcard_whitelisted, listOf(cleanDomain))
+            }
         }
     }
 }
