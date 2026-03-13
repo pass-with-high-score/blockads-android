@@ -43,7 +43,7 @@ class AppWhitelistViewModel(
             _isLoading.value = true
             val apps = withContext(Dispatchers.IO) {
                 val pm = application.applicationContext.packageManager
-                pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                pm.getInstalledApplications(PackageManager.GET_META_DATA or PackageManager.MATCH_UNINSTALLED_PACKAGES)
                     .filter { it.packageName != application.applicationContext.packageName }
                     .map { appInfo ->
                         val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
