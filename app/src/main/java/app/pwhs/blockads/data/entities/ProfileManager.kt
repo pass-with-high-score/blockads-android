@@ -29,7 +29,7 @@ class ProfileManager(
             "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt",
             "https://easylist.to/easylist/easylist.txt",
             "https://easylist.to/easylist/easyprivacy.txt",
-            "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext",
+            "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=1&mimetype=plaintext",
             "https://filters.adtidy.org/extension/ublock/filters/2.txt",
             "https://filters.adtidy.org/extension/ublock/filters/11.txt"
         )
