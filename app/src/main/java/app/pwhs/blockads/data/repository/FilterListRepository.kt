@@ -400,16 +400,18 @@ class FilterListRepository(
      */
     suspend fun seedDefaultsIfNeeded() {
         val existingLists = filterListDao.getAllSync()
-        val existingMap = existingLists.associateBy { it.url }
+        val existingByUrl = existingLists.associateBy { it.url }
+        val existingByName = existingLists.associateBy { it.name }
 
         // Find which default lists need to be inserted or updated
         for (defaultList in DEFAULT_LISTS) {
-            val existing = existingMap[defaultList.url]
+            val existing = existingByUrl[defaultList.url] ?: existingByName[defaultList.name]
             if (existing == null) {
                 // Insert new built-in list
                 filterListDao.insert(defaultList)
                 Timber.d("Seeded new built-in filter: ${defaultList.name}")
-            } else if (existing.name != defaultList.name || 
+            } else if (existing.name != defaultList.name ||
+                existing.url != defaultList.url ||
                 existing.description != defaultList.description || 
                 existing.category != defaultList.category || 
                 !existing.isBuiltIn) {
@@ -418,6 +420,7 @@ class FilterListRepository(
                 filterListDao.update(
                     existing.copy(
                         name = defaultList.name,
+                        url = defaultList.url,
                         description = defaultList.description,
                         category = defaultList.category,
                         isBuiltIn = true
@@ -428,8 +431,8 @@ class FilterListRepository(
         }
 
         // Remove old built-in lists that are no longer in DEFAULT_LISTS
-        val defaultUrls = DEFAULT_LISTS.map { it.url }.toSet()
-        val obsoleteBuiltIn = existingLists.filter { it.isBuiltIn && it.url !in defaultUrls }
+        val defaultNames = DEFAULT_LISTS.map { it.name }.toSet()
+        val obsoleteBuiltIn = existingLists.filter { it.isBuiltIn && it.name !in defaultNames }
         for (obsolete in obsoleteBuiltIn) {
             filterListDao.delete(obsolete)
             Timber.d("Removed obsolete built-in filter: ${obsolete.name}")
