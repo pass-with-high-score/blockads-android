@@ -160,6 +160,13 @@ class FilterListRepository(
                 isBuiltIn = true
             ),
             FilterList(
+                name = "Hagezi Ultimate",
+                url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/ultimate.txt",
+                description = "Hagezi Ultimate — extremely aggressive blocking, will break most apps/sites",
+                isEnabled = false,
+                isBuiltIn = true
+            ),
+            FilterList(
                 name = "Hagezi TIF",
                 url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/tif.txt",
                 description = "Hagezi Threat Intelligence — blocks malware, phishing, scam & cryptojacking",
