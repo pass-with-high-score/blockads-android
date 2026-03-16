@@ -54,6 +54,7 @@ import app.pwhs.blockads.ui.customrules.component.CustomRuleItem
 import app.pwhs.blockads.ui.customrules.component.EmptyRulesState
 import app.pwhs.blockads.ui.customrules.component.ImportRulesDialog
 import app.pwhs.blockads.ui.customrules.component.InfoDialog
+import app.pwhs.blockads.ui.customrules.data.ExportFormat
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -323,6 +324,7 @@ fun CustomRulesScreen(
     // ── Export Format Dialog ──
     if (showExportFormatDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.background,
             onDismissRequest = { showExportFormatDialog = false },
             title = { Text(stringResource(R.string.export_format_title)) },
             text = {

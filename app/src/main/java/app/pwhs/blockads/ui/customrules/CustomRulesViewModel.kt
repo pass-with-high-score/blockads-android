@@ -12,6 +12,7 @@ import app.pwhs.blockads.data.entities.toEntity
 import app.pwhs.blockads.data.entities.toExport
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.ui.customrules.data.ExportFormat
 import app.pwhs.blockads.util.CustomRuleParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,11 +22,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-
-enum class ExportFormat(val extension: String, val mimeType: String) {
-    JSON("json", "application/json"),
-    TXT("txt", "text/plain")
-}
 
 class CustomRulesViewModel(
     private val customDnsRuleDao: CustomDnsRuleDao,
