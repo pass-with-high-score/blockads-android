@@ -104,9 +104,9 @@ func (p *MitmProxy) GetProxyBlockedCount() int64 {
 	return p.proxyBlocked.Load()
 }
 
-// Start begins listening on the given address (e.g., "127.0.0.1:8080").
-// This function blocks; call it in a goroutine.
-func (p *MitmProxy) Start(addr string) error {
+// Listen binds the TCP listener synchronously. Call this BEFORE configuring
+// HTTP proxy routing in the VPN so the port is guaranteed to be open.
+func (p *MitmProxy) Listen(addr string) error {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("listen %s: %w", addr, err)
@@ -118,6 +118,19 @@ func (p *MitmProxy) Start(addr string) error {
 	p.mu.Unlock()
 
 	logf("MITM Proxy: listening on %s", addr)
+	return nil
+}
+
+// Serve runs the accept loop. This function blocks; call it in a goroutine
+// AFTER Listen() has returned successfully.
+func (p *MitmProxy) Serve() error {
+	p.mu.Lock()
+	ln := p.listener
+	p.mu.Unlock()
+
+	if ln == nil {
+		return fmt.Errorf("Serve called before Listen")
+	}
 
 	for {
 		conn, err := ln.Accept()
@@ -210,21 +223,30 @@ func (p *MitmProxy) handleConnect(clientConn net.Conn, req *http.Request) {
 	hostname := hostOnly(host)
 
 	// ── Guard: Block loopback/internal addresses to prevent SSRF ──────
-	// If a malicious app sends CONNECT 127.0.0.1:8080, the proxy would
-	// connect to itself in an infinite loop, exhausting file descriptors.
 	if isLoopbackOrInternal(hostname) {
 		writeHTTPError(clientConn, 403, "Blocked: loopback address")
 		return
 	}
 
 	// ── Gate 1: BLOCK — ad/tracker domain? Drop immediately. ──────────
+	// NOTE: Ad blocking applies to ALL apps, not just browsers.
 	if p.blocker != nil && p.blocker.IsDomainBlocked(hostname) {
 		p.proxyBlocked.Add(1)
 		writeHTTPError(clientConn, 403, "Blocked by BlockAds")
 		return
 	}
 
-	// ── Gate 2: PASS-THROUGH — sensitive / cert-pinned domain ─────────
+	// ── Gate 2: UID CHECK — only intercept selected browsers ──────────
+	// Resolve the source UID from /proc/net/tcp to determine which app
+	// initiated this connection. Non-browser apps get pass-through.
+	sourceUID := resolveConnUID(clientConn)
+	if sourceUID >= 0 && !p.filter.IsUIDAllowed(sourceUID) {
+		// Not a selected browser → tunnel directly, no MITM
+		p.forwardDirect(clientConn, host)
+		return
+	}
+
+	// ── Gate 3: PASS-THROUGH — sensitive / cert-pinned domain ─────────
 	if !p.filter.IsInterceptionAllowed(hostname) {
 		// Direct tunnel — no decryption
 		p.forwardDirect(clientConn, host)

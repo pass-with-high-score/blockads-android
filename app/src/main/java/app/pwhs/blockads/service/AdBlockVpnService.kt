@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 import java.util.Locale
@@ -677,7 +678,7 @@ class AdBlockVpnService : VpnService() {
             vpnInterface = null
 
             // Switch back to main thread for UI/Service lifecycle operations
-            kotlinx.coroutines.withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 _state.value = VpnState.STOPPED
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 if (showStoppedNotification) {

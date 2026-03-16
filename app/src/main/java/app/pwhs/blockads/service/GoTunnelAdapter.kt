@@ -199,9 +199,8 @@ class GoTunnelAdapter(
                     }
                 }.joinToString(",")
                 
-                if (uids.isNotEmpty()) {
-                    engine.setMitmAllowedUIDs(uids)
-                }
+                // Always set UIDs (empty string clears the filter in Go)
+                engine.setMitmAllowedUIDs(uids)
 
                 // Start the MITM Proxy in Go (listens on 127.0.0.1:8080)
                 engine.startMitmProxy("127.0.0.1:8080", certDir)

@@ -275,10 +275,10 @@ class HttpsFilteringViewModel(
         val activities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.queryIntentActivities(
                 browserIntent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong())
             )
         } else {
-            pm.queryIntentActivities(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            pm.queryIntentActivities(browserIntent, PackageManager.MATCH_ALL)
         }
 
         // Load saved selected browsers from prefs

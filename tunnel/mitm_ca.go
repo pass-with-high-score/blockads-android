@@ -44,11 +44,17 @@ type CertManager struct {
 	caPEM   []byte // PEM-encoded CA cert for export to Android
 	caKeyPEM []byte
 
-	// Per-host cert cache (host → *tls.Certificate)
+	// Per-host cert cache (host → *cachedCert)
 	certCache sync.Map
 
 	// flightCache deduplicates concurrent cert generation requests (host → *sync.WaitGroup)
 	flightCache sync.Map
+}
+
+// cachedCert wraps a TLS certificate with its expiry time for TTL eviction.
+type cachedCert struct {
+	cert      *tls.Certificate
+	expiresAt time.Time
 }
 
 // NewCertManager creates a CertManager and initialises the Root CA.
@@ -91,9 +97,15 @@ func (cm *CertManager) GetDynamicTLSConfigForHost(defaultHost string) *tls.Confi
 
 // getCertificateWithDedup provides fast-path caching and Singleflight deduplication
 func (cm *CertManager) getCertificateWithDedup(host string) (*tls.Certificate, error) {
-	// ── FAST PATH: Cache hit ────────────────────────────────────────────────
+	// ── FAST PATH: Cache hit (with TTL check) ───────────────────────────
 	if cached, ok := cm.certCache.Load(host); ok {
-		return cached.(*tls.Certificate), nil
+		entry := cached.(*cachedCert)
+		// Evict if cert expires within 5 minutes (renew early to avoid serving stale)
+		if time.Now().Before(entry.expiresAt.Add(-5 * time.Minute)) {
+			return entry.cert, nil
+		}
+		// Expired or about to expire — delete and regenerate below
+		cm.certCache.Delete(host)
 	}
 
 	// ── SLOW PATH: Deduplicate and Generate ─────────────────────────────────
@@ -159,6 +171,7 @@ func (cm *CertManager) initCA(certDir string) error {
 }
 
 // loadCA reads PEM-encoded cert and key from disk and parses them.
+// It validates the cert is a CA, is not expired, and the key matches.
 func (cm *CertManager) loadCA(certPath, keyPath string) error {
 	certPEM, err := os.ReadFile(certPath)
 	if err != nil {
@@ -179,6 +192,18 @@ func (cm *CertManager) loadCA(certPath, keyPath string) error {
 		return fmt.Errorf("parse CA cert: %w", err)
 	}
 
+	// Validate: must be a CA certificate
+	if !caCert.IsCA {
+		return fmt.Errorf("loaded certificate is not a CA (IsCA=false)")
+	}
+
+	// Validate: must not be expired
+	now := time.Now()
+	if now.Before(caCert.NotBefore) || now.After(caCert.NotAfter) {
+		return fmt.Errorf("CA certificate expired or not yet valid (NotBefore=%s, NotAfter=%s)",
+			caCert.NotBefore.Format("2006-01-02"), caCert.NotAfter.Format("2006-01-02"))
+	}
+
 	// Parse private key
 	keyBlock, _ := pem.Decode(keyPEM)
 	if keyBlock == nil {
@@ -187,6 +212,15 @@ func (cm *CertManager) loadCA(certPath, keyPath string) error {
 	caKey, err := x509.ParseECPrivateKey(keyBlock.Bytes)
 	if err != nil {
 		return fmt.Errorf("parse CA key: %w", err)
+	}
+
+	// Validate: private key must match the certificate's public key
+	certPubKey, ok := caCert.PublicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return fmt.Errorf("CA certificate public key is not ECDSA")
+	}
+	if caKey.PublicKey.X.Cmp(certPubKey.X) != 0 || caKey.PublicKey.Y.Cmp(certPubKey.Y) != 0 {
+		return fmt.Errorf("CA private key does not match certificate public key")
 	}
 
 	cm.mu.Lock()
@@ -282,9 +316,13 @@ func (cm *CertManager) generateCA() error {
 // getCertForHost returns a cached or freshly-generated TLS certificate
 // for the given hostname, signed by the Root CA.
 func (cm *CertManager) getCertForHost(host string) (*tls.Certificate, error) {
-	// Check cache first
+	// Check cache first (with TTL)
 	if cached, ok := cm.certCache.Load(host); ok {
-		return cached.(*tls.Certificate), nil
+		entry := cached.(*cachedCert)
+		if time.Now().Before(entry.expiresAt.Add(-5 * time.Minute)) {
+			return entry.cert, nil
+		}
+		cm.certCache.Delete(host)
 	}
 
 	// Generate new leaf cert
@@ -342,8 +380,11 @@ func (cm *CertManager) getCertForHost(host string) (*tls.Certificate, error) {
 		PrivateKey:  leafKey,
 	}
 
-	// Cache it
-	cm.certCache.Store(host, tlsCert)
+	// Cache with TTL (matches the cert's NotAfter)
+	cm.certCache.Store(host, &cachedCert{
+		cert:      tlsCert,
+		expiresAt: leafTemplate.NotAfter,
+	})
 	return tlsCert, nil
 }
 

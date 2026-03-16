@@ -88,9 +88,6 @@ type Engine struct {
 	adBloom  *BloomFilter
 	secBloom *BloomFilter
 
-	// Native Go blocklist for mobile ad SDKs + DoH providers
-	nativeBlocklist *nativeBlocklist
-
 	mu      sync.Mutex
 	running bool
 	tunFile *os.File
@@ -120,7 +117,6 @@ func NewEngine() *Engine {
 		safeSearch:     NewSafeSearch(),
 		responseType:   ResponseCustomIP,
 		router:         router,
-		nativeBlocklist: newNativeBlocklist(),
 	}
 	e.interceptor = NewDnsInterceptor(e, router)
 	return e
@@ -461,10 +457,20 @@ func (e *Engine) StartMitmProxy(addr string, certDir string) string {
 	caPEM := proxy.GetCACertPEM()
 	logf("MITM Proxy: CA cert generated (%d bytes)", len(caPEM))
 
-	// Start in background goroutine (Start() blocks)
+	// Bind the listener SYNCHRONOUSLY so the port is open before we return.
+	// This guarantees the VPN can safely route traffic to this address.
+	if err := proxy.Listen(addr); err != nil {
+		e.mu.Lock()
+		e.mitmProxy = nil
+		e.mu.Unlock()
+		logf("MITM Proxy listen error: %v", err)
+		return ""
+	}
+
+	// Accept loop runs in background (Serve() blocks)
 	go func() {
-		if err := proxy.Start(addr); err != nil {
-			logf("MITM Proxy error: %v", err)
+		if err := proxy.Serve(); err != nil {
+			logf("MITM Proxy serve error: %v", err)
 		}
 	}()
 
@@ -615,13 +621,6 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		}
 	}
 
-	// ── Native Go blocklist (mobile ad SDKs + DoH) ──
-	if e.nativeBlocklist != nil {
-		if blocked, _ := e.nativeBlocklist.isBlocked(host); blocked {
-			return true
-		}
-	}
-
 	return false
 }
 
@@ -710,16 +709,6 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 				e.handleBlockedDomain(queryInfo, "filter_list", appName, startTime)
 				return
 			}
-		}
-	}
-
-	// Native Go blocklist — mobile ad SDKs + DoH providers
-	// Catches Unity Ads, AdMob, AppLovin, Vungle, ironSource, etc.
-	// that web-focused filter lists (EasyList) miss.
-	if e.nativeBlocklist != nil {
-		if blocked, reason := e.nativeBlocklist.isBlocked(domain); blocked {
-			e.handleBlockedDomain(queryInfo, reason, appName, startTime)
-			return
 		}
 	}
 

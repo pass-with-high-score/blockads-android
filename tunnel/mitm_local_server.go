@@ -116,18 +116,15 @@ func IsLocalAssetHost(host string) bool {
 // popupKillerJS is the popup-killer script served from /killer.js.
 // Extracted from the old inline injection for reuse.
 const popupKillerJS = `(function(){
-    // 1. Khóa mõm các hàm nổ popup cơ bản
     window.open=function(){ console.log('[BlockAds] Prevented window.open'); return null;};
     window.alert=function(){};
     window.confirm=function(){return false;};
     window.prompt=function(){return null;};
 
-    // 2. Chặn trò giả lập click link ẩn (Thay vì cấm tiệt Iframe)
     var _ce=document.createElement.bind(document);
     document.createElement=function(t){
         var el = _ce(t);
         if(t.toLowerCase() === 'a'){
-            // Bọn web lậu hay tạo thẻ <a> ẩn rồi tự trigger click() để mở tab mới
             el.addEventListener('click', function(e){
                 if(el.target === '_blank') { 
                     e.preventDefault(); 
@@ -138,19 +135,16 @@ const popupKillerJS = `(function(){
         return el;
     };
 
-    // 3. Tuyệt chiêu phá màng tàng hình (Invisible Overlays)
     document.addEventListener('click', function(e){
         var el = e.target;
         var style = window.getComputedStyle(el);
         
-        // Nếu sếp click nhầm vào một cái thẻ DIV trong suốt, to đùng đè lên màn hình (z-index cực lớn)
         if(el.tagName === 'DIV' && style.zIndex > 9000 && (style.position === 'absolute' || style.position === 'fixed')) {
-            e.stopPropagation(); // Ngăn không cho sự kiện click lan truyền
-            e.preventDefault();  // Chặn mở tab
-            el.remove();         // Tiêu diệt luôn cái màng đó
-            console.log('[BlockAds] Destroyed invisible click-trap');
+            e.stopPropagation(); 
+            e.preventDefault();  
+            el.remove();         
         }
-    }, true); // Dùng Capture Phase (true) để chặn đòn click ngay từ vòng ngoài cùng, không cho JS của web kịp phản ứng!
+    }, true);
 })();`
 
 // readCloserFromString wraps a string in an io.ReadCloser.
