@@ -41,11 +41,11 @@ class FilterDownloadManager(
             val trieFile = File(filterDir, "${filter.id}.trie")
             val cssFile = File(filterDir, "${filter.id}.css")
 
-            val bloomPath = if (!filter.bloomUrl.isNullOrEmpty()) downloadFile(filter.bloomUrl!!, bloomFile, forceUpdate) else null
-            val triePath = if (!filter.trieUrl.isNullOrEmpty()) downloadFile(filter.trieUrl!!, trieFile, forceUpdate) else null
+            val bloomPath = if (filter.bloomUrl.isNotEmpty()) downloadFile(filter.bloomUrl, bloomFile, forceUpdate) else null
+            val triePath = if (filter.trieUrl.isNotEmpty()) downloadFile(filter.trieUrl, trieFile, forceUpdate) else null
 
             var cssPath: String? = null
-            if (!filter.cssUrl.isNullOrEmpty()) {
+            if (filter.cssUrl.isNotEmpty()) {
                 cssPath = downloadFile(filter.cssUrl, cssFile, forceUpdate)
             }
 
@@ -81,12 +81,14 @@ class FilterDownloadManager(
             val channel = response.bodyAsChannel()
 
             val tempFile = File(destFile.parent, "${destFile.name}.tmp")
-            FileOutputStream(tempFile).use { output ->
-                val buffer = ByteArray(8 * 1024)
-                var bytesRead: Int
-                while (channel.readAvailable(buffer).also { bytesRead = it } >= 0) {
-                    if (bytesRead > 0) {
-                        output.write(buffer, 0, bytesRead)
+            withContext(Dispatchers.IO) {
+                FileOutputStream(tempFile).use { output ->
+                    val buffer = ByteArray(8 * 1024)
+                    var bytesRead: Int
+                    while (channel.readAvailable(buffer).also { bytesRead = it } >= 0) {
+                        if (bytesRead > 0) {
+                            output.write(buffer, 0, bytesRead)
+                        }
                     }
                 }
             }
