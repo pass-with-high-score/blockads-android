@@ -642,4 +642,5 @@ Desteklenen formatlar:
     <string name="edit_custom_filter">Özel Filtreyi Düzenle</string>
     <string name="filter_name">Filtre Adı</string>
     <string name="filter_url_domain">Filtre URL/Alan Adı</string>
+    <string name="clear_logs_confirm_message">Tüm DNS günlüklerini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
 </resources>

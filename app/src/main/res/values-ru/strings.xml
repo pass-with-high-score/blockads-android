@@ -617,4 +617,5 @@
     <string name="edit_custom_filter">Изменить пользовательский фильтр</string>
     <string name="filter_name">Имя фильтра</string>
     <string name="filter_url_domain">URL/домен фильтра</string>
+    <string name="clear_logs_confirm_message">Вы уверены, что хотите очистить все журналы DNS? Это действие нельзя отменить.</string>
 </resources>

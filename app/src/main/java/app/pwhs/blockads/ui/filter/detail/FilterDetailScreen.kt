@@ -459,6 +459,7 @@ fun FilterDetailScreen(
 
     if (showEditDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.background,
             onDismissRequest = { viewModel.closeEditDialog() },
             title = { Text(stringResource(R.string.edit_custom_filter)) },
             text = {

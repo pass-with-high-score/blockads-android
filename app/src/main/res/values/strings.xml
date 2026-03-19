@@ -282,6 +282,7 @@
     <string name="dns_response_custom_ip">Custom IP (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">Return a null route address (default)</string>
     <string name="settings_clear_logs">Clear All Logs</string>
+    <string name="clear_logs_confirm_message">Are you sure you want to clear all DNS logs? This action cannot be undone.</string>
     <string name="dns_error_notification_title">DNS configuration error</string>
     <string name="dns_error_notification_no_fallback">%1$s connection to %2$s is failing. No fallback DNS configured — websites may not load. Check your DNS settings.</string>
     <string name="dns_error_notification_both_failed">%1$s connection to %2$s and fallback %3$s are both failing. Websites may not load. Check your DNS settings.</string>

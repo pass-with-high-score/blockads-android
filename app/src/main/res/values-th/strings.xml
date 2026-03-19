@@ -570,4 +570,5 @@
     <string name="edit_custom_filter">แก้ไขตัวกรองแบบกำหนดเอง</string>
     <string name="filter_name">ชื่อตัวกรอง</string>
     <string name="filter_url_domain">URL/โดเมนของตัวกรอง</string>
+    <string name="clear_logs_confirm_message">คุณแน่ใจหรือไม่ว่าต้องการล้างบันทึก DNS ทั้งหมด? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
 </resources>

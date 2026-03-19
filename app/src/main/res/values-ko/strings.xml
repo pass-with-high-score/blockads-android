@@ -570,4 +570,5 @@
     <string name="edit_custom_filter">사용자 지정 필터 편집</string>
     <string name="filter_name">필터 이름</string>
     <string name="filter_url_domain">필터 URL/도메인</string>
+    <string name="clear_logs_confirm_message">모든 DNS 로그를 지우시겠습니까? 이 작업은 실행 취소할 수 없습니다.</string>
 </resources>

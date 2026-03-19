@@ -571,4 +571,5 @@
     <string name="edit_custom_filter">Editar filtro personalizado</string>
     <string name="filter_name">Nombre del filtro</string>
     <string name="filter_url_domain">URL/Dominio del filtro</string>
+    <string name="clear_logs_confirm_message">¿Estás seguro de que quieres borrar todos los registros DNS? Esta acción no se puede deshacer.</string>
 </resources>

@@ -618,4 +618,5 @@
     <string name="edit_custom_filter">Chỉnh sửa bộ lọc tùy chỉnh</string>
     <string name="filter_name">Tên bộ lọc</string>
     <string name="filter_url_domain">URL/Tên miền của bộ lọc</string>
+    <string name="clear_logs_confirm_message">Bạn có chắc chắn muốn xóa tất cả nhật ký DNS không? Hành động này không thể hoàn tác.</string>
 </resources>

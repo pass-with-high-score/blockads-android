@@ -571,4 +571,5 @@
     <string name="edit_custom_filter">编辑自定义过滤器</string>
     <string name="filter_name">过滤器名称</string>
     <string name="filter_url_domain">过滤器 URL/域名</string>
+    <string name="clear_logs_confirm_message">您确定要清除所有 DNS 日志吗？此操作无法撤销。</string>
 </resources>

@@ -586,4 +586,5 @@
     <string name="edit_custom_filter">تعديل الفلتر المخصص</string>
     <string name="filter_name">اسم الفلتر</string>
     <string name="filter_url_domain">رابط/نطاق الفلتر</string>
+    <string name="clear_logs_confirm_message">هل أنت متأكد أنك تريد مسح جميع سجلات DNS؟ لا يمكن التراجع عن هذا الإجراء.</string>
 </resources>

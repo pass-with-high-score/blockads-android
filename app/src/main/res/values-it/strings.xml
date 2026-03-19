@@ -623,4 +623,5 @@
     <string name="edit_custom_filter">Modifica filtro personalizzato</string>
     <string name="filter_name">Nome del filtro</string>
     <string name="filter_url_domain">URL/Dominio del filtro</string>
+    <string name="clear_logs_confirm_message">Sei sicuro di voler cancellare tutti i registri DNS? Questa azione non può essere annullata.</string>
 </resources>

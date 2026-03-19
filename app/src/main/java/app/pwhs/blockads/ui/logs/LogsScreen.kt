@@ -32,6 +32,8 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -87,6 +89,7 @@ fun LogsScreen(
     val whitelistedDomains by viewModel.whitelistedDomains.collectAsStateWithLifecycle()
     var isSearchVisible by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
+    var showClearConfirm by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val resource = LocalResources.current
 
@@ -125,7 +128,7 @@ fun LogsScreen(
                             tint = TextSecondary
                         )
                     }
-                    IconButton(onClick = { viewModel.clearLogs() }) {
+                    IconButton(onClick = { showClearConfirm = true }) {
                         Icon(
                             Icons.Default.DeleteSweep,
                             contentDescription = "Clear logs",
@@ -392,6 +395,31 @@ fun LogsScreen(
                 viewModel = viewModel
             )
         }
+    }
+
+    if (showClearConfirm) {
+        AlertDialog(
+            containerColor = MaterialTheme.colorScheme.background,
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text(stringResource(R.string.settings_clear_logs)) },
+            text = { Text(stringResource(R.string.clear_logs_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearLogs()
+                    showClearConfirm = false
+                }) {
+                    Text(
+                        stringResource(R.string.settings_clear_logs),
+                        color = DangerRed
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 
 }
