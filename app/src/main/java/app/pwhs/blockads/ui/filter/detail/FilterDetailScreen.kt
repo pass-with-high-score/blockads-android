@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
@@ -82,6 +83,12 @@ fun FilterDetailScreen(
     val testDomainResult by viewModel.testDomainResult.collectAsStateWithLifecycle()
     val isTestingDomain by viewModel.isTestingDomain.collectAsStateWithLifecycle()
     val isUpdating by viewModel.isUpdating.collectAsStateWithLifecycle()
+    
+    val showEditDialog by viewModel.showEditDialog.collectAsStateWithLifecycle()
+    val editName by viewModel.editName.collectAsStateWithLifecycle()
+    val editUrl by viewModel.editUrl.collectAsStateWithLifecycle()
+    val editError by viewModel.editError.collectAsStateWithLifecycle()
+    val isSavingEdit by viewModel.isSavingEdit.collectAsStateWithLifecycle()
 
     val clipboardManager = LocalClipboard.current
     val context = LocalContext.current
@@ -107,6 +114,16 @@ fun FilterDetailScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
+                    }
+                },
+                actions = {
+                    if (filter?.isBuiltIn == false) {
+                        IconButton(onClick = { viewModel.openEditDialog() }) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit"
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -436,5 +453,58 @@ fun FilterDetailScreen(
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
+    }
+
+    if (showEditDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel.closeEditDialog() },
+            title = { Text("Edit Custom Filter") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = editName,
+                        onValueChange = { viewModel.setEditName(it) },
+                        label = { Text("Filter Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    androidx.compose.material3.OutlinedTextField(
+                        value = editUrl,
+                        onValueChange = { viewModel.setEditUrl(it) },
+                        label = { Text("Filter URL/Domain") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (editError.isNotEmpty()) {
+                        Text(
+                            text = editError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.saveEdit() },
+                    enabled = !isSavingEdit
+                ) {
+                    if (isSavingEdit) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.closeEditDialog() }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }

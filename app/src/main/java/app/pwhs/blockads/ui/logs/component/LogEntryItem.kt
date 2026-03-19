@@ -56,6 +56,7 @@ fun LogEntryItem(
     isWhitelisted: Boolean = false,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
+    filterNames: Map<String, String> = emptyMap(),
     onTap: () -> Unit = {},
     onLongPress: () -> Unit = {},
     onToggleSelection: () -> Unit = {},
@@ -254,7 +255,7 @@ fun LogEntryItem(
                             stringResource(R.string.block_reason_firewall) to MaterialTheme.colorScheme.primary
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_UPSTREAM_DNS, "UPSTREAM_DNS" -> 
                             stringResource(R.string.block_reason_upstream_dns) to app.pwhs.blockads.ui.theme.UpstreamDnsPurple
-                        else -> entry.blockedBy to TextSecondary
+                        else -> (filterNames[entry.blockedBy] ?: entry.blockedBy) to TextSecondary
                     }
                     
                     Box(

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.DnsLogDao
+import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.entities.WhitelistDomain
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
+    private val filterListDao: FilterListDao,
     private val whitelistDomainDao: WhitelistDomainDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val filterListRepository: FilterListRepository,
@@ -58,6 +60,10 @@ class LogViewModel(
     val whitelistedDomains: StateFlow<Set<String>> = whitelistDomainDao.getAll()
         .map { list -> list.map { it.domain.lowercase() }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val filterNames: StateFlow<Map<String, String>> = filterListDao.getAll()
+        .map { list -> list.associate { it.id.toString() to it.name } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val appNames: StateFlow<List<String>> = dnsLogDao.getDistinctAppNames()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

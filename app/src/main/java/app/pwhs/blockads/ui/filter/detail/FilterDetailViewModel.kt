@@ -49,6 +49,21 @@ class FilterDetailViewModel(
     private val _isUpdating = MutableStateFlow(false)
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
+    private val _showEditDialog = MutableStateFlow(false)
+    val showEditDialog: StateFlow<Boolean> = _showEditDialog.asStateFlow()
+
+    private val _editName = MutableStateFlow("")
+    val editName: StateFlow<String> = _editName.asStateFlow()
+
+    private val _editUrl = MutableStateFlow("")
+    val editUrl: StateFlow<String> = _editUrl.asStateFlow()
+
+    private val _editError = MutableStateFlow("")
+    val editError: StateFlow<String> = _editError.asStateFlow()
+
+    private val _isSavingEdit = MutableStateFlow(false)
+    val isSavingEdit: StateFlow<Boolean> = _isSavingEdit.asStateFlow()
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -112,6 +127,67 @@ class FilterDetailViewModel(
                 filterListDao.delete(f)
                 AdBlockVpnService.requestRestart(application.applicationContext)
             }
+        }
+    }
+
+    fun openEditDialog() {
+        val f = filter.value ?: return
+        if (f.isBuiltIn) return
+        _editName.value = f.name
+        _editUrl.value = f.originalUrl.ifEmpty { f.url }
+        _editError.value = ""
+        _showEditDialog.value = true
+    }
+
+    fun closeEditDialog() {
+        _showEditDialog.value = false
+    }
+
+    fun setEditName(name: String) {
+        _editName.value = name
+    }
+
+    fun setEditUrl(url: String) {
+        _editUrl.value = url
+    }
+
+    fun saveEdit() {
+        val f = filter.value ?: return
+        val name = _editName.value.trim()
+        val url = _editUrl.value.trim()
+
+        if (name.isBlank()) {
+            _editError.value = "Name cannot be empty"
+            return
+        }
+        if (url.isBlank()) {
+            _editError.value = "Domain/URL cannot be empty"
+            return
+        }
+
+        viewModelScope.launch {
+            _isSavingEdit.value = true
+            _editError.value = ""
+
+            val result = customFilterManager.editCustomFilter(f, name, url)
+
+            _isSavingEdit.value = false
+
+            result.fold(
+                onSuccess = { updatedFilter ->
+                    _showEditDialog.value = false
+                    _events.toast(R.string.filter_updated, listOf(updatedFilter.ruleCount))
+
+                    // Reload the filter engine if the URL changed (binaries re-downloaded/re-compiled)
+                    if (url != f.originalUrl && url != f.url) {
+                        filterRepo.loadAllEnabledFilters()
+                        AdBlockVpnService.requestRestart(application.applicationContext)
+                    }
+                },
+                onFailure = { error ->
+                    _editError.value = error.message ?: "Failed to edit filter"
+                }
+            )
         }
     }
 }

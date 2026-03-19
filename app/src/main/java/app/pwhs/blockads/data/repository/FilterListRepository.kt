@@ -375,7 +375,7 @@ class FilterListRepository(
         for (defaultList in DEFAULT_LISTS) {
             val existing = existingByName[defaultList.name]
             if (existing == null) {
-                filterListDao.insert(defaultList)
+                filterListDao.insert(defaultList.copy(domainCount = defaultList.ruleCount))
                 Timber.d("Seeded new built-in filter: ${defaultList.name}")
             } else {
                 val needsUpdate = existing.url != defaultList.url ||
@@ -385,6 +385,7 @@ class FilterListRepository(
                     existing.trieUrl != defaultList.trieUrl ||
                     existing.cssUrl != defaultList.cssUrl ||
                     existing.ruleCount != defaultList.ruleCount ||
+                    existing.domainCount != defaultList.ruleCount ||
                     existing.originalUrl != defaultList.originalUrl ||
                     !existing.isBuiltIn
 
@@ -398,6 +399,7 @@ class FilterListRepository(
                             trieUrl = defaultList.trieUrl,
                             cssUrl = defaultList.cssUrl,
                             ruleCount = defaultList.ruleCount,
+                            domainCount = defaultList.ruleCount,
                             originalUrl = defaultList.originalUrl,
                             isBuiltIn = true
                         )
@@ -447,6 +449,7 @@ class FilterListRepository(
                             existing.copy(
                                 bloomUrl = remote.bloomUrl,
                                 trieUrl = remote.trieUrl,
+                                domainCount = remote.ruleCount,
                                 cssUrl = remote.cssUrl ?: "",
                                 ruleCount = remote.ruleCount,
                                 originalUrl = remote.originalUrl ?: existing.originalUrl
@@ -579,6 +582,10 @@ class FilterListRepository(
                             paths.triePath?.let { adTrieSb.append(it).append(",") }
                             paths.bloomPath?.let { adBloomSb.append(it).append(",") }
                         }
+                        // Update per-filter domainCount so UI shows the correct value
+                        if (filter.domainCount != filter.ruleCount) {
+                            filterListDao.updateStats(id = filter.id, count = filter.ruleCount, timestamp = System.currentTimeMillis())
+                        }
                         totalCount += filter.ruleCount
                     } else {
                         Timber.e("Failed to download filter: ${filter.name}")
@@ -636,15 +643,62 @@ class FilterListRepository(
         }
     }
 
+    suspend fun forceUpdateAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
+        try {
+            // Sync the latest metadata for all built-in filters to the DB
+            fetchAndSyncRemoteFilterLists()
+
+            // Fetch the enabled built-in filters (now with updated ruleCounts and URLs)
+            val enabledBuiltIn = filterListDao.getEnabled().filter { it.isBuiltIn }
+
+            var totalCount = 0
+
+            for (filter in enabledBuiltIn) {
+                // Force download the binary files from the remote server
+                val result = downloadManager.downloadFilterList(filter, forceUpdate = true)
+                if (result.isSuccess) {
+                    filterListDao.updateStats(id = filter.id, count = filter.ruleCount, timestamp = System.currentTimeMillis())
+                    totalCount += filter.ruleCount
+                } else {
+                    Timber.e("Failed to force update built-in filter: ${filter.name}")
+                }
+            }
+            
+            // Reload into the Go engine
+            loadAllEnabledFilters()
+            Result.success(totalCount)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to force update all enabled filters")
+            Result.failure(e)
+        }
+    }
+
     suspend fun updateSingleFilter(filter: FilterList): Result<Int> = withContext(Dispatchers.IO) {
         try {
-            val result = downloadManager.downloadFilterList(filter, forceUpdate = true)
-            if (result.isSuccess) {
-                filterListDao.updateStats(id = filter.id, count = filter.ruleCount, timestamp = System.currentTimeMillis())
-                loadAllEnabledFilters()
-                Result.success(filter.ruleCount)
+            if (filter.isBuiltIn) {
+                // Fetch the latest remote configs
+                fetchAndSyncRemoteFilterLists()
+                
+                // Get the updated entity from DB to have the latest ruleCount & URLs
+                val updatedFilter = filterListDao.getById(filter.id) ?: filter
+                
+                val result = downloadManager.downloadFilterList(updatedFilter, forceUpdate = true)
+                if (result.isSuccess) {
+                    filterListDao.updateStats(id = updatedFilter.id, count = updatedFilter.ruleCount, timestamp = System.currentTimeMillis())
+                    loadAllEnabledFilters()
+                    Result.success(updatedFilter.ruleCount)
+                } else {
+                    Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+                }
             } else {
-                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+                val result = downloadManager.downloadFilterList(filter, forceUpdate = true)
+                if (result.isSuccess) {
+                    filterListDao.updateStats(id = filter.id, count = filter.ruleCount, timestamp = System.currentTimeMillis())
+                    loadAllEnabledFilters()
+                    Result.success(filter.ruleCount)
+                } else {
+                    Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+                }
             }
         } catch (e: Exception) {
             Timber.d("Failed to update ${filter.name}: $e")

@@ -95,7 +95,7 @@ val appModule = module {
     // ViewModels
     viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { StatisticsViewModel(get()) }
-    viewModel { LogViewModel(get(), get(), get(), get()) }
+    viewModel { LogViewModel(get(), get(), get(), get(), get()) }
     viewModel {
         SettingsViewModel(
             get(),

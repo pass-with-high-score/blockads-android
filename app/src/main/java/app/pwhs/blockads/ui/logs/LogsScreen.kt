@@ -77,6 +77,7 @@ fun LogsScreen(
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val showBlockedOnly by viewModel.showBlockedOnly.collectAsStateWithLifecycle()
+    val filterNames by viewModel.filterNames.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
     val appFilter by viewModel.appFilter.collectAsStateWithLifecycle()
@@ -344,6 +345,7 @@ fun LogsScreen(
                             isWhitelisted = isDomainWhitelisted,
                             isSelectionMode = selectionMode,
                             isSelected = selectedIds.contains(entry.id),
+                            filterNames = filterNames,
                             onTap = { selectedEntry = entry },
                             onLongPress = { selectedEntry = entry },
                             onToggleSelection = { viewModel.toggleSelection(entry.id) },
@@ -362,6 +364,7 @@ fun LogsScreen(
             DomainDetailBottomSheet(
                 entry = entry,
                 isWhitelisted = isDomainWhitelisted,
+                filterNames = filterNames,
                 onDismiss = { selectedEntry = null },
                 onAddToWhiteList = {
                     viewModel.addToWhitelist(entry.domain)

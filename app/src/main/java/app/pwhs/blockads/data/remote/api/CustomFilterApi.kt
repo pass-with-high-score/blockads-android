@@ -39,10 +39,10 @@ class CustomFilterApi(
      * @return [BuildResponse] containing the download URL and metadata
      * @throws CustomFilterException on API errors
      */
-    suspend fun buildFilter(filterUrl: String, force: Boolean = false): BuildResponse =
+    suspend fun buildFilter(filterUrl: String): BuildResponse =
         withContext(Dispatchers.IO) {
             try {
-                val endpoint = if (force) "$BUILD_ENDPOINT?force=true" else BUILD_ENDPOINT
+                val endpoint = BUILD_ENDPOINT
                 val requestBody = """{"url":"$filterUrl"}"""
 
                 Timber.d("Calling build API: $endpoint with url=$filterUrl")

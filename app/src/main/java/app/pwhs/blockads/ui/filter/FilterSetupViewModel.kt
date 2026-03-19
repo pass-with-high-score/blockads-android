@@ -70,6 +70,8 @@ class FilterSetupViewModel(
     fun toggleFilterList(filter: FilterList) {
         viewModelScope.launch {
             filterListDao.setEnabled(filter.id, !filter.isEnabled)
+            // Recalculate the active domain count immediately even if VPN is stopped
+            filterRepo.loadAllEnabledFilters()
             AdBlockVpnService.requestRestart(application.applicationContext)
         }
     }
@@ -122,7 +124,7 @@ class FilterSetupViewModel(
             _isUpdatingFilter.value = true
             
             // 1. Update remote built-in filters
-            val result = filterRepo.loadAllEnabledFilters()
+            val result = filterRepo.forceUpdateAllEnabledFilters()
 
             // 2. Update all enabled custom filters
             val customFilters = filterListDao.getAllNonBuiltIn()

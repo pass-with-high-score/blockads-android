@@ -49,6 +49,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 fun DomainDetailBottomSheet(
     entry: DnsLogEntry,
     isWhitelisted: Boolean,
+    filterNames: Map<String, String> = emptyMap(),
     onDismiss: () -> Unit,
     onCopyDomain: () -> Unit,
     onAddToWhiteList: () -> Unit,
@@ -196,7 +197,7 @@ fun DomainDetailBottomSheet(
                                 stringResource(R.string.block_reason_firewall)
                             FilterListRepository.BLOCK_REASON_UPSTREAM_DNS.uppercase() ->
                                 stringResource(R.string.block_reason_upstream_dns)
-                            else -> entry.blockedBy
+                            else -> filterNames[entry.blockedBy] ?: entry.blockedBy
                         }
                         DetailRow(
                             label = stringResource(R.string.log_detail_blocked_by),

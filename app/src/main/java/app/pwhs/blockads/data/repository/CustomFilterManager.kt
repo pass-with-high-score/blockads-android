@@ -175,6 +175,103 @@ class CustomFilterManager(
     }
 
     /**
+     * Edits an existing custom filter's name and/or URL.
+     * Recompiles binaries if the URL changed.
+     */
+    suspend fun editCustomFilter(
+        filter: FilterList,
+        newName: String,
+        newUrl: String
+    ): Result<FilterList> = withContext(Dispatchers.IO) {
+        try {
+            val trimmedUrl = newUrl.trim()
+            val trimmedName = newName.trim()
+
+            // If URL hasn't changed, just update name.
+            if (trimmedUrl == filter.originalUrl || trimmedUrl == filter.url) {
+                if (trimmedName != filter.name) {
+                    val updated = filter.copy(name = trimmedName, lastUpdated = System.currentTimeMillis())
+                    filterListDao.update(updated)
+                    return@withContext Result.success(updated)
+                }
+                return@withContext Result.success(filter)
+            }
+
+            // Url changed: Check duplicate
+            val existingByUrl = filterListDao.getByUrl(trimmedUrl)
+            val existingByOriginalUrl = filterListDao.getByOriginalUrl(trimmedUrl)
+            
+            if ((existingByUrl != null && existingByUrl.id != filter.id) || 
+                (existingByOriginalUrl != null && existingByOriginalUrl.id != filter.id)) {
+                return@withContext Result.failure(
+                    CustomFilterException("Filter already exists")
+                )
+            }
+
+            // Re-compile via API
+            val buildResponse = customFilterApi.buildFilter(trimmedUrl)
+
+            // Download & extract
+            val sanitizedName = sanitizeName(trimmedUrl)
+            val extractDir = File(context.filesDir, "$CUSTOM_FILTERS_DIR/$sanitizedName")
+            if (extractDir.exists()) extractDir.deleteRecursively()
+
+            val extractedFiles = ZipUtils.downloadAndExtractZip(
+                client = client,
+                downloadUrl = buildResponse.downloadUrl,
+                destDir = extractDir
+            )
+
+            // Parse info.json
+            val infoJson = extractedFiles.find { it.name == "info.json" }
+            val filterInfo = if (infoJson != null && infoJson.exists()) {
+                parseInfoJson(infoJson.readText())
+            } else {
+                null
+            }
+
+            val finalName = if (trimmedName.isNotEmpty()) trimmedName else filterInfo?.name ?: deriveFilterName(trimmedUrl)
+            val ruleCount = filterInfo?.ruleCount ?: buildResponse.ruleCount
+
+            // Overwrite binary files
+            val remoteFilterDir = File(context.filesDir, REMOTE_FILTERS_DIR).apply { mkdirs() }
+            val trieFile = extractedFiles.find { it.extension == "trie" }
+            val bloomFile = extractedFiles.find { it.extension == "bloom" }
+            val cssFile = extractedFiles.find { it.extension == "css" }
+
+            trieFile?.copyTo(File(remoteFilterDir, "${filter.id}.trie"), overwrite = true)
+            bloomFile?.copyTo(File(remoteFilterDir, "${filter.id}.bloom"), overwrite = true)
+            cssFile?.copyTo(File(remoteFilterDir, "${filter.id}.css"), overwrite = true)
+
+            // Update DB
+            val updated = filter.copy(
+                name = finalName,
+                url = trimmedUrl,
+                originalUrl = trimmedUrl,
+                ruleCount = ruleCount,
+                domainCount = ruleCount,
+                bloomUrl = if (bloomFile != null) "local://${filter.id}.bloom" else filter.bloomUrl,
+                trieUrl = if (trieFile != null) "local://${filter.id}.trie" else filter.trieUrl,
+                cssUrl = if (cssFile != null) "local://${filter.id}.css" else filter.cssUrl,
+                lastUpdated = System.currentTimeMillis()
+            )
+            filterListDao.update(updated)
+
+            // Cleanup
+            extractDir.deleteRecursively()
+
+            Timber.d("Edited custom filter: $finalName, newUrl=$trimmedUrl")
+            Result.success(updated)
+        } catch (e: CustomFilterException) {
+            Timber.e(e, "Custom filter API error on edit")
+            Result.failure(e)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to edit custom filter")
+            Result.failure(CustomFilterException("Failed to edit filter: ${e.message}", e))
+        }
+    }
+
+    /**
      * Re-compiles and updates an existing custom filter.
      */
     suspend fun updateCustomFilter(filter: FilterList): Result<FilterList> =
@@ -183,7 +280,7 @@ class CustomFilterManager(
                 val url = filter.originalUrl.ifEmpty { filter.url }
 
                 // Re-compile via API
-                val buildResponse = customFilterApi.buildFilter(url, force = true)
+                val buildResponse = customFilterApi.buildFilter(url)
 
                 // Download & extract
                 val sanitizedName = sanitizeName(url)
