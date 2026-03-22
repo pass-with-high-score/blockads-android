@@ -123,15 +123,21 @@ class FilterSetupViewModel(
         viewModelScope.launch {
             _isUpdatingFilter.value = true
             
+            var totalCount = 0
+
             // 1. Update remote built-in filters
             val result = filterRepo.forceUpdateAllEnabledFilters()
+            result.onSuccess { count -> totalCount += count }
 
             // 2. Update all enabled custom filters
             val customFilters = filterListDao.getAllNonBuiltIn()
             for (filter in customFilters) {
                 if (filter.isEnabled) {
                     // Recompile via backend, download new binaries, and update rule count
-                    customFilterManager.updateCustomFilter(filter)
+                    val customResult = customFilterManager.updateCustomFilter(filter)
+                    customResult.onSuccess { updatedFilter ->
+                        totalCount += updatedFilter.ruleCount
+                    }
                 }
             }
 
@@ -140,17 +146,16 @@ class FilterSetupViewModel(
             
             _isUpdatingFilter.value = false
 
-            result.fold(
-                onSuccess = { count ->
-                    _events.toast(
-                        R.string.filter_updated,
-                        listOf(count)
-                    )
-                },
-                onFailure = {
+            if (result.isSuccess || totalCount > 0) {
+                _events.toast(
+                    R.string.filter_updated,
+                    listOf(totalCount)
+                )
+            } else {
+                result.onFailure {
                     _events.toast(R.string.filter_update_failed)
                 }
-            )
+            }
         }
     }
 }
