@@ -33,11 +33,15 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HomeViewModel(
+    appPrefs: AppPreferences,
     dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
     profileDao: ProtectionProfileDao,
     filterListDao: FilterListDao,
 ) : ViewModel() {
+
+    val routingMode: StateFlow<String> = appPrefs.routingMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "local")
 
     // ── Reactive VPN state (derived from the single source of truth) ──
     val vpnEnabled: StateFlow<Boolean> = combine(

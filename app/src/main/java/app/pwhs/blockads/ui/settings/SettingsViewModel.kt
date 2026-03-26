@@ -133,7 +133,40 @@ class SettingsViewModel(
     }
 
     fun setRoutingMode(mode: String) {
-        viewModelScope.launch { appPrefs.setRoutingMode(mode) }
+        viewModelScope.launch { 
+            val oldMode = appPrefs.routingMode.first()
+            if (oldMode == mode) return@launch
+
+            appPrefs.setRoutingMode(mode) 
+            val context = getApplication<Application>().applicationContext
+            
+            val wasRoot = oldMode == AppPreferences.ROUTING_MODE_ROOT
+            val isRoot = mode == AppPreferences.ROUTING_MODE_ROOT
+
+            if (AdBlockVpnService.isRunning || app.pwhs.blockads.service.RootProxyService.isRunning) {
+                if (wasRoot && !isRoot) {
+                    app.pwhs.blockads.service.RootProxyService.stop(context)
+                    kotlinx.coroutines.delay(800)
+                    val startIntent = android.content.Intent(context, AdBlockVpnService::class.java).apply {
+                        action = AdBlockVpnService.ACTION_START
+                    }
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        context.startForegroundService(startIntent)
+                    } else {
+                        context.startService(startIntent)
+                    }
+                } else if (!wasRoot && isRoot) {
+                    val stopIntent = android.content.Intent(context, AdBlockVpnService::class.java).apply {
+                        action = AdBlockVpnService.ACTION_STOP
+                    }
+                    context.startService(stopIntent)
+                    kotlinx.coroutines.delay(800)
+                    app.pwhs.blockads.service.RootProxyService.start(context)
+                } else {
+                    requestVpnRestart()
+                }
+            }
+        }
     }
 
     fun setAutoUpdateEnabled(enabled: Boolean) {

@@ -93,7 +93,7 @@ val appModule = module {
     single { ProfileManager(get(), get(), get(), get()) }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
     viewModel { StatisticsViewModel(get()) }
     viewModel { LogViewModel(get(), get(), get(), get(), get()) }
     viewModel {

@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.PowerButton
@@ -114,6 +115,7 @@ fun HomeScreen(
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsStateWithLifecycle()
     val activeProfile by viewModel.activeProfile.collectAsStateWithLifecycle()
     val securityFilterIds by viewModel.securityFilterIds.collectAsStateWithLifecycle()
+    val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -243,7 +245,27 @@ fun HomeScreen(
                 textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = when (routingMode) {
+                        AppPreferences.ROUTING_MODE_ROOT -> "Root Proxy Mode"
+                        AppPreferences.ROUTING_MODE_WIREGUARD -> "WireGuard Mode"
+                        else -> "Local VPN Mode"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onNavigateToProfileScreen,
                 colors = ButtonDefaults.buttonColors(
