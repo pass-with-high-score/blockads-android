@@ -1,128 +1,127 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">BlockAds</string>
-    <string name="app_tagline">Navigation sans publicités</string>
+    <string name="app_tagline">Navigation sans publicité</string>
     <string name="notification_channel_name">Service de blocage des publicités</string>
-    <string name="notification_channel_description">Affiché lorsque le bloqueur VPN est actif</string>
-    <string name="vpn_notification_title">BlockAds est actif</string>
-    <string name="vpn_notification_text">Protection de votre appareil contre les publicités</string>
+    <string name="notification_channel_description">Indique quand le bloqueur de publicités VPN est activé</string>
+    <string name="vpn_notification_title">BlockAds est activé</string>
+    <string name="vpn_notification_text">Protéger votre appareil contre les publicités</string>
     <string name="vpn_notification_reconnecting">BlockAds se reconnecte</string>
-    <string name="vpn_notification_reconnecting_text">Réseau modifié, reconnexion du VPN…</string>
-    <string name="vpn_notification_retrying">BlockAds réessaie</string>
-    <string name="vpn_notification_retry_text">Tentative %1$d sur %2$d</string>
+    <string name="vpn_notification_reconnecting_text">Changement de réseau, reconnexion au VPN…</string>
+    <string name="vpn_notification_retrying">BlockAds effectue une nouvelle tentative</string>
+    <string name="vpn_notification_retry_text">Tentative de réessai n° %1 sur %2</string>
     <string name="vpn_alert_channel_name">Alertes VPN</string>
-    <string name="vpn_alert_channel_description">Alertes importantes sur les changements d\'état du VPN</string>
-    <string name="vpn_revoked_title">Blocage des publicités arrêté</string>
-    <string name="vpn_revoked_text">Une autre application VPN a pris le contrôle de la connexion. Appuyez pour réactiver BlockAds.</string>
-    <string name="vpn_stopped_title">BlockAds est en pause</string>
-    <string name="vpn_stopped_text">Le blocage des publicités est désactivé. Appuyez sur Activer pour reprendre.</string>
+    <string name="vpn_alert_channel_description">Alertes importantes concernant les changements d\'état du VPN</string>
+    <string name="vpn_revoked_title">Le blocage des publicités a été désactivé</string>
+    <string name="vpn_revoked_text">Une autre application VPN a pris le contrôle de la connexion. Appuyez ici pour réactiver BlockAds.</string>
+    <string name="vpn_stopped_title">BlockAds est désactivé</string>
+    <string name="vpn_stopped_text">Le blocage des publicités est désactivé. Appuyez sur « Activer » pour continuer.</string>
     <string name="vpn_stopped_action_enable">Activer</string>
     <string name="status_protected">Protégé</string>
-    <string name="status_connecting">Connexion en cours</string>
+    <string name="status_connecting">Connexion</string>
     <string name="status_unprotected">Non protégé</string>
-    <string name="total_queries">Total des requêtes</string>
-    <string name="blocked_queries">Bloquées</string>
+    <string name="total_queries">Nombre total de requêtes</string>
+    <string name="blocked_queries">Bloqué</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_logs">Journaux</string>
-    <string name="nav_filter">Filtres</string>
+    <string name="nav_filter">Filtre</string>
     <string name="nav_settings">Paramètres</string>
     <string name="settings_filter_url">URL de la liste de filtres</string>
-    <string name="settings_update_filter">Mettre à jour la liste de filtres</string>
-    <string name="filter_updating">Mise à jour de la liste de filtres…</string>
-    <string name="filter_updated">Liste de filtres mise à jour : %d domaines</string>
-    <string name="filter_update_failed">Échec de la mise à jour de la liste de filtres</string>
+    <string name="settings_update_filter">Actualiser la liste des filtres</string>
+    <string name="filter_updating">Mise à jour de la liste des filtres…</string>
+    <string name="filter_updated">Liste des filtres mise à jour : %d domaines</string>
+    <string name="filter_update_failed">Échec de la mise à jour de la liste des filtres</string>
     <string name="filter_detail_enabled">Activé</string>
     <string name="filter_detail_rules">Règles</string>
     <string name="filter_detail_last_updated">Dernière mise à jour</string>
-    <string name="filter_detail_update">Mettre à jour</string>
+    <string name="filter_detail_update">Mise à jour</string>
     <string name="filter_detail_delete">Supprimer</string>
     <string name="filter_detail_domain_preview">Aperçu des domaines bloqués</string>
-    <string name="filter_detail_no_domains">Aucun domaine en cache. Essayez d\'abord de mettre à jour ce filtre.</string>
+    <string name="filter_detail_no_domains">Aucun domaine n\'est mis en cache. Essayez d\'abord de mettre à jour ce filtre.</string>
     <string name="filter_detail_more_domains">… et %s domaines supplémentaires</string>
-    <string name="logs_empty">Aucune requête DNS enregistrée pour l\'instant</string>
+    <string name="logs_empty">Aucune requête DNS n\'a encore été enregistrée</string>
     <string name="logs_filter_all">Tout</string>
-    <string name="logs_filter_blocked">Bloquées</string>
+    <string name="logs_filter_blocked">Bloqué</string>
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Bloquez les publicités intelligemment</string>
-    <string name="onboarding_desc_1">Bloquez les publicités dans toutes les applications et navigateurs en un seul appui. Utilise la technologie de filtrage DNS — aucun root requis.\n\n🔒 Promesse de confidentialité : nous ne collectons, ne stockons ni ne transmettons jamais vos données de navigation. Tout le traitement s\'effectue uniquement sur votre appareil.</string>
-    <string name="onboarding_title_2">Votre vie privée, protégée</string>
-    <string name="onboarding_desc_2">Aucune collecte de données. Aucun suivi. Tous les journaux DNS restent uniquement sur votre appareil. Nous ne voyons jamais votre activité de navigation.</string>
-    <string name="onboarding_title_3">Gratuit et open source</string>
-    <string name="onboarding_desc_3">BlockAds est entièrement gratuit, sans achats intégrés. Notre code source est ouvert à l\'inspection et à la vérification par tous.</string>
-    <string name="onboarding_skip">Ignorer</string>
+    <string name="onboarding_desc_1">Bloquez les publicités dans toutes les applications et tous les navigateurs d\'un simple geste. Utilise la technologie de filtrage DNS — aucun accès root requis.\n\n🔒 Engagement en matière de confidentialité : nous ne collectons, ne stockons ni ne transmettons jamais vos données de navigation. Tout le traitement s\'effectue exclusivement sur votre appareil.</string>
+    <string name="onboarding_title_2">Votre vie privée est protégée</string>
+    <string name="onboarding_desc_2">Aucune collecte de données. Aucun suivi. Tous les journaux DNS restent exclusivement sur votre appareil. Nous n\'avons jamais accès à votre historique de navigation.</string>
+    <string name="onboarding_title_3">Gratuit &amp; Open Source</string>
+    <string name="onboarding_desc_3">BlockAds est entièrement gratuit et ne comporte aucun achat intégré. Notre code source est accessible à tous pour consultation et vérification.</string>
+    <string name="onboarding_skip">Passer</string>
     <string name="onboarding_next">Suivant</string>
     <string name="onboarding_get_started">Commencer</string>
     <string name="onboarding_recommended">★ Recommandé</string>
 
     <!-- Onboarding: Protection Level -->
-    <string name="onboarding_protection_title">Choisir le niveau de protection</string>
-    <string name="onboarding_protection_desc">Sélectionnez le niveau d\'agressivité du blocage des publicités et des traqueurs</string>
+    <string name="onboarding_protection_title">Choisissez le niveau de protection</string>
+    <string name="onboarding_protection_desc">Choisissez le niveau d\'intensité avec lequel vous souhaitez bloquer les publicités et les traceurs</string>
     <string name="onboarding_protection_basic">Basique</string>
-    <string name="onboarding_protection_basic_desc">Bloque les principaux réseaux publicitaires. Impact minimal sur les fonctionnalités des sites web.</string>
+    <string name="onboarding_protection_basic_desc">Bloquez les principaux réseaux publicitaires. Impact minimal sur le fonctionnement du site web.</string>
     <string name="onboarding_protection_standard">Standard</string>
-    <string name="onboarding_protection_standard_desc">Bloque les publicités, traqueurs et analyses. Bon équilibre entre protection et compatibilité.</string>
+    <string name="onboarding_protection_standard_desc">Bloque les publicités, les traceurs et les outils d\'analyse. Offre un bon équilibre entre protection et compatibilité.</string>
     <string name="onboarding_protection_strict">Strict</string>
-    <string name="onboarding_protection_strict_desc">Blocage maximum. Peut affecter certaines fonctionnalités de sites web, mais offre la protection la plus forte.</string>
+    <string name="onboarding_protection_strict_desc">Blocage maximal. Cela peut affecter certaines fonctionnalités du site web, mais offre la protection la plus efficace.</string>
 
     <!-- Onboarding: DNS Server -->
-    <string name="onboarding_dns_title">Choisir un serveur DNS</string>
-    <string name="onboarding_dns_desc">Sélectionnez un serveur DNS pour la résolution des noms de domaine. Vous pouvez modifier ce paramètre ultérieurement dans les Paramètres.</string>
+    <string name="onboarding_dns_title">Choisissez un serveur DNS</string>
+    <string name="onboarding_dns_desc">Sélectionnez un serveur DNS pour la résolution des noms de domaine. Vous pourrez modifier ce paramètre ultérieurement dans les paramètres.</string>
 
     <!-- Onboarding: VPN Permission -->
-    <string name="onboarding_vpn_title">Permission VPN requise</string>
-    <string name="onboarding_vpn_desc">BlockAds utilise un VPN local pour filtrer les requêtes DNS et bloquer les publicités. Aucune donnée ne quitte votre appareil — ce VPN fonctionne uniquement en local pour intercepter et filtrer les requêtes DNS.</string>
-    <string name="onboarding_vpn_grant">Accorder la permission VPN</string>
+    <string name="onboarding_vpn_title">Autorisation VPN requise</string>
+    <string name="onboarding_vpn_desc">BlockAds utilise un VPN local pour filtrer les requêtes DNS et bloquer les publicités. Aucune donnée ne quitte votre appareil : ce VPN fonctionne uniquement en local pour intercepter et filtrer les requêtes DNS.</string>
+    <string name="onboarding_vpn_grant">Accorder l\'autorisation VPN</string>
 
     <!-- Onboarding: Notification Permission -->
     <string name="onboarding_notification_title">Restez informé</string>
-    <string name="onboarding_notification_desc">Autorisez les notifications pour voir les statistiques de blocage en temps réel et savoir quand votre protection est active. Requis pour la notification VPN persistante sur Android 13+.</string>
+    <string name="onboarding_notification_desc">Autorisez les notifications pour consulter les statistiques de blocage en temps réel et savoir quand votre protection est active. Indispensable pour l\'affichage permanent de la notification VPN sur Android 13 et versions ultérieures.</string>
     <string name="onboarding_notification_grant">Autoriser les notifications</string>
 
     <!-- Onboarding: Battery Optimization -->
     <string name="onboarding_battery_title">Maintenir la protection active</string>
-    <string name="onboarding_battery_desc">Excluez BlockAds de l\'optimisation de la batterie pour que le service VPN reste actif en arrière-plan et ne soit pas tué par le système.</string>
+    <string name="onboarding_battery_desc">Excluez BlockAds de l\'optimisation de la batterie afin que le service VPN reste actif en arrière-plan et ne soit pas interrompu par le système.</string>
     <string name="onboarding_battery_grant">Désactiver l\'optimisation de la batterie</string>
     <string name="onboarding_battery_unsupported">Non pris en charge</string>
 
     <!-- Onboarding: Permission Granted -->
-    <string name="onboarding_permission_granted">✓ Permission accordée</string>
+    <string name="onboarding_permission_granted">✓ Autorisation accordée</string>
 
     <!-- Onboarding: Completion -->
-    <string name="onboarding_complete_title">Vous êtes maintenant protégé !</string>
-    <string name="onboarding_complete_desc">Félicitations ! BlockAds est configuré et prêt à protéger votre appareil contre les publicités et les traqueurs.</string>
+    <string name="onboarding_complete_title">Vous êtes désormais protégé !</string>
+    <string name="onboarding_complete_desc">Félicitations ! BlockAds est désormais configuré et prêt à protéger votre appareil contre les publicités et les traceurs.</string>
     <string name="onboarding_complete_stats">Appuyez sur « Commencer » pour activer la protection</string>
 
     <!-- Whitelist Apps -->
-    <string name="whitelist_apps_title">Applications en liste blanche</string>
-    <string name="whitelist_apps_subtitle">Ces applications contourneront le blocage des publicités</string>
+    <string name="whitelist_apps_title">Applications sur liste blanche</string>
+    <string name="whitelist_apps_subtitle">Ces applications contourneront les bloqueurs de publicités</string>
     <string name="whitelist_apps_search">Rechercher des applications…</string>
     <string name="whitelist_apps_empty">Aucune application installée</string>
-    <string name="whitelist_apps_count">%d applications en liste blanche</string>
+    <string name="whitelist_apps_count">%d applications autorisées</string>
     <string name="whitelist_tab_user">Applications utilisateur</string>
     <string name="whitelist_tab_system">Applications système</string>
 
     <!-- Whitelist Domains -->
-    <string name="whitelist_domains_title">Domaines en liste blanche</string>
+    <string name="whitelist_domains_title">Domaines sur liste blanche</string>
     <string name="whitelist_domains_subtitle">Ces domaines ne seront jamais bloqués</string>
     <string name="whitelist_domains_add">Ajouter un domaine</string>
-    <string name="whitelist_domains_hint">ex. exemple.com</string>
-    <string name="whitelist_domains_empty">Aucun domaine en liste blanche</string>
-    <string name="whitelist_domain_added">Domaine mis en liste blanche : %s</string>
+    <string name="whitelist_domains_hint">par exemple : example.com</string>
+    <string name="whitelist_domains_empty">Aucun domaine autorisé</string>
+    <string name="whitelist_domain_added">Domaine ajouté à la liste blanche : %s</string>
     <string name="whitelist_domain_removed">Domaine retiré de la liste blanche</string>
 
     <string name="settings_blocklist_domains_desc">Ces domaines seront toujours bloqués</string>
-    <string name="blocklist_domains_title">Domaines en liste noire</string>
+    <string name="blocklist_domains_title">Domaines sur liste noire</string>
     <string name="blocklist_domains_subtitle">Ces domaines seront toujours bloqués</string>
     <string name="blocklist_domains_add">Ajouter un domaine</string>
-    <string name="blocklist_domains_hint">ex. exemple.com</string>
-    <string name="blocklist_domains_empty">Aucun domaine en liste noire</string>
-    <string name="blocklist_domain_added">Domaine mis en liste noire : %s</string>
+    <string name="blocklist_domains_hint">par exemple : example.com</string>
+    <string name="blocklist_domains_empty">Aucun domaine sur liste noire</string>
+    <string name="blocklist_domain_added">Domaine ajouté à la liste noire : %s</string>
     <string name="blocklist_domain_removed">Domaine retiré de la liste noire</string>
-    <string name="blocklist_domain_already_exists">Le domaine est déjà en liste noire</string>
+    <string name="blocklist_domain_already_exists">Le domaine figure déjà sur la liste noire</string>
 
     <!-- Domain Rules (merged screen) -->
-    <string name="domain_rules_title">Règles de domaine</string>
+    <string name="domain_rules_title">Règles relatives aux domaines</string>
     <string name="domain_rules_tab_whitelist">Liste blanche</string>
     <string name="domain_rules_tab_blocklist">Liste noire</string>
 
@@ -133,7 +132,7 @@
     <string name="about_github">Code source (GitHub)</string>
     <string name="about_website">Site web</string>
     <string name="about_privacy_policy">Politique de confidentialité</string>
-    <string name="about_contact">Nous contacter</string>
+    <string name="about_contact">Contactez-nous</string>
     <string name="about_licenses">Licences open source</string>
     <string name="about_no_data">🔒 Cette application ne collecte aucune donnée personnelle</string>
 
@@ -141,9 +140,9 @@
     <string name="log_action_whitelist">Ajouter à la liste blanche</string>
     <string name="log_action_copy">Copier le domaine</string>
     <string name="log_search_hint">Rechercher des domaines…</string>
-    <string name="domain_copied">Domaine copié</string>
-    <string name="log_whitelisted">Mis en liste blanche : %s</string>
-    <string name="log_already_whitelisted">Déjà en liste blanche</string>
+    <string name="domain_copied">Nom de domaine copié</string>
+    <string name="log_whitelisted">Ajouté à la liste blanche : %s</string>
+    <string name="log_already_whitelisted">Déjà ajouté à la liste blanche</string>
 
     <!-- Test Block Ads -->
     <string name="test_block_ads">Tester le blocage des publicités</string>
@@ -154,13 +153,13 @@
     <string name="home_protected_desc">Votre appareil est protégé contre les publicités</string>
     <string name="home_unprotected_desc">Appuyez sur le bouton pour activer le blocage des publicités</string>
     <string name="home_block_rate">Taux de blocage</string>
-    <string name="home_filter_rules">Règles de filtres</string>
+    <string name="home_filter_rules">Règles de filtrage</string>
     <string name="home_recent_blocked">Récemment bloqués</string>
-    <string name="home_data_saved">Données économisées</string>
-    <string name="home_protection_uptime">Durée de fonctionnement</string>
+    <string name="home_data_saved">Données enregistrées</string>
+    <string name="home_protection_uptime">Temps de fonctionnement</string>
     <string name="home_chart_24h">24 heures</string>
     <string name="home_chart_7d">7 jours</string>
-    <string name="home_top_blocked">Domaines les plus bloqués</string>
+    <string name="home_top_blocked">Principaux domaines bloqués</string>
     <string name="home_chart_no_data">Aucune donnée disponible</string>
     <string name="settings_language">Langue</string>
 
@@ -173,58 +172,77 @@
     <string name="settings_category_interface">Interface</string>
     <string name="settings_category_interface_desc">Thème, langue</string>
     <string name="settings_category_apps">Applications</string>
-    <string name="settings_category_apps_desc">Liste blanche d\'applications, paramètres par application</string>
+    <string name="settings_category_apps_desc">Liste blanche des applications, paramètres par application</string>
     <string name="settings_category_filters">Filtres</string>
     <string name="settings_category_filters_desc">Gestion des filtres, mise à jour automatique, règles personnalisées</string>
     <string name="settings_category_data">Données</string>
     <string name="settings_category_data_desc">Exporter/Importer, effacer les journaux</string>
-    <string name="settings_category_info">Informations</string>
+    <string name="settings_category_info">Information</string>
     <string name="settings_category_info_desc">À propos, politique de confidentialité, code source</string>
     <string name="settings_appearance">Apparence</string>
     <string name="settings_theme">Thème</string>
     <string name="settings_theme_system">Système</string>
     <string name="settings_theme_light">Clair</string>
-    <string name="settings_show_bottom_nav_labels">Afficher les libellés de navigation inférieure</string>
+    <string name="settings_show_bottom_nav_labels">Afficher les libellés de la barre de navigation inférieure</string>
     <string name="settings_show_bottom_nav_labels_desc">Afficher le texte sous les icônes dans la barre de navigation inférieure</string>
     <string name="settings_theme_dark">Sombre</string>
     <string name="settings_lang_system">Système</string>
+    <string name="settings_lang_en" translatable="false">English</string>
+    <string name="settings_lang_vi" translatable="false">Tiếng Việt</string>
+    <string name="settings_lang_ja" translatable="false">日本語</string>
+    <string name="settings_lang_ko" translatable="false">한국어</string>
+    <string name="settings_lang_zh" translatable="false">中文</string>
+    <string name="settings_lang_th" translatable="false">ไทย</string>
+    <string name="settings_lang_es" translatable="false">Español</string>
+    <string name="settings_lang_ru" translatable="false">Русский</string>
+    <string name="settings_lang_it" translatable="false">Italiano</string>
+    <string name="settings_lang_ar" translatable="false">العربية</string>
+    <string name="settings_lang_tr" translatable="false">Türkçe</string>
+    <string name="settings_lang_pl" translatable="false">Polski</string>
+    <string name="settings_lang_in" translatable="false">Bahasa Indonesia</string>
+    <string name="settings_lang_pt_br" translatable="false">Português (Brasil)</string>
+    <string name="settings_lang_uk" translatable="false">Українська</string>
+    <string name="settings_lang_de" translatable="false">Deutsch</string>
+    <string name="settings_lang_cs" translatable="false">Čeština</string>
+    <string name="settings_lang_iw" translatable="false">עברית</string>
+    <string name="settings_lang_fr" translatable="false">Français</string>
     <string name="settings_high_contrast">Contraste élevé</string>
-    <string name="settings_high_contrast_desc">Augmenter le contraste pour une meilleure visibilité</string>
+    <string name="settings_high_contrast_desc">Augmentez le contraste pour une meilleure visibilité</string>
     <string name="settings_accent_color">Couleur d\'accentuation</string>
     <string name="settings_accent_color_desc">Personnaliser la couleur principale de l\'application</string>
-    <string name="accent_dynamic">Dynamique (Material You)</string>
+    <string name="accent_dynamic">Dynamisue (Material You)</string>
     <string name="accent_dynamic_desc">Utilise les couleurs de votre fond d\'écran</string>
     <string name="settings_connection">Connexion</string>
     <string name="settings_filter_lists">Listes de filtres (%d actives)</string>
-    <string name="settings_add_custom_filter">Ajouter une liste de filtres personnalisée</string>
-    <string name="settings_updating">Mise à jour…</string>
-    <string name="settings_update_all">Mettre à jour tous les filtres</string>
+    <string name="settings_add_custom_filter">Ajouter une liste de filtres personnalisés</string>
+    <string name="settings_updating">Mise à jour en cours…</string>
+    <string name="settings_update_all">Actualiser tous les filtres</string>
     <string name="settings_dns_config">Configuration DNS</string>
     <string name="settings_save_dns">Enregistrer le DNS</string>
     <string name="settings_whitelist">Liste blanche</string>
-    <string name="settings_whitelist_apps">Applications en liste blanche</string>
+    <string name="settings_whitelist_apps">Applications sur liste blanche</string>
     <string name="settings_whitelist_apps_desc">Exclure des applications du blocage des publicités</string>
-    <string name="settings_whitelist_domains">Domaines en liste blanche</string>
+    <string name="settings_whitelist_domains">Domaines sur liste blanche</string>
     <string name="settings_whitelist_domains_desc">Ces domaines ne seront jamais bloqués</string>
 
     <string name="settings_add_domain">Ajouter un domaine</string>
-    <string name="settings_data_backup">Données et sauvegarde</string>
+    <string name="settings_data_backup">Données &amp; Sauvegarde</string>
     <string name="settings_export">Exporter</string>
     <string name="settings_import">Importer</string>
     <string name="settings_about">À propos</string>
     <string name="settings_about_desc">Version, politique de confidentialité, code source</string>
     <string name="settings_add_filter_title">Ajouter une liste de filtres</string>
     <string name="settings_add_filter_name">Nom</string>
-    <string name="settings_add_filter_url">URL (format hosts)</string>
+    <string name="settings_add_filter_url">URL (format « hosts »)</string>
     <string name="settings_add">Ajouter</string>
     <string name="settings_cancel">Annuler</string>
-    <string name="settings_add_domain_hint">Domaine (ex. exemple.com)</string>
+    <string name="settings_add_domain_hint">Nom de domaine (par exemple, example.com)</string>
     <string name="settings_auto_reconnect">Reconnexion automatique</string>
     <string name="settings_auto_reconnect_desc">Redémarrer le bloqueur de publicités au démarrage de l\'appareil</string>
     <string name="settings_safe_search">SafeSearch</string>
-    <string name="settings_safe_search_desc">Forcer la recherche sécurisée sur les moteurs de recherche pris en charge (Google, Bing)</string>
-    <string name="settings_youtube_restricted">Mode restreint YouTube</string>
-    <string name="settings_youtube_restricted_desc">Filtrer les vidéos pour adultes sur YouTube, bloquer les vidéos intégrées pour adultes sur d\'autres sites, et masquer tous les commentaires</string>
+    <string name="settings_safe_search_desc">Activer la recherche sécurisée sur les moteurs de recherche pris en charge (Google, Bing)</string>
+    <string name="settings_youtube_restricted">Mode restreint sur YouTube</string>
+    <string name="settings_youtube_restricted_desc">Filtrer les vidéos pour adultes sur YouTube, bloquer les vidéos pour adultes intégrées sur d\'autres sites et masquer tous les commentaires</string>
     <string name="settings_dns_protocol">Protocole DNS</string>
     <string name="settings_dns_protocol_plain">DNS standard</string>
     <string name="settings_dns_protocol_doh" translatable="false">DoH</string>
@@ -233,7 +251,7 @@
     <string name="settings_doh_server_url">URL du serveur DoH</string>
     <string name="settings_doh_url_placeholder" translatable="false">https://dns.google/dns-query</string>
     <string name="settings_save_doh_url">Enregistrer l\'URL DoH</string>
-    <string name="settings_dot_server">Serveur DoT (nom d\'hôte ou IP)</string>
+    <string name="settings_dot_server">Serveur DoT (nom d\'hôte ou adresse IP)</string>
     <string name="settings_dot_server_placeholder">dns.google</string>
     <string name="settings_doq_server_url">URL du serveur DoQ</string>
     <string name="settings_doq_url_placeholder" translatable="false">quic://dns.adguard-dns.com/dns-query</string>
@@ -241,81 +259,81 @@
     <string name="settings_upstream_dns_placeholder" translatable="false">8.8.8.8</string>
     <string name="settings_fallback_dns">Serveur DNS de secours</string>
     <string name="settings_fallback_dns_placeholder" translatable="false">1.1.1.1</string>
-    <string name="settings_fallback_dns_desc">Le DNS de secours est utilisé lorsque votre serveur DNS principal échoue. Entrez l\'adresse IP d\'un serveur DNS de sauvegarde.</string>
-    <string name="settings_fallback_dns_short_desc">Utilisé comme sauvegarde si le DNS principal échoue</string>
+    <string name="settings_fallback_dns_desc">Le DNS de secours est utilisé en cas de défaillance de votre serveur DNS principal. Saisissez l\'adresse IP d'un serveur DNS de secours.</string>
+    <string name="settings_fallback_dns_short_desc">Utilisé comme solution de secours en cas de défaillance du DNS principal</string>
     <string name="dns_error_duplicate">Le DNS de secours ne peut pas être identique au DNS personnalisé</string>
-    <string name="dns_category_fallback">Secours</string>
-    <string name="settings_fallback_dns_not_set">Non défini (aucune sauvegarde)</string>
+    <string name="dns_category_fallback">Solution de secours</string>
+    <string name="settings_fallback_dns_not_set">Non défini (pas de sauvegarde)</string>
     <string name="settings_custom_dns_server">Serveur DNS personnalisé</string>
     <string name="settings_custom_dns_placeholder" translatable="false">8.8.8.8, https://…, tls://…, quic://…</string>
-    <string name="settings_custom_dns_hint">Entrez une IP pour le DNS standard, https:// pour DoH, tls:// pour DoT, ou quic:// pour DoQ</string>
-    <string name="settings_detected_plain">DNS standard</string>
+    <string name="settings_custom_dns_hint">Entrez l\'adresse IP pour le DNS standard, https:// pour DoH, tls:// pour DoT ou quic:// pour DoQ</string>
+    <string name="settings_detected_plain">DNS simple</string>
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
     <string name="settings_detected_protocol">Détecté : %s</string>
-    <string name="settings_invalid_dns_input">Adresse de serveur DNS invalide</string>
+    <string name="settings_invalid_dns_input">Adresse de serveur DNS non valide</string>
     <string name="settings_save_custom_dns">Enregistrer le DNS</string>
     <string name="settings_dns_response_type">Type de réponse DNS</string>
     <string name="settings_dns_response_type_desc">Type de réponse pour les domaines bloqués</string>
     <string name="dns_response_nxdomain" translatable="false">NXDOMAIN</string>
-    <string name="dns_response_nxdomain_desc">Le domaine n\'existe pas (standard)</string>
-    <string name="dns_response_refused" translatable="false">REFUSED</string>
+    <string name="dns_response_nxdomain_desc">Le domaine n\'existe pas (message standard)</string>
+    <string name="dns_response_refused" translatable="false">REFUSÉ</string>
     <string name="dns_response_refused_desc">Requête refusée (meilleure compatibilité)</string>
-    <string name="dns_response_custom_ip">IP personnalisée (0.0.0.0)</string>
-    <string name="dns_response_custom_ip_desc">Renvoyer une adresse de route nulle (par défaut)</string>
+    <string name="dns_response_custom_ip">Adresse IP personnalisée (0.0.0.0)</string>
+    <string name="dns_response_custom_ip_desc">Renvoie une adresse de route nulle (par défaut)</string>
     <string name="settings_clear_logs">Effacer tous les journaux</string>
     <string name="clear_logs_confirm_message">Êtes-vous sûr de vouloir effacer tous les journaux DNS ? Cette action est irréversible.</string>
     <string name="dns_error_notification_title">Erreur de configuration DNS</string>
-    <string name="dns_error_notification_no_fallback">La connexion %1$s à %2$s échoue. Aucun DNS de secours configuré — les sites web peuvent ne pas se charger. Vérifiez vos paramètres DNS.</string>
-    <string name="dns_error_notification_both_failed">Les connexions %1$s à %2$s et au secours %3$s échouent toutes les deux. Les sites web peuvent ne pas se charger. Vérifiez vos paramètres DNS.</string>
+    <string name="dns_error_notification_no_fallback">La connexion de %1$s à %2$s échoue. Aucun DNS de secours n\'est configuré ; les sites Web risquent de ne pas s\'afficher. Vérifiez vos paramètres DNS.</string>
+    <string name="dns_error_notification_both_failed">La connexion de %1$s à %2$s et la connexion de secours à %3$s échouent toutes les deux. Il est possible que les sites Web ne s\'affichent pas. Vérifiez vos paramètres DNS.</string>
 
     <!-- Filter Setup Screen -->
     <string name="filter_setup_title">Configuration des filtres</string>
-    <string name="filter_setup_desc">Gérer les listes de filtres intégrées et personnalisées</string>
+    <string name="filter_setup_desc">Gérer les fonctionnalités intégrées &amp; les listes de filtres personnalisées</string>
     <string name="filter_built_in">Intégré</string>
     <string name="filter_custom">Personnalisé</string>
-    <string name="filter_custom_empty">Aucun filtre personnalisé ajouté pour l\'instant</string>
-    <string name="filter_search_hint">Rechercher des filtres…</string>
+    <string name="filter_custom_empty">Aucun filtre personnalisé n\'a encore été ajouté</string>
+    <string name="filter_search_hint">Filtres de recherche…</string>
     <string name="filter_search_no_results">Aucun filtre trouvé pour « %s »</string>
     <string name="filter_log_cleared">Journal effacé</string>
-    <string name="filter_domain_whitelisted">Domaine mis en liste blanche : %s</string>
-    <string name="filter_domain_already_whitelisted">Domaine déjà en liste blanche</string>
+    <string name="filter_domain_whitelisted">Domaine ajouté à la liste blanche : %s</string>
+    <string name="filter_domain_already_whitelisted">Domaine déjà ajouté à la liste blanche</string>
     <string name="filter_settings_export">Paramètres exportés</string>
-    <string name="filter_export_failed">Échec de l\'export : %s</string>
+    <string name="filter_export_failed">Échec de l\'exportation : %s</string>
     <string name="filter_settings_imported">Paramètres importés</string>
-    <string name="filter_import_failed">Échec de l\'import : %s</string>
+    <string name="filter_import_failed">Échec de l\'importation : %s</string>
 
     <!-- Auto-update Filter Lists -->
     <string name="settings_auto_update">Mise à jour automatique des listes de filtres</string>
     <string name="settings_auto_update_enabled">Activer la mise à jour automatique</string>
     <string name="settings_auto_update_enabled_desc">Mettre à jour automatiquement les listes de filtres en arrière-plan</string>
-    <string name="settings_auto_update_frequency">Fréquence de mise à jour</string>
+    <string name="settings_auto_update_frequency">Fréquence des mises à jour</string>
     <string name="settings_auto_update_frequency_6h">Toutes les 6 heures</string>
     <string name="settings_auto_update_frequency_12h">Toutes les 12 heures</string>
     <string name="settings_auto_update_frequency_24h">Toutes les 24 heures</string>
     <string name="settings_auto_update_frequency_48h">Toutes les 48 heures</string>
-    <string name="settings_auto_update_frequency_manual">Manuelle uniquement</string>
+    <string name="settings_auto_update_frequency_manual">Mode manuel uniquement</string>
     <string name="settings_auto_update_wifi_only">Wi-Fi uniquement</string>
-    <string name="settings_auto_update_wifi_only_desc">Mettre à jour uniquement lorsque connecté au Wi-Fi</string>
+    <string name="settings_auto_update_wifi_only_desc">Ne mettre à jour que lorsque vous êtes connecté au Wi-Fi</string>
     <string name="settings_auto_update_notification">Notifications de mise à jour</string>
     <string name="settings_auto_update_notification_normal">Normal</string>
     <string name="settings_auto_update_notification_silent">Silencieux</string>
-    <string name="settings_auto_update_notification_none">Aucune</string>
-    <string name="filter_update_success">Listes de filtres mises à jour</string>
-    <string name="filter_update_success_message">%d domaines mis à jour avec succès</string>
+    <string name="settings_auto_update_notification_none">Aucun</string>
+    <string name="filter_update_success">Mise à jour des listes de filtres</string>
+    <string name="filter_update_success_message">%d domaines ont été mis à jour avec succès</string>
     <string name="filter_update_failed_message">Échec de la mise à jour des listes de filtres</string>
     <string name="filter_update_notification_channel">Mises à jour des filtres</string>
-    <string name="filter_update_notification_channel_desc">Notifications pour les mises à jour des listes de filtres</string>
+    <string name="filter_update_notification_channel_desc">Notifications concernant les mises à jour de la liste de filtres</string>
 
     <!-- DNS Provider -->
     <string name="dns_provider_title">Serveur DNS</string>
     <string name="dns_category_standard">Standard</string>
     <string name="dns_category_privacy">Axé sur la confidentialité</string>
-    <string name="dns_category_family">Adapté aux familles</string>
+    <string name="dns_category_family">Adapté à toute la famille</string>
     <string name="dns_category_custom">Personnalisé</string>
     <string name="dns_custom_title">DNS personnalisé</string>
-    <string name="dns_custom_description">Entrez vos propres adresses de serveur DNS</string>
+    <string name="dns_custom_description">Saisissez les adresses de vos propres serveurs DNS</string>
     <string name="dns_custom_save">Enregistrer</string>
     <string name="dns_custom_cancel">Annuler</string>
     <string name="dns_select_server">Sélectionner un serveur DNS</string>
@@ -323,26 +341,26 @@
     <string name="dns_doq_badge" translatable="false">DoQ</string>
 
     <!-- Widget -->
-    <string name="widget_name">Bouton BlockAds</string>
-    <string name="widget_description">Activer/désactiver le blocage des publicités et voir les statistiques</string>
+    <string name="widget_name">Activer/désactiver BlockAds</string>
+    <string name="widget_description">Activer ou désactiver le blocage des publicités et consulter les statistiques</string>
     <string name="widget_toggle_description">Activer/désactiver le blocage des publicités</string>
-    <string name="widget_blocked_today">Bloquées aujourd\'hui</string>
+    <string name="widget_blocked_today">Bloqué aujourd\'hui</string>
     <string name="widget_protected">Protégé</string>
-    <string name="widget_unprotected">Désactivé</string>
+    <string name="widget_unprotected">Off</string>
 
     <!-- Shortcuts -->
-    <string name="shortcut_toggle_vpn">Activer/Désactiver le blocage des publicités</string>
-    <string name="shortcut_toggle_vpn_short">Activer/Désactiver VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Bascule non disponible</string>
+    <string name="shortcut_toggle_vpn">Activer/désactiver le blocage des publicités</string>
+    <string name="shortcut_toggle_vpn_short">Activer/désactiver le VPN</string>
+    <string name="shortcut_toggle_vpn_disabled">Bouton bascule indisponible</string>
 
     <!-- Custom Rules -->
     <string name="custom_rules">Règles personnalisées</string>
     <string name="add_custom_rule">Ajouter une règle personnalisée</string>
-    <string name="import_rules">Importer des règles</string>
-    <string name="export_rules">Exporter des règles</string>
+    <string name="import_rules">Règles d\'importation</string>
+    <string name="export_rules">Règles d\'exportation</string>
     <string name="delete_all_rules">Supprimer toutes les règles</string>
-    <string name="delete_all_rules_confirmation">Êtes-vous sûr de vouloir supprimer toutes les règles personnalisées ? Cette action est irréversible.</string>
-    <string name="all_rules_deleted">Toutes les règles supprimées</string>
+    <string name="delete_all_rules_confirmation">Êtes-vous sûr de vouloir supprimer toutes les règles personnalisées ? Cette action ne peut pas être annulée.</string>
+    <string name="all_rules_deleted">Toutes les règles ont été supprimées</string>
     <string name="rule_added">Règle ajoutée avec succès</string>
     <string name="rules_imported">%d règles importées</string>
     <string name="rules_copied_to_clipboard">Règles copiées dans le presse-papiers</string>
@@ -351,11 +369,11 @@
     <string name="tap_add_to_create_rule">Appuyez sur + pour créer votre première règle personnalisée</string>
     <string name="rule">Règle</string>
     <string name="rules">Règles</string>
-    <string name="add_rule_hint">Entrez une règle DNS personnalisée :\n• Bloquer : ||exemple.com^ ou exemple.com\n• Bloquer avec joker : ||*.pubs.exemple.com^ ou *.pubs.exemple.com\n• Autoriser : @@||exemple.com^\n• Commentaire : ! Ceci est un commentaire</string>
-    <string name="import_rules_hint">Coller les règles (une par ligne) :</string>
+    <string name="add_rule_hint">Saisissez une règle DNS personnalisée :\n• Bloquer : ||example.com^ ou example.com\n• Bloquer les caractères génériques : ||*.ads.example.com^ ou *.ads.example.com\n• Autoriser : @@||example.com^\n• Commentaire : ! Ceci est un commentaire</string>
+    <string name="import_rules_hint">Collez les règles (une par ligne) :</string>
     <string name="import_label">Importer</string>
     <string name="custom_rules_help">Aide sur les règles personnalisées</string>
-    <string name="custom_rules_help_text">Les règles personnalisées sont appliquées avant les listes de filtres, leur conférant une priorité plus élevée.\n\nFormats pris en charge :\n• Bloquer un domaine : ||exemple.com^ ou exemple.com\n• Bloquer avec joker : ||*.pubs.exemple.com^ ou *.pubs.exemple.com\n• Autoriser un domaine : @@||exemple.com^\n• Autoriser avec joker : @@||*.exemple.com^\n• Commentaire : ! Ceci est un commentaire\n\nExemples :\n• ||pubs.exemple.com^ - Bloque pubs.exemple.com et tous ses sous-domaines\n• ||*.traceur.com^ - Bloque tout sous-domaine de traceur.com (mais pas traceur.com lui-même)\n• @@||exemple.com^ - Autorise exemple.com (remplace les listes noires)\n• *.pubs.exemple.com - Bloque x.pubs.exemple.com, y.pubs.exemple.com, etc.\n• ! Mes règles personnalisées - Une ligne de commentaire</string>
+    <string name="custom_rules_help_text">Les règles personnalisées sont appliquées avant les listes de filtrage, ce qui leur confère une priorité plus élevée.\n\nFormats pris en charge :\n• Bloquer un domaine : ||example.com^ ou example.com\n• Bloquer un caractère générique : ||*.ads.example.com^ ou *.ads.example.com\n• Autoriser un domaine : @@||example.com^\n• Autoriser un caractère générique : @@||*.example.com^\n• Commentaire : ! Ceci est un commentaire\n\nExemples :\n• ||ads.example.com^ - Bloque ads.example.com et tous ses sous-domaines\n• ||*.tracker.com^ - Bloque tout sous-domaine de tracker.com (mais pas tracker.com lui-même)\n• @@||example.com^ - Autorise example.com (remplace les listes de blocage)\n• *.ads.example.com - Bloque x.ads.example.com, y.ads.example.com, etc.\n• ! Mes règles personnalisées - Une ligne de commentaire</string>
     <string name="add">Ajouter</string>
     <string name="delete">Supprimer</string>
     <string name="cancel">Annuler</string>
@@ -364,229 +382,223 @@
     <string name="add_to_custom_rules">Ajouter aux règles personnalisées</string>
     <string name="import_from_file">Importer depuis un fichier</string>
     <string name="export_to_file">Exporter vers un fichier</string>
-    <string name="export_format_title">Format d\'export</string>
+    <string name="export_format_title">Format d\'exportation</string>
     <string name="export_format_json">JSON (.json)</string>
-    <string name="export_format_txt">Texte (.txt)</string>
+    <string name="export_format_txt">Text (.txt)</string>
     <string name="rules_exported">%d règles exportées</string>
-    <string name="export_failed">Échec de l\'export : %s</string>
-    <string name="import_failed">Échec de l\'import : %s</string>
-    <string name="import_no_valid_rules">Aucune règle valide trouvée dans le fichier</string>
+    <string name="export_failed">Échec de l\'exportation : %s</string>
+    <string name="import_failed">Échec de l\'importation : %s</string>
+    <string name="import_no_valid_rules">Aucune règle valide n\'a été trouvée dans le fichier</string>
 
     <!-- App Management -->
     <string name="app_management_title">Gestion des applications</string>
     <string name="app_management_subtitle">%d applications</string>
-    <string name="app_management_subtitle_filtered">%1$d sur %2$d applications</string>
-    <string name="app_management_desc">Gérer le routage VPN par application et voir les statistiques</string>
+    <string name="app_management_subtitle_filtered">%1$d applications sur %2$d</string>
+    <string name="app_management_desc">Gérer le routage VPN par application et consulter les statistiques</string>
     <string name="app_management_search">Rechercher des applications…</string>
     <string name="app_management_loading">Chargement des applications…</string>
     <string name="app_management_sort">Trier</string>
     <string name="app_management_sort_name">Trier par nom</string>
     <string name="app_management_sort_queries">Trier par requêtes</string>
-    <string name="app_management_sort_blocked">Trier par bloquées</string>
+    <string name="app_management_sort_blocked">Trier par « Bloqué »</string>
     <string name="app_management_queries">Requêtes : %d</string>
-    <string name="app_management_blocked">Bloquées : %d</string>
+    <string name="app_management_blocked">Bloqué : %d</string>
     <string name="app_management_system">Système</string>
     <string name="app_management_vpn_toggle">Routage VPN pour %s</string>
-
     <!-- Improved DNS Log Screen -->
-    <string name="log_status_blocked">Bloquée</string>
-    <string name="log_status_allowed">Autorisée</string>
-    <string name="log_status_whitelisted">Liste blanche</string>
+    <string name="log_status_blocked">Bloqué</string>
+    <string name="log_status_allowed">Autorisé</string>
+    <string name="log_status_whitelisted">Ajouté à la liste blanche</string>
     <string name="log_detail_title">Détails du domaine</string>
     <string name="log_detail_query_type">Type de requête</string>
     <string name="log_detail_response_time">Temps de réponse</string>
     <string name="log_detail_status">Statut</string>
     <string name="log_detail_app">Application</string>
-    <string name="log_detail_resolved_ip">IP résolue</string>
+    <string name="log_detail_resolved_ip">Adresse IP résolue</string>
     <string name="log_detail_blocked_by">Bloqué par</string>
     <string name="log_detail_timestamp">Heure</string>
     <string name="log_detail_unknown">Inconnu</string>
     <string name="log_detail_na">N/A</string>
-    <string name="log_realtime_on">Temps réel : ACTIVÉ</string>
-    <string name="log_realtime_off">Temps réel : DÉSACTIVÉ</string>
-    <string name="log_time_range_all">Tout</string>
-    <string name="log_time_range_1h">1h</string>
-    <string name="log_time_range_6h">6h</string>
-    <string name="log_time_range_24h">24h</string>
-    <string name="log_time_range_7d">7j</string>
+    <string name="log_realtime_on">Temps réel : activé</string>
+    <string name="log_realtime_off">Temps réel : désactivé</string>
+    <string name="log_time_range_all">Tout le temps</string>
+    <string name="log_time_range_1h">1 heure</string>
+    <string name="log_time_range_6h">6 heures</string>
+    <string name="log_time_range_24h">24 heures</string>
+    <string name="log_time_range_7d">7 jours</string>
     <string name="log_filter_all_apps">Toutes les applications</string>
     <string name="log_bulk_mode">Sélectionner</string>
     <string name="log_bulk_selected">%d sélectionnés</string>
     <string name="log_bulk_block">Tout bloquer</string>
-    <string name="log_bulk_whitelist">Tout mettre en liste blanche</string>
+    <string name="log_bulk_whitelist">Tout ajouter à la liste blanche</string>
     <string name="log_unblock_domain">Débloquer ce domaine</string>
-    <string name="log_wildcard_whitelist_domain">Mettre tous les sous-domaines en liste blanche</string>
-    <string name="log_domain_unblocked">Domaine %1$s débloqué</string>
-    <string name="log_wildcard_whitelisted">Le domaine %1$s et tous ses sous-domaines sont en liste blanche</string>
+    <string name="log_wildcard_whitelist_domain">Ajouter tous les sous-domaines à la liste blanche</string>
+    <string name="log_domain_unblocked">Le domaine %1$s a été débloqué</string>
+    <string name="log_wildcard_whitelisted">Le domaine %1$s et tous ses sous-domaines ont été ajoutés à la liste blanche</string>
     <string name="log_action_unblock">Débloquer</string>
     <string name="log_action_block">Bloquer</string>
     <string name="block_reason_custom_rule">Règle de blocage personnalisée</string>
-    <string name="block_reason_filter_list">Liste de filtres</string>
-    <string name="block_reason_security">Site dangereux</string>
-
+    <string name="block_reason_filter_list">Liste des filtres</string>
+    <string name="block_reason_security">Site web dangereux</string>
     <!-- Security Stats -->
     <string name="home_security_threats">Menaces bloquées</string>
     <string name="filter_category_ad">Blocage des publicités</string>
     <string name="filter_category_security">Sécurité</string>
-
     <!-- Statistics Screen -->
-    <string name="nav_statistics">Stats</string>
+    <string name="nav_statistics">Statistiques</string>
     <string name="stats_title">Statistiques</string>
-    <string name="stats_overview">Vue d\'ensemble</string>
-    <string name="stats_all_time_queries">Total des requêtes</string>
-    <string name="stats_all_time_blocked">Total bloquées</string>
-    <string name="stats_today_queries">Requêtes aujourd\'hui</string>
-    <string name="stats_today_blocked">Bloquées aujourd\'hui</string>
-    <string name="stats_today_security">Menaces aujourd\'hui</string>
-    <string name="stats_charts">Graphiques d\'activité</string>
+    <string name="stats_overview">Aperçu</string>
+    <string name="stats_all_time_queries">Requêtes de tous les temps</string>
+    <string name="stats_all_time_blocked">Toujours bloqué</string>
+    <string name="stats_today_queries">Requêtes du jour</string>
+    <string name="stats_today_blocked">Bloqué aujourd\'hui</string>
+    <string name="stats_today_security">Menaces d\'aujourd'hui</string>
+    <string name="stats_charts">Tableaux d\'activités</string>
     <string name="stats_chart_4w">4 semaines</string>
     <string name="stats_chart_12m">12 mois</string>
     <string name="stats_per_app">Statistiques par application</string>
     <string name="stats_app_queries_blocked">%1$s requêtes · %2$s bloquées</string>
 
     <string name="vpn_conflict_title">Connexion bloquée</string>
-    <string name="vpn_conflict_desc">Android n\'autorise qu\'une seule connexion VPN à la fois. Un autre VPN est actuellement actif sur votre appareil.\n\nVeuillez d\'abord déconnecter l\'autre VPN ou désactiver « VPN toujours actif » dans les Paramètres avant de connecter BlockAds.</string>
+    <string name="vpn_conflict_desc">Android n\'autorise qu\'une seule connexion VPN à la fois. Un autre VPN est actuellement actif sur votre appareil.\n\nVeuillez d\'abord vous déconnecter de l\'autre VPN ou désactiver l\'option « VPN toujours actif » dans les Paramètres avant de vous connecter à BlockAds.</string>
     <string name="open_settings">Ouvrir les paramètres</string>
 
     <!-- VPN Connecting Phases (progress feedback) -->
     <string name="vpn_phase_loading_filters">Chargement des listes de filtres…</string>
     <string name="vpn_phase_preparing_dns">Préparation du DNS…</string>
     <string name="vpn_phase_establishing">Établissement du VPN…</string>
-    <string name="vpn_phase_waiting_network">En attente du réseau…</string>
+    <string name="vpn_phase_waiting_network">En attente de connexion au réseau…</string>
 
     <!-- Notification Improvements -->
-    <string name="vpn_notification_stats_today">%1$d publicités bloquées aujourd\'hui | Durée %2$s</string>
-    <string name="vpn_notification_action_pause">Pause 1h</string>
+    <string name="vpn_notification_stats_today">%1$d publicités bloquées aujourd\'hui | Temps de fonctionnement : %2$s</string>
+    <string name="vpn_notification_action_pause">Pause d\'une heure</string>
     <string name="vpn_notification_action_stop">Arrêter</string>
-    <string name="vpn_paused_title">BlockAds en pause</string>
-    <string name="vpn_paused_text">Blocage des publicités mis en pause pendant 1 heure. Reprise automatique.</string>
+    <string name="vpn_paused_title">BlockAds est en pause</string>
+    <string name="vpn_paused_text">Le blocage des publicités a été suspendu pendant 1 heure. Il reprendra automatiquement.</string>
     <string name="daily_summary_channel_name">Résumé quotidien</string>
-    <string name="daily_summary_channel_description">Résumé du blocage des publicités en fin de journée</string>
-    <string name="daily_summary_title">Résumé quotidien de protection</string>
+    <string name="daily_summary_channel_description">Résumé quotidien de l\'activité de blocage des publicités</string>
+    <string name="daily_summary_title">Résumé quotidien de la protection</string>
     <string name="daily_summary_text">Aujourd\'hui, nous avons bloqué %1$d publicités pour vous !</string>
-    <string name="milestone_channel_name">Étapes</string>
-    <string name="milestone_channel_description">Succès lorsque vous atteignez des étapes de blocage de publicités</string>
-    <string name="milestone_title">🎉 Étape atteinte !</string>
+    <string name="milestone_channel_name">Étapes importantes</string>
+    <string name="milestone_channel_description">Réalisations lorsque vous franchissez certaines étapes dans le blocage des publicités</string>
+    <string name="milestone_title">🎉 Une étape importante franchie !</string>
     <string name="milestone_text">Vous avez bloqué %1$s publicités ! Continuez !</string>
     <string name="settings_category_notifications">Notifications</string>
-    <string name="settings_category_notifications_desc">Résumé quotidien, étapes</string>
+    <string name="settings_category_notifications_desc">Résumé quotidien, étapes clés</string>
     <string name="settings_daily_summary">Résumé quotidien</string>
-    <string name="settings_daily_summary_desc">Afficher le résumé de blocage en fin de journée</string>
-    <string name="settings_milestone_notifications">Notifications d\'étapes</string>
-    <string name="settings_milestone_notifications_desc">Notifier lorsque vous atteignez des étapes de blocage</string>
-
+    <string name="settings_daily_summary_desc">Afficher le récapitulatif des blocages en fin de journée</string>
+    <string name="settings_milestone_notifications">Notifications d\'étapes importantes</string>
+    <string name="settings_milestone_notifications_desc">Envoyer une notification lorsque vous atteignez des étapes clés</string>
     <!-- Protection Profiles -->
     <string name="profile_title">Profils de protection</string>
     <string name="profile_section_profiles">Profils</string>
-    <string name="profile_section_schedules">Planifications</string>
+    <string name="profile_section_schedules">Horaires</string>
     <string name="profile_name_default">Par défaut</string>
     <string name="profile_name_strict">Strict</string>
     <string name="profile_name_family">Famille</string>
-    <string name="profile_name_gaming">Jeux</string>
+    <string name="profile_name_gaming">Jeux vidéo</string>
     <string name="profile_name_custom">Personnalisé</string>
     <string name="profile_name_strict_family">Famille stricte</string>
-    <string name="profile_desc_strict_family">Blocage maximum : publicités, traqueurs, contenu adulte et jeux d\'argent</string>
-    <string name="profile_desc_default">Blocage équilibré : publicités et traqueurs de base</string>
-    <string name="profile_desc_strict">Blocage agressif : publicités, traqueurs, analyses, télémétrie</string>
-    <string name="profile_desc_family">Navigation sécurisée : publicités, contenu adulte, jeux d\'argent</string>
-    <string name="profile_desc_gaming">Blocage léger : publicités de base uniquement, optimisé pour une faible latence</string>
+    <string name="profile_desc_strict_family">Blocage maximal : publicités, traceurs, contenu pour adultes &amp; jeux d\'argent</string>
+    <string name="profile_desc_default">Blocage équilibré : publicités et traceurs de base</string>
+    <string name="profile_desc_strict">Blocage systématique : publicités, traceurs, outils d\'analyse, données de télémétrie</string>
+    <string name="profile_desc_family">Navigation sécurisée : publicités, contenu pour adultes, jeux d\'argent</string>
+    <string name="profile_desc_gaming">Blocage des publicités : publicités de base uniquement, optimisées pour une faible latence</string>
     <string name="profile_desc_custom">Vos règles de protection personnalisées</string>
     <string name="profile_active">Actif</string>
-    <string name="profile_switched">Profil changé</string>
+    <string name="profile_switched">Profil modifié</string>
     <string name="profile_created">Profil créé</string>
     <string name="profile_deleted">Profil supprimé</string>
     <string name="profile_create_custom">Créer un profil personnalisé</string>
     <string name="profile_name_label">Nom du profil</string>
-    <string name="profile_add_schedule">Ajouter une planification</string>
+    <string name="profile_add_schedule">Ajouter un rendez-vous</string>
     <string name="profile_schedule_start">Heure de début</string>
     <string name="profile_schedule_end">Heure de fin</string>
     <string name="profile_schedule_days">Jours</string>
-    <string name="profile_schedule_added">Planification ajoutée</string>
-    <string name="profile_schedule_deleted">Planification supprimée</string>
-    <string name="profile_schedule_every_day">Chaque jour</string>
-    <string name="profile_day_mon">Lun</string>
-    <string name="profile_day_tue">Mar</string>
-    <string name="profile_day_wed">Mer</string>
-    <string name="profile_day_thu">Jeu</string>
-    <string name="profile_day_fri">Ven</string>
-    <string name="profile_day_sat">Sam</string>
-    <string name="profile_day_sun">Dim</string>
+    <string name="profile_schedule_added">Calendrier ajouté</string>
+    <string name="profile_schedule_deleted">Calendrier supprimé</string>
+    <string name="profile_schedule_every_day">Tous les jours</string>
+    <string name="profile_day_mon">Lundi</string>
+    <string name="profile_day_tue">Mardi</string>
+    <string name="profile_day_wed">Mercredi</string>
+    <string name="profile_day_thu">Jeudi</string>
+    <string name="profile_day_fri">Vendredi</string>
+    <string name="profile_day_sat">Samedi</string>
+    <string name="profile_day_sun">Dimanche</string>
     <string name="settings_profiles">Profils de protection</string>
-    <string name="settings_profiles_desc">Configurations prédéfinies pour différents cas d\'usage</string>
-
+    <string name="settings_profiles_desc">Configurations prédéfinies pour différents cas d\'utilisation</string>
     <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Activer/désactiver la protection VPN</string>
-    <string name="accessibility_vpn_active">La protection VPN est active</string>
-    <string name="accessibility_vpn_inactive">La protection VPN est inactive</string>
-    <string name="accessibility_vpn_connecting">Le VPN se connecte</string>
+    <string name="accessibility_vpn_active">La protection VPN est activée</string>
+    <string name="accessibility_vpn_inactive">La protection VPN est désactivée</string>
+    <string name="accessibility_vpn_connecting">Le VPN est en cours de connexion</string>
     <string name="accessibility_stat_card">%1$s : %2$s</string>
-    <string name="accessibility_block_rate_value">Taux de blocage %1$s pourcent</string>
+    <string name="accessibility_block_rate_value">Taux de blocage : %1$s %</string>
     <string name="accessibility_navigate_back">Retour</string>
-
     <!-- Firewall -->
     <string name="firewall_title">Pare-feu</string>
-    <string name="firewall_subtitle">Contrôle Internet par application</string>
+    <string name="firewall_subtitle">Contrôle de l\'accès à Internet par application</string>
     <string name="firewall_count">%d applications bloquées</string>
     <string name="firewall_search">Rechercher des applications…</string>
     <string name="firewall_enable">Activer le pare-feu</string>
-    <string name="firewall_enable_desc">Bloquer l\'accès Internet pour les applications sélectionnées via DNS</string>
+    <string name="firewall_enable_desc">Bloquer l\'accès à Internet pour certaines applications via le DNS</string>
     <string name="firewall_block_wifi">Bloquer le Wi-Fi</string>
     <string name="firewall_block_mobile">Bloquer les données mobiles</string>
-    <string name="firewall_schedule">Planification</string>
-    <string name="firewall_schedule_desc">Bloquer uniquement pendant des heures spécifiques</string>
+    <string name="firewall_schedule">Calendrier</string>
+    <string name="firewall_schedule_desc">Bloquer uniquement à certaines heures</string>
     <string name="firewall_schedule_from">De</string>
     <string name="firewall_schedule_to">À</string>
     <string name="firewall_app_blocked">Internet bloqué</string>
     <string name="firewall_app_not_blocked">Internet autorisé</string>
     <string name="firewall_rule_saved">Règle de pare-feu enregistrée</string>
     <string name="firewall_rule_removed">Règle de pare-feu supprimée</string>
-    <string name="firewall_configure">Configurer la règle</string>
-    <string name="firewall_channel_name">Alertes pare-feu</string>
+    <string name="firewall_configure">Configurer une règle</string>
+    <string name="firewall_channel_name">Alertes du pare-feu</string>
     <string name="firewall_channel_description">Notifications lorsque des applications sont bloquées par le pare-feu</string>
     <string name="firewall_notification_title">Application bloquée par le pare-feu</string>
-    <string name="firewall_notification_text">%s a été bloqué de l\'accès à Internet</string>
+    <string name="firewall_notification_text">%s n\'a pas pu accéder à Internet</string>
     <string name="firewall_network_wifi" translatable="false">Wi-Fi</string>
     <string name="firewall_network_mobile">Mobile</string>
     <string name="firewall_network_all">Tout</string>
     <string name="firewall_status_schedule"> · %1$02d:%2$02d–%3$02d:%4$02d</string>
     <string name="firewall_schedule_hour_plus">Heure +</string>
-    <string name="firewall_schedule_minute_plus">Min +</string>
+    <string name="firewall_schedule_minute_plus">Minute +</string>
     <string name="block_reason_firewall">Pare-feu</string>
     <string name="block_reason_upstream_dns">DNS en amont</string>
     <string name="settings_firewall">Pare-feu</string>
-    <string name="settings_firewall_desc">Bloquer l\'accès Internet par application</string>
+    <string name="settings_firewall_desc">Bloquer l\'accès à Internet par application</string>
 
     <!-- Share & Rate -->
-    <string name="settings_sponsor">Nous soutenir</string>
-    <string name="settings_sponsor_desc">Soutenir le développement de BlockAds sur GitHub</string>
+    <string name="settings_sponsor">Soutenez-nous</string>
+    <string name="settings_sponsor_desc">Soutenez le développement de BlockAds sur GitHub</string>
     <string name="settings_community">Communauté</string>
     <string name="settings_reddit">Reddit</string>
-    <string name="settings_reddit_desc">Rejoindre notre communauté sur Reddit</string>
+    <string name="settings_reddit_desc">Rejoignez notre communauté sur Reddit</string>
     <string name="settings_telegram">Telegram</string>
-    <string name="settings_telegram_desc">Rejoindre notre chat sur Telegram</string>
-    <string name="filter_setup_active_count">%1$d actif(s)</string>
+    <string name="settings_telegram_desc">Rejoignez notre discussion sur Telegram</string>
+    <string name="filter_setup_active_count">%1$d actifs</string>
     <string name="copied_url">URL copiée</string>
-    <string name="filter_error_invalid_url">Veuillez entrer une URL valide (http:// ou https://)</string>
+    <string name="filter_error_invalid_url">Veuillez saisir une URL valide (http:// ou https://)</string>
     <string name="filter_error_duplicate_url">Cette liste de filtres existe déjà</string>
-    <string name="filter_error_invalid_content">L\'URL ne contient pas une liste de filtres valide</string>
+    <string name="filter_error_invalid_content">L\'URL ne contient pas de liste de filtres valide</string>
     <string name="filter_chip_all">Tout</string>
-    <string name="filter_chip_enabled">Activés</string>
-    <string name="filter_chip_disabled">Désactivés</string>
+    <string name="filter_chip_enabled">Activé</string>
+    <string name="filter_chip_disabled">Désactivé</string>
 
-    <string name="dns_custom_primary_label">Principal</string>
-    <string name="dns_custom_fallback_label">Secours</string>
-    <string name="dns_custom_extra_label">Supplémentaire</string>
+    <string name="dns_custom_primary_label">Primaire</string>
+    <string name="dns_custom_fallback_label">Solution de secours</string>
+    <string name="dns_custom_extra_label">Extra</string>
     <string name="dns_custom_add_server">Ajouter un serveur</string>
-    <string name="dns_custom_max_reached">Nombre maximum de serveurs atteint</string>
+    <string name="dns_custom_max_reached">Le nombre maximal de serveurs a été atteint</string>
     <string name="dns_custom_remove_server">Supprimer le serveur</string>
     <string name="dns_custom_duplicate">Le serveur existe déjà</string>
     <string name="dns_custom_empty">L\'adresse du serveur ne peut pas être vide</string>
 
     <!-- WireGuard Import -->
-    <string name="wireguard_import_title">Import WireGuard</string>
-    <string name="wireguard_import_button">Importer .conf</string>
-    <string name="wireguard_empty_title">Aucune configuration chargée</string>
-    <string name="wireguard_empty_desc">Appuyez sur le bouton ci-dessous pour importer un fichier WireGuard .conf</string>
+    <string name="wireguard_import_title">Importation WireGuard</string>
+    <string name="wireguard_import_button">Importer le fichier .conf</string>
+    <string name="wireguard_empty_title">Aucune configuration n\'a été chargée</string>
+    <string name="wireguard_empty_desc">Appuyez sur le bouton ci-dessous pour importer un fichier .conf WireGuard</string>
     <string name="wireguard_section_interface">Interface</string>
     <string name="wireguard_section_peer">Pair %d</string>
     <string name="wireguard_label_address">Adresse</string>
@@ -594,61 +606,61 @@
     <string name="wireguard_label_dns">DNS</string>
     <string name="wireguard_label_listen_port">Port d\'écoute</string>
     <string name="wireguard_label_public_key">Clé publique</string>
-    <string name="wireguard_label_endpoint">Point de terminaison</string>
-    <string name="wireguard_label_allowed_ips">IPs autorisées</string>
-    <string name="wireguard_label_preshared_key">Clé prépartagée</string>
-    <string name="wireguard_label_keepalive">Keepalive persistant</string>
+    <string name="wireguard_label_endpoint">Point d\'extrémité</string>
+    <string name="wireguard_label_allowed_ips">Adresses IP autorisées</string>
+    <string name="wireguard_label_preshared_key">Clé pré-partagée</string>
+    <string name="wireguard_label_keepalive">Maintien en vie persistant</string>
     <string name="wireguard_keepalive_value">%d secondes</string>
-    <string name="wireguard_toggle_key_visibility">Afficher/masquer la clé</string>
+    <string name="wireguard_toggle_key_visibility">Afficher/masquer les touches</string>
     <string name="wireguard_copy_key">Copier la clé</string>
-    <string name="wireguard_connect">Connecter le tunnel</string>
+    <string name="wireguard_connect">Se connecter au tunnel</string>
     <string name="wireguard_disconnect">Déconnecter le tunnel</string>
-    <string name="wireguard_save_activate">Enregistrer et activer</string>
+    <string name="wireguard_save_activate">Enregistrer &amp; Activer</string>
     <string name="wireguard_clear">Effacer WireGuard</string>
-    <string name="wireguard_active_label">WireGuard actif — Redémarrez le VPN pour appliquer</string>
+    <string name="wireguard_active_label">WireGuard est activé — Redémarrez le VPN pour que les modifications prennent effet</string>
 
     <!-- HTTPS Filtering -->
     <string name="https_filtering_title">Filtrage HTTPS</string>
     <string name="https_filtering_toggle_label">Filtre cosmétique HTTPS</string>
     <string name="https_filtering_status_active">Actif — Masquage des publicités</string>
     <string name="https_filtering_status_inactive">Inactif</string>
-    <string name="https_filtering_explain_title">Comment ça fonctionne ?</string>
-    <string name="https_filtering_explain_body">Le filtrage HTTPS intercepte le trafic web de vos navigateurs sélectionnés et applique des règles CSS cosmétiques pour masquer les bannières publicitaires, superpositions et autres éléments visuels sur les pages web.\n\nPour cela, un certificat CA racine local doit être installé sur votre appareil. Ce certificat est généré localement et ne quitte jamais votre téléphone. Les applications bancaires, Google et autres services sensibles ne sont jamais interceptés.</string>
-    <string name="https_filtering_ca_title">Guide de configuration</string>
+    <string name="https_filtering_explain_title">Comment ça marche ?</string>
+    <string name="https_filtering_explain_body">Le filtrage HTTPS intercepte le trafic Web provenant des navigateurs que vous avez sélectionnés et applique des règles CSS esthétiques afin de masquer les bannières publicitaires, les superpositions et autres éléments publicitaires visuels sur les pages Web.\n\nPour cela, un certificat d\'autorité de certification racine (Root CA) local doit être installé sur votre appareil. Ce certificat est généré localement et ne quitte jamais votre téléphone. Les applications bancaires, Google et les autres services sensibles ne sont jamais interceptés.</string>
+    <string name="https_filtering_ca_title">Guide d\'installation</string>
     <string name="https_filtering_ca_desc">Suivez ces étapes pour configurer le filtrage cosmétique HTTPS :</string>
-    <string name="https_filtering_export_ca">Enregistrer dans Téléchargements</string>
-    <string name="https_filtering_cert_saved">Certificat enregistré dans Téléchargements !</string>
-    <string name="https_filtering_install_steps">1. Allez dans Paramètres → Sécurité → Chiffrement et identifiants\n2. Appuyez sur « Installer un certificat » → « Certificat CA »\n3. Sélectionnez « BlockAds-RootCA.crt » dans Téléchargements\n4. Confirmez l\'installation</string>
+    <string name="https_filtering_export_ca">Enregistrer dans le dossier « Téléchargements »</string>
+    <string name="https_filtering_cert_saved">Le certificat a été enregistré dans le dossier « Téléchargements » !</string>
+    <string name="https_filtering_install_steps">1. Allez dans Paramètres → Sécurité → Chiffrement et identifiants\n2. Appuyez sur « Installer un certificat » → « Certificat CA »\n3. Sélectionnez « BlockAds-RootCA.crt » dans le dossier Téléchargements\n4. Confirmez l\'installation</string>
     <string name="https_filtering_open_settings">Ouvrir les paramètres de sécurité</string>
     <string name="https_filtering_browser_section">Sélection du navigateur</string>
-    <string name="https_filtering_browser_desc">Sélectionnez les navigateurs pour appliquer le filtrage cosmétique des publicités. Seules les applications sélectionnées sont filtrées.</string>
-    <string name="https_filtering_settings_desc">Masquer les publicités visuellement dans les navigateurs</string>
+    <string name="https_filtering_browser_desc">Sélectionnez les navigateurs auxquels appliquer le filtrage cosmétique des publicités. Seules les applications sélectionnées sont filtrées.</string>
+    <string name="https_filtering_settings_desc">Masquer visuellement les publicités dans les navigateurs</string>
     <string name="https_filtering_step1_title">Étape 1 : Enregistrer le certificat</string>
-    <string name="https_filtering_step1_desc">Télécharger le certificat CA racine sur votre appareil</string>
+    <string name="https_filtering_step1_desc">Téléchargez le certificat de l\'autorité de certification racine sur votre appareil</string>
     <string name="https_filtering_step2_title">Étape 2 : Installer le certificat</string>
-    <string name="https_filtering_step2_desc">Installer le certificat sur votre appareil :</string>
+    <string name="https_filtering_step2_desc">Installez le certificat sur votre appareil :</string>
     <string name="https_filtering_step3_title">Étape 3 : Vérifier l\'installation</string>
-    <string name="https_filtering_step3_desc">Vérifier si le certificat est correctement installé</string>
+    <string name="https_filtering_step3_desc">Vérifiez si le certificat est correctement installé</string>
     <string name="https_filtering_verify_cert">Vérifier le certificat</string>
     <string name="https_filtering_cert_installed">Certificat installé ✓</string>
     <string name="https_filtering_cert_not_installed">Certificat non installé</string>
-    <string name="https_filtering_cert_checking">Vérification…</string>
-    <string name="https_filtering_cert_vpn_required">Appuyez sur « Vérifier le certificat » pour contrôler</string>
+    <string name="https_filtering_cert_checking">Vérification en cours…</string>
+    <string name="https_filtering_cert_vpn_required">Appuyez sur « Vérifier le certificat » pour vérifier</string>
     <string name="edit_custom_filter">Modifier le filtre personnalisé</string>
     <string name="filter_name">Nom du filtre</string>
-    <string name="filter_url_domain">URL/Domaine du filtre</string>
-    <string name="add_blocklist_domains_title">Ajouter des domaines en liste noire</string>
-    <string name="add_whitelisted_domain_title">Ajouter un domaine en liste blanche</string>
+    <string name="filter_url_domain">Filtrer l\'URL/le domaine</string>
+    <string name="add_blocklist_domains_title">Ajouter des domaines à la liste noire</string>
+    <string name="add_whitelisted_domain_title">Ajouter un domaine à la liste blanche</string>
     <string name="disable_all_user_apps">Désactiver toutes les applications utilisateur</string>
     <string name="enable_all_user_apps">Activer toutes les applications utilisateur</string>
     <string name="disable_all_system_apps">Désactiver toutes les applications système</string>
     <string name="enable_all_system_apps">Activer toutes les applications système</string>
-    <string name="vpn_network_switch_waiting">En attente de stabilisation du réseau… %1$ds</string>
-    <string name="settings_network_switch_delay">Délai de changement de réseau</string>
-    <string name="settings_network_switch_delay_desc">Mettre en pause la reconnexion VPN après les changements de réseau (utile pour les appels Wi-Fi)</string>
+    <string name="vpn_network_switch_waiting">En attente de la stabilisation du réseau… %1$ds</string>
+    <string name="settings_network_switch_delay">Retard au niveau du commutateur réseau</string>
+    <string name="settings_network_switch_delay_desc">Mettre en pause la reconnexion au VPN après un changement de réseau (pratique pour les appels via Wi-Fi)</string>
     <string name="settings_network_switch_delay_value">Délai : %1$d secondes</string>
-    <string name="settings_root_proxy">Mode Proxy Root</string>
-    <string name="settings_root_proxy_desc">Rediriger le DNS via iptables au lieu du VPN (nécessite le Root)</string>
-    <string name="root_not_available">Accès Root non disponible. Veuillez accorder la permission dans votre gestionnaire root (ex. Magisk/KernelSU).</string>
-    <string name="root_proxy_notification_text">Mode Proxy Root actif — trafic DNS redirigé via iptables</string>
+    <string name="settings_root_proxy">Mode proxy root</string>
+    <string name="settings_root_proxy_desc">Rediriger le DNS via iptables au lieu d\'un VPN (nécessite des droits d\'administrateur)</string>
+    <string name="root_not_available">L\'accès root n\'est pas disponible. Veuillez accorder l\'autorisation dans votre gestionnaire root (par exemple, Magisk/KernelSU).</string>
+    <string name="root_proxy_notification_text">Mode proxy root activé — Trafic DNS redirigé via iptables</string>
 </resources>
