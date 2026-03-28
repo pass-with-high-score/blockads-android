@@ -585,4 +585,5 @@
     <string name="settings_export_logs_subtitle">แชร์บันทึกการแก้ไขจุดบกพร่องแบบออฟไลน์โดยตรงผ่านอีเมล, Telegram ฯลฯ</string>
     <string name="settings_export_logs_chooser_title">แชร์บันทึก</string>
     <string name="settings_export_logs_not_found">ไม่พบบันทึกที่ต้องการส่งออก</string>
+    <string name="custom_color_title">สีที่กำหนดเอง</string>
 </resources>

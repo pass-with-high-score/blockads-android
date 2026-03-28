@@ -681,4 +681,5 @@
     <string name="settings_export_logs_subtitle">Share offline debug logs directly via Email, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Share Logs</string>
     <string name="settings_export_logs_not_found">No logs found to export</string>
+    <string name="custom_color_title">Custom Color</string>
 </resources>

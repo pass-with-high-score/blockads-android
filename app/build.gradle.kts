@@ -7,8 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-
-    id("io.sentry.android.gradle") version "6.3.0"
+    alias(libs.plugins.sentry)
 }
 
 android {
@@ -147,8 +146,8 @@ dependencies {
     implementation(libs.compose.charts)
 
     // libsu — root shell access for iptables mode
-    implementation("com.github.topjohnwu.libsu:core:6.0.0")
-    implementation("com.github.topjohnwu.libsu:service:6.0.0")
+    implementation(libs.core)
+    implementation(libs.service)
 
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
@@ -166,8 +165,5 @@ dependencies {
 sentry {
     org.set("nqm")
     projectName.set("android")
-
-    // this will upload your source code to Sentry to show it as part of the stack traces
-    // disable if you don't want to expose your sources
     includeSourceContext.set(true)
 }

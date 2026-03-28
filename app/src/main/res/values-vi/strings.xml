@@ -633,4 +633,5 @@
     <string name="settings_export_logs_subtitle">Chia sẻ trực tiếp tệp nhật ký ngoại tuyến qua Email, Telegram, v.v.</string>
     <string name="settings_export_logs_chooser_title">Chia sẻ nhật ký</string>
     <string name="settings_export_logs_not_found">Không tìm thấy nhật ký để xuất</string>
+    <string name="custom_color_title">Màu tùy chỉnh</string>
 </resources>

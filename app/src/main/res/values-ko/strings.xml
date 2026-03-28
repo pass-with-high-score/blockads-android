@@ -583,4 +583,5 @@
     <string name="settings_export_logs_subtitle">오프라인 디버그 로그를 이메일, Telegram 등을 통해 직접 공유하세요.</string>
     <string name="settings_export_logs_chooser_title">로그 공유</string>
     <string name="settings_export_logs_not_found">내보낼 로그를 찾을 수 없습니다</string>
+    <string name="custom_color_title">사용자 지정 색상</string>
 </resources>

@@ -584,4 +584,5 @@
     <string name="settings_export_logs_subtitle">Comparte registros de depuración sin conexión directamente por correo electrónico, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Compartir registros</string>
     <string name="settings_export_logs_not_found">No se encontraron registros para exportar</string>
+    <string name="custom_color_title">Color personalizado</string>
 </resources>

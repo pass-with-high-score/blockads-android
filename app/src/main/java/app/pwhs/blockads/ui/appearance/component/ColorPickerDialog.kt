@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -42,10 +40,9 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
+import app.pwhs.blockads.R
 
 @Composable
 fun ColorPickerDialog(
@@ -69,8 +66,9 @@ fun ColorPickerDialog(
     }
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
-        title = { Text("Custom Color") },
+        title = { Text(stringResource(R.string.custom_color_title)) },
         text = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,12 +134,12 @@ fun ColorPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = { onColorSelected(currentColor) }) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -155,8 +153,6 @@ private fun SaturationBrightnessPanel(
     onSaturationBrightnessChanged: (Float, Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val density = LocalDensity.current
-
     Box(modifier = modifier) {
         Canvas(
             modifier = Modifier

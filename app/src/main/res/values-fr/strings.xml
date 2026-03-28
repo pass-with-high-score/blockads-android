@@ -639,4 +639,5 @@
     <string name="settings_export_logs_subtitle">Partagez les journaux de débogage hors ligne directement via Email, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Partager les journaux</string>
     <string name="settings_export_logs_not_found">Aucun journal à exporter trouvé</string>
+    <string name="custom_color_title">Couleur personnalisée</string>
 </resources>

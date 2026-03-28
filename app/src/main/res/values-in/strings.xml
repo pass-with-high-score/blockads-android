@@ -605,4 +605,5 @@
     <string name="settings_export_logs_subtitle">Bagikan log debug offline langsung melalui Email, Telegram, dll.</string>
     <string name="settings_export_logs_chooser_title">Bagikan Log</string>
     <string name="settings_export_logs_not_found">Tidak ada log yang ditemukan untuk diekspor</string>
+    <string name="custom_color_title">Warna Kustom</string>
 </resources>

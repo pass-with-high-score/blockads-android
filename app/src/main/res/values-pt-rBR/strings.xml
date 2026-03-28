@@ -605,4 +605,5 @@
     <string name="settings_export_logs_subtitle">Compartilhe logs de depuração offline diretamente via Email, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Compartilhar Logs</string>
     <string name="settings_export_logs_not_found">Nenhum log encontrado para exportar</string>
+    <string name="custom_color_title">Cor personalizada</string>
 </resources>

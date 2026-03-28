@@ -614,4 +614,5 @@
     <string name="settings_export_logs_subtitle">Offline-Debug-Protokolle direkt per E-Mail, Telegram usw. teilen.</string>
     <string name="settings_export_logs_chooser_title">Protokolle teilen</string>
     <string name="settings_export_logs_not_found">Keine Protokolle zum Exportieren gefunden</string>
+    <string name="custom_color_title">Benutzerdefinierte Farbe</string>
 </resources>

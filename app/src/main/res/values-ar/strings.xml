@@ -598,4 +598,5 @@
     <string name="settings_export_logs_subtitle">شارك سجلات التصحيح في وضع عدم الاتصال مباشرة عبر البريد الإلكتروني، Telegram، إلخ.</string>
     <string name="settings_export_logs_chooser_title">مشاركة السجلات</string>
     <string name="settings_export_logs_not_found">لم يتم العثور على سجلات للتصدير</string>
+    <string name="custom_color_title">لون مخصص</string>
 </resources>

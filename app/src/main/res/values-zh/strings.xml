@@ -583,4 +583,5 @@
     <string name="settings_export_logs_subtitle">直接通过电子邮件、Telegram 等分享离线调试日志。</string>
     <string name="settings_export_logs_chooser_title">分享日志</string>
     <string name="settings_export_logs_not_found">未找到可导出的日志</string>
+    <string name="custom_color_title">自定义颜色</string>
 </resources>

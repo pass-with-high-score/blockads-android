@@ -608,4 +608,5 @@
     <string name="settings_export_logs_subtitle">Sdílejte offline protokoly ladění přímo přes e-mail, Telegram atd.</string>
     <string name="settings_export_logs_chooser_title">Sdílet protokoly</string>
     <string name="settings_export_logs_not_found">Nebyly nalezeny žádné protokoly k exportu</string>
+    <string name="custom_color_title">Vlastní barva</string>
 </resources>

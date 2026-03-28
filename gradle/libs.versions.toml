@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.2"
+core = "6.0.0"
 kotlin = "2.3.10"
 ksp = "2.3.6"
 coreKtx = "1.18.0"
@@ -8,23 +9,25 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-composeBom = "2026.03.00"
+composeBom = "2026.03.01"
 room = "2.8.4"
 datastorePreferences = "1.2.1"
-ktor = "3.4.1"
+ktor = "3.4.2"
 materialIconsExtended = "1.7.8"
 koin = "4.2.0"
 accompanist = "0.37.3"
 kotlinxSerialization = "1.10.0"
 coroutinesTest = "1.10.2"
 timber = "5.0.1"
-workManager = "2.11.1"
+workManager = "2.11.2"
 composeCharts = "0.2.5"
 lifecycleRuntimeCompose = "2.10.0"
 nav3Core = "1.0.1"
+sentry = "6.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+core = { module = "com.github.topjohnwu.libsu:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -56,6 +59,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 compose-charts = { group = "io.github.ehsannarmani", name = "compose-charts", version.ref = "composeCharts" }
+service = { module = "com.github.topjohnwu.libsu:service", version.ref = "core" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
@@ -68,3 +72,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+sentry = { id = "io.sentry.android.gradle", version.ref = "sentry" }

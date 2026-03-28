@@ -653,4 +653,5 @@ Desteklenen formatlar:
     <string name="settings_export_logs_subtitle">Çevrimdışı hata ayıklama günlüklerini doğrudan E-posta, Telegram vb. yoluyla paylaşın.</string>
     <string name="settings_export_logs_chooser_title">Günlükleri Paylaş</string>
     <string name="settings_export_logs_not_found">Dışa aktarılacak günlük bulunamadı</string>
+    <string name="custom_color_title">Özel Renk</string>
 </resources>
