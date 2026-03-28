@@ -32,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
-import app.pwhs.blockads.ui.theme.TextSecondary
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.VpnKey
 
 @Composable
 fun ProtectionSection(
@@ -53,6 +53,8 @@ fun ProtectionSection(
     onSetYoutubeRestrictedMode: (Boolean) -> Unit,
     onShowDnsResponseTypeDialog: () -> Unit,
     onNavigateToDNSProvider: () -> Unit,
+    onNavigateToWireGuardImport: () -> Unit,
+    onNavigateToHttpsFiltering: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -73,7 +75,10 @@ fun ProtectionSection(
                     isChecked = autoReconnect,
                     onCheckedChange = onSetAutoReconnect
                 )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
                 SettingsToggleItem(
                     icon = Icons.Default.Security,
                     title = stringResource(R.string.settings_root_proxy),
@@ -81,14 +86,11 @@ fun ProtectionSection(
                     isChecked = routingMode == AppPreferences.ROUTING_MODE_ROOT,
                     onCheckedChange = onSetRoutingMode
                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Network Switch Delay
-        SettingsCard {
-            Column {
+                // Network Switch Delay
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
                 SettingsToggleItem(
                     icon = Icons.Default.PhoneAndroid,
                     title = stringResource(R.string.settings_network_switch_delay),
@@ -105,7 +107,10 @@ fun ProtectionSection(
                         modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 12.dp)
                     ) {
                         Text(
-                            stringResource(R.string.settings_network_switch_delay_value, networkSwitchDelaySec),
+                            stringResource(
+                                R.string.settings_network_switch_delay_value,
+                                networkSwitchDelaySec
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold
@@ -125,59 +130,79 @@ fun ProtectionSection(
                         }
                     }
                 }
+                // Safe Search
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingsToggleItem(
+                    icon = Icons.Default.Search,
+                    title = stringResource(R.string.settings_safe_search),
+                    subtitle = stringResource(R.string.settings_safe_search_desc),
+                    isChecked = safeSearchEnabled,
+                    onCheckedChange = onSetSafeSearchEnabled
+                )
+                // YouTube Restricted
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingsToggleItem(
+                    icon = Icons.Default.OndemandVideo,
+                    title = stringResource(R.string.settings_youtube_restricted),
+                    subtitle = stringResource(R.string.settings_youtube_restricted_desc),
+                    isChecked = youtubeRestrictedMode,
+                    onCheckedChange = onSetYoutubeRestrictedMode
+                )
+                // DNS Response Type
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingItem(
+                    icon = Icons.Default.Block,
+                    title = stringResource(R.string.settings_dns_response_type),
+                    desc = when (dnsResponseType) {
+                        AppPreferences.DNS_RESPONSE_NXDOMAIN -> stringResource(R.string.dns_response_nxdomain)
+                        AppPreferences.DNS_RESPONSE_REFUSED -> stringResource(R.string.dns_response_refused)
+                        else -> stringResource(R.string.dns_response_custom_ip)
+                    },
+                    onClick = onShowDnsResponseTypeDialog
+                )
+                // DNS Provider
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingItem(
+                    icon = Icons.Default.Dns,
+                    title = stringResource(R.string.dns_provider_title),
+                    desc = upstreamDNS,
+                    onClick = onNavigateToDNSProvider
+                )
+                // WireGuard Import
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingItem(
+                    icon = Icons.Default.VpnKey,
+                    title = stringResource(R.string.wireguard_import_title) + " (BETA)",
+                    desc = stringResource(R.string.wireguard_empty_desc),
+                    onClick = onNavigateToWireGuardImport
+                )
+                // HTTPS Filtering
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                )
+                SettingItem(
+                    icon = Icons.Default.Shield,
+                    title = stringResource(R.string.https_filtering_title) + " (BETA)",
+                    desc = stringResource(R.string.https_filtering_settings_desc),
+                    onClick = onNavigateToHttpsFiltering
+                )
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Safe Search
-        SettingsCard {
-            SettingsToggleItem(
-                icon = Icons.Default.Search,
-                title = stringResource(R.string.settings_safe_search),
-                subtitle = stringResource(R.string.settings_safe_search_desc),
-                isChecked = safeSearchEnabled,
-                onCheckedChange = onSetSafeSearchEnabled
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // YouTube Restricted
-        SettingsCard {
-            SettingsToggleItem(
-                icon = Icons.Default.OndemandVideo,
-                title = stringResource(R.string.settings_youtube_restricted),
-                subtitle = stringResource(R.string.settings_youtube_restricted_desc),
-                isChecked = youtubeRestrictedMode,
-                onCheckedChange = onSetYoutubeRestrictedMode
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // DNS Response Type
-        SettingsCard(onClick = onShowDnsResponseTypeDialog) {
-            SettingItem(
-                icon = Icons.Default.Block,
-                title = stringResource(R.string.settings_dns_response_type),
-                desc = when (dnsResponseType) {
-                    AppPreferences.DNS_RESPONSE_NXDOMAIN -> stringResource(R.string.dns_response_nxdomain)
-                    AppPreferences.DNS_RESPONSE_REFUSED -> stringResource(R.string.dns_response_refused)
-                    else -> stringResource(R.string.dns_response_custom_ip)
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // DNS Provider
-        SettingsCard(onClick = onNavigateToDNSProvider) {
-            SettingItem(
-                icon = Icons.Default.Dns,
-                title = stringResource(R.string.dns_provider_title),
-                desc = upstreamDNS
-            )
         }
     }
 }

@@ -33,8 +33,6 @@ fun DataSection(
     onExport: () -> Unit,
     onImport: () -> Unit,
     onClearLogs: () -> Unit,
-    onNavigateToWireGuardImport: () -> Unit,
-    onNavigateToHttpsFiltering: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -90,28 +88,6 @@ fun DataSection(
             Icon(Icons.Default.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.settings_clear_logs))
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // WireGuard Import
-        SettingsCard(onClick = onNavigateToWireGuardImport) {
-            SettingItem(
-                icon = Icons.Default.VpnKey,
-                title = stringResource(R.string.wireguard_import_title) + " (BETA)",
-                desc = stringResource(R.string.wireguard_empty_desc)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // HTTPS Filtering
-        SettingsCard(onClick = onNavigateToHttpsFiltering) {
-            SettingItem(
-                icon = Icons.Default.Shield,
-                title = stringResource(R.string.https_filtering_title) + " (BETA)",
-                desc = stringResource(R.string.https_filtering_settings_desc)
-            )
         }
     }
 }

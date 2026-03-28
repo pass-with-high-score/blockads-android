@@ -30,32 +30,30 @@ fun CommunitySection(
             description = stringResource(R.string.settings_category_info_desc)
         )
         SettingsCard {
-            Column {
-                SettingItem(
-                    iconPainter = painterResource(R.drawable.ic_reddit),
-                    iconTint = Color(0xFFFF4500),
-                    title = stringResource(R.string.settings_reddit),
-                    desc = stringResource(R.string.settings_reddit_desc),
-                    onClick = {
-                        val uri = "https://www.reddit.com/r/BlockAds/".toUri()
-                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                    }
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                )
-                SettingItem(
-                    iconPainter = painterResource(R.drawable.ic_telegram),
-                    iconTint = Color(0xFF0088CC),
-                    title = stringResource(R.string.settings_telegram),
-                    desc = stringResource(R.string.settings_telegram_desc),
-                    onClick = {
-                        val uri = "https://t.me/blockads_android".toUri()
-                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                    }
-                )
-            }
+            SettingItem(
+                iconPainter = painterResource(R.drawable.ic_reddit),
+                iconTint = Color(0xFFFF4500),
+                title = stringResource(R.string.settings_reddit),
+                desc = stringResource(R.string.settings_reddit_desc),
+                onClick = {
+                    val uri = "https://www.reddit.com/r/BlockAds/".toUri()
+                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                }
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+            )
+            SettingItem(
+                iconPainter = painterResource(R.drawable.ic_telegram),
+                iconTint = Color(0xFF0088CC),
+                title = stringResource(R.string.settings_telegram),
+                desc = stringResource(R.string.settings_telegram_desc),
+                onClick = {
+                    val uri = "https://t.me/blockads_android".toUri()
+                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                }
+            )
         }
     }
 }

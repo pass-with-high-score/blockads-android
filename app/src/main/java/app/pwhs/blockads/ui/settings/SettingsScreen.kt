@@ -128,7 +128,9 @@ fun SettingsScreen(
                 onSetSafeSearchEnabled = { viewModel.setSafeSearchEnabled(it) },
                 onSetYoutubeRestrictedMode = { viewModel.setYoutubeRestrictedMode(it) },
                 onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },
-                onNavigateToDNSProvider = onNavigateToDNSProvider
+                onNavigateToDNSProvider = onNavigateToDNSProvider,
+                onNavigateToWireGuardImport = onNavigateToWireGuardImport,
+                onNavigateToHttpsFiltering = onNavigateToHttpsFiltering
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -183,8 +185,6 @@ fun SettingsScreen(
                 onExport = { exportLauncher.launch("blockads_settings.json") },
                 onImport = { importLauncher.launch(arrayOf("application/json")) },
                 onClearLogs = { showClearConfirm = true },
-                onNavigateToWireGuardImport = onNavigateToWireGuardImport,
-                onNavigateToHttpsFiltering = onNavigateToHttpsFiltering
             )
 
             Spacer(modifier = Modifier.height(24.dp))
