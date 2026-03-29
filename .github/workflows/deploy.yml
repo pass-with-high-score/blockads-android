@@ -71,7 +71,7 @@ jobs:
 
       - name: Build Go Tunnel
         run: |
-          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240329174117-7dcb8f23e00b
           gomobile init
           chmod +x scripts/build_tunnel.sh
           ./scripts/build_tunnel.sh
