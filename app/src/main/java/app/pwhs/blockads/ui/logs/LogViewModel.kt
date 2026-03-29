@@ -1,6 +1,8 @@
 package app.pwhs.blockads.ui.logs
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.core.content.FileProvider.getUriForFile
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
@@ -14,6 +16,7 @@ import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.utils.CustomRuleParser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +30,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.PrintWriter
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
@@ -34,7 +40,8 @@ class LogViewModel(
     private val whitelistDomainDao: WhitelistDomainDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val filterListRepository: FilterListRepository,
-) : ViewModel() {
+    private val application: Application,
+) : AndroidViewModel(application) {
 
     private val _showBlockedOnly = MutableStateFlow(false)
     val showBlockedOnly: StateFlow<Boolean> = _showBlockedOnly.asStateFlow()
@@ -143,7 +150,7 @@ class LogViewModel(
             val cleanDomain = domain.trim().lowercase()
             val ruleText = CustomRuleParser.formatBlockRule(cleanDomain)
             val rule = CustomRuleParser.parseRule(ruleText)
-            
+
             if (rule != null) {
                 if (customDnsRuleDao.exists(rule.rule) == 0) {
                     customDnsRuleDao.insert(rule)
@@ -166,10 +173,10 @@ class LogViewModel(
     fun addWildcardWhitelist(domain: String) {
         viewModelScope.launch {
             val cleanDomain = domain.trim().lowercase()
-            
+
             val domainRuleText = "@@||$cleanDomain^"
             val wildcardRuleText = "@@||*.$cleanDomain^"
-            
+
             var addedAny = false
 
             if (customDnsRuleDao.exists(domainRuleText) == 0) {
@@ -179,7 +186,7 @@ class LogViewModel(
                     addedAny = true
                 }
             }
-            
+
             if (customDnsRuleDao.exists(wildcardRuleText) == 0) {
                 val wildcardRule = CustomRuleParser.parseRule(wildcardRuleText)
                 if (wildcardRule != null) {
@@ -187,12 +194,48 @@ class LogViewModel(
                     addedAny = true
                 }
             }
-            
+
             if (addedAny) {
                 filterListRepository.loadCustomRules()
                 _events.toast(R.string.log_wildcard_whitelisted, listOf(cleanDomain))
             } else {
                 _events.toast(R.string.log_wildcard_whitelisted, listOf(cleanDomain))
+            }
+        }
+    }
+
+    fun exportLogs() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            try {
+                val currentLogs = logs.value
+                if (currentLogs.isEmpty()) {
+                    _events.tryEmit(UiEvent.ToastRes(R.string.logs_empty))
+                    return@launch
+                }
+
+                val logsDir = java.io.File(context.cacheDir, "logs")
+                if (!logsDir.exists()) logsDir.mkdirs()
+
+                val fileName = "blockads_logs_${System.currentTimeMillis()}.csv"
+                val file = java.io.File(logsDir, fileName)
+
+                PrintWriter(file).use { writer ->
+                    writer.println("Time,Domain,App,Blocked")
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                    currentLogs.forEach { log ->
+                        val timeStr = dateFormat.format(java.util.Date(log.timestamp))
+                        writer.println("$timeStr,${log.domain},${log.appName},${log.isBlocked}")
+                    }
+                }
+
+                val authority = "${context.packageName}.fileprovider"
+                val uri = getUriForFile(context, authority, file)
+
+                _events.tryEmit(UiEvent.ShareFile(uri, "text/csv"))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _events.tryEmit(UiEvent.ToastText("Failed to export logs: ${e.message}"))
             }
         }
     }

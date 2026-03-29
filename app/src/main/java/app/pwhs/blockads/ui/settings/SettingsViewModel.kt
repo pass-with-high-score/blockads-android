@@ -31,6 +31,7 @@ import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import app.pwhs.blockads.service.IptablesManager
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.utils.CrashReportingManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -138,7 +139,7 @@ class SettingsViewModel(
     fun setCrashReportingEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setCrashReportingEnabled(enabled)
-            app.pwhs.blockads.utils.CrashReportingManager.toggleSentry(getApplication(), enabled)
+            CrashReportingManager.toggleSentry(getApplication(), enabled)
         }
     }
 

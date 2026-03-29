@@ -32,6 +32,17 @@ fun UiEventEffect(
 
                     Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
+                
+                is UiEvent.ShareFile -> {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = event.mimeType
+                        putExtra(android.content.Intent.EXTRA_STREAM, event.uri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    val chooser = android.content.Intent.createChooser(intent, "Share Logs")
+                    chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(chooser)
+                }
             }
         }
     }

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -124,6 +125,13 @@ fun LogsScreen(
                         Icon(
                             if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
                             contentDescription = "Search",
+                            tint = TextSecondary
+                        )
+                    }
+                    IconButton(onClick = { viewModel.exportLogs() }) {
+                        Icon(
+                            Icons.Default.UploadFile,
+                            contentDescription = "Export logs",
                             tint = TextSecondary
                         )
                     }

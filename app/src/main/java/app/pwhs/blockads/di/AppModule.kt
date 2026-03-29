@@ -85,34 +85,88 @@ val appModule = module {
 
     // Repository
     single { FilterDownloadManager(androidContext(), get()) }
-    single { FilterListRepository(androidContext(), get(), get(), get(), get(), get()) }
+    single {
+        FilterListRepository(
+            context = androidContext(),
+            filterListDao = get(),
+            whitelistDomainDao = get(),
+            customDnsRuleDao = get(),
+            client = get(),
+            downloadManager = get()
+        )
+    }
     single { CustomFilterApi(get()) }
-    single { CustomFilterManager(androidContext(), get(), get(), get()) }
+    single {
+        CustomFilterManager(
+            context = androidContext(),
+            client = get(),
+            filterListDao = get(),
+            customFilterApi = get()
+        )
+    }
 
     // Profile Manager
-    single { ProfileManager(get(), get(), get(), get()) }
+    single {
+        ProfileManager(
+            profileDao = get(),
+            filterListDao = get(),
+            appPrefs = get(),
+            filterRepo = get()
+        )
+    }
 
     // ViewModels
-    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
-    viewModel { StatisticsViewModel(get()) }
-    viewModel { LogViewModel(get(), get(), get(), get(), get()) }
     viewModel {
-        SettingsViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+        HomeViewModel(
+            appPrefs = get(),
+            dnsLogDao = get(),
+            filterRepo = get(),
+            profileDao = get(),
+            filterListDao = get()
+        )
+    }
+    viewModel { StatisticsViewModel(dnsLogDao = get()) }
+    viewModel {
+        LogViewModel(
+            dnsLogDao = get(),
+            filterListDao = get(),
+            whitelistDomainDao = get(),
+            customDnsRuleDao = get(),
+            filterListRepository = get(),
             application = androidApplication()
         )
     }
-    viewModel { FilterSetupViewModel(get(), get(), get(), androidApplication()) }
+    viewModel {
+        SettingsViewModel(
+            appPrefs = get(),
+            filterRepo = get(),
+            dnsLogDao = get(),
+            whitelistDomainDao = get(),
+            filterListDao = get(),
+            customDnsRuleDao = get(),
+            profileDao = get(),
+            profileManager = get(),
+            firewallRuleDao = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
+        FilterSetupViewModel(
+            filterRepo = get(),
+            filterListDao = get(),
+            customFilterManager = get(),
+            application = androidApplication()
+        )
+    }
     viewModel { (filterId: Long) ->
-        FilterDetailViewModel(filterId, get(), get(), get(), androidApplication(), get())
+        FilterDetailViewModel(
+            filterId = filterId,
+            filterListDao = get(),
+            dnsLogDao = get(),
+            filterRepo = get(),
+            application = androidApplication(),
+            customFilterManager = get()
+        )
     }
     viewModel {
         AppWhitelistViewModel(
@@ -120,7 +174,13 @@ val appModule = module {
             application = androidApplication()
         )
     }
-    viewModel { CustomRulesViewModel(get(), get(), androidApplication()) }
+    viewModel {
+        CustomRulesViewModel(
+            customDnsRuleDao = get(),
+            filterListRepository = get(),
+            application = androidApplication()
+        )
+    }
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),
