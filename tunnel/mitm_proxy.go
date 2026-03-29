@@ -21,6 +21,9 @@ type AdBlockChecker interface {
 	// IsDomainBlocked returns true if the given hostname (no port) should be
 	// blocked according to the ad/security filter lists + custom rules.
 	IsDomainBlocked(host string) bool
+
+	// LookupIP resolves a domain to an IP address using the internal resolver.
+	LookupIP(host string) (net.IP, error)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -265,8 +268,10 @@ func (p *MitmProxy) handleConnect(clientConn net.Conn, req *http.Request) {
 
 // forwardDirect creates a raw TCP tunnel (no TLS interception).
 func (p *MitmProxy) forwardDirect(clientConn net.Conn, host string) {
+	dialAddr := p.resolveDialAddr(host)
+
 	// Connect to the real server
-	serverConn, err := net.DialTimeout("tcp", host, dialTimeout)
+	serverConn, err := net.DialTimeout("tcp", dialAddr, dialTimeout)
 	if err != nil {
 		writeHTTPError(clientConn, 502, "Bad Gateway")
 		return
@@ -285,10 +290,12 @@ func (p *MitmProxy) forwardDirect(clientConn net.Conn, host string) {
 // If the client TLS handshake fails (cert pinning), the domain is
 // automatically blacklisted for all future requests.
 func (p *MitmProxy) mitmIntercept(clientConn net.Conn, host, hostname string) {
+	dialAddr := p.resolveDialAddr(host)
+
 	// Connect to the real server first (verify it's reachable)
 	serverConn, err := tls.DialWithDialer(
 		&net.Dialer{Timeout: dialTimeout},
-		"tcp", host,
+		"tcp", dialAddr,
 		&tls.Config{
 			ServerName:         hostname,
 			InsecureSkipVerify: false,
@@ -488,7 +495,8 @@ func (p *MitmProxy) handleHTTP(clientConn net.Conn, req *http.Request) {
 		return
 	}
 
-	serverConn, err := net.DialTimeout("tcp", host, dialTimeout)
+	dialAddr := p.resolveDialAddr(host)
+	serverConn, err := net.DialTimeout("tcp", dialAddr, dialTimeout)
 	if err != nil {
 		writeHTTPError(clientConn, 502, "Bad Gateway")
 		return
@@ -526,6 +534,32 @@ func (p *MitmProxy) handleHTTP(clientConn net.Conn, req *http.Request) {
 }
 
 // ── Utilities ────────────────────────────────────────────────────────────────
+
+// resolveDialAddr uses the Engine's DNS resolver to get the IP for the host.
+// This bypasses Android's system DNS resolver which times out when the app
+// bypasses the VPN tunnel.
+func (p *MitmProxy) resolveDialAddr(hostport string) string {
+	if p.blocker == nil {
+		return hostport
+	}
+
+	host, port, err := net.SplitHostPort(hostport)
+	if err != nil {
+		return hostport // Fallback if no port
+	}
+
+	// Skip resolving if it's already an IP address
+	if net.ParseIP(host) != nil {
+		return hostport
+	}
+
+	ip, err := p.blocker.LookupIP(host)
+	if err == nil && ip != nil {
+		return net.JoinHostPort(ip.String(), port)
+	}
+
+	return hostport
+}
 
 // bidirectionalCopy copies data between two connections in both directions.
 func bidirectionalCopy(a, b net.Conn) {

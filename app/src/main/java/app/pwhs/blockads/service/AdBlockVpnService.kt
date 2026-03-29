@@ -1139,7 +1139,7 @@ class AdBlockVpnService : VpnService() {
 
     private fun getSystemDnsServers(context: Context): List<String> {
         val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork = connectivityManager.activeNetwork ?: return emptyList()
         val linkProperties = connectivityManager.getLinkProperties(activeNetwork) ?: return emptyList()
         return linkProperties.dnsServers.mapNotNull { it.hostAddress }.filter { it.isNotEmpty() }

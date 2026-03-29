@@ -653,6 +653,27 @@ func (e *Engine) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	e.standaloneForward(w, r, appName, startTime)
 }
 
+// LookupIP resolves a domain to an IP address using the Engine's internal resolver.
+// It is used by the MITM proxy to bypass Android's problematic system DNS resolver
+// when the app itself is excluded from the VPN.
+func (e *Engine) LookupIP(domain string) (net.IP, error) {
+	e.mu.Lock()
+	resolver := e.resolver
+	primary := e.primaryDNS
+	e.mu.Unlock()
+
+	if resolver == nil {
+		return nil, fmt.Errorf("engine resolver not initialized")
+	}
+
+	// Make sure we have a valid primary server
+	if primary == "" {
+		primary = "8.8.8.8"
+	}
+
+	return resolver.ResolveARecord(domain, primary)
+}
+
 func (e *Engine) standaloneBlock(w dns.ResponseWriter, r *dns.Msg, blockedBy, appName string, startTime time.Time) {
 	m := new(dns.Msg)
 	m.SetReply(r)
