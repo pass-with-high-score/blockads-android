@@ -46,26 +46,76 @@ func ServeLocalAsset(req *http.Request) *http.Response {
 	}
 }
 
-// serveCSS returns the cosmetic filter CSS from memory.
+// serveCSS returns the cosmetic filter CSS from memory based on the domain.
 func serveCSS(req *http.Request) *http.Response {
+	domain := req.URL.Query().Get("domain")
+
 	cosmeticMu.RLock()
-	css := cosmeticCSS
+	globalCSS := bakedGlobalCSS
+	complex := complexRules
 	cosmeticMu.RUnlock()
 
-	if css == "" {
-		css = "/* BlockAds: no cosmetic rules loaded */"
+	var css strings.Builder
+	css.Grow(len(globalCSS) + 4096)
+	css.WriteString(globalCSS)
+
+	for _, r := range complex {
+		apply := false
+		if len(r.included) == 0 {
+			apply = true
+		} else {
+			for _, inc := range r.included {
+				if matchDomain(inc, domain) {
+					apply = true
+					break
+				}
+			}
+		}
+
+		if apply && len(r.excluded) > 0 {
+			for _, exc := range r.excluded {
+				if matchDomain(exc, domain) {
+					apply = false
+					break
+				}
+			}
+		}
+
+		if apply {
+			css.WriteString(r.selector)
+			css.WriteString(" { display: none !important; }\n")
+		}
 	}
 
-	return buildTextResponse(req, 200, "text/css; charset=utf-8", css)
+	res := css.String()
+	if res == "" {
+		res = "/* BlockAds: no cosmetic rules loaded for this domain */"
+	}
+
+	return buildTextResponse(req, 200, "text/css; charset=utf-8", res)
+}
+
+func matchDomain(ruleDom, reqDom string) bool {
+	if ruleDom == "" || reqDom == "" {
+		return false
+	}
+	if ruleDom == reqDom {
+		return true
+	}
+	if strings.HasSuffix(reqDom, "."+ruleDom) {
+		return true
+	}
+	return false
 }
 
 // serveHealth returns a simple health check (useful for debugging).
 func serveHealth(req *http.Request) *http.Response {
 	cosmeticMu.RLock()
-	cssLen := len(cosmeticCSS)
+	cssLen := len(bakedGlobalCSS)
+	complexLen := len(complexRules)
 	cosmeticMu.RUnlock()
 
-	body := fmt.Sprintf(`{"status":"ok","css_bytes":%d}`, cssLen)
+	body := fmt.Sprintf(`{"status":"ok","global_css_bytes":%d,"complex_rules":%d}`, cssLen, complexLen)
 	return buildTextResponse(req, 200, "application/json", body)
 }
 

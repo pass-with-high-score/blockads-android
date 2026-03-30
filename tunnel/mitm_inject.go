@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"sync"
+	"fmt"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,10 +20,9 @@ import (
 // with just two small tags (~120 bytes), dramatically reducing HTML bloat.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// injectionTags are the lightweight tags injected after <head>.
-// The browser fetches these via HTTPS through the MITM proxy, which
-// intercepts "local.pwhs.app" and serves assets from memory.
-const injectionTags = `<link rel="stylesheet" href="https://local.pwhs.app/cosmetic.css">`
+// injectionTagsTemplate is the lightweight tag injected after <head>.
+// It dynamically includes the domain so the local server can serve specific rules.
+const injectionTagsTemplate = `<link rel="stylesheet" href="https://local.pwhs.app/cosmetic.css?domain=%s">`
 
 // headTagBytes is the pattern to search for (case-insensitive matching done manually).
 var headTagBytes = []byte("<head") // matches both <head> and <head ...attributes>
@@ -31,21 +31,77 @@ var headTagBytes = []byte("<head") // matches both <head> and <head ...attribute
 // If <head> isn't found within this limit, it's likely not a standard HTML page.
 const scanLimit = 16 * 1024 // 16KB
 
-// cosmeticCSS holds the cosmetic filter CSS rules (thread-safe).
-// Read by mitm_local_server.go when serving /cosmetic.css.
+type cosmeticRule struct {
+	selector string
+	included []string
+	excluded []string
+}
+
 var (
-	cosmeticMu  sync.RWMutex
-	cosmeticCSS string
+	cosmeticMu     sync.RWMutex
+	bakedGlobalCSS string
+	complexRules   []*cosmeticRule
 )
 
 // SetCosmeticCSS sets the cosmetic filter CSS that will be served by the
 // local asset server at https://local.pwhs.app/cosmetic.css.
 // Called from Kotlin after parsing EasyList cosmetic rules.
-func SetCosmeticCSS(css string) {
+// Supports both raw CSS selectors and Adguard-style ## filters.
+func SetCosmeticCSS(rawRules string) {
+	var globalBuilder strings.Builder
+	var complex []*cosmeticRule
+
+	lines := strings.Split(rawRules, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "!") {
+			continue
+		}
+
+		idx := strings.Index(line, "##")
+		if idx == -1 {
+			// fallback: raw selector
+			globalBuilder.WriteString(line)
+			globalBuilder.WriteString(" { display: none !important; }\n")
+			continue
+		}
+
+		domainsPart := line[:idx]
+		selector := line[idx+2:]
+		if selector == "" {
+			continue
+		}
+
+		if domainsPart == "" {
+			globalBuilder.WriteString(selector)
+			globalBuilder.WriteString(" { display: none !important; }\n")
+		} else {
+			var included []string
+			var excluded []string
+			for _, d := range strings.Split(domainsPart, ",") {
+				d = strings.TrimSpace(d)
+				if d == "" {
+					continue
+				}
+				if strings.HasPrefix(d, "~") {
+					excluded = append(excluded, d[1:])
+				} else {
+					included = append(included, d)
+				}
+			}
+			complex = append(complex, &cosmeticRule{
+				selector: selector,
+				included: included,
+				excluded: excluded,
+			})
+		}
+	}
+
 	cosmeticMu.Lock()
-	cosmeticCSS = css
+	bakedGlobalCSS = globalBuilder.String()
+	complexRules = complex
 	cosmeticMu.Unlock()
-	logf("Cosmetic CSS updated: %d bytes", len(css))
+	logf("Cosmetic CSS updated: %d global bytes, %d complex rules", globalBuilder.Len(), len(complex))
 }
 
 // ShouldInjectHTML checks if a Content-Type header indicates HTML content.
@@ -62,18 +118,20 @@ func ShouldInjectHTML(contentType string) bool {
 //   - Scan limit to avoid scanning large non-HTML bodies
 //   - Case-insensitive matching
 type injectingReader struct {
-	upstream    io.Reader
-	injected    bool   // true after injection is done (or scan limit reached)
-	pending     []byte // buffered data waiting to be read by the caller
-	carry       []byte // bytes carried from end of previous read (potential partial <head match)
-	scannedBytes int   // total bytes scanned so far
+	upstream     io.Reader
+	domain       string
+	injected     bool   // true after injection is done (or scan limit reached)
+	pending      []byte // buffered data waiting to be read by the caller
+	carry        []byte // bytes carried from end of previous read (potential partial <head match)
+	scannedBytes int    // total bytes scanned so far
 }
 
 // NewInjectingReader wraps an upstream reader to inject the local asset server
 // tags after the first <head> tag.
-func NewInjectingReader(upstream io.Reader) io.Reader {
+func NewInjectingReader(upstream io.Reader, domain string) io.Reader {
 	return &injectingReader{
 		upstream: upstream,
+		domain:   domain,
 	}
 }
 
@@ -196,7 +254,7 @@ func (r *injectingReader) Read(p []byte) (int, error) {
 func (r *injectingReader) doInject(p []byte, data []byte, tagEnd int, upstreamErr error) (int, error) {
 	r.injected = true
 
-	script := []byte(injectionTags)
+	script := []byte(fmt.Sprintf(injectionTagsTemplate, r.domain))
 
 	// Build: [before + tag] + [injected tags] + [rest of data]
 	before := data[:tagEnd]

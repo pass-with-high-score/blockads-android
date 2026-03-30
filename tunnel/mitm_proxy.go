@@ -457,7 +457,7 @@ func (p *MitmProxy) relayHTTP(clientConn net.Conn, serverConn net.Conn, hostname
 		if ShouldInjectHTML(contentType) {
 			// Wrap the body with our injecting reader
 			originalBody := resp.Body
-			resp.Body = io.NopCloser(NewInjectingReader(originalBody))
+			resp.Body = io.NopCloser(NewInjectingReader(originalBody, hostname))
 
 			// Injection changes the body size, so we must switch to
 			// chunked transfer encoding.
@@ -524,7 +524,7 @@ func (p *MitmProxy) handleHTTP(clientConn net.Conn, req *http.Request) {
 	contentType := resp.Header.Get("Content-Type")
 	if ShouldInjectHTML(contentType) {
 		originalBody := resp.Body
-		resp.Body = io.NopCloser(NewInjectingReader(originalBody))
+		resp.Body = io.NopCloser(NewInjectingReader(originalBody, hostname))
 		resp.ContentLength = -1
 		resp.Header.Del("Content-Length")
 		resp.Header.Del("Content-Encoding")

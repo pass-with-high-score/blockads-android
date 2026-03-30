@@ -108,26 +108,19 @@ class FilterDownloadManager(
     }
 
     /**
-     * Reads a downloaded CSS file containing raw selectors, appends { display: none !important; }
-     * and returns a single valid CSS string ready for injection.
+     * Reads a downloaded CSS/Adguard file containing rules and returns them as a single string.
+     * The Go engine now handles parsing Adguard/ABP formatting and domain specificity.
      */
     fun getInjectableCss(file: File): String {
         if (!file.exists() || file.length() == 0L) {
             return ""
         }
 
-        val cssBuilder = StringBuilder()
-        try {
-            file.forEachLine { line ->
-                val selector = line.trim()
-                if (selector.isNotEmpty()) {
-                    cssBuilder.append(selector).append(" { display: none !important; }\n")
-                }
-            }
+        return try {
+            file.readText()
         } catch (e: Exception) {
             Timber.e(e, "Error reading CSS file ${file.absolutePath}")
-            return ""
+            ""
         }
-        return cssBuilder.toString()
     }
 }
