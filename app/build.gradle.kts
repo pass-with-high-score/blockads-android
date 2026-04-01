@@ -157,6 +157,7 @@ dependencies {
 
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.sentry.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
