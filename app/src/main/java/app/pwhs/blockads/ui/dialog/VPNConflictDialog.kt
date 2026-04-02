@@ -3,6 +3,7 @@ package app.pwhs.blockads.ui.dialog
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ fun VPNConflictDialog(
     val context = LocalContext.current
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier,
         onDismissRequest = onDismissVpnConflictDialog,
         title = {

@@ -640,4 +640,8 @@
     <string name="settings_export_logs_chooser_title">Partager les journaux</string>
     <string name="settings_export_logs_not_found">Aucun journal à exporter trouvé</string>
     <string name="custom_color_title">Couleur personnalisée</string>
+    <string name="home_disconnecting_desc">Arrêt de la connexion VPN…</string>
+    <string name="status_disconnecting">Déconnexion</string>
+    <string name="vpn_notification_stopping">BlockAds s\'arrête</string>
+    <string name="vpn_notification_stopping_text">Fermeture du tunnel VPN…</string>
 </resources>

@@ -584,4 +584,8 @@
     <string name="settings_export_logs_chooser_title">分享日志</string>
     <string name="settings_export_logs_not_found">未找到可导出的日志</string>
     <string name="custom_color_title">自定义颜色</string>
+    <string name="home_disconnecting_desc">正在停止 VPN 连接…</string>
+    <string name="status_disconnecting">正在断开连接</string>
+    <string name="vpn_notification_stopping">BlockAds 正在停止</string>
+    <string name="vpn_notification_stopping_text">正在关闭 VPN 隧道…</string>
 </resources>

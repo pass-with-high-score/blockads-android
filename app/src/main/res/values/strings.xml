@@ -682,4 +682,8 @@
     <string name="settings_export_logs_chooser_title">Share Logs</string>
     <string name="settings_export_logs_not_found">No logs found to export</string>
     <string name="custom_color_title">Custom Color</string>
+    <string name="home_disconnecting_desc">Stopping VPN connection…</string>
+    <string name="status_disconnecting">Disconnecting</string>
+    <string name="vpn_notification_stopping">BlockAds is stopping</string>
+    <string name="vpn_notification_stopping_text">Closing VPN tunnel…</string>
 </resources>

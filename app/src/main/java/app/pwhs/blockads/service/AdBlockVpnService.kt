@@ -113,9 +113,16 @@ class AdBlockVpnService : VpnService() {
         val isRunning: Boolean get() = _state.value == VpnState.RUNNING
         val isConnecting: Boolean get() = _state.value == VpnState.STARTING
         val isRestarting: Boolean get() = _state.value == VpnState.RESTARTING
+        val isStopping: Boolean get() = _state.value == VpnState.STOPPING
 
         @Volatile
         var startTimestamp = 0L
+            private set
+
+        /** Timestamp (epoch ms) of the last transition to STOPPED.
+         *  Used by [VpnUtils] to recognise our own lingering VPN transport. */
+        @Volatile
+        var lastStoppedTimestamp = 0L
             private set
 
         /**
@@ -706,6 +713,9 @@ class AdBlockVpnService : VpnService() {
         isReconnecting = false
         startTimestamp = 0L
 
+        // Show "Stopping…" notification immediately
+        updateNotification()
+
         // Stop monitoring (lightweight, safe on main thread)
         networkMonitor?.stopMonitoring()
         stopBatteryMonitoring()
@@ -730,6 +740,7 @@ class AdBlockVpnService : VpnService() {
             // Switch back to main thread for UI/Service lifecycle operations
             withContext(Dispatchers.Main) {
                 _state.value = VpnState.STOPPED
+                lastStoppedTimestamp = System.currentTimeMillis()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 if (showStoppedNotification) {
                     stopForeground(STOP_FOREGROUND_DETACH)
@@ -760,6 +771,7 @@ class AdBlockVpnService : VpnService() {
 
     override fun onDestroy() {
         _state.value = VpnState.STOPPED
+        lastStoppedTimestamp = System.currentTimeMillis()
         isReconnecting = false
         startTimestamp = 0L
 
@@ -923,6 +935,7 @@ class AdBlockVpnService : VpnService() {
         }
 
         val title = when {
+            isStopping -> getString(R.string.vpn_notification_stopping)
             isReconnecting && connectingPhase.isNotEmpty() -> getString(R.string.vpn_notification_reconnecting)
             isReconnecting -> getString(R.string.vpn_notification_reconnecting)
             retryManager.getRetryCount() > 0 -> getString(R.string.vpn_notification_retrying)
@@ -931,6 +944,7 @@ class AdBlockVpnService : VpnService() {
         }
 
         val text = when {
+            isStopping -> getString(R.string.vpn_notification_stopping_text)
             isReconnecting && connectingPhase.isNotEmpty() -> connectingPhase
             isReconnecting -> getString(R.string.vpn_notification_reconnecting_text)
             retryManager.getRetryCount() > 0 -> getString(

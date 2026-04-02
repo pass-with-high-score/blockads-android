@@ -609,4 +609,8 @@
     <string name="settings_export_logs_chooser_title">Sdílet protokoly</string>
     <string name="settings_export_logs_not_found">Nebyly nalezeny žádné protokoly k exportu</string>
     <string name="custom_color_title">Vlastní barva</string>
+    <string name="home_disconnecting_desc">Zastavování připojení VPN…</string>
+    <string name="status_disconnecting">Odpojování</string>
+    <string name="vpn_notification_stopping">BlockAds se zastavuje</string>
+    <string name="vpn_notification_stopping_text">Zavírání VPN tunelu…</string>
 </resources>

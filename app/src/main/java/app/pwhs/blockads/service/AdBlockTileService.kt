@@ -27,6 +27,9 @@ class AdBlockTileService : TileService() {
     override fun onClick() {
         super.onClick()
 
+        // Don't allow toggling while VPN is still tearing down
+        if (AdBlockVpnService.isStopping) return
+
         val isRootProxyRunning = RootProxyService.isRunning
         val isVpnRunning = AdBlockVpnService.isRunning
 

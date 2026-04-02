@@ -59,6 +59,13 @@ class HomeViewModel(
         state2 == VpnState.STARTING || state2 == VpnState.RESTARTING
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isConnecting)
 
+    val vpnStopping: StateFlow<Boolean> = combine(
+        AdBlockVpnService.state,
+        RootProxyService.state
+    ) { state1, state2 ->
+        state1 == VpnState.STOPPING || state2 == VpnState.STOPPING
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val blockedCount: StateFlow<Int> = dnsLogDao.getBlockedCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 

@@ -606,4 +606,8 @@
     <string name="settings_export_logs_chooser_title">Bagikan Log</string>
     <string name="settings_export_logs_not_found">Tidak ada log yang ditemukan untuk diekspor</string>
     <string name="custom_color_title">Warna Kustom</string>
+    <string name="home_disconnecting_desc">Menghentikan koneksi VPN…</string>
+    <string name="status_disconnecting">Memutuskan koneksi</string>
+    <string name="vpn_notification_stopping">BlockAds sedang berhenti</string>
+    <string name="vpn_notification_stopping_text">Menutup terowongan VPN…</string>
 </resources>

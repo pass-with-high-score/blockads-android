@@ -585,4 +585,8 @@
     <string name="settings_export_logs_chooser_title">Compartir registros</string>
     <string name="settings_export_logs_not_found">No se encontraron registros para exportar</string>
     <string name="custom_color_title">Color personalizado</string>
+    <string name="home_disconnecting_desc">Deteniendo la conexión VPN…</string>
+    <string name="status_disconnecting">Desconectando</string>
+    <string name="vpn_notification_stopping">BlockAds se está deteniendo</string>
+    <string name="vpn_notification_stopping_text">Cerrando el túnel VPN…</string>
 </resources>

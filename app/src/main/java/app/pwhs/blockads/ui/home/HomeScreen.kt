@@ -95,6 +95,7 @@ fun HomeScreen(
 ) {
     val vpnEnabled by viewModel.vpnEnabled.collectAsStateWithLifecycle()
     val vpnConnecting by viewModel.vpnConnecting.collectAsStateWithLifecycle()
+    val vpnStopping by viewModel.vpnStopping.collectAsStateWithLifecycle()
     val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
     val domainCount by viewModel.domainCount.collectAsStateWithLifecycle()
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
@@ -141,12 +142,14 @@ fun HomeScreen(
             // Status text
             Text(
                 text = when {
+                    vpnStopping -> stringResource(R.string.status_disconnecting)
                     vpnConnecting -> stringResource(R.string.status_connecting)
                     vpnEnabled -> stringResource(R.string.status_protected)
                     else -> stringResource(R.string.status_unprotected)
                 },
                 style = MaterialTheme.typography.headlineMedium,
                 color = when {
+                    vpnStopping -> SecurityOrange
                     vpnConnecting -> AccentBlue
                     vpnEnabled -> MaterialTheme.colorScheme.primary
                     else -> DangerRed
@@ -158,6 +161,7 @@ fun HomeScreen(
 
             Text(
                 text = when {
+                    vpnStopping -> stringResource(R.string.home_disconnecting_desc)
                     vpnConnecting -> stringResource(R.string.home_connecting_desc)
                     vpnEnabled -> stringResource(R.string.home_protected_desc)
                     else -> stringResource(R.string.home_unprotected_desc)
@@ -234,9 +238,9 @@ fun HomeScreen(
             // Power button — never blocked by filter loading
             PowerButton(
                 isActive = vpnEnabled,
-                isConnecting = vpnConnecting,
+                isConnecting = vpnConnecting || vpnStopping,
                 onClick = {
-                    if (!vpnConnecting) {
+                    if (!vpnConnecting && !vpnStopping) {
                         if (vpnEnabled) {
                             viewModel.stopVpn(context)
                         } else {
