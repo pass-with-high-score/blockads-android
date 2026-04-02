@@ -1,0 +1,2 @@
+- Fix VPN conflict dialog falsely triggering during disable → enable cycle
+- Fix Root Proxy iptables setup failing silently
