@@ -35,12 +35,6 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22.12'
-          cache: true
-
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -69,17 +63,35 @@ jobs:
         run: |
           echo "auth.token=${{ secrets.SENTRY_AUTH_TOKEN }}" > sentry.properties    
 
-      - name: Build Go Tunnel
-        run: |
-          rm -rf app/libs
-          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240404231514-09dbf07665ed
-          gomobile init
-          chmod +x scripts/build_tunnel.sh
-          ./scripts/build_tunnel.sh
-
       # Build & Deploy
       - name: Grant execute permission
         run: chmod +x gradlew
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+
+      - name: Build tunnel.aar natively
+        run: |
+          # Install NDK r26b using sdkmanager
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
+          yes | sdkmanager --licenses > /dev/null 2>&1
+          sdkmanager "ndk;26.1.10909125" "platforms;android-24"
+
+          # Install patched gomobile from SagerNet (to strip paths)
+          export GOFLAGS='-buildvcs=false'
+          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+          gomobile init
+          
+          # Build tunnel.aar
+          mkdir -p app/libs
+          cd tunnel
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
+          gomobile bind -target=android -androidapi 24 -trimpath \
+            -ldflags='-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384' \
+            -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
 
       - name: Build APK
         run: bundle exec fastlane build_release

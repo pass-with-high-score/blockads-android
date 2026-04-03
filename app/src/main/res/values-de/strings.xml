@@ -615,4 +615,8 @@
     <string name="settings_export_logs_chooser_title">Protokolle teilen</string>
     <string name="settings_export_logs_not_found">Keine Protokolle zum Exportieren gefunden</string>
     <string name="custom_color_title">Benutzerdefinierte Farbe</string>
+    <string name="home_disconnecting_desc">Stoppe VPN-Verbindung…</string>
+    <string name="status_disconnecting">Wird getrennt</string>
+    <string name="vpn_notification_stopping">BlockAds stoppt</string>
+    <string name="vpn_notification_stopping_text">Schließe VPN-Tunnel…</string>
 </resources>

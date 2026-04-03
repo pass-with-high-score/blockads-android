@@ -106,6 +106,10 @@ improve the app.
    ```bash
    ./scripts/build_tunnel.sh
    ```
+   Or
+    ```
+   ./gradlew buildGoTunnel
+   ```
    *Note: A pre-built version is already included in `app/libs/`.*
 
 4. Open the project in Android Studio

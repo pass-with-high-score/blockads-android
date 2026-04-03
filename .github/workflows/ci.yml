@@ -25,12 +25,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22.12'
-          cache: true
-
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -45,17 +39,23 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      - name: Create Sentry properties file
-        run: |
-          echo "auth.token=${{ secrets.SENTRY_AUTH_TOKEN }}" > sentry.properties
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+          cache: true
 
-      - name: Build Go Tunnel
+      - name: Install gomobile
         run: |
-          rm -rf app/libs
-          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240404231514-09dbf07665ed
+          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+          export PATH="$HOME/go/bin:$PATH"
           gomobile init
-          chmod +x scripts/build_tunnel.sh
-          ./scripts/build_tunnel.sh
+
+      - name: Add gomobile to PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Build Go Tunnel (tunnel.aar)
+        run: ./gradlew buildGoTunnel
 
       - name: Lint
         run: ./gradlew lint

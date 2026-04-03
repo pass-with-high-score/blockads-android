@@ -613,4 +613,8 @@
     <string name="settings_export_logs_chooser_title">שתף יומנים</string>
     <string name="settings_export_logs_not_found">לא נמצאו יומנים לייצוא</string>
     <string name="custom_color_title">צבע מותאם אישית</string>
+    <string name="home_disconnecting_desc">עוצר את חיבור ה-VPN…</string>
+    <string name="status_disconnecting">מתנתק</string>
+    <string name="vpn_notification_stopping">BlockAds נעצר</string>
+    <string name="vpn_notification_stopping_text">סוגר את מנהרת ה-VPN…</string>
 </resources>

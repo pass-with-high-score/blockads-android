@@ -366,17 +366,15 @@ class SettingsViewModel(
                 appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
                 appPrefs.setFirewallEnabled(backup.firewallEnabled)
 
-                // Restore active profile by type (applies filter config + prefs atomically)
-                if (backup.activeProfileType.isNotBlank()) {
-                    val profile = profileDao.getByType(backup.activeProfileType)
-                    if (profile != null) {
-                        profileManager.switchToProfile(profile.id)
-                    }
-                }
-
-                // Filter lists — only add new
+                // Filter lists — add new AND update isEnabled for existing
                 backup.filterLists.forEach { f ->
-                    if (filterLists.value.none { it.url == f.url }) {
+                    val existing = filterLists.value.firstOrNull { it.url == f.url }
+                    if (existing != null) {
+                        // Update isEnabled state if it differs
+                        if (existing.isEnabled != f.isEnabled) {
+                            filterListDao.setEnabled(existing.id, f.isEnabled)
+                        }
+                    } else {
                         filterListDao.insert(
                             FilterList(
                                 name = f.name,
@@ -425,6 +423,16 @@ class SettingsViewModel(
                                 isEnabled = r.isEnabled
                             )
                         )
+                    }
+                }
+
+                // Restore active profile LAST — after all filter/rule data is in place.
+                // switchToProfile() overwrites filter isEnabled states based on profile
+                // template, so it must run after the filter list import above.
+                if (backup.activeProfileType.isNotBlank()) {
+                    val profile = profileDao.getByType(backup.activeProfileType)
+                    if (profile != null) {
+                        profileManager.switchToProfile(profile.id)
                     }
                 }
 

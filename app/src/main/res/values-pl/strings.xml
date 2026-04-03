@@ -606,4 +606,8 @@
     <string name="settings_export_logs_chooser_title">Udostępnij logi</string>
     <string name="settings_export_logs_not_found">Nie znaleziono logów do wyeksportowania</string>
     <string name="custom_color_title">Niestandardowy kolor</string>
+    <string name="home_disconnecting_desc">Zatrzymywanie połączenia VPN…</string>
+    <string name="status_disconnecting">Rozłączanie</string>
+    <string name="vpn_notification_stopping">BlockAds zatrzymuje się</string>
+    <string name="vpn_notification_stopping_text">Zamykanie tunelu VPN…</string>
 </resources>

@@ -34,3 +34,5 @@ play-store-key.json
 
 # Sentry Config File
 sentry.properties
+.gopath
+.ruby-lsp

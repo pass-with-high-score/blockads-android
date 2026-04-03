@@ -43,4 +43,11 @@ platform :android do
 
     UI.success("✅ Bumped to versionCode=#{new_code}, versionName=#{version_name}")
   end
+
+  desc "Trigger GitHub Action to auto-build Go Tunnel"
+  lane :update_tunnel do
+    UI.message("Triggering GitHub Action: update_tunnel.yml...")
+    sh("gh workflow run update_tunnel.yml --ref main")
+    UI.success("✅ Workflow triggered! Vui lòng chờ 2-3 phút cho Bot build xong, sau đó chạy 'git pull' nhé!")
+  end
 end

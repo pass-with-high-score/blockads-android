@@ -1,0 +1,2 @@
+- Fix WireGuard failing to connect when using a hostname endpoint
+- Fix app settings import functionality

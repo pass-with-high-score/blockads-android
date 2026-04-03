@@ -654,4 +654,8 @@ Desteklenen formatlar:
     <string name="settings_export_logs_chooser_title">Günlükleri Paylaş</string>
     <string name="settings_export_logs_not_found">Dışa aktarılacak günlük bulunamadı</string>
     <string name="custom_color_title">Özel Renk</string>
+    <string name="home_disconnecting_desc">VPN bağlantısı durduruluyor…</string>
+    <string name="status_disconnecting">Bağlantı kesiliyor</string>
+    <string name="vpn_notification_stopping">BlockAds durduruluyor</string>
+    <string name="vpn_notification_stopping_text">VPN tüneli kapatılıyor…</string>
 </resources>

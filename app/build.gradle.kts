@@ -10,18 +10,54 @@ plugins {
     alias(libs.plugins.sentry)
 }
 
+tasks.register<Exec>("buildGoTunnel") {
+    val libsDir = file("libs")
+    val aarFile = file("libs/tunnel.aar")
+    val tunnelDir = rootProject.file("tunnel")
+    
+    // Only rebuild if the tunnel source code changes (or if aar is missing)
+    inputs.dir(tunnelDir)
+    outputs.file(aarFile)
+
+    workingDir = tunnelDir
+    
+    // For local development, gomobile might not be in PATH for Gradle, so we use bash
+    // to load user's profile which usually exports GOPATH/bin to PATH.
+    commandLine(
+        "bash", "-c",
+        "mkdir -p \"${libsDir.absolutePath}\" && " +
+        "export GOFLAGS=\"-buildvcs=false\" && " +
+        "export PATH=\"\$PATH:\$GOPATH/bin:\$HOME/go/bin:/usr/local/go/bin\" && " +
+        "gomobile bind -target=android -androidapi 24 -trimpath " +
+        "-ldflags=\"-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384\" " +
+        "-o ${aarFile.absolutePath} github.com/nqmgaming/blockads-tunnel"
+    )
+
+    doFirst {
+        if (!libsDir.exists()) {
+            libsDir.mkdirs()
+        }
+        println("Building Go tunnel for Android...")
+    }
+    
+    doLast {
+        println("Go tunnel built successfully.")
+    }
+}
+
 android {
     namespace = "app.pwhs.blockads"
     compileSdk {
         version = release(36)
     }
+    ndkVersion = "26.1.10909125"
 
     defaultConfig {
         applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 38
-        versionName = "6.1.1"
+        versionCode = 42
+        versionName = "6.1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -85,6 +121,13 @@ android {
     }
 
     packaging {
+        jniLibs {
+            // Disable stripping native libraries to ensure byte-for-byte reproducible builds
+            // across different CI environments (F-Droid vs GitHub Actions).
+            keepDebugSymbols.add("**/libdatastore_shared_counter.so")
+            keepDebugSymbols.add("**/libgojni.so")
+        }
+
         resources {
             excludes += "**/sentry-debug-meta.properties"
         }
@@ -157,6 +200,7 @@ dependencies {
 
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.sentry.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -169,10 +213,17 @@ dependencies {
 }
 
 sentry {
-    org.set("nqm")
-    projectName.set("android")
-    val hasSentryConfig = file("sentry.properties").exists() || System.getenv("SENTRY_AUTH_TOKEN") != null
+    // Disable Proguard mapping entirely — prevents sentry-debug-meta.properties
+    // from being generated (contains random UUID that breaks reproducible builds)
+    includeProguardMapping = false
+    includeSourceContext = false
+    autoUploadProguardMapping = false
+    autoUploadSourceContext = false
 
-    autoUploadProguardMapping.set(hasSentryConfig)
-    includeSourceContext.set(hasSentryConfig)
+    // Disable instrumentation that causes manifest/UUID changes
+    tracingInstrumentation { enabled = false }
+    autoInstallation { enabled = false }
+
+    // Disable telemetry and dependency reporting that cause non-deterministic builds
+    includeDependenciesReport = false
 }

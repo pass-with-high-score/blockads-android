@@ -57,9 +57,13 @@ object IptablesManager {
 
         // ══════════════════════════════════════════════════════════════
         // Step 1: nat table — REDIRECT port 53 → local engine
+        //
+        // NOTE: We run each iptables command individually so that a single
+        // failure (e.g. chain already exists) doesn't abort the entire setup.
         // ══════════════════════════════════════════════════════════════
-        val ipv4Nat = buildList {
-            add("iptables -t nat -N $CHAIN")
+        val ipv4Commands = buildList {
+            // Create chain (may fail if leftover — that's OK)
+            add("iptables -t nat -N $CHAIN 2>/dev/null || true")
             // Skip our own app's traffic (prevents infinite loop)
             add("iptables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
             // Redirect UDP DNS → local engine
@@ -68,61 +72,66 @@ object IptablesManager {
             add("iptables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             // Hook into OUTPUT chain
             add("iptables -t nat -A OUTPUT -j $CHAIN")
-        }
 
-        // ══════════════════════════════════════════════════════════════
-        // Step 2: filter table — DROP port 853 (DoT)
-        // NOTE: DROP is NOT valid in nat table! Must use filter table.
-        // ══════════════════════════════════════════════════════════════
-        val ipv4Filter = if (blockDoT) {
-            buildList {
-                add("iptables -t filter -N $CHAIN_FILTER")
+            if (blockDoT) {
+                // filter table — DROP port 853 (DoT)
+                add("iptables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
                 add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
                 add("iptables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
                 add("iptables -t filter -A OUTPUT -j $CHAIN_FILTER")
             }
-        } else emptyList()
+        }
 
-        // Execute IPv4 rules
-        val allIpv4 = ipv4Nat + ipv4Filter
-        val result4 = Shell.cmd(*allIpv4.toTypedArray()).exec()
-        val success4 = result4.isSuccess
+        var ipv4Success = true
+        for (cmd in ipv4Commands) {
+            val result = Shell.cmd(cmd).exec()
+            if (!result.isSuccess) {
+                Timber.e("IPv4 iptables cmd FAILED: [$cmd] err=${result.err} out=${result.out}")
+                ipv4Success = false
+                // Don't break — continue applying remaining rules so partial state is maximised
+            }
+        }
 
-        if (success4) {
+        if (ipv4Success) {
             Timber.d("IPv4 iptables setup SUCCESS")
         } else {
-            Timber.e("IPv4 iptables setup FAILED: err=${result4.err}, out=${result4.out}")
+            Timber.e("IPv4 iptables setup had failures (see individual logs above)")
         }
 
         // ══════════════════════════════════════════════════════════════
         // IPv6 — try independently, many Android kernels lack ip6tables nat
         // ══════════════════════════════════════════════════════════════
-        val ipv6Nat = buildList {
-            add("ip6tables -t nat -N $CHAIN")
+        val ipv6Commands = buildList {
+            add("ip6tables -t nat -N $CHAIN 2>/dev/null || true")
             add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
             add("ip6tables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A OUTPUT -j $CHAIN")
-        }
 
-        val ipv6Filter = if (blockDoT) {
-            buildList {
-                add("ip6tables -t filter -N $CHAIN_FILTER")
+            if (blockDoT) {
+                add("ip6tables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
                 add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
                 add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
                 add("ip6tables -t filter -A OUTPUT -j $CHAIN_FILTER")
             }
-        } else emptyList()
-
-        val allIpv6 = ipv6Nat + ipv6Filter
-        val result6 = Shell.cmd(*allIpv6.toTypedArray()).exec()
-        if (result6.isSuccess) {
-            Timber.d("IPv6 ip6tables setup SUCCESS")
-        } else {
-            Timber.w("IPv6 ip6tables setup FAILED (ignoring): err=${result6.err}, out=${result6.out}")
         }
 
-        return success4
+        for (cmd in ipv6Commands) {
+            val result = Shell.cmd(cmd).exec()
+            if (!result.isSuccess) {
+                Timber.w("IPv6 ip6tables cmd FAILED (ignoring): [$cmd] err=${result.err}")
+            }
+        }
+
+        // Verify rules are actually in place
+        val verified = isActive()
+        if (verified) {
+            Timber.d("iptables rules verified active")
+        } else {
+            Timber.e("iptables rules NOT active after setup — root may have been denied")
+        }
+
+        return ipv4Success && verified
     }
 
     /**

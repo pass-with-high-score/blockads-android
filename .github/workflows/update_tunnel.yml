@@ -1,0 +1,64 @@
+name: Auto-Build Go Tunnel
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tunnel/**'
+      - '.github/workflows/update_tunnel.yml'
+  workflow_dispatch: # Cho phép click tự chạy bằng tay trên Github
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Dùng token mặc định. Commit sinh ra từ token này sẽ KHÔNG vô tình
+          # kích hoạt các workflow khác (tránh trường hợp loop vô tận).
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+
+      - name: Build tunnel.aar natively
+        run: |
+          # Install NDK r26b using sdkmanager
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
+          yes | sdkmanager --licenses > /dev/null 2>&1
+          sdkmanager "ndk;26.1.10909125" "platforms;android-24"
+
+          # Use patched gomobile from SagerNet to strip absolute build paths
+          export GOFLAGS='-buildvcs=false'
+          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+          gomobile init
+          
+          mkdir -p app/libs
+          cd tunnel
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
+          gomobile bind -target=android -androidapi 24 -trimpath \
+            -ldflags='-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384' \
+            -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: auto-update reproducible tunnel.aar from CI"
+          title: "🤖 Auto-update Reproducible tunnel.aar"
+          body: "Bản cập nhật tự động cho thư viện `tunnel.aar` được biên dịch chuẩn môi trường Linux/Ubuntu (cho Reproducible Builds)."
+          branch: "auto-update-tunnel"
+          base: "main"
+          add-paths: |
+            app/libs/tunnel.aar
+            app/libs/tunnel-sources.jar
+
