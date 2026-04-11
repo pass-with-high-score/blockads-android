@@ -159,10 +159,11 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val isRootMode = routingMode == AppPreferences.ROUTING_MODE_ROOT
             Text(
                 text = when {
-                    vpnStopping -> stringResource(R.string.home_disconnecting_desc)
-                    vpnConnecting -> stringResource(R.string.home_connecting_desc)
+                    vpnStopping -> stringResource(if (isRootMode) R.string.home_disconnecting_desc_root else R.string.home_disconnecting_desc)
+                    vpnConnecting -> stringResource(if (isRootMode) R.string.home_connecting_desc_root else R.string.home_connecting_desc)
                     vpnEnabled -> stringResource(R.string.home_protected_desc)
                     else -> stringResource(R.string.home_unprotected_desc)
                 },

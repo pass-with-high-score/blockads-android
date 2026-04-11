@@ -151,6 +151,7 @@
 
     <!-- Home Screen -->
     <string name="home_connecting_desc">Establishing VPN connection…</string>
+    <string name="home_connecting_desc_root">Establishing Root Proxy…</string>
     <string name="home_protected_desc">Your device is protected from ads</string>
     <string name="home_unprotected_desc">Tap the button to enable ad blocking</string>
     <string name="home_block_rate">Block Rate</string>
@@ -692,6 +693,7 @@
     <string name="settings_export_logs_not_found">No logs found to export</string>
     <string name="custom_color_title">Custom Color</string>
     <string name="home_disconnecting_desc">Stopping VPN connection…</string>
+    <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
     <string name="status_disconnecting">Disconnecting</string>
     <string name="vpn_notification_stopping">BlockAds is stopping</string>
     <string name="vpn_notification_stopping_text">Closing VPN tunnel…</string>
