@@ -66,18 +66,19 @@ class AppNameResolver(private val context: Context) {
         destPort: Int
     ): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
+            return try {
                 val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val local = InetSocketAddress(InetAddress.getByAddress(sourceIp), sourcePort)
                 val remote = InetSocketAddress(InetAddress.getByAddress(destIp), destPort)
-                val uid = cm.getConnectionOwnerUid(OsConstants.IPPROTO_UDP, local, remote)
-                if (uid >= 0) return uid
+                cm.getConnectionOwnerUid(OsConstants.IPPROTO_UDP, local, remote)
             } catch (e: Exception) {
-                Timber.d("getConnectionOwnerUid failed, trying fallback: ${e.message}")
+                // Don't fall back to /proc/net — it's blocked on Android 10+ and
+                // the root shell fallback is too slow (blocks DNS processing threads)
+                -1
             }
         }
 
-        // Fallback for API < 29 or if official API fails
+        // Fallback for API < 29 only
         return findUidFromProcNet(sourcePort)
     }
 
