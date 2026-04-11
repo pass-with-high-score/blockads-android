@@ -183,7 +183,9 @@ class FilterListRepository(
         loadMutex.withLock {
             try {
                 val enabledLists = filterListDao.getEnabled()
+                Timber.d("Enabled filters: ${enabledLists.size}")
                 if (enabledLists.isEmpty()) {
+                    Timber.d("No enabled filters, clearing all paths")
                     adTriePaths = ""
                     securityTriePaths = ""
                     adBloomPaths = ""
@@ -199,10 +201,15 @@ class FilterListRepository(
                 var totalCount = 0
 
                 for (filter in enabledLists) {
-                    if (filter.bloomUrl.isEmpty() || filter.trieUrl.isEmpty()) continue
+                    if (filter.bloomUrl.isEmpty() || filter.trieUrl.isEmpty()) {
+                        Timber.d("Skipping ${filter.name}: empty bloomUrl or trieUrl")
+                        continue
+                    }
+                    Timber.d("Downloading filter: ${filter.name} (bloom=${filter.bloomUrl.take(60)}, trie=${filter.trieUrl.take(60)})")
                     val result = downloadManager.downloadFilterList(filter, forceUpdate = false)
                     if (result.isSuccess) {
                         val paths = result.getOrNull() ?: continue
+                        Timber.d("  OK: ${filter.name} bloom=${paths.bloomPath}, trie=${paths.triePath}")
                         if (filter.category == FilterList.CATEGORY_SECURITY) {
                             paths.triePath?.let { secTrieSb.append(it).append(",") }
                             paths.bloomPath?.let { secBloomSb.append(it).append(",") }
@@ -218,6 +225,8 @@ class FilterListRepository(
                             )
                         }
                         totalCount += filter.ruleCount
+                    } else {
+                        Timber.e("  FAILED: ${filter.name} - ${result.exceptionOrNull()?.message}")
                     }
                 }
 

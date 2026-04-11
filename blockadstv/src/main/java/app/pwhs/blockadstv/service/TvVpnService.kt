@@ -22,6 +22,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,19 +118,31 @@ class TvVpnService : VpnService() {
         serviceScope.launch {
             try {
                 // Phase 1: Load filters
+                Timber.d("Phase 1: Seeding default filters...")
                 filterRepo.seedDefaultsIfNeeded()
+
+                Timber.d("Phase 1: Loading enabled filters...")
                 val result = filterRepo.loadAllEnabledFilters()
-                Timber.d("Filters loaded: ${result.getOrDefault(0)} domains")
+                val domainCount = result.getOrDefault(0)
+                Timber.d("Filters loaded: $domainCount domains")
+                Timber.d("Ad trie paths: '${filterRepo.getAdTriePath()}'")
+                Timber.d("Security trie paths: '${filterRepo.getSecurityTriePath()}'")
+                Timber.d("Ad bloom paths: '${filterRepo.getAdBloomPath()}'")
+                Timber.d("Security bloom paths: '${filterRepo.getSecurityBloomPath()}'")
 
                 // Phase 2: Read preferences
+                Timber.d("Phase 2: Reading preferences...")
                 val upstreamDns = tvPrefs.upstreamDns.first()
                 val fallbackDns = tvPrefs.fallbackDns.first()
                 val dnsProtocol = tvPrefs.dnsProtocol.first()
                 val dohUrl = tvPrefs.dohUrl.first()
                 val dnsResponseType = tvPrefs.dnsResponseType.first()
                 val whitelistedApps = tvPrefs.getWhitelistedAppsSnapshot()
+                Timber.d("DNS: protocol=$dnsProtocol, primary=$upstreamDns, fallback=$fallbackDns")
+                Timber.d("Response type: $dnsResponseType, whitelisted apps: ${whitelistedApps.size}")
 
                 // Phase 3: Establish VPN
+                Timber.d("Phase 3: Establishing VPN tunnel...")
                 val established = establishVpn(whitelistedApps)
                 if (!established) {
                     Timber.e("Failed to establish VPN")
@@ -142,10 +156,13 @@ class TvVpnService : VpnService() {
 
                 withContext(Dispatchers.Main) {
                     val nm = getSystemService(NotificationManager::class.java)
-                    nm.notify(NOTIFICATION_ID, buildNotification("BlockAds TV Active", "Your device is protected"))
+                    nm.notify(
+                        NOTIFICATION_ID,
+                        buildNotification("BlockAds TV Active", "$domainCount filter rules loaded")
+                    )
                 }
 
-                // Configure and start Go tunnel engine
+                // Configure Go tunnel engine
                 goTunnelAdapter.configureDns(
                     protocol = dnsProtocol.name,
                     primary = upstreamDns,
@@ -153,6 +170,17 @@ class TvVpnService : VpnService() {
                     dohUrl = dohUrl,
                 )
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
+                Timber.d("Go engine configured, starting tunnel...")
+
+                // Dynamically update Go Engine tries whenever filters change
+                // (e.g. user toggles filters in UI while VPN is running)
+                launch {
+                    filterRepo.domainCountFlow.drop(1).collectLatest { count ->
+                        Timber.d("Filter count changed to $count, hot-reloading tries...")
+                        goTunnelAdapter.updateTries()
+                        Timber.d("Tries reloaded: ad='${filterRepo.getAdTriePath()}', sec='${filterRepo.getSecurityTriePath()}'")
+                    }
+                }
 
                 vpnInterface?.let {
                     goTunnelAdapter.start(
@@ -198,6 +226,7 @@ class TvVpnService : VpnService() {
             for (appPackage in whitelistedApps) {
                 try {
                     builder.addDisallowedApplication(appPackage)
+                    Timber.d("Excluded from VPN: $appPackage")
                 } catch (e: Exception) {
                     Timber.w(e, "Could not exclude $appPackage")
                 }
@@ -210,6 +239,7 @@ class TvVpnService : VpnService() {
             }
 
             vpnInterface = builder.establish()
+            Timber.d("VPN interface established: ${vpnInterface != null}")
             vpnInterface != null
         } catch (e: Exception) {
             Timber.e(e, "Error establishing VPN")

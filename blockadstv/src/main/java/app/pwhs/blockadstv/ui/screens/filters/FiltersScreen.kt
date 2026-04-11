@@ -43,6 +43,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.pwhs.blockadstv.data.dao.FilterListDao
 import app.pwhs.blockadstv.data.entities.FilterList
+import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.ui.components.TvSwitch
 import app.pwhs.blockadstv.ui.components.TvTextInput
 import app.pwhs.blockadstv.ui.theme.NeonGreen
@@ -57,6 +58,7 @@ import org.koin.compose.koinInject
 fun FiltersScreen(
     modifier: Modifier = Modifier,
     filterListDao: FilterListDao = koinInject(),
+    filterRepo: FilterListRepository = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val filters by filterListDao.getAll().collectAsStateWithLifecycle(initialValue = emptyList())
@@ -190,8 +192,10 @@ fun FiltersScreen(
                     FilterListItem(
                         filter = filter,
                         onToggle = {
-                            CoroutineScope(Dispatchers.IO).launch {
+                            scope.launch {
                                 filterListDao.setEnabled(filter.id, !filter.isEnabled)
+                                // Reload tries so the running Go engine picks up the change
+                                filterRepo.loadAllEnabledFilters()
                             }
                         },
                     )
