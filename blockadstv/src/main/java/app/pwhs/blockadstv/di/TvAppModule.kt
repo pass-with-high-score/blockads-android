@@ -29,6 +29,8 @@ val tvAppModule = module {
     single { TvDatabase.getInstance(androidContext()) }
     single { get<TvDatabase>().dnsLogDao() }
     single { get<TvDatabase>().filterListDao() }
+    single { get<TvDatabase>().whitelistDomainDao() }
+    single { get<TvDatabase>().customDnsRuleDao() }
 
     // Preferences
     single { TvPreferences(androidContext()) }

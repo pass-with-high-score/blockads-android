@@ -1,6 +1,5 @@
 package app.pwhs.blockadstv
 
-import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,15 +13,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import app.pwhs.blockadstv.service.TvVpnService
 import app.pwhs.blockadstv.ui.navigation.TvNavigationDrawer
 import app.pwhs.blockadstv.ui.navigation.TvScreen
+import app.pwhs.blockadstv.ui.screens.apps.WhitelistAppScreen
+import app.pwhs.blockadstv.ui.screens.dns.DnsSetupScreen
 import app.pwhs.blockadstv.ui.screens.filters.FiltersScreen
 import app.pwhs.blockadstv.ui.screens.home.HomeScreen
 import app.pwhs.blockadstv.ui.screens.logs.LogsScreen
+import app.pwhs.blockadstv.ui.screens.rules.DomainRulesScreen
 import app.pwhs.blockadstv.ui.screens.settings.SettingsScreen
 import app.pwhs.blockadstv.ui.theme.BlockadsTheme
 
@@ -59,7 +60,6 @@ class MainActivity : ComponentActivity() {
         if (prepareIntent != null) {
             vpnPermissionLauncher.launch(prepareIntent)
         } else {
-            // Permission already granted
             TvVpnService.start(this)
         }
     }
@@ -82,7 +82,10 @@ fun BlockAdsTvApp(
                 onStopVpn = onStopVpn,
             )
             TvScreen.Filters -> FiltersScreen()
+            TvScreen.Rules -> DomainRulesScreen()
+            TvScreen.Apps -> WhitelistAppScreen()
             TvScreen.Logs -> LogsScreen()
+            TvScreen.Dns -> DnsSetupScreen()
             TvScreen.Settings -> SettingsScreen()
         }
     }

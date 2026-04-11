@@ -85,4 +85,27 @@ class TvPreferences(private val context: Context) {
     suspend fun getWhitelistedAppsSnapshot(): Set<String> {
         return whitelistedApps.first()
     }
+
+    suspend fun toggleWhitelistedApp(packageName: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[KEY_WHITELISTED_APPS] ?: emptySet()
+            prefs[KEY_WHITELISTED_APPS] = if (packageName in current) {
+                current - packageName
+            } else {
+                current + packageName
+            }
+        }
+    }
+
+    suspend fun setUpstreamDns(dns: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_UPSTREAM_DNS] = dns
+        }
+    }
+
+    suspend fun setFallbackDns(dns: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FALLBACK_DNS] = dns
+        }
+    }
 }

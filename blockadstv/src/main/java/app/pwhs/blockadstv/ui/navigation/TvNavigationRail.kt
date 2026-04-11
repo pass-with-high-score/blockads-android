@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Rule
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,7 +54,10 @@ enum class TvScreen(
 ) {
     Home("Home", Icons.Default.Home),
     Filters("Filters", Icons.Default.FilterList),
+    Rules("Rules", Icons.AutoMirrored.Default.Rule),
+    Apps("Apps", Icons.Default.Apps),
     Logs("Logs", Icons.AutoMirrored.Default.List),
+    Dns("DNS", Icons.Default.Dns),
     Settings("Settings", Icons.Default.Settings),
 }
 
@@ -79,7 +85,7 @@ fun TvNavigationDrawer(
                 text = "BA",
                 style = MaterialTheme.typography.titleLarge,
                 color = NeonGreen,
-                modifier = Modifier.padding(bottom = 32.dp),
+                modifier = Modifier.padding(bottom = 24.dp),
             )
 
             TvScreen.entries.forEach { screen ->
@@ -89,7 +95,7 @@ fun TvNavigationDrawer(
                     selected = selectedScreen == screen,
                     onClick = { onScreenSelected(screen) },
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
 
@@ -145,16 +151,16 @@ private fun NavRailItem(
                     false
                 }
             }
-            .padding(vertical = 12.dp, horizontal = 8.dp),
+            .padding(vertical = 8.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
             tint = iconTint,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(22.dp),
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,

@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +44,7 @@ import androidx.tv.material3.Text
 import app.pwhs.blockadstv.data.dao.FilterListDao
 import app.pwhs.blockadstv.data.entities.FilterList
 import app.pwhs.blockadstv.ui.components.TvSwitch
+import app.pwhs.blockadstv.ui.components.TvTextInput
 import app.pwhs.blockadstv.ui.theme.NeonGreen
 import app.pwhs.blockadstv.ui.theme.TextSecondary
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +58,9 @@ fun FiltersScreen(
     modifier: Modifier = Modifier,
     filterListDao: FilterListDao = koinInject(),
 ) {
+    val scope = rememberCoroutineScope()
     val filters by filterListDao.getAll().collectAsStateWithLifecycle(initialValue = emptyList())
+    var customUrl by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -96,6 +101,78 @@ fun FiltersScreen(
             style = MaterialTheme.typography.labelLarge,
             color = NeonGreen,
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add custom filter
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            TvTextInput(
+                value = customUrl,
+                onValueChange = { customUrl = it },
+                placeholder = "Add custom filter URL (hosts file)",
+                modifier = Modifier.weight(1f),
+                onDone = {},
+            )
+
+            var isFocused by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (isFocused) NeonGreen.copy(alpha = 0.2f)
+                        else MaterialTheme.colorScheme.surface
+                    )
+                    .border(
+                        width = if (isFocused) 2.dp else 1.dp,
+                        color = if (isFocused) NeonGreen else MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                    )
+                    .onFocusChanged { isFocused = it.isFocused }
+                    .focusable()
+                    .onKeyEvent { event ->
+                        if (event.type == KeyEventType.KeyUp && (event.key == Key.Enter || event.key == Key.DirectionCenter)) {
+                            val url = customUrl.trim()
+                            if (url.isNotEmpty()) {
+                                scope.launch {
+                                    filterListDao.insert(
+                                        FilterList(
+                                            name = url.substringAfterLast("/").take(30).ifEmpty { "Custom filter" },
+                                            url = url,
+                                            description = "Custom filter",
+                                            isEnabled = true,
+                                            isBuiltIn = false,
+                                            originalUrl = url,
+                                        )
+                                    )
+                                    customUrl = ""
+                                }
+                            }
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = if (isFocused) NeonGreen else TextSecondary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Add",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isFocused) NeonGreen else TextSecondary,
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
