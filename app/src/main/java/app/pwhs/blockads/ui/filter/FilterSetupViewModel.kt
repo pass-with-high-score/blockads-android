@@ -88,27 +88,30 @@ class FilterSetupViewModel(
                 return@launch
             }
 
-            _isAddingCustomFilter.value = true
-            val result = if (buildLocally) {
-                customFilterManager.addCustomFilterLocally(trimmedUrl, name.trim())
+            if (buildLocally) {
+                // Enqueue WorkManager job — returns immediately, compiles in background
+                customFilterManager.enqueueLocalCompile(trimmedUrl, name.trim())
+                _events.toast(R.string.filter_compile_enqueued)
+                _filterAddedEvent.tryEmit(Unit)
             } else {
-                customFilterManager.addCustomFilter(trimmedUrl, name.trim())
+                _isAddingCustomFilter.value = true
+                val result = customFilterManager.addCustomFilter(trimmedUrl, name.trim())
+                _isAddingCustomFilter.value = false
+
+                result.fold(
+                    onSuccess = { _ ->
+                        _events.toast(R.string.settings_add, listOf(": $name"))
+                        _filterAddedEvent.tryEmit(Unit)
+
+                        // Reload all filters so the new custom filter is active
+                        filterRepo.loadAllEnabledFilters()
+                        ServiceController.requestRestart(application.applicationContext)
+                    },
+                    onFailure = { _ ->
+                        _events.toast(R.string.filter_update_failed)
+                    }
+                )
             }
-            _isAddingCustomFilter.value = false
-
-            result.fold(
-                onSuccess = { _ ->
-                    _events.toast(R.string.settings_add, listOf(": $name"))
-                    _filterAddedEvent.tryEmit(Unit)
-
-                    // Reload all filters so the new custom filter is active
-                    filterRepo.loadAllEnabledFilters()
-                    ServiceController.requestRestart(application.applicationContext)
-                },
-                onFailure = { _ ->
-                    _events.toast(R.string.filter_update_failed)
-                }
-            )
         }
     }
 

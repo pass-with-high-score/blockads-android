@@ -126,31 +126,31 @@ class FilterDetailViewModel(
             val f = filter.value ?: return@launch
             if (f.isBuiltIn) return@launch
 
-            _isUpdating.value = true
             val isCurrentlyLocal = f.trieUrl.startsWith("local://")
 
-            val result = if (isCurrentlyLocal) {
+            if (isCurrentlyLocal) {
                 // Switch to server: re-compile via backend API
-                customFilterManager.updateCustomFilter(
+                _isUpdating.value = true
+                val result = customFilterManager.updateCustomFilter(
                     f.copy(trieUrl = "", bloomUrl = "")
                 )
+                _isUpdating.value = false
+
+                result.fold(
+                    onSuccess = { updated ->
+                        _events.toast(R.string.filter_updated, listOf(updated.ruleCount))
+                        filterRepo.loadAllEnabledFilters()
+                        ServiceController.requestRestart(application.applicationContext)
+                    },
+                    onFailure = {
+                        _events.toast(R.string.filter_update_failed)
+                    }
+                )
             } else {
-                // Switch to local: re-compile on-device, update in-place
-                customFilterManager.recompileLocally(f)
+                // Switch to local: enqueue WorkManager job
+                customFilterManager.enqueueRecompileLocally(f)
+                _events.toast(R.string.filter_compile_enqueued)
             }
-
-            _isUpdating.value = false
-
-            result.fold(
-                onSuccess = { updated ->
-                    _events.toast(R.string.filter_updated, listOf(updated.ruleCount))
-                    filterRepo.loadAllEnabledFilters()
-                    ServiceController.requestRestart(application.applicationContext)
-                },
-                onFailure = {
-                    _events.toast(R.string.filter_update_failed)
-                }
-            )
         }
     }
 

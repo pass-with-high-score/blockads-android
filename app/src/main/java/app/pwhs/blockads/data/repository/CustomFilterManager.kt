@@ -1,11 +1,15 @@
 package app.pwhs.blockads.data.repository
 
 import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.remote.api.CustomFilterApi
 import app.pwhs.blockads.data.remote.api.CustomFilterException
 import app.pwhs.blockads.utils.ZipUtils
+import app.pwhs.blockads.worker.FilterCompileWorker
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
@@ -512,6 +516,40 @@ class CustomFilterManager(
             tempTrieFile.delete()
             tempBloomFile.delete()
         }
+    }
+
+    // ── WorkManager-based local compile ────────────────────────────────
+
+    /**
+     * Enqueues a WorkManager job to download and compile a filter locally.
+     * Returns immediately — compilation happens in the background with a notification.
+     */
+    fun enqueueLocalCompile(url: String, name: String) {
+        val workRequest = OneTimeWorkRequestBuilder<FilterCompileWorker>()
+            .setInputData(FilterCompileWorker.buildInputData(url, name))
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            FilterCompileWorker.WORK_NAME_PREFIX + url.hashCode(),
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+        Timber.d("Enqueued local compile worker for: $name")
+    }
+
+    /**
+     * Enqueues a WorkManager job to recompile an existing filter locally.
+     */
+    fun enqueueRecompileLocally(filter: FilterList) {
+        val url = filter.originalUrl.ifEmpty { filter.url }
+        val workRequest = OneTimeWorkRequestBuilder<FilterCompileWorker>()
+            .setInputData(FilterCompileWorker.buildInputData(url, filter.name, filter.id))
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            FilterCompileWorker.WORK_NAME_PREFIX + filter.id,
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
+        Timber.d("Enqueued local recompile worker for: ${filter.name}")
     }
 
     // ── Helpers ────────────────────────────────────────────────────────

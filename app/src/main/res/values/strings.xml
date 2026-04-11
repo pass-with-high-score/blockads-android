@@ -696,6 +696,11 @@
     <string name="filter_build_mode_server">Built via server</string>
     <string name="filter_switch_to_server">Switch to Server</string>
     <string name="filter_switch_to_local">Switch to Local</string>
+    <string name="filter_compile_enqueued">Building filter in background…</string>
+    <string name="filter_compile_progress_title">Compiling filter…</string>
+    <string name="filter_compile_success_title">Filter compiled</string>
+    <string name="filter_compile_failed_title">Filter compilation failed</string>
+    <string name="filter_compile_channel_name">Filter Compilation</string>
     <string name="exclude_lan_title">Exclude LAN Traffic</string>
     <string name="exclude_lan_description">Allow access to local network devices (printers, NAS, local servers) while WireGuard is active</string>
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
