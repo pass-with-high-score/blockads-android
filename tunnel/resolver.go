@@ -51,6 +51,10 @@ type Resolver struct {
 	protocol        DNSProtocol
 	protectSocketFn func(fd int) bool
 
+	// Split-DNS: route queries for specific zones to a different DNS server
+	splitDNS   string   // DNS server for split zones (e.g., WireGuard DNS)
+	splitZones []string // Zone suffixes (e.g., ["internal", "local", "lan"])
+
 	// HTTP client for DoH (reusable)
 	httpClient *http.Client
 	// QUIC connection for DoQ (reusable)
@@ -111,15 +115,89 @@ func (r *Resolver) Configure(protocol DNSProtocol, primary, fallback, dohURL str
 	r.quicMu.Unlock()
 }
 
+// SetSplitDNS configures split-DNS routing for specific zones.
+// Queries matching a zone suffix are resolved via the given DNS server
+// using plain UDP WITHOUT socket protection (so they traverse the VPN/WireGuard tunnel).
+func (r *Resolver) SetSplitDNS(dnsServer string, zones []string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.splitDNS = dnsServer
+	r.splitZones = zones
+	if dnsServer != "" && len(zones) > 0 {
+		logf("Split-DNS configured: server=%s, zones=%v", dnsServer, zones)
+	}
+}
+
+// matchesSplitZone checks if a domain matches any configured split-DNS zone.
+func (r *Resolver) matchesSplitZone(domain string) bool {
+	for _, zone := range r.splitZones {
+		if domain == zone || strings.HasSuffix(domain, "."+zone) {
+			return true
+		}
+	}
+	return false
+}
+
+// extractDomain parses the queried domain name from a raw DNS query.
+func extractDomain(rawQuery []byte) string {
+	var msg dns.Msg
+	if err := msg.Unpack(rawQuery); err != nil || len(msg.Question) == 0 {
+		return ""
+	}
+	return strings.TrimSuffix(strings.ToLower(msg.Question[0].Name), ".")
+}
+
+// queryPlainUnprotected sends a DNS query via plain UDP WITHOUT socket protection.
+// Used for split-DNS queries that must traverse the VPN/WireGuard tunnel.
+func (r *Resolver) queryPlainUnprotected(rawQuery []byte, server string) ([]byte, error) {
+	if !strings.Contains(server, ":") {
+		server = server + ":53"
+	}
+
+	conn, err := net.DialTimeout("udp", server, connectTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("split-dns dial: %w", err)
+	}
+	defer conn.Close()
+
+	conn.SetDeadline(time.Now().Add(queryTimeoutPlain))
+
+	if _, err := conn.Write(rawQuery); err != nil {
+		return nil, fmt.Errorf("split-dns write: %w", err)
+	}
+
+	buf := make([]byte, 4096)
+	n, err := conn.Read(buf)
+	if err != nil {
+		return nil, fmt.Errorf("split-dns read: %w", err)
+	}
+
+	return buf[:n], nil
+}
+
 // Resolve forwards a DNS query and returns the response.
-// It tries the primary server first, then fallback on failure.
+// It checks split-DNS zones first, then tries the primary server, then fallback.
 func (r *Resolver) Resolve(rawQuery []byte) ([]byte, error) {
 	r.mu.RLock()
 	protocol := r.protocol
 	primary := r.primaryServer
 	fallback := r.fallbackServer
 	dohURL := r.dohURL
+	splitDNS := r.splitDNS
+	splitZones := r.splitZones
 	r.mu.RUnlock()
+
+	// Split-DNS: route matching zones to WireGuard/private DNS (unprotected)
+	if splitDNS != "" && len(splitZones) > 0 {
+		domain := extractDomain(rawQuery)
+		if domain != "" && r.matchesSplitZone(domain) {
+			resp, err := r.queryPlainUnprotected(rawQuery, splitDNS)
+			if err == nil {
+				return resp, nil
+			}
+			logf("Split-DNS query to %s for %s failed: %v", splitDNS, domain, err)
+		}
+	}
 
 	// Try primary
 	resp, err := r.query(rawQuery, protocol, primary, dohURL)

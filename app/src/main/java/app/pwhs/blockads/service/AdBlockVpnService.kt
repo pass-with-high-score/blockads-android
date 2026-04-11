@@ -471,6 +471,10 @@ class AdBlockVpnService : VpnService() {
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
                 goTunnelAdapter.configureSafeSearch(safeSearchEnabled, youtubeRestrictedMode)
 
+                // Configure split-DNS zones for WireGuard internal domains
+                val splitDnsZones = appPrefs.splitDnsZones.first()
+                goTunnelAdapter.setSplitDNSZones(splitDnsZones)
+
                 // Dynamically update Go Engine Native Tries whenever filters change (enabled/disabled/deleted)
                 // We use drop(1) because start() already calls updateTries() once on boot.
                 launch {

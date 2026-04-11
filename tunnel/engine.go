@@ -98,6 +98,9 @@ type Engine struct {
 	router      *Router
 	interceptor *DnsInterceptor
 
+	// Split-DNS zones (comma-separated, set from Kotlin)
+	splitZones string
+
 	// MITM Proxy
 	mitmProxy *MitmProxy
 
@@ -291,6 +294,47 @@ func (e *Engine) SetYouTubeRestricted(enabled bool) {
 	e.safeSearch.SetYouTubeRestricted(enabled)
 }
 
+// SetSplitDNSZones configures which domain zones should be resolved via the
+// WireGuard DNS server instead of the upstream DNS. Zones are comma-separated
+// suffixes (e.g., "internal,local,lan,corp"). The WireGuard DNS server is
+// automatically extracted from the WireGuard config during Start().
+func (e *Engine) SetSplitDNSZones(zones string) {
+	e.splitZones = zones
+	// If resolver is already running, update it
+	if e.resolver != nil {
+		e.applySplitDNS("")
+	}
+}
+
+// applySplitDNS configures split-DNS on the resolver.
+// If dnsServer is empty, only zones are updated (server kept from previous config).
+func (e *Engine) applySplitDNS(dnsServer string) {
+	if e.resolver == nil {
+		return
+	}
+	zones := parseSplitZones(e.splitZones)
+	if len(zones) > 0 && dnsServer != "" {
+		e.resolver.SetSplitDNS(dnsServer, zones)
+	} else if len(zones) == 0 {
+		e.resolver.SetSplitDNS("", nil)
+	}
+}
+
+// parseSplitZones parses comma-separated zone string into a slice.
+func parseSplitZones(zones string) []string {
+	if zones == "" {
+		return nil
+	}
+	var result []string
+	for _, z := range strings.Split(zones, ",") {
+		z = strings.TrimSpace(strings.ToLower(z))
+		if z != "" {
+			result = append(result, z)
+		}
+	}
+	return result
+}
+
 // Start begins processing packets from the TUN file descriptor.
 // protector is called to protect sockets from VPN routing loop.
 // wgConfigJSON: if non-empty, WireGuard is initialized from this JSON config
@@ -369,6 +413,11 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 					} else {
 						e.router.SetAdapter(wgAdapter)
 						logf("WireGuard adapter fully initialized and active")
+
+						// Configure split-DNS using WireGuard's DNS server
+						if len(wgCfg.Interface.DNS) > 0 && e.splitZones != "" {
+							e.applySplitDNS(wgCfg.Interface.DNS[0])
+						}
 					}
 				}
 			}

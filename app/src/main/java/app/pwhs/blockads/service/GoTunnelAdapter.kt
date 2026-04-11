@@ -66,6 +66,14 @@ class GoTunnelAdapter(
     }
 
     /**
+     * Configure split-DNS zones for WireGuard internal domains.
+     * @param zones Comma-separated zone suffixes (e.g., "internal,local,lan")
+     */
+    fun setSplitDNSZones(zones: String) {
+        engine.setSplitDNSZones(zones)
+    }
+
+    /**
      * Configure SafeSearch and YouTube restricted mode.
      */
     fun configureSafeSearch(safeSearchEnabled: Boolean, youtubeRestricted: Boolean) {

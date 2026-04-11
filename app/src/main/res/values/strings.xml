@@ -620,6 +620,9 @@
     <string name="wireguard_clear">Clear WireGuard</string>
     <string name="wireguard_active_label">WireGuard Active — Restart VPN to apply</string>
 
+    <string name="split_dns_title">Split DNS Zones</string>
+    <string name="split_dns_description">Comma-separated domain zones to resolve via WireGuard DNS instead of upstream (e.g., internal,local,lan)</string>
+
     <!-- HTTPS Filtering -->
     <string name="https_filtering_title">HTTPS Filtering</string>
     <string name="https_filtering_toggle_label">HTTPS Cosmetic Filter</string>

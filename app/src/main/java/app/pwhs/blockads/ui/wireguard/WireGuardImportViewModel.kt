@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -44,6 +45,10 @@ class WireGuardImportViewModel(
     private val _isConfigSaved = MutableStateFlow(false)
     val isConfigSaved: StateFlow<Boolean> = _isConfigSaved.asStateFlow()
 
+    /** Split-DNS zones for routing internal domains via WireGuard DNS. */
+    private val _splitDnsZones = MutableStateFlow("")
+    val splitDnsZones: StateFlow<String> = _splitDnsZones.asStateFlow()
+
     /** One-shot UI events. */
     private val _events = MutableSharedFlow<WireGuardUiEvent>()
     val events: SharedFlow<WireGuardUiEvent> = _events.asSharedFlow()
@@ -62,6 +67,9 @@ class WireGuardImportViewModel(
                     _config.value = WireGuardConfig.fromJson(json)
                 } catch (_: Exception) { /* ignore parse errors */ }
             }
+
+            // Load split-DNS zones
+            _splitDnsZones.value = appPrefs.splitDnsZones.first()
         }
     }
 
@@ -158,6 +166,13 @@ class WireGuardImportViewModel(
             _config.value = null
             ServiceController.requestRestart(getApplication())
             _events.emit(WireGuardUiEvent.ConfigCleared)
+        }
+    }
+
+    fun setSplitDnsZones(zones: String) {
+        _splitDnsZones.value = zones
+        viewModelScope.launch {
+            appPrefs.setSplitDnsZones(zones)
         }
     }
 
