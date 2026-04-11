@@ -72,7 +72,16 @@ class FilterUpdateWorker(
             // 2. Update all enabled custom filters
             val customFilters = filterListDao.getAllNonBuiltIn()
             for (filter in customFilters) {
-                if (filter.isEnabled) {
+                if (!filter.isEnabled) continue
+
+                val isLocal = filter.trieUrl.startsWith("local://") &&
+                        filter.bloomUrl.startsWith("local://")
+
+                if (isLocal) {
+                    // Enqueue separate worker for local filters
+                    customFilterManager.enqueueRecompileLocally(filter)
+                    isAnySuccess = true
+                } else {
                     val customResult = customFilterManager.updateCustomFilter(filter)
                     if (customResult.isSuccess) {
                         totalCount += customResult.getOrNull()?.ruleCount ?: 0

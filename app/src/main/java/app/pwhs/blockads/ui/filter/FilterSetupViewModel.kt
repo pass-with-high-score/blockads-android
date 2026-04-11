@@ -129,8 +129,9 @@ class FilterSetupViewModel(
     fun updateAllFilters() {
         viewModelScope.launch {
             _isUpdatingFilter.value = true
-            
+
             var totalCount = 0
+            var hasLocalFilters = false
 
             // 1. Update remote built-in filters
             val result = filterRepo.forceUpdateAllEnabledFilters()
@@ -139,8 +140,16 @@ class FilterSetupViewModel(
             // 2. Update all enabled custom filters
             val customFilters = filterListDao.getAllNonBuiltIn()
             for (filter in customFilters) {
-                if (filter.isEnabled) {
-                    // Recompile via backend, download new binaries, and update rule count
+                if (!filter.isEnabled) continue
+
+                val isLocal = filter.trieUrl.startsWith("local://") &&
+                        filter.bloomUrl.startsWith("local://")
+
+                if (isLocal) {
+                    // Enqueue WorkManager job for local filters
+                    customFilterManager.enqueueRecompileLocally(filter)
+                    hasLocalFilters = true
+                } else {
                     val customResult = customFilterManager.updateCustomFilter(filter)
                     customResult.onSuccess { updatedFilter ->
                         totalCount += updatedFilter.ruleCount
@@ -150,15 +159,18 @@ class FilterSetupViewModel(
 
             // Always reload engine in case any custom filters updated their binaries
             filterRepo.loadAllEnabledFilters()
-            
+
             _isUpdatingFilter.value = false
 
+            if (hasLocalFilters) {
+                _events.toast(R.string.filter_compile_enqueued)
+            }
             if (result.isSuccess || totalCount > 0) {
                 _events.toast(
                     R.string.filter_updated,
                     listOf(totalCount)
                 )
-            } else {
+            } else if (!hasLocalFilters) {
                 result.onFailure {
                     _events.toast(R.string.filter_update_failed)
                 }
