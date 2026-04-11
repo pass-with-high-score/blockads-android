@@ -38,5 +38,5 @@ val tvAppModule = module {
     single { FilterListRepository(androidContext(), get(), get(), get()) }
 
     // ViewModels
-    viewModel { TvHomeViewModel(get(), get()) }
+    viewModel { TvHomeViewModel(get(), get(), get()) }
 }

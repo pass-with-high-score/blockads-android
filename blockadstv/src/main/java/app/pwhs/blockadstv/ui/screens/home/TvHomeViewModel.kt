@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockadstv.data.dao.DnsLogDao
 import app.pwhs.blockadstv.data.datastore.TvPreferences
+import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.service.TvVpnService
 import app.pwhs.blockadstv.service.VpnState
 import kotlinx.coroutines.delay
@@ -17,6 +18,7 @@ import java.util.Calendar
 class TvHomeViewModel(
     private val dnsLogDao: DnsLogDao,
     private val tvPrefs: TvPreferences,
+    private val filterRepo: FilterListRepository,
 ) : ViewModel() {
 
     val vpnState: StateFlow<VpnState> = TvVpnService.state
@@ -45,6 +47,9 @@ class TvHomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val securityThreats: StateFlow<Int> = dnsLogDao.getSecurityBlockedCountSince(startOfDayMillis())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val filterRuleCount: StateFlow<Int> = filterRepo.domainCountFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val protectionUptimeMs: StateFlow<Long> = flow {

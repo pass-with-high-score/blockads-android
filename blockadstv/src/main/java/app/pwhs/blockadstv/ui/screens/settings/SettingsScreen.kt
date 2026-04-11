@@ -13,18 +13,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,59 +37,30 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import app.pwhs.blockadstv.data.datastore.TvPreferences
+import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.ui.components.TvSwitch
 import app.pwhs.blockadstv.ui.theme.NeonGreen
 import app.pwhs.blockadstv.ui.theme.TextSecondary
-
-private data class SettingItem(
-    val icon: ImageVector,
-    val title: String,
-    val subtitle: String,
-    val isToggle: Boolean = false,
-    val defaultEnabled: Boolean = false,
-)
-
-private val settingItems = listOf(
-    SettingItem(
-        icon = Icons.Default.Start,
-        title = "Start on boot",
-        subtitle = "Automatically start protection when device boots",
-        isToggle = true,
-        defaultEnabled = true,
-    ),
-    SettingItem(
-        icon = Icons.Default.Dns,
-        title = "DNS Provider",
-        subtitle = "System default",
-    ),
-    SettingItem(
-        icon = Icons.Default.Refresh,
-        title = "Update filter lists",
-        subtitle = "Last updated: Never",
-    ),
-    SettingItem(
-        icon = Icons.Default.Info,
-        title = "About",
-        subtitle = "BlockAds TV v1.0",
-    ),
-)
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
+    tvPrefs: TvPreferences = koinInject(),
+    filterRepo: FilterListRepository = koinInject(),
 ) {
-    val toggleStates = remember {
-        mutableStateMapOf<String, Boolean>().apply {
-            settingItems.filter { it.isToggle }.forEach { put(it.title, it.defaultEnabled) }
-        }
-    }
+    val scope = rememberCoroutineScope()
+    val startOnBoot by tvPrefs.startOnBoot.collectAsStateWithLifecycle(initialValue = true)
+    var isUpdatingFilters by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -123,23 +94,64 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Settings list
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items(settingItems) { setting ->
-                val isEnabled = toggleStates[setting.title] ?: false
+            // Start on boot - real toggle
+            item {
                 SettingListItem(
-                    icon = setting.icon,
-                    title = setting.title,
-                    subtitle = setting.subtitle,
-                    isToggle = setting.isToggle,
-                    isEnabled = isEnabled,
+                    icon = Icons.Default.Start,
+                    title = "Start on boot",
+                    subtitle = "Automatically start protection when device boots",
+                    isToggle = true,
+                    isEnabled = startOnBoot,
                     onClick = {
-                        if (setting.isToggle) {
-                            toggleStates[setting.title] = !isEnabled
+                        scope.launch { tvPrefs.setStartOnBoot(!startOnBoot) }
+                    },
+                )
+            }
+
+            // Update filter lists - real action
+            item {
+                SettingListItem(
+                    icon = Icons.Default.Refresh,
+                    title = "Update filter lists",
+                    subtitle = when {
+                        isUpdatingFilters -> "Updating..."
+                        updateResult != null -> updateResult!!
+                        else -> "Tap to sync and download latest filters"
+                    },
+                    isToggle = false,
+                    isEnabled = false,
+                    onClick = {
+                        if (!isUpdatingFilters) {
+                            isUpdatingFilters = true
+                            updateResult = null
+                            scope.launch {
+                                try {
+                                    filterRepo.fetchAndSyncRemoteFilterLists()
+                                    val result = filterRepo.loadAllEnabledFilters()
+                                    val count = result.getOrDefault(0)
+                                    updateResult = "Updated: $count rules loaded"
+                                } catch (e: Exception) {
+                                    updateResult = "Update failed: ${e.message}"
+                                }
+                                isUpdatingFilters = false
+                            }
                         }
                     },
+                )
+            }
+
+            // About
+            item {
+                SettingListItem(
+                    icon = Icons.Default.Info,
+                    title = "About",
+                    subtitle = "BlockAds TV v1.0",
+                    isToggle = false,
+                    isEnabled = false,
+                    onClick = {},
                 )
             }
         }
@@ -163,11 +175,8 @@ private fun SettingListItem(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(
-                if (isFocused) {
-                    MaterialTheme.colorScheme.surfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.surface
-                }
+                if (isFocused) MaterialTheme.colorScheme.surfaceVariant
+                else MaterialTheme.colorScheme.surface
             )
             .border(
                 width = if (isFocused) 2.dp else 1.dp,

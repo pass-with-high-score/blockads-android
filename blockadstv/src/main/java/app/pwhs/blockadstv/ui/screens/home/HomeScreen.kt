@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Timer
@@ -69,6 +70,7 @@ fun HomeScreen(
     val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
     val securityThreats by viewModel.securityThreats.collectAsStateWithLifecycle()
+    val filterRuleCount by viewModel.filterRuleCount.collectAsStateWithLifecycle()
     val uptimeMs by viewModel.protectionUptimeMs.collectAsStateWithLifecycle()
 
     val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
@@ -206,7 +208,12 @@ fun HomeScreen(
                 value = formatUptime(uptimeMs),
                 modifier = Modifier.weight(1f),
             )
-            Spacer(modifier = Modifier.weight(1f))
+            StatCard(
+                icon = Icons.AutoMirrored.Default.Rule,
+                label = "Filter Rules",
+                value = formatCount(filterRuleCount),
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
