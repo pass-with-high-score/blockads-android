@@ -61,8 +61,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material.icons.extended)
 
-    // TV
-    implementation(libs.androidx.tv.foundation)
+    // TV Material
     implementation(libs.androidx.tv.material)
 
     // Lifecycle
