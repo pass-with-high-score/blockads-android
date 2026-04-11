@@ -48,15 +48,17 @@ class FilterDownloadManager(
         }
 
         if (!forceUpdate && destFile.exists() && destFile.length() > 0) {
+            Timber.d("Cache hit: ${destFile.name} (${destFile.length()} bytes)")
             return destFile.absolutePath
         }
 
         return try {
-            Timber.d("Downloading from $url to ${destFile.name}")
+            Timber.d("Downloading: $url")
             val response = client.get(url)
             val channel = response.bodyAsChannel()
 
             val tempFile = File(destFile.parent, "${destFile.name}.tmp")
+            var totalBytes = 0L
             withContext(Dispatchers.IO) {
                 FileOutputStream(tempFile).use { output ->
                     val buffer = ByteArray(8 * 1024)
@@ -64,14 +66,24 @@ class FilterDownloadManager(
                     while (channel.readAvailable(buffer).also { bytesRead = it } >= 0) {
                         if (bytesRead > 0) {
                             output.write(buffer, 0, bytesRead)
+                            totalBytes += bytesRead
                         }
                     }
                 }
             }
 
+            // Verify file is not suspiciously small (error page or empty)
+            if (totalBytes < 100) {
+                Timber.e("Downloaded file too small ($totalBytes bytes), likely an error: ${destFile.name}")
+                tempFile.delete()
+                return null
+            }
+
             if (tempFile.renameTo(destFile)) {
+                Timber.d("Downloaded ${destFile.name}: $totalBytes bytes")
                 destFile.absolutePath
             } else {
+                Timber.e("Failed to rename temp file: ${destFile.name}")
                 tempFile.delete()
                 null
             }
