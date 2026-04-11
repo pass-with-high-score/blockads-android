@@ -604,4 +604,9 @@
     <string name="filter_build_mode_server">สร้างผ่านเซิร์ฟเวอร์</string>
     <string name="filter_switch_to_server">เปลี่ยนเป็นเซิร์ฟเวอร์</string>
     <string name="filter_switch_to_local">เปลี่ยนเป็นในเครื่อง</string>
+    <string name="filter_compile_enqueued">กำลังสร้างตัวกรองในพื้นหลัง…</string>
+    <string name="filter_compile_progress_title">กำลังคอมไพล์ตัวกรอง…</string>
+    <string name="filter_compile_success_title">คอมไพล์ตัวกรองสำเร็จ</string>
+    <string name="filter_compile_failed_title">การคอมไพล์ตัวกรองล้มเหลว</string>
+    <string name="filter_compile_channel_name">การคอมไพล์ตัวกรอง</string>
 </resources>

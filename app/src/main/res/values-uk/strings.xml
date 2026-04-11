@@ -625,4 +625,9 @@
     <string name="filter_build_mode_server">Зібрано через сервер</string>
     <string name="filter_switch_to_server">Перемкнути на сервер</string>
     <string name="filter_switch_to_local">Перемкнути на локальний</string>
+    <string name="filter_compile_enqueued">Збірка фільтра у фоновому режимі…</string>
+    <string name="filter_compile_progress_title">Компіляція фільтра…</string>
+    <string name="filter_compile_success_title">Фільтр скомпільовано</string>
+    <string name="filter_compile_failed_title">Помилка компіляції фільтра</string>
+    <string name="filter_compile_channel_name">Компіляція фільтра</string>
 </resources>

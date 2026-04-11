@@ -602,4 +602,9 @@
     <string name="filter_build_mode_server">通过服务器构建</string>
     <string name="filter_switch_to_server">切换到服务器</string>
     <string name="filter_switch_to_local">切换到本地</string>
+    <string name="filter_compile_enqueued">正在后台构建过滤器…</string>
+    <string name="filter_compile_progress_title">正在编译过滤器…</string>
+    <string name="filter_compile_success_title">过滤器编译完成</string>
+    <string name="filter_compile_failed_title">过滤器编译失败</string>
+    <string name="filter_compile_channel_name">过滤器编译</string>
 </resources>

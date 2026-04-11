@@ -602,4 +602,9 @@
     <string name="filter_build_mode_server">서버를 통해 빌드됨</string>
     <string name="filter_switch_to_server">서버로 전환</string>
     <string name="filter_switch_to_local">로컬로 전환</string>
+    <string name="filter_compile_enqueued">백그라운드에서 필터 빌드 중…</string>
+    <string name="filter_compile_progress_title">필터 컴파일 중…</string>
+    <string name="filter_compile_success_title">필터 컴파일 완료</string>
+    <string name="filter_compile_failed_title">필터 컴파일 실패</string>
+    <string name="filter_compile_channel_name">필터 컴파일</string>
 </resources>

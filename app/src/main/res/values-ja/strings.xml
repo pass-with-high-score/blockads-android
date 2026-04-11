@@ -601,4 +601,9 @@
     <string name="filter_build_mode_server">サーバー経由でビルド</string>
     <string name="filter_switch_to_server">サーバーに切り替え</string>
     <string name="filter_switch_to_local">ローカルに切り替え</string>
+    <string name="filter_compile_enqueued">バックグラウンドでフィルターをビルド中…</string>
+    <string name="filter_compile_progress_title">フィルターをコンパイル中…</string>
+    <string name="filter_compile_success_title">フィルターのコンパイル完了</string>
+    <string name="filter_compile_failed_title">フィルターのコンパイルに失敗</string>
+    <string name="filter_compile_channel_name">フィルターコンパイル</string>
 </resources>

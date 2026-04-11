@@ -651,4 +651,9 @@
     <string name="filter_build_mode_server">Compilato tramite server</string>
     <string name="filter_switch_to_server">Passa al server</string>
     <string name="filter_switch_to_local">Passa al locale</string>
+    <string name="filter_compile_enqueued">Costruzione del filtro in background…</string>
+    <string name="filter_compile_progress_title">Compilazione del filtro…</string>
+    <string name="filter_compile_success_title">Filtro compilato</string>
+    <string name="filter_compile_failed_title">Compilazione del filtro non riuscita</string>
+    <string name="filter_compile_channel_name">Compilazione filtro</string>
 </resources>

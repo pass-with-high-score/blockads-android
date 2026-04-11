@@ -627,4 +627,9 @@
     <string name="filter_build_mode_server">Sestaveno přes server</string>
     <string name="filter_switch_to_server">Přepnout na server</string>
     <string name="filter_switch_to_local">Přepnout na lokální</string>
+    <string name="filter_compile_enqueued">Sestavování filtru na pozadí…</string>
+    <string name="filter_compile_progress_title">Kompilace filtru…</string>
+    <string name="filter_compile_success_title">Filtr zkompilován</string>
+    <string name="filter_compile_failed_title">Kompilace filtru selhala</string>
+    <string name="filter_compile_channel_name">Kompilace filtru</string>
 </resources>

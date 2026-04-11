@@ -652,4 +652,9 @@
     <string name="filter_build_mode_server">Xây dựng qua máy chủ</string>
     <string name="filter_switch_to_server">Chuyển sang máy chủ</string>
     <string name="filter_switch_to_local">Chuyển sang cục bộ</string>
+    <string name="filter_compile_enqueued">Đang xây dựng bộ lọc trong nền…</string>
+    <string name="filter_compile_progress_title">Đang biên dịch bộ lọc…</string>
+    <string name="filter_compile_success_title">Biên dịch bộ lọc thành công</string>
+    <string name="filter_compile_failed_title">Biên dịch bộ lọc thất bại</string>
+    <string name="filter_compile_channel_name">Biên dịch bộ lọc</string>
 </resources>

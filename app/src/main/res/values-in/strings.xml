@@ -624,4 +624,9 @@
     <string name="filter_build_mode_server">Dibangun melalui server</string>
     <string name="filter_switch_to_server">Beralih ke Server</string>
     <string name="filter_switch_to_local">Beralih ke Lokal</string>
+    <string name="filter_compile_enqueued">Membangun filter di latar belakang…</string>
+    <string name="filter_compile_progress_title">Mengompilasi filter…</string>
+    <string name="filter_compile_success_title">Filter berhasil dikompilasi</string>
+    <string name="filter_compile_failed_title">Kompilasi filter gagal</string>
+    <string name="filter_compile_channel_name">Kompilasi Filter</string>
 </resources>

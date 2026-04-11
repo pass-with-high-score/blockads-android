@@ -617,4 +617,9 @@
     <string name="filter_build_mode_server">تم البناء عبر الخادم</string>
     <string name="filter_switch_to_server">التبديل إلى الخادم</string>
     <string name="filter_switch_to_local">التبديل إلى المحلي</string>
+    <string name="filter_compile_enqueued">جاري بناء الفلتر في الخلفية…</string>
+    <string name="filter_compile_progress_title">جاري تجميع الفلتر…</string>
+    <string name="filter_compile_success_title">تم تجميع الفلتر</string>
+    <string name="filter_compile_failed_title">فشل تجميع الفلتر</string>
+    <string name="filter_compile_channel_name">تجميع الفلتر</string>
 </resources>

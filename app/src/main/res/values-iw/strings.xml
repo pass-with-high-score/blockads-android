@@ -631,4 +631,9 @@
     <string name="filter_build_mode_server">נבנה דרך השרת</string>
     <string name="filter_switch_to_server">עבור לשרת</string>
     <string name="filter_switch_to_local">עבור למקומי</string>
+    <string name="filter_compile_enqueued">בונה פילטר ברקע…</string>
+    <string name="filter_compile_progress_title">מקמפל פילטר…</string>
+    <string name="filter_compile_success_title">הפילטר קומפל בהצלחה</string>
+    <string name="filter_compile_failed_title">קומפילציית הפילטר נכשלה</string>
+    <string name="filter_compile_channel_name">קומפילציית פילטר</string>
 </resources>
