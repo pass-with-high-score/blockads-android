@@ -118,8 +118,15 @@ class TvVpnService : VpnService() {
         serviceScope.launch {
             try {
                 // Phase 1: Load filters
-                Timber.d("Phase 1: Seeding default filters...")
-                filterRepo.seedDefaultsIfNeeded()
+                val isFirstDownload = !tvPrefs.filtersDownloaded.first()
+                if (isFirstDownload) {
+                    Timber.d("Phase 1: First VPN start — force downloading all filters...")
+                    filterRepo.forceReloadAllFilters()
+                    tvPrefs.setFiltersDownloaded(true)
+                } else {
+                    Timber.d("Phase 1: Seeding default filters...")
+                    filterRepo.seedDefaultsIfNeeded()
+                }
 
                 Timber.d("Phase 1: Loading enabled filters...")
                 val result = filterRepo.loadAllEnabledFilters()

@@ -26,6 +26,7 @@ class TvPreferences(private val context: Context) {
         private val KEY_DNS_RESPONSE_TYPE = stringPreferencesKey("dns_response_type")
         private val KEY_START_ON_BOOT = booleanPreferencesKey("start_on_boot")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
+        private val KEY_FILTERS_DOWNLOADED = booleanPreferencesKey("filters_downloaded")
 
         const val DEFAULT_UPSTREAM_DNS = "9.9.9.9"
         const val DEFAULT_FALLBACK_DNS = "94.140.14.14"
@@ -79,6 +80,16 @@ class TvPreferences(private val context: Context) {
     suspend fun setStartOnBoot(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_START_ON_BOOT] = enabled
+        }
+    }
+
+    val filtersDownloaded: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FILTERS_DOWNLOADED] ?: false
+    }
+
+    suspend fun setFiltersDownloaded(downloaded: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FILTERS_DOWNLOADED] = downloaded
         }
     }
 

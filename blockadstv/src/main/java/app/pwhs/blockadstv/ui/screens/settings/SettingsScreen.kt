@@ -129,8 +129,7 @@ fun SettingsScreen(
                             updateResult = null
                             scope.launch {
                                 try {
-                                    filterRepo.fetchAndSyncRemoteFilterLists()
-                                    val result = filterRepo.loadAllEnabledFilters()
+                                    val result = filterRepo.forceReloadAllFilters()
                                     val count = result.getOrDefault(0)
                                     updateResult = "Updated: $count rules loaded"
                                 } catch (e: Exception) {

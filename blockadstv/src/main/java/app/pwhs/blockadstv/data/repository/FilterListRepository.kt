@@ -179,7 +179,31 @@ class FilterListRepository(
         }
     }
 
-    suspend fun loadAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
+    /**
+     * Force re-download all enabled filter files, bypassing cache.
+     * Use when files may be corrupt from a previous partial download.
+     */
+    suspend fun forceReloadAllFilters(): Result<Int> = withContext(Dispatchers.IO) {
+        loadMutex.withLock {
+            try {
+                // Delete all cached filter files
+                val filterDir = File(context.filesDir, "remote_filters")
+                if (filterDir.exists()) {
+                    filterDir.listFiles()?.forEach { it.delete() }
+                    Timber.d("Cleared filter cache: ${filterDir.absolutePath}")
+                }
+
+                // Re-sync from remote
+                fetchAndSyncRemoteFilterLists()
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to clear and re-sync filters")
+            }
+        }
+        // Now download fresh files (loadMutex released, loadAllEnabledFilters will re-acquire)
+        loadAllEnabledFilters(forceDownload = true)
+    }
+
+    suspend fun loadAllEnabledFilters(forceDownload: Boolean = false): Result<Int> = withContext(Dispatchers.IO) {
         loadMutex.withLock {
             try {
                 val enabledLists = filterListDao.getEnabled()
@@ -205,8 +229,8 @@ class FilterListRepository(
                         Timber.d("Skipping ${filter.name}: empty bloomUrl or trieUrl")
                         continue
                     }
-                    Timber.d("Downloading filter: ${filter.name} (bloom=${filter.bloomUrl.take(60)}, trie=${filter.trieUrl.take(60)})")
-                    val result = downloadManager.downloadFilterList(filter, forceUpdate = false)
+                    Timber.d("Downloading filter: ${filter.name} (force=$forceDownload)")
+                    val result = downloadManager.downloadFilterList(filter, forceUpdate = forceDownload)
                     if (result.isSuccess) {
                         val paths = result.getOrNull() ?: continue
                         Timber.d("  OK: ${filter.name} bloom=${paths.bloomPath}, trie=${paths.triePath}")
