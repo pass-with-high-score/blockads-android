@@ -2,6 +2,7 @@ package app.pwhs.blockadstv.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,15 +25,23 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
@@ -119,7 +128,9 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Button(
+            PowerButton(
+                vpnEnabled = vpnEnabled,
+                vpnConnecting = vpnConnecting,
                 onClick = {
                     if (vpnEnabled) {
                         onStopVpn()
@@ -127,32 +138,7 @@ fun HomeScreen(
                         onRequestVpnPermission()
                     }
                 },
-                modifier = Modifier.size(120.dp),
-                shape = ButtonDefaults.shape(shape = CircleShape),
-                colors = ButtonDefaults.colors(
-                    containerColor = when {
-                        vpnEnabled -> NeonGreenDim
-                        vpnConnecting -> AccentBlue.copy(alpha = 0.3f)
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    focusedContainerColor = when {
-                        vpnEnabled -> NeonGreen
-                        vpnConnecting -> AccentBlue.copy(alpha = 0.5f)
-                        else -> MaterialTheme.colorScheme.surface
-                    },
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PowerSettingsNew,
-                    contentDescription = if (vpnEnabled) "Turn off" else "Turn on",
-                    modifier = Modifier.size(56.dp),
-                    tint = if (vpnEnabled) {
-                        MaterialTheme.colorScheme.background
-                    } else {
-                        TextSecondary
-                    },
-                )
-            }
+            )
 
             Spacer(modifier = Modifier.width(40.dp))
 
@@ -241,6 +227,53 @@ private fun formatUptime(millis: Long): String {
         String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds)
     } else {
         String.format(Locale.getDefault(), "%d:%02d", minutes, seconds)
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun PowerButton(
+    vpnEnabled: Boolean,
+    vpnConnecting: Boolean,
+    onClick: () -> Unit,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    val bgColor = when {
+        vpnEnabled && isFocused -> NeonGreen
+        vpnEnabled -> NeonGreenDim
+        vpnConnecting -> AccentBlue.copy(alpha = 0.3f)
+        isFocused -> MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .background(bgColor)
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyUp && (event.key == Key.Enter || event.key == Key.DirectionCenter)) {
+                    onClick()
+                    true
+                } else {
+                    false
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.PowerSettingsNew,
+            contentDescription = if (vpnEnabled) "Turn off" else "Turn on",
+            modifier = Modifier.size(56.dp),
+            tint = if (vpnEnabled) {
+                MaterialTheme.colorScheme.background
+            } else {
+                TextSecondary
+            },
+        )
     }
 }
 
