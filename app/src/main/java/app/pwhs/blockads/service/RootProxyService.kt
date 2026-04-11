@@ -489,11 +489,12 @@ class RootProxyService : Service() {
         notificationUpdateJob?.cancel()
 
         notificationUpdateJob = serviceScope.launch {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
             while (isActive && isRunning) {
                 try {
                     todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
                     delay(30_000L)
-                    if (isRunning) {
+                    if (isRunning && powerManager.isInteractive) {
                         updateNotification()
                     }
                 } catch (e: Exception) {

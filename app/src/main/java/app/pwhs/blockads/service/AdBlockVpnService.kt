@@ -1192,13 +1192,16 @@ class AdBlockVpnService : VpnService() {
         notificationUpdateJob?.cancel()
 
         notificationUpdateJob = serviceScope.launch {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
             while (isRunning) {
                 try {
                     // Refresh today's blocked count from database
                     todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
 
                     delay(30_000L) // Update every 30 seconds
-                    if (isRunning) {
+                    // Skip notification update when screen is off to avoid
+                    // waking Always-On Display on some devices
+                    if (isRunning && powerManager.isInteractive) {
                         updateNotification()
                     }
                 } catch (e: Exception) {
