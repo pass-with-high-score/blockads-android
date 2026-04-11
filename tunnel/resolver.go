@@ -176,28 +176,14 @@ func (r *Resolver) queryPlainUnprotected(rawQuery []byte, server string) ([]byte
 }
 
 // Resolve forwards a DNS query and returns the response.
-// It checks split-DNS zones first, then tries the primary server, then fallback.
+// Split-DNS is handled by the engine (handleSplitDNSForward) before calling this.
 func (r *Resolver) Resolve(rawQuery []byte) ([]byte, error) {
 	r.mu.RLock()
 	protocol := r.protocol
 	primary := r.primaryServer
 	fallback := r.fallbackServer
 	dohURL := r.dohURL
-	splitDNS := r.splitDNS
-	splitZones := r.splitZones
 	r.mu.RUnlock()
-
-	// Split-DNS: route matching zones to WireGuard/private DNS (unprotected)
-	if splitDNS != "" && len(splitZones) > 0 {
-		domain := extractDomain(rawQuery)
-		if domain != "" && r.matchesSplitZone(domain) {
-			resp, err := r.queryPlainUnprotected(rawQuery, splitDNS)
-			if err == nil {
-				return resp, nil
-			}
-			logf("Split-DNS query to %s for %s failed: %v", splitDNS, domain, err)
-		}
-	}
 
 	// Try primary
 	resp, err := r.query(rawQuery, protocol, primary, dohURL)

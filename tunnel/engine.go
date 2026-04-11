@@ -1208,6 +1208,24 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 		}
 	}
 
+	// Split-DNS check: forward matching domains through WireGuard tunnel
+	// Must happen before ad-blocking so internal domains are never blocked.
+	e.mu.Lock()
+	resolver := e.resolver
+	e.mu.Unlock()
+	if resolver != nil {
+		resolver.mu.RLock()
+		splitDNS := resolver.splitDNS
+		splitZones := resolver.splitZones
+		resolver.mu.RUnlock()
+
+		if splitDNS != "" && len(splitZones) > 0 && resolver.matchesSplitZone(domain) {
+			// Route this DNS packet through the WireGuard tunnel via the router
+			e.handleSplitDNSForward(queryInfo, appName, startTime)
+			return
+		}
+	}
+
 	// SafeSearch check
 	ssResult := e.safeSearch.Check(domain, queryInfo.QueryType)
 	if ssResult.Action == ActionRedirect {
@@ -1425,6 +1443,60 @@ func (e *Engine) handleForward(queryInfo *DNSQueryInfo, appName string, startTim
 	e.totalQueries.Add(1)
 
 	elapsed := time.Since(startTime).Milliseconds()
+	e.notifyLog(queryInfo.Domain, false, queryInfo.QueryType, elapsed, appName, "", "")
+}
+
+// handleSplitDNSForward forwards a DNS query through the WireGuard tunnel
+// for domains matching split-DNS zones. Instead of resolving via our own
+// resolver (which can't reach the WireGuard DNS because the app is excluded
+// from VPN), we forward the original packet through the router/WireGuard adapter.
+func (e *Engine) handleSplitDNSForward(queryInfo *DNSQueryInfo, appName string, startTime time.Time) {
+	// Build a packet addressed to the WireGuard DNS server
+	// and inject it into the router (WireGuard adapter).
+	// The router will encrypt it and send it through the tunnel.
+	// The response comes back through channelTUN → real TUN → app.
+	e.mu.Lock()
+	router := e.router
+	resolver := e.resolver
+	e.mu.Unlock()
+
+	if router == nil || resolver == nil {
+		e.handleForward(queryInfo, appName, startTime)
+		return
+	}
+
+	resolver.mu.RLock()
+	splitDNS := resolver.splitDNS
+	resolver.mu.RUnlock()
+
+	if splitDNS == "" {
+		e.handleForward(queryInfo, appName, startTime)
+		return
+	}
+
+	// Build a new DNS packet destined for the WireGuard DNS server
+	dnsServerIP := net.ParseIP(splitDNS)
+	if dnsServerIP == nil {
+		logf("Split-DNS: invalid DNS server IP: %s", splitDNS)
+		e.handleForward(queryInfo, appName, startTime)
+		return
+	}
+
+	// Construct IP/UDP packet with the original DNS payload
+	// Source: original source IP/port, Dest: WireGuard DNS:53
+	var packet []byte
+	if queryInfo.IsIPv6 {
+		packet = buildIPv6UDPPacket(queryInfo.SourceIP, dnsServerIP, queryInfo.SourcePort, 53, queryInfo.RawDNSPayload)
+	} else {
+		packet = buildIPv4UDPPacket(queryInfo.SourceIP, dnsServerIP.To4(), queryInfo.SourcePort, 53, queryInfo.RawDNSPayload)
+	}
+
+	// Forward through the WireGuard tunnel via the router
+	router.RoutePacket(packet, len(packet))
+
+	e.totalQueries.Add(1)
+	elapsed := time.Since(startTime).Milliseconds()
+	logf("Split-DNS: forwarded %s to %s via WireGuard", queryInfo.Domain, splitDNS)
 	e.notifyLog(queryInfo.Domain, false, queryInfo.QueryType, elapsed, appName, "", "")
 }
 
