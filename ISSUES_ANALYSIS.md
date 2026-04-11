@@ -1,114 +1,85 @@
-# BlockAds Open Issues Analysis (2026-04-11)
+# BlockAds Open Issues Analysis (Updated 2026-04-11)
 
-Total: **28 open issues**
-
----
-
-## PRIORITY 1: BUGS - Fix Now
-
-These are core functionality bugs affecting many users. Should be fixed in the next release.
-
-| # | Title | Why Fix Now | Estimated Effort |
-|---|-------|-------------|------------------|
-| **#126** | Custom Lists 'Statistics' shows 0 | Core feature broken - custom lists appear non-functional to users. Likely a counting bug in `StatisticsViewModel.kt` that only counts default lists. | Small |
-| **#125** | Unable to add custom filter lists (oisd, etc.) | Blocks users from adding popular filter lists. Likely a URL validation or parsing issue in `CustomFilterManager.kt` or `FilterListRepository.kt`. | Small |
-| **#124** | Whitelist domain not working instantly | Whitelist changes don't apply until reboot. Need to flush DNS cache or trigger service reload after whitelist update. | Small-Medium |
-| **#56** | Whitelist filter lists improperly load | Shows wrong rule count from whitelist files. Parsing issue - other apps (AdGuard, DNSNet) read the same lists correctly. | Small |
+Total: **16 open** / 12 closed today
 
 ---
 
-## PRIORITY 2: BUGS - Fix Soon
+## CLOSED - Fixed (3)
 
-Important but either complex to fix or affect fewer users.
+| # | Title | Fix |
+|---|-------|-----|
+| ~~#126~~ | Custom Lists Statistics shows 0 | Fixed Go engine first-match-wins → now attributes all matching filters (d4727ef) |
+| ~~#92~~ | Hide from recent tasks | Added toggle in Settings > Privacy & Diagnostics (40e21d1) |
+| ~~#102~~ | Watchdog / auto-restart | BootReceiver now handles MY_PACKAGE_REPLACED (0123203) |
 
-| # | Title | Notes | Estimated Effort |
-|---|-------|-------|------------------|
-| **#130** | Root Proxy mode doesn't work | Root mode completely broken while VPN works. Involves `RootProxyService.kt` + `IptablesManager.kt`. Needs deep debugging. | Large |
-| **#129** | Internal domains not accessible in WireGuard mode | Private DNS (e.g., 10.8.0.1) not resolving through BlockAds WireGuard. Need to forward internal domain queries to WireGuard DNS. | Medium |
-| **#106** | Brave Browser + BlockAds broken | Sites don't fully load in Brave since v5.x. Brave may use its own DNS (DoH). May need per-browser handling or documentation. | Medium |
-| **#63** | Issue with NextDNS | Log discrepancies between app and NextDNS dashboard. 24 comments - active discussion. Custom DNS integration logic issue. | Medium |
+## CLOSED - Already Implemented (5)
 
----
+| # | Title | Status |
+|---|-------|--------|
+| ~~#120~~ | Quick Settings toggle | AdBlockTileService already registered and functional |
+| ~~#128~~ | Automation via intent | TaskerReceiver supports TASKER_START / TASKER_STOP |
+| ~~#69~~ | Add Delete button for filters | Delete button exists in filter list and detail pages |
+| ~~#105~~ | Root Mode without VPN | Duplicate of #123, Root Proxy mode already exists |
+| ~~#118~~ | Intercept hardcoded port 53 | Already handled by VPN TUN + Root Proxy iptables |
 
-## PRIORITY 3: FEATURE REQUESTS - Easy to Implement
+## CLOSED - Not a Bug / Resolved (4)
 
-These FRs have low complexity and existing code infrastructure to build on.
-
-| # | Title | Why Easy | Estimated Effort |
-|---|-------|----------|------------------|
-| **#120** | Quick Settings toggle | `AdBlockTileService.kt` **already exists**. May just need registration in AndroidManifest or minor fixes. | Tiny |
-| **#128** | Automation via intent | `TaskerReceiver.kt` **already exists**. Extend to support enable/disable intents for Tasker/MacroDroid integration. | Small |
-| **#69** | Add Delete button for filters | Delete logic exists in `FilterDetailViewModel.kt` and `FilterListRepository.kt`. Just needs a delete button in the Filter list UI. | Small |
-| **#92** | Hide app from recent tasks | Single line: `android:excludeFromRecents="true"` in AndroidManifest, or add as a toggle in Settings. | Tiny |
-| **#132** | Crowdin/Weblate for translations | Not a code change - project/CI setup. Strings already externalized in `values-*/strings.xml` (20+ languages). | Small (config) |
-| **#102** | Watchdog / auto-restart service | `VpnResumeWorker.kt` and `RootProxyResumeWorker.kt` already exist. Extend to monitor service health and auto-restart after updates. | Small |
-
----
-
-## PRIORITY 4: FEATURE REQUESTS - Medium Effort
-
-Require meaningful new code but are well-scoped.
-
-| # | Title | Notes | Estimated Effort |
-|---|-------|-------|------------------|
-| **#91** | WireGuard blocks local servers | Need to exclude LAN/private IP ranges (10.x, 192.168.x, 172.16-31.x) from WireGuard tunnel. Config change in `WireGuardConfigParser.kt`. | Medium |
-| **#104** | Accessing by IP address blocked | IP addresses shouldn't go through domain filtering. Need to detect and bypass IPs in DNS resolution. | Medium |
-| **#123** | Root Proxy conflicts with other VPNs | Root proxy should work independently of VPN slot. AdGuard handles this - study their approach. Related to #130. | Medium |
-| **#105** | Root Mode without VPN | Duplicate of #123/#130 theme. Users want root-based ad blocking without consuming VPN slot. | Medium |
-| **#107** | Per-app domain blocking/unblocking | `FirewallRule.kt` and `FirewallManager.kt` exist. Need to extend domain rules to be per-app scoped. | Medium-Large |
-| **#118** | Intercept hardcoded port 53 traffic | Redirect all port 53 traffic through BlockAds even if apps hardcode DNS IPs (e.g., 8.8.8.8). Needs iptables rules. | Medium |
+| # | Title | Reason |
+|---|-------|--------|
+| ~~#125~~ | Unable to add custom filters | Server issue, confirmed fixed |
+| ~~#124~~ | Whitelist domain needs reboot | Not a code bug — Android/browser DNS cache |
+| ~~#106~~ | Brave Browser broken | Caused by beta HTTPS filtering, disabling fixes it |
+| ~~#100~~ | CA Certificate for HTTPS | Already implemented as HTTPS filtering (beta) |
 
 ---
 
-## PRIORITY 5: FEATURE REQUESTS - Large Effort / Long-term
+## OPEN - Needs Investigation (2)
 
-Major features requiring significant development.
+| # | Title | Status |
+|---|-------|--------|
+| **#130** | Root Proxy mode doesn't work | No code bug found. Likely Android 16 + KernelSU compatibility. Need user logs. |
+| **#63** | Issue with NextDNS | Active discussion (24 comments). Log discrepancy is expected — local blocks don't reach NextDNS. |
 
-| # | Title | Notes | Estimated Effort |
-|---|-------|-------|------------------|
-| **#133** | DNS over HTTP/3 and QUIC | New protocol implementation. Requires QUIC library integration. | Large |
-| **#119** | Shizuku/ADB connection mode | New connection mode alongside VPN and Root. Requires Shizuku API integration. | Large |
-| **#89** | Bypass DPI / spoof SNI RST | Deep packet inspection bypass. Would need integration with byedpi or similar library. | Large |
-| **#74** | Block internet by default for new apps | Firewall functionality - need to monitor app installs and apply default-deny rules. `FirewallManager.kt` exists as base. | Large |
-| **#73** | Queries tab, App tab, Stats, Profiles | Major UI restructuring with new tabs and per-app management. | Very Large |
-| **#111** | Filter building locally and VPS | Build filter lists on-device or user's VPS instead of downloading. Novel architecture. | Very Large |
-| **#100** | CA Certificate for HTTPS filtering | `HttpsFilteringScreen.kt` exists but full CA cert generation and installation flow is complex. | Large |
-| **#95** | Multiple requests (DPI bypass, custom DNS, nav bar, etc.) | Umbrella issue - individual items vary in effort. | Mixed |
+## OPEN - Feature Gaps (2)
 
----
+| # | Title | Notes |
+|---|-------|-------|
+| **#56** | Whitelist filter lists improperly load | App only supports block lists. Need whitelist filter list format support. |
+| **#129** | Internal domains in WireGuard mode | Need split-DNS to forward private domain queries to WireGuard DNS. |
 
-## Recommended Action Plan
+## OPEN - Feature Requests: Medium Effort (5)
 
-### Next Release (Quick Wins)
-1. **#126** - Fix custom list statistics counter
-2. **#125** - Fix custom filter list URL validation/parsing
-3. **#124** - Apply whitelist changes without reboot
-4. **#56** - Fix whitelist filter list parsing
-5. **#120** - Verify Quick Settings tile works (code exists)
-6. **#69** - Add delete button to filter list UI
-7. **#92** - Add hide-from-recents option
+| # | Title | Notes |
+|---|-------|-------|
+| **#132** | Crowdin/Weblate for translations | CI/config setup, not code. Strings already externalized. |
+| **#91** | WireGuard blocks local servers | Exclude LAN/private IP ranges from WireGuard tunnel. |
+| **#104** | Accessing by IP address blocked | Bypass domain filtering for raw IP addresses. |
+| **#123** | Root Proxy conflicts with other VPNs | Root proxy should work independently of VPN slot. |
+| **#107** | Per-app domain blocking/unblocking | Extend FirewallManager for per-app domain rules. |
 
-### Release After
-1. **#128** - Extend Tasker/intent automation
-2. **#102** - Watchdog auto-restart
-3. **#132** - Set up Crowdin for translations
-4. **#91** - Exclude LAN from WireGuard
-5. **#130** - Debug and fix Root Proxy mode
+## OPEN - Feature Requests: Large Effort (7)
 
-### Backlog
-- #129, #106, #63 (compatibility bugs - need investigation)
-- #107, #118, #104, #123, #105 (medium FRs)
-- #133, #119, #89, #74, #73, #111, #100, #95 (long-term FRs)
+| # | Title | Notes |
+|---|-------|-------|
+| **#133** | DNS over HTTP/3 and QUIC | Requires QUIC library integration. |
+| **#119** | Shizuku/ADB connection mode | New connection mode, significant development. |
+| **#89** | Bypass DPI / spoof SNI RST | Out of scope for DNS-based blocker. |
+| **#74** | Block internet by default for new apps | Default-deny firewall for new installs. |
+| **#73** | Queries tab, App tab, Stats, Profiles | Major UI restructuring. |
+| **#111** | Filter building locally and VPS | Novel architecture change. |
+| **#95** | Multiple requests | Umbrella issue, mixed complexity. |
 
 ---
 
-## Summary Stats
+## Summary
 
 | Category | Count |
 |----------|-------|
-| Bugs - Fix Now | 4 |
-| Bugs - Fix Soon | 4 |
-| FR - Easy | 6 |
-| FR - Medium | 6 |
-| FR - Large/Long-term | 8 |
+| Closed — Fixed | 3 |
+| Closed — Already Implemented | 5 |
+| Closed — Not a Bug | 4 |
+| Open — Needs Investigation | 2 |
+| Open — Feature Gaps | 2 |
+| Open — FR Medium | 5 |
+| Open — FR Large | 7 |
 | **Total** | **28** |
