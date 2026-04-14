@@ -399,6 +399,7 @@
     <string name="app_management_desc">Manage per-app VPN routing and view stats</string>
     <string name="app_management_search">Search apps…</string>
     <string name="app_management_loading">Loading apps…</string>
+    <string name="app_management_refresh">Refresh</string>
     <string name="app_management_sort">Sort</string>
     <string name="app_management_sort_name">Sort by Name</string>
     <string name="app_management_sort_queries">Sort by Queries</string>

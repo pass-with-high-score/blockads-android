@@ -69,6 +69,10 @@ class FirewallViewModel(
         }
     }
 
+    fun refreshApps() {
+        loadApps()
+    }
+
     fun setFirewallEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setFirewallEnabled(enabled)

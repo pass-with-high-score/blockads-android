@@ -113,6 +113,10 @@ class AppManagementViewModel(
         }
     }
 
+    fun refreshApps() {
+        loadApps()
+    }
+
     fun toggleApp(packageName: String) {
         viewModelScope.launch {
             appPrefs.toggleWhitelistedApp(packageName)
