@@ -1,0 +1,4 @@
+- Fix Tasker stop intent not working (VPN auto-restarting)
+- Fix fallback DNS resetting to AdGuard when selecting a provider
+- Fix auto-update not working for locally-built custom filters
+- Add refresh button in Firewall, App Management, and Whitelist screens
