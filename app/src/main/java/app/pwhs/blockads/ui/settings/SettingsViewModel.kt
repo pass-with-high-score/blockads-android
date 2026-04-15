@@ -31,6 +31,7 @@ import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import app.pwhs.blockads.service.IptablesManager
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.service.ShizukuManager
 import app.pwhs.blockads.utils.CrashReportingManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -162,7 +163,17 @@ class SettingsViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             if (enabled) {
                 if (IptablesManager.isRootAvailable()) {
+                    // Root available (via libsu or Shizuku)
                     applyRoutingMode(AppPreferences.ROUTING_MODE_ROOT)
+                } else if (ShizukuManager.isAvailable()) {
+                    if (!ShizukuManager.isPermissionGranted()) {
+                        // Shizuku running but permission not yet granted
+                        ShizukuManager.requestPermission()
+                        _events.toast(R.string.shizuku_permission_required)
+                    } else {
+                        // Permission granted but Shizuku server is not root
+                        _events.toast(R.string.shizuku_not_root)
+                    }
                 } else {
                     _events.toast(R.string.root_not_available)
                 }

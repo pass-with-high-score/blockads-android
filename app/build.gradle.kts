@@ -102,6 +102,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        aidl = true
     }
 
     dependenciesInfo {
@@ -197,6 +198,10 @@ dependencies {
     // libsu — root shell access for iptables mode
     implementation(libs.core)
     implementation(libs.service)
+
+    // Shizuku — ADB root shell access (alternative to Magisk/KernelSU)
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
 
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)

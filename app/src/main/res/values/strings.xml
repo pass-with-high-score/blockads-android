@@ -662,8 +662,10 @@
     <string name="settings_network_switch_delay_desc">Pause VPN reconnect after network changes (useful for Wi-Fi Calling)</string>
     <string name="settings_network_switch_delay_value">Delay: %1$d seconds</string>
     <string name="settings_root_proxy">Root Proxy Mode</string>
-    <string name="settings_root_proxy_desc">Redirect DNS via iptables instead of VPN (requires Root)</string>
-    <string name="root_not_available">Root access not available. Please grant permission in your root manager (e.g., Magisk/KernelSU).</string>
+    <string name="settings_root_proxy_desc">Redirect DNS via iptables instead of VPN (requires Root or Shizuku)</string>
+    <string name="root_not_available">Root access not available. Please grant permission in your root manager (Magisk/KernelSU) or start Shizuku with ADB root.</string>
+    <string name="shizuku_permission_required">Shizuku permission required. Please grant and try again.</string>
+    <string name="shizuku_not_root">Shizuku is not running as root. Enable \"ADB root debugging\" in your custom ROM developer settings.</string>
     <string name="root_proxy_notification_text">Root Proxy mode active — DNS traffic redirected via iptables</string>
     <string name="reddit_link" translatable="false">https://www.reddit.com/r/BlockAds/</string>
     <string name="telegram_link" translatable="false">https://t.me/blockads_android</string>

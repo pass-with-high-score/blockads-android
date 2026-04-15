@@ -29,6 +29,10 @@
 # Keep VPN service
 -keep class app.pwhs.blockads.service.** { *; }
 
+# Shizuku
+-keep class rikka.shizuku.** { *; }
+-dontwarn rikka.shizuku.**
+
 # Go tunnel (gomobile)
 -keep class tunnel.** { *; }
 
