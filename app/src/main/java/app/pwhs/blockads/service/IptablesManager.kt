@@ -16,6 +16,10 @@ import timber.log.Timber
  * - nat table:    REDIRECT port 53 → 15353 (DNS interception)
  * - filter table: DROP port 853 (block DoT to force plain DNS)
  * - settings:     Disable Android Private DNS (forces port 53 fallback)
+ *
+ * Supports two shell backends:
+ * - LIBSU: Traditional root via Magisk/KernelSU
+ * - SHIZUKU: ADB root via Shizuku (for custom ROMs with ADB root debugging)
  */
 object IptablesManager {
 
@@ -23,14 +27,61 @@ object IptablesManager {
     private const val CHAIN_FILTER = "BLOCKADS_DOT"
     private const val LOCAL_DNS_PORT = 15353
 
+    enum class ShellBackend { LIBSU, SHIZUKU }
+
+    /** Which backend is currently active — set by [isRootAvailable]. */
+    var activeBackend: ShellBackend = ShellBackend.LIBSU
+        private set
+
     /**
-     * Actively request root access. This will trigger the Magisk/KernelSU
-     * permission prompt if it hasn't been granted yet.
+     * Actively request root access. Tries libsu (Magisk/KernelSU) first,
+     * then falls back to Shizuku if available.
+     *
+     * Sets [activeBackend] to whichever method succeeded.
      */
     fun isRootAvailable(): Boolean {
-        // Explicitly trigger 'su' so Magisk/KernelSU shows the permission prompt
-        val result = Shell.cmd("su -c id").exec()
-        return result.isSuccess && result.out.any { it.contains("uid=0") }
+        // Try libsu first (Magisk/KernelSU)
+        val libsuResult = Shell.cmd("su -c id").exec()
+        if (libsuResult.isSuccess && libsuResult.out.any { it.contains("uid=0") }) {
+            activeBackend = ShellBackend.LIBSU
+            Timber.d("Root available via libsu (Magisk/KernelSU)")
+            return true
+        }
+
+        // Fallback: try Shizuku
+        if (ShizukuManager.isRootAvailable()) {
+            activeBackend = ShellBackend.SHIZUKU
+            Timber.d("Root available via Shizuku (ADB root)")
+            return true
+        }
+
+        return false
+    }
+
+    // ── Shell abstraction ──────────────────────────────────────────
+    private data class CmdResult(val isSuccess: Boolean, val out: List<String>, val err: List<String>)
+
+    private fun exec(command: String): CmdResult {
+        return when (activeBackend) {
+            ShellBackend.LIBSU -> {
+                val r = Shell.cmd(command).exec()
+                CmdResult(r.isSuccess, r.out, r.err)
+            }
+            ShellBackend.SHIZUKU -> {
+                val r = ShizukuManager.exec(command)
+                CmdResult(r.isSuccess, r.out, r.err)
+            }
+        }
+    }
+
+    private fun execBatch(commands: List<String>) {
+        when (activeBackend) {
+            ShellBackend.LIBSU -> Shell.cmd(*commands.toTypedArray()).exec()
+            ShellBackend.SHIZUKU -> {
+                // Shizuku doesn't support batch — join with ';'
+                ShizukuManager.exec(commands.joinToString("; "))
+            }
+        }
     }
 
     /**
@@ -42,7 +93,7 @@ object IptablesManager {
      */
     fun setupRules(context: Context, blockDoT: Boolean = true): Boolean {
         val uid = context.applicationInfo.uid
-        Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT")
+        Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT, backend=$activeBackend")
 
         // Always teardown first (idempotent)
         teardownRules()
@@ -52,7 +103,7 @@ object IptablesManager {
         // This is CRITICAL — without this, Android 9+ uses DoT (853)
         // and our port 53 redirect never sees traffic.
         // ══════════════════════════════════════════════════════════════
-        Shell.cmd("settings put global private_dns_mode off").exec()
+        exec("settings put global private_dns_mode off")
         Timber.d("Disabled Android Private DNS (forced plain DNS mode)")
 
         // ══════════════════════════════════════════════════════════════
@@ -84,7 +135,7 @@ object IptablesManager {
 
         var ipv4Success = true
         for (cmd in ipv4Commands) {
-            val result = Shell.cmd(cmd).exec()
+            val result = exec(cmd)
             if (!result.isSuccess) {
                 Timber.e("IPv4 iptables cmd FAILED: [$cmd] err=${result.err} out=${result.out}")
                 ipv4Success = false
@@ -117,7 +168,7 @@ object IptablesManager {
         }
 
         for (cmd in ipv6Commands) {
-            val result = Shell.cmd(cmd).exec()
+            val result = exec(cmd)
             if (!result.isSuccess) {
                 Timber.w("IPv6 ip6tables cmd FAILED (ignoring): [$cmd] err=${result.err}")
             }
@@ -160,7 +211,7 @@ object IptablesManager {
             "settings put global private_dns_mode opportunistic",
         )
 
-        Shell.cmd(*commands.toTypedArray()).exec()
+        execBatch(commands)
         Timber.d("iptables teardown done, Private DNS restored")
         return true
     }
@@ -169,9 +220,7 @@ object IptablesManager {
      * Check if our iptables rules are currently active.
      */
     fun isActive(): Boolean {
-        val result = Shell.cmd(
-            "iptables -t nat -L OUTPUT -n 2>/dev/null | grep $CHAIN"
-        ).exec()
+        val result = exec("iptables -t nat -L OUTPUT -n 2>/dev/null | grep $CHAIN")
         return result.out.any { it.contains(CHAIN) }
     }
 }

@@ -201,7 +201,11 @@ class RootProxyService : Service() {
                     firewallManager = null
                 }
 
-                // 3. Retry loop for Standalone mode and IPTables setup
+                // 3. Detect root backend (libsu vs Shizuku) before applying iptables.
+                // After a reboot, activeBackend resets to LIBSU; this re-detects the correct one.
+                IptablesManager.isRootAvailable()
+
+                // 4. Retry loop for Standalone mode and IPTables setup
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
                 var proxyStarted = false
                 while (!proxyStarted && retryManager.shouldRetry()) {
@@ -253,6 +257,11 @@ class RootProxyService : Service() {
 
         // Teardown iptables rules (critical — prevents internet loss)
         IptablesManager.teardownRules()
+
+        // Release Shizuku shell service if it was used
+        if (IptablesManager.activeBackend == IptablesManager.ShellBackend.SHIZUKU) {
+            ShizukuManager.unbindService()
+        }
 
         // Stop Go engine
         goTunnelAdapter.stop()
