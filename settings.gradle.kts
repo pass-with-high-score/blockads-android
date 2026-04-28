@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "blockads"
 include(":app")
+include(":blockadstv")
