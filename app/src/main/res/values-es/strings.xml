@@ -441,10 +441,10 @@
     <string name="vpn_conflict_title">Conexión Bloqueada</string>
     <string name="vpn_conflict_desc">Android solo permite una conexión VPN a la vez. Otra VPN está activa actualmente en tu dispositivo.\n\nPor favor, desconecta la otra VPN primero o desactiva la \&quot;VPN siempre activa\&quot; en los Ajustes antes de conectar BlockAds.</string>
     <string name="open_settings">Abrir Ajustes</string>
-    <string name="vpn_network_switch_waiting">Menunggu jaringan stabil… %1$ds</string>
-    <string name="settings_network_switch_delay">Penundaan Peralihan Jaringan</string>
-    <string name="settings_network_switch_delay_desc">Jeda penyambungan ulang VPN setelah perubahan jaringan (berguna untuk Panggilan Wi-Fi)</string>
-    <string name="settings_network_switch_delay_value">Penundaan: %1$d detik</string>
+    <string name="vpn_network_switch_waiting">Esperando red estable… %1$ds</string>
+    <string name="settings_network_switch_delay">Retraso en el cambio de red</string>
+    <string name="settings_network_switch_delay_desc">Retrasa la reconexión de la VPN después de un cambio de red (útil para Llamadas Wi-Fi)</string>
+    <string name="settings_network_switch_delay_value">Retraso: %1$d segundos</string>
     <string name="settings_root_proxy">Modo Proxy Root</string>
     <string name="settings_root_proxy_desc">Redirigir DNS vía iptables en lugar de VPN (requiere Root)</string>
     <string name="root_not_available">Acceso Root no disponible. Por favor, concede el permiso en tu administrador root (ej. Magisk/KernelSU).</string>
