@@ -13,6 +13,7 @@ import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.utils.startOfDayMillis
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,6 @@ import org.koin.java.KoinJavaComponent.getKoin
 class AdBlockWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_TOGGLE_VPN = "app.pwhs.blockads.WIDGET_TOGGLE_VPN"
         private const val EXPANDED_MIN_WIDTH_DP = 160
         private const val EXPANDED_MIN_HEIGHT_DP = 90
 
@@ -61,47 +61,6 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-
-        if (intent.action == ACTION_TOGGLE_VPN) {
-            if (AdBlockVpnService.isRunning) {
-                val stop = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = AdBlockVpnService.ACTION_STOP
-                }
-                context.startService(stop)
-            } else {
-                val prepare = android.net.VpnService.prepare(context)
-                if (prepare == null) {
-                    val start = Intent(context, AdBlockVpnService::class.java).apply {
-                        action = AdBlockVpnService.ACTION_START
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(start)
-                    } else {
-                        context.startService(start)
-                    }
-                } else {
-                    val openApp = Intent(context, MainActivity::class.java).apply {
-                        putExtra(MainActivity.EXTRA_START_VPN, true)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(openApp)
-                }
-            }
-
-            updateAllWidgets(context)
-        }
-    }
-
-    fun updateAllWidgets(context: Context) {
-        val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(
-            ComponentName(context, AdBlockWidgetProvider::class.java)
-        )
-
-        for (id in ids) {
-            val options = manager.getAppWidgetOptions(id)
-            updateWidgetInternal(context, manager, id, options)
-        }
     }
 
     private fun updateWidgetInternal(
@@ -117,7 +76,7 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
             minWidth >= EXPANDED_MIN_WIDTH_DP &&
                     minHeight >= EXPANDED_MIN_HEIGHT_DP
 
-        val isRunning = AdBlockVpnService.isRunning
+        val isRunning = AdBlockVpnService.isRunning || RootProxyService.isRunning
 
         if (isExpanded) {
             updateExpanded(context, appWidgetManager, appWidgetId, isRunning)
@@ -213,8 +172,8 @@ class AdBlockWidgetProvider : AppWidgetProvider() {
     }
 
     private fun bindClicks(context: Context, views: RemoteViews) {
-        val toggleIntent = Intent(context, AdBlockWidgetProvider::class.java).apply {
-            action = ACTION_TOGGLE_VPN
+        val toggleIntent = Intent(context, WidgetToggleReceiver::class.java).apply {
+            action = WidgetToggleReceiver.ACTION_TOGGLE_VPN
         }
         val togglePending = PendingIntent.getBroadcast(
             context, 0, toggleIntent,

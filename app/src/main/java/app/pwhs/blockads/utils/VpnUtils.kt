@@ -18,7 +18,11 @@ object VpnUtils {
      */
     fun isOtherVpnActive(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val allNetworks = connectivityManager.allNetworks
+        val activeNetwork = connectivityManager.activeNetwork
+        val allNetworks = connectivityManager.allNetworks.toMutableList()
+        if (activeNetwork != null && !allNetworks.contains(activeNetwork)) {
+            allNetworks.add(0, activeNetwork)
+        }
 
         for (network in allNetworks) {
             val capabilities = connectivityManager.getNetworkCapabilities(network)

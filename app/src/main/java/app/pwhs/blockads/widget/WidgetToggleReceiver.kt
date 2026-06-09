@@ -9,8 +9,10 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.utils.VpnUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -26,25 +28,41 @@ class WidgetToggleReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_TOGGLE_VPN) {
-            toggleVpn(context)
-            AdBlockWidgetProvider.sendUpdateBroadcast(context)
+            val pendingResult = goAsync()
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    toggleVpn(context)
+                    AdBlockWidgetProvider.sendUpdateBroadcast(context)
+                } catch (e: Exception) {
+                    Timber.e(e, "Error toggling VPN from widget receiver")
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         }
     }
 
-    private fun toggleVpn(context: Context) {
-        val isRootProxyRunning = RootProxyService.isRunning
-        val isVpnRunning = AdBlockVpnService.isRunning
-
-        if (isRootProxyRunning) {
-            RootProxyService.stop(context)
-        } else if (isVpnRunning) {
-            val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = AdBlockVpnService.ACTION_STOP
+    private suspend fun toggleVpn(context: Context) {
+        // Stop logic: evaluate running status of both services
+        if (AdBlockVpnService.isRunning || RootProxyService.isRunning) {
+            // Stop AdBlockVpnService if running
+            if (AdBlockVpnService.isRunning) {
+                val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {
+                    action = AdBlockVpnService.ACTION_STOP
+                }
+                context.startService(stopIntent)
             }
-            context.startService(stopIntent)
+            
+            // Stop RootProxyService if running
+            if (RootProxyService.isRunning) {
+                val stopIntent = Intent(context, RootProxyService::class.java).apply {
+                    action = RootProxyService.ACTION_STOP
+                }
+                context.startService(stopIntent)
+            }
         } else {
             val appPrefs = AppPreferences(context)
-            val routingMode = runBlocking { appPrefs.routingMode.first() }
+            val routingMode = appPrefs.routingMode.first()
             val isRootMode = routingMode == AppPreferences.ROUTING_MODE_ROOT
 
             if (!isRootMode && VpnUtils.isOtherVpnActive(context)) {
@@ -57,25 +75,26 @@ class WidgetToggleReceiver : BroadcastReceiver() {
                 return
             }
 
-            if (isRootMode) {
-                RootProxyService.start(context)
-            } else {
-                val startIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = AdBlockVpnService.ACTION_START
+            // Start logic: determine the service class and action dynamically based on routing mode
+            val targetClass = if (isRootMode) RootProxyService::class.java else AdBlockVpnService::class.java
+            val targetAction = if (isRootMode) RootProxyService.ACTION_START else AdBlockVpnService.ACTION_START
+
+            val startIntent = Intent(context, targetClass).apply {
+                action = targetAction
+            }
+            
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(startIntent)
+                } else {
+                    context.startService(startIntent)
                 }
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(startIntent)
-                    } else {
-                        context.startService(startIntent)
-                    }
-                } catch (e: Exception) {
-                    Timber.w("Cannot start VPN from widget, opening app: $e")
-                    val appIntent = Intent(context, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    }
-                    context.startActivity(appIntent)
+            } catch (e: Exception) {
+                Timber.w(e, "Cannot start VPN from widget, opening app")
+                val appIntent = Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
+                context.startActivity(appIntent)
             }
         }
     }

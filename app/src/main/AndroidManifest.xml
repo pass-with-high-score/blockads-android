@@ -93,6 +93,10 @@
                 android:resource="@xml/widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".widget.WidgetToggleReceiver"
+            android:exported="false" />
+
         <!-- Tasker / Automation integration -->
         <receiver
             android:name=".receiver.TaskerReceiver"
