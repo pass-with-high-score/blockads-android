@@ -111,6 +111,13 @@ type Engine struct {
 	tcpStackPipe atomic.Pointer[packetPipe]
 	useTcpStack  atomic.Bool
 
+	// tunMTU is the MTU of the userspace TCP/IP stack endpoint. It MUST
+	// match the VpnService TUN MTU. Full-route capture sets a large MTU
+	// (9000, matching AdGuard) so the gVisor stack handles egress
+	// segmentation itself — a 1500 TUN MTU through a userspace forwarder
+	// causes TCP connection resets. 0 means "use default" (1500).
+	tunMTU atomic.Int64
+
 	// Stack-mode MITM state (Phase D). When both are non-nil, the stack
 	// uses the MITM TCP handler; otherwise the Phase C direct-dial
 	// passthrough handler is used.
@@ -1087,6 +1094,12 @@ func (e *Engine) SetUseTcpStack(enabled bool) {
 // IsUsingTcpStack reports the current flag value.
 func (e *Engine) IsUsingTcpStack() bool { return e.useTcpStack.Load() }
 
+// SetTunMTU sets the userspace stack endpoint MTU. Must equal the
+// VpnService TUN MTU. Call before Engine.Start. 0 = default (1500).
+func (e *Engine) SetTunMTU(mtu int) {
+	e.tunMTU.Store(int64(mtu))
+}
+
 // SetUIDResolver registers the Kotlin-implemented resolver used to look
 // up the owning app UID for each TCP/UDP flow terminated by the
 // userspace TCP/IP stack. Typically wired once at VPN start.
@@ -1119,6 +1132,9 @@ func (e *Engine) startTcpStackParallel() error {
 	certMgr := e.stackCertMgr
 	filter := e.stackMitmFilter
 	mtu := uint32(defaultTunMTU)
+	if m := e.tunMTU.Load(); m > 0 {
+		mtu = uint32(m)
+	}
 	e.tcpStack = stack
 	e.mu.Unlock()
 	e.tcpStackPipe.Store(pipe)

@@ -275,7 +275,12 @@ class GoTunnelAdapter(
             try {
                 engine.setUseTcpStack(true)
                 engine.setOutboundAdapter(tunnel.DirectOutbound())
-                Timber.d("Full-route capture: TCP stack + DirectOutbound enabled for forwarding")
+                // Large MTU (matches AdGuard's 9000) so the gVisor stack does
+                // egress segmentation itself. A 1500 TUN MTU through the
+                // userspace forwarder caused TCP connection resets. Must match
+                // the VpnService.Builder.setMtu() value used for full-route.
+                engine.setTunMTU(FULL_ROUTE_MTU.toLong())
+                Timber.d("Full-route capture: TCP stack + DirectOutbound + MTU $FULL_ROUTE_MTU")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to enable forwarding for full-route capture")
             }
@@ -466,6 +471,11 @@ class GoTunnelAdapter(
     }
 
     companion object {
+        /** TUN/stack MTU for full-route capture (matches AdGuard's 9000).
+         *  Large MTU lets the gVisor stack handle egress segmentation and
+         *  avoids the TCP resets seen with a 1500 MTU userspace forwarder. */
+        const val FULL_ROUTE_MTU = 9000
+
         /**
          * Convert DNS query type number to human-readable string.
          * DNS types defined in RFC 1035 & 3596.

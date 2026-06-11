@@ -678,6 +678,11 @@ class AdBlockVpnService : VpnService() {
                 // The forcing of full-route for everyone in #187 broke
                 // internet — hence the toggle, default OFF.
                 if (fullRoute) {
+                    // Large MTU (matches AdGuard) so the userspace gVisor
+                    // stack handles egress segmentation — a 1500 MTU through
+                    // the forwarder caused TCP resets. Must match
+                    // engine.setTunMTU() in GoTunnelAdapter.
+                    b.setMtu(GoTunnelAdapter.FULL_ROUTE_MTU)
                     b.addRoute("0.0.0.0", 0)
                     b.addRoute("::", 0)
                     val excludeLan = runBlocking { appPrefs.excludeLan.first() }
