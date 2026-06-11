@@ -264,16 +264,20 @@ class GoTunnelAdapter(
 
         // Full-route capture (DNS-only mode toggle): the TUN now receives ALL
         // packets, so the engine must forward non-DNS flows instead of
-        // dropping them. Enable the userspace TCP stack (without MITM) so the
-        // engine terminates and forwards TCP via DirectOutbound on protect()ed
-        // sockets. Without this, routing 0.0.0.0/0 blackholes traffic (#187).
-        // When HTTPS filtering is on the stack is already enabled below.
+        // dropping them. Enabling the userspace TCP stack alone is NOT enough
+        // — the stack needs an OutboundAdapter to actually send packets out,
+        // otherwise everything is blackholed (observed: full-route = no
+        // internet). The HTTPS-filtering path gets its outbound from
+        // startStackMitm(); for plain full-route we wire a DirectOutbound
+        // adapter so flows are forwarded straight to the internet (no MITM).
+        // The engine's protector (passed to start()) protects these sockets.
         if (forwardAllTraffic && !httpsFilteringEnabled) {
             try {
                 engine.setUseTcpStack(true)
-                Timber.d("Full-route capture: userspace TCP stack enabled for forwarding")
+                engine.setOutboundAdapter(tunnel.DirectOutbound())
+                Timber.d("Full-route capture: TCP stack + DirectOutbound enabled for forwarding")
             } catch (e: Exception) {
-                Timber.e(e, "Failed to enable TCP stack for full-route capture")
+                Timber.e(e, "Failed to enable forwarding for full-route capture")
             }
         }
 
