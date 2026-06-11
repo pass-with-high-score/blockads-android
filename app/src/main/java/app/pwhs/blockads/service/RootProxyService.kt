@@ -114,6 +114,11 @@ class RootProxyService : Service() {
     @Volatile
     private var firewallManager: FirewallManager? = null
 
+    // Preserve the displayed uptime across internal restarts (#163) —
+    // settings/filter changes restart the proxy but shouldn't reset uptime.
+    @Volatile
+    private var preserveUptimeOnRestart = false
+
     // UIDs of whitelisted apps, excluded from the iptables DNS redirect.
     // Kept as a field so the watchdog re-applies the same rules (#150).
     @Volatile
@@ -272,7 +277,10 @@ class RootProxyService : Service() {
                 appNameResolver.startSnapshotter(serviceScope)
 
                 _state.value = VpnState.RUNNING
-                startTimestamp = System.currentTimeMillis()
+                if (!preserveUptimeOnRestart || startTimestamp == 0L) {
+                    startTimestamp = System.currentTimeMillis()
+                }
+                preserveUptimeOnRestart = false
                 Timber.d("Root Proxy mode active — DNS traffic redirected to :15353")
 
                 updateNotification()
@@ -356,6 +364,7 @@ class RootProxyService : Service() {
             delay(1000L)
 
             // Restart
+            preserveUptimeOnRestart = true
             _state.value = VpnState.STOPPED
             startProxy()
         }

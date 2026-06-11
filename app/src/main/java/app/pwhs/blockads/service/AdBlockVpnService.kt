@@ -415,10 +415,17 @@ class AdBlockVpnService : VpnService() {
                 // VPN established successfully - reset retry counter
                 retryManager.reset()
                 connectingPhase = ""
+                // Preserve the displayed uptime across silent reconnects and
+                // settings restarts — resetting it on every network switch
+                // made the uptime look random (#163). Only a fresh start
+                // (not a reconnect) begins a new uptime window.
+                val resumedFromReconnect = isReconnecting && vpnStartTime > 0L
                 isReconnecting = false
                 _state.value = VpnState.RUNNING
                 appPrefs.setVpnEnabled(true)
-                vpnStartTime = System.currentTimeMillis()
+                if (!resumedFromReconnect) {
+                    vpnStartTime = System.currentTimeMillis()
+                }
                 startTimestamp = vpnStartTime
 
                 val startupElapsed = System.currentTimeMillis() - startupTime
