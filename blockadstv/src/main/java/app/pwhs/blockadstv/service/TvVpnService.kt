@@ -243,6 +243,10 @@ class TvVpnService : VpnService() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 builder.setUnderlyingNetworks(null)
+                // VPN networks are metered by default on Android 10+ —
+                // inherit meteredness from the underlying network instead,
+                // so "Wi-Fi/unmetered only" apps keep working (see #181).
+                builder.setMetered(false)
             }
 
             vpnInterface = builder.establish()
