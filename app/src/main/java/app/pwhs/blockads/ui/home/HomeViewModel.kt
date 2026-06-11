@@ -17,6 +17,7 @@ import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.VpnState
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class HomeViewModel(
-    appPrefs: AppPreferences,
+    private val appPrefs: AppPreferences,
     dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
     profileDao: ProtectionProfileDao,
@@ -120,6 +121,9 @@ class HomeViewModel(
         enabled && mode != AppPreferences.ROUTING_MODE_ROOT && strict
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val fullRouteCapture: StateFlow<Boolean> = appPrefs.fullRouteCapture
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     init {
         // Uptime ticker — only ticks while VPN or Root Proxy is RUNNING
         viewModelScope.launch {
@@ -145,6 +149,14 @@ class HomeViewModel(
                 action = AdBlockVpnService.ACTION_STOP
             }
             context.startService(intent)
+        }
+    }
+
+    fun setFullRouteCapture(context: Context, enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setFullRouteCapture(enabled)
+            // Re-establish the tunnel so the new routing applies immediately.
+            ServiceController.requestRestart(context)
         }
     }
 

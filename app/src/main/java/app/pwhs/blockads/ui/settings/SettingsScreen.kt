@@ -69,6 +69,7 @@ fun SettingsScreen(
     val crashReportingEnabled by viewModel.crashReportingEnabled.collectAsStateWithLifecycle()
     val hideFromRecents by viewModel.hideFromRecents.collectAsStateWithLifecycle()
     val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
+    val fullRouteCapture by viewModel.fullRouteCapture.collectAsStateWithLifecycle()
     val dnsResponseType by viewModel.dnsResponseType.collectAsStateWithLifecycle()
     val safeSearchEnabled by viewModel.safeSearchEnabled.collectAsStateWithLifecycle()
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsStateWithLifecycle()
@@ -118,6 +119,7 @@ fun SettingsScreen(
                 routingMode = routingMode,
                 networkSwitchDelayEnabled = networkSwitchDelayEnabled,
                 networkSwitchDelaySec = networkSwitchDelaySec,
+                fullRouteCapture = fullRouteCapture,
                 safeSearchEnabled = safeSearchEnabled,
                 youtubeRestrictedMode = youtubeRestrictedMode,
                 dnsResponseType = dnsResponseType,
@@ -126,6 +128,7 @@ fun SettingsScreen(
                 onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
                 onSetNetworkSwitchDelayEnabled = { viewModel.setNetworkSwitchDelayEnabled(it) },
                 onSetNetworkSwitchDelaySec = { viewModel.setNetworkSwitchDelaySec(it) },
+                onSetFullRouteCapture = { viewModel.setFullRouteCapture(it) },
                 onSetSafeSearchEnabled = { viewModel.setSafeSearchEnabled(it) },
                 onSetYoutubeRestrictedMode = { viewModel.setYoutubeRestrictedMode(it) },
                 onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },

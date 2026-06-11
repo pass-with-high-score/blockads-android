@@ -511,4 +511,6 @@
     <string name="root_proxy_start_failed_text">Не вдалося отримати root-доступ для запуску захисту. Натисніть «Увімкнути», щоб повторити спробу.</string>
     <string name="private_dns_warning_title">Приватний DNS увімкнено</string>
     <string name="private_dns_warning_text">Приватний DNS Android обходить BlockAds, тож фільтрування може не застосовуватися. Установіть приватний DNS на «Вимкнено» або «Автоматично» в налаштуваннях системи.</string>
+    <string name="settings_full_route">Повний захист мережі</string>
+    <string name="settings_full_route_desc">Спрямовувати весь трафік через BlockAds, щоб запобігти витокам DNS (приватний DNS/DoT). Може впливати на батарею та швидкість. Якщо зник інтернет — вимкніть.</string>
 </resources>
