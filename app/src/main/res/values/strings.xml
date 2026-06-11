@@ -503,6 +503,8 @@
     <string name="settings_root_proxy_desc">Redirect DNS via iptables instead of VPN (requires Root)</string>
     <string name="root_not_available">Root access not available. Please grant permission in your root manager (e.g., Magisk/KernelSU).</string>
     <string name="root_proxy_notification_text">Root Proxy mode active — DNS traffic redirected via iptables</string>
+    <string name="root_proxy_start_failed_title">BlockAds failed to start</string>
+    <string name="root_proxy_start_failed_text">Could not get root access to start protection. Tap Enable to retry.</string>
     <string name="reddit_link" translatable="false">https://www.reddit.com/r/BlockAds/</string>
     <string name="telegram_link" translatable="false">https://t.me/blockads_android</string>
     <string name="test_block_link" translatable="false">https://adblock.turtlecute.org/</string>

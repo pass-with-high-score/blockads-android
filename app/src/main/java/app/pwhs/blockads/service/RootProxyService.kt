@@ -101,7 +101,7 @@ class RootProxyService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var watchdogJob: Job? = null
     private var notificationUpdateJob: Job? = null
-    private val retryManager = VpnRetryManager(maxRetries = 10, maxDelayMs = 60000L)
+    private var retryManager = VpnRetryManager(maxRetries = 10, maxDelayMs = 60000L)
 
     @Volatile
     private var todayBlockedCount: Int = 0
@@ -167,6 +167,13 @@ class RootProxyService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
 
+        // On boot the su daemon (Magisk/KernelSU) can take well over the
+        // normal retry window to come up — allow a much longer budget.
+        retryManager = VpnRetryManager(
+            maxRetries = if (startedFromBoot) 30 else 10,
+            maxDelayMs = 60000L
+        )
+
         serviceScope.launch {
             try {
                 // 1. Load filters (same as VPN mode)
@@ -205,12 +212,21 @@ class RootProxyService : Service() {
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
                 var proxyStarted = false
                 while (!proxyStarted && retryManager.shouldRetry()) {
-                    val engineStarted = goTunnelAdapter.startStandalone(port = 15353)
-                    if (engineStarted) {
-                        if (IptablesManager.setupRules(this@RootProxyService)) {
-                            proxyStarted = true
-                        } else {
-                            goTunnelAdapter.stop() // stop engine if iptables fails
+                    // Recreate the libsu shell if a non-root one got cached
+                    // (happens when the first shell command ran before the
+                    // su daemon was ready — see #179). Without this, every
+                    // retry reuses the poisoned non-root shell and iptables
+                    // can never succeed.
+                    if (!IptablesManager.ensureRootShell()) {
+                        Timber.w("Root shell not available yet")
+                    } else {
+                        val engineStarted = goTunnelAdapter.startStandalone(port = 15353)
+                        if (engineStarted) {
+                            if (IptablesManager.setupRules(this@RootProxyService)) {
+                                proxyStarted = true
+                            } else {
+                                goTunnelAdapter.stop() // stop engine if iptables fails
+                            }
                         }
                     }
 
@@ -223,6 +239,7 @@ class RootProxyService : Service() {
                 if (!proxyStarted) {
                     Timber.e("Failed to start Root Proxy after ${retryManager.getMaxRetries()} attempts")
                     stopProxy()
+                    showStartFailedNotification()
                     return@launch
                 }
 
@@ -496,6 +513,57 @@ class RootProxyService : Service() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
     
+    private fun showStartFailedNotification() {
+        createNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val retryIntent = Intent(this, RootProxyService::class.java).apply {
+            action = ACTION_START
+        }
+        val retryPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(
+                this, 4, retryIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getService(
+                this, 4, retryIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+
+        val notification = builder
+            .setContentTitle(getString(R.string.root_proxy_start_failed_title))
+            .setContentText(getString(R.string.root_proxy_start_failed_text))
+            .setStyle(Notification.BigTextStyle().bigText(getString(R.string.root_proxy_start_failed_text)))
+            .setSmallIcon(R.drawable.ic_shield_off)
+            .setOngoing(false)
+            .setContentIntent(pendingIntent)
+            .addAction(
+                Notification.Action.Builder(
+                    null, getString(R.string.vpn_stopped_action_enable), retryPendingIntent
+                ).build()
+            )
+            .build()
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
     private fun startNotificationUpdates() {
         notificationUpdateJob?.cancel()
 
