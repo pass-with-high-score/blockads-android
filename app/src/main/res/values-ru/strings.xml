@@ -511,6 +511,4 @@
     <string name="root_proxy_start_failed_text">Не удалось получить root-доступ для запуска защиты. Нажмите «Включить», чтобы повторить попытку.</string>
     <string name="private_dns_warning_title">Частный DNS включён</string>
     <string name="private_dns_warning_text">Частный DNS Android обходит BlockAds, поэтому фильтрация может не работать. Установите «Частный DNS» в значение «Выкл.» или «Автоматически» в настройках системы.</string>
-    <string name="settings_full_route">Полная защита сети</string>
-    <string name="settings_full_route_desc">Направлять весь трафик через BlockAds, чтобы предотвратить утечки DNS (Частный DNS/DoT). Может влиять на батарею и скорость. Если пропал интернет — отключите.</string>
 </resources>

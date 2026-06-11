@@ -511,6 +511,4 @@
     <string name="root_proxy_start_failed_text">保護を開始するための root 権限を取得できませんでした。「有効にする」をタップして再試行してください。</string>
     <string name="private_dns_warning_title">プライベート DNS が有効です</string>
     <string name="private_dns_warning_text">Android のプライベート DNS は BlockAds を迂回するため、フィルタリングが適用されないことがあります。システム設定でプライベート DNS をオフまたは自動に設定してください。</string>
-    <string name="settings_full_route">ネットワーク全体保護</string>
-    <string name="settings_full_route_desc">すべての通信を BlockAds 経由にして DNS 漏れ（プライベート DNS/DoT）を防ぎます。電池や速度に影響する場合があります。ネットに繋がらない場合はオフにしてください。</string>
 </resources>

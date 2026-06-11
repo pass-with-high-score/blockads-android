@@ -38,7 +38,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -113,7 +112,6 @@ fun HomeScreen(
     val securityFilterIds by viewModel.securityFilterIds.collectAsStateWithLifecycle()
     val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
     val privateDnsWarning by viewModel.privateDnsWarning.collectAsStateWithLifecycle()
-    val fullRouteCapture by viewModel.fullRouteCapture.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -230,35 +228,6 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.SemiBold
                 )
-            }
-
-            // Full network protection toggle — only in Direct (DNS) mode
-            if (routingMode == AppPreferences.ROUTING_MODE_DIRECT) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.settings_full_route),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = fullRouteCapture,
-                            onCheckedChange = { viewModel.setFullRouteCapture(context, it) }
-                        )
-                    }
-                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

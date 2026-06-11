@@ -511,6 +511,4 @@
     <string name="root_proxy_start_failed_text">Impossibile ottenere l\'accesso root per avviare la protezione. Tocca Attiva per riprovare.</string>
     <string name="private_dns_warning_title">DNS privato attivo</string>
     <string name="private_dns_warning_text">Il DNS privato di Android aggira BlockAds, quindi il filtraggio potrebbe non essere applicato. Imposta il DNS privato su Disattivato o Automatico nelle impostazioni di sistema.</string>
-    <string name="settings_full_route">Protezione di rete completa</string>
-    <string name="settings_full_route_desc">Instrada tutto il traffico tramite BlockAds per impedire fughe di DNS (DNS privato/DoT). Può influire su batteria e velocità. Se perdi internet, disattivala.</string>
 </resources>

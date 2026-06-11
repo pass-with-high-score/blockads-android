@@ -507,8 +507,6 @@
     <string name="root_proxy_start_failed_text">Could not get root access to start protection. Tap Enable to retry.</string>
     <string name="private_dns_warning_title">Private DNS is on</string>
     <string name="private_dns_warning_text">Android Private DNS bypasses BlockAds, so filtering may not apply. Set Private DNS to Off or Automatic in system settings.</string>
-    <string name="settings_full_route">Full network protection</string>
-    <string name="settings_full_route_desc">Route all traffic through BlockAds to stop DNS leaks (Private DNS/DoT). May affect battery and speed. If you lose internet, turn this off.</string>
     <string name="reddit_link" translatable="false">https://www.reddit.com/r/BlockAds/</string>
     <string name="telegram_link" translatable="false">https://t.me/blockads_android</string>
     <string name="test_block_link" translatable="false">https://adblock.turtlecute.org/</string>

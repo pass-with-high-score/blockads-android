@@ -511,6 +511,4 @@
     <string name="root_proxy_start_failed_text">Root-Zugriff zum Starten des Schutzes konnte nicht erlangt werden. Tippe auf Aktivieren, um es erneut zu versuchen.</string>
     <string name="private_dns_warning_title">Privates DNS ist aktiv</string>
     <string name="private_dns_warning_text">Android Privates DNS umgeht BlockAds, daher greift die Filterung evtl. nicht. Stelle Privates DNS in den Systemeinstellungen auf Aus oder Automatisch.</string>
-    <string name="settings_full_route">Vollständiger Netzwerkschutz</string>
-    <string name="settings_full_route_desc">Gesamten Datenverkehr über BlockAds leiten, um DNS-Lecks (Privates DNS/DoT) zu verhindern. Kann Akku und Geschwindigkeit beeinflussen. Bei Internetverlust ausschalten.</string>
 </resources>

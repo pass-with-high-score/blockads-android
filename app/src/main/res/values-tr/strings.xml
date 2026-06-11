@@ -532,6 +532,4 @@ Desteklenen formatlar:
     <string name="root_proxy_start_failed_text">Korumayı başlatmak için root erişimi alınamadı. Yeniden denemek için Etkinleştir\'e dokunun.</string>
     <string name="private_dns_warning_title">Özel DNS açık</string>
     <string name="private_dns_warning_text">Android Özel DNS, BlockAds\'i atlar; bu nedenle filtreleme uygulanmayabilir. Sistem ayarlarından Özel DNS\'i Kapalı veya Otomatik yapın.</string>
-    <string name="settings_full_route">Tam ağ koruması</string>
-    <string name="settings_full_route_desc">DNS sızıntılarını (Özel DNS/DoT) önlemek için tüm trafiği BlockAds üzerinden yönlendir. Pil ve hızı etkileyebilir. İnternet giderse bunu kapatın.</string>
 </resources>

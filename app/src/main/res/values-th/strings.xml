@@ -511,6 +511,4 @@
     <string name="root_proxy_start_failed_text">ไม่สามารถรับสิทธิ์รูทเพื่อเริ่มการป้องกันได้ แตะ เปิดใช้งาน เพื่อลองอีกครั้ง</string>
     <string name="private_dns_warning_title">เปิด DNS ส่วนตัวอยู่</string>
     <string name="private_dns_warning_text">DNS ส่วนตัวของ Android จะข้าม BlockAds การกรองจึงอาจไม่ทำงาน โปรดตั้งค่า DNS ส่วนตัวเป็นปิดหรืออัตโนมัติในการตั้งค่าระบบ</string>
-    <string name="settings_full_route">ป้องกันเครือข่ายเต็มรูปแบบ</string>
-    <string name="settings_full_route_desc">กำหนดเส้นทางทราฟฟิกทั้งหมดผ่าน BlockAds เพื่อป้องกัน DNS รั่ว (DNS ส่วนตัว/DoT) อาจมีผลต่อแบตเตอรี่และความเร็ว หากเน็ตหลุดให้ปิด</string>
 </resources>

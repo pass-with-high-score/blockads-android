@@ -251,31 +251,15 @@ class GoTunnelAdapter(
      * @param certDir Directory to store the proxy's root CA certificate
      */
     fun start(
-        vpnInterface: android.os.ParcelFileDescriptor,
+        vpnInterface: android.os.ParcelFileDescriptor, 
         wgConfigJson: String = "",
         httpsFilteringEnabled: Boolean = false,
         selectedBrowsers: Set<String> = emptySet(),
         certDir: String = "",
-        forwardAllTraffic: Boolean = false,
         socketProtector: ((Int) -> Boolean)? = null
     ) {
         if (isRunning) return
         isRunning = true
-
-        // Full-route capture (DNS-only mode toggle): the TUN now receives ALL
-        // packets, so the engine must forward non-DNS flows instead of
-        // dropping them. Enable the userspace TCP stack (without MITM) so the
-        // engine terminates and forwards TCP via DirectOutbound on protect()ed
-        // sockets. Without this, routing 0.0.0.0/0 blackholes traffic (#187).
-        // When HTTPS filtering is on the stack is already enabled below.
-        if (forwardAllTraffic && !httpsFilteringEnabled) {
-            try {
-                engine.setUseTcpStack(true)
-                Timber.d("Full-route capture: userspace TCP stack enabled for forwarding")
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to enable TCP stack for full-route capture")
-            }
-        }
 
         // 1. Synchronize the MITM state before starting the tunnel.
         // HTTPS filtering now runs through the userspace TCP/IP stack
