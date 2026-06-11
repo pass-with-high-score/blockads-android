@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">גלישה ללא פרסומות</string>
     <string name="notification_channel_name">שירות חסימת פרסומות</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">יומנים</string>
     <string name="nav_filter">מסננים</string>
     <string name="nav_settings">הגדרות</string>
-    <string name="settings_filter_url">כתובת אתר (URL) של רשימת הסינון</string>
-    <string name="settings_update_filter">עדכן את רשימת הסינון</string>
-    <string name="filter_updating">מעדכן את רשימת הסינון…</string>
     <string name="filter_updated">רשימת הסינון עודכנה: %d דומיינים</string>
     <string name="filter_update_failed">עדכון רשימת הסינון נכשל</string>
     <string name="filter_detail_enabled">מופעל</string>
@@ -35,24 +32,15 @@
     <string name="filter_detail_last_updated">עודכן לאחרונה</string>
     <string name="filter_detail_update">עדכן</string>
     <string name="filter_detail_delete">מחק</string>
-    <string name="filter_detail_domain_preview">תצוגה מקדימה של דומיינים חסומים</string>
-    <string name="filter_detail_no_domains">אין דומיינים במטמון. נסה לעדכן את המסנן הזה קודם.</string>
-    <string name="filter_detail_more_domains">… ועוד %s דומיינים</string>
     <string name="logs_empty">עדיין לא תועדו שאילתות DNS</string>
     <string name="logs_filter_all">הכל</string>
     <string name="logs_filter_blocked">חסומים</string>
-
     <string name="onboarding_title_1">חסום פרסומות בחכמה</string>
     <string name="onboarding_desc_1">חסום פרסומות בכל האפליקציות והדפדפנים בלחיצה אחת. משתמש בטכנולוגיית סינון DNS — ללא צורך ב-Root.\n\n🔒 הבטחת פרטיות: אנחנו לעולם לא אוספים, שומרים או מעבירים את נתוני הגלישה שלך. כל העיבוד מתבצע אך ורק על המכשיר שלך.</string>
-    <string name="onboarding_title_2">הפרטיות שלך, מוגנת</string>
-    <string name="onboarding_desc_2">ללא איסוף נתונים. ללא מעקב. כל יומני ה-DNS נשארים אך ורק במכשיר שלך. אנחנו לעולם לא רואים את פעילות הגלישה שלך.</string>
-    <string name="onboarding_title_3">חינמי וקוד פתוח</string>
-    <string name="onboarding_desc_3">BlockAds חינמית לחלוטין ללא רכישות בתוך האפליקציה. קוד המקור שלנו פתוח לכל אחד כדי לבדוק ולאמת.</string>
     <string name="onboarding_skip">דלג</string>
     <string name="onboarding_next">הבא</string>
     <string name="onboarding_get_started">בואו נתחיל</string>
     <string name="onboarding_recommended">★ מומלץ</string>
-
     <string name="onboarding_protection_title">בחר רמת הגנה</string>
     <string name="onboarding_protection_desc">בחר עד כמה אגרסיבית תהיה חסימת הפרסומות והעוקבים</string>
     <string name="onboarding_protection_basic">בסיסית</string>
@@ -61,59 +49,40 @@
     <string name="onboarding_protection_standard_desc">חוסם פרסומות, עוקבים ומערכות אנליטיקה. איזון טוב בין הגנה לתאימות.</string>
     <string name="onboarding_protection_strict">מחמירה</string>
     <string name="onboarding_protection_strict_desc">חסימה מקסימלית. עלול להשפיע על תפקוד של אתרים מסוימים אך מספק את ההגנה החזקה ביותר.</string>
-
     <string name="onboarding_dns_title">בחר שרת DNS</string>
     <string name="onboarding_dns_desc">בחר שרת DNS לפענוח שמות דומיין. תוכל לשנות זאת מאוחר יותר בהגדרות.</string>
-
     <string name="onboarding_vpn_title">נדרשת הרשאת VPN</string>
     <string name="onboarding_vpn_desc">BlockAds משתמשת ב-VPN מקומי כדי לסנן שאילתות DNS ולחסום פרסומות. שום מידע לא יוצא מהמכשיר שלך — ה-VPN הזה פועל באופן מקומי בלבד כדי ליירט ולסנן בקשות DNS.</string>
     <string name="onboarding_vpn_grant">הענק הרשאת VPN</string>
-
     <string name="onboarding_notification_title">הישאר מעודכן</string>
     <string name="onboarding_notification_desc">אפשר התראות כדי לראות סטטיסטיקות חסימה בזמן אמת ולדעת מתי ההגנה שלך פעילה. נדרש עבור התראת ה-VPN הקבועה ב-Android 13 ומעלה.</string>
     <string name="onboarding_notification_grant">אפשר התראות</string>
-
     <string name="onboarding_battery_title">שמור על ההגנה פעילה</string>
     <string name="onboarding_battery_desc">החרג את BlockAds מאופטימיזציית הסוללה כדי ששירות ה-VPN יישאר פעיל ברקע ולא ייסגר על ידי המערכת.</string>
     <string name="onboarding_battery_grant">השבת אופטימיזציית סוללה</string>
     <string name="onboarding_battery_unsupported">לא נתמך</string>
-
     <string name="onboarding_permission_granted">✓ ההרשאה הוענקה</string>
-
     <string name="onboarding_complete_title">אתה כעת מוגן!</string>
     <string name="onboarding_complete_desc">ברכות! BlockAds מוגדרת ומוכנה להגן על המכשיר שלך מפני פרסומות ועוקבים.</string>
-    <string name="onboarding_complete_stats">הקש על \"בואו נתחיל\" כדי להפעיל את ההגנה</string>
-
+    <string name="onboarding_complete_stats">הקש על \&quot;בואו נתחיל\&quot; כדי להפעיל את ההגנה</string>
     <string name="whitelist_apps_title">אפליקציות מורשות</string>
-    <string name="whitelist_apps_subtitle">אפליקציות אלו יעקפו את חסימת הפרסומות</string>
     <string name="whitelist_apps_search">חפש אפליקציות…</string>
     <string name="whitelist_apps_empty">אין אפליקציות מותקנות</string>
     <string name="whitelist_apps_count">%d אפליקציות מורשות</string>
     <string name="whitelist_tab_user">אפליקציות משתמש</string>
     <string name="whitelist_tab_system">אפליקציות מערכת</string>
-
-    <string name="whitelist_domains_title">דומיינים מורשים</string>
-    <string name="whitelist_domains_subtitle">דומיינים אלו לעולם לא ייחסמו</string>
     <string name="whitelist_domains_add">הוסף דומיין</string>
     <string name="whitelist_domains_hint">לדוגמה: example.com</string>
     <string name="whitelist_domains_empty">אין דומיינים מורשים</string>
     <string name="whitelist_domain_added">דומיין אושר: %s</string>
     <string name="whitelist_domain_removed">הדומיין הוסר מהרשימה המורשית</string>
-
-    <string name="settings_blocklist_domains_desc">דומיינים אלו תמיד ייחסמו</string>
-    <string name="blocklist_domains_title">דומיינים חסומים</string>
-    <string name="blocklist_domains_subtitle">דומיינים אלו תמיד ייחסמו</string>
-    <string name="blocklist_domains_add">הוסף דומיין</string>
-    <string name="blocklist_domains_hint">לדוגמה: example.com</string>
     <string name="blocklist_domains_empty">אין דומיינים ברשימה החסומה</string>
     <string name="blocklist_domain_added">הדומיין נחסם: %s</string>
     <string name="blocklist_domain_removed">הדומיין הוסר מהרשימה החסומה</string>
     <string name="blocklist_domain_already_exists">הדומיין כבר נמצא ברשימה החסומה</string>
-
     <string name="domain_rules_title">כללי דומיין</string>
     <string name="domain_rules_tab_whitelist">רשימה מורשית</string>
     <string name="domain_rules_tab_blocklist">רשימה חסומה</string>
-
     <string name="about_title">אודות</string>
     <string name="about_description">חוסם פרסומות חינמי וקוד פתוח.\nללא איסוף נתונים. ללא מעקב.</string>
     <string name="about_version">גרסה %s</string>
@@ -123,17 +92,13 @@
     <string name="about_contact">צור קשר</string>
     <string name="about_licenses">רישיונות קוד פתוח</string>
     <string name="about_no_data">🔒 אפליקציה זו אינה אוספת נתונים אישיים כלשהם</string>
-
     <string name="log_action_whitelist">הוסף לרשימה המורשית</string>
     <string name="log_action_copy">העתק דומיין</string>
     <string name="log_search_hint">חפש דומיינים…</string>
     <string name="domain_copied">הדומיין הועתק</string>
     <string name="log_whitelisted">אושר: %s</string>
     <string name="log_already_whitelisted">כבר נמצא ברשימה המורשית</string>
-
     <string name="test_block_ads">בדוק חסימת פרסומות</string>
-    <string name="test_block_ads_title">בדיקת חסימת פרסומות</string>
-
     <string name="home_connecting_desc">מבסס חיבור VPN…</string>
     <string name="home_protected_desc">המכשיר שלך מוגן מפני פרסומות</string>
     <string name="home_unprotected_desc">הקש על הכפתור כדי להפעיל חסימת פרסומות</string>
@@ -147,10 +112,7 @@
     <string name="home_top_blocked">הדומיינים החסומים ביותר</string>
     <string name="home_chart_no_data">אין נתונים זמינים</string>
     <string name="settings_language">שפה</string>
-
     <string name="settings_title">הגדרות</string>
-    <string name="settings_search_hint">חפש בהגדרות…</string>
-    <string name="settings_search_clear">נקה חיפוש</string>
     <string name="settings_category_protection">הגנה</string>
     <string name="settings_category_protection_desc">שרת DNS, פרוטוקול, התחברות אוטומטית</string>
     <string name="settings_category_interface">ממשק</string>
@@ -163,7 +125,6 @@
     <string name="settings_category_data_desc">ייצוא/ייבוא, ניקוי יומנים</string>
     <string name="settings_category_info">מידע</string>
     <string name="settings_category_info_desc">אודות, מדיניות פרטיות, קוד מקור</string>
-    <string name="settings_appearance">מראה</string>
     <string name="settings_theme">ערכת נושא</string>
     <string name="settings_theme_system">מערכת</string>
     <string name="settings_theme_light">בהיר</string>
@@ -171,27 +132,17 @@
     <string name="settings_show_bottom_nav_labels_desc">הצג טקסט מתחת לסמלים בסרגל הניווט התחתון</string>
     <string name="settings_theme_dark">כהה</string>
     <string name="settings_lang_system">מערכת</string>
-    <string name="settings_high_contrast">ניגודיות גבוהה</string>
-    <string name="settings_high_contrast_desc">הגדל את הניגודיות לראות טובה יותר</string>
     <string name="settings_accent_color">צבע הדגשה</string>
     <string name="settings_accent_color_desc">התאם אישית את צבע הנושא של האפליקציה</string>
     <string name="accent_dynamic">דינמי (Material You)</string>
     <string name="accent_dynamic_desc">משתמש בצבעי הטפט שלך</string>
-    <string name="settings_connection">חיבור</string>
     <string name="settings_filter_lists">רשימות סינון (%d פעילות)</string>
     <string name="settings_add_custom_filter">הוסף רשימת סינון מותאמת אישית</string>
     <string name="settings_updating">מעדכן…</string>
     <string name="settings_update_all">עדכן את כל המסננים</string>
-    <string name="settings_dns_config">הגדרת DNS</string>
-    <string name="settings_save_dns">שמור DNS</string>
-    <string name="settings_whitelist">רשימה מורשית</string>
     <string name="settings_whitelist_apps">אפליקציות מורשות</string>
     <string name="settings_whitelist_apps_desc">החרג אפליקציות מחסימת פרסומות</string>
     <string name="settings_whitelist_domains">דומיינים מורשים</string>
-    <string name="settings_whitelist_domains_desc">דומיינים אלו לעולם לא ייחסמו</string>
-
-    <string name="settings_add_domain">הוסף דומיין</string>
-    <string name="settings_data_backup">נתונים וגיבוי</string>
     <string name="settings_export">ייצוא</string>
     <string name="settings_import">ייבוא</string>
     <string name="settings_about">אודות</string>
@@ -208,14 +159,6 @@
     <string name="settings_safe_search_desc">כפה חיפוש בטוח במנועי חיפוש נתמכים (Google, Bing)</string>
     <string name="settings_youtube_restricted">מצב מוגבל ב-YouTube</string>
     <string name="settings_youtube_restricted_desc">סנן סרטונים למבוגרים ב-YouTube, חסום סרטונים מוטמעים למבוגרים באתרים אחרים, והסתר את כל התגובות</string>
-    <string name="settings_dns_protocol">פרוטוקול DNS</string>
-    <string name="settings_dns_protocol_plain">DNS רגיל (Plain)</string>
-    <string name="settings_doh_server_url">כתובת שרת DoH</string>
-    <string name="settings_save_doh_url">שמור כתובת DoH</string>
-    <string name="settings_dot_server">שרת DoT (שם מארח או IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">כתובת שרת DoQ</string>
-    <string name="settings_upstream_dns">שרת DNS ראשי</string>
     <string name="settings_fallback_dns">שרת DNS לגיבוי</string>
     <string name="settings_fallback_dns_desc">DNS גיבוי משמש כאשר שרת ה-DNS הראשי שלך נכשל. הזן כתובת IP של שרת גיבוי.</string>
     <string name="settings_fallback_dns_short_desc">משמש כגיבוי כשה-DNS הראשי נכשל</string>
@@ -228,37 +171,25 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">זוהה: %s</string>
-    <string name="settings_invalid_dns_input">כתובת שרת DNS לא חוקית</string>
-    <string name="settings_save_custom_dns">שמור DNS</string>
     <string name="settings_dns_response_type">סוג תגובת DNS</string>
-    <string name="settings_dns_response_type_desc">סוג התגובה עבור דומיינים חסומים</string>
     <string name="dns_response_nxdomain_desc">הדומיין אינו קיים (סטנדרטי)</string>
     <string name="dns_response_refused_desc">השאילתה נדחתה (תאימות טובה יותר)</string>
     <string name="dns_response_custom_ip">כתובת IP מותאמת אישית (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">החזרת כתובת ניתוב ריקה (ברירת מחדל)</string>
     <string name="settings_clear_logs">נקה את כל היומנים</string>
     <string name="clear_logs_confirm_message">האם אתה בטוח שברצונך לנקות את כל יומני ה-DNS? פעולה זו בלתי הפיכה.</string>
-    <string name="dns_error_notification_title">שגיאת הגדרת DNS</string>
-    <string name="dns_error_notification_no_fallback">חיבור %1$s ל-%2$s נכשל. לא הוגדר DNS גיבוי — אתרים עלולים לא להיטען. בדוק את הגדרות ה-DNS שלך.</string>
-    <string name="dns_error_notification_both_failed">חיבור %1$s ל-%2$s ולשרת הגיבוי %3$s נכשלו. אתרים עלולים לא להיטען. בדוק את הגדרות ה-DNS שלך.</string>
-
     <string name="filter_setup_title">הגדרת מסננים</string>
-    <string name="filter_setup_desc">נהל רשימות סינון מובנות ומותאמות אישית</string>
     <string name="filter_built_in">מובנות</string>
     <string name="filter_custom">מותאמות אישית</string>
     <string name="filter_custom_empty">טרם נוספו מסננים מותאמים אישית</string>
     <string name="filter_search_hint">חפש מסננים…</string>
-    <string name="filter_search_no_results">לא נמצאו מסננים עבור \"%s\"</string>
+    <string name="filter_search_no_results">לא נמצאו מסננים עבור \&quot;%s\&quot;</string>
     <string name="filter_log_cleared">היומן נוקה</string>
-    <string name="filter_domain_whitelisted">הדומיין אושר: %s</string>
     <string name="filter_domain_already_whitelisted">הדומיין כבר מאושר</string>
     <string name="filter_settings_export">ההגדרות יוצאו</string>
     <string name="filter_export_failed">הייצוא נכשל: %s</string>
     <string name="filter_settings_imported">ההגדרות יובאו</string>
     <string name="filter_import_failed">הייבוא נכשל: %s</string>
-
-    <string name="settings_auto_update">עדכון אוטומטי של רשימות סינון</string>
     <string name="settings_auto_update_enabled">אפשר עדכון אוטומטי</string>
     <string name="settings_auto_update_enabled_desc">עדכן רשימות סינון ברקע באופן אוטומטי</string>
     <string name="settings_auto_update_frequency">תדירות עדכון</string>
@@ -278,7 +209,6 @@
     <string name="filter_update_failed_message">עדכון רשימות הסינון נכשל</string>
     <string name="filter_update_notification_channel">עדכוני מסננים</string>
     <string name="filter_update_notification_channel_desc">התראות עבור עדכוני רשימות סינון</string>
-
     <string name="dns_provider_title">שרת DNS</string>
     <string name="dns_category_standard">רגיל</string>
     <string name="dns_category_privacy">ממוקד פרטיות</string>
@@ -288,19 +218,13 @@
     <string name="dns_custom_description">הזן את כתובות שרתי ה-DNS שלך</string>
     <string name="dns_custom_save">שמור</string>
     <string name="dns_custom_cancel">ביטול</string>
-    <string name="dns_select_server">בחר שרת DNS</string>
-
-    <string name="widget_name">מתג BlockAds</string>
     <string name="widget_description">הפעל/כבה את חסימת הפרסומות והצג סטטיסטיקות</string>
     <string name="widget_toggle_description">הפעל/כבה חסימת פרסומות</string>
     <string name="widget_blocked_today">נחסמו היום</string>
     <string name="widget_protected">מוגן</string>
     <string name="widget_unprotected">כבוי</string>
-
     <string name="shortcut_toggle_vpn">הפעל/כבה חסימת פרסומות</string>
     <string name="shortcut_toggle_vpn_short">הפעל/כבה VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">לא זמין</string>
-
     <string name="custom_rules">כללים מותאמים אישית</string>
     <string name="add_custom_rule">הוסף כלל</string>
     <string name="import_rules">ייבא כללים</string>
@@ -325,7 +249,6 @@
     <string name="delete">מחק</string>
     <string name="cancel">ביטול</string>
     <string name="block_this_domain">חסום דומיין זה</string>
-    <string name="add_to_custom_rules">הוסף לכללים המותאמים אישית</string>
     <string name="import_from_file">ייבא מקובץ</string>
     <string name="export_to_file">ייצא לקובץ</string>
     <string name="export_format_title">פורמט ייצוא</string>
@@ -334,14 +257,13 @@
     <string name="rules_exported">יוצאו %d כללים</string>
     <string name="export_failed">הייצוא נכשל: %s</string>
     <string name="import_failed">הייבוא נכשל: %s</string>
-    <string name="import_no_valid_rules">לא נמצאו כללים חוקיים בקובץ</string>
-
     <string name="app_management_title">ניהול אפליקציות</string>
     <string name="app_management_subtitle">%d אפליקציות</string>
     <string name="app_management_subtitle_filtered">%1$d מתוך %2$d אפליקציות</string>
     <string name="app_management_desc">נהל ניתוב VPN לכל אפליקציה וצפה בסטטיסטיקות</string>
     <string name="app_management_search">חפש אפליקציות…</string>
     <string name="app_management_loading">טוען אפליקציות…</string>
+    <string name="app_management_refresh">רענון</string>
     <string name="app_management_sort">מיון</string>
     <string name="app_management_sort_name">מיין לפי שם</string>
     <string name="app_management_sort_queries">מיין לפי שאילתות</string>
@@ -350,46 +272,33 @@
     <string name="app_management_blocked">נחסמו: %d</string>
     <string name="app_management_system">מערכת</string>
     <string name="app_management_vpn_toggle">ניתוב VPN עבור %s</string>
-
     <string name="log_status_blocked">נחסם</string>
     <string name="log_status_allowed">אושר</string>
     <string name="log_status_whitelisted">ברשימה המורשית</string>
-    <string name="log_detail_title">פרטי דומיין</string>
     <string name="log_detail_query_type">סוג שאילתה</string>
     <string name="log_detail_response_time">זמן תגובה</string>
-    <string name="log_detail_status">סטטוס</string>
     <string name="log_detail_app">אפליקציה</string>
     <string name="log_detail_resolved_ip">IP מפוענח</string>
     <string name="log_detail_blocked_by">נחסם על ידי</string>
     <string name="log_detail_timestamp">זמן</string>
-    <string name="log_detail_unknown">לא ידוע</string>
     <string name="log_detail_na">לא זמין</string>
-    <string name="log_realtime_on">זמן אמת: פעיל</string>
-    <string name="log_realtime_off">זמן אמת: כבוי</string>
     <string name="log_time_range_all">כל הזמן</string>
     <string name="log_time_range_1h">שעה</string>
     <string name="log_time_range_6h">6 שעות</string>
     <string name="log_time_range_24h">24 שעות</string>
     <string name="log_time_range_7d">7 ימים</string>
     <string name="log_filter_all_apps">כל האפליקציות</string>
-    <string name="log_bulk_mode">בחר</string>
     <string name="log_bulk_selected">%d נבחרו</string>
-    <string name="log_bulk_block">חסום הכל</string>
-    <string name="log_bulk_whitelist">אשר הכל</string>
-    <string name="log_unblock_domain">בטל חסימה לדומיין זה</string>
     <string name="log_wildcard_whitelist_domain">אשר את כל תתי-הדומיינים</string>
-    <string name="log_domain_unblocked">הדומיין %1$s שוחרר מחסימה</string>
     <string name="log_wildcard_whitelisted">הדומיין %1$s וכל תתי-הדומיינים אושרו</string>
     <string name="log_action_unblock">בטל חסימה</string>
     <string name="log_action_block">חסום</string>
     <string name="block_reason_custom_rule">כלל חסימה מותאם אישית</string>
     <string name="block_reason_filter_list">רשימת סינון</string>
     <string name="block_reason_security">אתר מסוכן</string>
-
     <string name="home_security_threats">איומים שנחסמו</string>
     <string name="filter_category_ad">חסימת פרסומות</string>
     <string name="filter_category_security">אבטחה</string>
-
     <string name="nav_statistics">סטטיסטיקות</string>
     <string name="stats_title">סטטיסטיקות</string>
     <string name="stats_overview">סקירה כללית</string>
@@ -402,17 +311,13 @@
     <string name="stats_chart_4w">4 שבועות</string>
     <string name="stats_chart_12m">12 חודשים</string>
     <string name="stats_per_app">סטטיסטיקות לפי אפליקציה</string>
-    <string name="stats_app_queries_blocked">%1$s שאילתות · %2$s נחסמו</string>
-
     <string name="vpn_conflict_title">חיבור חסום</string>
-    <string name="vpn_conflict_desc">Android מאפשר רק חיבור VPN אחד בכל פעם. אפליקציית VPN אחרת פעילה כרגע במכשיר שלך.\n\nאנא נתק את ה-VPN האחר או בטל את האפשרות \"VPN פעיל תמיד\" בהגדרות לפני התחברות ל-BlockAds.</string>
+    <string name="vpn_conflict_desc">Android מאפשר רק חיבור VPN אחד בכל פעם. אפליקציית VPN אחרת פעילה כרגע במכשיר שלך.\n\nאנא נתק את ה-VPN האחר או בטל את האפשרות \&quot;VPN פעיל תמיד\&quot; בהגדרות לפני התחברות ל-BlockAds.</string>
     <string name="open_settings">פתח הגדרות</string>
-
     <string name="vpn_phase_loading_filters">טוען רשימות סינון…</string>
     <string name="vpn_phase_preparing_dns">מכין DNS…</string>
     <string name="vpn_phase_establishing">מבסס VPN…</string>
     <string name="vpn_phase_waiting_network">ממתין לרשת…</string>
-
     <string name="vpn_notification_stats_today">%1$d פרסומות נחסמו היום | זמן פעילות %2$s</string>
     <string name="vpn_notification_action_pause">השהה לשעה</string>
     <string name="vpn_notification_action_stop">עצור</string>
@@ -432,16 +337,10 @@
     <string name="settings_daily_summary_desc">הצג סיכום חסימות בסוף היום</string>
     <string name="settings_milestone_notifications">התראות ציוני דרך</string>
     <string name="settings_milestone_notifications_desc">הודע לי כאשר אני מגיע לציוני דרך בחסימה</string>
-
     <string name="profile_title">פרופילי הגנה</string>
     <string name="profile_section_profiles">פרופילים</string>
     <string name="profile_section_schedules">לוחות זמנים</string>
     <string name="profile_name_default">ברירת מחדל</string>
-    <string name="profile_name_strict">מחמיר</string>
-    <string name="profile_name_family">משפחה</string>
-    <string name="profile_name_gaming">גיימינג</string>
-    <string name="profile_name_custom">מותאם אישית</string>
-    <string name="profile_name_strict_family">משפחה מחמיר</string>
     <string name="profile_desc_strict_family">חסימה מקסימלית: פרסומות, עוקבים, תוכן למבוגרים והימורים</string>
     <string name="profile_desc_default">חסימה מאוזנת: פרסומות ועוקבים בסיסיים</string>
     <string name="profile_desc_strict">חסימה אגרסיבית: פרסומות, עוקבים, אנליטיקה, טלמטריה</string>
@@ -468,19 +367,13 @@
     <string name="profile_day_fri">ו\'</string>
     <string name="profile_day_sat">שבת</string>
     <string name="profile_day_sun">א\'</string>
-    <string name="settings_profiles">פרופילי הגנה</string>
-    <string name="settings_profiles_desc">הגדרות קבועות מראש לתרחישי שימוש שונים</string>
-
     <string name="accessibility_toggle_vpn">הפעל/כבה הגנת VPN</string>
     <string name="accessibility_vpn_active">הגנת ה-VPN פעילה</string>
     <string name="accessibility_vpn_inactive">הגנת ה-VPN אינה פעילה</string>
     <string name="accessibility_vpn_connecting">ה-VPN מתחבר</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">שיעור חסימה %1$s אחוזים</string>
     <string name="accessibility_navigate_back">נווט אחורה</string>
-
     <string name="firewall_title">חומת אש (Firewall)</string>
-    <string name="firewall_subtitle">בקרת אינטרנט לכל אפליקציה</string>
     <string name="firewall_count">%d אפליקציות חסומות</string>
     <string name="firewall_search">חפש אפליקציות…</string>
     <string name="firewall_enable">הפעל חומת אש</string>
@@ -492,14 +385,7 @@
     <string name="firewall_schedule_from">מ-</string>
     <string name="firewall_schedule_to">עד</string>
     <string name="firewall_app_blocked">אינטרנט חסום</string>
-    <string name="firewall_app_not_blocked">אינטרנט מאושר</string>
-    <string name="firewall_rule_saved">כלל חומת האש נשמר</string>
-    <string name="firewall_rule_removed">כלל חומת האש הוסר</string>
     <string name="firewall_configure">הגדר כלל</string>
-    <string name="firewall_channel_name">התראות חומת אש</string>
-    <string name="firewall_channel_description">התראות כאשר אפליקציות נחסמות על ידי חומת האש</string>
-    <string name="firewall_notification_title">האפליקציה נחסמה על ידי חומת האש</string>
-    <string name="firewall_notification_text">הגישה לאינטרנט של %s נחסמה</string>
     <string name="firewall_network_mobile">סלולרי</string>
     <string name="firewall_network_all">הכל</string>
     <string name="firewall_schedule_hour_plus">שעה +</string>
@@ -507,54 +393,23 @@
     <string name="block_reason_firewall">חומת אש</string>
     <string name="block_reason_upstream_dns">DNS ראשי</string>
     <string name="settings_firewall">חומת אש</string>
-    <string name="settings_firewall_desc">חסום גישה לאינטרנט לכל אפליקציה בנפרד</string>
-
     <string name="settings_sponsor">תמוך בנו (Sponsor)</string>
     <string name="settings_sponsor_desc">תמוך בפיתוח של BlockAds ב-GitHub</string>
     <string name="settings_community">קהילה</string>
     <string name="settings_reddit_desc">הצטרף לקהילה שלנו ב-Reddit</string>
     <string name="settings_telegram_desc">הצטרף לצ\'אט שלנו ב-Telegram</string>
     <string name="filter_setup_active_count">%1$d פעילות</string>
-    <string name="copied_url">כתובת ה-URL הועתקה</string>
     <string name="filter_error_invalid_url">אנא הזן כתובת URL חוקית (http:// או https://)</string>
     <string name="filter_error_duplicate_url">רשימת סינון זו כבר קיימת</string>
-    <string name="filter_error_invalid_content">כתובת ה-URL אינה מכילה רשימת סינון חוקית</string>
     <string name="filter_chip_all">הכל</string>
     <string name="filter_chip_enabled">מופעל</string>
     <string name="filter_chip_disabled">מושבת</string>
-
-    <string name="dns_custom_primary_label">ראשי</string>
-    <string name="dns_custom_fallback_label">גיבוי</string>
-    <string name="dns_custom_extra_label">נוסף</string>
-    <string name="dns_custom_add_server">הוסף שרת</string>
-    <string name="dns_custom_max_reached">הגעת למספר השרתים המקסימלי</string>
-    <string name="dns_custom_remove_server">הסר שרת</string>
-    <string name="dns_custom_duplicate">השרת כבר קיים</string>
-    <string name="dns_custom_empty">כתובת השרת אינה יכולה להיות ריקה</string>
-
     <string name="wireguard_import_title">ייבוא WireGuard</string>
     <string name="wireguard_import_button">ייבא .conf</string>
     <string name="wireguard_empty_title">לא נטענה תצורה</string>
     <string name="wireguard_empty_desc">הקש על הכפתור למטה כדי לייבא קובץ .conf של WireGuard</string>
-    <string name="wireguard_section_interface">ממשק</string>
-    <string name="wireguard_section_peer">עמית (Peer) %d</string>
-    <string name="wireguard_label_address">כתובת</string>
-    <string name="wireguard_label_private_key">מפתח פרטי</string>
-    <string name="wireguard_label_listen_port">יציאת האזנה (Listen Port)</string>
-    <string name="wireguard_label_public_key">מפתח ציבורי</string>
-    <string name="wireguard_label_endpoint">נקודת קצה (Endpoint)</string>
-    <string name="wireguard_label_allowed_ips">כתובות IP מורשות</string>
-    <string name="wireguard_label_preshared_key">מפתח משותף מראש (Preshared Key)</string>
-    <string name="wireguard_label_keepalive">Keepalive קבוע</string>
-    <string name="wireguard_keepalive_value">%d שניות</string>
-    <string name="wireguard_toggle_key_visibility">הצג/הסתר מפתח</string>
-    <string name="wireguard_copy_key">העתק מפתח</string>
     <string name="wireguard_connect">התחבר למנהרה (Tunnel)</string>
     <string name="wireguard_disconnect">נתק מנהרה</string>
-    <string name="wireguard_save_activate">שמור והפעל</string>
-    <string name="wireguard_clear">נקה WireGuard</string>
-    <string name="wireguard_active_label">WireGuard פעיל — הפעל מחדש VPN כדי להחיל</string>
-
     <string name="https_filtering_title">סינון HTTPS</string>
     <string name="https_filtering_toggle_label">מסנן קוסמטי HTTPS</string>
     <string name="https_filtering_status_active">פעיל — מסתיר פרסומות</string>
@@ -565,7 +420,7 @@
     <string name="https_filtering_ca_desc">בצע את השלבים הבאים כדי להגדיר סינון קוסמטי HTTPS:</string>
     <string name="https_filtering_export_ca">שמור בהורדות (Downloads)</string>
     <string name="https_filtering_cert_saved">האישור נשמר בהורדות!</string>
-    <string name="https_filtering_install_steps">1. עבור אל הגדרות → אבטחה → הצפנה והרשאות\n2. הקש על \"התקן אישור\" → \"אישור CA\"\n3. בחר \"BlockAds-RootCA.crt\" מההורדות\n4. אשר את ההתקנה</string>
+    <string name="https_filtering_install_steps">1. עבור אל הגדרות → אבטחה → הצפנה והרשאות\n2. הקש על \&quot;התקן אישור\&quot; → \&quot;אישור CA\&quot;\n3. בחר \&quot;BlockAds-RootCA.crt\&quot; מההורדות\n4. אשר את ההתקנה</string>
     <string name="https_filtering_open_settings">פתח הגדרות אבטחה</string>
     <string name="https_filtering_browser_section">בחירת דפדפן</string>
     <string name="https_filtering_browser_desc">בחר דפדפנים כדי להחיל סינון פרסומות קוסמטי. רק אפליקציות שנבחרו יסוננו.</string>
@@ -580,16 +435,12 @@
     <string name="https_filtering_cert_installed">האישור הותקן ✓</string>
     <string name="https_filtering_cert_not_installed">האישור לא הותקן</string>
     <string name="https_filtering_cert_checking">בודק…</string>
-    <string name="https_filtering_cert_vpn_required">הקש על \"אמת אישור\" כדי לבדוק</string>
+    <string name="https_filtering_cert_vpn_required">הקש על \&quot;אמת אישור\&quot; כדי לבדוק</string>
     <string name="edit_custom_filter">ערוך מסנן מותאם אישית</string>
     <string name="filter_name">שם המסנן</string>
     <string name="filter_url_domain">URL/דומיין של המסנן</string>
     <string name="add_blocklist_domains_title">הוסף דומיינים חסומים</string>
     <string name="add_whitelisted_domain_title">הוסף דומיין מורשה</string>
-    <string name="disable_all_user_apps">השבת את כל אפליקציות המשתמש</string>
-    <string name="enable_all_user_apps">הפעל את כל אפליקציות המשתמש</string>
-    <string name="disable_all_system_apps">השבת את כל אפליקציות המערכת</string>
-    <string name="enable_all_system_apps">הפעל את כל אפליקציות המערכת</string>
     <string name="vpn_network_switch_waiting">ממתין להתייצבות הרשת… %1$ds</string>
     <string name="settings_network_switch_delay">השהיית החלפת רשת</string>
     <string name="settings_network_switch_delay_desc">השהה חיבור מחדש של VPN לאחר שינויי רשת (שימושי לשיחות Wi-Fi)</string>
@@ -604,12 +455,10 @@
     <string name="onboarding_crash_report_btn_no">לא, תודה</string>
     <string name="settings_privacy_diagnostics_title">פרטיות &amp; אבחון</string>
     <string name="settings_privacy_diagnostics_desc">נהל דוחות קריסה ויומנים מקומיים</string>
-
     <string name="settings_crash_reporting_title">דיווח קריסות אנונימי</string>
     <string name="settings_crash_reporting_subtitle">שלח יומני שגיאות באופן אוטומטי כדי לעזור לנו לתקן בעיות. לא נכלל מידע אישי.</string>
-
     <string name="settings_export_logs_title">ייצוא יומנים מקומיים</string>
-    <string name="settings_export_logs_subtitle">שתף יומני איתור באגים לא מקוונים ישירות דרך דוא"ל, Telegram וכו\'.</string>
+    <string name="settings_export_logs_subtitle">שתף יומני איתור באגים לא מקוונים ישירות דרך דוא&quot;ל, Telegram וכו\'.</string>
     <string name="settings_export_logs_chooser_title">שתף יומנים</string>
     <string name="settings_export_logs_not_found">לא נמצאו יומנים לייצוא</string>
     <string name="custom_color_title">צבע מותאם אישית</string>
@@ -636,4 +485,26 @@
     <string name="filter_compile_success_title">הפילטר קומפל בהצלחה</string>
     <string name="filter_compile_failed_title">קומפילציית הפילטר נכשלה</string>
     <string name="filter_compile_channel_name">קומפילציית פילטר</string>
+    <string name="wireguard_https_filtering_disabled">סינון HTTPS מושבת (אינו תואם ל-WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard מושבת (אינו תואם לסינון HTTPS)</string>
+    <string name="wireguard_imported">יובא \'%1$s\'</string>
+    <string name="wireguard_deleted">נמחק \'%1$s\'</string>
+    <string name="wireguard_active">פעיל: %1$s</string>
+    <string name="wireguard_renamed">שונה שמו</string>
+    <string name="wireguard_enabled_restarting">WireGuard הופעל. מפעיל מחדש VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard הושבת. מפעיל מחדש VPN…</string>
+    <string name="wireguard_delete_dialog_title">למחוק \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">פרופיל זה יוסר. לא ניתן לבטל פעולה זו.</string>
+    <string name="wireguard_action_delete">מחק</string>
+    <string name="wireguard_action_cancel">ביטול</string>
+    <string name="wireguard_action_save">שמור</string>
+    <string name="wireguard_action_edit">ערוך</string>
+    <string name="wireguard_action_rename">שנה שם</string>
+    <string name="wireguard_more_options">אפשרויות נוספות</string>
+    <string name="wireguard_no_peer">(אין עמית)</string>
+    <string name="wireguard_rename_dialog_title">שנה שם פרופיל</string>
+    <string name="https_filtering_cert_saved_downloads">✅ האישור נשמר ב-Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">האישור נשמר. התקן ממנהל הקבצים.</string>
+    <string name="https_filtering_started">סינון HTTPS הופעל</string>
+    <string name="https_filtering_stopped">סינון HTTPS הופסק</string>
 </resources>

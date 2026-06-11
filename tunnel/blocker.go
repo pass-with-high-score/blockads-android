@@ -21,8 +21,9 @@ type Blocker struct {
 	// Custom block rules (||example.com^)
 	customBlockDomains map[string]struct{}
 	// Wildcard rules (e.g., *.ads.example.com)
-	wildcardBlocks []string
-	wildcardAllows []string
+	wildcardBlocks    []string
+	wildcardAllows    []string
+	wildcardWhitelist []string
 }
 
 // BlockResult holds the result of a domain check.
@@ -79,14 +80,22 @@ func (b *Blocker) LoadSecurityDomains(data string) int {
 }
 
 // LoadWhitelist loads whitelisted domains.
+// Entries with a "*." prefix are treated as wildcard suffix patterns
+// (e.g., "*.example.com" matches "x.example.com" but not "example.com").
 func (b *Blocker) LoadWhitelist(data string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	b.whitelistedDomains = make(map[string]struct{})
+	b.wildcardWhitelist = nil
 	for _, line := range strings.Split(data, "\n") {
 		domain := strings.TrimSpace(strings.ToLower(line))
-		if domain != "" {
+		if domain == "" {
+			continue
+		}
+		if strings.HasPrefix(domain, "*.") {
+			b.wildcardWhitelist = append(b.wildcardWhitelist, domain[2:])
+		} else {
 			b.whitelistedDomains[domain] = struct{}{}
 		}
 	}
@@ -145,7 +154,7 @@ func (b *Blocker) IsBlocked(domain string) BlockResult {
 	}
 
 	// Priority 3: Whitelist
-	if b.checkDomainAndParents(domain, b.whitelistedDomains) {
+	if b.checkDomainAndParents(domain, b.whitelistedDomains) || b.matchesWildcard(domain, b.wildcardWhitelist) {
 		return BlockResult{Blocked: false}
 	}
 

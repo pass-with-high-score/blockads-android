@@ -15,5 +15,6 @@ data class FilterList(
     val bloomUrl: String,
     val trieUrl: String,
     val cssUrl: String? = null,
+    val scriptletsUrl: String? = null,
     val originalUrl: String? = null
 )

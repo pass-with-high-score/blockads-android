@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,10 +68,26 @@ fun HttpsFilteringScreen(
     val certStatus by viewModel.certStatus.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
+    val wgDisabledMsg = stringResource(R.string.https_filtering_wireguard_disabled)
+    val certSavedLegacyMsg = stringResource(R.string.https_filtering_cert_saved_legacy)
+    val proxyStartedMsg = stringResource(R.string.https_filtering_started)
+    val proxyStoppedMsg = stringResource(R.string.https_filtering_stopped)
+
+    // Re-verify when the user returns from Android's Security Settings.
+    // They likely just installed (or removed) the certificate.
     val settingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { }
+    ) {
+        viewModel.verifyCert()
+    }
+
+    // Auto-verify on first composition when filtering is on, so users
+    // see the install status without having to tap the button.
+    LaunchedEffect(isEnabled) {
+        if (isEnabled) viewModel.verifyCert()
+    }
 
     // Collect one-shot events
     LaunchedEffect(Unit) {
@@ -78,7 +95,7 @@ fun HttpsFilteringScreen(
             when (event) {
                 is HttpsFilteringEvent.CaCertSavedToDownloads -> {
                     snackbarHostState.showSnackbar(
-                        "✅ Certificate saved to Downloads/${event.fileName}"
+                        resources.getString(R.string.https_filtering_cert_saved_downloads, event.fileName)
                     )
                 }
 
@@ -88,7 +105,7 @@ fun HttpsFilteringScreen(
                         val intent = viewModel.createSecuritySettingsIntent()
                         settingsLauncher.launch(intent)
                     } catch (_: Exception) {
-                        snackbarHostState.showSnackbar("Certificate saved. Install from file manager.")
+                        snackbarHostState.showSnackbar(certSavedLegacyMsg)
                     }
                 }
 
@@ -97,11 +114,15 @@ fun HttpsFilteringScreen(
                 }
 
                 is HttpsFilteringEvent.ProxyStarted -> {
-                    snackbarHostState.showSnackbar("HTTPS filtering started")
+                    snackbarHostState.showSnackbar(proxyStartedMsg)
                 }
 
                 is HttpsFilteringEvent.ProxyStopped -> {
-                    snackbarHostState.showSnackbar("HTTPS filtering stopped")
+                    snackbarHostState.showSnackbar(proxyStoppedMsg)
+                }
+
+                is HttpsFilteringEvent.WireGuardDisabledForHttps -> {
+                    snackbarHostState.showSnackbar(wgDisabledMsg)
                 }
             }
         }

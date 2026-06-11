@@ -22,7 +22,20 @@ import (
 // injectionTags are the lightweight tags injected after <head>.
 // The browser fetches these via HTTPS through the MITM proxy, which
 // intercepts "local.pwhs.app" and serves assets from memory.
-const injectionTags = `<link rel="stylesheet" href="https://local.pwhs.app/cosmetic.css">`
+//
+// Three injections, in order:
+//  1. <link>   cosmetic.css     — element-hiding rules
+//  2. <script> scriptlets.js    — scriptlet runtime (set-constant,
+//                                  abort-on-prop, prevent-fetch, …)
+//  3. inline   per-host loader  — fetches /sl-<host>.js for the
+//     current document.location.host and evals it. Cheaper than
+//     parsing the host server-side: the runtime fetch happens once
+//     per host, browser caches the response.
+const injectionTags = `<link rel="stylesheet" href="https://local.pwhs.app/cosmetic.css">` +
+	`<script src="https://local.pwhs.app/scriptlets.js" async></script>` +
+	`<script>(function(){var s=document.createElement('script');s.async=true;` +
+	`s.src='https://local.pwhs.app/sl-'+encodeURIComponent(location.hostname)+'.js';` +
+	`(document.head||document.documentElement).appendChild(s);})();</script>`
 
 // headTagBytes is the pattern to search for (case-insensitive matching done manually).
 var headTagBytes = []byte("<head") // matches both <head> and <head ...attributes>

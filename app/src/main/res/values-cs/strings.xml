@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">Prohlížení bez reklam</string>
     <string name="notification_channel_name">Služba blokování reklam</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">Záznamy</string>
     <string name="nav_filter">Filtry</string>
     <string name="nav_settings">Nastavení</string>
-    <string name="settings_filter_url">URL seznamu filtrů</string>
-    <string name="settings_update_filter">Aktualizovat seznam filtrů</string>
-    <string name="filter_updating">Aktualizace seznamu filtrů…</string>
     <string name="filter_updated">Seznam filtrů aktualizován: %d domén</string>
     <string name="filter_update_failed">Aktualizace seznamu filtrů se nezdařila</string>
     <string name="filter_detail_enabled">Povoleno</string>
@@ -35,24 +32,15 @@
     <string name="filter_detail_last_updated">Poslední aktualizace</string>
     <string name="filter_detail_update">Aktualizovat</string>
     <string name="filter_detail_delete">Smazat</string>
-    <string name="filter_detail_domain_preview">Náhled blokovaných domén</string>
-    <string name="filter_detail_no_domains">Žádné domény v mezipaměti. Zkuste nejprve aktualizovat tento filtr.</string>
-    <string name="filter_detail_more_domains">… a dalších %s domén</string>
     <string name="logs_empty">Zatím žádné zaznamenané DNS dotazy</string>
     <string name="logs_filter_all">Vše</string>
     <string name="logs_filter_blocked">Blokováno</string>
-
     <string name="onboarding_title_1">Blokujte reklamy chytře</string>
     <string name="onboarding_desc_1">Blokujte reklamy ve všech aplikacích a prohlížečích jedním klepnutím. Využívá technologii DNS filtrování – není vyžadován root.\n\n🔒 Slib soukromí: Nikdy neshromažďujeme, neukládáme ani nepřenášíme vaše data o prohlížení. Veškeré zpracování probíhá pouze ve vašem zařízení.</string>
-    <string name="onboarding_title_2">Vaše soukromí, chráněno</string>
-    <string name="onboarding_desc_2">Žádný sběr dat. Žádné sledování. Veškeré DNS záznamy zůstávají pouze ve vašem zařízení. Vaši aktivitu při prohlížení nikdy neuvidíme.</string>
-    <string name="onboarding_title_3">Zdarma a Open Source</string>
-    <string name="onboarding_desc_3">BlockAds là hoàn toàn zdarma bez nákupů v aplikaci. Náš zdrojový kód je otevřený pro kohokoli ke kontrole a ověření.</string>
     <string name="onboarding_skip">Přeskočit</string>
     <string name="onboarding_next">Další</string>
     <string name="onboarding_get_started">Začít</string>
     <string name="onboarding_recommended">★ Doporučeno</string>
-
     <string name="onboarding_protection_title">Zvolte úroveň ochrany</string>
     <string name="onboarding_protection_desc">Vyberte, jak agresivně chcete blokovat reklamy a sledovače</string>
     <string name="onboarding_protection_basic">Základní</string>
@@ -61,59 +49,40 @@
     <string name="onboarding_protection_standard_desc">Blokuje reklamy, sledovače a analytiku. Dobrá rovnováha mezi ochranou a kompatibilitou.</string>
     <string name="onboarding_protection_strict">Striktní</string>
     <string name="onboarding_protection_strict_desc">Maximální blokování. Může ovlivnit funkčnost některých webů, ale poskytuje nejsilnější ochranu.</string>
-
     <string name="onboarding_dns_title">Zvolte DNS server</string>
     <string name="onboarding_dns_desc">Vyberte DNS server pro překlad doménových jmen. To můžete později změnit v Nastavení.</string>
-
     <string name="onboarding_vpn_title">Vyžadováno povolení VPN</string>
     <string name="onboarding_vpn_desc">BlockAds používá lokální VPN k filtrování DNS dotazů a blokování reklam. Žádná data neopouštějí vaše zařízení – tato VPN funguje pouze lokálně k zachycení a filtrování DNS požadavků.</string>
     <string name="onboarding_vpn_grant">Udělit povolení VPN</string>
-
     <string name="onboarding_notification_title">Zůstaňte v obraze</string>
     <string name="onboarding_notification_desc">Povolte oznámení, abyste viděli statistiky blokování v reálném čase a věděli, kdy je ochrana aktivní. Vyžadováno pro trvalé oznámení VPN v Androidu 13+.</string>
     <string name="onboarding_notification_grant">Povolit oznámení</string>
-
     <string name="onboarding_battery_title">Udržujte ochranu v chodu</string>
     <string name="onboarding_battery_desc">Vylučte BlockAds z optimalizace baterie, aby služba VPN zůstala aktivní na pozadí a nebyla ukončena systémem.</string>
     <string name="onboarding_battery_grant">Vypnout optimalizaci baterie</string>
     <string name="onboarding_battery_unsupported">Nepodporováno</string>
-
     <string name="onboarding_permission_granted">✓ Povolení uděleno</string>
-
     <string name="onboarding_complete_title">Nyní jste chráněni!</string>
     <string name="onboarding_complete_desc">Gratulujeme! BlockAds là nakonfigurováno a připraveno chránit vaše zařízení před reklamami a sledovači.</string>
     <string name="onboarding_complete_stats">Klepnutím na „Začít“ aktivujete ochranu</string>
-
     <string name="whitelist_apps_title">Povolené aplikace</string>
-    <string name="whitelist_apps_subtitle">Tyto aplikace budou obcházet blokování</string>
     <string name="whitelist_apps_search">Hledat aplikace…</string>
     <string name="whitelist_apps_empty">Nejsou nainstalovány žádné aplikace</string>
     <string name="whitelist_apps_count">Povolených aplikací: %d</string>
     <string name="whitelist_tab_user">Uživatelské</string>
     <string name="whitelist_tab_system">Systémové</string>
-
-    <string name="whitelist_domains_title">Povolené domény</string>
-    <string name="whitelist_domains_subtitle">Tyto domény nebudou nikdy blokovány</string>
     <string name="whitelist_domains_add">Přidat doménu</string>
     <string name="whitelist_domains_hint">např. priklad.cz</string>
     <string name="whitelist_domains_empty">Žádné povolené domény</string>
     <string name="whitelist_domain_added">Doména povolena: %s</string>
     <string name="whitelist_domain_removed">Doména odstraněna ze seznamu povolených</string>
-
-    <string name="settings_blocklist_domains_desc">Tyto domény budou vždy blokovány</string>
-    <string name="blocklist_domains_title">Blokované domény</string>
-    <string name="blocklist_domains_subtitle">Tyto domény budou vždy blokovány</string>
-    <string name="blocklist_domains_add">Přidat doménu</string>
-    <string name="blocklist_domains_hint">např. priklad.cz</string>
     <string name="blocklist_domains_empty">Žádné blokované domény</string>
     <string name="blocklist_domain_added">Doména zablokována: %s</string>
     <string name="blocklist_domain_removed">Doména odstraněna ze seznamu blokovaných</string>
     <string name="blocklist_domain_already_exists">Doména již je na seznamu blokovaných</string>
-
     <string name="domain_rules_title">Pravidla domén</string>
     <string name="domain_rules_tab_whitelist">Povolené</string>
     <string name="domain_rules_tab_blocklist">Blokované</string>
-
     <string name="about_title">O aplikaci</string>
     <string name="about_description">Zdarma và open-source blokátor reklam.\nŽádný sběr dat. Žádné sledování.</string>
     <string name="about_version">Verze %s</string>
@@ -123,14 +92,12 @@
     <string name="about_contact">Kontaktujte nás</string>
     <string name="about_licenses">Open Source licence</string>
     <string name="about_no_data">🔒 Tato aplikace neshromažďuje žádné osobní údaje</string>
-
     <string name="log_action_whitelist">Přidat na seznam povolených</string>
     <string name="log_action_copy">Kopírovat doménu</string>
     <string name="log_search_hint">Hledat domény…</string>
     <string name="domain_copied">Doména zkopírována</string>
     <string name="log_whitelisted">Povoleno: %s</string>
     <string name="log_already_whitelisted">Již je na seznamu povolených</string>
-
     <string name="home_connecting_desc">Navazování připojení VPN…</string>
     <string name="home_protected_desc">Vaše zařízení là chráněno před reklamami</string>
     <string name="home_unprotected_desc">Klepnutím na tlačítko zapnete blokování</string>
@@ -143,10 +110,7 @@
     <string name="home_chart_7d">7 dní</string>
     <string name="home_top_blocked">Nejčastěji blokované domény</string>
     <string name="home_chart_no_data">Žádná data nejsou k dispozici</string>
-
     <string name="settings_title">Nastavení</string>
-    <string name="settings_search_hint">Hledat v nastavení…</string>
-    <string name="settings_search_clear">Vymazat hledání</string>
     <string name="settings_category_protection">Ochrana</string>
     <string name="settings_category_protection_desc">DNS server, protokol, automatické připojení</string>
     <string name="settings_category_interface">Rozhraní</string>
@@ -159,32 +123,22 @@
     <string name="settings_category_data_desc">Export/Import, smazat záznamy</string>
     <string name="settings_category_info">Informace</string>
     <string name="settings_category_info_desc">O aplikaci, zásady soukromí, zdrojový kód</string>
-    <string name="settings_appearance">Vzhled</string>
     <string name="settings_theme">Motiv</string>
     <string name="settings_theme_system">Systémový</string>
     <string name="settings_theme_light">Světlý</string>
     <string name="settings_theme_dark">Tmavý</string>
     <string name="settings_lang_system">Systémový</string>
-    <string name="settings_high_contrast">Vysoký kontrast</string>
-    <string name="settings_high_contrast_desc">Zvýšit kontrast pro lepší viditelnost</string>
     <string name="settings_accent_color">Barva akcentu</string>
     <string name="settings_accent_color_desc">Přizpůsobit hlavní barvu aplikace</string>
     <string name="accent_dynamic">Dynamická (Material You)</string>
     <string name="accent_dynamic_desc">Použije barvy vaší tapety</string>
-    <string name="settings_connection">Připojení</string>
     <string name="settings_filter_lists">Seznamy filtrů (%d aktivních)</string>
     <string name="settings_add_custom_filter">Přidat vlastní seznam filtrů</string>
     <string name="settings_updating">Aktualizace…</string>
     <string name="settings_update_all">Aktualizovat všechny filtry</string>
-    <string name="settings_dns_config">Konfigurace DNS</string>
-    <string name="settings_save_dns">Uložit DNS</string>
-    <string name="settings_whitelist">Seznam povolených</string>
     <string name="settings_whitelist_apps">Povolené aplikace</string>
     <string name="settings_whitelist_apps_desc">Vyloučit aplikace z blokování reklam</string>
     <string name="settings_whitelist_domains">Povolené domény</string>
-    <string name="settings_whitelist_domains_desc">Tyto domény nebudou nikdy blokovány</string>
-
-    <string name="settings_data_backup">Data a záloha</string>
     <string name="settings_export">Exportovat</string>
     <string name="settings_import">Importovat</string>
     <string name="settings_auto_reconnect">Automatické připojení</string>
@@ -193,16 +147,11 @@
     <string name="settings_safe_search_desc">Vynutit bezpečné vyhledávání (Google, Bing)</string>
     <string name="settings_youtube_restricted">Omezený režim YouTube</string>
     <string name="settings_youtube_restricted_desc">Filtrovat nevhodná videa và skrýt komentáře</string>
-    <string name="settings_dns_protocol">DNS protokol</string>
-    <string name="settings_dns_protocol_plain">Standardní DNS</string>
-    <string name="settings_upstream_dns">Upstream DNS server</string>
     <string name="settings_fallback_dns">Záložní DNS server</string>
     <string name="settings_fallback_dns_desc">Použije se, když primární DNS server selže.</string>
     <string name="settings_fallback_dns_short_desc">Záloha při selhání primárního DNS</string>
     <string name="settings_custom_dns_server">Vlastní DNS server</string>
     <string name="settings_custom_dns_hint">Zadejte IP pro Plain DNS, https:// pro DoH, tls:// pro DoT, nebo quic:// pro DoQ</string>
-    <string name="settings_detected_protocol">Zjištěno: %s</string>
-    <string name="settings_invalid_dns_input">Neplatná adresa DNS serveru</string>
     <string name="settings_dns_response_type">Typ DNS odpovědi</string>
     <string name="dns_response_nxdomain_desc">Doména neexistuje (standardní)</string>
     <string name="dns_response_refused_desc">Dotaz odmítnut (lepší kompatibilita)</string>
@@ -210,9 +159,6 @@
     <string name="dns_response_custom_ip_desc">Vrátí nulovou adresu trasy (výchozí)</string>
     <string name="settings_clear_logs">Vymazat všechny záznamy</string>
     <string name="clear_logs_confirm_message">Opravdu chcete vymazat všechny DNS záznamy? Tuto akci nelze vzít zpět.</string>
-    <string name="dns_error_notification_title">Chyba konfigurace DNS</string>
-    <string name="dns_error_notification_no_fallback">Připojení %1$s k %2$s selhává. Není nastaven záložní DNS.</string>
-
     <string name="custom_rules">Vlastní pravidla</string>
     <string name="add_custom_rule">Přidat vlastní pravidlo</string>
     <string name="import_rules">Importovat pravidla</string>
@@ -235,13 +181,13 @@
     <string name="delete">Smazat</string>
     <string name="cancel">Zrušit</string>
     <string name="block_this_domain">Zablokovat tuto doménu</string>
-
     <string name="app_management_title">Správa aplikací</string>
     <string name="app_management_subtitle">Aplikací: %d</string>
     <string name="app_management_subtitle_filtered">%1$d z %2$d aplikací</string>
     <string name="app_management_desc">Správa směrování VPN pro aplikace và statistiky</string>
     <string name="app_management_search">Hledat aplikace…</string>
     <string name="app_management_loading">Načítání aplikací…</string>
+    <string name="app_management_refresh">Obnovit</string>
     <string name="app_management_sort">Seřadit</string>
     <string name="app_management_sort_name">Podle názvu</string>
     <string name="app_management_sort_queries">Podle dotazů</string>
@@ -250,50 +196,36 @@
     <string name="app_management_blocked">Zablokováno: %d</string>
     <string name="app_management_system">Systém</string>
     <string name="app_management_vpn_toggle">Směrování VPN pro %s</string>
-
     <string name="log_status_blocked">Blokováno</string>
     <string name="log_status_allowed">Povoleno</string>
     <string name="log_status_whitelisted">Na seznamu povolených</string>
-    <string name="log_detail_title">Detaily domény</string>
     <string name="log_detail_query_type">Typ dotazu</string>
     <string name="log_detail_response_time">Doba odezvy</string>
-    <string name="log_detail_status">Stav</string>
     <string name="log_detail_app">Aplikace</string>
     <string name="log_detail_resolved_ip">Přeložená IP</string>
     <string name="log_detail_blocked_by">Zablokováno filtrem</string>
     <string name="log_detail_timestamp">Čas</string>
-    <string name="log_detail_unknown">Neznámý</string>
     <string name="log_detail_na">N/A</string>
-    <string name="log_realtime_on">Reálný čas: ZAP</string>
-    <string name="log_realtime_off">Reálný čas: VYP</string>
     <string name="log_time_range_all">Vše</string>
     <string name="log_time_range_1h">1h</string>
     <string name="log_time_range_6h">6h</string>
     <string name="log_time_range_24h">24h</string>
     <string name="log_time_range_7d">7d</string>
     <string name="log_filter_all_apps">Všechny aplikace</string>
-    <string name="log_bulk_mode">Vybrat</string>
     <string name="log_bulk_selected">Vybráno: %d</string>
-    <string name="log_bulk_block">Zablokovat vše</string>
-    <string name="log_bulk_whitelist">Povolit vše</string>
-    <string name="log_unblock_domain">Odblokovat tuto doménu</string>
     <string name="log_action_unblock">Odblokovat</string>
     <string name="log_action_block">Zablokovat</string>
     <string name="block_reason_custom_rule">Vlastní pravidlo blokování</string>
     <string name="block_reason_filter_list">Seznam filtrů</string>
     <string name="block_reason_security">Nebezpečný web</string>
-
-    <string name="widget_name">BlockAds Přepínač</string>
     <string name="widget_description">Zapnout/vypnout blokování và zobrazit statistiky</string>
     <string name="widget_blocked_today">Dnes zablokováno</string>
     <string name="widget_protected">Zapnuto</string>
     <string name="widget_unprotected">Vypnuto</string>
-
     <string name="shortcut_toggle_vpn">Přepnout blokování reklam</string>
     <string name="home_security_threats">Zablokované hrozby</string>
     <string name="filter_category_ad">Blokování reklam</string>
     <string name="filter_category_security">Zabezpečení</string>
-
     <string name="nav_statistics">Statistiky</string>
     <string name="stats_title">Statistiky</string>
     <string name="stats_overview">Přehled</string>
@@ -306,17 +238,13 @@
     <string name="stats_chart_4w">4 týdny</string>
     <string name="stats_chart_12m">12 měsíců</string>
     <string name="stats_per_app">Statistiky podle aplikací</string>
-    <string name="stats_app_queries_blocked">%1$s dotazů · %2$s blokováno</string>
-
     <string name="vpn_conflict_title">Připojení zablokováno</string>
     <string name="vpn_conflict_desc">Android umožňuje pouze jedno aktivní připojení VPN současně. Ve vašem zařízení là již aktivní jiná VPN.\n\nNež se připojíte k BlockAds, odpojte prosím jinou VPN nebo v Nastavení vypněte funkci „Vždy zapnutá VPN“.</string>
     <string name="open_settings">Otevřít nastavení</string>
-
     <string name="vpn_phase_loading_filters">Načítání seznamů filtrů…</string>
     <string name="vpn_phase_preparing_dns">Příprava DNS…</string>
     <string name="vpn_phase_establishing">Navazování VPN…</string>
     <string name="vpn_phase_waiting_network">Čekání na síť…</string>
-
     <string name="vpn_notification_stats_today">Dnes zablokováno %1$d reklam | Provoz %2$s</string>
     <string name="vpn_notification_action_pause">Pauza 1h</string>
     <string name="vpn_notification_action_stop">Zastavit</string>
@@ -336,16 +264,10 @@
     <string name="settings_daily_summary_desc">Zobrazit souhrn blokování na konci dne</string>
     <string name="settings_milestone_notifications">Upozornění na milníky</string>
     <string name="settings_milestone_notifications_desc">Upozornit při dosažení milníku v blokování</string>
-
     <string name="profile_title">Profily ochrany</string>
     <string name="profile_section_profiles">Profily</string>
     <string name="profile_section_schedules">Plány</string>
     <string name="profile_name_default">Výchozí</string>
-    <string name="profile_name_strict">Striktní</string>
-    <string name="profile_name_family">Rodina</string>
-    <string name="profile_name_gaming">Hraní</string>
-    <string name="profile_name_custom">Vlastní</string>
-    <string name="profile_name_strict_family">Striktní rodina</string>
     <string name="profile_desc_strict_family">Maximální blokování: reklamy, sledovače, obsah pro dospělé a hazard</string>
     <string name="profile_desc_default">Vyvážené blokování: základní reklamy a sledovače</string>
     <string name="profile_desc_strict">Agresivní blokování: reklamy, sledovače, analytika, telemetrie</string>
@@ -372,19 +294,13 @@
     <string name="profile_day_fri">Pá</string>
     <string name="profile_day_sat">So</string>
     <string name="profile_day_sun">Ne</string>
-    <string name="settings_profiles">Profily ochrany</string>
-    <string name="settings_profiles_desc">Předvolby pro různé situace použití</string>
-
     <string name="accessibility_toggle_vpn">Přepnout ochranu VPN</string>
     <string name="accessibility_vpn_active">Ochrana VPN là aktivní</string>
     <string name="accessibility_vpn_inactive">Ochrana VPN là neaktivní</string>
     <string name="accessibility_vpn_connecting">VPN se připojuje</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Míra blokování %1$s procent</string>
     <string name="accessibility_navigate_back">Zpět</string>
-
     <string name="firewall_title">Firewall</string>
-    <string name="firewall_subtitle">Kontrola internetu pro aplikace</string>
     <string name="firewall_count">%d aplikací blokováno</string>
     <string name="firewall_search">Hledat aplikace…</string>
     <string name="firewall_enable">Zapnout Firewall</string>
@@ -396,14 +312,7 @@
     <string name="firewall_schedule_from">Od</string>
     <string name="firewall_schedule_to">Do</string>
     <string name="firewall_app_blocked">Internet zablokován</string>
-    <string name="firewall_app_not_blocked">Internet povolen</string>
-    <string name="firewall_rule_saved">Pravidlo firewallu uloženo</string>
-    <string name="firewall_rule_removed">Pravidlo firewallu odstraněno</string>
     <string name="firewall_configure">Konfigurovat pravidlo</string>
-    <string name="firewall_channel_name">Upozornění firewallu</string>
-    <string name="firewall_channel_description">Oznámení při zablokování aplikace firewallem</string>
-    <string name="firewall_notification_title">Aplikace zablokována firewallem</string>
-    <string name="firewall_notification_text">Aplikaci %s byl zamezen přístup k internetu</string>
     <string name="firewall_network_mobile">Mobilní data</string>
     <string name="firewall_network_all">Vše</string>
     <string name="firewall_schedule_hour_plus">Hod +</string>
@@ -411,54 +320,23 @@
     <string name="block_reason_firewall">Firewall</string>
     <string name="block_reason_upstream_dns">Upstream DNS</string>
     <string name="settings_firewall">Firewall</string>
-    <string name="settings_firewall_desc">Blokovat přístup k internetu pro jednotlivé aplikace</string>
-
     <string name="settings_sponsor">Podpořte nás</string>
     <string name="settings_sponsor_desc">Podpořte vývoj BlockAds na GitHubu</string>
     <string name="settings_community">Komunita</string>
     <string name="settings_reddit_desc">Připojte se k naší komunitě na Redditu</string>
     <string name="settings_telegram_desc">Připojte se k našemu chatu na Telegramu</string>
     <string name="filter_setup_active_count">%1$d aktivních</string>
-    <string name="copied_url">URL zkopírována</string>
     <string name="filter_error_invalid_url">Zadejte prosím platnou URL (http:// nebo https://)</string>
     <string name="filter_error_duplicate_url">Tento seznam filtrů již existuje</string>
-    <string name="filter_error_invalid_content">URL neobsahuje platný seznam filtrů</string>
     <string name="filter_chip_all">Vše</string>
     <string name="filter_chip_enabled">Povoleno</string>
     <string name="filter_chip_disabled">Zakázáno</string>
-
-    <string name="dns_custom_primary_label">Primární</string>
-    <string name="dns_custom_fallback_label">Záložní</string>
-    <string name="dns_custom_extra_label">Extra</string>
-    <string name="dns_custom_add_server">Přidat server</string>
-    <string name="dns_custom_max_reached">Dosažen maximální počet serverů</string>
-    <string name="dns_custom_remove_server">Odstranit server</string>
-    <string name="dns_custom_duplicate">Server již existuje</string>
-    <string name="dns_custom_empty">Adresa serveru nesmí být prázdná</string>
-
     <string name="wireguard_import_title">Import WireGuard</string>
     <string name="wireguard_import_button">Importovat .conf</string>
     <string name="wireguard_empty_title">Není načtena žádná konfigurace</string>
     <string name="wireguard_empty_desc">Klepnutím na tlačítko níže importujte soubor .conf pro WireGuard</string>
-    <string name="wireguard_section_interface">Rozhraní</string>
-    <string name="wireguard_section_peer">Peer %d</string>
-    <string name="wireguard_label_address">Adresa</string>
-    <string name="wireguard_label_private_key">Soukromý klíč</string>
-    <string name="wireguard_label_listen_port">Naslouchací port</string>
-    <string name="wireguard_label_public_key">Veřejný klíč</string>
-    <string name="wireguard_label_endpoint">Koncový bod (Endpoint)</string>
-    <string name="wireguard_label_allowed_ips">Povolené IP adresy</string>
-    <string name="wireguard_label_preshared_key">Předsdílený klíč</string>
-    <string name="wireguard_label_keepalive">Persistent Keepalive</string>
-    <string name="wireguard_keepalive_value">%d sekund</string>
-    <string name="wireguard_toggle_key_visibility">Přepnout viditelnost klíče</string>
-    <string name="wireguard_copy_key">Kopírovat klíč</string>
     <string name="wireguard_connect">Připojit tunel</string>
     <string name="wireguard_disconnect">Odpojit tunel</string>
-    <string name="wireguard_save_activate">Uložit a aktivovat</string>
-    <string name="wireguard_clear">Vymazat WireGuard</string>
-    <string name="wireguard_active_label">WireGuard Aktivní — restartujte VPN k aplikování</string>
-
     <string name="https_filtering_title">Filtrování HTTPS</string>
     <string name="https_filtering_toggle_label">Kosmetický filtr HTTPS</string>
     <string name="https_filtering_status_active">Aktivní — skrývání reklam</string>
@@ -490,7 +368,6 @@
     <string name="filter_url_domain">URL/Doména filtru</string>
     <string name="add_blocklist_domains_title">Přidat blokované domény</string>
     <string name="add_whitelisted_domain_title">Přidat povolenou doménu</string>
-    <string name="settings_add_domain">Přidat doménu</string>
     <string name="settings_about">O aplikaci</string>
     <string name="settings_about_desc">Verze, zásady ochrany soukromí, zdrojový kód</string>
     <string name="settings_add_filter_title">Přidat seznam filtrů</string>
@@ -499,11 +376,6 @@
     <string name="settings_add">Přidat</string>
     <string name="settings_cancel">Zrušit</string>
     <string name="settings_add_domain_hint">Doména (např. priklad.cz)</string>
-    <string name="settings_doh_server_url">URL adresa DoH serveru</string>
-    <string name="settings_save_doh_url">Uložit URL DoH</string>
-    <string name="settings_dot_server">DoT server (hostitel nebo IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">URL adresa DoQ serveru</string>
     <string name="dns_error_duplicate">Záložní DNS nemůže být stejné jako vlastní DNS</string>
     <string name="dns_category_fallback">Záložní</string>
     <string name="settings_fallback_dns_not_set">Nenastaveno (žádná záloha)</string>
@@ -511,24 +383,18 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_save_custom_dns">Uložit DNS</string>
-    <string name="settings_dns_response_type_desc">Typ odpovědi pro blokované domény</string>
-    <string name="dns_error_notification_both_failed">Připojení %1$s k %2$s i záložnímu %3$s selhává. Webové stránky se nemusí načíst. Zkontrolujte nastavení DNS.</string>
     <string name="filter_setup_title">Nastavení filtrů</string>
-    <string name="filter_setup_desc">Správa vestavěných a vlastních seznamů filtrů</string>
     <string name="filter_built_in">Vestavěné</string>
     <string name="filter_custom">Vlastní</string>
     <string name="filter_custom_empty">Zatím nebyly přidány žádné vlastní filtry</string>
     <string name="filter_search_hint">Hledat filtry…</string>
     <string name="filter_search_no_results">Pro „%s“ nebyly nalezeny žádné filtry</string>
     <string name="filter_log_cleared">Záznam byl vymazán</string>
-    <string name="filter_domain_whitelisted">Doména byla přidána na seznam povolených: %s</string>
     <string name="filter_domain_already_whitelisted">Doména již je na seznamu povolených</string>
     <string name="filter_settings_export">Nastavení byla exportována</string>
     <string name="filter_export_failed">Export se nezdařil: %s</string>
     <string name="filter_settings_imported">Nastavení byla importována</string>
     <string name="filter_import_failed">Import se nezdařil: %s</string>
-    <string name="settings_auto_update">Automatická aktualizace seznamů filtrů</string>
     <string name="settings_auto_update_enabled">Povolit automatickou aktualizaci</string>
     <string name="settings_auto_update_enabled_desc">Automaticky aktualizovat seznamy filtrů na pozadí</string>
     <string name="settings_auto_update_frequency">Frekvence aktualizace</string>
@@ -557,13 +423,10 @@
     <string name="dns_custom_description">Zadejte vlastní adresy DNS serverů</string>
     <string name="dns_custom_save">Uložit</string>
     <string name="dns_custom_cancel">Zrušit</string>
-    <string name="dns_select_server">Vyberte DNS server</string>
     <string name="widget_toggle_description">Přepnout blokování reklam</string>
     <string name="shortcut_toggle_vpn_short">Přepnout VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Přepnutí není k dispozici</string>
     <string name="import_rules_hint">Vložte pravidla (jedno na řádek):</string>
     <string name="import_label">Importovat</string>
-    <string name="add_to_custom_rules">Přidat do vlastních pravidel</string>
     <string name="import_from_file">Importovat ze souboru</string>
     <string name="export_to_file">Exportovat do souboru</string>
     <string name="export_format_title">Formát exportu</string>
@@ -572,20 +435,12 @@
     <string name="rules_exported">Exportováno %d pravidel</string>
     <string name="export_failed">Export se nezdařil: %s</string>
     <string name="import_failed">Import se nezdařil: %s</string>
-    <string name="import_no_valid_rules">V souboru nebyla nalezena žádná platná pravidla</string>
     <string name="log_wildcard_whitelist_domain">Povolit všechny subdomény</string>
-    <string name="log_domain_unblocked">Doména %1$s byla odblokována</string>
     <string name="log_wildcard_whitelisted">Doména %1$s a všechny její subdomény byly přidány na seznam povolených</string>
-
     <string name="settings_show_bottom_nav_labels">Zobrazit popisky spodní navigace</string>
     <string name="settings_show_bottom_nav_labels_desc">Zobrazovat text pod ikonami ve spodním navigačním panelu</string>
     <string name="settings_language">Jazyk</string>
     <string name="test_block_ads">Otestovat blokování reklam</string>
-    <string name="test_block_ads_title">Test blokování reklam</string>
-    <string name="disable_all_user_apps">Zakázat všechny uživatelské aplikace</string>
-    <string name="enable_all_user_apps">Povolit všechny uživatelské aplikace</string>
-    <string name="disable_all_system_apps">Zakázat všechny systémové aplikace</string>
-    <string name="enable_all_system_apps">Povolit všechny systémové aplikace</string>
     <string name="vpn_network_switch_waiting">Čekání na stabilizaci sítě… %1$ds</string>
     <string name="settings_network_switch_delay">Zpoždění při změně sítě</string>
     <string name="settings_network_switch_delay_desc">Pozastavit opětovné připojení VPN po změně sítě (užitečné pro Wi-Fi volání)</string>
@@ -600,10 +455,8 @@
     <string name="onboarding_crash_report_btn_no">Ne, děkuji</string>
     <string name="settings_privacy_diagnostics_title">Soukromí &amp; Diagnostika</string>
     <string name="settings_privacy_diagnostics_desc">Správa hlášení o chybách a místních protokolů</string>
-
     <string name="settings_crash_reporting_title">Anonymní hlášení o chybách</string>
     <string name="settings_crash_reporting_subtitle">Automaticky odesílat protokoly o chybách, aby nám to pomohlo vyřešit problémy. Nejsou zahrnuty žádné osobní údaje.</string>
-
     <string name="settings_export_logs_title">Exportovat místní protokoly</string>
     <string name="settings_export_logs_subtitle">Sdílejte offline protokoly ladění přímo přes e-mail, Telegram atd.</string>
     <string name="settings_export_logs_chooser_title">Sdílet protokoly</string>
@@ -632,4 +485,26 @@
     <string name="filter_compile_success_title">Filtr zkompilován</string>
     <string name="filter_compile_failed_title">Kompilace filtru selhala</string>
     <string name="filter_compile_channel_name">Kompilace filtru</string>
+    <string name="wireguard_https_filtering_disabled">HTTPS filtrování deaktivováno (nekompatibilní s WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard deaktivován (nekompatibilní s HTTPS filtrováním)</string>
+    <string name="wireguard_imported">\'%1$s\' importován</string>
+    <string name="wireguard_deleted">\'%1$s\' smazán</string>
+    <string name="wireguard_active">Aktivní: %1$s</string>
+    <string name="wireguard_renamed">Přejmenováno</string>
+    <string name="wireguard_enabled_restarting">WireGuard zapnut. Restartování VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard vypnut. Restartování VPN…</string>
+    <string name="wireguard_delete_dialog_title">Smazat \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">Tento profil bude odstraněn. Akce nelze vrátit zpět.</string>
+    <string name="wireguard_action_delete">Smazat</string>
+    <string name="wireguard_action_cancel">Zrušit</string>
+    <string name="wireguard_action_save">Uložit</string>
+    <string name="wireguard_action_edit">Upravit</string>
+    <string name="wireguard_action_rename">Přejmenovat</string>
+    <string name="wireguard_more_options">Další možnosti</string>
+    <string name="wireguard_no_peer">(žádný peer)</string>
+    <string name="wireguard_rename_dialog_title">Přejmenovat profil</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Certifikát uložen do Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Certifikát uložen. Nainstalujte ze správce souborů.</string>
+    <string name="https_filtering_started">HTTPS filtrování spuštěno</string>
+    <string name="https_filtering_stopped">HTTPS filtrování zastaveno</string>
 </resources>

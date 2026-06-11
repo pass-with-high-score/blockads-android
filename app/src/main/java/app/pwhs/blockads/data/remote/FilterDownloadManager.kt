@@ -15,7 +15,8 @@ import java.io.FileOutputStream
 data class DownloadedFilterPaths(
     val bloomPath: String?,
     val triePath: String?,
-    val cssPath: String?
+    val cssPath: String?,
+    val scriptletPath: String?
 )
 
 class FilterDownloadManager(
@@ -40,6 +41,7 @@ class FilterDownloadManager(
             val bloomFile = File(filterDir, "${filter.id}.bloom")
             val trieFile = File(filterDir, "${filter.id}.trie")
             val cssFile = File(filterDir, "${filter.id}.css")
+            val scriptletFile = File(filterDir, "${filter.id}.scriptlets")
 
             val bloomPath = if (filter.bloomUrl.isNotEmpty()) downloadFile(filter.bloomUrl, bloomFile, forceUpdate) else null
             val triePath = if (filter.trieUrl.isNotEmpty()) downloadFile(filter.trieUrl, trieFile, forceUpdate) else null
@@ -49,8 +51,13 @@ class FilterDownloadManager(
                 cssPath = downloadFile(filter.cssUrl, cssFile, forceUpdate)
             }
 
+            var scriptletPath: String? = null
+            if (filter.scriptletsUrl.isNotEmpty()) {
+                scriptletPath = downloadFile(filter.scriptletsUrl, scriptletFile, forceUpdate)
+            }
+
             if (bloomPath != null && triePath != null) {
-                Result.success(DownloadedFilterPaths(bloomPath, triePath, cssPath))
+                Result.success(DownloadedFilterPaths(bloomPath, triePath, cssPath, scriptletPath))
             } else {
                 Result.failure(Exception("Failed to download core filter files (.bloom or .trie) for ${filter.id}"))
             }

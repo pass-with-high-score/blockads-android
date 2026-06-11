@@ -101,8 +101,31 @@ type Engine struct {
 	// Split-DNS zones (comma-separated, set from Kotlin)
 	splitZones string
 
-	// MITM Proxy
-	mitmProxy *MitmProxy
+	// Userspace TCP/IP stack (AdGuard-style model — Phase E).
+	//
+	// tcpStackPipe uses atomic.Pointer because the DnsInterceptor hot
+	// path reads it without holding e.mu — racing with Stop would be a
+	// data race otherwise. The pipe's own Close is panic-free so a
+	// stale pointer read + Push is safe (silently drops).
+	tcpStack     *TcpIpStack
+	tcpStackPipe atomic.Pointer[packetPipe]
+	useTcpStack  atomic.Bool
+
+	// Stack-mode MITM state (Phase D). When both are non-nil, the stack
+	// uses the MITM TCP handler; otherwise the Phase C direct-dial
+	// passthrough handler is used.
+	stackCertMgr    *CertManager
+	stackMitmFilter *MitmFilter
+
+	// UID resolver — supplied by Kotlin. When nil, flow-level UID lookup
+	// falls back to UIDUnknown. Stored on the engine so both the stack
+	// (once created) and any future consumer can pull from one place.
+	uidResolver UIDResolver
+
+	// protectFn is captured at Start time from the SocketProtector.
+	// Handlers that dial outbound (direct flows, resolver fallbacks)
+	// use it to ensure the socket bypasses the VPN.
+	protectFn func(fd int) bool
 
 	// Standalone Servers
 	standaloneUdp *dns.Server
@@ -362,6 +385,7 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 			return protector.Protect(fd)
 		}
 	}
+	e.protectFn = protectFn
 	e.resolver = NewResolver(protectFn)
 	e.resolver.Configure(ParseProtocol(e.protocol), e.primaryDNS, e.fallbackDNS, e.dohURL)
 	e.mu.Unlock()
@@ -404,7 +428,7 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 				// Non-DNS packets → channelTUN.Inject() → wireguard-go.
 				// Decrypted responses → channelTUN.Write() → real TUN.
 				tunDevice := newChannelTUN(e.tunFile)
-				wgAdapter, err := NewWgOutbound(tunDevice, ipcConfig)
+				wgAdapter, err := NewWgOutbound(tunDevice, ipcConfig, e.protectFn)
 				if err != nil {
 					logf("WireGuard adapter create error: %v", err)
 				} else {
@@ -426,9 +450,21 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 		logf("No WireGuard config, running in DNS-only mode")
 	}
 
+	// ── Optional TCP/IP Stack (AdGuard-style parallel path) ──────────
+	// When enabled, non-DNS packets are redirected from the interceptor
+	// into the stack instead of going through the legacy Router. The
+	// stack terminates each flow and invokes the registered handler
+	// (Phase C: direct-dial passthrough; Phase D: MITM for HTTPS).
+	if e.useTcpStack.Load() {
+		if err := e.startTcpStackParallel(); err != nil {
+			logf("TcpIpStack parallel start failed, falling back to legacy path: %v", err)
+		}
+	}
+
 	// ── Packet Read Loop ─────────────────────────────────────────────
 	// DnsInterceptor reads from TUN, routes DNS to adblock engine,
-	// and non-DNS to Router → active OutboundAdapter.
+	// and non-DNS to Router → active OutboundAdapter (or to the
+	// TcpIpStack pipe when enabled).
 	// This call blocks until Stop() is called.
 	e.interceptor.Run(e.tunFile)
 
@@ -451,9 +487,10 @@ func (e *Engine) Stop() {
 		e.router.Stop()
 	}
 
-	// Grab MITM proxy reference and clear it while locked
-	proxy := e.mitmProxy
-	e.mitmProxy = nil
+	// Tear down TCP/IP stack, if running.
+	stack := e.tcpStack
+	e.tcpStack = nil
+	pipe := e.tcpStackPipe.Swap(nil)
 
 	// Close TUN, clear caches — all while locked
 	if e.tunFile != nil {
@@ -526,9 +563,14 @@ func (e *Engine) Stop() {
 	if oldResolver != nil {
 		oldResolver.Shutdown()
 	}
-	// Stop proxy OUTSIDE the lock (proxy.Stop() may block briefly)
-	if proxy != nil {
-		proxy.Stop()
+	// Tear down the TCP/IP stack outside the lock — Stop() blocks on
+	// dispatcher goroutines. Close the pipe first so the outbound
+	// writer goroutine unblocks from Pop(), then stop the stack.
+	if pipe != nil {
+		pipe.Close()
+	}
+	if stack != nil {
+		stack.Stop()
 	}
 }
 
@@ -711,7 +753,12 @@ func (e *Engine) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 // It is used by the MITM proxy to bypass Android's problematic system DNS resolver
 // when the app itself is excluded from the VPN.
 // Uses the full Resolve() pipeline (DoH/DoT/DoQ/Plain + fallback) so it works
-// regardless of the user's chosen DNS protocol.
+// regardless of the user's chosen DNS protocol. If the configured upstream is
+// unreachable (transport failure), falls back to direct UDP queries against
+// well-known public resolvers so browser passthrough still works when the
+// user's DNS provider is temporarily down. A successful DNS response with
+// no A record (NXDOMAIN / empty answer) is NOT retried — that's treated as
+// intentional filtering by the user's configured DNS.
 func (e *Engine) lookupIP(domain string) (net.IP, error) {
 	e.mu.Lock()
 	resolver := e.resolver
@@ -734,6 +781,16 @@ func (e *Engine) lookupIP(domain string) (net.IP, error) {
 	// Use the full Resolve() pipeline (primary + fallback, respects DoH/DoT/DoQ)
 	resp, err := resolver.Resolve(rawQuery)
 	if err != nil {
+		// Primary + configured fallback both failed at the transport
+		// level. Try unfiltered public DNS over plain UDP so the MITM
+		// proxy doesn't have to fall through to Go's system resolver
+		// (which is unreliable on Android for VPN-excluded processes).
+		for _, server := range []string{"1.1.1.1:53", "8.8.8.8:53"} {
+			if ip, fbErr := resolver.ResolveARecord(domain, server); fbErr == nil && ip != nil {
+				logf("lookupIP: %s resolved via public fallback %s (primary err: %v)", domain, server, err)
+				return ip, nil
+			}
+		}
 		return nil, fmt.Errorf("resolve %s: %w", domain, err)
 	}
 
@@ -967,89 +1024,203 @@ func (e *Engine) StartStandalone(port int) error {
 	return nil
 }
 
-// ── MITM Proxy API ───────────────────────────────────────────────────────────
-// gomobile-compatible methods for controlling the HTTPS MITM cosmetic filter.
+// ── HTTPS MITM API ───────────────────────────────────────────────────────────
+// gomobile-compatible methods for controlling HTTPS MITM filtering.
+// Historically a CONNECT-based HTTP proxy on 127.0.0.1:8080; since
+// Phase E the handler is attached to the userspace TCP/IP stack
+// (StartStackMitm + SetUseTcpStack).
 
-// StartMitmProxy starts the local HTTPS MITM proxy on the given address
-// (e.g., "127.0.0.1:8080"). certDir is the persistent directory for the
-// Root CA files (e.g., Android's getFilesDir()). Returns the PEM-encoded
-// Root CA certificate that the user must install on their Android device.
+// StartStackMitm initialises MITM state for the userspace TCP/IP
+// stack path. Call this in addition to SetUseTcpStack(true) to have
+// the stack handle HTTPS filtering. The persistent Root CA is loaded
+// from (or generated in) certDir; the returned PEM must be installed
+// on-device as a user CA for browsers to accept intercepted TLS.
 //
 // Returns empty string on error (check logs).
-func (e *Engine) StartMitmProxy(addr string, certDir string) string {
-	e.mu.Lock()
-	if e.mitmProxy != nil {
-		e.mu.Unlock()
-		logf("MITM Proxy already running")
-		return e.mitmProxy.GetCACertPEM()
-	}
-
-	proxy, err := NewMitmProxy(certDir)
+//
+// Kotlin usage:
+//
+//	adapter.setUseTcpStack(true)
+//	val caPem = engine.startStackMitm(context.filesDir.absolutePath)
+//	// Write caPem to storage and prompt the user to install it.
+//	engine.setMitmAllowedUIDs(browserUids.joinToString(","))
+func (e *Engine) StartStackMitm(certDir string) string {
+	certMgr, err := NewCertManager(certDir)
 	if err != nil {
-		e.mu.Unlock()
-		logf("Failed to create MITM proxy: %v", err)
+		logf("StartStackMitm: cert manager init failed: %v", err)
 		return ""
 	}
-	// ── Wire ad-block engine into proxy for Gate 1 blocking ──
-	proxy.setAdBlockChecker(e)
-	e.mitmProxy = proxy
+	certMgr.WarmLocalAssetCert()
+
+	e.mu.Lock()
+	e.stackCertMgr = certMgr
+	if e.stackMitmFilter == nil {
+		e.stackMitmFilter = NewMitmFilter()
+	}
 	e.mu.Unlock()
 
-	caPEM := proxy.GetCACertPEM()
-	logf("MITM Proxy: CA cert generated (%d bytes)", len(caPEM))
+	return certMgr.GetCACertPEM()
+}
 
-	// Bind the listener SYNCHRONOUSLY so the port is open before we return.
-	// This guarantees the VPN can safely route traffic to this address.
-	if err := proxy.Listen(addr); err != nil {
+// StopStackMitm clears stack-mode MITM state. The stack itself keeps
+// running on the direct-dial handler after this call.
+func (e *Engine) StopStackMitm() {
+	e.mu.Lock()
+	e.stackCertMgr = nil
+	e.stackMitmFilter = nil
+	e.mu.Unlock()
+}
+
+// SetUseTcpStack toggles whether non-DNS packets are routed into the
+// userspace TCP/IP stack. When true (recommended for HTTPS filtering),
+// the DnsInterceptor redirects non-DNS packets into the stack for
+// per-flow processing (direct dial or MITM depending on whether
+// StartStackMitm was called). When false, non-DNS packets go through
+// the Router → outbound adapter path for DNS-only or WireGuard use.
+//
+// The flag must be set before Engine.Start. Runtime toggling after
+// Start is not supported.
+func (e *Engine) SetUseTcpStack(enabled bool) {
+	e.useTcpStack.Store(enabled)
+}
+
+// IsUsingTcpStack reports the current flag value.
+func (e *Engine) IsUsingTcpStack() bool { return e.useTcpStack.Load() }
+
+// SetUIDResolver registers the Kotlin-implemented resolver used to look
+// up the owning app UID for each TCP/UDP flow terminated by the
+// userspace TCP/IP stack. Typically wired once at VPN start.
+//
+// Passing nil clears the resolver; flows will then report UIDUnknown.
+func (e *Engine) SetUIDResolver(r UIDResolver) {
+	e.mu.Lock()
+	e.uidResolver = r
+	stack := e.tcpStack
+	e.mu.Unlock()
+
+	if stack != nil {
+		stack.SetUIDResolver(r)
+	}
+}
+
+// startTcpStackParallel brings up the userspace TCP/IP stack on a
+// packet pipe that the DnsInterceptor will feed from. The legacy
+// mitmProxy and Router remain in place — only non-DNS packets diverge
+// into the stack for Phase C testing. Called with e.mu unlocked
+// (sets up state visible to other goroutines atomically via fields
+// protected by locks where necessary).
+func (e *Engine) startTcpStackParallel() error {
+	pipe := newPacketPipe()
+	stack := NewTcpIpStack()
+
+	e.mu.Lock()
+	uidr := e.uidResolver
+	protectFn := e.protectFn
+	certMgr := e.stackCertMgr
+	filter := e.stackMitmFilter
+	mtu := uint32(defaultTunMTU)
+	e.tcpStack = stack
+	e.mu.Unlock()
+	e.tcpStackPipe.Store(pipe)
+
+	stack.SetUIDResolver(uidr)
+	if certMgr != nil && filter != nil {
+		// Phase D path — MITM handler applies the full filtering flow.
+		stack.SetTcpHandler(newMitmTcpHandler(certMgr, filter, e, uidr, protectFn))
+		logf("TcpIpStack: MITM handler registered")
+	} else {
+		// Phase C default — direct-dial passthrough, no MITM.
+		stack.SetTcpHandler(newProtectedTcpHandler(uidr, protectFn))
+	}
+	stack.SetUdpHandler(newProtectedUdpHandler(uidr, protectFn))
+
+	if err := stack.Start(pipe, mtu); err != nil {
 		e.mu.Lock()
-		e.mitmProxy = nil
+		e.tcpStack = nil
 		e.mu.Unlock()
-		logf("MITM Proxy listen error: %v", err)
-		return ""
+		e.tcpStackPipe.Store(nil)
+		pipe.Close()
+		return fmt.Errorf("stack start: %w", err)
 	}
 
-	// Accept loop runs in background (Serve() blocks)
-	go func() {
-		if err := proxy.Serve(); err != nil {
-			logf("MITM Proxy serve error: %v", err)
-		}
+	// Drain outbound packets from the stack and write them back to the
+	// real TUN so responses reach the originating app. Runs until the
+	// pipe is closed (Stop → pipe.Close → Pop returns nil).
+	go e.runTcpStackOutboundWriter(pipe)
+
+	logf("TcpIpStack: parallel path started (flag=on)")
+	return nil
+}
+
+// runTcpStackOutboundWriter drains outbound packets emitted by the
+// stack and forwards them to the real TUN device. The TUN file is
+// captured once at start so the hot path doesn't acquire e.mu on
+// every packet; if Stop closes the TUN, tun.Write returns an error
+// and the goroutine exits cleanly.
+func (e *Engine) runTcpStackOutboundWriter(p *packetPipe) {
+	e.mu.Lock()
+	tun := e.tunFile
+	e.mu.Unlock()
+	if tun == nil {
+		logf("TcpIpStack: outbound writer started with nil TUN, exiting")
+		return
+	}
+
+	var written, dropped int64
+	defer func() {
+		logf("TcpIpStack: outbound writer stopped (written=%d dropped=%d)", written, dropped)
 	}()
 
-	return caPEM
-}
-
-// StopMitmProxy stops the MITM proxy if it is running.
-func (e *Engine) StopMitmProxy() {
-	e.mu.Lock()
-	proxy := e.mitmProxy
-	e.mitmProxy = nil
-	e.mu.Unlock()
-
-	if proxy != nil {
-		proxy.Stop()
+	for {
+		pkt := p.Pop()
+		if pkt == nil {
+			return
+		}
+		if _, err := tun.Write(pkt); err != nil {
+			dropped++
+			logf("TcpIpStack: TUN write error after %d packets: %v", written, err)
+			return
+		}
+		written++
 	}
 }
 
-// GetMitmCACert returns the PEM-encoded Root CA certificate.
-// certDir is the persistent directory where the CA files are stored.
-// If the proxy is running in-memory, it returns its cert. Otherwise it reads from disk.
-// Returns empty string if no CA cert exists.
+// defaultTunMTU matches the VpnService.Builder.setMtu(1500) default in
+// AdBlockVpnService.kt. Keeping them aligned avoids fragmentation in
+// the userspace stack.
+const defaultTunMTU = 1500
+
+// localAssetSynthIP is the synthetic IPv4 address handed out for
+// resolution of LocalAssetHost. RFC 5737 reserves 198.51.100.0/24 for
+// documentation use; nothing in production routes there, so the
+// browser SYN unambiguously enters our TUN where the userspace stack
+// catches it and dispatches to mitm_handler's local-asset branch
+// based on the SNI.
+var localAssetSynthIP = net.IPv4(198, 51, 100, 1)
+
+// IsMitmActive returns true when the HTTPS MITM filter is active
+// (stack handler registered with cert manager + filter).
+func (e *Engine) IsMitmActive() bool {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.stackCertMgr != nil
+}
+
+// GetMitmCACert returns the PEM-encoded Root CA certificate. Reads
+// from disk at certDir; stack MITM uses the same ca.crt file.
 func (e *Engine) GetMitmCACert(certDir string) string {
 	e.mu.Lock()
-	proxy := e.mitmProxy
+	certMgr := e.stackCertMgr
 	e.mu.Unlock()
 
-	// If proxy is active, it has the cert in memory
-	if proxy != nil {
-		return proxy.GetCACertPEM()
+	if certMgr != nil {
+		return certMgr.GetCACertPEM()
 	}
 
-	// Proxy not running in this instance, check disk directly
 	certPath := filepath.Join(certDir, caCertFile)
 	if !fileExists(certPath) {
 		return ""
 	}
-
 	data, err := os.ReadFile(certPath)
 	if err != nil {
 		logf("Failed to read persistent CA cert: %v", err)
@@ -1070,11 +1241,11 @@ func (e *Engine) GetMitmCACert(certDir string) string {
 //	engine.setMitmAllowedUIDs(browserUids.joinToString(","))
 func (e *Engine) SetMitmAllowedUIDs(uidsCsv string) {
 	e.mu.Lock()
-	proxy := e.mitmProxy
+	stackFilter := e.stackMitmFilter
 	e.mu.Unlock()
 
-	if proxy == nil {
-		logf("MITM: SetAllowedUIDs called but proxy not running")
+	if stackFilter == nil {
+		logf("MITM: SetAllowedUIDs called but stack MITM is not active")
 		return
 	}
 
@@ -1094,8 +1265,55 @@ func (e *Engine) SetMitmAllowedUIDs(uidsCsv string) {
 			uids = append(uids, uid)
 		}
 	}
+	stackFilter.SetAllowedUIDs(uids)
+}
 
-	proxy.GetFilter().SetAllowedUIDs(uids)
+// SetExtraPassthroughSuffixes loads the runtime passthrough list onto
+// the stack-mode MITM filter. Call this after StartStackMitm. The
+// input is a newline-separated string (the raw contents of
+// assets/https_passthrough.txt); blank lines and # / // comments are
+// ignored. gomobile doesn't bridge []string cleanly, so we use a
+// single string and split inside Go.
+//
+// Kotlin usage:
+//
+//	val raw = context.assets.open("https_passthrough.txt").bufferedReader().readText()
+//	engine.setExtraPassthroughSuffixes(raw)
+func (e *Engine) SetExtraPassthroughSuffixes(content string) {
+	e.mu.Lock()
+	filter := e.stackMitmFilter
+	e.mu.Unlock()
+	if filter == nil {
+		logf("SetExtraPassthroughSuffixes: stack MITM not active")
+		return
+	}
+	filter.SetExtraPassthroughSuffixes(strings.Split(content, "\n"))
+}
+
+// SetScriptletRules parses +js() rules from the supplied filter-list
+// content and rebuilds the in-memory store. Lines that aren't +js()
+// rules are ignored, so the same content that drives cosmetic CSS
+// can be passed verbatim. Pass an empty string to clear the store.
+//
+// Kotlin usage:
+//
+//	val raw = filterRepo.allFilterTextConcatenated()
+//	engine.setScriptletRules(raw)
+func (e *Engine) SetScriptletRules(content string) {
+	if content == "" {
+		SetScriptletStore(nil)
+		return
+	}
+	rules := parseScriptletRules(content)
+	if len(rules) == 0 {
+		SetScriptletStore(nil)
+		logf("Scriptlet rules: parsed 0 rules from %d-byte input", len(content))
+		return
+	}
+	store := buildScriptletStore(rules)
+	SetScriptletStore(store)
+	logf("Scriptlet rules: parsed %d rules (%d global, %d host-bound)",
+		len(rules), len(store.all), len(store.byHost))
 }
 
 // SetCosmeticCSS sets the minified CSS string to inject into HTML responses
@@ -1188,6 +1406,18 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 
 	startTime := time.Now()
 	domain := strings.ToLower(queryInfo.Domain)
+
+	// Local asset host: synthesize a response with a routable IP from
+	// the RFC 5737 documentation range so the browser can SYN to it
+	// and have the packet enter our TUN. The userspace stack catches
+	// the flow and serves cosmetic.css from memory based on SNI. This
+	// replaces the legacy CONNECT-via-setHttpProxy path.
+	if domain == LocalAssetHost {
+		response := BuildRedirectResponse(queryInfo, localAssetSynthIP)
+		e.writeToTUN(response)
+		e.totalQueries.Add(1)
+		return
+	}
 
 	// Fetch App Name for logging (and firewall)
 	appName := ""

@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -610,9 +609,9 @@ class AdBlockVpnService : VpnService() {
                 b.addRoute("10.255.255.1", 32)
                 b
             } else {
-                // Direct mode — only route DNS traffic
-                Timber.d("Establishing VPN in DNS-only mode")
-                Builder()
+                // Direct mode — DNS + (optional) HTTPS local asset host.
+                Timber.d("Establishing VPN in DNS-only mode (httpsFiltering=$httpsFilteringEnabled)")
+                val b = Builder()
                     .setSession("BlockAds")
                     .addAddress("10.0.0.2", 32)
                     .addRoute("10.0.0.1", 32)
@@ -622,18 +621,24 @@ class AdBlockVpnService : VpnService() {
                     .addDnsServer("fd00::1")
                     .setBlocking(true)
                     .setMtu(1500)
+
+                if (httpsFilteringEnabled) {
+                    // Route the synthetic IP range used for the local
+                    // asset host (engine maps local.pwhs.app → 198.51.100.1)
+                    // so the browser's request enters the TUN and the
+                    // userspace stack can serve cosmetic.css / scriptlets.js
+                    // / sl-<host>.js from memory. RFC 5737 documentation
+                    // prefix — never collides with real Internet traffic.
+                    b.addRoute("198.51.100.0", 24)
+                }
+                b
             }
 
-            // Phase 7: Auto-Routing via HTTP Proxy (Android 10+)
-            if (httpsFilteringEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                try {
-                    val proxyInfo = ProxyInfo.buildDirectProxy("127.0.0.1", 8080)
-                    builder.setHttpProxy(proxyInfo)
-                    Timber.d("VPN Auto-Routing (HTTP Proxy) enabled to 127.0.0.1:8080")
-                } catch (e: Exception) {
-                    Timber.w(e, "Could not set HTTP proxy for VPN")
-                }
-            }
+            // HTTPS filtering no longer relies on VpnService.setHttpProxy.
+            // The userspace TCP/IP stack in the Go tunnel terminates every
+            // flow and applies per-app MITM decisions directly (Phase E
+            // of the AdGuard-style refactor). System apps that previously
+            // bypassed the HTTP proxy are now covered by the stack.
 
             // Exclude our own app from VPN to avoid loops
             try {
@@ -658,6 +663,13 @@ class AdBlockVpnService : VpnService() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 builder.setUnderlyingNetworks(null)
+                // VPN networks are METERED by default on Android 10+. Apps
+                // with "Wi-Fi only" download settings (OneDrive, Audible,
+                // torrent clients, ...) check NOT_METERED, so they refuse to
+                // work while the VPN is up even on Wi-Fi. Inherit meteredness
+                // from the underlying network instead (Wi-Fi stays unmetered,
+                // cellular stays metered).
+                builder.setMetered(false)
             }
 
             vpnInterface = builder.establish()
@@ -793,6 +805,7 @@ class AdBlockVpnService : VpnService() {
     private fun stopVpn(showStoppedNotification: Boolean = true) {
         _state.value = VpnState.STOPPING
         isReconnecting = false
+        networkSwitchJob?.cancel()
         startTimestamp = 0L
 
         // Show "Stopping…" notification immediately
@@ -1120,7 +1133,7 @@ class AdBlockVpnService : VpnService() {
             }
 
             // Case 2: VPN is not running but should be → reconnect
-            if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isRestarting) {
+            if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isRestarting && !isStopping) {
                 Timber.d("Auto-reconnecting VPN after network became available")
                 isReconnecting = true
 
@@ -1141,7 +1154,7 @@ class AdBlockVpnService : VpnService() {
                     delay(delayMs)
                 }
 
-                if (!isRunning && !isConnecting) {
+                if (!isRunning && !isConnecting && !isStopping) {
                     retryManager.reset()
                     startVpn()
                 }

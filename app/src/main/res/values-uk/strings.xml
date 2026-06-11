@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">Перегляд без реклами</string>
     <string name="notification_channel_name">Служба блокування реклами</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">Журнали</string>
     <string name="nav_filter">Фільтр</string>
     <string name="nav_settings">Налаштування</string>
-    <string name="settings_filter_url">URL списку фільтрів</string>
-    <string name="settings_update_filter">Оновити список фільтрів</string>
-    <string name="filter_updating">Оновлення списку фільтрів…</string>
     <string name="filter_updated">Список фільтрів оновлено: %d доменів</string>
     <string name="filter_update_failed">Не вдалося оновити список фільтрів</string>
     <string name="filter_detail_enabled">Увімкнено</string>
@@ -35,24 +32,15 @@
     <string name="filter_detail_last_updated">Останнє оновлення</string>
     <string name="filter_detail_update">Оновити</string>
     <string name="filter_detail_delete">Видалити</string>
-    <string name="filter_detail_domain_preview">Попередній перегляд заблокованих доменів</string>
-    <string name="filter_detail_no_domains">Немає кешованих доменів. Спробуйте спочатку оновити цей фільтр.</string>
-    <string name="filter_detail_more_domains">… та ще %s доменів</string>
     <string name="logs_empty">Жодного DNS-запиту ще не зареєстровано</string>
     <string name="logs_filter_all">Усі</string>
     <string name="logs_filter_blocked">Заблоковані</string>
-
     <string name="onboarding_title_1">Розумне блокування реклами</string>
     <string name="onboarding_desc_1">Блокуйте рекламу в усіх додатках і браузерах одним дотиком. Використовує технологію фільтрації DNS — root не потрібен.\n\n🔒 Обіцянка конфіденційності: Ми ніколи не збираємо, не зберігаємо і не передаємо ваші дані перегляду. Вся обробка відбувається лише на вашому пристрої.</string>
-    <string name="onboarding_title_2">Ваша конфіденційність захищена</string>
-    <string name="onboarding_desc_2">Жодного збору даних. Жодного відстеження. Усі журнали DNS залишаються лише на вашому пристрої. Ми ніколи не бачимо вашу активність у мережі.</string>
-    <string name="onboarding_title_3">Безкоштовно та з відкритим вихідним кодом</string>
-    <string name="onboarding_desc_3">BlockAds є повністю безкоштовним додатком без внутрішніх покупок. Наш вихідний код відкритий для будь-кого для перевірки.</string>
     <string name="onboarding_skip">Пропустити</string>
     <string name="onboarding_next">Далі</string>
     <string name="onboarding_get_started">Почати</string>
     <string name="onboarding_recommended">★ Рекомендовано</string>
-
     <string name="onboarding_protection_title">Виберіть рівень захисту</string>
     <string name="onboarding_protection_desc">Виберіть, наскільки агресивно ви хочете блокувати рекламу та трекери</string>
     <string name="onboarding_protection_basic">Базовий</string>
@@ -61,58 +49,39 @@
     <string name="onboarding_protection_standard_desc">Блокує рекламу, трекери та аналітику. Хороший баланс між захистом і сумісністю.</string>
     <string name="onboarding_protection_strict">Строгий</string>
     <string name="onboarding_protection_strict_desc">Максимальне блокування. Може вплинути на функціональність деяких сайтів, але забезпечує найсильніший захист.</string>
-
     <string name="onboarding_dns_title">Виберіть DNS-сервер</string>
     <string name="onboarding_dns_desc">Виберіть DNS-сервер для визначення доменних імен. Ви зможете змінити це пізніше в Налаштуваннях.</string>
-
     <string name="onboarding_vpn_title">Потрібен дозвіл на VPN</string>
     <string name="onboarding_vpn_desc">BlockAds використовує локальний VPN для фільтрації DNS-запитів і блокування реклами. Жодні дані не залишають ваш пристрій — цей VPN працює лише локально для перехоплення та фільтрації DNS-запитів.</string>
     <string name="onboarding_vpn_grant">Надати дозвіл на VPN</string>
-
     <string name="onboarding_notification_title">Будьте в курсі</string>
     <string name="onboarding_notification_desc">Дозвольте сповіщення, щоб бачити статистику блокування в реальному часі та знати, коли ваш захист активний. Обов\'язково для постійного сповіщення VPN на Android 13+.</string>
     <string name="onboarding_notification_grant">Дозволити сповіщення</string>
-
     <string name="onboarding_battery_title">Підтримуйте роботу захисту</string>
     <string name="onboarding_battery_desc">Виключіть BlockAds з оптимізації батареї, щоб служба VPN залишалася активною у фоновому режимі та не закривалася системою.</string>
     <string name="onboarding_battery_grant">Вимкнути оптимізацію батареї</string>
-
     <string name="onboarding_permission_granted">✓ Дозвіл надано</string>
-
     <string name="onboarding_complete_title">Тепер ви під захистом!</string>
     <string name="onboarding_complete_desc">Вітаємо! BlockAds налаштовано і він готовий захищати ваш пристрій від реклами та трекерів.</string>
-    <string name="onboarding_complete_stats">Натисніть \"Почати\", щоб увімкнути захист</string>
-
+    <string name="onboarding_complete_stats">Натисніть \&quot;Почати\&quot;, щоб увімкнути захист</string>
     <string name="whitelist_apps_title">Додатки у білому списку</string>
-    <string name="whitelist_apps_subtitle">Ці додатки обходитимуть блокування реклами</string>
     <string name="whitelist_apps_search">Пошук додатків…</string>
     <string name="whitelist_apps_empty">Немає встановлених додатків</string>
     <string name="whitelist_apps_count">Додатків у білому списку: %d</string>
     <string name="whitelist_tab_user">Додатки користувача</string>
     <string name="whitelist_tab_system">Системні додатки</string>
-
-    <string name="whitelist_domains_title">Домени у білому списку</string>
-    <string name="whitelist_domains_subtitle">Ці домени ніколи не будуть блокуватися</string>
     <string name="whitelist_domains_add">Додати домен</string>
     <string name="whitelist_domains_hint">напр. example.com</string>
     <string name="whitelist_domains_empty">Немає доменів у білому списку</string>
     <string name="whitelist_domain_added">Домен додано до білого списку: %s</string>
     <string name="whitelist_domain_removed">Домен видалено з білого списку</string>
-
-    <string name="settings_blocklist_domains_desc">Ці домени завжди будуть блокуватися</string>
-    <string name="blocklist_domains_title">Заблоковані домени</string>
-    <string name="blocklist_domains_subtitle">Ці домени завжди будуть блокуватися</string>
-    <string name="blocklist_domains_add">Додати домен</string>
-    <string name="blocklist_domains_hint">напр. example.com</string>
     <string name="blocklist_domains_empty">Немає заблокованих доменів</string>
     <string name="blocklist_domain_added">Домен заблоковано: %s</string>
     <string name="blocklist_domain_removed">Домен видалено зі списку блокування</string>
     <string name="blocklist_domain_already_exists">Домен вже заблоковано</string>
-
     <string name="domain_rules_title">Правила для доменів</string>
     <string name="domain_rules_tab_whitelist">Білий список</string>
     <string name="domain_rules_tab_blocklist">Список блокування</string>
-
     <string name="about_title">Про додаток</string>
     <string name="about_description">Безкоштовний блокувальник реклами з відкритим кодом.\nЖодного збору даних. Жодного відстеження.</string>
     <string name="about_version">Версія %s</string>
@@ -122,17 +91,13 @@
     <string name="about_contact">Зв\'яжіться з нами</string>
     <string name="about_licenses">Ліцензії відкритого коду</string>
     <string name="about_no_data">🔒 Цей додаток не збирає жодних особистих даних</string>
-
     <string name="log_action_whitelist">Додати до білого списку</string>
     <string name="log_action_copy">Копіювати домен</string>
     <string name="log_search_hint">Пошук доменів…</string>
     <string name="domain_copied">Домен скопійовано</string>
     <string name="log_whitelisted">У білому списку: %s</string>
     <string name="log_already_whitelisted">Вже у білому списку</string>
-
     <string name="test_block_ads">Перевірити блокування реклами</string>
-    <string name="test_block_ads_title">Тест блокування реклами</string>
-
     <string name="home_connecting_desc">Встановлення VPN-з\'єднання…</string>
     <string name="home_protected_desc">Ваш пристрій захищено від реклами</string>
     <string name="home_unprotected_desc">Натисніть кнопку, щоб увімкнути блокування реклами</string>
@@ -146,10 +111,7 @@
     <string name="home_top_blocked">Найчастіше блоковані домени</string>
     <string name="home_chart_no_data">Немає доступних даних</string>
     <string name="settings_language">Мова</string>
-
     <string name="settings_title">Налаштування</string>
-    <string name="settings_search_hint">Пошук налаштувань…</string>
-    <string name="settings_search_clear">Очистити пошук</string>
     <string name="settings_category_protection">Захист</string>
     <string name="settings_category_protection_desc">DNS-сервер, протокол, автоперепідключення</string>
     <string name="settings_category_interface">Інтерфейс</string>
@@ -162,7 +124,6 @@
     <string name="settings_category_data_desc">Експорт/Імпорт, очищення журналів</string>
     <string name="settings_category_info">Інформація</string>
     <string name="settings_category_info_desc">Про додаток, політика конфіденційності, код</string>
-    <string name="settings_appearance">Зовнішній вигляд</string>
     <string name="settings_theme">Тема</string>
     <string name="settings_theme_system">Системна</string>
     <string name="settings_theme_light">Світла</string>
@@ -170,27 +131,17 @@
     <string name="settings_show_bottom_nav_labels_desc">Відображати текст під значками на нижній панелі навігації</string>
     <string name="settings_theme_dark">Темна</string>
     <string name="settings_lang_system">Системна</string>
-    <string name="settings_high_contrast">Високий контраст</string>
-    <string name="settings_high_contrast_desc">Збільшити контраст для кращої видимості</string>
     <string name="settings_accent_color">Колір акценту</string>
     <string name="settings_accent_color_desc">Налаштуйте основний колір додатка</string>
     <string name="accent_dynamic">Динамічний (Material You)</string>
     <string name="accent_dynamic_desc">Використовує кольори ваших шпалер</string>
-    <string name="settings_connection">З\'єднання</string>
     <string name="settings_filter_lists">Списки фільтрів (активних: %d)</string>
     <string name="settings_add_custom_filter">Додати власний список фільтрів</string>
     <string name="settings_updating">Оновлення…</string>
     <string name="settings_update_all">Оновити всі фільтри</string>
-    <string name="settings_dns_config">Конфігурація DNS</string>
-    <string name="settings_save_dns">Зберегти DNS</string>
-    <string name="settings_whitelist">Білий список</string>
     <string name="settings_whitelist_apps">Додатки у білому списку</string>
     <string name="settings_whitelist_apps_desc">Виключити додатки з блокування реклами</string>
     <string name="settings_whitelist_domains">Домени у білому списку</string>
-    <string name="settings_whitelist_domains_desc">Ці домени ніколи не будуть блокуватися</string>
-
-    <string name="settings_add_domain">Додати домен</string>
-    <string name="settings_data_backup">Дані та резервне копіювання</string>
     <string name="settings_export">Експортувати</string>
     <string name="settings_import">Імпортувати</string>
     <string name="settings_about">Про додаток</string>
@@ -207,14 +158,6 @@
     <string name="settings_safe_search_desc">Примусовий безпечний пошук у підтримуваних системах (Google, Bing)</string>
     <string name="settings_youtube_restricted">Безпечний режим YouTube</string>
     <string name="settings_youtube_restricted_desc">Фільтрувати відео для дорослих на YouTube, блокувати вбудовані відео для дорослих на інших сайтах і приховувати всі коментарі</string>
-    <string name="settings_dns_protocol">Протокол DNS</string>
-    <string name="settings_dns_protocol_plain">Звичайний DNS</string>
-    <string name="settings_doh_server_url">URL сервера DoH</string>
-    <string name="settings_save_doh_url">Зберегти URL DoH</string>
-    <string name="settings_dot_server">Сервер DoT (ім\'я хоста або IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">URL сервера DoQ</string>
-    <string name="settings_upstream_dns">Основний DNS-сервер</string>
     <string name="settings_fallback_dns">Резервний DNS-сервер</string>
     <string name="settings_fallback_dns_desc">Резервний DNS використовується, якщо основний DNS-сервер недоступний. Введіть IP-адресу резервного DNS-сервера.</string>
     <string name="settings_fallback_dns_short_desc">Використовується як запасний при збої основного DNS</string>
@@ -227,37 +170,25 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">Виявлено: %s</string>
-    <string name="settings_invalid_dns_input">Недійсна адреса DNS-сервера</string>
-    <string name="settings_save_custom_dns">Зберегти DNS</string>
     <string name="settings_dns_response_type">Тип відповіді DNS</string>
-    <string name="settings_dns_response_type_desc">Тип відповіді для заблокованих доменів</string>
     <string name="dns_response_nxdomain_desc">Домен не існує (стандарт)</string>
     <string name="dns_response_refused_desc">Запит відхилено (краща сумісність)</string>
     <string name="dns_response_custom_ip">Користувацький IP (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">Повертати нульову адресу маршрутизації (за замовчуванням)</string>
     <string name="settings_clear_logs">Очистити всі журнали</string>
     <string name="clear_logs_confirm_message">Ви впевнені, що хочете очистити всі журнали DNS? Цю дію неможливо скасувати.</string>
-    <string name="dns_error_notification_title">Помилка конфігурації DNS</string>
-    <string name="dns_error_notification_no_fallback">З\'єднання %1$s з %2$s не вдалося. Резервний DNS не налаштовано — вебсайти можуть не завантажуватися. Перевірте налаштування DNS.</string>
-    <string name="dns_error_notification_both_failed">З\'єднання %1$s з %2$s та резервний %3$s не працюють. Вебсайти можуть не завантажуватися. Перевірте налаштування DNS.</string>
-
     <string name="filter_setup_title">Налаштування фільтрів</string>
-    <string name="filter_setup_desc">Керування вбудованими та власними списками фільтрів</string>
     <string name="filter_built_in">Вбудовані</string>
     <string name="filter_custom">Користувацькі</string>
     <string name="filter_custom_empty">Власні фільтри ще не додано</string>
     <string name="filter_search_hint">Пошук фільтрів…</string>
-    <string name="filter_search_no_results">Не знайдено фільтрів для \"%s\"</string>
+    <string name="filter_search_no_results">Не знайдено фільтрів для \&quot;%s\&quot;</string>
     <string name="filter_log_cleared">Журнал очищено</string>
-    <string name="filter_domain_whitelisted">Домен у білому списку: %s</string>
     <string name="filter_domain_already_whitelisted">Домен вже у білому списку</string>
     <string name="filter_settings_export">Налаштування експортовано</string>
     <string name="filter_export_failed">Помилка експорту: %s</string>
     <string name="filter_settings_imported">Налаштування імпортовано</string>
     <string name="filter_import_failed">Помилка імпорту: %s</string>
-
-    <string name="settings_auto_update">Автооновлення списків фільтрів</string>
     <string name="settings_auto_update_enabled">Увімкнути автооновлення</string>
     <string name="settings_auto_update_enabled_desc">Автоматично оновлювати списки фільтрів у фоновому режимі</string>
     <string name="settings_auto_update_frequency">Частота оновлення</string>
@@ -277,7 +208,6 @@
     <string name="filter_update_failed_message">Не вдалося оновити списки фільтрів</string>
     <string name="filter_update_notification_channel">Оновлення фільтрів</string>
     <string name="filter_update_notification_channel_desc">Сповіщення про оновлення списків фільтрів</string>
-
     <string name="dns_provider_title">DNS-сервер</string>
     <string name="dns_category_standard">Стандартний</string>
     <string name="dns_category_privacy">Конфіденційний</string>
@@ -287,19 +217,13 @@
     <string name="dns_custom_description">Введіть адреси власного DNS-сервера</string>
     <string name="dns_custom_save">Зберегти</string>
     <string name="dns_custom_cancel">Скасувати</string>
-    <string name="dns_select_server">Виберіть DNS-сервер</string>
-
-    <string name="widget_name">Перемикач BlockAds</string>
     <string name="widget_description">Вмикайте/вимикайте блокування реклами та дивіться статистику</string>
     <string name="widget_toggle_description">Перемкнути блокування реклами</string>
     <string name="widget_blocked_today">Заблоковано сьогодні</string>
     <string name="widget_protected">Захищено</string>
     <string name="widget_unprotected">Вимкнено</string>
-
     <string name="shortcut_toggle_vpn">Перемкнути блокування реклами</string>
     <string name="shortcut_toggle_vpn_short">Перемкнути VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Перемикач недоступний</string>
-
     <string name="custom_rules">Власні правила</string>
     <string name="add_custom_rule">Додати власне правило</string>
     <string name="import_rules">Імпортувати правила</string>
@@ -324,7 +248,6 @@
     <string name="delete">Видалити</string>
     <string name="cancel">Скасувати</string>
     <string name="block_this_domain">Блокувати цей домен</string>
-    <string name="add_to_custom_rules">Додати до власних правил</string>
     <string name="import_from_file">Імпортувати з файлу</string>
     <string name="export_to_file">Експортувати у файл</string>
     <string name="export_format_title">Формат експорту</string>
@@ -333,14 +256,13 @@
     <string name="rules_exported">Експортовано %d правил</string>
     <string name="export_failed">Помилка експорту: %s</string>
     <string name="import_failed">Помилка імпорту: %s</string>
-    <string name="import_no_valid_rules">У файлі не знайдено дійсних правил</string>
-
     <string name="app_management_title">Керування додатками</string>
     <string name="app_management_subtitle">%d додатків</string>
     <string name="app_management_subtitle_filtered">%1$d з %2$d додатків</string>
     <string name="app_management_desc">Керування маршрутизацією VPN для кожного додатка та статистика</string>
     <string name="app_management_search">Пошук додатків…</string>
     <string name="app_management_loading">Завантаження додатків…</string>
+    <string name="app_management_refresh">Оновити</string>
     <string name="app_management_sort">Сортувати</string>
     <string name="app_management_sort_name">За назвою</string>
     <string name="app_management_sort_queries">За запитами</string>
@@ -352,31 +274,21 @@
     <string name="log_status_blocked">Заблоковано</string>
     <string name="log_status_allowed">Дозволено</string>
     <string name="log_status_whitelisted">У білому списку</string>
-    <string name="log_detail_title">Деталі домену</string>
     <string name="log_detail_query_type">Тип запиту</string>
     <string name="log_detail_response_time">Час відповіді</string>
-    <string name="log_detail_status">Статус</string>
     <string name="log_detail_app">Додаток</string>
     <string name="log_detail_resolved_ip">Отриманий IP</string>
     <string name="log_detail_blocked_by">Заблоковано через</string>
     <string name="log_detail_timestamp">Час</string>
-    <string name="log_detail_unknown">Невідомо</string>
     <string name="log_detail_na">Н/Д</string>
-    <string name="log_realtime_on">Реальний час: УВІМК</string>
-    <string name="log_realtime_off">Реальний час: ВИМК</string>
     <string name="log_time_range_all">За весь час</string>
     <string name="log_time_range_1h">1 год</string>
     <string name="log_time_range_6h">6 год</string>
     <string name="log_time_range_24h">24 год</string>
     <string name="log_time_range_7d">7 дн</string>
     <string name="log_filter_all_apps">Усі додатки</string>
-    <string name="log_bulk_mode">Вибрати</string>
     <string name="log_bulk_selected">Вибрано: %d</string>
-    <string name="log_bulk_block">Блокувати все</string>
-    <string name="log_bulk_whitelist">У білий список усе</string>
-    <string name="log_unblock_domain">Розблокувати цей домен</string>
     <string name="log_wildcard_whitelist_domain">Додати всі піддомени у білий список</string>
-    <string name="log_domain_unblocked">Домен %1$s розблоковано</string>
     <string name="log_wildcard_whitelisted">Домен %1$s та всі піддомени додано у білий список</string>
     <string name="log_action_unblock">Розблокувати</string>
     <string name="log_action_block">Блокувати</string>
@@ -398,13 +310,10 @@
     <string name="stats_chart_4w">4 Тижні</string>
     <string name="stats_chart_12m">12 Місяців</string>
     <string name="stats_per_app">Статистика за додатками</string>
-    <string name="stats_app_queries_blocked">%1$s запитів · %2$s заблоковано</string>
-
     <string name="vpn_phase_loading_filters">Завантаження списків фільтрів…</string>
     <string name="vpn_phase_preparing_dns">Підготовка DNS…</string>
     <string name="vpn_phase_establishing">Встановлення VPN-з\'єднання…</string>
     <string name="vpn_phase_waiting_network">Очікування мережі…</string>
-
     <string name="vpn_notification_stats_today">%1$d реклам заблоковано сьогодні | Час роботи %2$s</string>
     <string name="vpn_notification_action_pause">Пауза 1 год</string>
     <string name="vpn_notification_action_stop">Зупинити</string>
@@ -428,11 +337,6 @@
     <string name="profile_section_profiles">Профілі</string>
     <string name="profile_section_schedules">Розклади</string>
     <string name="profile_name_default">За замовчуванням</string>
-    <string name="profile_name_strict">Строгий</string>
-    <string name="profile_name_family">Сімейний</string>
-    <string name="profile_name_gaming">Ігровий</string>
-    <string name="profile_name_custom">Власний</string>
-    <string name="profile_name_strict_family">Строгий сімейний</string>
     <string name="profile_desc_strict_family">Максимальне блокування: реклама, трекери, контент для дорослих та азартні ігри</string>
     <string name="profile_desc_default">Збалансоване блокування: базова реклама та трекери</string>
     <string name="profile_desc_strict">Агресивне блокування: реклама, трекери, аналітика, телеметрія</string>
@@ -459,18 +363,13 @@
     <string name="profile_day_fri">Пт</string>
     <string name="profile_day_sat">Сб</string>
     <string name="profile_day_sun">Нд</string>
-    <string name="settings_profiles">Профілі захисту</string>
-    <string name="settings_profiles_desc">Попередньо налаштовані конфігурації для різних ситуацій</string>
-
     <string name="accessibility_toggle_vpn">Перемкнути захист VPN</string>
     <string name="accessibility_vpn_active">Захист VPN активний</string>
     <string name="accessibility_vpn_inactive">Захист VPN неактивний</string>
     <string name="accessibility_vpn_connecting">VPN підключається</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Рівень блокування %1$s відсотків</string>
     <string name="accessibility_navigate_back">Повернутися назад</string>
     <string name="firewall_title">Брандмауер (Файрвол)</string>
-    <string name="firewall_subtitle">Контроль інтернету для додатків</string>
     <string name="firewall_count">Заблоковано додатків: %d</string>
     <string name="firewall_search">Пошук додатків…</string>
     <string name="firewall_enable">Увімкнути брандмауер</string>
@@ -482,14 +381,7 @@
     <string name="firewall_schedule_from">З</string>
     <string name="firewall_schedule_to">До</string>
     <string name="firewall_app_blocked">Інтернет заблоковано</string>
-    <string name="firewall_app_not_blocked">Інтернет дозволено</string>
-    <string name="firewall_rule_saved">Правило брандмауера збережено</string>
-    <string name="firewall_rule_removed">Правило брандмауера видалено</string>
     <string name="firewall_configure">Налаштувати правило</string>
-    <string name="firewall_channel_name">Сповіщення брандмауера</string>
-    <string name="firewall_channel_description">Сповіщення, коли додатки блокуються брандмауером</string>
-    <string name="firewall_notification_title">Додаток заблоковано брандмауером</string>
-    <string name="firewall_notification_text">Доступ до інтернету для %s було заблоковано</string>
     <string name="firewall_network_mobile">Мобільна мережа</string>
     <string name="firewall_network_all">Усі</string>
     <string name="firewall_schedule_hour_plus">Год +</string>
@@ -497,54 +389,23 @@
     <string name="block_reason_firewall">Брандмауер</string>
     <string name="block_reason_upstream_dns">Основний DNS</string>
     <string name="settings_firewall">Брандмауер (Файрвол)</string>
-    <string name="settings_firewall_desc">Блокувати доступ до інтернету для окремих додатків</string>
-
     <string name="settings_sponsor">Спонсорувати нас</string>
     <string name="settings_sponsor_desc">Підтримайте розробку BlockAds на GitHub</string>
     <string name="settings_community">Спільнота</string>
     <string name="settings_reddit_desc">Приєднуйтесь до нашої спільноти на Reddit</string>
     <string name="settings_telegram_desc">Приєднуйтесь до нашого чату в Telegram</string>
     <string name="filter_setup_active_count">Активних: %1$d</string>
-    <string name="copied_url">URL скопійовано</string>
     <string name="filter_error_invalid_url">Будь ласка, введіть дійсний URL (http:// або https://)</string>
     <string name="filter_error_duplicate_url">Цей список фільтрів уже існує</string>
-    <string name="filter_error_invalid_content">URL не містить дійсного списку фільтрів</string>
     <string name="filter_chip_all">Усі</string>
     <string name="filter_chip_enabled">Увімкнені</string>
     <string name="filter_chip_disabled">Вимкнені</string>
-
-    <string name="dns_custom_primary_label">Основний</string>
-    <string name="dns_custom_fallback_label">Резервний</string>
-    <string name="dns_custom_extra_label">Додатковий</string>
-    <string name="dns_custom_add_server">Додати сервер</string>
-    <string name="dns_custom_max_reached">Досягнуто максимальної кількості серверів</string>
-    <string name="dns_custom_remove_server">Видалити сервер</string>
-    <string name="dns_custom_duplicate">Сервер уже існує</string>
-    <string name="dns_custom_empty">Адреса сервера не може бути порожньою</string>
-
     <string name="wireguard_import_title">Імпорт WireGuard</string>
     <string name="wireguard_import_button">Імпортувати .conf</string>
     <string name="wireguard_empty_title">Конфігурацію не завантажено</string>
     <string name="wireguard_empty_desc">Натисніть кнопку нижче, щоб імпортувати файл WireGuard .conf</string>
-    <string name="wireguard_section_interface">Інтерфейс</string>
-    <string name="wireguard_section_peer">Вузол (Peer) %d</string>
-    <string name="wireguard_label_address">Адреса</string>
-    <string name="wireguard_label_private_key">Приватний ключ</string>
-    <string name="wireguard_label_listen_port">Порт прослуховування</string>
-    <string name="wireguard_label_public_key">Публічний ключ</string>
-    <string name="wireguard_label_endpoint">Кінцева точка (Endpoint)</string>
-    <string name="wireguard_label_allowed_ips">Дозволені IP-адреси</string>
-    <string name="wireguard_label_preshared_key">Спільний ключ (Preshared Key)</string>
-    <string name="wireguard_label_keepalive">Підтримка з\'єднання (Keepalive)</string>
-    <string name="wireguard_keepalive_value">%d секунд</string>
-    <string name="wireguard_toggle_key_visibility">Перемкнути видимість ключа</string>
-    <string name="wireguard_copy_key">Копіювати ключ</string>
     <string name="wireguard_connect">Підключити тунель</string>
     <string name="wireguard_disconnect">Відключити тунель</string>
-    <string name="wireguard_save_activate">Зберегти та активувати</string>
-    <string name="wireguard_clear">Очистити WireGuard</string>
-    <string name="wireguard_active_label">WireGuard активний — Перезапустіть VPN, щоб застосувати</string>
-
     <string name="https_filtering_title">Фільтрація HTTPS</string>
     <string name="https_filtering_toggle_label">Косметичний фільтр HTTPS</string>
     <string name="https_filtering_status_active">Активно — Приховування реклами</string>
@@ -555,7 +416,7 @@
     <string name="https_filtering_ca_desc">Виконайте ці кроки, щоб налаштувати косметичну фільтрацію HTTPS:</string>
     <string name="https_filtering_export_ca">Зберегти в Завантаження</string>
     <string name="https_filtering_cert_saved">Сертифікат збережено в Завантаження!</string>
-    <string name="https_filtering_install_steps">1. Перейдіть до Налаштування → Безпека → Шифрування та облікові дані\n2. Натисніть \"Встановити сертифікат\" → \"Сертифікат ЦС (CA)\"\n3. Виберіть \"BlockAds-RootCA.crt\" з папки Завантаження\n4. Підтвердьте встановлення</string>
+    <string name="https_filtering_install_steps">1. Перейдіть до Налаштування → Безпека → Шифрування та облікові дані\n2. Натисніть \&quot;Встановити сертифікат\&quot; → \&quot;Сертифікат ЦС (CA)\&quot;\n3. Виберіть \&quot;BlockAds-RootCA.crt\&quot; з папки Завантаження\n4. Підтвердьте встановлення</string>
     <string name="https_filtering_open_settings">Відкрити налаштування безпеки</string>
     <string name="https_filtering_browser_section">Вибір браузера</string>
     <string name="https_filtering_browser_desc">Виберіть браузери, щоб застосувати косметичну фільтрацію реклами. Фільтруються лише вибрані додатки.</string>
@@ -570,7 +431,7 @@
     <string name="https_filtering_cert_installed">Сертифікат встановлено ✓</string>
     <string name="https_filtering_cert_not_installed">Сертифікат не встановлено</string>
     <string name="https_filtering_cert_checking">Перевірка…</string>
-    <string name="https_filtering_cert_vpn_required">Натисніть \"Перевірити сертифікат\", щоб дізнатися статус</string>
+    <string name="https_filtering_cert_vpn_required">Натисніть \&quot;Перевірити сертифікат\&quot;, щоб дізнатися статус</string>
     <string name="edit_custom_filter">Редагувати власний фільтр</string>
     <string name="filter_name">Назва фільтру</string>
     <string name="filter_url_domain">URL/Домен фільтру</string>
@@ -580,10 +441,6 @@
     <string name="vpn_conflict_title">З\'єднання заблоковано</string>
     <string name="vpn_conflict_desc">Android дозволяє лише одне активне VPN-з\'єднання одночасно. На вашому пристрої зараз працює інший VPN.\n\nБудь ласка, відключіть інший VPN або вимкніть «Постійний VPN» у Налаштуваннях перед підключенням BlockAds.</string>
     <string name="open_settings">Відкрити налаштування</string>
-    <string name="disable_all_user_apps">Вимкнути всі користувацькі програми</string>
-    <string name="enable_all_user_apps">Увімкнути всі користувацькі програми</string>
-    <string name="disable_all_system_apps">Вимкнути всі системні програми</string>
-    <string name="enable_all_system_apps">Увімкнути всі системні програми</string>
     <string name="vpn_network_switch_waiting">Очікування стабілізації мережі… %1$ds</string>
     <string name="settings_network_switch_delay">Затримка зміни мережі</string>
     <string name="settings_network_switch_delay_desc">Призупинити перепідключення VPN після зміни мережі (корисно для викликів через Wi-Fi)</string>
@@ -598,10 +455,8 @@
     <string name="onboarding_crash_report_btn_no">Ні, дякую</string>
     <string name="settings_privacy_diagnostics_title">Конфіденційність &amp; Діагностика</string>
     <string name="settings_privacy_diagnostics_desc">Керування звітами про збої та локальними журналами</string>
-
     <string name="settings_crash_reporting_title">Анонімні звіти про помилки</string>
     <string name="settings_crash_reporting_subtitle">Автоматично надсилати журнали помилок, щоб допомогти нам у їх усуненні. Особисті дані не збираються.</string>
-
     <string name="settings_export_logs_title">Експорт локальних журналів</string>
     <string name="settings_export_logs_subtitle">Поділіться офлайн-журналами налагодження безпосередньо через Email, Telegram тощо.</string>
     <string name="settings_export_logs_chooser_title">Поділитися журналами</string>
@@ -630,4 +485,26 @@
     <string name="filter_compile_success_title">Фільтр скомпільовано</string>
     <string name="filter_compile_failed_title">Помилка компіляції фільтра</string>
     <string name="filter_compile_channel_name">Компіляція фільтра</string>
+    <string name="wireguard_https_filtering_disabled">HTTPS-фільтрацію вимкнено (несумісно з WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard вимкнено (несумісно з HTTPS-фільтрацією)</string>
+    <string name="wireguard_imported">Імпортовано \'%1$s\'</string>
+    <string name="wireguard_deleted">Видалено \'%1$s\'</string>
+    <string name="wireguard_active">Активний: %1$s</string>
+    <string name="wireguard_renamed">Перейменовано</string>
+    <string name="wireguard_enabled_restarting">WireGuard увімкнено. Перезапуск VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard вимкнено. Перезапуск VPN…</string>
+    <string name="wireguard_delete_dialog_title">Видалити \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">Цей профіль буде видалено. Дію не можна скасувати.</string>
+    <string name="wireguard_action_delete">Видалити</string>
+    <string name="wireguard_action_cancel">Скасувати</string>
+    <string name="wireguard_action_save">Зберегти</string>
+    <string name="wireguard_action_edit">Змінити</string>
+    <string name="wireguard_action_rename">Перейменувати</string>
+    <string name="wireguard_more_options">Інші параметри</string>
+    <string name="wireguard_no_peer">(немає вузла)</string>
+    <string name="wireguard_rename_dialog_title">Перейменувати профіль</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Сертифікат збережено в Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Сертифікат збережено. Встановіть через файловий менеджер.</string>
+    <string name="https_filtering_started">HTTPS-фільтрацію розпочато</string>
+    <string name="https_filtering_stopped">HTTPS-фільтрацію зупинено</string>
 </resources>

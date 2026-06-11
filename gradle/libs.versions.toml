@@ -9,22 +9,22 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
-composeBom = "2026.03.01"
+composeBom = "2026.05.00"
 room = "2.8.4"
 datastorePreferences = "1.2.1"
-ktor = "3.4.2"
+ktor = "3.4.3"
 materialIconsExtended = "1.7.8"
-koin = "4.2.0"
+koin = "4.2.1"
 accompanist = "0.37.3"
-kotlinxSerialization = "1.10.0"
-coroutinesTest = "1.10.2"
+kotlinxSerialization = "1.11.0"
+coroutinesTest = "1.11.0"
 timber = "5.0.1"
 workManager = "2.11.2"
 composeCharts = "0.2.5"
 lifecycleRuntimeCompose = "2.10.0"
-nav3Core = "1.0.1"
-sentry = "6.3.0"
-sentry-android = "8.36.0"
+nav3Core = "1.1.1"
+sentry = "6.6.0"
+sentry-android = "8.41.0"
 appcompat = "1.7.1"
 tvFoundation = "1.0.0-alpha07"
 tvMaterial = "1.0.0-alpha07"
@@ -68,7 +68,7 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
-sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry" }
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry-android" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-tv-foundation = { group = "androidx.tv", name = "tv-foundation", version.ref = "tvFoundation" }
 androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }

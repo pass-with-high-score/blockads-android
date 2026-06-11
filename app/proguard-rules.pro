@@ -35,12 +35,6 @@
 # Coroutines
 -dontwarn kotlinx.coroutines.**
 
--assumenosideeffects class io.github.oshai.kotlinlogging.KLogger {
-    public *** debug(...);
-    public *** info(...);
-    public *** trace(...);
-}
-
 -assumenosideeffects class org.slf4j.Logger {
     public *** debug(...);
     public *** info(...);

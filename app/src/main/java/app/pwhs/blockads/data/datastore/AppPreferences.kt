@@ -11,6 +11,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.entities.WireGuardConfig
+import app.pwhs.blockads.data.entities.WireGuardProfile
+import app.pwhs.blockads.data.entities.WireGuardProfileList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -49,7 +52,12 @@ class AppPreferences(private val context: Context) {
         private val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
         private val KEY_SHOW_BOTTOM_NAV_LABELS = booleanPreferencesKey("show_bottom_nav_labels")
         private val KEY_ROUTING_MODE = stringPreferencesKey("routing_mode")
+        // Legacy single-config key (v6.3.0 and earlier). Migrated lazily into
+        // KEY_WG_PROFILES_JSON; kept around so an older build can still read
+        // its own data if a user downgrades.
         private val KEY_WG_CONFIG_JSON = stringPreferencesKey("wg_config_json")
+        private val KEY_WG_PROFILES_JSON = stringPreferencesKey("wg_profiles_json")
+        private val KEY_WG_ACTIVE_PROFILE_ID = stringPreferencesKey("wg_active_profile_id")
         private val KEY_HTTPS_FILTERING_ENABLED = booleanPreferencesKey("https_filtering_enabled")
         private val KEY_SELECTED_BROWSERS = stringSetPreferencesKey("selected_browsers")
         private val KEY_NETWORK_SWITCH_DELAY_ENABLED = booleanPreferencesKey("network_switch_delay_enabled")
@@ -62,6 +70,11 @@ class AppPreferences(private val context: Context) {
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
         const val ROUTING_MODE_ROOT = "root"
+
+        // Stable ID assigned to the migrated single config from v6.3.0,
+        // so the synthesized profile has a deterministic key during the
+        // brief window before [migrateLegacyWgConfigIfNeeded] persists it.
+        private const val LEGACY_PROFILE_ID = "legacy-default"
 
         const val PROTECTION_BASIC = "BASIC"
         const val PROTECTION_STANDARD = "STANDARD"
@@ -257,8 +270,37 @@ class AppPreferences(private val context: Context) {
         prefs[KEY_ROUTING_MODE] ?: ROUTING_MODE_DIRECT
     }
 
-    val wgConfigJson: Flow<String?> = context.dataStore.data.map { prefs ->
-        prefs[KEY_WG_CONFIG_JSON]
+    val wgProfiles: Flow<List<WireGuardProfile>> = context.dataStore.data.map { prefs ->
+        readProfilesFromPrefs(prefs)
+    }
+
+    val wgActiveProfileId: Flow<String?> = context.dataStore.data.map { prefs ->
+        readActiveIdFromPrefs(prefs)
+    }
+
+    private fun readProfilesFromPrefs(prefs: Preferences): List<WireGuardProfile> {
+        prefs[KEY_WG_PROFILES_JSON]?.let {
+            return WireGuardProfileList.fromJson(it).profiles
+        }
+        // Lazy migration: synthesize a one-element list from the legacy key
+        // so callers see consistent state even before the persisting migration
+        // runs. The actual persist happens in [migrateLegacyWgConfigIfNeeded].
+        prefs[KEY_WG_CONFIG_JSON]?.let { legacy ->
+            val cfg = try {
+                WireGuardConfig.fromJson(legacy)
+            } catch (_: Exception) {
+                return emptyList()
+            }
+            return listOf(WireGuardProfile(LEGACY_PROFILE_ID, "Default", cfg))
+        }
+        return emptyList()
+    }
+
+    private fun readActiveIdFromPrefs(prefs: Preferences): String? {
+        prefs[KEY_WG_ACTIVE_PROFILE_ID]?.let { return it }
+        // Pre-migration: the lone legacy profile is implicitly active.
+        if (prefs[KEY_WG_CONFIG_JSON] != null) return LEGACY_PROFILE_ID
+        return null
     }
 
     val crashReportingEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -476,22 +518,104 @@ class AppPreferences(private val context: Context) {
         }
     }
 
-    suspend fun setWgConfigJson(json: String?) {
-        context.dataStore.edit { prefs ->
-            if (json == null) {
-                prefs.remove(KEY_WG_CONFIG_JSON)
-            } else {
-                prefs[KEY_WG_CONFIG_JSON] = json
-            }
-        }
-    }
-
     suspend fun getRoutingModeSnapshot(): String {
         return routingMode.first()
     }
 
+    /**
+     * Returns the active profile's serialized config JSON, or null if no
+     * profile is active. Used by the VPN service to feed the Go engine.
+     */
     suspend fun getWgConfigJsonSnapshot(): String? {
-        return wgConfigJson.first()
+        val active = getActiveWgProfileSnapshot() ?: return null
+        return active.config.toJson()
+    }
+
+    suspend fun getWgProfilesSnapshot(): List<WireGuardProfile> = wgProfiles.first()
+
+    suspend fun getActiveWgProfileSnapshot(): WireGuardProfile? {
+        val profiles = getWgProfilesSnapshot()
+        if (profiles.isEmpty()) return null
+        val activeId = wgActiveProfileId.first()
+        return profiles.firstOrNull { it.id == activeId } ?: profiles.first()
+    }
+
+    suspend fun addOrUpdateWgProfile(profile: WireGuardProfile, makeActive: Boolean = false) {
+        context.dataStore.edit { prefs ->
+            val current = readProfilesFromPrefs(prefs).toMutableList()
+            val idx = current.indexOfFirst { it.id == profile.id }
+            if (idx >= 0) current[idx] = profile else current.add(profile)
+            prefs[KEY_WG_PROFILES_JSON] = WireGuardProfileList(current).toJson()
+            if (makeActive) prefs[KEY_WG_ACTIVE_PROFILE_ID] = profile.id
+            // Once profiles exist, the legacy single-config key is dead weight.
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
+    }
+
+    suspend fun removeWgProfile(id: String) {
+        context.dataStore.edit { prefs ->
+            val current = readProfilesFromPrefs(prefs).filterNot { it.id == id }
+            prefs[KEY_WG_PROFILES_JSON] = WireGuardProfileList(current).toJson()
+            if (prefs[KEY_WG_ACTIVE_PROFILE_ID] == id) {
+                val newActive = current.firstOrNull()?.id
+                if (newActive != null) {
+                    prefs[KEY_WG_ACTIVE_PROFILE_ID] = newActive
+                } else {
+                    prefs.remove(KEY_WG_ACTIVE_PROFILE_ID)
+                }
+            }
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
+    }
+
+    suspend fun setActiveWgProfile(id: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_WG_ACTIVE_PROFILE_ID] = id
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
+    }
+
+    suspend fun renameWgProfile(id: String, name: String) {
+        context.dataStore.edit { prefs ->
+            val current = readProfilesFromPrefs(prefs).map {
+                if (it.id == id) it.copy(name = name) else it
+            }
+            prefs[KEY_WG_PROFILES_JSON] = WireGuardProfileList(current).toJson()
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
+    }
+
+    suspend fun clearAllWgProfiles() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(KEY_WG_PROFILES_JSON)
+            prefs.remove(KEY_WG_ACTIVE_PROFILE_ID)
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
+    }
+
+    /**
+     * One-shot migration from the v6.3.0 single-config schema to the multi-
+     * profile schema. Idempotent: a no-op once profiles are persisted.
+     */
+    suspend fun migrateLegacyWgConfigIfNeeded() {
+        context.dataStore.edit { prefs ->
+            if (prefs[KEY_WG_PROFILES_JSON] != null) {
+                // Already migrated; drop the legacy key for tidiness.
+                prefs.remove(KEY_WG_CONFIG_JSON)
+                return@edit
+            }
+            val legacyJson = prefs[KEY_WG_CONFIG_JSON] ?: return@edit
+            val cfg = try {
+                WireGuardConfig.fromJson(legacyJson)
+            } catch (_: Exception) {
+                prefs.remove(KEY_WG_CONFIG_JSON)
+                return@edit
+            }
+            val profile = WireGuardProfile(LEGACY_PROFILE_ID, "Default", cfg)
+            prefs[KEY_WG_PROFILES_JSON] = WireGuardProfileList(listOf(profile)).toJson()
+            prefs[KEY_WG_ACTIVE_PROFILE_ID] = profile.id
+            prefs.remove(KEY_WG_CONFIG_JSON)
+        }
     }
 
     // ── HTTPS Filtering ──────────────────────────────────────────────────

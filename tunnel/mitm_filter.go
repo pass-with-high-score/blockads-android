@@ -30,6 +30,12 @@ type MitmFilter struct {
 	// permanentBlacklist contains domains where TLS handshake failed
 	// (cert pinning detected). These are auto-added and never MITM'd again.
 	permanentBlacklist map[string]bool
+
+	// extraPassthroughSuffixes is a runtime-loaded list (typically from
+	// assets/https_passthrough.txt) of additional DNS suffixes that
+	// should never be MITM'd. Stored with leading dot so the suffix
+	// match works the same way as the hardcoded list.
+	extraPassthroughSuffixes []string
 }
 
 // sniSensitiveKeywords — if a domain contains any of these, NEVER intercept.
@@ -137,6 +143,31 @@ func (f *MitmFilter) HasAllowedUIDs() bool {
 	return len(f.allowedUIDs) > 0
 }
 
+// SetExtraPassthroughSuffixes replaces the runtime-loaded passthrough
+// list. Each entry should be a bare DNS suffix without a leading dot
+// (e.g., "vietcombank.com.vn") — this method normalises by lowercasing
+// and prepending a dot so suffix matching works the same as the
+// hardcoded list. Empty entries and entries that look like comments
+// are dropped.
+func (f *MitmFilter) SetExtraPassthroughSuffixes(suffixes []string) {
+	clean := make([]string, 0, len(suffixes))
+	for _, s := range suffixes {
+		s = strings.TrimSpace(strings.ToLower(s))
+		if s == "" || s[0] == '#' || strings.HasPrefix(s, "//") {
+			continue
+		}
+		// Normalise: ensure leading dot so HasSuffix matches subdomains.
+		if !strings.HasPrefix(s, ".") {
+			s = "." + s
+		}
+		clean = append(clean, s)
+	}
+	f.mu.Lock()
+	f.extraPassthroughSuffixes = clean
+	f.mu.Unlock()
+	logf("MITM Filter: loaded %d extra passthrough suffixes", len(clean))
+}
+
 // IsInterceptionAllowed determines if a domain should be MITM'd.
 // This is the SECOND check (after UID). Only called for browser traffic.
 //
@@ -160,6 +191,16 @@ func (f *MitmFilter) IsInterceptionAllowed(host string) bool {
 
 	// Layer 2: Check minimal hardcoded passthrough
 	for _, suffix := range minimalPassthroughSuffixes {
+		if strings.HasSuffix(host, suffix) || host == suffix[1:] {
+			return false
+		}
+	}
+
+	// Layer 2b: Check runtime-loaded passthrough (assets/HttpsExclusions)
+	f.mu.RLock()
+	extra := f.extraPassthroughSuffixes
+	f.mu.RUnlock()
+	for _, suffix := range extra {
 		if strings.HasSuffix(host, suffix) || host == suffix[1:] {
 			return false
 		}

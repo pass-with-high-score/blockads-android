@@ -24,6 +24,33 @@ object IptablesManager {
     private const val LOCAL_DNS_PORT = 15353
 
     /**
+     * Ensure the cached libsu main shell actually has root.
+     *
+     * libsu creates the main shell once and caches it for the process
+     * lifetime. If the first shell was created while the su daemon wasn't
+     * ready yet (typical right after boot), a non-root `sh` gets cached and
+     * every subsequent command silently runs without root — retries can
+     * never succeed. Closing the poisoned shell forces libsu to build a
+     * fresh one that attempts `su` again.
+     */
+    fun ensureRootShell(): Boolean {
+        val cached = Shell.getCachedShell()
+        if (cached != null && cached.isRoot) return true
+
+        if (cached != null) {
+            try {
+                cached.close()
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to close non-root shell")
+            }
+        }
+
+        val fresh = Shell.getShell()
+        Timber.d("Recreated libsu main shell, isRoot=${fresh.isRoot}")
+        return fresh.isRoot
+    }
+
+    /**
      * Actively request root access. This will trigger the Magisk/KernelSU
      * permission prompt if it hasn't been granted yet.
      */

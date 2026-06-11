@@ -34,14 +34,14 @@ class DnsProviderViewModel(
     val upstreamDns: StateFlow<String> = appPrefs.upstreamDns
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
+            SharingStarted.Eagerly,
             AppPreferences.DEFAULT_UPSTREAM_DNS
         )
 
     val fallbackDns: StateFlow<String> = appPrefs.fallbackDns
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
+            SharingStarted.Eagerly,
             AppPreferences.DEFAULT_FALLBACK_DNS
         )
 
@@ -99,20 +99,21 @@ class DnsProviderViewModel(
                 appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
             }
 
-            // Set fallback DNS to a different provider for redundancy
-            // Use privacy-friendly Quad9 <-> AdGuard pairing
-            val fallbackProvider = when (provider.id) {
-                DnsProviders.QUAD9.id -> DnsProviders.ADGUARD
-                DnsProviders.ADGUARD.id -> DnsProviders.QUAD9
-                DnsProviders.SYSTEM.id -> DnsProviders.QUAD9
-                else -> {
-                    // Find first privacy provider different from selected
-                    DnsProviders.ALL_PROVIDERS.firstOrNull {
-                        it.id != provider.id && it.category == DnsCategory.PRIVACY
-                    } ?: DnsProviders.QUAD9
+            // Only auto-set fallback DNS if it would conflict with the new primary
+            val currentFallback = appPrefs.fallbackDns.first()
+            if (currentFallback == provider.ipAddress) {
+                val fallbackProvider = when (provider.id) {
+                    DnsProviders.QUAD9.id -> DnsProviders.ADGUARD
+                    DnsProviders.ADGUARD.id -> DnsProviders.QUAD9
+                    DnsProviders.SYSTEM.id -> DnsProviders.QUAD9
+                    else -> {
+                        DnsProviders.ALL_PROVIDERS.firstOrNull {
+                            it.id != provider.id && it.category == DnsCategory.PRIVACY
+                        } ?: DnsProviders.QUAD9
+                    }
                 }
+                appPrefs.setFallbackDns(fallbackProvider.ipAddress)
             }
-            appPrefs.setFallbackDns(fallbackProvider.ipAddress)
             ServiceController.requestRestart(getApplication<Application>().applicationContext)
         }
     }

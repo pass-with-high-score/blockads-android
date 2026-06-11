@@ -36,3 +36,5 @@ play-store-key.json
 sentry.properties
 .gopath
 .ruby-lsp
+adguard.apk
+adguard

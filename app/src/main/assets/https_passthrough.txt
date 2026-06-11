@@ -1,0 +1,345 @@
+# BlockAds HTTPS passthrough list
+#
+# Domains in this file are NOT MITM'd by BlockAds — they pass through
+# untouched so cert-pinned apps and security-critical traffic keep
+# working. One DNS suffix per line; the consumer matches against host
+# and any subdomain.
+#
+# Format:  bare domain, no leading dot, no trailing slash
+# Comment: lines starting with # or // are ignored
+#
+# Each entry is grouped by category. Within a category, entries are
+# alphabetical. When adding a domain, include a brief reason or a
+# bug-report link.
+
+# ─── Cloud & platform owners (cert pinning + cert transparency) ──────
+android.com
+apple.com
+fbcdn.net
+google.com
+googleapis.com
+googleusercontent.com
+googlevideo.com
+gstatic.com
+huawei.com
+huaweicloud.com
+icloud.com
+icloud-content.com
+microsoft.com
+microsoftonline.com
+office.com
+office365.com
+outlook.com
+sharepoint.com
+windowsupdate.com
+windows.com
+xboxlive.com
+youtube.com
+ytimg.com
+
+# ─── Major CDN / infrastructure ──────────────────────────────────────
+akamaized.net
+akamaihd.net
+amazonaws.com
+appspot.com
+cloudflare.com
+cloudfront.net
+fastly.net
+
+# ─── App stores ──────────────────────────────────────────────────────
+play.google.com
+appstore.com
+apps.apple.com
+itunes.apple.com
+samsungapps.com
+appgallery.huawei.com
+
+# ─── Crash reporting / telemetry (used by the app itself) ────────────
+app-measurement.com
+crashlytics.com
+firebaseio.com
+sentry.io
+ingest.sentry.io
+
+# ─── Authentication / secrets ────────────────────────────────────────
+auth0.com
+okta.com
+duo.com
+yubico.com
+
+# ─── Source / dev / security infra ───────────────────────────────────
+github.com
+github.io
+githubassets.com
+githubusercontent.com
+gitlab.com
+bitbucket.org
+
+# ─── Vietnam — banking ───────────────────────────────────────────────
+abbank.vn
+acb.com.vn
+agribank.com.vn
+bidv.com.vn
+bvbank.com.vn
+eximbank.com.vn
+hdbank.com.vn
+kienlongbank.com
+lpbank.com.vn
+mbbank.com.vn
+nab.com.vn
+namabank.com.vn
+ocb.com.vn
+pgbank.com.vn
+publicbank.com.vn
+sacombank.com.vn
+saigonbank.com.vn
+scb.com.vn
+seabank.com.vn
+shb.com.vn
+techcombank.com.vn
+tpb.com.vn
+vibonline.com.vn
+vietabank.com.vn
+vietbank.com.vn
+vietcapitalbank.com.vn
+vietcombank.com.vn
+vietinbank.vn
+vpbank.com.vn
+
+# ─── Vietnam — mobile money / wallets / fintech ──────────────────────
+momo.vn
+napas.com.vn
+shopeepay.vn
+viettelpay.com.vn
+vnpay.vn
+zalopay.vn
+
+# ─── Vietnam — e-commerce / ride / food ──────────────────────────────
+baemin.vn
+be.com.vn
+fpt.vn
+gojek.com
+grab.com
+lazada.vn
+sendo.vn
+shopee.vn
+tiki.vn
+
+# ─── Vietnam — telecom and government ────────────────────────────────
+fpt.com.vn
+mobifone.vn
+viettel.com.vn
+vnpt.com.vn
+gov.vn
+
+# ─── Vietnam — communication / social ────────────────────────────────
+zalo.me
+zdn.vn
+
+# ─── United States — banking ─────────────────────────────────────────
+amex.com
+americanexpress.com
+ally.com
+bankofamerica.com
+bbt.com
+capitalone.com
+chase.com
+citi.com
+citibank.com
+citizensbank.com
+discover.com
+fidelity.com
+huntington.com
+keybank.com
+pnc.com
+regions.com
+schwab.com
+synchrony.com
+truist.com
+usbank.com
+usaa.com
+vanguard.com
+wellsfargo.com
+
+# ─── United Kingdom / EU — banking ───────────────────────────────────
+abnamro.com
+barclays.co.uk
+bbva.com
+bnpparibas.com
+caixabank.com
+commerzbank.com
+creditagricole.com
+deutschebank.com
+hsbc.com
+hsbc.co.uk
+ing.com
+intesasanpaolo.com
+lloydsbank.com
+natwest.com
+nordea.com
+rabobank.com
+revolut.com
+santander.com
+santander.co.uk
+sebgroup.com
+societegenerale.com
+tsb.co.uk
+unicredit.it
+
+# ─── APAC — banking ──────────────────────────────────────────────────
+anz.com
+anz.com.au
+aubank.com
+bok.or.kr
+boc.cn
+ccb.com
+citic.com
+commbank.com.au
+dbs.com.sg
+hangseng.com
+hktdc.com
+icbc.com.cn
+kbstar.com
+maybank2u.com.my
+mufg.jp
+nab.com.au
+ocbc.com
+posbank.co.kr
+publicbank.com.my
+sc.com
+shinhan.com
+smbc.co.jp
+standardchartered.com
+suncorp.com.au
+sumitomo.com
+uob.com.sg
+westpac.com.au
+woori.go.kr
+
+# ─── Canada — banking ────────────────────────────────────────────────
+bmo.com
+cibc.com
+desjardins.com
+nbc.ca
+rbcroyalbank.com
+scotiabank.com
+td.com
+tdbank.com
+
+# ─── Payment processors and card networks ────────────────────────────
+adyen.com
+afterpay.com
+amex.com
+braintreepayments.com
+checkout.com
+diners.com
+discovercard.com
+jcb.co.jp
+klarna.com
+mastercard.com
+paypal.com
+paypalobjects.com
+square.com
+squareup.com
+stripe.com
+unionpayintl.com
+visa.com
+worldpay.com
+
+# ─── Cryptocurrency exchanges ────────────────────────────────────────
+binance.com
+bitfinex.com
+bitstamp.net
+bybit.com
+coinbase.com
+gemini.com
+huobi.com
+kraken.com
+kucoin.com
+okx.com
+remitano.com
+
+# ─── Secure messaging and conferencing ───────────────────────────────
+discord.com
+discordapp.com
+keybase.io
+line.me
+naver.com
+session.org
+signal.org
+slack.com
+telegram.org
+telegram.dog
+threema.ch
+viber.com
+webex.com
+whatsapp.com
+whatsapp.net
+wickr.com
+zoom.us
+
+# ─── Social platforms (cert pinning + WAF heuristics) ────────────────
+fbcdn.net
+facebook.com
+instagram.com
+linkedin.com
+pinterest.com
+reddit.com
+snapchat.com
+threads.net
+tiktok.com
+twitter.com
+x.com
+
+# ─── Healthcare / insurance ──────────────────────────────────────────
+anthem.com
+cigna.com
+cvshealth.com
+healthcare.gov
+humana.com
+kaiserpermanente.org
+mayoclinic.org
+medicare.gov
+nhs.uk
+uhc.com
+unitedhealthcare.com
+
+# ─── Government top-level domains ────────────────────────────────────
+gov
+gov.au
+gov.cn
+gov.in
+gov.sg
+gov.uk
+gov.us
+
+# ─── Aviation / travel (cert-pinned apps) ────────────────────────────
+aa.com
+americanairlines.com
+delta.com
+emirates.com
+expedia.com
+flyfrontier.com
+jetblue.com
+qantas.com
+ryanair.com
+singaporeair.com
+southwest.com
+united.com
+vietnamairlines.com
+
+# ─── Education / academic ────────────────────────────────────────────
+canvas.instructure.com
+edx.org
+khanacademy.org
+mit.edu
+stanford.edu
+
+# ─── Misc — known to fail under MITM (browsers, anti-cheat, gaming) ──
+battle.net
+ea.com
+epicgames.com
+roblox.com
+steamcommunity.com
+steampowered.com
+unity3d.com

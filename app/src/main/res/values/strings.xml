@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">BlockAds</string>
     <string name="app_tagline">Ad-Free Browsing</string>
@@ -26,9 +26,6 @@
     <string name="nav_logs">Logs</string>
     <string name="nav_filter">Filter</string>
     <string name="nav_settings">Settings</string>
-    <string name="settings_filter_url">Filter List URL</string>
-    <string name="settings_update_filter">Update Filter List</string>
-    <string name="filter_updating">Updating filter list…</string>
     <string name="filter_updated">Filter list updated: %d domains</string>
     <string name="filter_update_failed">Failed to update filter list</string>
     <string name="filter_detail_enabled">Enabled</string>
@@ -36,26 +33,15 @@
     <string name="filter_detail_last_updated">Last updated</string>
     <string name="filter_detail_update">Update</string>
     <string name="filter_detail_delete">Delete</string>
-    <string name="filter_detail_domain_preview">Blocked Domains Preview</string>
-    <string name="filter_detail_no_domains">No cached domains. Try updating this filter first.</string>
-    <string name="filter_detail_more_domains">… and %s more domains</string>
     <string name="logs_empty">No DNS queries logged yet</string>
     <string name="logs_filter_all">All</string>
     <string name="logs_filter_blocked">Blocked</string>
-
-    <!-- Onboarding -->
     <string name="onboarding_title_1">Block Ads Smartly</string>
     <string name="onboarding_desc_1">Block ads across all apps and browsers with one tap. Uses DNS filtering technology — no root required.\n\n🔒 Privacy promise: We never collect, store, or transmit your browsing data. All processing happens on your device only.</string>
-    <string name="onboarding_title_2">Your Privacy, Protected</string>
-    <string name="onboarding_desc_2">No data collection. No tracking. All DNS logs stay on your device only. We never see your browsing activity.</string>
-    <string name="onboarding_title_3">Free &amp; Open Source</string>
-    <string name="onboarding_desc_3">BlockAds is completely free with no in-app purchases. Our source code is open for anyone to inspect and verify.</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_recommended">★ Recommended</string>
-
-    <!-- Onboarding: Protection Level -->
     <string name="onboarding_protection_title">Choose Protection Level</string>
     <string name="onboarding_protection_desc">Select how aggressively you want to block ads and trackers</string>
     <string name="onboarding_protection_basic">Basic</string>
@@ -64,69 +50,40 @@
     <string name="onboarding_protection_standard_desc">Block ads, trackers, and analytics. Good balance of protection and compatibility.</string>
     <string name="onboarding_protection_strict">Strict</string>
     <string name="onboarding_protection_strict_desc">Maximum blocking. May affect some website functionality but provides the strongest protection.</string>
-
-    <!-- Onboarding: DNS Server -->
     <string name="onboarding_dns_title">Choose DNS Server</string>
     <string name="onboarding_dns_desc">Select a DNS server for resolving domain names. You can change this later in Settings.</string>
-
-    <!-- Onboarding: VPN Permission -->
     <string name="onboarding_vpn_title">VPN Permission Required</string>
     <string name="onboarding_vpn_desc">BlockAds uses a local VPN to filter DNS queries and block ads. No data leaves your device — this VPN only works locally to intercept and filter DNS requests.</string>
     <string name="onboarding_vpn_grant">Grant VPN Permission</string>
-
-    <!-- Onboarding: Notification Permission -->
     <string name="onboarding_notification_title">Stay Informed</string>
     <string name="onboarding_notification_desc">Allow notifications to see real-time blocking statistics and know when your protection is active. Required for the persistent VPN notification on Android 13+.</string>
     <string name="onboarding_notification_grant">Allow Notifications</string>
-
-    <!-- Onboarding: Battery Optimization -->
     <string name="onboarding_battery_title">Keep Protection Running</string>
     <string name="onboarding_battery_desc">Exclude BlockAds from battery optimization so the VPN service stays active in the background and doesn\'t get killed by the system.</string>
     <string name="onboarding_battery_grant">Disable Battery Optimization</string>
     <string name="onboarding_battery_unsupported">Not Supported</string>
-
-    <!-- Onboarding: Permission Granted -->
     <string name="onboarding_permission_granted">✓ Permission granted</string>
-
-    <!-- Onboarding: Completion -->
     <string name="onboarding_complete_title">You\'re Now Protected!</string>
     <string name="onboarding_complete_desc">Congratulations! BlockAds is configured and ready to protect your device from ads and trackers.</string>
-    <string name="onboarding_complete_stats">Tap \"Get Started\" to enable protection</string>
-
-    <!-- Whitelist Apps -->
+    <string name="onboarding_complete_stats">Tap \&quot;Get Started\&quot; to enable protection</string>
     <string name="whitelist_apps_title">Whitelisted Apps</string>
-    <string name="whitelist_apps_subtitle">These apps will bypass ad blocking</string>
     <string name="whitelist_apps_search">Search apps…</string>
     <string name="whitelist_apps_empty">No apps installed</string>
     <string name="whitelist_apps_count">%d apps whitelisted</string>
     <string name="whitelist_tab_user">User Apps</string>
     <string name="whitelist_tab_system">System Apps</string>
-
-    <!-- Whitelist Domains -->
-    <string name="whitelist_domains_title">Whitelisted Domains</string>
-    <string name="whitelist_domains_subtitle">These domains will never be blocked</string>
     <string name="whitelist_domains_add">Add Domain</string>
     <string name="whitelist_domains_hint">e.g. example.com</string>
     <string name="whitelist_domains_empty">No whitelisted domains</string>
     <string name="whitelist_domain_added">Domain whitelisted: %s</string>
     <string name="whitelist_domain_removed">Domain removed from whitelist</string>
-
-    <string name="settings_blocklist_domains_desc">These domains will always be blocked</string>
-    <string name="blocklist_domains_title">Blocklisted Domains</string>
-    <string name="blocklist_domains_subtitle">These domains will always be blocked</string>
-    <string name="blocklist_domains_add">Add Domain</string>
-    <string name="blocklist_domains_hint">e.g. example.com</string>
     <string name="blocklist_domains_empty">No blocklisted domains</string>
     <string name="blocklist_domain_added">Domain blocklisted: %s</string>
     <string name="blocklist_domain_removed">Domain removed from blocklist</string>
     <string name="blocklist_domain_already_exists">Domain is already blocklisted</string>
-
-    <!-- Domain Rules (merged screen) -->
     <string name="domain_rules_title">Domain Rules</string>
     <string name="domain_rules_tab_whitelist">Whitelist</string>
     <string name="domain_rules_tab_blocklist">Blocklist</string>
-
-    <!-- About -->
     <string name="about_title">About</string>
     <string name="about_description">Free, open-source ad blocker.\nNo data collection. No tracking.</string>
     <string name="about_version">Version %s</string>
@@ -136,20 +93,13 @@
     <string name="about_contact">Contact Us</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_no_data">🔒 This app does not collect any personal data</string>
-
-    <!-- Log Actions -->
     <string name="log_action_whitelist">Add to Whitelist</string>
     <string name="log_action_copy">Copy Domain</string>
     <string name="log_search_hint">Search domains…</string>
     <string name="domain_copied">Domain copied</string>
     <string name="log_whitelisted">Whitelisted: %s</string>
     <string name="log_already_whitelisted">Already whitelisted</string>
-
-    <!-- Test Block Ads -->
     <string name="test_block_ads">Test Ad Blocking</string>
-    <string name="test_block_ads_title">Test Ad Blocking</string>
-
-    <!-- Home Screen -->
     <string name="home_connecting_desc">Establishing VPN connection…</string>
     <string name="home_connecting_desc_root">Establishing Root Proxy…</string>
     <string name="home_protected_desc">Your device is protected from ads</string>
@@ -164,11 +114,7 @@
     <string name="home_top_blocked">Top Blocked Domains</string>
     <string name="home_chart_no_data">No data available</string>
     <string name="settings_language">Language</string>
-
-    <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
-    <string name="settings_search_hint">Search settings…</string>
-    <string name="settings_search_clear">Clear search</string>
     <string name="settings_category_protection">Protection</string>
     <string name="settings_category_protection_desc">DNS server, protocol, auto-reconnect</string>
     <string name="settings_category_interface">Interface</string>
@@ -181,7 +127,6 @@
     <string name="settings_category_data_desc">Export/Import, clear logs</string>
     <string name="settings_category_info">Information</string>
     <string name="settings_category_info_desc">About, privacy policy, source code</string>
-    <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_light">Light</string>
@@ -208,27 +153,17 @@
     <string name="settings_lang_cs" translatable="false">Čeština</string>
     <string name="settings_lang_iw" translatable="false">עברית</string>
     <string name="settings_lang_fr" translatable="false">Français</string>
-    <string name="settings_high_contrast">High Contrast</string>
-    <string name="settings_high_contrast_desc">Increase contrast for better visibility</string>
     <string name="settings_accent_color">Accent Color</string>
     <string name="settings_accent_color_desc">Customize the app\'s primary color</string>
     <string name="accent_dynamic">Dynamic (Material You)</string>
     <string name="accent_dynamic_desc">Uses your wallpaper colors</string>
-    <string name="settings_connection">Connection</string>
     <string name="settings_filter_lists">Filter Lists (%d active)</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>
     <string name="settings_updating">Updating…</string>
     <string name="settings_update_all">Update All Filters</string>
-    <string name="settings_dns_config">DNS Configuration</string>
-    <string name="settings_save_dns">Save DNS</string>
-    <string name="settings_whitelist">Whitelist</string>
     <string name="settings_whitelist_apps">Whitelisted Apps</string>
     <string name="settings_whitelist_apps_desc">Exclude apps from ad blocking</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
-    <string name="settings_whitelist_domains_desc">These domains will never be blocked</string>
-
-    <string name="settings_add_domain">Add Domain</string>
-    <string name="settings_data_backup">Data &amp; Backup</string>
     <string name="settings_export">Export</string>
     <string name="settings_import">Import</string>
     <string name="settings_about">About</string>
@@ -245,20 +180,6 @@
     <string name="settings_safe_search_desc">Force safe search on supported search engines (Google, Bing)</string>
     <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
     <string name="settings_youtube_restricted_desc">Filter out mature videos on YouTube, block embedded mature videos on other sites, and hide all comments</string>
-    <string name="settings_dns_protocol">DNS Protocol</string>
-    <string name="settings_dns_protocol_plain">Plain DNS</string>
-    <string name="settings_dns_protocol_doh" translatable="false">DoH</string>
-    <string name="settings_dns_protocol_dot" translatable="false">DoT</string>
-    <string name="settings_dns_protocol_doq" translatable="false">DoQ</string>
-    <string name="settings_doh_server_url">DoH Server URL</string>
-    <string name="settings_doh_url_placeholder" translatable="false">https://dns.google/dns-query</string>
-    <string name="settings_save_doh_url">Save DoH URL</string>
-    <string name="settings_dot_server">DoT Server (hostname or IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">DoQ Server URL</string>
-    <string name="settings_doq_url_placeholder" translatable="false">quic://dns.adguard-dns.com/dns-query</string>
-    <string name="settings_upstream_dns">Upstream DNS Server</string>
-    <string name="settings_upstream_dns_placeholder" translatable="false">8.8.8.8</string>
     <string name="settings_fallback_dns">Fallback DNS Server</string>
     <string name="settings_fallback_dns_placeholder" translatable="false">1.1.1.1</string>
     <string name="settings_fallback_dns_desc">Fallback DNS is used when your primary DNS server fails. Enter the IP address of a backup DNS server.</string>
@@ -273,11 +194,7 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">Detected: %s</string>
-    <string name="settings_invalid_dns_input">Invalid DNS server address</string>
-    <string name="settings_save_custom_dns">Save DNS</string>
     <string name="settings_dns_response_type">DNS response type</string>
-    <string name="settings_dns_response_type_desc">Response type for blocked domains</string>
     <string name="dns_response_nxdomain" translatable="false">NXDOMAIN</string>
     <string name="dns_response_nxdomain_desc">Domain does not exist (standard)</string>
     <string name="dns_response_refused" translatable="false">REFUSED</string>
@@ -286,28 +203,18 @@
     <string name="dns_response_custom_ip_desc">Return a null route address (default)</string>
     <string name="settings_clear_logs">Clear All Logs</string>
     <string name="clear_logs_confirm_message">Are you sure you want to clear all DNS logs? This action cannot be undone.</string>
-    <string name="dns_error_notification_title">DNS configuration error</string>
-    <string name="dns_error_notification_no_fallback">%1$s connection to %2$s is failing. No fallback DNS configured — websites may not load. Check your DNS settings.</string>
-    <string name="dns_error_notification_both_failed">%1$s connection to %2$s and fallback %3$s are both failing. Websites may not load. Check your DNS settings.</string>
-
-    <!-- Filter Setup Screen -->
     <string name="filter_setup_title">Filter Setup</string>
-    <string name="filter_setup_desc">Manage built-in &amp; custom filter lists</string>
     <string name="filter_built_in">Built-in</string>
     <string name="filter_custom">Custom</string>
     <string name="filter_custom_empty">No custom filters added yet</string>
     <string name="filter_search_hint">Search filters…</string>
-    <string name="filter_search_no_results">No filters found for \"%s\"</string>
+    <string name="filter_search_no_results">No filters found for \&quot;%s\&quot;</string>
     <string name="filter_log_cleared">Log cleared</string>
-    <string name="filter_domain_whitelisted">Domain whitelisted: %s</string>
     <string name="filter_domain_already_whitelisted">Domain already whitelisted</string>
     <string name="filter_settings_export">Settings exported</string>
     <string name="filter_export_failed">Export failed: %s</string>
     <string name="filter_settings_imported">Settings imported</string>
     <string name="filter_import_failed">Import failed: %s</string>
-
-    <!-- Auto-update Filter Lists -->
-    <string name="settings_auto_update">Auto-update Filter Lists</string>
     <string name="settings_auto_update_enabled">Enable auto-update</string>
     <string name="settings_auto_update_enabled_desc">Automatically update filter lists in background</string>
     <string name="settings_auto_update_frequency">Update frequency</string>
@@ -327,8 +234,6 @@
     <string name="filter_update_failed_message">Failed to update filter lists</string>
     <string name="filter_update_notification_channel">Filter Updates</string>
     <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
-
-    <!-- DNS Provider -->
     <string name="dns_provider_title">DNS Server</string>
     <string name="dns_category_standard">Standard</string>
     <string name="dns_category_privacy">Privacy-focused</string>
@@ -338,24 +243,14 @@
     <string name="dns_custom_description">Enter your own DNS server addresses</string>
     <string name="dns_custom_save">Save</string>
     <string name="dns_custom_cancel">Cancel</string>
-    <string name="dns_select_server">Select DNS Server</string>
     <string name="dns_doh_badge" translatable="false">DoH</string>
-    <string name="dns_doq_badge" translatable="false">DoQ</string>
-
-    <!-- Widget -->
-    <string name="widget_name">BlockAds Toggle</string>
     <string name="widget_description">Toggle ad blocking on/off and view statistics</string>
     <string name="widget_toggle_description">Toggle ad blocking</string>
     <string name="widget_blocked_today">Blocked today</string>
     <string name="widget_protected">Protected</string>
     <string name="widget_unprotected">Off</string>
-
-    <!-- Shortcuts -->
     <string name="shortcut_toggle_vpn">Toggle Ad Blocking</string>
     <string name="shortcut_toggle_vpn_short">Toggle VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Toggle not available</string>
-
-    <!-- Custom Rules -->
     <string name="custom_rules">Custom Rules</string>
     <string name="add_custom_rule">Add Custom Rule</string>
     <string name="import_rules">Import Rules</string>
@@ -381,7 +276,6 @@
     <string name="cancel">Cancel</string>
     <string name="ok" translatable="false">OK</string>
     <string name="block_this_domain">Block this domain</string>
-    <string name="add_to_custom_rules">Add to custom rules</string>
     <string name="import_from_file">Import from File</string>
     <string name="export_to_file">Export to File</string>
     <string name="export_format_title">Export Format</string>
@@ -390,15 +284,13 @@
     <string name="rules_exported">Exported %d rules</string>
     <string name="export_failed">Export failed: %s</string>
     <string name="import_failed">Import failed: %s</string>
-    <string name="import_no_valid_rules">No valid rules found in file</string>
-
-    <!-- App Management -->
     <string name="app_management_title">App Management</string>
     <string name="app_management_subtitle">%d apps</string>
     <string name="app_management_subtitle_filtered">%1$d of %2$d apps</string>
     <string name="app_management_desc">Manage per-app VPN routing and view stats</string>
     <string name="app_management_search">Search apps…</string>
     <string name="app_management_loading">Loading apps…</string>
+    <string name="app_management_refresh">Refresh</string>
     <string name="app_management_sort">Sort</string>
     <string name="app_management_sort_name">Sort by Name</string>
     <string name="app_management_sort_queries">Sort by Queries</string>
@@ -407,46 +299,33 @@
     <string name="app_management_blocked">Blocked: %d</string>
     <string name="app_management_system">System</string>
     <string name="app_management_vpn_toggle">VPN routing for %s</string>
-    <!-- Improved DNS Log Screen -->
     <string name="log_status_blocked">Blocked</string>
     <string name="log_status_allowed">Allowed</string>
     <string name="log_status_whitelisted">Whitelisted</string>
-    <string name="log_detail_title">Domain Details</string>
     <string name="log_detail_query_type">Query Type</string>
     <string name="log_detail_response_time">Response Time</string>
-    <string name="log_detail_status">Status</string>
     <string name="log_detail_app">App</string>
     <string name="log_detail_resolved_ip">Resolved IP</string>
     <string name="log_detail_blocked_by">Blocked By</string>
     <string name="log_detail_timestamp">Time</string>
-    <string name="log_detail_unknown">Unknown</string>
     <string name="log_detail_na">N/A</string>
-    <string name="log_realtime_on">Real-time: ON</string>
-    <string name="log_realtime_off">Real-time: OFF</string>
     <string name="log_time_range_all">All Time</string>
     <string name="log_time_range_1h">1h</string>
     <string name="log_time_range_6h">6h</string>
     <string name="log_time_range_24h">24h</string>
     <string name="log_time_range_7d">7d</string>
     <string name="log_filter_all_apps">All Apps</string>
-    <string name="log_bulk_mode">Select</string>
     <string name="log_bulk_selected">%d selected</string>
-    <string name="log_bulk_block">Block All</string>
-    <string name="log_bulk_whitelist">Whitelist All</string>
-    <string name="log_unblock_domain">Unblock this domain</string>
     <string name="log_wildcard_whitelist_domain">Whitelist all subdomains</string>
-    <string name="log_domain_unblocked">Domain %1$s unblocked</string>
     <string name="log_wildcard_whitelisted">Domain %1$s and all subdomains whitelisted</string>
     <string name="log_action_unblock">Unblock</string>
     <string name="log_action_block">Block</string>
     <string name="block_reason_custom_rule">Custom Block Rule</string>
     <string name="block_reason_filter_list">Filter List</string>
     <string name="block_reason_security">Dangerous Website</string>
-    <!-- Security Stats -->
     <string name="home_security_threats">Threats Blocked</string>
     <string name="filter_category_ad">Ad Blocking</string>
     <string name="filter_category_security">Security</string>
-    <!-- Statistics Screen -->
     <string name="nav_statistics">Stats</string>
     <string name="stats_title">Statistics</string>
     <string name="stats_overview">Overview</string>
@@ -459,19 +338,13 @@
     <string name="stats_chart_4w">4 Weeks</string>
     <string name="stats_chart_12m">12 Months</string>
     <string name="stats_per_app">Per-App Statistics</string>
-    <string name="stats_app_queries_blocked">%1$s queries · %2$s blocked</string>
-
     <string name="vpn_conflict_title">Connection Blocked</string>
-    <string name="vpn_conflict_desc">Android only allows one VPN connection at a time. Another VPN is currently active on your device.\n\nPlease disconnect the other VPN first or disable \"Always-on VPN\" in Settings before connecting BlockAds.</string>
+    <string name="vpn_conflict_desc">Android only allows one VPN connection at a time. Another VPN is currently active on your device.\n\nPlease disconnect the other VPN first or disable \&quot;Always-on VPN\&quot; in Settings before connecting BlockAds.</string>
     <string name="open_settings">Open Settings</string>
-
-    <!-- VPN Connecting Phases (progress feedback) -->
     <string name="vpn_phase_loading_filters">Loading filter lists…</string>
     <string name="vpn_phase_preparing_dns">Preparing DNS…</string>
     <string name="vpn_phase_establishing">Establishing VPN…</string>
     <string name="vpn_phase_waiting_network">Waiting for network…</string>
-
-    <!-- Notification Improvements -->
     <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Pause 1h</string>
     <string name="vpn_notification_action_stop">Stop</string>
@@ -491,16 +364,10 @@
     <string name="settings_daily_summary_desc">Show end-of-day blocking summary</string>
     <string name="settings_milestone_notifications">Milestone notifications</string>
     <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
-    <!-- Protection Profiles -->
     <string name="profile_title">Protection Profiles</string>
     <string name="profile_section_profiles">Profiles</string>
     <string name="profile_section_schedules">Schedules</string>
     <string name="profile_name_default">Default</string>
-    <string name="profile_name_strict">Strict</string>
-    <string name="profile_name_family">Family</string>
-    <string name="profile_name_gaming">Gaming</string>
-    <string name="profile_name_custom">Custom</string>
-    <string name="profile_name_strict_family">Strict Family</string>
     <string name="profile_desc_strict_family">Maximum blocking: ads, trackers, adult content &amp; gambling</string>
     <string name="profile_desc_default">Balanced blocking: basic ads and trackers</string>
     <string name="profile_desc_strict">Aggressive blocking: ads, trackers, analytics, telemetry</string>
@@ -527,19 +394,13 @@
     <string name="profile_day_fri">Fri</string>
     <string name="profile_day_sat">Sat</string>
     <string name="profile_day_sun">Sun</string>
-    <string name="settings_profiles">Protection Profiles</string>
-    <string name="settings_profiles_desc">Preset configurations for different use cases</string>
-    <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Toggle VPN protection</string>
     <string name="accessibility_vpn_active">VPN protection is active</string>
     <string name="accessibility_vpn_inactive">VPN protection is inactive</string>
     <string name="accessibility_vpn_connecting">VPN is connecting</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Block rate %1$s percent</string>
     <string name="accessibility_navigate_back">Navigate back</string>
-    <!-- Firewall -->
     <string name="firewall_title">Firewall</string>
-    <string name="firewall_subtitle">Per-app internet control</string>
     <string name="firewall_count">%d apps blocked</string>
     <string name="firewall_search">Search apps…</string>
     <string name="firewall_enable">Enable Firewall</string>
@@ -551,26 +412,16 @@
     <string name="firewall_schedule_from">From</string>
     <string name="firewall_schedule_to">To</string>
     <string name="firewall_app_blocked">Internet blocked</string>
-    <string name="firewall_app_not_blocked">Internet allowed</string>
-    <string name="firewall_rule_saved">Firewall rule saved</string>
-    <string name="firewall_rule_removed">Firewall rule removed</string>
     <string name="firewall_configure">Configure Rule</string>
-    <string name="firewall_channel_name">Firewall Alerts</string>
-    <string name="firewall_channel_description">Notifications when apps are blocked by firewall</string>
-    <string name="firewall_notification_title">App blocked by firewall</string>
-    <string name="firewall_notification_text">%s was blocked from accessing the internet</string>
     <string name="firewall_network_wifi" translatable="false">Wi-Fi</string>
     <string name="firewall_network_mobile">Mobile</string>
     <string name="firewall_network_all">All</string>
-    <string name="firewall_status_schedule" translatable="false"> · %1$02d:%2$02d–%3$02d:%4$02d</string>
+    <string name="firewall_status_schedule" translatable="false">· %1$02d:%2$02d–%3$02d:%4$02d</string>
     <string name="firewall_schedule_hour_plus">Hour +</string>
     <string name="firewall_schedule_minute_plus">Min +</string>
     <string name="block_reason_firewall">Firewall</string>
     <string name="block_reason_upstream_dns">Upstream DNS</string>
     <string name="settings_firewall">Firewall</string>
-    <string name="settings_firewall_desc">Block internet access per app</string>
-
-    <!-- Share & Rate -->
     <string name="settings_sponsor">Sponsor Us</string>
     <string name="settings_sponsor_desc">Support BlockAds development on GitHub</string>
     <string name="settings_community">Community</string>
@@ -579,48 +430,40 @@
     <string name="settings_telegram" translatable="false">Telegram</string>
     <string name="settings_telegram_desc">Join our chat on Telegram</string>
     <string name="filter_setup_active_count">%1$d active</string>
-    <string name="copied_url">Copied URL</string>
     <string name="filter_error_invalid_url">Please enter a valid URL (http:// or https://)</string>
     <string name="filter_error_duplicate_url">This filter list already exists</string>
-    <string name="filter_error_invalid_content">URL does not contain a valid filter list</string>
     <string name="filter_chip_all">All</string>
     <string name="filter_chip_enabled">Enabled</string>
     <string name="filter_chip_disabled">Disabled</string>
-
-    <string name="dns_custom_primary_label">Primary</string>
-    <string name="dns_custom_fallback_label">Fallback</string>
-    <string name="dns_custom_extra_label">Extra</string>
-    <string name="dns_custom_add_server">Add Server</string>
-    <string name="dns_custom_max_reached">Maximum number of servers reached</string>
-    <string name="dns_custom_remove_server">Remove Server</string>
-    <string name="dns_custom_duplicate">Server already exists</string>
-    <string name="dns_custom_empty">Server address cannot be empty</string>
-
-    <!-- WireGuard Import -->
     <string name="wireguard_import_title">WireGuard Import</string>
     <string name="wireguard_import_button">Import .conf</string>
     <string name="wireguard_empty_title">No configuration loaded</string>
     <string name="wireguard_empty_desc">Tap the button below to import a WireGuard .conf file</string>
-    <string name="wireguard_section_interface">Interface</string>
-    <string name="wireguard_section_peer">Peer %d</string>
-    <string name="wireguard_label_address">Address</string>
-    <string name="wireguard_label_private_key">Private Key</string>
-    <string name="wireguard_label_dns" translatable="false">DNS</string>
-    <string name="wireguard_label_listen_port">Listen Port</string>
-    <string name="wireguard_label_public_key">Public Key</string>
-    <string name="wireguard_label_endpoint">Endpoint</string>
-    <string name="wireguard_label_allowed_ips">Allowed IPs</string>
-    <string name="wireguard_label_preshared_key">Preshared Key</string>
-    <string name="wireguard_label_keepalive">Persistent Keepalive</string>
-    <string name="wireguard_keepalive_value">%d seconds</string>
-    <string name="wireguard_toggle_key_visibility">Toggle key visibility</string>
-    <string name="wireguard_copy_key">Copy key</string>
     <string name="wireguard_connect">Connect Tunnel</string>
     <string name="wireguard_disconnect">Disconnect Tunnel</string>
-    <string name="wireguard_save_activate">Save &amp; Activate</string>
-    <string name="wireguard_clear">Clear WireGuard</string>
-    <string name="wireguard_active_label">WireGuard Active — Restart VPN to apply</string>
-    <!-- HTTPS Filtering -->
+    <string name="wireguard_https_filtering_disabled">HTTPS filtering disabled (incompatible with WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard disabled (incompatible with HTTPS filtering)</string>
+    <string name="wireguard_imported">Imported \'%1$s\'</string>
+    <string name="wireguard_deleted">Deleted \'%1$s\'</string>
+    <string name="wireguard_active">Active: %1$s</string>
+    <string name="wireguard_renamed">Renamed</string>
+    <string name="wireguard_enabled_restarting">WireGuard enabled. Restarting VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard disabled. Restarting VPN…</string>
+    <string name="wireguard_delete_dialog_title">Delete \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">This profile will be removed. The action cannot be undone.</string>
+    <string name="wireguard_action_delete">Delete</string>
+    <string name="wireguard_action_cancel">Cancel</string>
+    <string name="wireguard_action_save">Save</string>
+    <string name="wireguard_action_edit">Edit</string>
+    <string name="wireguard_action_rename">Rename</string>
+    <string name="wireguard_more_options">More options</string>
+    <string name="wireguard_no_peer">(no peer)</string>
+    <string name="wireguard_split_dns_placeholder" translatable="false">internal,local,lan,corp</string>
+    <string name="wireguard_rename_dialog_title">Rename profile</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Certificate saved to Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Certificate saved. Install from file manager.</string>
+    <string name="https_filtering_started">HTTPS filtering started</string>
+    <string name="https_filtering_stopped">HTTPS filtering stopped</string>
     <string name="https_filtering_title">HTTPS Filtering</string>
     <string name="https_filtering_toggle_label">HTTPS Cosmetic Filter</string>
     <string name="https_filtering_status_active">Active — Hiding ads</string>
@@ -631,7 +474,7 @@
     <string name="https_filtering_ca_desc">Follow these steps to set up HTTPS cosmetic filtering:</string>
     <string name="https_filtering_export_ca">Save to Downloads</string>
     <string name="https_filtering_cert_saved">Certificate saved to Downloads!</string>
-    <string name="https_filtering_install_steps">1. Go to Settings → Security → Encryption &amp; credentials\n2. Tap \"Install a certificate\" → \"CA certificate\"\n3. Select \"BlockAds-RootCA.crt\" from Downloads\n4. Confirm the installation</string>
+    <string name="https_filtering_install_steps">1. Go to Settings → Security → Encryption &amp; credentials\n2. Tap \&quot;Install a certificate\&quot; → \&quot;CA certificate\&quot;\n3. Select \&quot;BlockAds-RootCA.crt\&quot; from Downloads\n4. Confirm the installation</string>
     <string name="https_filtering_open_settings">Open Security Settings</string>
     <string name="https_filtering_browser_section">Browser Selection</string>
     <string name="https_filtering_browser_desc">Select browsers to apply cosmetic ad filtering. Only selected apps are filtered.</string>
@@ -646,16 +489,12 @@
     <string name="https_filtering_cert_installed">Certificate installed ✓</string>
     <string name="https_filtering_cert_not_installed">Certificate not installed</string>
     <string name="https_filtering_cert_checking">Checking…</string>
-    <string name="https_filtering_cert_vpn_required">Tap \"Verify Certificate\" to check</string>
+    <string name="https_filtering_cert_vpn_required">Tap \&quot;Verify Certificate\&quot; to check</string>
     <string name="edit_custom_filter">Edit Custom Filter</string>
     <string name="filter_name">Filter Name</string>
     <string name="filter_url_domain">Filter URL/Domain</string>
     <string name="add_blocklist_domains_title">Add Blocklisted Domains</string>
     <string name="add_whitelisted_domain_title">Add Whitelisted Domain</string>
-    <string name="disable_all_user_apps">Disable All User Apps</string>
-    <string name="enable_all_user_apps">Enable All User Apps</string>
-    <string name="disable_all_system_apps">Disable All System Apps</string>
-    <string name="enable_all_system_apps">Enable All System Apps</string>
     <string name="vpn_network_switch_waiting">Waiting for network to stabilize… %1$ds</string>
     <string name="settings_network_switch_delay">Network Switch Delay</string>
     <string name="settings_network_switch_delay_desc">Pause VPN reconnect after network changes (useful for Wi-Fi Calling)</string>
@@ -664,6 +503,8 @@
     <string name="settings_root_proxy_desc">Redirect DNS via iptables instead of VPN (requires Root)</string>
     <string name="root_not_available">Root access not available. Please grant permission in your root manager (e.g., Magisk/KernelSU).</string>
     <string name="root_proxy_notification_text">Root Proxy mode active — DNS traffic redirected via iptables</string>
+    <string name="root_proxy_start_failed_title">BlockAds failed to start</string>
+    <string name="root_proxy_start_failed_text">Could not get root access to start protection. Tap Enable to retry.</string>
     <string name="reddit_link" translatable="false">https://www.reddit.com/r/BlockAds/</string>
     <string name="telegram_link" translatable="false">https://t.me/blockads_android</string>
     <string name="test_block_link" translatable="false">https://adblock.turtlecute.org/</string>
@@ -673,11 +514,8 @@
     <string name="onboarding_crash_report_btn_no">No, thanks</string>
     <string name="settings_privacy_diagnostics_title">Privacy &amp; Diagnostics</string>
     <string name="settings_privacy_diagnostics_desc">Manage crash reporting and local logs</string>
-
-
     <string name="settings_crash_reporting_title">Anonymous Crash Reporting</string>
     <string name="settings_crash_reporting_subtitle">Automatically send error logs to help us fix issues. No personal data is included.</string>
-
     <string name="settings_export_logs_title">Export Local Logs</string>
     <string name="settings_export_logs_subtitle">Share offline debug logs directly via Email, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Share Logs</string>
@@ -687,7 +525,6 @@
     <string name="status_disconnecting">Disconnecting</string>
     <string name="vpn_notification_stopping">BlockAds is stopping</string>
     <string name="vpn_notification_stopping_text">Closing VPN tunnel…</string>
-
     <string name="split_dns_title">Split DNS Zones</string>
     <string name="split_dns_description">Comma-separated domain zones to resolve via WireGuard DNS instead of upstream (e.g., internal,local,lan)</string>
     <string name="filter_build_locally">Build locally (no server)</string>
@@ -706,5 +543,4 @@
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
     <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
-
 </resources>

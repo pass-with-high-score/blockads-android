@@ -1,0 +1,5 @@
+- Multiple WireGuard configurations: add, switch, and edit configs in-app
+- Auto-disable VPN or HTTPS filtering when the other is enabled (cannot run together)
+- Fix app UID detection on rooted devices
+- Fix Sentry crash on 16KB page-size devices (alignment)
+- Fix missing translations and resource issues

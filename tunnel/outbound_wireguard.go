@@ -36,14 +36,25 @@ type WgOutbound struct {
 }
 
 // NewWgOutbound creates a new WireGuard outbound adapter from a channelTUN
-// and an UAPI IPC config string.
+// and an UAPI IPC config string. If protectFn is non-nil, the WireGuard
+// outbound UDP socket is protected from the VPN routing loop (required
+// when WireGuard is layered inside our own VpnService TUN).
 // The caller must call Start() to bring the WireGuard device online.
-func NewWgOutbound(tunDev tun.Device, ipcConfig string) (*WgOutbound, error) {
+func NewWgOutbound(tunDev tun.Device, ipcConfig string, protectFn func(fd int) bool) (*WgOutbound, error) {
 	// Create wireguard-go logger
 	logger := device.NewLogger(device.LogLevelVerbose, "[BlockAds/WG] ")
 
+	// Pick a bind that protects its UDP sockets so encrypted WG packets
+	// reach the underlying network instead of looping back into our TUN.
+	var bind conn.Bind
+	if protectFn != nil {
+		bind = newProtectedBind(protectFn)
+	} else {
+		bind = conn.NewDefaultBind()
+	}
+
 	// Create wireguard-go device
-	dev := device.NewDevice(tunDev, conn.NewDefaultBind(), logger)
+	dev := device.NewDevice(tunDev, bind, logger)
 
 	// Apply IPC config
 	if err := dev.IpcSet(ipcConfig); err != nil {

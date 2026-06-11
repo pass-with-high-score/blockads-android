@@ -33,6 +33,11 @@ type DnsInterceptor struct {
 	// Stats (shared with Engine)
 	totalQueries   *atomic.Int64
 	blockedQueries *atomic.Int64
+
+	// Diagnostic counters for the stack-bridge hot path. Only the
+	// first few hits are logged; counts persist for later inspection.
+	stackPacketsPushed atomic.Int64
+	stackPipeNilDrops  atomic.Int64
 }
 
 // NewDnsInterceptor creates a new DnsInterceptor.
@@ -80,6 +85,23 @@ func (i *DnsInterceptor) Run(tunFile *os.File) {
 			if queryInfo != nil {
 				go i.engine.handleDNSQuery(queryInfo)
 			}
+		} else if i.engine.IsUsingTcpStack() {
+			// Hand non-DNS packets to the userspace TCP/IP stack
+			// instead of the legacy Router. atomic.Pointer load avoids
+			// a data race with Stop() which clears the pipe under
+			// e.mu; the pipe's own Close is panic-free so a stale
+			// pointer + Push is safe.
+			pipe := i.engine.tcpStackPipe.Load()
+			if pipe != nil {
+				pipe.Push(buf[:n])
+				if c := i.stackPacketsPushed.Add(1); c <= 10 {
+					logf("DnsInterceptor: pushed packet #%d to stack (size=%d, version=%d)", c, n, buf[0]>>4)
+				}
+			} else {
+				if c := i.stackPipeNilDrops.Add(1); c <= 5 {
+					logf("DnsInterceptor: stack flag on but pipe nil (drop #%d, size=%d)", c, n)
+				}
+			}
 		} else {
 			// Non-DNS path → route to active outbound adapter
 			// Make a copy because buf will be reused on next iteration
@@ -109,6 +131,38 @@ func (i *DnsInterceptor) IsRunning() bool {
 // ─────────────────────────────────────────────────────────────────────────────
 // isDNSPacket — Fast check: is this a UDP packet with destination port 53?
 // ─────────────────────────────────────────────────────────────────────────────
+
+// isUDP443Packet reports whether the packet is UDP to destination port 443
+// (QUIC / HTTP-3). Uses the same fast IP-header parsing as isDNSPacket.
+func isUDP443Packet(packet []byte, length int) bool {
+	if length < ipv4HeaderSize+udpHeaderSize {
+		return false
+	}
+	version := packet[0] >> 4
+	switch version {
+	case 4:
+		if packet[9] != 17 {
+			return false
+		}
+		ihl := int(packet[0]&0x0F) * 4
+		if length < ihl+udpHeaderSize {
+			return false
+		}
+		destPort := binary.BigEndian.Uint16(packet[ihl+2 : ihl+4])
+		return destPort == 443
+	case 6:
+		if length < ipv6HeaderSize+udpHeaderSize {
+			return false
+		}
+		if packet[6] != 17 {
+			return false
+		}
+		destPort := binary.BigEndian.Uint16(packet[ipv6HeaderSize+2 : ipv6HeaderSize+4])
+		return destPort == 443
+	default:
+		return false
+	}
+}
 
 func isDNSPacket(packet []byte, length int) bool {
 	if length < ipv4HeaderSize+udpHeaderSize {

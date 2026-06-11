@@ -45,7 +45,10 @@
 * Dual Routing Modes: System-wide ad blocking via VPN (no root needed) OR Root Proxy Mode (via iptables)
 * Privacy-first Optional Crash Reporting & Manual Local Logs Export
 * Comprehensive Onboarding Flow (Permissions, Battery Optimization, Opt-in telemetry)
-* WireGuard Profile Import & HTTPS Filtering (Beta)
+* WireGuard Profile Import
+* HTTPS Filtering with userspace TCP/IP stack — per-app MITM, cosmetic CSS, JS scriptlets
+* CA cert install verification (auto-refresh after returning from Settings)
+* 284-domain curated passthrough list keeps banking, payments and gov apps working
 * Multiple built-in filter lists (StevenBlack, AdGuard DNS, EasyList, and more)
 * Region-aware defaults — auto-enables filters for your language
 * Real-time DNS query logs with search & filtering
@@ -127,6 +130,8 @@ improve the app.
 ## How It Works
 
 BlockAds routes DNS queries locally either through a VpnService (Vpn Mode) or via iptables redirection (Root Proxy Mode). These queries are matched against loaded filter lists using a memory-efficient Trie data structure. Matching queries are blocked locally, while all other traffic passes through normally — no data leaves your device.
+
+When HTTPS Filtering is enabled, a userspace TCP/IP stack (gVisor netstack via tun2socks) terminates each TCP/UDP flow in Go, looks up the owning app UID via Android's `ConnectivityManager.getConnectionOwnerUid()`, and only MITMs flows from selected browsers. Cert-pinned apps and the 284-domain curated passthrough list bypass MITM cleanly. Cosmetic CSS rules and EasyList `##+js(…)` / AdGuard `#%#//scriptlet(…)` scriptlets are injected into HTML responses via a tiny in-memory local asset host.
 
 ---  
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -93,6 +94,12 @@ fun PowerButton(
         label = "pulseScale"
     )
 
+    // Track focus so the button is visibly highlighted when navigated to
+    // with a D-pad/remote (Android TV) or keyboard — without this, focus
+    // lands on the button but nothing on screen indicates it (#158).
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier.size(180.dp)
@@ -112,6 +119,19 @@ fun PowerButton(
                     )
                 )
         )
+
+        // Focus ring (visible only while focused via D-pad/keyboard)
+        if (isFocused) {
+            Box(
+                modifier = Modifier
+                    .size(158.dp)
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        shape = CircleShape
+                    )
+            )
+        }
 
         // Main button
         Box(
@@ -145,7 +165,7 @@ fun PowerButton(
                     shape = CircleShape
                 )
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
+                    interactionSource = interactionSource,
                     indication = null,
                     enabled = !isConnecting
                 ) { onClick() }

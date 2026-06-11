@@ -5,6 +5,12 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.system.OsConstants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import java.net.InetAddress
@@ -21,6 +27,19 @@ import java.util.concurrent.ConcurrentHashMap
 class AppNameResolver(private val context: Context) {
     // Cache UID -> app name to avoid repeated PackageManager lookups
     private val uidToAppNameCache = ConcurrentHashMap<Int, String>()
+
+    // Our own app's UID. Excluded from background snapshots: in Root
+    // Proxy mode the engine forwards upstream DNS via UDP sockets that
+    // belong to this UID, and on Android 10+ SELinux limits the
+    // unprivileged /proc/net read to those sockets only — including
+    // them would mask real foreign sockets via first-writer-wins.
+    private val ownUid: Int = context.applicationInfo.uid
+
+    // Background snapshot of /proc/net/udp{,6} maintained by [snapshotJob].
+    // Populated only when [startSnapshotter] is active (Root Proxy mode).
+    // DNS query lookups read this map without blocking — no inline shell.
+    @Volatile private var procNetSnapshot: Map<Int, Int> = emptyMap()
+    private var snapshotJob: Job? = null
 
     /**
      * Resolved app identity containing both display name and package name.
@@ -57,7 +76,9 @@ class AppNameResolver(private val context: Context) {
 
     /**
      * Find the UID owning the connection.
-     * Uses official API on Android 10+, falls back to /proc/net/udp on older versions.
+     * Uses official API on Android 10+, falls back to /proc/net/udp on older versions
+     * or when the official API returns UID_UNKNOWN (Root Proxy mode: iptables REDIRECT
+     * rewrites the 5-tuple so getConnectionOwnerUid can't see the original socket pair).
      */
     private fun findUidForConnection(
         sourcePort: Int,
@@ -66,39 +87,110 @@ class AppNameResolver(private val context: Context) {
         destPort: Int
     ): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return try {
+            try {
                 val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val local = InetSocketAddress(InetAddress.getByAddress(sourceIp), sourcePort)
                 val remote = InetSocketAddress(InetAddress.getByAddress(destIp), destPort)
-                cm.getConnectionOwnerUid(OsConstants.IPPROTO_UDP, local, remote)
+                val uid = cm.getConnectionOwnerUid(OsConstants.IPPROTO_UDP, local, remote)
+                if (uid >= 0) return uid
             } catch (e: Exception) {
-                // Don't fall back to /proc/net — it's blocked on Android 10+ and
-                // the root shell fallback is too slow (blocks DNS processing threads)
-                -1
+                Timber.d("getConnectionOwnerUid failed, trying fallback: ${e.message}")
             }
         }
 
-        // Fallback for API < 29 only
         return findUidFromProcNet(sourcePort)
     }
 
     /**
-     * Fallback: Look up /proc/net/udp and /proc/net/udp6 to find the UID owning the given port.
-     * Used on Android versions before 10 (API < 29) where getConnectionOwnerUid() is unavailable.
+     * Start a background coroutine that snapshots /proc/net/udp{,6} via
+     * the persistent root shell every [SNAPSHOT_INTERVAL_MS]. Should be
+     * called when Root Proxy mode starts. The snapshot is consulted
+     * first by [findUidFromProcNet], so DNS query lookups never block on
+     * a shell call — they just read an in-memory map. This avoids issue
+     * #130 (per-query shell spawns serialising DNS threads) while still
+     * catching short-lived DNS sockets that close before an on-demand
+     * read could see them.
+     */
+    fun startSnapshotter(scope: CoroutineScope) {
+        snapshotJob?.cancel()
+        snapshotJob = scope.launch(Dispatchers.IO) {
+            while (isActive) {
+                try {
+                    val map = readProcNetViaRoot()
+                    if (map.isNotEmpty()) {
+                        procNetSnapshot = map
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "/proc/net snapshot read failed")
+                }
+                delay(SNAPSHOT_INTERVAL_MS)
+            }
+        }
+        Timber.d("AppNameResolver snapshotter started (interval=${SNAPSHOT_INTERVAL_MS}ms)")
+    }
+
+    /**
+     * Stop the background snapshotter and clear the snapshot. Call when
+     * Root Proxy mode stops so we don't keep spawning root shell calls.
+     */
+    fun stopSnapshotter() {
+        snapshotJob?.cancel()
+        snapshotJob = null
+        procNetSnapshot = emptyMap()
+        Timber.d("AppNameResolver snapshotter stopped")
+    }
+
+    /**
+     * Look up /proc/net/udp and /proc/net/udp6 to find the UID owning the given port.
+     * Used on API < 29 and on Android 10+ in Root Proxy mode.
      */
     private fun findUidFromProcNet(port: Int): Int {
+        // Hot path (Root Proxy mode): read from the background snapshot.
+        procNetSnapshot[port]?.let { return it }
+
         val hexPort = String.format("%04X", port)
 
-        // Normal unprivileged read (works for own app's sockets and on older Android)
+        // Unprivileged read fallback (works for own app's sockets and on older Android)
         findUidInProcFile("/proc/net/udp", hexPort)?.let { return it }
         findUidInProcFile("/proc/net/udp6", hexPort)?.let { return it }
 
         // Root-privileged read: on Android 10+, SELinux restricts /proc/net/udp
-        // to only show the app's own sockets. In Root Proxy mode, we use the
-        // established root shell to read the full socket table.
+        // to only show the app's own sockets. In Root Proxy mode the snapshotter
+        // already covers this path; this branch is the slow-path safety net.
         findUidFromProcNetRoot(hexPort)?.let { return it }
 
         return -1
+    }
+
+    /**
+     * Build a port → UID map from the full /proc/net/udp{,6} table via
+     * the libsu persistent root shell. Sockets owned by our own app
+     * are filtered out (they'd otherwise mask foreign sockets via
+     * first-writer-wins in the map and would never be the originator
+     * of a redirected query).
+     */
+    private fun readProcNetViaRoot(): Map<Int, Int> {
+        val map = HashMap<Int, Int>()
+        val result = com.topjohnwu.superuser.Shell.cmd(
+            "cat /proc/net/udp /proc/net/udp6 2>/dev/null"
+        ).exec()
+        if (!result.isSuccess) return map
+        for (line in result.out) {
+            try {
+                val parts = line.trim().split("\\s+".toRegex())
+                if (parts.size < 8) continue
+                val localAddress = parts[1]
+                val colonIndex = localAddress.lastIndexOf(':')
+                if (colonIndex < 0) continue
+                val port = localAddress.substring(colonIndex + 1).toInt(16)
+                val uid = parts[7].toIntOrNull() ?: continue
+                if (uid == ownUid) continue
+                map.putIfAbsent(port, uid)
+            } catch (_: Exception) {
+                // Skip header / malformed lines
+            }
+        }
+        return map
     }
 
     /**
@@ -211,5 +303,12 @@ class AppNameResolver(private val context: Context) {
         val packageName = packages[0]
         uidToPackageNameCache[uid] = packageName
         return packageName
+    }
+
+    private companion object {
+        // 100ms catches most DNS sockets (typically 100–500ms lifetime)
+        // while keeping the persistent-shell call rate at ~10/sec, which
+        // is well under the per-query rate that caused issue #130.
+        const val SNAPSHOT_INTERVAL_MS = 100L
     }
 }

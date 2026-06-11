@@ -9,7 +9,7 @@ assignees: nqmgaming
 
 **⚠️ Before submitting a feature request:**
 - [ ] I have checked existing issues to ensure this feature hasn't already been requested.
-- [ ] **I understand that BlockAds is a lightweight, DNS-based blocker.** (Please do NOT request features that require Root access, HTTPS/Certificate inspection, or deep packet inspection).
+- [ ] **I understand that BlockAds is a lightweight, DNS-based blocker.** (Please do NOT request features that require Root access, HTTPS/Certificate inspection, or deep packet inspection, It is developing).
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. 

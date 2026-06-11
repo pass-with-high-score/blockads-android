@@ -74,6 +74,11 @@ class FilterListRepository(
     fun getAdBloomPath(): String = adBloomPaths
     fun getSecurityBloomPath(): String = securityBloomPaths
 
+    fun getScriptletsPath(): String? {
+        val file = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
+        return if (file.exists() && file.length() > 0) file.absolutePath else null
+    }
+
     fun getCosmeticCssPath(): String? {
         val file = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
         return if (file.exists() && file.length() > 0) file.absolutePath else null
@@ -173,6 +178,7 @@ class FilterListRepository(
                         existing.bloomUrl != remote.bloomUrl ||
                         existing.trieUrl != remote.trieUrl ||
                         existing.cssUrl != (remote.cssUrl ?: "") ||
+                        existing.scriptletsUrl != (remote.scriptletsUrl ?: "") ||
                         existing.ruleCount != remote.ruleCount ||
                         existing.domainCount != remote.ruleCount ||
                         existing.originalUrl != (remote.originalUrl ?: existing.originalUrl) ||
@@ -188,6 +194,7 @@ class FilterListRepository(
                                 trieUrl = remote.trieUrl,
                                 domainCount = remote.ruleCount,
                                 cssUrl = remote.cssUrl ?: "",
+                                scriptletsUrl = remote.scriptletsUrl ?: "",
                                 ruleCount = remote.ruleCount,
                                 originalUrl = remote.originalUrl ?: existing.originalUrl,
                                 isBuiltIn = true
@@ -208,6 +215,7 @@ class FilterListRepository(
                             bloomUrl = remote.bloomUrl,
                             trieUrl = remote.trieUrl,
                             cssUrl = remote.cssUrl ?: "",
+                            scriptletsUrl = remote.scriptletsUrl ?: "",
                             originalUrl = remote.originalUrl ?: ""
                         )
                     )
@@ -274,6 +282,7 @@ class FilterListRepository(
                         bloomUrl = bloomUrl,
                         trieUrl = trieUrl,
                         cssUrl = extractString("cssUrl"),
+                        scriptletsUrl = extractString("scriptletsUrl"),
                         originalUrl = extractString("originalUrl")
                     )
                 )
@@ -349,6 +358,7 @@ class FilterListRepository(
                 securityBloomPaths = secBloomSb.toString().trimEnd(',')
 
                 compileCosmeticRules(enabledLists)
+                compileScriptletRules(enabledLists)
 
                 _domainCountFlow.value = totalCount
                 val elapsed = System.currentTimeMillis() - startTime
@@ -360,6 +370,40 @@ class FilterListRepository(
             }
         }
     }
+
+    private suspend fun compileScriptletRules(enabledLists: List<FilterList>) =
+        withContext(Dispatchers.IO) {
+            try {
+                val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+                if (validLists.isEmpty()) {
+                    File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt").delete()
+                    return@withContext
+                }
+
+                val sb = StringBuilder()
+                var added = 0
+                for (filter in validLists) {
+                    if (filter.scriptletsUrl.isEmpty()) continue
+                    val f = File(context.filesDir, "remote_filters/${filter.id}.scriptlets")
+                    if (f.exists() && f.length() > 0) {
+                        sb.append(f.readText())
+                        if (!sb.endsWith("\n")) sb.append("\n")
+                        added++
+                    }
+                }
+
+                val outFile = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
+                if (added > 0) {
+                    outFile.parentFile?.mkdirs()
+                    outFile.writeText(sb.toString())
+                    Timber.d("Wrote scriptlets ($added lists, ${sb.length} bytes)")
+                } else {
+                    outFile.delete()
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to compile scriptlet rules")
+            }
+        }
 
     private suspend fun compileCosmeticRules(enabledLists: List<FilterList>) =
         withContext(Dispatchers.IO) {

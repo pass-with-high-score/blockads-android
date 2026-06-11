@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">Интернет без рекламы</string>
     <string name="notification_channel_name">Сервис блокировки рекламы</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">Журнал</string>
     <string name="nav_filter">Фильтры</string>
     <string name="nav_settings">Настройки</string>
-    <string name="settings_filter_url">URL списка фильтров</string>
-    <string name="settings_update_filter">Обновить список фильтров</string>
-    <string name="filter_updating">Обновление списка фильтров…</string>
     <string name="filter_updated">Список фильтров обновлён: %d доменов</string>
     <string name="filter_update_failed">Не удалось обновить список фильтров</string>
     <string name="filter_detail_enabled">Включено</string>
@@ -35,26 +32,15 @@
     <string name="filter_detail_last_updated">Последнее обновление</string>
     <string name="filter_detail_update">Обновить</string>
     <string name="filter_detail_delete">Удалить</string>
-    <string name="filter_detail_domain_preview">Предпросмотр заблокированных доменов</string>
-    <string name="filter_detail_no_domains">Нет кэшированных доменов. Сначала обновите этот фильтр.</string>
-    <string name="filter_detail_more_domains">… и ещё %s доменов</string>
     <string name="logs_empty">Записи DNS-запросов пока отсутствуют</string>
     <string name="logs_filter_all">Все</string>
     <string name="logs_filter_blocked">Заблокированные</string>
-
-    <!-- Onboarding -->
     <string name="onboarding_title_1">Умная блокировка рекламы</string>
     <string name="onboarding_desc_1">Блокируйте рекламу во всех приложениях и браузерах одним нажатием. Используется DNS-фильтрация — root-права не нужны.\n\n🔒 Обещание конфиденциальности: мы никогда не собираем, не храним и не передаём данные о вашем просмотре. Вся обработка выполняется только на вашем устройстве.</string>
-    <string name="onboarding_title_2">Ваша конфиденциальность под защитой</string>
-    <string name="onboarding_desc_2">Без сбора данных. Без отслеживания. Все DNS-журналы хранятся только на вашем устройстве. Мы никогда не видим вашу активность в интернете.</string>
-    <string name="onboarding_title_3">Бесплатно и с открытым исходным кодом</string>
-    <string name="onboarding_desc_3">BlockAds полностью бесплатен и без встроенных покупок. Исходный код открыт — любой может проверить и убедиться.</string>
     <string name="onboarding_skip">Пропустить</string>
     <string name="onboarding_next">Далее</string>
     <string name="onboarding_get_started">Начать</string>
     <string name="onboarding_recommended">★ Рекомендуется</string>
-
-    <!-- Onboarding: Protection Level -->
     <string name="onboarding_protection_title">Выберите уровень защиты</string>
     <string name="onboarding_protection_desc">Выберите, насколько строго блокировать рекламу и трекеры</string>
     <string name="onboarding_protection_basic">Базовый</string>
@@ -63,53 +49,32 @@
     <string name="onboarding_protection_standard_desc">Блокирует рекламу, трекеры и аналитику. Хороший баланс защиты и совместимости.</string>
     <string name="onboarding_protection_strict">Строгий</string>
     <string name="onboarding_protection_strict_desc">Максимальная блокировка. Может повлиять на работу некоторых сайтов, но даёт самую сильную защиту.</string>
-
-    <!-- Onboarding: DNS Server -->
     <string name="onboarding_dns_title">Выберите DNS-сервер</string>
     <string name="onboarding_dns_desc">Выберите DNS-сервер для разрешения доменных имён. Позже это можно изменить в настройках.</string>
-
-    <!-- Onboarding: VPN Permission -->
     <string name="onboarding_vpn_title">Требуется разрешение VPN</string>
     <string name="onboarding_vpn_desc">BlockAds использует локальный VPN для фильтрации DNS-запросов и блокировки рекламы. Данные не покидают устройство — этот VPN работает только локально для перехвата и фильтрации DNS-запросов.</string>
     <string name="onboarding_vpn_grant">Выдать разрешение VPN</string>
-
-    <!-- Onboarding: Notification Permission -->
     <string name="onboarding_notification_title">Будьте в курсе</string>
     <string name="onboarding_notification_desc">Разрешите уведомления, чтобы видеть статистику блокировки в реальном времени и знать, когда защита активна. Необходимо для постоянного VPN-уведомления на Android 13+.</string>
     <string name="onboarding_notification_grant">Разрешить уведомления</string>
-
-    <!-- Onboarding: Battery Optimization -->
     <string name="onboarding_battery_title">Поддерживайте защиту активной</string>
     <string name="onboarding_battery_desc">Исключите BlockAds из оптимизации батареи, чтобы VPN-сервис оставался активным в фоне и не завершался системой.</string>
     <string name="onboarding_battery_grant">Отключить оптимизацию батареи</string>
-
-    <!-- Onboarding: Permission Granted -->
     <string name="onboarding_permission_granted">✓ Разрешение выдано</string>
-
-    <!-- Onboarding: Completion -->
     <string name="onboarding_complete_title">Теперь вы защищены!</string>
     <string name="onboarding_complete_desc">Готово! BlockAds настроен и готов защищать ваше устройство от рекламы и трекеров.</string>
     <string name="onboarding_complete_stats">Нажмите «Начать», чтобы включить защиту</string>
-
-    <!-- Whitelist Apps -->
     <string name="whitelist_apps_title">Приложения в белом списке</string>
-    <string name="whitelist_apps_subtitle">Для этих приложений блокировка рекламы не применяется</string>
     <string name="whitelist_apps_search">Поиск приложений…</string>
     <string name="whitelist_apps_empty">Приложения не установлены</string>
     <string name="whitelist_apps_count">В белом списке: %d приложений</string>
     <string name="whitelist_tab_user">Пользовательские</string>
     <string name="whitelist_tab_system">Системные</string>
-
-    <!-- Whitelist Domains -->
-    <string name="whitelist_domains_title">Домены в белом списке</string>
-    <string name="whitelist_domains_subtitle">Эти домены никогда не будут блокироваться</string>
     <string name="whitelist_domains_add">Добавить домен</string>
     <string name="whitelist_domains_hint">например: example.com</string>
     <string name="whitelist_domains_empty">Белый список доменов пуст</string>
     <string name="whitelist_domain_added">Домен добавлен в белый список: %s</string>
     <string name="whitelist_domain_removed">Домен удалён из белого списка</string>
-
-    <!-- About -->
     <string name="about_title">О приложении</string>
     <string name="about_description">Бесплатный блокировщик рекламы с открытым исходным кодом.\nБез сбора данных. Без отслеживания.</string>
     <string name="about_version">Версия %s</string>
@@ -119,20 +84,13 @@
     <string name="about_contact">Связаться с нами</string>
     <string name="about_licenses">Лицензии open source</string>
     <string name="about_no_data">🔒 Это приложение не собирает персональные данные</string>
-
-    <!-- Log Actions -->
     <string name="log_action_whitelist">Добавить в белый список</string>
     <string name="log_action_copy">Скопировать домен</string>
     <string name="log_search_hint">Поиск доменов…</string>
     <string name="domain_copied">Домен скопирован</string>
     <string name="log_whitelisted">Добавлено в белый список: %s</string>
     <string name="log_already_whitelisted">Уже в белом списке</string>
-
-    <!-- Test Block Ads -->
     <string name="test_block_ads">Проверить блокировку рекламы</string>
-    <string name="test_block_ads_title">Проверка блокировки рекламы</string>
-
-    <!-- Home Screen -->
     <string name="home_connecting_desc">Устанавливается VPN-подключение…</string>
     <string name="home_protected_desc">Ваше устройство защищено от рекламы</string>
     <string name="home_unprotected_desc">Нажмите кнопку, чтобы включить блокировку рекламы</string>
@@ -146,11 +104,7 @@
     <string name="home_top_blocked">Чаще всего блокируемые домены</string>
     <string name="home_chart_no_data">Нет данных</string>
     <string name="settings_language">Язык</string>
-
-    <!-- Settings Screen -->
     <string name="settings_title">Настройки</string>
-    <string name="settings_search_hint">Поиск настроек…</string>
-    <string name="settings_search_clear">Очистить поиск</string>
     <string name="settings_category_protection">Защита</string>
     <string name="settings_category_protection_desc">DNS-сервер, протокол, автопереподключение</string>
     <string name="settings_category_interface">Интерфейс</string>
@@ -163,32 +117,22 @@
     <string name="settings_category_data_desc">Экспорт/Импорт, очистка журналов</string>
     <string name="settings_category_info">Информация</string>
     <string name="settings_category_info_desc">О приложении, политика конфиденциальности, исходный код</string>
-    <string name="settings_appearance">Оформление</string>
     <string name="settings_theme">Тема</string>
     <string name="settings_theme_system">Системная</string>
     <string name="settings_theme_light">Светлая</string>
     <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_lang_system">Системный</string>
-    <string name="settings_high_contrast">Высокая контрастность</string>
-    <string name="settings_high_contrast_desc">Повышает контраст для лучшей читаемости</string>
     <string name="settings_accent_color">Акцентный цвет</string>
     <string name="settings_accent_color_desc">Настройте основной цвет приложения</string>
     <string name="accent_dynamic">Динамический (Material You)</string>
     <string name="accent_dynamic_desc">Использует цвета ваших обоев</string>
-    <string name="settings_connection">Подключение</string>
     <string name="settings_filter_lists">Списки фильтров (%d активно)</string>
     <string name="settings_add_custom_filter">Добавить пользовательский список фильтров</string>
     <string name="settings_updating">Обновление…</string>
     <string name="settings_update_all">Обновить все фильтры</string>
-    <string name="settings_dns_config">Настройка DNS</string>
-    <string name="settings_save_dns">Сохранить DNS</string>
-    <string name="settings_whitelist">Белый список</string>
     <string name="settings_whitelist_apps">Приложения в белом списке</string>
     <string name="settings_whitelist_apps_desc">Исключить приложения из блокировки рекламы</string>
     <string name="settings_whitelist_domains">Домены в белом списке</string>
-    <string name="settings_whitelist_domains_desc">Эти домены никогда не будут блокироваться</string>
-    <string name="settings_add_domain">Добавить домен</string>
-    <string name="settings_data_backup">Данные и резервные копии</string>
     <string name="settings_export">Экспорт</string>
     <string name="settings_import">Импорт</string>
     <string name="settings_about">О приложении</string>
@@ -205,14 +149,6 @@
     <string name="settings_safe_search_desc">Принудительно включать безопасный поиск в поддерживаемых поисковиках (Google, Bing)</string>
     <string name="settings_youtube_restricted">Ограниченный режим YouTube</string>
     <string name="settings_youtube_restricted_desc">Фильтрует видео 18+ на YouTube, блокирует встроенные видео 18+ на других сайтах и скрывает все комментарии</string>
-    <string name="settings_dns_protocol">Протокол DNS</string>
-    <string name="settings_dns_protocol_plain">Обычный DNS</string>
-    <string name="settings_doh_server_url">URL сервера DoH</string>
-    <string name="settings_save_doh_url">Сохранить URL DoH</string>
-    <string name="settings_dot_server">Сервер DoT (имя хоста или IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">URL-адрес сервера DoQ</string>
-    <string name="settings_upstream_dns">Основной DNS-сервер</string>
     <string name="settings_fallback_dns">Резервный DNS-сервер</string>
     <string name="settings_fallback_dns_desc">Резервный DNS используется при сбое основного DNS-сервера. Введите IP-адрес резервного DNS-сервера.</string>
     <string name="settings_fallback_dns_short_desc">Используется как резервный при сбое основного DNS</string>
@@ -225,38 +161,24 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">Обнаружено: %s</string>
-    <string name="settings_invalid_dns_input">Некорректный адрес DNS-сервера</string>
-    <string name="settings_save_custom_dns">Сохранить DNS</string>
     <string name="settings_dns_response_type">Тип DNS-ответа</string>
-    <string name="settings_dns_response_type_desc">Тип ответа для заблокированных доменов</string>
     <string name="dns_response_nxdomain_desc">Домен не существует (стандартно)</string>
     <string name="dns_response_refused_desc">Запрос отклонён (лучшая совместимость)</string>
     <string name="dns_response_custom_ip">Пользовательский IP (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">Возвращать null-route адрес (по умолчанию)</string>
     <string name="settings_clear_logs">Очистить все журналы</string>
-    <string name="dns_error_notification_title">Ошибка конфигурации DNS</string>
-    <string name="dns_error_notification_no_fallback">Подключение %1$s к %2$s не удаётся. Резервный DNS не настроен — сайты могут не загружаться. Проверьте настройки DNS.</string>
-    <string name="dns_error_notification_both_failed">Подключение %1$s к %2$s и резервный %3$s не работают. Сайты могут не загружаться. Проверьте настройки DNS.</string>
-
-    <!-- Filter Setup Screen -->
     <string name="filter_setup_title">Настройка фильтров</string>
-    <string name="filter_setup_desc">Управление встроенными и пользовательскими списками фильтров</string>
     <string name="filter_built_in">Встроенные</string>
     <string name="filter_custom">Пользовательские</string>
     <string name="filter_custom_empty">Пользовательские фильтры ещё не добавлены</string>
     <string name="filter_search_hint">Поиск фильтров…</string>
-    <string name="filter_search_no_results">По запросу \"%s\" фильтры не найдены</string>
+    <string name="filter_search_no_results">По запросу \&quot;%s\&quot; фильтры не найдены</string>
     <string name="filter_log_cleared">Журнал очищен</string>
-    <string name="filter_domain_whitelisted">Домен добавлен в белый список: %s</string>
     <string name="filter_domain_already_whitelisted">Домен уже в белом списке</string>
     <string name="filter_settings_export">Настройки экспортированы</string>
     <string name="filter_export_failed">Ошибка экспорта: %s</string>
     <string name="filter_settings_imported">Настройки импортированы</string>
     <string name="filter_import_failed">Ошибка импорта: %s</string>
-
-    <!-- Auto-update Filter Lists -->
-    <string name="settings_auto_update">Автообновление списков фильтров</string>
     <string name="settings_auto_update_enabled">Включить автообновление</string>
     <string name="settings_auto_update_enabled_desc">Автоматически обновлять списки фильтров в фоне</string>
     <string name="settings_auto_update_frequency">Частота обновления</string>
@@ -276,8 +198,6 @@
     <string name="filter_update_failed_message">Не удалось обновить списки фильтров</string>
     <string name="filter_update_notification_channel">Обновления фильтров</string>
     <string name="filter_update_notification_channel_desc">Уведомления об обновлении списков фильтров</string>
-
-    <!-- DNS Provider -->
     <string name="dns_provider_title">DNS-сервер</string>
     <string name="dns_category_standard">Стандартные</string>
     <string name="dns_category_privacy">С упором на приватность</string>
@@ -287,22 +207,13 @@
     <string name="dns_custom_description">Введите адреса своих DNS-серверов</string>
     <string name="dns_custom_save">Сохранить</string>
     <string name="dns_custom_cancel">Отмена</string>
-    <string name="dns_select_server">Выберите DNS-сервер</string>
-
-    <!-- Widget -->
-    <string name="widget_name">Переключатель BlockAds</string>
     <string name="widget_description">Включайте/выключайте блокировку рекламы и смотрите статистику</string>
     <string name="widget_toggle_description">Включить/выключить блокировку рекламы</string>
     <string name="widget_blocked_today">Заблокировано сегодня</string>
     <string name="widget_protected">Защищено</string>
     <string name="widget_unprotected">Выкл.</string>
-
-    <!-- Shortcuts -->
     <string name="shortcut_toggle_vpn">Переключить блокировку рекламы</string>
     <string name="shortcut_toggle_vpn_short">Переключить VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Переключение недоступно</string>
-
-    <!-- Custom Rules -->
     <string name="custom_rules">Пользовательские правила</string>
     <string name="add_custom_rule">Добавить правило</string>
     <string name="import_rules">Импорт правил</string>
@@ -327,15 +238,13 @@
     <string name="delete">Удалить</string>
     <string name="cancel">Отмена</string>
     <string name="block_this_domain">Заблокировать этот домен</string>
-    <string name="add_to_custom_rules">Добавить в пользовательские правила</string>
-
-    <!-- App Management -->
     <string name="app_management_title">Управление приложениями</string>
     <string name="app_management_subtitle">%d приложений</string>
     <string name="app_management_subtitle_filtered">%1$d из %2$d приложений</string>
     <string name="app_management_desc">Управляйте VPN-маршрутизацией по приложениям и смотрите статистику</string>
     <string name="app_management_search">Поиск приложений…</string>
     <string name="app_management_loading">Загрузка приложений…</string>
+    <string name="app_management_refresh">Обновить</string>
     <string name="app_management_sort">Сортировка</string>
     <string name="app_management_sort_name">Сортировать по имени</string>
     <string name="app_management_sort_queries">Сортировать по запросам</string>
@@ -344,55 +253,34 @@
     <string name="app_management_blocked">Заблокировано: %d</string>
     <string name="app_management_system">Системное</string>
     <string name="app_management_vpn_toggle">VPN-маршрутизация для %s</string>
-    <!-- Improved DNS Log Screen -->
     <string name="log_status_blocked">Заблокировано</string>
     <string name="log_status_allowed">Разрешено</string>
     <string name="log_status_whitelisted">В белом списке</string>
-    <string name="log_detail_title">Сведения о домене</string>
     <string name="log_detail_query_type">Тип запроса</string>
     <string name="log_detail_response_time">Время отклика</string>
-    <string name="log_detail_status">Статус</string>
     <string name="log_detail_app">Приложение</string>
     <string name="log_detail_resolved_ip">Разрешённый IP</string>
     <string name="log_detail_blocked_by">Заблокировано чем</string>
     <string name="log_detail_timestamp">Время</string>
-    <string name="log_detail_unknown">Неизвестно</string>
     <string name="log_detail_na">Н/Д</string>
-    <string name="log_realtime_on">Реальное время: ВКЛ</string>
-    <string name="log_realtime_off">Реальное время: ВЫКЛ</string>
     <string name="log_time_range_all">За всё время</string>
     <string name="log_time_range_1h">1ч</string>
     <string name="log_time_range_6h">6ч</string>
     <string name="log_time_range_24h">24ч</string>
     <string name="log_time_range_7d">7д</string>
     <string name="log_filter_all_apps">Все приложения</string>
-    <string name="log_bulk_mode">Выбрать</string>
     <string name="log_bulk_selected">Выбрано: %d</string>
-    <string name="log_bulk_block">Заблокировать все</string>
-    <string name="log_bulk_whitelist">Добавить все в белый список</string>
     <string name="log_wildcard_whitelist_domain">Разрешить все поддомены</string>
     <string name="log_wildcard_whitelisted">Домен %1$s и все поддомены добавлены в белый список</string>
     <string name="block_reason_upstream_dns">Upstream DNS</string>
-    <string name="dns_custom_primary_label">Основной</string>
-    <string name="dns_custom_fallback_label">Резервный</string>
-    <string name="dns_custom_extra_label">Дополнительный</string>
-    <string name="dns_custom_add_server">Добавить сервер</string>
-    <string name="dns_custom_max_reached">Достигнуто максимальное количество серверов</string>
-    <string name="dns_custom_remove_server">Удалить сервер</string>
-    <string name="dns_custom_duplicate">Сервер уже существует</string>
-    <string name="dns_custom_empty">Адрес сервера не может быть пустым</string>
-    <string name="log_unblock_domain">Разблокировать этот домен</string>
-    <string name="log_domain_unblocked">Домен разблокирован: %s</string>
     <string name="log_action_unblock">Разблокировать</string>
     <string name="log_action_block">Заблокировать</string>
     <string name="block_reason_custom_rule">Пользовательское правило блокировки</string>
     <string name="block_reason_filter_list">Список фильтров</string>
     <string name="block_reason_security">Опасный сайт</string>
-    <!-- Security Stats -->
     <string name="home_security_threats">Угроз заблокировано</string>
     <string name="filter_category_ad">Блокировка рекламы</string>
     <string name="filter_category_security">Безопасность</string>
-    <!-- Statistics Screen -->
     <string name="nav_statistics">Статистика</string>
     <string name="stats_title">Статистика</string>
     <string name="stats_overview">Обзор</string>
@@ -405,9 +293,6 @@
     <string name="stats_chart_4w">4 недели</string>
     <string name="stats_chart_12m">12 месяцев</string>
     <string name="stats_per_app">Статистика по приложениям</string>
-    <string name="stats_app_queries_blocked">%1$s запросов · %2$s заблокировано</string>
-
-    <!-- Notification Improvements -->
     <string name="vpn_notification_stats_today">Сегодня заблокировано %1$d реклам | Время работы %2$s</string>
     <string name="vpn_notification_action_pause">Пауза на 1ч</string>
     <string name="vpn_notification_action_stop">Остановить</string>
@@ -430,16 +315,10 @@
     <string name="settings_daily_summary_desc">Показывать итоговую сводку блокировок за день</string>
     <string name="settings_milestone_notifications">Уведомления о достижениях</string>
     <string name="settings_milestone_notifications_desc">Уведомлять при достижении этапов блокировки</string>
-    <!-- Protection Profiles -->
     <string name="profile_title">Профили защиты</string>
     <string name="profile_section_profiles">Профили</string>
     <string name="profile_section_schedules">Расписания</string>
     <string name="profile_name_default">По умолчанию</string>
-    <string name="profile_name_strict">Строгий</string>
-    <string name="profile_name_family">Семейный</string>
-    <string name="profile_name_gaming">Игровой</string>
-    <string name="profile_name_custom">Пользовательский</string>
-    <string name="profile_name_strict_family">Строгий + Семья</string>
     <string name="profile_desc_default">Блокировка рекламы и базовых трекеров</string>
     <string name="profile_desc_strict">Блокировка всей рекламы, трекеров и аналитики</string>
     <string name="profile_desc_family">Блокировка рекламы + контент 18+ + азартные игры</string>
@@ -466,19 +345,13 @@
     <string name="profile_day_fri">Пт</string>
     <string name="profile_day_sat">Сб</string>
     <string name="profile_day_sun">Вс</string>
-    <string name="settings_profiles">Профили защиты</string>
-    <string name="settings_profiles_desc">Готовые конфигурации для разных сценариев</string>
-    <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Переключить VPN-защиту</string>
     <string name="accessibility_vpn_active">VPN-защита активна</string>
     <string name="accessibility_vpn_inactive">VPN-защита неактивна</string>
     <string name="accessibility_vpn_connecting">VPN подключается</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Доля блокировок: %1$s процентов</string>
     <string name="accessibility_navigate_back">Назад</string>
-    <!-- Firewall -->
     <string name="firewall_title">Брандмауэр</string>
-    <string name="firewall_subtitle">Контроль доступа в интернет по приложениям</string>
     <string name="firewall_count">Заблокировано приложений: %d</string>
     <string name="firewall_search">Поиск приложений…</string>
     <string name="firewall_enable">Включить брандмауэр</string>
@@ -490,52 +363,31 @@
     <string name="firewall_schedule_from">С</string>
     <string name="firewall_schedule_to">По</string>
     <string name="firewall_app_blocked">Доступ в интернет заблокирован</string>
-    <string name="firewall_app_not_blocked">Доступ в интернет разрешён</string>
-    <string name="firewall_rule_saved">Правило брандмауэра сохранено</string>
-    <string name="firewall_rule_removed">Правило брандмауэра удалено</string>
     <string name="firewall_configure">Настроить правило</string>
-    <string name="firewall_channel_name">Оповещения брандмауэра</string>
-    <string name="firewall_channel_description">Уведомления, когда приложения блокируются брандмауэром</string>
-    <string name="firewall_notification_title">Приложение заблокировано брандмауэром</string>
-    <string name="firewall_notification_text">Для %s заблокирован доступ в интернет</string>
     <string name="firewall_network_mobile">Мобильная сеть</string>
     <string name="firewall_network_all">Все</string>
     <string name="firewall_schedule_hour_plus">Час +</string>
     <string name="firewall_schedule_minute_plus">Мин +</string>
     <string name="block_reason_firewall">Брандмауэр</string>
     <string name="settings_firewall">Брандмауэр</string>
-    <string name="settings_firewall_desc">Блокировка доступа в интернет по приложениям</string>
-
-    <!-- Share & Rate -->
     <string name="settings_sponsor">Поддержать проект</string>
     <string name="settings_sponsor_desc">Поддержите развитие BlockAds на GitHub</string>
     <string name="settings_community">Сообщество</string>
     <string name="settings_reddit_desc">Присоединяйтесь к сообществу на Reddit</string>
     <string name="settings_telegram_desc">Присоединяйтесь к чату в Telegram</string>
     <string name="filter_setup_active_count">Активно: %1$d</string>
-    <string name="copied_url">URL скопирован</string>
     <string name="filter_error_invalid_url">Введите корректный URL (http:// или https://)</string>
     <string name="filter_error_duplicate_url">Этот список фильтров уже существует</string>
-    <string name="filter_error_invalid_content">URL не содержит корректный список фильтров</string>
-
     <string name="filter_chip_all">Все</string>
     <string name="filter_chip_enabled">Включённые</string>
     <string name="filter_chip_disabled">Отключённые</string>
-
-    <string name="settings_blocklist_domains_desc">Эти домены всегда будут заблокированы</string>
-    <string name="blocklist_domains_title">Заблокированные домены</string>
-    <string name="blocklist_domains_subtitle">Эти домены всегда будут заблокированы</string>
-    <string name="blocklist_domains_add">Добавить домен</string>
-    <string name="blocklist_domains_hint">напр. example.com</string>
     <string name="blocklist_domains_empty">Нет заблокированных доменов</string>
     <string name="blocklist_domain_added">Домен заблокирован: %s</string>
     <string name="blocklist_domain_removed">Домен удален из списка блокировки</string>
     <string name="blocklist_domain_already_exists">Домен уже находится в списке блокировки</string>
-
     <string name="settings_show_bottom_nav_labels">Показывать подписи нижней панели</string>
     <string name="settings_show_bottom_nav_labels_desc">Отображать текст под значками на нижней панели навигации</string>
     <string name="vpn_phase_waiting_network">Ожидание сети…</string>
-
     <string name="import_from_file">Импорт из файла</string>
     <string name="export_to_file">Экспорт в файл</string>
     <string name="export_format_title">Формат экспорта</string>
@@ -544,29 +396,12 @@
     <string name="rules_exported">Экспортировано правил: %d</string>
     <string name="export_failed">Сбой экспорта: %s</string>
     <string name="import_failed">Сбой импорта: %s</string>
-    <string name="import_no_valid_rules">В файле не найдено допустимых правил</string>
     <string name="wireguard_import_title">Импорт WireGuard</string>
     <string name="wireguard_import_button">Импорт .conf</string>
     <string name="wireguard_empty_title">Конфигурация не загружена</string>
     <string name="wireguard_empty_desc">Нажмите кнопку ниже, чтобы импортировать файл WireGuard .conf</string>
-    <string name="wireguard_section_interface">Интерфейс (Interface)</string>
-    <string name="wireguard_section_peer">Пир %d</string>
-    <string name="wireguard_label_address">Адрес</string>
-    <string name="wireguard_label_private_key">Закрытый ключ</string>
-    <string name="wireguard_label_listen_port">Порт прослушивания</string>
-    <string name="wireguard_label_public_key">Открытый ключ</string>
-    <string name="wireguard_label_endpoint">Конечная точка (Endpoint)</string>
-    <string name="wireguard_label_allowed_ips">Разрешенные IP</string>
-    <string name="wireguard_label_preshared_key">Общий ключ (Preshared Key)</string>
-    <string name="wireguard_label_keepalive">Постоянная поддержка активности</string>
-    <string name="wireguard_keepalive_value">%d секунд</string>
-    <string name="wireguard_toggle_key_visibility">Переключить видимость ключа</string>
-    <string name="wireguard_copy_key">Копировать ключ</string>
     <string name="wireguard_connect">Подключить туннель</string>
     <string name="wireguard_disconnect">Отключить туннель</string>
-    <string name="wireguard_save_activate">Сохранить &amp; Активировать</string>
-    <string name="wireguard_clear">Очистить WireGuard</string>
-    <string name="wireguard_active_label">WireGuard Активен — Перезапустите VPN для применения</string>
     <string name="https_filtering_title">HTTPS Фильтрация</string>
     <string name="https_filtering_toggle_label">Косметический фильтр HTTPS</string>
     <string name="https_filtering_status_active">Активен — Скрытие рекламы</string>
@@ -577,7 +412,7 @@
     <string name="https_filtering_ca_desc">Выполните следующие шаги для настройки косметического фильтра HTTPS:</string>
     <string name="https_filtering_export_ca">Шаг 1: Сохранить сертификат в Загрузки</string>
     <string name="https_filtering_cert_saved">Сертификат сохранен в Загрузки!</string>
-    <string name="https_filtering_install_steps">Шаг 2: Установите сертификат вручную:\n\n1. Перейдите в Настройки → Безопасность → Шифрование &amp; учетные данные\n2. Нажмите \"Установить сертификат\" → \"Сертификат CA\"\n3. Выберите \"BlockAds-RootCA.crt\" из Загрузок\n4. Подтвердите установку</string>
+    <string name="https_filtering_install_steps">Шаг 2: Установите сертификат вручную:\n\n1. Перейдите в Настройки → Безопасность → Шифрование &amp; учетные данные\n2. Нажмите \&quot;Установить сертификат\&quot; → \&quot;Сертификат CA\&quot;\n3. Выберите \&quot;BlockAds-RootCA.crt\&quot; из Загрузок\n4. Подтвердите установку</string>
     <string name="https_filtering_open_settings">Открыть настройки безопасности</string>
     <string name="https_filtering_step1_title">Шаг 1: Сохранить сертификат</string>
     <string name="https_filtering_step1_desc">Скачайте корневой сертификат CA на ваше устройство</string>
@@ -589,7 +424,7 @@
     <string name="https_filtering_cert_installed">Сертификат установлен ✓</string>
     <string name="https_filtering_cert_not_installed">Сертификат не установлен</string>
     <string name="https_filtering_cert_checking">Проверка…</string>
-    <string name="https_filtering_cert_vpn_required">Нажмите \"Проверить сертификат\" для проверки</string>
+    <string name="https_filtering_cert_vpn_required">Нажмите \&quot;Проверить сертификат\&quot; для проверки</string>
     <string name="https_filtering_browser_section">Выбор браузера</string>
     <string name="https_filtering_browser_desc">Выберите браузеры для применения косметического фильтра. Фильтруются только выбранные приложения.</string>
     <string name="https_filtering_settings_desc">Скрытие рекламы в браузерах</string>
@@ -606,10 +441,6 @@
     <string name="vpn_conflict_title">Подключение заблокировано</string>
     <string name="vpn_conflict_desc">Android разрешает только одно активное VPN-соединение. В данный момент на вашем устройстве работает другой VPN.\n\nПожалуйста, отключите другой VPN или деактивируйте «Постоянный VPN» в Настройках перед подключением BlockAds.</string>
     <string name="open_settings">Открыть настройки</string>
-    <string name="disable_all_user_apps">Отключить все пользовательские приложения</string>
-    <string name="enable_all_user_apps">Включить все пользовательские приложения</string>
-    <string name="disable_all_system_apps">Отключить все системные приложения</string>
-    <string name="enable_all_system_apps">Включить все системные приложения</string>
     <string name="vpn_network_switch_waiting">Ожидание стабилизации сети… %1$ds</string>
     <string name="settings_network_switch_delay">Задержка при смене сети</string>
     <string name="settings_network_switch_delay_desc">Приостановить переподключение VPN после смены сети (полезно для вызовов по Wi-Fi)</string>
@@ -624,10 +455,8 @@
     <string name="onboarding_crash_report_btn_no">Нет, спасибо</string>
     <string name="settings_privacy_diagnostics_title">Конфиденциальность &amp; Диагностика</string>
     <string name="settings_privacy_diagnostics_desc">Управление отчетами об ошибках и локальными логами</string>
-
     <string name="settings_crash_reporting_title">Анонимные отчеты об ошибках</string>
     <string name="settings_crash_reporting_subtitle">Автоматически отправлять логи ошибок, чтобы помочь нам в их устранении. Личные данные не собираются.</string>
-
     <string name="settings_export_logs_title">Экспорт локальных логов</string>
     <string name="settings_export_logs_subtitle">Поделитесь офлайн-логами отладки напрямую через Email, Telegram и т.д.</string>
     <string name="settings_export_logs_chooser_title">Поделиться логами</string>
@@ -656,4 +485,26 @@
     <string name="filter_compile_success_title">Фильтр скомпилирован</string>
     <string name="filter_compile_failed_title">Ошибка компиляции фильтра</string>
     <string name="filter_compile_channel_name">Компиляция фильтра</string>
+    <string name="wireguard_https_filtering_disabled">HTTPS-фильтрация отключена (несовместимо с WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard отключён (несовместимо с HTTPS-фильтрацией)</string>
+    <string name="wireguard_imported">Импортирован \'%1$s\'</string>
+    <string name="wireguard_deleted">Удалён \'%1$s\'</string>
+    <string name="wireguard_active">Активен: %1$s</string>
+    <string name="wireguard_renamed">Переименован</string>
+    <string name="wireguard_enabled_restarting">WireGuard включён. Перезапуск VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard отключён. Перезапуск VPN…</string>
+    <string name="wireguard_delete_dialog_title">Удалить \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">Этот профиль будет удалён. Действие нельзя отменить.</string>
+    <string name="wireguard_action_delete">Удалить</string>
+    <string name="wireguard_action_cancel">Отмена</string>
+    <string name="wireguard_action_save">Сохранить</string>
+    <string name="wireguard_action_edit">Изменить</string>
+    <string name="wireguard_action_rename">Переименовать</string>
+    <string name="wireguard_more_options">Дополнительно</string>
+    <string name="wireguard_no_peer">(нет узла)</string>
+    <string name="wireguard_rename_dialog_title">Переименовать профиль</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Сертификат сохранён в Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Сертификат сохранён. Установите его через файловый менеджер.</string>
+    <string name="https_filtering_started">HTTPS-фильтрация запущена</string>
+    <string name="https_filtering_stopped">HTTPS-фильтрация остановлена</string>
 </resources>

@@ -45,6 +45,9 @@ class BlockAdsApplication : Application() {
             val isCrashReportingEnabled = appPreferences.crashReportingEnabled.first()
             CrashReportingManager.toggleSentry(this@BlockAdsApplication, isCrashReportingEnabled)
 
+            // Move v6.3.0 single-config users onto the multi-profile schema.
+            appPreferences.migrateLegacyWgConfigIfNeeded()
+
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
 
             // Schedule daily summary only if enabled

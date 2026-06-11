@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">Penjelajahan Bebas Iklan</string>
     <string name="notification_channel_name">Layanan Pemblokir Iklan</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">Log</string>
     <string name="nav_filter">Filter</string>
     <string name="nav_settings">Pengaturan</string>
-    <string name="settings_filter_url">URL Daftar Filter</string>
-    <string name="settings_update_filter">Perbarui Daftar Filter</string>
-    <string name="filter_updating">Memperbarui daftar filter…</string>
     <string name="filter_updated">Daftar filter diperbarui: %d domain</string>
     <string name="filter_update_failed">Gagal memperbarui daftar filter</string>
     <string name="filter_detail_enabled">Diaktifkan</string>
@@ -35,24 +32,15 @@
     <string name="filter_detail_last_updated">Pembaruan terakhir</string>
     <string name="filter_detail_update">Perbarui</string>
     <string name="filter_detail_delete">Hapus</string>
-    <string name="filter_detail_domain_preview">Pratinjau Domain Diblokir</string>
-    <string name="filter_detail_no_domains">Tidak ada domain dalam cache. Coba perbarui filter ini terlebih dahulu.</string>
-    <string name="filter_detail_more_domains">… dan %s domain lainnya</string>
     <string name="logs_empty">Belum ada kueri DNS yang dicatat</string>
     <string name="logs_filter_all">Semua</string>
     <string name="logs_filter_blocked">Diblokiir</string>
-
     <string name="onboarding_title_1">Blokir Iklan dengan Cerdas</string>
     <string name="onboarding_desc_1">Blokir iklan di semua aplikasi dan browser dengan satu ketukan. Menggunakan teknologi penyaringan DNS — tidak perlu akses root.\n\n🔒 Janji privasi: Kami tidak pernah mengumpulkan, menyimpan, atau mengirimkan data penjelajahan Anda. Semua pemrosesan hanya terjadi di perangkat Anda.</string>
-    <string name="onboarding_title_2">Privasi Anda, Terlindungi</string>
-    <string name="onboarding_desc_2">Tanpa pengumpulan data. Tanpa pelacakan. Semua log DNS hanya tersimpan di perangkat Anda. Kami tidak pernah melihat aktivitas penjelajahan Anda.</string>
-    <string name="onboarding_title_3">Gratis &amp; Sumber Terbuka</string>
-    <string name="onboarding_desc_3">BlockAds sepenuhnya gratis tanpa pembelian dalam aplikasi. Kode sumber kami terbuka bagi siapa saja untuk diperiksa dan diverifikasi.</string>
     <string name="onboarding_skip">Lewati</string>
     <string name="onboarding_next">Lanjut</string>
     <string name="onboarding_get_started">Mulai</string>
     <string name="onboarding_recommended">★ Direkomendasikan</string>
-
     <string name="onboarding_protection_title">Pilih Tingkat Perlindungan</string>
     <string name="onboarding_protection_desc">Pilih seberapa agresif Anda ingin memblokir iklan dan pelacak</string>
     <string name="onboarding_protection_basic">Dasar</string>
@@ -61,58 +49,39 @@
     <string name="onboarding_protection_standard_desc">Blokir iklan, pelacak, dan analitik. Keseimbangan yang baik antara perlindungan dan kompatibilitas.</string>
     <string name="onboarding_protection_strict">Ketat</string>
     <string name="onboarding_protection_strict_desc">Pemblokiran maksimal. Mungkin memengaruhi beberapa fungsionalitas situs web tetapi memberikan perlindungan terkuat.</string>
-
     <string name="onboarding_dns_title">Pilih Server DNS</string>
     <string name="onboarding_dns_desc">Pilih server DNS untuk menyelesaikan nama domain. Anda dapat mengubahnya nanti di Pengaturan.</string>
-
     <string name="onboarding_vpn_title">Izin VPN Diperlukan</string>
     <string name="onboarding_vpn_desc">BlockAds menggunakan VPN lokal untuk menyaring kueri DNS dan memblokir iklan. Tidak ada data yang keluar dari perangkat Anda — VPN ini hanya bekerja secara lokal untuk mencegat dan menyaring permintaan DNS.</string>
     <string name="onboarding_vpn_grant">Berikan Izin VPN</string>
-
     <string name="onboarding_notification_title">Tetap Terinformasi</string>
     <string name="onboarding_notification_desc">Izinkan notifikasi untuk melihat statistik pemblokiran waktu nyata dan mengetahui saat perlindungan Anda aktif. Diperlukan untuk notifikasi VPN persisten di Android 13+.</string>
     <string name="onboarding_notification_grant">Izinkan Notifikasi</string>
-
     <string name="onboarding_battery_title">Biarkan Perlindungan Tetap Berjalan</string>
     <string name="onboarding_battery_desc">Kecualikan BlockAds dari pengoptimalan baterai agar layanan VPN tetap aktif di latar belakang dan tidak dihentikan oleh sistem.</string>
     <string name="onboarding_battery_grant">Nonaktifkan Pengoptimalan Baterai</string>
-
     <string name="onboarding_permission_granted">✓ Izin diberikan</string>
-
     <string name="onboarding_complete_title">Anda Kini Terlindungi!</string>
     <string name="onboarding_complete_desc">Selamat! BlockAds telah dikonfigurasi dan siap melindungi perangkat Anda dari iklan dan pelacak.</string>
-    <string name="onboarding_complete_stats">Ketuk \"Mulai\" untuk mengaktifkan perlindungan</string>
-
+    <string name="onboarding_complete_stats">Ketuk \&quot;Mulai\&quot; untuk mengaktifkan perlindungan</string>
     <string name="whitelist_apps_title">Aplikasi Daftar Putih</string>
-    <string name="whitelist_apps_subtitle">Aplikasi ini akan melewati pemblokiran iklan</string>
     <string name="whitelist_apps_search">Cari aplikasi…</string>
     <string name="whitelist_apps_empty">Tidak ada aplikasi yang diinstal</string>
     <string name="whitelist_apps_count">%d aplikasi di daftar putih</string>
     <string name="whitelist_tab_user">Aplikasi Pengguna</string>
     <string name="whitelist_tab_system">Aplikasi Sistem</string>
-
-    <string name="whitelist_domains_title">Domain Daftar Putih</string>
-    <string name="whitelist_domains_subtitle">Domain ini tidak akan pernah diblokir</string>
     <string name="whitelist_domains_add">Tambah Domain</string>
     <string name="whitelist_domains_hint">mis. example.com</string>
     <string name="whitelist_domains_empty">Tidak ada domain daftar putih</string>
     <string name="whitelist_domain_added">Domain masuk daftar putih: %s</string>
     <string name="whitelist_domain_removed">Domain dihapus dari daftar putih</string>
-
-    <string name="settings_blocklist_domains_desc">Domain ini akan selalu diblokir</string>
-    <string name="blocklist_domains_title">Domain Daftar Blokir</string>
-    <string name="blocklist_domains_subtitle">Domain ini akan selalu diblokir</string>
-    <string name="blocklist_domains_add">Tambah Domain</string>
-    <string name="blocklist_domains_hint">mis. example.com</string>
     <string name="blocklist_domains_empty">Tidak ada domain daftar blokir</string>
     <string name="blocklist_domain_added">Domain masuk daftar blokir: %s</string>
     <string name="blocklist_domain_removed">Domain dihapus dari daftar blokir</string>
     <string name="blocklist_domain_already_exists">Domain sudah ada di daftar blokir</string>
-
     <string name="domain_rules_title">Aturan Domain</string>
     <string name="domain_rules_tab_whitelist">Daftar Putih</string>
     <string name="domain_rules_tab_blocklist">Daftar Blokir</string>
-
     <string name="about_title">Tentang</string>
     <string name="about_description">Pemblokir iklan gratis bersumber terbuka.\nTanpa pengumpulan data. Tanpa pelacakan.</string>
     <string name="about_version">Versi %s</string>
@@ -122,17 +91,13 @@
     <string name="about_contact">Hubungi Kami</string>
     <string name="about_licenses">Lisensi Sumber Terbuka</string>
     <string name="about_no_data">🔒 Aplikasi ini tidak mengumpulkan data pribadi apa pun</string>
-
     <string name="log_action_whitelist">Tambahkan ke Daftar Putih</string>
     <string name="log_action_copy">Salin Domain</string>
     <string name="log_search_hint">Cari domain…</string>
     <string name="domain_copied">Domain disalin</string>
     <string name="log_whitelisted">Masuk Daftar Putih: %s</string>
     <string name="log_already_whitelisted">Sudah ada di daftar putih</string>
-
     <string name="test_block_ads">Uji Pemblokiran Iklan</string>
-    <string name="test_block_ads_title">Uji Pemblokiran Iklan</string>
-
     <string name="home_connecting_desc">Membangun koneksi VPN…</string>
     <string name="home_protected_desc">Perangkat Anda terlindungi dari iklan</string>
     <string name="home_unprotected_desc">Ketuk tombol untuk mengaktifkan pemblokiran iklan</string>
@@ -146,10 +111,7 @@
     <string name="home_top_blocked">Domain Teratas Diblokir</string>
     <string name="home_chart_no_data">Tidak ada data tersedia</string>
     <string name="settings_language">Bahasa</string>
-
     <string name="settings_title">Pengaturan</string>
-    <string name="settings_search_hint">Cari pengaturan…</string>
-    <string name="settings_search_clear">Hapus pencarian</string>
     <string name="settings_category_protection">Perlindungan</string>
     <string name="settings_category_protection_desc">Server DNS, protokol, sambung ulang otomatis</string>
     <string name="settings_category_interface">Antarmuka</string>
@@ -162,7 +124,6 @@
     <string name="settings_category_data_desc">Ekspor/Impor, hapus log</string>
     <string name="settings_category_info">Informasi</string>
     <string name="settings_category_info_desc">Tentang, kebijakan privasi, kode sumber</string>
-    <string name="settings_appearance">Penampilan</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_system">Sistem</string>
     <string name="settings_theme_light">Terang</string>
@@ -170,27 +131,17 @@
     <string name="settings_show_bottom_nav_labels_desc">Tampilkan teks di bawah ikon pada navigasi bawah</string>
     <string name="settings_theme_dark">Gelap</string>
     <string name="settings_lang_system">Sistem</string>
-    <string name="settings_high_contrast">Kontras Tinggi</string>
-    <string name="settings_high_contrast_desc">Tingkatkan kontras untuk visibilitas yang lebih baik</string>
     <string name="settings_accent_color">Warna Aksen</string>
     <string name="settings_accent_color_desc">Sesuaikan warna utama aplikasi</string>
     <string name="accent_dynamic">Dinamis (Material You)</string>
     <string name="accent_dynamic_desc">Menggunakan warna wallpaper Anda</string>
-    <string name="settings_connection">Koneksi</string>
     <string name="settings_filter_lists">Daftar Filter (%d aktif)</string>
     <string name="settings_add_custom_filter">Tambahkan Daftar Filter Kustom</string>
     <string name="settings_updating">Memperbarui…</string>
     <string name="settings_update_all">Perbarui Semua Filter</string>
-    <string name="settings_dns_config">Konfigurasi DNS</string>
-    <string name="settings_save_dns">Simpan DNS</string>
-    <string name="settings_whitelist">Daftar Putih</string>
     <string name="settings_whitelist_apps">Aplikasi Daftar Putih</string>
     <string name="settings_whitelist_apps_desc">Kecualikan aplikasi dari pemblokiran iklan</string>
     <string name="settings_whitelist_domains">Domain Daftar Putih</string>
-    <string name="settings_whitelist_domains_desc">Domain ini tidak akan pernah diblokir</string>
-
-    <string name="settings_add_domain">Tambah Domain</string>
-    <string name="settings_data_backup">Data &amp; Cadangan</string>
     <string name="settings_export">Ekspor</string>
     <string name="settings_import">Impor</string>
     <string name="settings_about">Tentang</string>
@@ -207,14 +158,6 @@
     <string name="settings_safe_search_desc">Paksa pencarian aman pada mesin pencari yang didukung (Google, Bing)</string>
     <string name="settings_youtube_restricted">Mode Terbatas YouTube</string>
     <string name="settings_youtube_restricted_desc">Saring video dewasa di YouTube, blokir video dewasa yang disematkan di situs lain, dan sembunyikan semua komentar</string>
-    <string name="settings_dns_protocol">Protokol DNS</string>
-    <string name="settings_dns_protocol_plain">DNS Biasa</string>
-    <string name="settings_doh_server_url">URL Server DoH</string>
-    <string name="settings_save_doh_url">Simpan URL DoH</string>
-    <string name="settings_dot_server">Server DoT (hostname atau IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">URL Server DoQ</string>
-    <string name="settings_upstream_dns">Server DNS Hulu</string>
     <string name="settings_fallback_dns">Server DNS Cadangan</string>
     <string name="settings_fallback_dns_desc">DNS Cadangan digunakan saat server DNS utama Anda gagal. Masukkan alamat IP dari server DNS cadangan.</string>
     <string name="settings_fallback_dns_short_desc">Digunakan sebagai cadangan saat DNS utama gagal</string>
@@ -227,37 +170,25 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">Terdeteksi: %s</string>
-    <string name="settings_invalid_dns_input">Alamat server DNS tidak valid</string>
-    <string name="settings_save_custom_dns">Simpan DNS</string>
     <string name="settings_dns_response_type">Tipe respons DNS</string>
-    <string name="settings_dns_response_type_desc">Tipe respons untuk domain yang diblokir</string>
     <string name="dns_response_nxdomain_desc">Domain tidak ada (standar)</string>
     <string name="dns_response_refused_desc">Kueri ditolak (kompatibilitas lebih baik)</string>
     <string name="dns_response_custom_ip">IP Kustom (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">Kembalikan alamat rute nol (default)</string>
     <string name="settings_clear_logs">Hapus Semua Log</string>
     <string name="clear_logs_confirm_message">Anda yakin ingin menghapus semua log DNS? Tindakan ini tidak dapat dibatalkan.</string>
-    <string name="dns_error_notification_title">Kesalahan konfigurasi DNS</string>
-    <string name="dns_error_notification_no_fallback">Koneksi %1$s ke %2$s gagal. Tidak ada DNS cadangan yang dikonfigurasi — situs web mungkin tidak dimuat. Periksa pengaturan DNS Anda.</string>
-    <string name="dns_error_notification_both_failed">Koneksi %1$s ke %2$s dan cadangan %3$s keduanya gagal. Situs web mungkin tidak dimuat. Periksa pengaturan DNS Anda.</string>
-
     <string name="filter_setup_title">Pengaturan Filter</string>
-    <string name="filter_setup_desc">Kelola daftar filter bawaan &amp; kustom</string>
     <string name="filter_built_in">Bawaan</string>
     <string name="filter_custom">Kustom</string>
     <string name="filter_custom_empty">Belum ada filter kustom yang ditambahkan</string>
     <string name="filter_search_hint">Cari filter…</string>
-    <string name="filter_search_no_results">Tidak ada filter ditemukan untuk \"%s\"</string>
+    <string name="filter_search_no_results">Tidak ada filter ditemukan untuk \&quot;%s\&quot;</string>
     <string name="filter_log_cleared">Log dihapus</string>
-    <string name="filter_domain_whitelisted">Domain masuk daftar putih: %s</string>
     <string name="filter_domain_already_whitelisted">Domain sudah ada di daftar putih</string>
     <string name="filter_settings_export">Pengaturan diekspor</string>
     <string name="filter_export_failed">Gagal mengekspor: %s</string>
     <string name="filter_settings_imported">Pengaturan diimpor</string>
     <string name="filter_import_failed">Gagal mengimpor: %s</string>
-
-    <string name="settings_auto_update">Pembaruan Otomatis Daftar Filter</string>
     <string name="settings_auto_update_enabled">Aktifkan pembaruan otomatis</string>
     <string name="settings_auto_update_enabled_desc">Perbarui daftar filter secara otomatis di latar belakang</string>
     <string name="settings_auto_update_frequency">Frekuensi pembaruan</string>
@@ -277,7 +208,6 @@
     <string name="filter_update_failed_message">Gagal memperbarui daftar filter</string>
     <string name="filter_update_notification_channel">Pembaruan Filter</string>
     <string name="filter_update_notification_channel_desc">Notifikasi untuk pembaruan daftar filter</string>
-
     <string name="dns_provider_title">Server DNS</string>
     <string name="dns_category_standard">Standar</string>
     <string name="dns_category_privacy">Berfokus privasi</string>
@@ -287,19 +217,13 @@
     <string name="dns_custom_description">Masukkan alamat server DNS Anda sendiri</string>
     <string name="dns_custom_save">Simpan</string>
     <string name="dns_custom_cancel">Batal</string>
-    <string name="dns_select_server">Pilih Server DNS</string>
-
-    <string name="widget_name">Tombol BlockAds</string>
     <string name="widget_description">Nyalakan/matikan pemblokiran iklan dan lihat statistik</string>
     <string name="widget_toggle_description">Nyalakan/matikan pemblokiran iklan</string>
     <string name="widget_blocked_today">Diblokir hari ini</string>
     <string name="widget_protected">Terlindungi</string>
     <string name="widget_unprotected">Mati</string>
-
     <string name="shortcut_toggle_vpn">Nyalakan/Matikan Pemblokiran Iklan</string>
     <string name="shortcut_toggle_vpn_short">Nyalakan/Matikan VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Tombol tidak tersedia</string>
-
     <string name="custom_rules">Aturan Kustom</string>
     <string name="add_custom_rule">Tambah Aturan Kustom</string>
     <string name="import_rules">Impor Aturan</string>
@@ -324,7 +248,6 @@
     <string name="delete">Hapus</string>
     <string name="cancel">Batal</string>
     <string name="block_this_domain">Blokir domain ini</string>
-    <string name="add_to_custom_rules">Tambahkan ke aturan kustom</string>
     <string name="import_from_file">Impor dari File</string>
     <string name="export_to_file">Ekspor ke File</string>
     <string name="export_format_title">Format Ekspor</string>
@@ -333,14 +256,13 @@
     <string name="rules_exported">Berhasil mengekspor %d aturan</string>
     <string name="export_failed">Gagal mengekspor: %s</string>
     <string name="import_failed">Gagal mengimpor: %s</string>
-    <string name="import_no_valid_rules">Tidak ditemukan aturan yang valid di dalam file</string>
-
     <string name="app_management_title">Manajemen Aplikasi</string>
     <string name="app_management_subtitle">%d aplikasi</string>
     <string name="app_management_subtitle_filtered">%1$d dari %2$d aplikasi</string>
     <string name="app_management_desc">Kelola perutean VPN per-aplikasi dan lihat statistik</string>
     <string name="app_management_search">Cari aplikasi…</string>
     <string name="app_management_loading">Memuat aplikasi…</string>
+    <string name="app_management_refresh">Segarkan</string>
     <string name="app_management_sort">Urutkan</string>
     <string name="app_management_sort_name">Urutkan berdasarkan Nama</string>
     <string name="app_management_sort_queries">Urutkan berdasarkan Kueri</string>
@@ -352,31 +274,21 @@
     <string name="log_status_blocked">Diblokir</string>
     <string name="log_status_allowed">Diizinkan</string>
     <string name="log_status_whitelisted">Daftar Putih</string>
-    <string name="log_detail_title">Detail Domain</string>
     <string name="log_detail_query_type">Tipe Kueri</string>
     <string name="log_detail_response_time">Waktu Respons</string>
-    <string name="log_detail_status">Status</string>
     <string name="log_detail_app">Aplikasi</string>
     <string name="log_detail_resolved_ip">IP Diselesaikan</string>
     <string name="log_detail_blocked_by">Diblokir Oleh</string>
     <string name="log_detail_timestamp">Waktu</string>
-    <string name="log_detail_unknown">Tidak diketahui</string>
     <string name="log_detail_na">N/A</string>
-    <string name="log_realtime_on">Waktu-nyata: NYALA</string>
-    <string name="log_realtime_off">Waktu-nyata: MATI</string>
     <string name="log_time_range_all">Semua Waktu</string>
     <string name="log_time_range_1h">1j</string>
     <string name="log_time_range_6h">6j</string>
     <string name="log_time_range_24h">24j</string>
     <string name="log_time_range_7d">7h</string>
     <string name="log_filter_all_apps">Semua Aplikasi</string>
-    <string name="log_bulk_mode">Pilih</string>
     <string name="log_bulk_selected">%d dipilih</string>
-    <string name="log_bulk_block">Blokir Semua</string>
-    <string name="log_bulk_whitelist">Masukkan Semua ke Daftar Putih</string>
-    <string name="log_unblock_domain">Buka blokir domain ini</string>
     <string name="log_wildcard_whitelist_domain">Masukkan semua subdomain ke daftar putih</string>
-    <string name="log_domain_unblocked">Domain %1$s dibuka blokirnya</string>
     <string name="log_wildcard_whitelisted">Domain %1$s dan semua subdomain masuk daftar putih</string>
     <string name="log_action_unblock">Buka blokir</string>
     <string name="log_action_block">Blokir</string>
@@ -398,13 +310,10 @@
     <string name="stats_chart_4w">4 Minggu</string>
     <string name="stats_chart_12m">12 Bulan</string>
     <string name="stats_per_app">Statistik Per-Aplikasi</string>
-    <string name="stats_app_queries_blocked">%1$s kueri · %2$s diblokir</string>
-
     <string name="vpn_phase_loading_filters">Memuat daftar filter…</string>
     <string name="vpn_phase_preparing_dns">Menyiapkan DNS…</string>
     <string name="vpn_phase_establishing">Membangun VPN…</string>
     <string name="vpn_phase_waiting_network">Menunggu jaringan…</string>
-
     <string name="vpn_notification_stats_today">%1$d iklan diblokir hari ini | Waktu aktif %2$s</string>
     <string name="vpn_notification_action_pause">Jeda 1j</string>
     <string name="vpn_notification_action_stop">Berhenti</string>
@@ -428,11 +337,6 @@
     <string name="profile_section_profiles">Profil</string>
     <string name="profile_section_schedules">Jadwal</string>
     <string name="profile_name_default">Bawaan</string>
-    <string name="profile_name_strict">Ketat</string>
-    <string name="profile_name_family">Keluarga</string>
-    <string name="profile_name_gaming">Bermain Game</string>
-    <string name="profile_name_custom">Kustom</string>
-    <string name="profile_name_strict_family">Keluarga Ketat</string>
     <string name="profile_desc_strict_family">Pemblokiran maksimal: iklan, pelacak, konten dewasa &amp; perjudian</string>
     <string name="profile_desc_default">Pemblokiran seimbang: iklan dan pelacak dasar</string>
     <string name="profile_desc_strict">Pemblokiran agresif: iklan, pelacak, analitik, telemetri</string>
@@ -459,17 +363,13 @@
     <string name="profile_day_fri">Jum</string>
     <string name="profile_day_sat">Sab</string>
     <string name="profile_day_sun">Min</string>
-    <string name="settings_profiles">Profil Perlindungan</string>
-    <string name="settings_profiles_desc">Konfigurasi prasetel untuk berbagai kasus penggunaan</string>
     <string name="accessibility_toggle_vpn">Nyalakan/matikan perlindungan VPN</string>
     <string name="accessibility_vpn_active">Perlindungan VPN aktif</string>
     <string name="accessibility_vpn_inactive">Perlindungan VPN tidak aktif</string>
     <string name="accessibility_vpn_connecting">VPN sedang menghubungkan</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Tingkat blokir %1$s persen</string>
     <string name="accessibility_navigate_back">Navigasi kembali</string>
     <string name="firewall_title">Firewall</string>
-    <string name="firewall_subtitle">Kontrol internet per-aplikasi</string>
     <string name="firewall_count">%d aplikasi diblokir</string>
     <string name="firewall_search">Cari aplikasi…</string>
     <string name="firewall_enable">Aktifkan Firewall</string>
@@ -481,14 +381,7 @@
     <string name="firewall_schedule_from">Dari</string>
     <string name="firewall_schedule_to">Hingga</string>
     <string name="firewall_app_blocked">Internet diblokir</string>
-    <string name="firewall_app_not_blocked">Internet diizinkan</string>
-    <string name="firewall_rule_saved">Aturan firewall disimpan</string>
-    <string name="firewall_rule_removed">Aturan firewall dihapus</string>
     <string name="firewall_configure">Konfigurasi Aturan</string>
-    <string name="firewall_channel_name">Peringatan Firewall</string>
-    <string name="firewall_channel_description">Notifikasi saat aplikasi diblokir oleh firewall</string>
-    <string name="firewall_notification_title">Aplikasi diblokir oleh firewall</string>
-    <string name="firewall_notification_text">%s diblokir dari mengakses internet</string>
     <string name="firewall_network_mobile">Seluler</string>
     <string name="firewall_network_all">Semua</string>
     <string name="firewall_schedule_hour_plus">Jam +</string>
@@ -496,54 +389,23 @@
     <string name="block_reason_firewall">Firewall</string>
     <string name="block_reason_upstream_dns">DNS Hulu</string>
     <string name="settings_firewall">Firewall</string>
-    <string name="settings_firewall_desc">Blokir akses internet per aplikasi</string>
-
     <string name="settings_sponsor">Sponsori Kami</string>
     <string name="settings_sponsor_desc">Dukung pengembangan BlockAds di GitHub</string>
     <string name="settings_community">Komunitas</string>
     <string name="settings_reddit_desc">Bergabunglah dengan komunitas kami di Reddit</string>
     <string name="settings_telegram_desc">Bergabunglah dengan obrolan kami di Telegram</string>
     <string name="filter_setup_active_count">%1$d aktif</string>
-    <string name="copied_url">URL disalin</string>
     <string name="filter_error_invalid_url">Harap masukkan URL yang valid (http:// atau https://)</string>
     <string name="filter_error_duplicate_url">Daftar filter ini sudah ada</string>
-    <string name="filter_error_invalid_content">URL tidak berisi daftar filter yang valid</string>
     <string name="filter_chip_all">Semua</string>
     <string name="filter_chip_enabled">Diaktifkan</string>
     <string name="filter_chip_disabled">Dinonaktifkan</string>
-
-    <string name="dns_custom_primary_label">Utama</string>
-    <string name="dns_custom_fallback_label">Cadangan</string>
-    <string name="dns_custom_extra_label">Ekstra</string>
-    <string name="dns_custom_add_server">Tambah Server</string>
-    <string name="dns_custom_max_reached">Jumlah server maksimum telah tercapai</string>
-    <string name="dns_custom_remove_server">Hapus Server</string>
-    <string name="dns_custom_duplicate">Server sudah ada</string>
-    <string name="dns_custom_empty">Alamat server tidak boleh kosong</string>
-
     <string name="wireguard_import_title">Impor WireGuard</string>
     <string name="wireguard_import_button">Impor .conf</string>
     <string name="wireguard_empty_title">Tidak ada konfigurasi yang dimuat</string>
     <string name="wireguard_empty_desc">Ketuk tombol di bawah untuk mengimpor file .conf WireGuard</string>
-    <string name="wireguard_section_interface">Antarmuka</string>
-    <string name="wireguard_section_peer">Rekan %d</string>
-    <string name="wireguard_label_address">Alamat</string>
-    <string name="wireguard_label_private_key">Kunci Privat</string>
-    <string name="wireguard_label_listen_port">Port Dengar</string>
-    <string name="wireguard_label_public_key">Kunci Publik</string>
-    <string name="wireguard_label_endpoint">Titik Akhir (Endpoint)</string>
-    <string name="wireguard_label_allowed_ips">IP yang Diizinkan</string>
-    <string name="wireguard_label_preshared_key">Kunci Pra-bagi (Preshared Key)</string>
-    <string name="wireguard_label_keepalive">Keepalive Persisten</string>
-    <string name="wireguard_keepalive_value">%d detik</string>
-    <string name="wireguard_toggle_key_visibility">Nyalakan/matikan visibilitas kunci</string>
-    <string name="wireguard_copy_key">Salin kunci</string>
     <string name="wireguard_connect">Hubungkan Terowongan</string>
     <string name="wireguard_disconnect">Putuskan Terowongan</string>
-    <string name="wireguard_save_activate">Simpan &amp; Aktifkan</string>
-    <string name="wireguard_clear">Hapus WireGuard</string>
-    <string name="wireguard_active_label">WireGuard Aktif — Mulai ulang VPN untuk menerapkan</string>
-
     <string name="https_filtering_title">Pemfilteran HTTPS</string>
     <string name="https_filtering_toggle_label">Filter Kosmetik HTTPS</string>
     <string name="https_filtering_status_active">Aktif — Menyembunyikan iklan</string>
@@ -554,7 +416,7 @@
     <string name="https_filtering_ca_desc">Ikuti langkah-langkah berikut untuk menyiapkan pemfilteran kosmetik HTTPS:</string>
     <string name="https_filtering_export_ca">Simpan ke Unduhan</string>
     <string name="https_filtering_cert_saved">Sertifikat disimpan ke Unduhan!</string>
-    <string name="https_filtering_install_steps">1. Buka Pengaturan → Keamanan → Enkripsi &amp; kredensial\n2. Ketuk \"Instal sertifikat\" → \"Sertifikat CA\"\n3. Pilih \"BlockAds-RootCA.crt\" dari Unduhan\n4. Konfirmasi penginstalan</string>
+    <string name="https_filtering_install_steps">1. Buka Pengaturan → Keamanan → Enkripsi &amp; kredensial\n2. Ketuk \&quot;Instal sertifikat\&quot; → \&quot;Sertifikat CA\&quot;\n3. Pilih \&quot;BlockAds-RootCA.crt\&quot; dari Unduhan\n4. Konfirmasi penginstalan</string>
     <string name="https_filtering_open_settings">Buka Pengaturan Keamanan</string>
     <string name="https_filtering_browser_section">Pemilihan Browser</string>
     <string name="https_filtering_browser_desc">Pilih browser untuk menerapkan pemfilteran iklan kosmetik. Hanya aplikasi yang dipilih yang difilter.</string>
@@ -569,7 +431,7 @@
     <string name="https_filtering_cert_installed">Sertifikat terinstal ✓</string>
     <string name="https_filtering_cert_not_installed">Sertifikat tidak terinstal</string>
     <string name="https_filtering_cert_checking">Memeriksa…</string>
-    <string name="https_filtering_cert_vpn_required">Ketuk \"Verifikasi Sertifikat\" untuk memeriksa</string>
+    <string name="https_filtering_cert_vpn_required">Ketuk \&quot;Verifikasi Sertifikat\&quot; untuk memeriksa</string>
     <string name="edit_custom_filter">Edit Filter Kustom</string>
     <string name="filter_name">Nama Filter</string>
     <string name="filter_url_domain">URL/Domain Filter</string>
@@ -577,12 +439,8 @@
     <string name="add_whitelisted_domain_title">Tambah Domain Daftar Putih</string>
     <string name="onboarding_battery_unsupported">Tidak Didukung</string>
     <string name="vpn_conflict_title">Koneksi Diblokir</string>
-    <string name="vpn_conflict_desc">Android hanya mengizinkan satu koneksi VPN dalam satu waktu. VPN lain saat ini sedang aktif di perangkat Anda.\n\nHarap putuskan koneksi VPN lain terlebih dahulu atau nonaktifkan \"VPN selalu aktif\" di Pengaturan sebelum menghubungkan BlockAds.</string>
+    <string name="vpn_conflict_desc">Android hanya mengizinkan satu koneksi VPN dalam satu waktu. VPN lain saat ini sedang aktif di perangkat Anda.\n\nHarap putuskan koneksi VPN lain terlebih dahulu atau nonaktifkan \&quot;VPN selalu aktif\&quot; di Pengaturan sebelum menghubungkan BlockAds.</string>
     <string name="open_settings">Buka Pengaturan</string>
-    <string name="disable_all_user_apps">Nonaktifkan Semua Aplikasi Pengguna</string>
-    <string name="enable_all_user_apps">Aktifkan Semua Aplikasi Pengguna</string>
-    <string name="disable_all_system_apps">Nonaktifkan Semua Aplikasi Sistem</string>
-    <string name="enable_all_system_apps">Aktifkan Semua Aplikasi Sistem</string>
     <string name="vpn_network_switch_waiting">Menunggu jaringan stabil… %1$ds</string>
     <string name="settings_network_switch_delay">Penundaan Peralihan Jaringan</string>
     <string name="settings_network_switch_delay_desc">Jeda penyambungan ulang VPN setelah perubahan jaringan (berguna untuk Panggilan Wi-Fi)</string>
@@ -597,10 +455,8 @@
     <string name="onboarding_crash_report_btn_no">Tidak, terima kasih</string>
     <string name="settings_privacy_diagnostics_title">Privasi &amp; Diagnostik</string>
     <string name="settings_privacy_diagnostics_desc">Kelola laporan kerusakan dan log lokal</string>
-
     <string name="settings_crash_reporting_title">Laporan Kerusakan Anonim</string>
     <string name="settings_crash_reporting_subtitle">Kirim log kesalahan secara otomatis untuk membantu kami memperbaiki masalah. Tidak ada data pribadi yang disertakan.</string>
-
     <string name="settings_export_logs_title">Ekspor Log Lokal</string>
     <string name="settings_export_logs_subtitle">Bagikan log debug offline langsung melalui Email, Telegram, dll.</string>
     <string name="settings_export_logs_chooser_title">Bagikan Log</string>
@@ -629,4 +485,26 @@
     <string name="filter_compile_success_title">Filter berhasil dikompilasi</string>
     <string name="filter_compile_failed_title">Kompilasi filter gagal</string>
     <string name="filter_compile_channel_name">Kompilasi Filter</string>
+    <string name="wireguard_https_filtering_disabled">Pemfilteran HTTPS dinonaktifkan (tidak kompatibel dengan WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard dinonaktifkan (tidak kompatibel dengan pemfilteran HTTPS)</string>
+    <string name="wireguard_imported">\'%1$s\' diimpor</string>
+    <string name="wireguard_deleted">\'%1$s\' dihapus</string>
+    <string name="wireguard_active">Aktif: %1$s</string>
+    <string name="wireguard_renamed">Diganti namanya</string>
+    <string name="wireguard_enabled_restarting">WireGuard diaktifkan. Memulai ulang VPN…</string>
+    <string name="wireguard_disabled_restarting">WireGuard dinonaktifkan. Memulai ulang VPN…</string>
+    <string name="wireguard_delete_dialog_title">Hapus \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">Profil ini akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="wireguard_action_delete">Hapus</string>
+    <string name="wireguard_action_cancel">Batal</string>
+    <string name="wireguard_action_save">Simpan</string>
+    <string name="wireguard_action_edit">Edit</string>
+    <string name="wireguard_action_rename">Ganti nama</string>
+    <string name="wireguard_more_options">Opsi lainnya</string>
+    <string name="wireguard_no_peer">(tidak ada peer)</string>
+    <string name="wireguard_rename_dialog_title">Ganti nama profil</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Sertifikat disimpan ke Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Sertifikat disimpan. Instal dari pengelola file.</string>
+    <string name="https_filtering_started">Pemfilteran HTTPS dimulai</string>
+    <string name="https_filtering_stopped">Pemfilteran HTTPS dihentikan</string>
 </resources>

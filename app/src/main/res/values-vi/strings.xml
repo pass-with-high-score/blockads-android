@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_tagline">Duyệt Web Không Quảng Cáo</string>
     <string name="notification_channel_name">Dịch vụ chặn quảng cáo</string>
@@ -25,9 +25,6 @@
     <string name="nav_logs">Nhật ký</string>
     <string name="nav_filter">Bộ lọc</string>
     <string name="nav_settings">Cài đặt</string>
-    <string name="settings_filter_url">URL danh sách bộ lọc</string>
-    <string name="settings_update_filter">Cập nhật danh sách bộ lọc</string>
-    <string name="filter_updating">Đang cập nhật danh sách bộ lọc…</string>
     <string name="filter_updated">Đã cập nhật bộ lọc: %d tên miền</string>
     <string name="filter_update_failed">Không thể cập nhật danh sách bộ lọc</string>
     <string name="filter_detail_enabled">Đã bật</string>
@@ -35,26 +32,15 @@
     <string name="filter_detail_last_updated">Cập nhật lần cuối</string>
     <string name="filter_detail_update">Cập nhật</string>
     <string name="filter_detail_delete">Xóa</string>
-    <string name="filter_detail_domain_preview">Xem trước tên miền bị chặn</string>
-    <string name="filter_detail_no_domains">Chưa có dữ liệu. Hãy thử cập nhật bộ lọc này trước.</string>
-    <string name="filter_detail_more_domains">… và %s tên miền khác</string>
     <string name="logs_empty">Chưa có truy vấn DNS nào được ghi lại</string>
     <string name="logs_filter_all">Tất cả</string>
     <string name="logs_filter_blocked">Đã chặn</string>
-
-    <!-- Onboarding -->
     <string name="onboarding_title_1">Chặn quảng cáo thông minh</string>
     <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.\n\n🔒 Cam kết bảo mật: Chúng tôi không bao giờ thu thập, lưu trữ hoặc truyền dữ liệu duyệt web của bạn. Mọi xử lý đều diễn ra trên thiết bị của bạn.</string>
-    <string name="onboarding_title_2">Quyền riêng tư của bạn, được bảo vệ</string>
-    <string name="onboarding_desc_2">Không thu thập dữ liệu. Không theo dõi. Tất cả nhật ký DNS chỉ lưu trên thiết bị của bạn. Chúng tôi không bao giờ xem hoạt động duyệt web của bạn.</string>
-    <string name="onboarding_title_3">Miễn phí &amp; Mã nguồn mở</string>
-    <string name="onboarding_desc_3">BlockAds hoàn toàn miễn phí, không có mua hàng trong ứng dụng. Mã nguồn được công khai để bất kỳ ai cũng có thể kiểm tra và xác minh.</string>
     <string name="onboarding_skip">Bỏ qua</string>
     <string name="onboarding_next">Tiếp theo</string>
     <string name="onboarding_get_started">Bắt đầu</string>
     <string name="onboarding_recommended">★ Khuyến nghị</string>
-
-    <!-- Onboarding: Protection Level -->
     <string name="onboarding_protection_title">Chọn mức độ bảo vệ</string>
     <string name="onboarding_protection_desc">Chọn mức độ chặn quảng cáo và trình theo dõi</string>
     <string name="onboarding_protection_basic">Cơ bản</string>
@@ -63,54 +49,33 @@
     <string name="onboarding_protection_standard_desc">Chặn quảng cáo, trình theo dõi và phân tích. Cân bằng tốt giữa bảo vệ và tương thích.</string>
     <string name="onboarding_protection_strict">Nghiêm ngặt</string>
     <string name="onboarding_protection_strict_desc">Chặn tối đa. Có thể ảnh hưởng một số chức năng trang web nhưng bảo vệ mạnh nhất.</string>
-
-    <!-- Onboarding: DNS Server -->
     <string name="onboarding_dns_title">Chọn máy chủ DNS</string>
     <string name="onboarding_dns_desc">Chọn máy chủ DNS để phân giải tên miền. Bạn có thể thay đổi sau trong Cài đặt.</string>
-
-    <!-- Onboarding: VPN Permission -->
     <string name="onboarding_vpn_title">Cần quyền VPN</string>
     <string name="onboarding_vpn_desc">BlockAds sử dụng VPN cục bộ để lọc truy vấn DNS và chặn quảng cáo. Không có dữ liệu nào rời khỏi thiết bị — VPN này chỉ hoạt động cục bộ để chặn và lọc các yêu cầu DNS.</string>
     <string name="onboarding_vpn_grant">Cấp quyền VPN</string>
-
-    <!-- Onboarding: Notification Permission -->
     <string name="onboarding_notification_title">Luôn cập nhật</string>
     <string name="onboarding_notification_desc">Cho phép thông báo để xem thống kê chặn theo thời gian thực và biết khi nào bảo vệ đang hoạt động. Cần thiết cho thông báo VPN trên Android 13+.</string>
     <string name="onboarding_notification_grant">Cho phép thông báo</string>
-
-    <!-- Onboarding: Battery Optimization -->
     <string name="onboarding_battery_title">Duy trì bảo vệ</string>
     <string name="onboarding_battery_desc">Loại trừ BlockAds khỏi tối ưu hóa pin để dịch vụ VPN luôn hoạt động trong nền và không bị hệ thống tắt.</string>
     <string name="onboarding_battery_grant">Tắt tối ưu hóa pin</string>
     <string name="onboarding_battery_unsupported">Không hỗ trợ</string>
-
-    <!-- Onboarding: Permission Granted -->
     <string name="onboarding_permission_granted">✓ Đã cấp quyền</string>
-
-    <!-- Onboarding: Completion -->
     <string name="onboarding_complete_title">Bạn đã được bảo vệ!</string>
     <string name="onboarding_complete_desc">Chúc mừng! BlockAds đã được cấu hình và sẵn sàng bảo vệ thiết bị của bạn khỏi quảng cáo và trình theo dõi.</string>
-    <string name="onboarding_complete_stats">Nhấn \"Bắt đầu\" để bật bảo vệ</string>
-
-    <!-- Whitelist Apps -->
+    <string name="onboarding_complete_stats">Nhấn \&quot;Bắt đầu\&quot; để bật bảo vệ</string>
     <string name="whitelist_apps_title">Ứng dụng được phép</string>
-    <string name="whitelist_apps_subtitle">Các ứng dụng này sẽ bỏ qua chặn quảng cáo</string>
     <string name="whitelist_apps_search">Tìm ứng dụng…</string>
     <string name="whitelist_apps_empty">Không có ứng dụng nào</string>
     <string name="whitelist_apps_count">%d ứng dụng được phép</string>
     <string name="whitelist_tab_user">Ứng dụng người dùng</string>
     <string name="whitelist_tab_system">Ứng dụng hệ thống</string>
-
-    <!-- Whitelist Domains -->
-    <string name="whitelist_domains_title">Tên miền được phép</string>
-    <string name="whitelist_domains_subtitle">Các tên miền này sẽ không bao giờ bị chặn</string>
     <string name="whitelist_domains_add">Thêm tên miền</string>
     <string name="whitelist_domains_hint">vd: example.com</string>
     <string name="whitelist_domains_empty">Chưa có tên miền được phép</string>
     <string name="whitelist_domain_added">Đã thêm tên miền: %s</string>
     <string name="whitelist_domain_removed">Đã xóa tên miền khỏi danh sách</string>
-
-    <!-- About -->
     <string name="about_title">Giới thiệu</string>
     <string name="about_description">Ứng dụng chặn quảng cáo miễn phí, mã nguồn mở.\nKhông thu thập dữ liệu. Không theo dõi.</string>
     <string name="about_version">Phiên bản %s</string>
@@ -120,20 +85,13 @@
     <string name="about_contact">Liên hệ</string>
     <string name="about_licenses">Giấy phép mã nguồn mở</string>
     <string name="about_no_data">🔒 Ứng dụng này không thu thập bất kỳ dữ liệu cá nhân nào</string>
-
-    <!-- Log Actions -->
     <string name="log_action_whitelist">Thêm vào danh sách cho phép</string>
     <string name="log_action_copy">Sao chép tên miền</string>
     <string name="log_search_hint">Tìm kiếm tên miền…</string>
     <string name="domain_copied">Đã sao chép tên miền</string>
     <string name="log_whitelisted">Đã thêm vào danh sách cho phép: %s</string>
     <string name="log_already_whitelisted">Đã có trong danh sách cho phép</string>
-
-    <!-- Test Block Ads -->
     <string name="test_block_ads">Kiểm tra chặn QC</string>
-    <string name="test_block_ads_title">Kiểm tra chặn quảng cáo</string>
-
-    <!-- Home Screen -->
     <string name="home_connecting_desc">Đang thiết lập kết nối VPN…</string>
     <string name="home_protected_desc">Thiết bị của bạn đang được bảo vệ khỏi quảng cáo</string>
     <string name="home_unprotected_desc">Nhấn nút để bật chặn quảng cáo</string>
@@ -147,11 +105,7 @@
     <string name="home_top_blocked">Domain bị chặn nhiều nhất</string>
     <string name="home_chart_no_data">Chưa có dữ liệu</string>
     <string name="settings_language">Ngôn ngữ</string>
-
-    <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>
-    <string name="settings_search_hint">Tìm kiếm cài đặt…</string>
-    <string name="settings_search_clear">Xóa tìm kiếm</string>
     <string name="settings_category_protection">Bảo vệ</string>
     <string name="settings_category_protection_desc">Máy chủ DNS, giao thức, tự động kết nối lại</string>
     <string name="settings_category_interface">Giao diện</string>
@@ -164,32 +118,22 @@
     <string name="settings_category_data_desc">Xuất/Nhập, xóa nhật ký</string>
     <string name="settings_category_info">Thông tin</string>
     <string name="settings_category_info_desc">Giới thiệu, chính sách bảo mật, mã nguồn</string>
-    <string name="settings_appearance">Giao diện</string>
     <string name="settings_theme">Chủ đề</string>
     <string name="settings_theme_system">Hệ thống</string>
     <string name="settings_theme_light">Sáng</string>
     <string name="settings_theme_dark">Tối</string>
     <string name="settings_lang_system">Hệ thống</string>
-    <string name="settings_high_contrast">Tương phản cao</string>
-    <string name="settings_high_contrast_desc">Tăng độ tương phản để dễ nhìn hơn</string>
     <string name="settings_accent_color">Màu nhấn</string>
     <string name="settings_accent_color_desc">Tùy chỉnh màu chủ đạo của ứng dụng</string>
     <string name="accent_dynamic">Động (Material You)</string>
     <string name="accent_dynamic_desc">Sử dụng màu từ hình nền của bạn</string>
-    <string name="settings_connection">Kết nối</string>
     <string name="settings_filter_lists">Danh sách bộ lọc (%d đang bật)</string>
     <string name="settings_add_custom_filter">Thêm bộ lọc tùy chỉnh</string>
     <string name="settings_updating">Đang cập nhật…</string>
     <string name="settings_update_all">Cập nhật tất cả bộ lọc</string>
-    <string name="settings_dns_config">Cấu hình DNS</string>
-    <string name="settings_save_dns">Lưu DNS</string>
-    <string name="settings_whitelist">Danh sách cho phép</string>
     <string name="settings_whitelist_apps">Ứng dụng được phép</string>
     <string name="settings_whitelist_apps_desc">Loại trừ ứng dụng khỏi chặn quảng cáo</string>
     <string name="settings_whitelist_domains">Tên miền được phép</string>
-    <string name="settings_whitelist_domains_desc">Các tên miền này sẽ không bao giờ bị chặn</string>
-    <string name="settings_add_domain">Thêm tên miền</string>
-    <string name="settings_data_backup">Dữ liệu &amp; Sao lưu</string>
     <string name="settings_export">Xuất</string>
     <string name="settings_import">Nhập</string>
     <string name="settings_about">Giới thiệu</string>
@@ -206,14 +150,6 @@
     <string name="settings_safe_search_desc">Bật tìm kiếm an toàn trên các công cụ tìm kiếm hỗ trợ (Google, Bing)</string>
     <string name="settings_youtube_restricted">Chế độ hạn chế YouTube</string>
     <string name="settings_youtube_restricted_desc">Lọc video người lớn trên YouTube, chặn video nhúng người lớn trên các trang khác và ẩn tất cả bình luận</string>
-    <string name="settings_dns_protocol">Giao thức DNS</string>
-    <string name="settings_dns_protocol_plain">DNS thường</string>
-    <string name="settings_doh_server_url">URL máy chủ DoH</string>
-    <string name="settings_save_doh_url">Lưu URL DoH</string>
-    <string name="settings_dot_server">Máy chủ DoT (hostname hoặc IP)</string>
-    <string name="settings_dot_server_placeholder">dns.google</string>
-    <string name="settings_doq_server_url">URL máy chủ DoQ</string>
-    <string name="settings_upstream_dns">Máy chủ DNS</string>
     <string name="settings_fallback_dns">Máy chủ DNS dự phòng</string>
     <string name="settings_fallback_dns_desc">DNS dự phòng được sử dụng khi máy chủ DNS chính gặp lỗi. Nhập địa chỉ IP của máy chủ DNS dự phòng.</string>
     <string name="settings_fallback_dns_short_desc">Dùng làm dự phòng khi DNS chính gặp lỗi</string>
@@ -226,38 +162,24 @@
     <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
     <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
     <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
-    <string name="settings_detected_protocol">Đã phát hiện: %s</string>
-    <string name="settings_invalid_dns_input">Địa chỉ máy chủ DNS không hợp lệ</string>
-    <string name="settings_save_custom_dns">Lưu DNS</string>
     <string name="settings_dns_response_type">Loại phản hồi DNS</string>
-    <string name="settings_dns_response_type_desc">Loại phản hồi cho tên miền bị chặn</string>
     <string name="dns_response_nxdomain_desc">Tên miền không tồn tại (chuẩn)</string>
     <string name="dns_response_refused_desc">Từ chối truy vấn (tương thích tốt hơn)</string>
     <string name="dns_response_custom_ip">IP tùy chỉnh (0.0.0.0)</string>
     <string name="dns_response_custom_ip_desc">Trả về địa chỉ null route (mặc định)</string>
     <string name="settings_clear_logs">Xóa tất cả nhật ký</string>
-    <string name="dns_error_notification_title">Lỗi cấu hình DNS</string>
-    <string name="dns_error_notification_no_fallback">Kết nối %1$s đến %2$s đang lỗi. Không có DNS dự phòng — trang web có thể không tải được. Kiểm tra cài đặt DNS.</string>
-    <string name="dns_error_notification_both_failed">Kết nối %1$s đến %2$s và dự phòng %3$s đều đang lỗi. Trang web có thể không tải được. Kiểm tra cài đặt DNS.</string>
-
-    <!-- Filter Setup Screen -->
     <string name="filter_setup_title">Cài đặt bộ lọc</string>
-    <string name="filter_setup_desc">Quản lý bộ lọc tích hợp &amp; tùy chỉnh</string>
     <string name="filter_built_in">Tích hợp</string>
     <string name="filter_custom">Tùy chỉnh</string>
     <string name="filter_custom_empty">Chưa thêm bộ lọc tùy chỉnh nào</string>
     <string name="filter_search_hint">Tìm kiếm bộ lọc…</string>
-    <string name="filter_search_no_results">Không tìm thấy bộ lọc cho \"%s\"</string>
+    <string name="filter_search_no_results">Không tìm thấy bộ lọc cho \&quot;%s\&quot;</string>
     <string name="filter_log_cleared">Đã xóa nhật ký</string>
-    <string name="filter_domain_whitelisted">Tên miền đã được thêm vào danh sách cho phép: %s</string>
     <string name="filter_domain_already_whitelisted">Tên miền đã tồn tại trong danh sách cho phép</string>
     <string name="filter_settings_export">Xuất cài đặt thành công</string>
     <string name="filter_export_failed">Lỗi khi xuất cài đặt: %s</string>
     <string name="filter_settings_imported">Nhập cài đặt thành công</string>
     <string name="filter_import_failed">Lỗi khi nhập cài đặt: %s</string>
-
-    <!-- Auto-update Filter Lists -->
-    <string name="settings_auto_update">Tự động cập nhật bộ lọc</string>
     <string name="settings_auto_update_enabled">Bật tự động cập nhật</string>
     <string name="settings_auto_update_enabled_desc">Tự động cập nhật danh sách bộ lọc ở chế độ nền</string>
     <string name="settings_auto_update_frequency">Tần suất cập nhật</string>
@@ -277,8 +199,6 @@
     <string name="filter_update_failed_message">Không thể cập nhật danh sách bộ lọc</string>
     <string name="filter_update_notification_channel">Cập nhật bộ lọc</string>
     <string name="filter_update_notification_channel_desc">Thông báo về cập nhật danh sách bộ lọc</string>
-
-    <!-- DNS Provider -->
     <string name="dns_provider_title">Máy chủ DNS</string>
     <string name="dns_category_standard">Tiêu chuẩn</string>
     <string name="dns_category_privacy">Tập trung bảo mật</string>
@@ -288,22 +208,13 @@
     <string name="dns_custom_description">Nhập địa chỉ máy chủ DNS của riêng bạn</string>
     <string name="dns_custom_save">Lưu</string>
     <string name="dns_custom_cancel">Hủy</string>
-    <string name="dns_select_server">Chọn máy chủ DNS</string>
-
-    <!-- Widget -->
-    <string name="widget_name">Bật/Tắt BlockAds</string>
     <string name="widget_description">Bật tắt chặn quảng cáo và xem thống kê</string>
     <string name="widget_toggle_description">Bật tắt chặn quảng cáo</string>
     <string name="widget_blocked_today">Đã chặn hôm nay</string>
     <string name="widget_protected">Đang bảo vệ</string>
     <string name="widget_unprotected">Tắt</string>
-
-    <!-- Shortcuts -->
     <string name="shortcut_toggle_vpn">Bật/Tắt chặn quảng cáo</string>
     <string name="shortcut_toggle_vpn_short">Bật/Tắt VPN</string>
-    <string name="shortcut_toggle_vpn_disabled">Không thể bật/tắt</string>
-
-    <!-- Custom Rules -->
     <string name="custom_rules">Quy Tắc Tùy Chỉnh</string>
     <string name="add_custom_rule">Thêm Quy Tắc</string>
     <string name="import_rules">Nhập Quy Tắc</string>
@@ -328,15 +239,13 @@
     <string name="delete">Xóa</string>
     <string name="cancel">Hủy</string>
     <string name="block_this_domain">Chặn tên miền này</string>
-    <string name="add_to_custom_rules">Thêm vào quy tắc tùy chỉnh</string>
-
-    <!-- App Management -->
     <string name="app_management_title">Quản lý ứng dụng</string>
     <string name="app_management_subtitle">%d ứng dụng</string>
     <string name="app_management_subtitle_filtered">%1$d / %2$d ứng dụng</string>
     <string name="app_management_desc">Quản lý VPN theo ứng dụng và xem thống kê</string>
     <string name="app_management_search">Tìm ứng dụng…</string>
     <string name="app_management_loading">Đang tải ứng dụng…</string>
+    <string name="app_management_refresh">Làm mới</string>
     <string name="app_management_sort">Sắp xếp</string>
     <string name="app_management_sort_name">Sắp xếp theo tên</string>
     <string name="app_management_sort_queries">Sắp xếp theo truy vấn</string>
@@ -345,55 +254,34 @@
     <string name="app_management_blocked">Bị chặn: %d</string>
     <string name="app_management_system">Hệ thống</string>
     <string name="app_management_vpn_toggle">Định tuyến VPN cho %s</string>
-    <!-- Improved DNS Log Screen -->
     <string name="log_status_blocked">Đã chặn</string>
     <string name="log_status_allowed">Cho phép</string>
     <string name="log_status_whitelisted">Trong danh sách trắng</string>
-    <string name="log_detail_title">Chi tiết tên miền</string>
     <string name="log_detail_query_type">Loại truy vấn</string>
     <string name="log_detail_response_time">Thời gian phản hồi</string>
-    <string name="log_detail_status">Trạng thái</string>
     <string name="log_detail_app">Ứng dụng</string>
     <string name="log_detail_resolved_ip">IP đã phân giải</string>
     <string name="log_detail_blocked_by">Bị chặn bởi</string>
     <string name="log_detail_timestamp">Thời gian</string>
-    <string name="log_detail_unknown">Không rõ</string>
     <string name="log_detail_na">N/A</string>
-    <string name="log_realtime_on">Thời gian thực: BẬT</string>
-    <string name="log_realtime_off">Thời gian thực: TẮT</string>
     <string name="log_time_range_all">Tất cả</string>
     <string name="log_time_range_1h">1h</string>
     <string name="log_time_range_6h">6h</string>
     <string name="log_time_range_24h">24h</string>
     <string name="log_time_range_7d">7d</string>
     <string name="log_filter_all_apps">Tất cả ứng dụng</string>
-    <string name="log_bulk_mode">Chọn</string>
     <string name="log_bulk_selected">Đã chọn %d</string>
-    <string name="log_bulk_block">Chặn tất cả</string>
-    <string name="log_bulk_whitelist">Cho phép tất cả</string>
     <string name="log_wildcard_whitelist_domain">Cho phép tất cả tên miền con</string>
     <string name="log_wildcard_whitelisted">Tên miền %1$s và tất cả tên miền con đã được cho phép</string>
     <string name="block_reason_upstream_dns">DNS Upstream</string>
-    <string name="dns_custom_primary_label">Chính</string>
-    <string name="dns_custom_fallback_label">Dự phòng</string>
-    <string name="dns_custom_extra_label">Thêm</string>
-    <string name="dns_custom_add_server">Thêm máy chủ</string>
-    <string name="dns_custom_max_reached">Đã đạt số lượng máy chủ tối đa</string>
-    <string name="dns_custom_remove_server">Xóa máy chủ</string>
-    <string name="dns_custom_duplicate">Máy chủ đã tồn tại</string>
-    <string name="dns_custom_empty">Địa chỉ máy chủ không được để trống</string>
-    <string name="log_unblock_domain">Bỏ chặn tên miền này</string>
-    <string name="log_domain_unblocked">Đã bỏ chặn tên miền: %s</string>
     <string name="log_action_unblock">Bỏ chặn</string>
     <string name="log_action_block">Chặn</string>
     <string name="block_reason_custom_rule">Quy tắc chặn tùy chỉnh</string>
     <string name="block_reason_filter_list">Danh sách bộ lọc</string>
     <string name="block_reason_security">Website nguy hiểm</string>
-    <!-- Security Stats -->
     <string name="home_security_threats">Mối đe dọa đã chặn</string>
     <string name="filter_category_ad">Chặn quảng cáo</string>
     <string name="filter_category_security">Bảo mật</string>
-    <!-- Statistics Screen -->
     <string name="nav_statistics">Thống kê</string>
     <string name="stats_title">Thống kê</string>
     <string name="stats_overview">Tổng quan</string>
@@ -406,9 +294,6 @@
     <string name="stats_chart_4w">4 Tuần</string>
     <string name="stats_chart_12m">12 Tháng</string>
     <string name="stats_per_app">Thống kê theo ứng dụng</string>
-    <string name="stats_app_queries_blocked">%1$s truy vấn · %2$s đã chặn</string>
-
-    <!-- Notification Improvements -->
     <string name="vpn_notification_stats_today">Đã chặn %1$d quảng cáo hôm nay | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Tạm dừng 1h</string>
     <string name="vpn_notification_action_stop">Dừng</string>
@@ -431,16 +316,10 @@
     <string name="settings_daily_summary_desc">Hiển thị tóm tắt chặn cuối ngày</string>
     <string name="settings_milestone_notifications">Thông báo cột mốc</string>
     <string name="settings_milestone_notifications_desc">Thông báo khi đạt cột mốc chặn</string>
-    <!-- Protection Profiles -->
     <string name="profile_title">Hồ sơ bảo vệ</string>
     <string name="profile_section_profiles">Hồ sơ</string>
     <string name="profile_section_schedules">Lịch trình</string>
     <string name="profile_name_default">Mặc định</string>
-    <string name="profile_name_strict">Nghiêm ngặt</string>
-    <string name="profile_name_family">Gia đình</string>
-    <string name="profile_name_gaming">Chơi game</string>
-    <string name="profile_name_custom">Tùy chỉnh</string>
-    <string name="profile_name_strict_family">Gia đình Nghiêm ngặt</string>
     <string name="profile_desc_default">Chặn cân bằng: quảng cáo cơ bản và trình theo dõi</string>
     <string name="profile_desc_strict">Chặn triệt để: quảng cáo, trình theo dõi, phân tích, dữ liệu từ xa</string>
     <string name="profile_desc_family">Duyệt web an toàn: quảng cáo, nội dung người lớn, cờ bạc</string>
@@ -467,19 +346,13 @@
     <string name="profile_day_fri">T6</string>
     <string name="profile_day_sat">T7</string>
     <string name="profile_day_sun">CN</string>
-    <string name="settings_profiles">Hồ sơ bảo vệ</string>
-    <string name="settings_profiles_desc">Cấu hình sẵn cho từng trường hợp sử dụng</string>
-    <!-- Accessibility -->
     <string name="accessibility_toggle_vpn">Bật/tắt bảo vệ VPN</string>
     <string name="accessibility_vpn_active">Bảo vệ VPN đang hoạt động</string>
     <string name="accessibility_vpn_inactive">Bảo vệ VPN không hoạt động</string>
     <string name="accessibility_vpn_connecting">VPN đang kết nối</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
-    <string name="accessibility_block_rate_value">Tỷ lệ chặn %1$s phần trăm</string>
     <string name="accessibility_navigate_back">Quay lại</string>
-    <!-- Firewall -->
     <string name="firewall_title">Tường lửa</string>
-    <string name="firewall_subtitle">Kiểm soát internet theo ứng dụng</string>
     <string name="firewall_count">%d ứng dụng bị chặn</string>
     <string name="firewall_search">Tìm ứng dụng…</string>
     <string name="firewall_enable">Bật tường lửa</string>
@@ -491,53 +364,31 @@
     <string name="firewall_schedule_from">Từ</string>
     <string name="firewall_schedule_to">Đến</string>
     <string name="firewall_app_blocked">Internet bị chặn</string>
-    <string name="firewall_app_not_blocked">Internet được phép</string>
-    <string name="firewall_rule_saved">Đã lưu quy tắc tường lửa</string>
-    <string name="firewall_rule_removed">Đã xóa quy tắc tường lửa</string>
     <string name="firewall_configure">Cấu hình quy tắc</string>
-    <string name="firewall_channel_name">Cảnh báo tường lửa</string>
-    <string name="firewall_channel_description">Thông báo khi ứng dụng bị chặn bởi tường lửa</string>
-    <string name="firewall_notification_title">Ứng dụng bị chặn bởi tường lửa</string>
-    <string name="firewall_notification_text">%s đã bị chặn truy cập internet</string>
     <string name="firewall_network_mobile">Di động</string>
     <string name="firewall_network_all">Tất cả</string>
     <string name="firewall_schedule_hour_plus">Giờ +</string>
     <string name="firewall_schedule_minute_plus">Phút +</string>
     <string name="block_reason_firewall">Tường lửa</string>
     <string name="settings_firewall">Tường lửa</string>
-    <string name="settings_firewall_desc">Chặn truy cập internet theo ứng dụng</string>
-
-    <!-- Share & Rate -->
     <string name="settings_sponsor">Tài trợ</string>
     <string name="settings_sponsor_desc">Hỗ trợ phát triển BlockAds trên GitHub</string>
     <string name="settings_community">Cộng đồng</string>
     <string name="settings_reddit_desc">Tham gia cộng đồng trên Reddit</string>
     <string name="settings_telegram_desc">Tham gia nhóm chat trên Telegram</string>
     <string name="filter_setup_active_count">%1$d active</string>
-    <string name="copied_url">Đã sao chép URL</string>
     <string name="filter_error_invalid_url">Vui lòng nhập URL hợp lệ (http:// hoặc https://)</string>
     <string name="filter_error_duplicate_url">Danh sách bộ lọc này đã tồn tại</string>
-    <string name="filter_error_invalid_content">URL không chứa danh sách bộ lọc hợp lệ</string>
-
-
     <string name="filter_chip_all">Tất cả</string>
     <string name="filter_chip_enabled">Đã bật</string>
     <string name="filter_chip_disabled">Đã tắt</string>
-
-    <string name="settings_blocklist_domains_desc">Các tên miền này sẽ luôn bị chặn</string>
-    <string name="blocklist_domains_title">Tên miền bị chặn</string>
-    <string name="blocklist_domains_subtitle">Các tên miền này sẽ luôn bị chặn</string>
-    <string name="blocklist_domains_add">Thêm tên miền</string>
-    <string name="blocklist_domains_hint">vd: example.com</string>
     <string name="blocklist_domains_empty">Không có tên miền nào bị chặn</string>
     <string name="blocklist_domain_added">Đã chặn tên miền: %s</string>
     <string name="blocklist_domain_removed">Đã gỡ tên miền khỏi danh sách chặn</string>
     <string name="blocklist_domain_already_exists">Tên miền đã có trong danh sách chặn</string>
-
     <string name="settings_show_bottom_nav_labels">Hiển thị chữ ở thanh điều hướng</string>
     <string name="settings_show_bottom_nav_labels_desc">Hiển thị văn bản bên dưới biểu tượng ở thanh điều hướng dưới cùng</string>
     <string name="vpn_phase_waiting_network">Đang chờ mạng…</string>
-
     <string name="import_from_file">Nhập từ tệp</string>
     <string name="export_to_file">Xuất ra tệp</string>
     <string name="export_format_title">Định dạng xuất</string>
@@ -546,29 +397,12 @@
     <string name="rules_exported">Đã xuất %d quy tắc</string>
     <string name="export_failed">Xuất không thành công: %s</string>
     <string name="import_failed">Nhập không thành công: %s</string>
-    <string name="import_no_valid_rules">Không tìm thấy quy tắc hợp lệ nào trong tệp</string>
     <string name="wireguard_import_title">Nhập WireGuard</string>
     <string name="wireguard_import_button">Nhập .conf</string>
     <string name="wireguard_empty_title">Chưa tải cấu hình nào</string>
     <string name="wireguard_empty_desc">Chạm vào nút bên dưới để nhập tệp WireGuard .conf</string>
-    <string name="wireguard_section_interface">Giao diện (Interface)</string>
-    <string name="wireguard_section_peer">Máy khách %d</string>
-    <string name="wireguard_label_address">Địa chỉ</string>
-    <string name="wireguard_label_private_key">Khóa riêng tư</string>
-    <string name="wireguard_label_listen_port">Cổng nghe</string>
-    <string name="wireguard_label_public_key">Khóa công khai</string>
-    <string name="wireguard_label_endpoint">Điểm cuối</string>
-    <string name="wireguard_label_allowed_ips">IP được phép</string>
-    <string name="wireguard_label_preshared_key">Khóa chia sẻ trước</string>
-    <string name="wireguard_label_keepalive">Duy trì kết nối liên tục</string>
-    <string name="wireguard_keepalive_value">%d giây</string>
-    <string name="wireguard_toggle_key_visibility">Chuyển đổi hiển thị khóa</string>
-    <string name="wireguard_copy_key">Sao chép khóa</string>
     <string name="wireguard_connect">Kết nối đường hầm</string>
     <string name="wireguard_disconnect">Ngắt kết nối đường hầm</string>
-    <string name="wireguard_save_activate">Lưu &amp; Kích hoạt</string>
-    <string name="wireguard_clear">Xóa WireGuard</string>
-    <string name="wireguard_active_label">WireGuard Đang hoạt động — Khởi động lại VPN để áp dụng</string>
     <string name="https_filtering_title">Lọc HTTPS</string>
     <string name="https_filtering_toggle_label">Bộ lọc quảng cáo HTTPS</string>
     <string name="https_filtering_status_active">Đang hoạt động — Ẩn quảng cáo</string>
@@ -579,7 +413,7 @@
     <string name="https_filtering_ca_desc">Làm theo các bước sau để thiết lập bộ lọc quảng cáo HTTPS:</string>
     <string name="https_filtering_export_ca">Bước 1: Lưu chứng chỉ vào thư mục Tải xuống</string>
     <string name="https_filtering_cert_saved">Đã lưu chứng chỉ vào thư mục Tải xuống!</string>
-    <string name="https_filtering_install_steps">Bước 2: Cài đặt chứng chỉ theo cách thủ công:\n\n1. Đi tới Cài đặt → Bảo mật → Mã hóa &amp; thông tin xác thực\n2. Chạm vào \"Cài đặt chứng chỉ\" → \"Chứng chỉ CA\"\n3. Chọn \"BlockAds-RootCA.crt\" từ Tải xuống\n4. Xác nhận cài đặt</string>
+    <string name="https_filtering_install_steps">Bước 2: Cài đặt chứng chỉ theo cách thủ công:\n\n1. Đi tới Cài đặt → Bảo mật → Mã hóa &amp; thông tin xác thực\n2. Chạm vào \&quot;Cài đặt chứng chỉ\&quot; → \&quot;Chứng chỉ CA\&quot;\n3. Chọn \&quot;BlockAds-RootCA.crt\&quot; từ Tải xuống\n4. Xác nhận cài đặt</string>
     <string name="https_filtering_open_settings">Mở cài đặt bảo mật</string>
     <string name="https_filtering_step1_title">Bước 1: Lưu chứng chỉ</string>
     <string name="https_filtering_step1_desc">Tải chứng chỉ Root CA xuống thiết bị của bạn</string>
@@ -591,7 +425,7 @@
     <string name="https_filtering_cert_installed">Đã cài đặt chứng chỉ ✓</string>
     <string name="https_filtering_cert_not_installed">Chưa cài đặt chứng chỉ</string>
     <string name="https_filtering_cert_checking">Đang kiểm tra…</string>
-    <string name="https_filtering_cert_vpn_required">Nhấn \"Xác minh chứng chỉ\" để kiểm tra</string>
+    <string name="https_filtering_cert_vpn_required">Nhấn \&quot;Xác minh chứng chỉ\&quot; để kiểm tra</string>
     <string name="https_filtering_browser_section">Lựa chọn trình duyệt</string>
     <string name="https_filtering_browser_desc">Chọn trình duyệt để áp dụng lọc quảng cáo. Chỉ các ứng dụng được chọn mới được lọc.</string>
     <string name="https_filtering_settings_desc">Ẩn quảng cáo trực quan trong trình duyệt</string>
@@ -605,12 +439,8 @@
     <string name="add_blocklist_domains_title">Thêm tên miền bị chặn</string>
     <string name="add_whitelisted_domain_title">Thêm tên miền được phép</string>
     <string name="vpn_conflict_title">Kết nối bị chặn</string>
-    <string name="vpn_conflict_desc">Android chỉ cho phép một kết nối VPN hoạt động cùng lúc. Một VPN khác đang chạy trên thiết bị của bạn.\n\nVui lòng ngắt kết nối VPN kia hoặc tắt \"VPN luôn bật\" trong Cài đặt trước khi kết nối BlockAds.</string>
+    <string name="vpn_conflict_desc">Android chỉ cho phép một kết nối VPN hoạt động cùng lúc. Một VPN khác đang chạy trên thiết bị của bạn.\n\nVui lòng ngắt kết nối VPN kia hoặc tắt \&quot;VPN luôn bật\&quot; trong Cài đặt trước khi kết nối BlockAds.</string>
     <string name="open_settings">Mở Cài đặt</string>
-    <string name="disable_all_user_apps">Tắt tất cả ứng dụng người dùng</string>
-    <string name="enable_all_user_apps">Bật tất cả ứng dụng người dùng</string>
-    <string name="disable_all_system_apps">Tắt tất cả ứng dụng hệ thống</string>
-    <string name="enable_all_system_apps">Bật tất cả ứng dụng hệ thống</string>
     <string name="vpn_network_switch_waiting">Đang chờ mạng ổn định… %1$ds</string>
     <string name="settings_network_switch_delay">Độ trễ khi chuyển mạng</string>
     <string name="settings_network_switch_delay_desc">Tạm dừng kết nối lại VPN sau khi chuyển mạng (hữu ích cho Gọi qua Wi-Fi)</string>
@@ -625,10 +455,8 @@
     <string name="onboarding_crash_report_btn_no">Không, cảm ơn</string>
     <string name="settings_privacy_diagnostics_title">Quyền riêng tư &amp; Chẩn đoán</string>
     <string name="settings_privacy_diagnostics_desc">Quản lý báo cáo sự cố và nhật ký cục bộ</string>
-
     <string name="settings_crash_reporting_title">Gửi báo cáo sự cố ẩn danh</string>
     <string name="settings_crash_reporting_subtitle">Tự động gửi nhật ký lỗi để giúp chúng tôi khắc phục sự cố. Không bao gồm dữ liệu cá nhân của bạn.</string>
-
     <string name="settings_export_logs_title">Xuất nhật ký cục bộ</string>
     <string name="settings_export_logs_subtitle">Chia sẻ trực tiếp tệp nhật ký ngoại tuyến qua Email, Telegram, v.v.</string>
     <string name="settings_export_logs_chooser_title">Chia sẻ nhật ký</string>
@@ -657,4 +485,26 @@
     <string name="filter_compile_success_title">Biên dịch bộ lọc thành công</string>
     <string name="filter_compile_failed_title">Biên dịch bộ lọc thất bại</string>
     <string name="filter_compile_channel_name">Biên dịch bộ lọc</string>
+    <string name="wireguard_https_filtering_disabled">Đã tắt lọc HTTPS (không tương thích với WireGuard)</string>
+    <string name="https_filtering_wireguard_disabled">Đã tắt WireGuard (không tương thích với lọc HTTPS)</string>
+    <string name="wireguard_imported">Đã nhập \'%1$s\'</string>
+    <string name="wireguard_deleted">Đã xóa \'%1$s\'</string>
+    <string name="wireguard_active">Đang dùng: %1$s</string>
+    <string name="wireguard_renamed">Đã đổi tên</string>
+    <string name="wireguard_enabled_restarting">Đã bật WireGuard. Đang khởi động lại VPN…</string>
+    <string name="wireguard_disabled_restarting">Đã tắt WireGuard. Đang khởi động lại VPN…</string>
+    <string name="wireguard_delete_dialog_title">Xóa \'%1$s\'?</string>
+    <string name="wireguard_delete_dialog_text">Hồ sơ này sẽ bị xóa. Không thể hoàn tác.</string>
+    <string name="wireguard_action_delete">Xóa</string>
+    <string name="wireguard_action_cancel">Hủy</string>
+    <string name="wireguard_action_save">Lưu</string>
+    <string name="wireguard_action_edit">Sửa</string>
+    <string name="wireguard_action_rename">Đổi tên</string>
+    <string name="wireguard_more_options">Tùy chọn khác</string>
+    <string name="wireguard_no_peer">(không có peer)</string>
+    <string name="wireguard_rename_dialog_title">Đổi tên hồ sơ</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Đã lưu chứng chỉ vào Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">Đã lưu chứng chỉ. Hãy cài đặt từ trình quản lý tệp.</string>
+    <string name="https_filtering_started">Đã bật lọc HTTPS</string>
+    <string name="https_filtering_stopped">Đã tắt lọc HTTPS</string>
 </resources>

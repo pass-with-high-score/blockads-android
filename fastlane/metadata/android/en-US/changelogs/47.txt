@@ -1,0 +1,5 @@
+- HTTPS filtering refactored to a userspace TCP/IP stack (AdGuard-style per-app MITM)
+- New scriptlet engine: blocks ads at JavaScript level (set-constant, abort-on-property-read, prevent-fetch, etc.)
+- Curated 284-domain HTTPS passthrough list (banking, payments, gov) so cert-pinned apps stay working
+- CA cert install verification on the HTTPS Filtering screen, auto-refreshes after returning from Settings
+- Backend support for filter lists with cosmetic CSS + scriptlets artifacts

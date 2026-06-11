@@ -62,4 +62,7 @@ data object CustomRuleKey : NavKey
 data object WireGuardImportKey : NavKey
 
 @Serializable
+data class WireGuardEditKey(val profileId: String) : NavKey
+
+@Serializable
 data object HttpsFilteringKey : NavKey
