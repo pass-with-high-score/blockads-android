@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.Blockads" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
