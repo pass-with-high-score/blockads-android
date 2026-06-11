@@ -65,11 +65,18 @@ object IptablesManager {
      *
      * @param context App context (used to get UID)
      * @param blockDoT If true, blocks DoT (port 853) to force DNS fallback to port 53
+     * @param whitelistUids UIDs of whitelisted apps whose DNS must bypass the
+     *        redirect entirely — the Root-mode equivalent of VPN mode's
+     *        addDisallowedApplication (#150)
      * @return true if at least IPv4 rules succeeded
      */
-    fun setupRules(context: Context, blockDoT: Boolean = true): Boolean {
+    fun setupRules(
+        context: Context,
+        blockDoT: Boolean = true,
+        whitelistUids: Collection<Int> = emptyList()
+    ): Boolean {
         val uid = context.applicationInfo.uid
-        Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT")
+        Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT, whitelistUids=$whitelistUids")
 
         // Always teardown first (idempotent)
         teardownRules()
@@ -93,6 +100,10 @@ object IptablesManager {
             add("iptables -t nat -N $CHAIN 2>/dev/null || true")
             // Skip our own app's traffic (prevents infinite loop)
             add("iptables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
+            // Skip whitelisted apps — their DNS goes straight upstream
+            for (wUid in whitelistUids) {
+                add("iptables -t nat -A $CHAIN -m owner --uid-owner $wUid -j RETURN")
+            }
             // Redirect UDP DNS → local engine
             add("iptables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             // Redirect TCP DNS → local engine
@@ -104,6 +115,9 @@ object IptablesManager {
                 // filter table — DROP port 853 (DoT)
                 add("iptables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
                 add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
+                for (wUid in whitelistUids) {
+                    add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $wUid -j RETURN")
+                }
                 add("iptables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
                 add("iptables -t filter -A OUTPUT -j $CHAIN_FILTER")
             }
@@ -131,6 +145,9 @@ object IptablesManager {
         val ipv6Commands = buildList {
             add("ip6tables -t nat -N $CHAIN 2>/dev/null || true")
             add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
+            for (wUid in whitelistUids) {
+                add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $wUid -j RETURN")
+            }
             add("ip6tables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A OUTPUT -j $CHAIN")
@@ -138,6 +155,9 @@ object IptablesManager {
             if (blockDoT) {
                 add("ip6tables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
                 add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
+                for (wUid in whitelistUids) {
+                    add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $wUid -j RETURN")
+                }
                 add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
                 add("ip6tables -t filter -A OUTPUT -j $CHAIN_FILTER")
             }

@@ -114,6 +114,11 @@ class RootProxyService : Service() {
     @Volatile
     private var firewallManager: FirewallManager? = null
 
+    // UIDs of whitelisted apps, excluded from the iptables DNS redirect.
+    // Kept as a field so the watchdog re-applies the same rules (#150).
+    @Volatile
+    private var whitelistedUids: List<Int> = emptyList()
+
     override fun onCreate() {
         super.onCreate()
         val koin = getKoin()
@@ -208,6 +213,19 @@ class RootProxyService : Service() {
                     firewallManager = null
                 }
 
+                // Resolve whitelisted apps to UIDs so iptables skips their
+                // DNS — Root-mode equivalent of VPN mode's
+                // addDisallowedApplication. Without this the whitelist had
+                // no effect at all in Root Proxy mode (#150).
+                whitelistedUids = appPrefs.getWhitelistedAppsSnapshot().mapNotNull { pkg ->
+                    try {
+                        packageManager.getApplicationInfo(pkg, 0).uid
+                    } catch (e: Exception) {
+                        Timber.w("Whitelisted app not found, skipping: $pkg")
+                        null
+                    }
+                }.distinct()
+
                 // 3. Retry loop for Standalone mode and IPTables setup
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
                 var proxyStarted = false
@@ -222,7 +240,7 @@ class RootProxyService : Service() {
                     } else {
                         val engineStarted = goTunnelAdapter.startStandalone(port = 15353)
                         if (engineStarted) {
-                            if (IptablesManager.setupRules(this@RootProxyService)) {
+                            if (IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)) {
                                 proxyStarted = true
                             } else {
                                 goTunnelAdapter.stop() // stop engine if iptables fails
@@ -364,7 +382,7 @@ class RootProxyService : Service() {
                 // For now, check if iptables rules are still active
                 if (!IptablesManager.isActive()) {
                     Timber.w("iptables rules disappeared — re-applying")
-                    IptablesManager.setupRules(this@RootProxyService)
+                    IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)
                 }
             }
         }
