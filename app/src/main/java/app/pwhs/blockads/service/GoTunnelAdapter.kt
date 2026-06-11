@@ -275,12 +275,8 @@ class GoTunnelAdapter(
             try {
                 engine.setUseTcpStack(true)
                 engine.setOutboundAdapter(tunnel.DirectOutbound())
-                // Large MTU (matches AdGuard's 9000) so the gVisor stack does
-                // egress segmentation itself. A 1500 TUN MTU through the
-                // userspace forwarder caused TCP connection resets. Must match
-                // the VpnService.Builder.setMtu() value used for full-route.
-                engine.setTunMTU(FULL_ROUTE_MTU.toLong())
-                Timber.d("Full-route capture: TCP stack + DirectOutbound + MTU $FULL_ROUTE_MTU")
+                // MTU stays 1500 (jumbo hung on the fd-based Android TUN).
+                Timber.d("Full-route capture: TCP stack + DirectOutbound enabled (MTU 1500)")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to enable forwarding for full-route capture")
             }

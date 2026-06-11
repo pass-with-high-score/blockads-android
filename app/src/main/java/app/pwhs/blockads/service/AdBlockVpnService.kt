@@ -678,11 +678,9 @@ class AdBlockVpnService : VpnService() {
                 // The forcing of full-route for everyone in #187 broke
                 // internet — hence the toggle, default OFF.
                 if (fullRoute) {
-                    // Large MTU (matches AdGuard) so the userspace gVisor
-                    // stack handles egress segmentation — a 1500 MTU through
-                    // the forwarder caused TCP resets. Must match
-                    // engine.setTunMTU() in GoTunnelAdapter.
-                    b.setMtu(GoTunnelAdapter.FULL_ROUTE_MTU)
+                    // Keep MTU at 1500 (the default set above). Jumbo MTU
+                    // (9000) made large packets hang because the fd-based
+                    // Android TUN read/write path doesn't carry jumbo frames.
                     b.addRoute("0.0.0.0", 0)
                     b.addRoute("::", 0)
                     val excludeLan = runBlocking { appPrefs.excludeLan.first() }
