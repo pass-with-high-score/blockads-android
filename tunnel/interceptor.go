@@ -85,6 +85,13 @@ func (i *DnsInterceptor) Run(tunFile *os.File) {
 			if queryInfo != nil {
 				go i.engine.handleDNSQuery(queryInfo)
 			}
+		} else if i.engine.IsUsingTcpStack() && i.engine.IsDroppingQuic() && isUDP443Packet(buf, n) {
+			// Drop QUIC (UDP 443) so the app falls back to TCP/TLS, which
+			// the userspace stack relays reliably. Without this, QUIC
+			// relayed as userspace datagrams breaks realtime apps
+			// (Telegram/Messenger) in full-route mode; browsers and
+			// messengers both fall back to TCP automatically.
+			continue
 		} else if i.engine.IsUsingTcpStack() {
 			// Hand non-DNS packets to the userspace TCP/IP stack
 			// instead of the legacy Router. atomic.Pointer load avoids

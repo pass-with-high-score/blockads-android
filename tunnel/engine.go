@@ -111,6 +111,15 @@ type Engine struct {
 	tcpStackPipe atomic.Pointer[packetPipe]
 	useTcpStack  atomic.Bool
 
+	// dropQuic, when true, makes the interceptor drop outbound QUIC
+	// (UDP port 443) so apps transparently fall back to TCP/TLS. Used by
+	// full-route capture mode: the userspace stack relays TCP reliably,
+	// but QUIC relayed over a userspace datagram copy is unreliable and
+	// breaks realtime apps (Telegram/Messenger). Forcing the well-known
+	// QUIC→TCP fallback keeps those apps working while still capturing
+	// all traffic. (Same approach AdGuard uses to filter HTTPS.)
+	dropQuic atomic.Bool
+
 	// Stack-mode MITM state (Phase D). When both are non-nil, the stack
 	// uses the MITM TCP handler; otherwise the Phase C direct-dial
 	// passthrough handler is used.
@@ -1086,6 +1095,15 @@ func (e *Engine) SetUseTcpStack(enabled bool) {
 
 // IsUsingTcpStack reports the current flag value.
 func (e *Engine) IsUsingTcpStack() bool { return e.useTcpStack.Load() }
+
+// SetDropQuic toggles dropping of QUIC (UDP 443) so apps fall back to
+// TCP. Enable alongside SetUseTcpStack(true) in full-route capture mode.
+func (e *Engine) SetDropQuic(enabled bool) {
+	e.dropQuic.Store(enabled)
+}
+
+// IsDroppingQuic reports the current flag value.
+func (e *Engine) IsDroppingQuic() bool { return e.dropQuic.Load() }
 
 // SetUIDResolver registers the Kotlin-implemented resolver used to look
 // up the owning app UID for each TCP/UDP flow terminated by the

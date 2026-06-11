@@ -275,7 +275,11 @@ class GoTunnelAdapter(
             try {
                 engine.setUseTcpStack(true)
                 engine.setOutboundAdapter(tunnel.DirectOutbound())
-                Timber.d("Full-route capture: TCP stack + DirectOutbound enabled for forwarding")
+                // Drop QUIC (UDP 443) → apps fall back to TCP, which the
+                // stack relays reliably. QUIC relayed as userspace datagrams
+                // broke Telegram/Messenger; the fallback keeps them working.
+                engine.setDropQuic(true)
+                Timber.d("Full-route capture: TCP stack + DirectOutbound + QUIC-drop enabled")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to enable forwarding for full-route capture")
             }
