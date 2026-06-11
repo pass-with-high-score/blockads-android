@@ -663,6 +663,13 @@ class AdBlockVpnService : VpnService() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 builder.setUnderlyingNetworks(null)
+                // VPN networks are METERED by default on Android 10+. Apps
+                // with "Wi-Fi only" download settings (OneDrive, Audible,
+                // torrent clients, ...) check NOT_METERED, so they refuse to
+                // work while the VPN is up even on Wi-Fi. Inherit meteredness
+                // from the underlying network instead (Wi-Fi stays unmetered,
+                // cellular stays metered).
+                builder.setMetered(false)
             }
 
             vpnInterface = builder.establish()
