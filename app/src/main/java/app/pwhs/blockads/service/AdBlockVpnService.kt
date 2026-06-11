@@ -527,6 +527,10 @@ class AdBlockVpnService : VpnService() {
                 // Read further HTTPS Filtering config (httpsFilteringEnabled is already loaded at the top)
                 val selectedBrowsers = appPrefs.getSelectedBrowsersSnapshot()
                 val certDir = filesDir.absolutePath
+                // Full-route capture only applies to Direct (DNS-only) mode;
+                // WireGuard mode is already full-tunnel via its own config.
+                val forwardAllTraffic = wgConfigJson.isEmpty() &&
+                        appPrefs.getFullRouteCaptureSnapshot()
 
                 vpnInterface?.let {
                     // start() blocks the coroutine while reading from TUN
@@ -537,6 +541,7 @@ class AdBlockVpnService : VpnService() {
                         httpsFilteringEnabled = httpsFilteringEnabled,
                         selectedBrowsers = selectedBrowsers,
                         certDir = certDir,
+                        forwardAllTraffic = forwardAllTraffic,
                         socketProtector = { fd ->
                             try {
                                 protect(fd)
@@ -592,6 +597,9 @@ class AdBlockVpnService : VpnService() {
                     }
                 } else null
 
+            // True when DNS-only mode is set to capture all traffic (toggle).
+            var fullRoute = false
+
             val builder = if (wgConfig != null) {
                 // WireGuard mode — full-route VPN (all traffic through TUN)
                 Timber.d("Establishing VPN in WireGuard mode")
@@ -641,7 +649,8 @@ class AdBlockVpnService : VpnService() {
                 b
             } else {
                 // Direct mode — DNS + (optional) HTTPS local asset host.
-                Timber.d("Establishing VPN in DNS-only mode (httpsFiltering=$httpsFilteringEnabled)")
+                fullRoute = runBlocking { appPrefs.getFullRouteCaptureSnapshot() }
+                Timber.d("Establishing VPN in DNS-only mode (httpsFiltering=$httpsFilteringEnabled, fullRoute=$fullRoute)")
                 val b = Builder()
                     .setSession("BlockAds")
                     .addAddress("10.0.0.2", 32)
@@ -653,15 +662,37 @@ class AdBlockVpnService : VpnService() {
                     .setBlocking(true)
                     .setMtu(1500)
 
-                // DNS-only routing: only the fake DNS IPs are captured. A
-                // full 0.0.0.0/0 route was tried for the #145 DNS-leak fix
-                // but the engine drops non-DNS packets in this mode (it only
-                // forwards when the userspace TCP stack is active for HTTPS
-                // filtering), so full-route blackholed all traffic = no
-                // internet. Reverted to DNS-only. The Private DNS (DoT)
-                // leak is instead surfaced to the user via a warning
-                // (see NetworkMonitor.isPrivateDnsActive); a proper capture
-                // needs engine-level DoT handling (tracked in #145).
+                // Routing depends on the "Full network protection" toggle.
+                //
+                // OFF (default): DNS-only — only the fake DNS IPs above are
+                // captured. Non-DNS traffic flows outside the tunnel. This is
+                // the safe, proven default; the engine drops anything it gets
+                // that isn't DNS, so we must NOT route general traffic here.
+                //
+                // ON: route everything through the engine and enable the
+                // userspace TCP stack (see startVpn → forwardAllTraffic) so
+                // the engine forwards non-DNS flows via DirectOutbound on
+                // protect()ed sockets. This captures Private DNS/DoT leaks
+                // (#145) and is kill-switch compatible (#162). Opt-in because
+                // routing all traffic through the userspace stack is heavier.
+                // The forcing of full-route for everyone in #187 broke
+                // internet — hence the toggle, default OFF.
+                if (fullRoute) {
+                    b.addRoute("0.0.0.0", 0)
+                    b.addRoute("::", 0)
+                    val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                    if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        try {
+                            b.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName("10.0.0.0"), 8))
+                            b.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName("172.16.0.0"), 12))
+                            b.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName("192.168.0.0"), 16))
+                            b.excludeRoute(android.net.IpPrefix(java.net.InetAddress.getByName("169.254.0.0"), 16))
+                            Timber.d("LAN excluded from full-route VPN")
+                        } catch (e: Exception) {
+                            Timber.w(e, "Failed to exclude LAN routes")
+                        }
+                    }
+                }
 
                 if (httpsFilteringEnabled) {
                     // Route the synthetic IP range used for the local
@@ -699,9 +730,9 @@ class AdBlockVpnService : VpnService() {
             }
 
             // DNS-only mode allows apps to bypass the tunnel for non-DNS
-            // sockets (we only route the fake DNS IPs anyway). WireGuard
-            // mode is full-tunnel, so no bypass there.
-            if (wgConfig == null) {
+            // sockets (we only route the fake DNS IPs anyway). WireGuard and
+            // full-route capture are full-tunnel, so no bypass there.
+            if (wgConfig == null && !fullRoute) {
                 builder.allowBypass()
             }
 

@@ -66,6 +66,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_HIDE_FROM_RECENTS = booleanPreferencesKey("hide_from_recents")
         private val KEY_SPLIT_DNS_ZONES = stringPreferencesKey("split_dns_zones")
         private val KEY_EXCLUDE_LAN = booleanPreferencesKey("exclude_lan")
+        private val KEY_FULL_ROUTE_CAPTURE = booleanPreferencesKey("full_route_capture")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
@@ -317,6 +318,19 @@ class AppPreferences(private val context: Context) {
 
     val excludeLan: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_EXCLUDE_LAN] ?: false
+    }
+
+    /**
+     * Full network capture (VPN/Direct mode). Default OFF.
+     * OFF: DNS-only routing — only the fake DNS IPs are captured (safe, the
+     *      proven default; non-DNS traffic flows outside the tunnel).
+     * ON:  route 0.0.0.0/0 + ::/0 and enable the userspace TCP stack so the
+     *      engine forwards non-DNS traffic, capturing Private DNS/DoT leaks
+     *      (#145) and enabling kill-switch compatibility (#162). Opt-in
+     *      because it routes everything through the engine.
+     */
+    val fullRouteCapture: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FULL_ROUTE_CAPTURE] ?: false
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
@@ -663,6 +677,16 @@ class AppPreferences(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[KEY_EXCLUDE_LAN] = enabled
         }
+    }
+
+    suspend fun setFullRouteCapture(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_FULL_ROUTE_CAPTURE] = enabled
+        }
+    }
+
+    suspend fun getFullRouteCaptureSnapshot(): Boolean {
+        return context.dataStore.data.map { it[KEY_FULL_ROUTE_CAPTURE] ?: false }.first()
     }
 
     suspend fun setSplitDnsZones(zones: String) {

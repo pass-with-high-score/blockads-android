@@ -34,6 +34,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.VpnLock
 
 @Composable
 fun ProtectionSection(
@@ -41,6 +42,7 @@ fun ProtectionSection(
     routingMode: String,
     networkSwitchDelayEnabled: Boolean,
     networkSwitchDelaySec: Int,
+    fullRouteCapture: Boolean,
     safeSearchEnabled: Boolean,
     youtubeRestrictedMode: Boolean,
     dnsResponseType: String,
@@ -49,6 +51,7 @@ fun ProtectionSection(
     onSetRoutingMode: (Boolean) -> Unit,
     onSetNetworkSwitchDelayEnabled: (Boolean) -> Unit,
     onSetNetworkSwitchDelaySec: (Int) -> Unit,
+    onSetFullRouteCapture: (Boolean) -> Unit,
     onSetSafeSearchEnabled: (Boolean) -> Unit,
     onSetYoutubeRestrictedMode: (Boolean) -> Unit,
     onShowDnsResponseTypeDialog: () -> Unit,
@@ -129,6 +132,20 @@ fun ProtectionSection(
                             }
                         }
                     }
+                }
+                // Full network protection — only meaningful in Direct (DNS) mode
+                if (routingMode == AppPreferences.ROUTING_MODE_DIRECT) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                    )
+                    SettingsToggleItem(
+                        icon = Icons.Default.VpnLock,
+                        title = stringResource(R.string.settings_full_route),
+                        subtitle = stringResource(R.string.settings_full_route_desc),
+                        isChecked = fullRouteCapture,
+                        onCheckedChange = onSetFullRouteCapture
+                    )
                 }
                 // Safe Search
                 HorizontalDivider(
