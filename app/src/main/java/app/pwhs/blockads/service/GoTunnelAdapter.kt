@@ -51,6 +51,17 @@ class GoTunnelAdapter(
     @Volatile
     private var isRunning = false
 
+    init {
+        // Route Go engine logs to Timber/logcat. gomobile does NOT redirect
+        // Go's os.Stderr to logcat, so without this the engine's logs
+        // (DnsInterceptor, TcpStack relay, dial results…) are invisible.
+        try {
+            tunnel.Tunnel.setLogger(tunnel.Logger { msg -> Timber.tag("GoEngine").d(msg) })
+        } catch (e: Throwable) {
+            Timber.w(e, "Failed to register Go engine logger")
+        }
+    }
+
     /**
      * Configure the DNS settings for the Go engine.
      */
@@ -251,15 +262,38 @@ class GoTunnelAdapter(
      * @param certDir Directory to store the proxy's root CA certificate
      */
     fun start(
-        vpnInterface: android.os.ParcelFileDescriptor, 
+        vpnInterface: android.os.ParcelFileDescriptor,
         wgConfigJson: String = "",
         httpsFilteringEnabled: Boolean = false,
         selectedBrowsers: Set<String> = emptySet(),
         certDir: String = "",
+        forwardAllTraffic: Boolean = false,
         socketProtector: ((Int) -> Boolean)? = null
     ) {
         if (isRunning) return
         isRunning = true
+
+        // Full-route capture (DNS-only mode toggle): the TUN now receives ALL
+        // packets, so the engine must forward non-DNS flows instead of
+        // dropping them. Enabling the userspace TCP stack alone is NOT enough
+        // — the stack needs an OutboundAdapter to actually send packets out,
+        // otherwise everything is blackholed (observed: full-route = no
+        // internet). The HTTPS-filtering path gets its outbound from
+        // startStackMitm(); for plain full-route we wire a DirectOutbound
+        // adapter so flows are forwarded straight to the internet (no MITM).
+        // The engine's protector (passed to start()) protects these sockets.
+        if (forwardAllTraffic && !httpsFilteringEnabled) {
+            try {
+                engine.setUseTcpStack(true)
+                engine.setOutboundAdapter(tunnel.DirectOutbound())
+                // Low MTU so the stack advertises a small MSS → no PMTU
+                // blackhole / partial page loads. Must match VpnService MTU.
+                engine.setTunMTU(FULL_ROUTE_MTU.toLong())
+                Timber.d("Full-route capture: TCP stack + DirectOutbound + MTU $FULL_ROUTE_MTU")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to enable forwarding for full-route capture")
+            }
+        }
 
         // 1. Synchronize the MITM state before starting the tunnel.
         // HTTPS filtering now runs through the userspace TCP/IP stack
@@ -446,6 +480,13 @@ class GoTunnelAdapter(
     }
 
     companion object {
+        /** TUN/stack MTU for full-route capture. Set LOW (1280, the IPv6
+         *  minimum) so the gVisor stack advertises a small TCP MSS to apps;
+         *  segments then fit through any real path without PMTU blackholing.
+         *  1500 caused partial page loads (large packets dropped en route);
+         *  9000 hung (fd-based TUN can't carry jumbo). 1280 is the safe middle. */
+        const val FULL_ROUTE_MTU = 1280
+
         /**
          * Convert DNS query type number to human-readable string.
          * DNS types defined in RFC 1035 & 3596.

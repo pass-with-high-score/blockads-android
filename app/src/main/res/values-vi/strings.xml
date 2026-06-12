@@ -511,4 +511,6 @@
     <string name="root_proxy_start_failed_text">Không thể lấy quyền root để bật bảo vệ. Nhấn Bật để thử lại.</string>
     <string name="private_dns_warning_title">DNS riêng tư đang bật</string>
     <string name="private_dns_warning_text">DNS riêng tư của Android bỏ qua BlockAds nên việc lọc có thể không áp dụng. Hãy đặt DNS riêng tư về Tắt hoặc Tự động trong cài đặt hệ thống.</string>
+    <string name="settings_full_route">Bảo vệ toàn mạng</string>
+    <string name="settings_full_route_desc">Định tuyến toàn bộ lưu lượng qua BlockAds để chặn rò rỉ DNS (DNS riêng tư/DoT). Có thể ảnh hưởng pin và tốc độ. Nếu mất mạng, hãy tắt tùy chọn này.</string>
 </resources>

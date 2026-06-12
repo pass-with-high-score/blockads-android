@@ -42,21 +42,22 @@ func newProtectedTcpHandler(uidr UIDResolver, protectFn func(fd int) bool) TcpFl
 			Control: protectedControl(protectFn),
 		}
 
+		logf("[TcpStack] TCP uid=%d %s → %s DIAL...", uid, flow.appIP, dst)
 		remote, err := dialer.Dial("tcp", dst)
 		if err != nil {
-			logf("[TcpStack] TCP uid=%d dial %s: %v", uid, dst, err)
+			logf("[TcpStack] TCP uid=%d dial %s FAILED: %v", uid, dst, err)
 			return
 		}
 		defer remote.Close()
 
-		logf("[TcpStack] TCP uid=%d %s ↔ %s", uid, flow.appIP, dst)
+		logf("[TcpStack] TCP uid=%d %s ↔ %s CONNECTED, relaying", uid, flow.appIP, dst)
 
-		// Idle deadline on both sides so a stalled flow can't hold
-		// stack goroutines forever.
-		// No absolute deadline — rely on tun2socks' TCP keepalive
-		// (60s idle / 30s interval / 9 probes) to clean up stuck
-		// connections. Hard deadlines killed long-lived streams.
-		bidiCopyFlow(conn, remote)
+		// No absolute deadline — rely on tun2socks' TCP keepalive to
+		// clean up stuck connections. Hard deadlines killed long-lived
+		// streams.
+		up, down, errUp, errDown := bidiCopyFlow(conn, remote)
+		logf("[TcpStack] TCP uid=%d %s ↔ %s DONE up=%d down=%d errUp=%v errDown=%v",
+			uid, flow.appIP, dst, up, down, errUp, errDown)
 	}
 }
 
@@ -82,17 +83,15 @@ func newProtectedUdpHandler(uidr UIDResolver, protectFn func(fd int) bool) UdpFl
 		}
 		remote, err := dialer.Dial("udp", dst.String())
 		if err != nil {
-			logf("[TcpStack] UDP uid=%d dial %s: %v", uid, dst, err)
+			logf("[TcpStack] UDP uid=%d dial %s FAILED: %v", uid, dst, err)
 			return
 		}
 		defer remote.Close()
 
-		logf("[TcpStack] UDP uid=%d %s ↔ %s", uid, flow.appIP, dst)
-
-		// No absolute deadline — rely on tun2socks' TCP keepalive
-		// (60s idle / 30s interval / 9 probes) to clean up stuck
-		// connections. Hard deadlines killed long-lived streams.
-		bidiCopyFlow(conn, remote)
+		logf("[TcpStack] UDP uid=%d %s ↔ %s CONNECTED", uid, flow.appIP, dst)
+		up, down, errUp, errDown := bidiCopyFlow(conn, remote)
+		logf("[TcpStack] UDP uid=%d %s ↔ %s DONE up=%d down=%d errUp=%v errDown=%v",
+			uid, flow.appIP, dst, up, down, errUp, errDown)
 	}
 }
 
@@ -106,7 +105,12 @@ func protectedControl(protectFn func(fd int) bool) func(network, address string,
 	}
 	return func(network, address string, c syscall.RawConn) error {
 		return c.Control(func(fd uintptr) {
-			protectFn(int(fd))
+			ok := protectFn(int(fd))
+			if !ok {
+				// Socket NOT protected → its packets loop back into the
+				// VPN TUN → connect can never complete (i/o timeout).
+				logf("[TcpStack] protect(fd=%d) FAILED for %s %s — socket will loop!", int(fd), network, address)
+			}
 		})
 	}
 }
@@ -116,24 +120,25 @@ func protectedControl(protectFn func(fd int) bool) func(network, address string,
 // semantics where available so a FIN on one direction does not abort
 // the opposite direction mid-stream (same bug H1 fixed for the legacy
 // proxy's bidirectionalCopy).
-func bidiCopyFlow(a, b net.Conn) {
+func bidiCopyFlow(a, b net.Conn) (aToB, bToA int64, errAB, errBA error) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		io.Copy(b, a)
+		aToB, errAB = io.Copy(b, a)
 		if cw, ok := b.(interface{ CloseWrite() error }); ok {
 			cw.CloseWrite()
 		}
 	}()
 	go func() {
 		defer wg.Done()
-		io.Copy(a, b)
+		bToA, errBA = io.Copy(a, b)
 		if cw, ok := a.(interface{ CloseWrite() error }); ok {
 			cw.CloseWrite()
 		}
 	}()
 
 	wg.Wait()
+	return aToB, bToA, errAB, errBA
 }

@@ -511,4 +511,6 @@
     <string name="root_proxy_start_failed_text">无法获取 Root 权限以启动防护。点按“启用”重试。</string>
     <string name="private_dns_warning_title">私人 DNS 已开启</string>
     <string name="private_dns_warning_text">Android 私人 DNS 会绕过 BlockAds，因此过滤可能不生效。请在系统设置中将私人 DNS 设为“关闭”或“自动”。</string>
+    <string name="settings_full_route">全网络保护</string>
+    <string name="settings_full_route_desc">通过 BlockAds 路由所有流量以防止 DNS 泄漏（私人 DNS/DoT）。可能影响电量和速度。若无法上网，请关闭。</string>
 </resources>

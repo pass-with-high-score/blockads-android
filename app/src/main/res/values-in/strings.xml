@@ -511,4 +511,6 @@
     <string name="root_proxy_start_failed_text">Tidak bisa mendapatkan akses root untuk memulai perlindungan. Ketuk Aktifkan untuk mencoba lagi.</string>
     <string name="private_dns_warning_title">DNS Pribadi aktif</string>
     <string name="private_dns_warning_text">DNS Pribadi Android melewati BlockAds, sehingga pemfilteran mungkin tidak diterapkan. Setel DNS Pribadi ke Nonaktif atau Otomatis di setelan sistem.</string>
+    <string name="settings_full_route">Perlindungan jaringan penuh</string>
+    <string name="settings_full_route_desc">Arahkan semua lalu lintas melalui BlockAds untuk mencegah kebocoran DNS (DNS Pribadi/DoT). Dapat memengaruhi baterai dan kecepatan. Jika internet putus, matikan.</string>
 </resources>

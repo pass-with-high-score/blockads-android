@@ -111,6 +111,13 @@ type Engine struct {
 	tcpStackPipe atomic.Pointer[packetPipe]
 	useTcpStack  atomic.Bool
 
+	// tunMTU is the MTU of the userspace TCP/IP stack endpoint. It MUST
+	// match the VpnService TUN MTU. Full-route capture sets a large MTU
+	// (9000, matching AdGuard) so the gVisor stack handles egress
+	// segmentation itself — a 1500 TUN MTU through a userspace forwarder
+	// causes TCP connection resets. 0 means "use default" (1500).
+	tunMTU atomic.Int64
+
 	// Stack-mode MITM state (Phase D). When both are non-nil, the stack
 	// uses the MITM TCP handler; otherwise the Phase C direct-dial
 	// passthrough handler is used.
@@ -1087,6 +1094,12 @@ func (e *Engine) SetUseTcpStack(enabled bool) {
 // IsUsingTcpStack reports the current flag value.
 func (e *Engine) IsUsingTcpStack() bool { return e.useTcpStack.Load() }
 
+// SetTunMTU sets the userspace stack endpoint MTU. Must equal the
+// VpnService TUN MTU. Call before Engine.Start. 0 = default (1500).
+func (e *Engine) SetTunMTU(mtu int) {
+	e.tunMTU.Store(int64(mtu))
+}
+
 // SetUIDResolver registers the Kotlin-implemented resolver used to look
 // up the owning app UID for each TCP/UDP flow terminated by the
 // userspace TCP/IP stack. Typically wired once at VPN start.
@@ -1119,6 +1132,9 @@ func (e *Engine) startTcpStackParallel() error {
 	certMgr := e.stackCertMgr
 	filter := e.stackMitmFilter
 	mtu := uint32(defaultTunMTU)
+	if m := e.tunMTU.Load(); m > 0 {
+		mtu = uint32(m)
+	}
 	e.tcpStack = stack
 	e.mu.Unlock()
 	e.tcpStackPipe.Store(pipe)
@@ -1795,9 +1811,35 @@ func (e *Engine) notifyLog(domain string, blocked bool, queryType uint16, respon
 	}
 }
 
-// logf logs a message (will appear in Android logcat via stderr).
+// Logger is implemented by Kotlin so Go engine logs reach Android
+// logcat. gomobile does NOT redirect Go's os.Stderr to logcat, so
+// without a registered logger the engine's logs are invisible (this is
+// why full-route debugging was blind). Kotlin routes Log() to Timber.
+type Logger interface {
+	Log(msg string)
+}
+
+// engineLogger holds the optional Kotlin logger. atomic.Pointer keeps
+// logf race-free on the hot path.
+var engineLogger atomic.Pointer[Logger]
+
+// SetLogger registers the Kotlin logger used by logf. Pass nil to clear.
+func SetLogger(l Logger) {
+	if l == nil {
+		engineLogger.Store(nil)
+		return
+	}
+	engineLogger.Store(&l)
+}
+
+// logf logs a message via the registered Logger (→ Android logcat),
+// falling back to stderr when none is set.
 func logf(format string, args ...interface{}) {
 	msg := fmt.Sprintf("[BlockAds/Go] "+format, args...)
+	if lp := engineLogger.Load(); lp != nil && *lp != nil {
+		(*lp).Log(msg)
+		return
+	}
 	fmt.Fprintln(os.Stderr, msg)
 }
 
