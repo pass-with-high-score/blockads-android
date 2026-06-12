@@ -681,8 +681,15 @@ class AdBlockVpnService : VpnService() {
                     // Keep MTU at 1500 (the default set above). Jumbo MTU
                     // (9000) made large packets hang because the fd-based
                     // Android TUN read/write path doesn't carry jumbo frames.
+                    //
+                    // IPv4 only: route 0.0.0.0/0 through the userspace stack
+                    // (proven to relay TCP+UDP correctly in logs). We do NOT
+                    // route ::/0 — the gVisor stack doesn't handle IPv6 here
+                    // (logs: v6 packets pushed but tcp=0 flows → apps stalled
+                    // on happy-eyeballs IPv6). IPv6 DNS is still intercepted
+                    // (port 53 to fd00::1), so domain blocking still applies
+                    // to IPv6; only IPv6 data flows bypass the tunnel.
                     b.addRoute("0.0.0.0", 0)
-                    b.addRoute("::", 0)
                     val excludeLan = runBlocking { appPrefs.excludeLan.first() }
                     if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         try {
