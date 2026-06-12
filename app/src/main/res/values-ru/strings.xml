@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Не удалось получить root-доступ для запуска защиты. Нажмите «Включить», чтобы повторить попытку.</string>
     <string name="private_dns_warning_title">Частный DNS включён</string>
     <string name="private_dns_warning_text">Частный DNS Android обходит BlockAds, поэтому фильтрация может не работать. Установите «Частный DNS» в значение «Выкл.» или «Автоматически» в настройках системы.</string>
+    <string name="trusted_networks_title">Доверенные сети</string>
+    <string name="trusted_networks_settings_desc">Авто-пауза BlockAds в выбранных сетях Wi-Fi</string>
+    <string name="trusted_networks_toggle">Пауза в доверенных сетях</string>
+    <string name="trusted_networks_desc">BlockAds отключается в этих сетях Wi-Fi и снова включается, когда вы их покидаете.</string>
+    <string name="trusted_networks_add_current">Добавить текущую сеть Wi-Fi</string>
+    <string name="trusted_networks_no_wifi">Нет подключения к Wi-Fi (или нужно разрешение на геолокацию)</string>
+    <string name="trusted_networks_list_header">Доверенные сети Wi-Fi</string>
+    <string name="trusted_networks_empty">Пока нет доверенных сетей. Добавьте текущую, чтобы приостанавливать BlockAds в ней.</string>
 </resources>

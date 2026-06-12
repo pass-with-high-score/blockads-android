@@ -163,6 +163,14 @@
     <string name="settings_update_all">Update All Filters</string>
     <string name="settings_whitelist_apps">Whitelisted Apps</string>
     <string name="settings_whitelist_apps_desc">Exclude apps from ad blocking</string>
+    <string name="trusted_networks_title">Trusted networks</string>
+    <string name="trusted_networks_settings_desc">Auto-pause BlockAds on chosen Wi-Fi networks</string>
+    <string name="trusted_networks_toggle">Pause on trusted networks</string>
+    <string name="trusted_networks_desc">BlockAds turns off on these Wi-Fi networks and back on when you leave.</string>
+    <string name="trusted_networks_add_current">Add current Wi-Fi network</string>
+    <string name="trusted_networks_no_wifi">Not connected to Wi-Fi (or location permission needed)</string>
+    <string name="trusted_networks_list_header">Trusted Wi-Fi networks</string>
+    <string name="trusted_networks_empty">No trusted networks yet. Add the one you\'re on to pause BlockAds there.</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
     <string name="settings_import">Import</string>

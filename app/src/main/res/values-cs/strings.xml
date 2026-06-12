@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Nepodařilo se získat root oprávnění ke spuštění ochrany. Klepnutím na Povolit to zkuste znovu.</string>
     <string name="private_dns_warning_title">Soukromé DNS je zapnuté</string>
     <string name="private_dns_warning_text">Soukromé DNS systému Android obchází BlockAds, takže filtrování nemusí fungovat. Nastavte soukromé DNS na Vypnuto nebo Automaticky v nastavení systému.</string>
+    <string name="trusted_networks_title">Důvěryhodné sítě</string>
+    <string name="trusted_networks_settings_desc">Automaticky pozastavit BlockAds ve vybraných Wi-Fi</string>
+    <string name="trusted_networks_toggle">Pozastavit v důvěryhodných sítích</string>
+    <string name="trusted_networks_desc">V těchto Wi-Fi se BlockAds vypne a po odchodu zase zapne.</string>
+    <string name="trusted_networks_add_current">Přidat aktuální Wi-Fi</string>
+    <string name="trusted_networks_no_wifi">Nepřipojeno k Wi-Fi (nebo je třeba oprávnění k poloze)</string>
+    <string name="trusted_networks_list_header">Důvěryhodné Wi-Fi sítě</string>
+    <string name="trusted_networks_empty">Zatím žádné důvěryhodné sítě. Přidejte aktuální a BlockAds se v ní pozastaví.</string>
 </resources>

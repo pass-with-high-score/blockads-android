@@ -49,6 +49,7 @@ import app.pwhs.blockads.ui.data.ProfileKey
 import app.pwhs.blockads.ui.data.SettingsKey
 import app.pwhs.blockads.ui.data.StatisticsKey
 import app.pwhs.blockads.ui.data.WhiteListAppKey
+import app.pwhs.blockads.ui.data.TrustedNetworksKey
 import app.pwhs.blockads.ui.data.WireGuardEditKey
 import app.pwhs.blockads.ui.data.WireGuardImportKey
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
@@ -220,6 +221,10 @@ fun HomeApp(
                             showBottomBar = false
                             settingsStack.add(WhiteListAppKey)
                         },
+                        onNavigateToTrustedNetworks = {
+                            showBottomBar = false
+                            settingsStack.add(TrustedNetworksKey)
+                        },
                         onNavigateToWireGuardImport = {
                             showBottomBar = false
                             settingsStack.add(WireGuardImportKey)
@@ -309,6 +314,14 @@ fun HomeApp(
                 }
                 entry<WhiteListAppKey> {
                     AppWhitelistScreen(
+                        onNavigateBack = {
+                            showBottomBar = true
+                            settingsStack.removeLastOrNull()
+                        }
+                    )
+                }
+                entry<TrustedNetworksKey> {
+                    app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen(
                         onNavigateBack = {
                             showBottomBar = true
                             settingsStack.removeLastOrNull()

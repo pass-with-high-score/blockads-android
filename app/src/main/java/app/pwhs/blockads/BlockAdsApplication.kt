@@ -55,5 +55,8 @@ class BlockAdsApplication : Application() {
                 DailySummaryScheduler.scheduleDailySummary(this@BlockAdsApplication)
             }
         }
+
+        // Trusted Wi-Fi networks (#197): auto-pause/resume on SSID change.
+        app.pwhs.blockads.service.TrustedNetworkManager(this, appPreferences).start()
     }
 }

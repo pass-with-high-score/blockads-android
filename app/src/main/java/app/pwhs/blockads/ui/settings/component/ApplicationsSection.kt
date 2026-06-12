@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AppBlocking
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import app.pwhs.blockads.R
 fun ApplicationsSection(
     onNavigateToWhitelistApps: () -> Unit,
     onNavigateToAppManagement: () -> Unit,
+    onNavigateToTrustedNetworks: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -42,6 +44,16 @@ fun ApplicationsSection(
                 title = stringResource(R.string.app_management_title),
                 desc = stringResource(R.string.app_management_desc),
                 onClick = onNavigateToAppManagement
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+            )
+            SettingItem(
+                icon = Icons.Default.Wifi,
+                title = stringResource(R.string.trusted_networks_title),
+                desc = stringResource(R.string.trusted_networks_settings_desc),
+                onClick = onNavigateToTrustedNetworks
             )
         }
     }

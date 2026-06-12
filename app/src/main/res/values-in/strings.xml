@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Tidak bisa mendapatkan akses root untuk memulai perlindungan. Ketuk Aktifkan untuk mencoba lagi.</string>
     <string name="private_dns_warning_title">DNS Pribadi aktif</string>
     <string name="private_dns_warning_text">DNS Pribadi Android melewati BlockAds, sehingga pemfilteran mungkin tidak diterapkan. Setel DNS Pribadi ke Nonaktif atau Otomatis di setelan sistem.</string>
+    <string name="trusted_networks_title">Jaringan tepercaya</string>
+    <string name="trusted_networks_settings_desc">Jeda BlockAds otomatis di Wi-Fi tertentu</string>
+    <string name="trusted_networks_toggle">Jeda di jaringan tepercaya</string>
+    <string name="trusted_networks_desc">BlockAds nonaktif di Wi-Fi ini dan aktif lagi saat Anda pergi.</string>
+    <string name="trusted_networks_add_current">Tambahkan Wi-Fi saat ini</string>
+    <string name="trusted_networks_no_wifi">Tidak terhubung ke Wi-Fi (atau perlu izin lokasi)</string>
+    <string name="trusted_networks_list_header">Wi-Fi tepercaya</string>
+    <string name="trusted_networks_empty">Belum ada jaringan tepercaya. Tambahkan yang sedang dipakai untuk menjeda BlockAds.</string>
 </resources>

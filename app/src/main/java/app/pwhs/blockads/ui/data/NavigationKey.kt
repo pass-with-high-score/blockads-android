@@ -49,6 +49,9 @@ data object WhiteListAppKey : NavKey
 data object AppManagementKey : NavKey
 
 @Serializable
+data object TrustedNetworksKey : NavKey
+
+@Serializable
 data object AppearanceKey : NavKey
 
 @Serializable

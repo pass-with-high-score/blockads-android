@@ -66,6 +66,9 @@ class AppPreferences(private val context: Context) {
         private val KEY_HIDE_FROM_RECENTS = booleanPreferencesKey("hide_from_recents")
         private val KEY_SPLIT_DNS_ZONES = stringPreferencesKey("split_dns_zones")
         private val KEY_EXCLUDE_LAN = booleanPreferencesKey("exclude_lan")
+        private val KEY_TRUSTED_SSIDS = stringSetPreferencesKey("trusted_ssids")
+        private val KEY_PAUSE_ON_TRUSTED = booleanPreferencesKey("pause_on_trusted")
+        private val KEY_PAUSED_BY_TRUSTED = booleanPreferencesKey("paused_by_trusted")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
@@ -318,6 +321,46 @@ class AppPreferences(private val context: Context) {
     val excludeLan: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_EXCLUDE_LAN] ?: false
     }
+
+    // ── Trusted Wi-Fi networks (#197) ──────────────────────────────
+    // SSIDs where BlockAds auto-pauses; resumes when leaving.
+    val trustedSsids: Flow<Set<String>> = context.dataStore.data.map { prefs ->
+        prefs[KEY_TRUSTED_SSIDS] ?: emptySet()
+    }
+
+    val pauseOnTrustedEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_PAUSE_ON_TRUSTED] ?: false
+    }
+
+    suspend fun setTrustedSsids(ssids: Set<String>) {
+        context.dataStore.edit { it[KEY_TRUSTED_SSIDS] = ssids }
+    }
+
+    suspend fun toggleTrustedSsid(ssid: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[KEY_TRUSTED_SSIDS] ?: emptySet()
+            prefs[KEY_TRUSTED_SSIDS] = if (ssid in current) current - ssid else current + ssid
+        }
+    }
+
+    suspend fun setPauseOnTrustedEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_PAUSE_ON_TRUSTED] = enabled }
+    }
+
+    suspend fun getTrustedSsidsSnapshot(): Set<String> =
+        context.dataStore.data.map { it[KEY_TRUSTED_SSIDS] ?: emptySet() }.first()
+
+    suspend fun getPauseOnTrustedEnabledSnapshot(): Boolean =
+        context.dataStore.data.map { it[KEY_PAUSE_ON_TRUSTED] ?: false }.first()
+
+    // Internal flag: true when WE auto-paused due to a trusted network, so
+    // we only auto-resume what we paused (not a user-initiated stop).
+    suspend fun setPausedByTrusted(value: Boolean) {
+        context.dataStore.edit { it[KEY_PAUSED_BY_TRUSTED] = value }
+    }
+
+    suspend fun getPausedByTrustedSnapshot(): Boolean =
+        context.dataStore.data.map { it[KEY_PAUSED_BY_TRUSTED] ?: false }.first()
 
     suspend fun setVpnEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->

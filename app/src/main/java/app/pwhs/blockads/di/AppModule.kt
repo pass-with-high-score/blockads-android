@@ -176,6 +176,12 @@ val appModule = module {
         )
     }
     viewModel {
+        app.pwhs.blockads.ui.trustednetworks.TrustedNetworksViewModel(
+            appPrefs = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
         CustomRulesViewModel(
             customDnsRuleDao = get(),
             filterListRepository = get(),

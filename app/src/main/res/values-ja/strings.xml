@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">保護を開始するための root 権限を取得できませんでした。「有効にする」をタップして再試行してください。</string>
     <string name="private_dns_warning_title">プライベート DNS が有効です</string>
     <string name="private_dns_warning_text">Android のプライベート DNS は BlockAds を迂回するため、フィルタリングが適用されないことがあります。システム設定でプライベート DNS をオフまたは自動に設定してください。</string>
+    <string name="trusted_networks_title">信頼するネットワーク</string>
+    <string name="trusted_networks_settings_desc">選んだ Wi-Fi で BlockAds を自動的に一時停止</string>
+    <string name="trusted_networks_toggle">信頼するネットワークで一時停止</string>
+    <string name="trusted_networks_desc">これらの Wi-Fi では BlockAds がオフになり、離れると再びオンになります。</string>
+    <string name="trusted_networks_add_current">現在の Wi-Fi を追加</string>
+    <string name="trusted_networks_no_wifi">Wi-Fi に未接続（または位置情報の許可が必要）</string>
+    <string name="trusted_networks_list_header">信頼する Wi-Fi</string>
+    <string name="trusted_networks_empty">信頼するネットワークはまだありません。現在のものを追加するとそこで BlockAds を一時停止します。</string>
 </resources>

@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Nie udało się uzyskać dostępu root, aby uruchomić ochronę. Stuknij Włącz, aby spróbować ponownie.</string>
     <string name="private_dns_warning_title">Prywatny DNS jest włączony</string>
     <string name="private_dns_warning_text">Prywatny DNS systemu Android omija BlockAds, więc filtrowanie może nie działać. Ustaw prywatny DNS na Wyłączony lub Automatyczny w ustawieniach systemu.</string>
+    <string name="trusted_networks_title">Zaufane sieci</string>
+    <string name="trusted_networks_settings_desc">Automatyczne wstrzymanie BlockAds w wybranych sieciach Wi-Fi</string>
+    <string name="trusted_networks_toggle">Wstrzymaj w zaufanych sieciach</string>
+    <string name="trusted_networks_desc">BlockAds wyłącza się w tych sieciach Wi-Fi i włącza po ich opuszczeniu.</string>
+    <string name="trusted_networks_add_current">Dodaj bieżącą sieć Wi-Fi</string>
+    <string name="trusted_networks_no_wifi">Brak połączenia Wi-Fi (lub wymagane uprawnienie do lokalizacji)</string>
+    <string name="trusted_networks_list_header">Zaufane sieci Wi-Fi</string>
+    <string name="trusted_networks_empty">Brak zaufanych sieci. Dodaj bieżącą, aby wstrzymać w niej BlockAds.</string>
 </resources>

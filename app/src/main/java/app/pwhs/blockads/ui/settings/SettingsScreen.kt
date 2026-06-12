@@ -54,6 +54,7 @@ fun SettingsScreen(
     onNavigateToAppManagement: () -> Unit = { },
     onNavigateToFilterSetup: () -> Unit = { },
     onNavigateToWhitelistApps: () -> Unit = { },
+    onNavigateToTrustedNetworks: () -> Unit = { },
     onNavigateToWireGuardImport: () -> Unit = { },
     onNavigateToHttpsFiltering: () -> Unit = { },
     onNavigateToDNSProvider: () -> Unit = { },
@@ -144,7 +145,8 @@ fun SettingsScreen(
             // ── Applications ─────────────────────────────────────
             ApplicationsSection(
                 onNavigateToWhitelistApps = onNavigateToWhitelistApps,
-                onNavigateToAppManagement = onNavigateToAppManagement
+                onNavigateToAppManagement = onNavigateToAppManagement,
+                onNavigateToTrustedNetworks = onNavigateToTrustedNetworks
             )
 
             Spacer(modifier = Modifier.height(24.dp))

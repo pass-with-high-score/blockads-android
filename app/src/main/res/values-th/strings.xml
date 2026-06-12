@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">ไม่สามารถรับสิทธิ์รูทเพื่อเริ่มการป้องกันได้ แตะ เปิดใช้งาน เพื่อลองอีกครั้ง</string>
     <string name="private_dns_warning_title">เปิด DNS ส่วนตัวอยู่</string>
     <string name="private_dns_warning_text">DNS ส่วนตัวของ Android จะข้าม BlockAds การกรองจึงอาจไม่ทำงาน โปรดตั้งค่า DNS ส่วนตัวเป็นปิดหรืออัตโนมัติในการตั้งค่าระบบ</string>
+    <string name="trusted_networks_title">เครือข่ายที่เชื่อถือได้</string>
+    <string name="trusted_networks_settings_desc">หยุด BlockAds อัตโนมัติบน Wi-Fi ที่เลือก</string>
+    <string name="trusted_networks_toggle">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
+    <string name="trusted_networks_desc">BlockAds จะปิดบน Wi-Fi เหล่านี้และเปิดอีกครั้งเมื่อคุณออกไป</string>
+    <string name="trusted_networks_add_current">เพิ่ม Wi-Fi ปัจจุบัน</string>
+    <string name="trusted_networks_no_wifi">ไม่ได้เชื่อมต่อ Wi-Fi (หรือต้องมีสิทธิ์ตำแหน่ง)</string>
+    <string name="trusted_networks_list_header">Wi-Fi ที่เชื่อถือได้</string>
+    <string name="trusted_networks_empty">ยังไม่มีเครือข่ายที่เชื่อถือได้ เพิ่มเครือข่ายปัจจุบันเพื่อหยุด BlockAds ที่นั่น</string>
 </resources>

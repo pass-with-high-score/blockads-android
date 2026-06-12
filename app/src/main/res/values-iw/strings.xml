@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">לא ניתן לקבל גישת root כדי להפעיל את ההגנה. הקש על הפעלה כדי לנסות שוב.</string>
     <string name="private_dns_warning_title">‏DNS פרטי פעיל</string>
     <string name="private_dns_warning_text">‏DNS פרטי של Android עוקף את BlockAds, ולכן הסינון עלול לא לחול. הגדירו את ה-DNS הפרטי לכבוי או אוטומטי בהגדרות המערכת.</string>
+    <string name="trusted_networks_title">רשתות מהימנות</string>
+    <string name="trusted_networks_settings_desc">השהיית BlockAds אוטומטית ברשתות Wi-Fi נבחרות</string>
+    <string name="trusted_networks_toggle">השהיה ברשתות מהימנות</string>
+    <string name="trusted_networks_desc">‏BlockAds נכבה ברשתות ה-Wi-Fi האלה ונדלק שוב כשאתם עוזבים.</string>
+    <string name="trusted_networks_add_current">הוספת רשת ה-Wi-Fi הנוכחית</string>
+    <string name="trusted_networks_no_wifi">אין חיבור ל-Wi-Fi (או נדרשת הרשאת מיקום)</string>
+    <string name="trusted_networks_list_header">רשתות Wi-Fi מהימנות</string>
+    <string name="trusted_networks_empty">אין עדיין רשתות מהימנות. הוסיפו את הנוכחית כדי להשהות שם את BlockAds.</string>
 </resources>

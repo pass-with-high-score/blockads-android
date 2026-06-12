@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Không thể lấy quyền root để bật bảo vệ. Nhấn Bật để thử lại.</string>
     <string name="private_dns_warning_title">DNS riêng tư đang bật</string>
     <string name="private_dns_warning_text">DNS riêng tư của Android bỏ qua BlockAds nên việc lọc có thể không áp dụng. Hãy đặt DNS riêng tư về Tắt hoặc Tự động trong cài đặt hệ thống.</string>
+    <string name="trusted_networks_title">Mạng tin cậy</string>
+    <string name="trusted_networks_settings_desc">Tự tạm dừng BlockAds trên các Wi-Fi đã chọn</string>
+    <string name="trusted_networks_toggle">Tạm dừng trên mạng tin cậy</string>
+    <string name="trusted_networks_desc">BlockAds sẽ tắt trên các Wi-Fi này và bật lại khi bạn rời đi.</string>
+    <string name="trusted_networks_add_current">Thêm Wi-Fi hiện tại</string>
+    <string name="trusted_networks_no_wifi">Chưa kết nối Wi-Fi (hoặc cần quyền vị trí)</string>
+    <string name="trusted_networks_list_header">Wi-Fi tin cậy</string>
+    <string name="trusted_networks_empty">Chưa có mạng tin cậy nào. Thêm mạng đang dùng để tạm dừng BlockAds tại đó.</string>
 </resources>

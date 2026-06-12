@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">Root-Zugriff zum Starten des Schutzes konnte nicht erlangt werden. Tippe auf Aktivieren, um es erneut zu versuchen.</string>
     <string name="private_dns_warning_title">Privates DNS ist aktiv</string>
     <string name="private_dns_warning_text">Android Privates DNS umgeht BlockAds, daher greift die Filterung evtl. nicht. Stelle Privates DNS in den Systemeinstellungen auf Aus oder Automatisch.</string>
+    <string name="trusted_networks_title">Vertrauenswürdige Netzwerke</string>
+    <string name="trusted_networks_settings_desc">BlockAds in gewählten WLANs automatisch pausieren</string>
+    <string name="trusted_networks_toggle">In vertrauenswürdigen Netzwerken pausieren</string>
+    <string name="trusted_networks_desc">BlockAds wird in diesen WLANs deaktiviert und beim Verlassen wieder aktiviert.</string>
+    <string name="trusted_networks_add_current">Aktuelles WLAN hinzufügen</string>
+    <string name="trusted_networks_no_wifi">Nicht mit WLAN verbunden (oder Standortberechtigung nötig)</string>
+    <string name="trusted_networks_list_header">Vertrauenswürdige WLANs</string>
+    <string name="trusted_networks_empty">Noch keine vertrauenswürdigen Netzwerke. Füge dein aktuelles hinzu, um BlockAds dort zu pausieren.</string>
 </resources>

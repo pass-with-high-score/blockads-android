@@ -511,4 +511,12 @@
     <string name="root_proxy_start_failed_text">无法获取 Root 权限以启动防护。点按“启用”重试。</string>
     <string name="private_dns_warning_title">私人 DNS 已开启</string>
     <string name="private_dns_warning_text">Android 私人 DNS 会绕过 BlockAds，因此过滤可能不生效。请在系统设置中将私人 DNS 设为“关闭”或“自动”。</string>
+    <string name="trusted_networks_title">信任的网络</string>
+    <string name="trusted_networks_settings_desc">在所选 Wi-Fi 上自动暂停 BlockAds</string>
+    <string name="trusted_networks_toggle">在信任的网络上暂停</string>
+    <string name="trusted_networks_desc">在这些 Wi-Fi 上 BlockAds 会关闭，离开后重新开启。</string>
+    <string name="trusted_networks_add_current">添加当前 Wi-Fi</string>
+    <string name="trusted_networks_no_wifi">未连接 Wi-Fi（或需要定位权限）</string>
+    <string name="trusted_networks_list_header">信任的 Wi-Fi</string>
+    <string name="trusted_networks_empty">暂无信任的网络。添加当前网络以在其上暂停 BlockAds。</string>
 </resources>

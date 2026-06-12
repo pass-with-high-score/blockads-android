@@ -532,4 +532,12 @@ Desteklenen formatlar:
     <string name="root_proxy_start_failed_text">Korumayı başlatmak için root erişimi alınamadı. Yeniden denemek için Etkinleştir\'e dokunun.</string>
     <string name="private_dns_warning_title">Özel DNS açık</string>
     <string name="private_dns_warning_text">Android Özel DNS, BlockAds\'i atlar; bu nedenle filtreleme uygulanmayabilir. Sistem ayarlarından Özel DNS\'i Kapalı veya Otomatik yapın.</string>
+    <string name="trusted_networks_title">Güvenilir ağlar</string>
+    <string name="trusted_networks_settings_desc">Seçili Wi-Fi ağlarında BlockAds\'i otomatik duraklat</string>
+    <string name="trusted_networks_toggle">Güvenilir ağlarda duraklat</string>
+    <string name="trusted_networks_desc">Bu Wi-Fi ağlarında BlockAds kapanır, ayrıldığınızda tekrar açılır.</string>
+    <string name="trusted_networks_add_current">Geçerli Wi-Fi\'yi ekle</string>
+    <string name="trusted_networks_no_wifi">Wi-Fi\'ye bağlı değil (veya konum izni gerekli)</string>
+    <string name="trusted_networks_list_header">Güvenilir Wi-Fi ağları</string>
+    <string name="trusted_networks_empty">Henüz güvenilir ağ yok. BlockAds\'i duraklatmak için geçerli ağı ekleyin.</string>
 </resources>
