@@ -688,9 +688,11 @@ class AdBlockVpnService : VpnService() {
                 // The forcing of full-route for everyone in #187 broke
                 // internet — hence the toggle, default OFF.
                 if (fullRoute) {
-                    // Keep MTU at 1500 (the default set above). Jumbo MTU
-                    // (9000) made large packets hang because the fd-based
-                    // Android TUN read/write path doesn't carry jumbo frames.
+                    // Low MTU (1280) so the userspace stack advertises a small
+                    // TCP MSS → segments fit through any real path. 1500 gave
+                    // partial page loads (large packets dropped en route);
+                    // 9000 hung. Must match engine.setTunMTU() in GoTunnelAdapter.
+                    b.setMtu(GoTunnelAdapter.FULL_ROUTE_MTU)
                     //
                     // IPv4 only: route 0.0.0.0/0 through the userspace stack
                     // (proven to relay TCP+UDP correctly in logs). No IPv6 at

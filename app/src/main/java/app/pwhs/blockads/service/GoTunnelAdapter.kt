@@ -286,8 +286,10 @@ class GoTunnelAdapter(
             try {
                 engine.setUseTcpStack(true)
                 engine.setOutboundAdapter(tunnel.DirectOutbound())
-                // MTU stays 1500 (jumbo hung on the fd-based Android TUN).
-                Timber.d("Full-route capture: TCP stack + DirectOutbound enabled (MTU 1500)")
+                // Low MTU so the stack advertises a small MSS → no PMTU
+                // blackhole / partial page loads. Must match VpnService MTU.
+                engine.setTunMTU(FULL_ROUTE_MTU.toLong())
+                Timber.d("Full-route capture: TCP stack + DirectOutbound + MTU $FULL_ROUTE_MTU")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to enable forwarding for full-route capture")
             }
@@ -478,10 +480,12 @@ class GoTunnelAdapter(
     }
 
     companion object {
-        /** TUN/stack MTU for full-route capture (matches AdGuard's 9000).
-         *  Large MTU lets the gVisor stack handle egress segmentation and
-         *  avoids the TCP resets seen with a 1500 MTU userspace forwarder. */
-        const val FULL_ROUTE_MTU = 9000
+        /** TUN/stack MTU for full-route capture. Set LOW (1280, the IPv6
+         *  minimum) so the gVisor stack advertises a small TCP MSS to apps;
+         *  segments then fit through any real path without PMTU blackholing.
+         *  1500 caused partial page loads (large packets dropped en route);
+         *  9000 hung (fd-based TUN can't carry jumbo). 1280 is the safe middle. */
+        const val FULL_ROUTE_MTU = 1280
 
         /**
          * Convert DNS query type number to human-readable string.
