@@ -185,18 +185,24 @@ func (r *Resolver) Resolve(rawQuery []byte) ([]byte, error) {
 	dohURL := r.dohURL
 	r.mu.RUnlock()
 
+	domain := extractDomain(rawQuery)
+
 	// Try primary
 	resp, err := r.query(rawQuery, protocol, primary, dohURL)
 	if err == nil {
+		logf("Resolve OK %q via %v/%s (%d bytes)", domain, protocol, primary, len(resp))
 		return resp, nil
 	}
+	logf("Resolve PRIMARY FAILED %q via %v/%s: %v", domain, protocol, primary, err)
 
 	// Try fallback with PLAIN protocol if configured and different
 	if fallback != "" && fallback != primary {
 		resp, err2 := r.query(rawQuery, ProtocolPlain, fallback, "")
 		if err2 == nil {
+			logf("Resolve OK %q via fallback PLAIN/%s (%d bytes)", domain, fallback, len(resp))
 			return resp, nil
 		}
+		logf("Resolve FALLBACK FAILED %q via %s: %v", domain, fallback, err2)
 		return nil, fmt.Errorf("primary (%s): %w; fallback (%s): %v", primary, err, fallback, err2)
 	}
 
