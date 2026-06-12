@@ -656,11 +656,21 @@ class AdBlockVpnService : VpnService() {
                     .addAddress("10.0.0.2", 32)
                     .addRoute("10.0.0.1", 32)
                     .addDnsServer("10.0.0.1")
-                    .addAddress("fd00::2", 128)
-                    .addRoute("fd00::1", 128)
-                    .addDnsServer("fd00::1")
                     .setBlocking(true)
                     .setMtu(1500)
+
+                // IPv6 (fake DNS) is added ONLY when NOT full-route. In
+                // full-route the userspace gVisor stack can't handle IPv6, so
+                // giving the TUN an IPv6 address makes Android push IPv6
+                // packets into the stack where they're dropped — apps then
+                // stall on happy-eyeballs IPv6. Keeping the TUN IPv4-only for
+                // full-route forces apps onto IPv4 (which the stack relays
+                // correctly) and lets IPv6 use the physical network.
+                if (!fullRoute) {
+                    b.addAddress("fd00::2", 128)
+                    b.addRoute("fd00::1", 128)
+                    b.addDnsServer("fd00::1")
+                }
 
                 // Routing depends on the "Full network protection" toggle.
                 //
@@ -683,12 +693,12 @@ class AdBlockVpnService : VpnService() {
                     // Android TUN read/write path doesn't carry jumbo frames.
                     //
                     // IPv4 only: route 0.0.0.0/0 through the userspace stack
-                    // (proven to relay TCP+UDP correctly in logs). We do NOT
-                    // route ::/0 — the gVisor stack doesn't handle IPv6 here
-                    // (logs: v6 packets pushed but tcp=0 flows → apps stalled
-                    // on happy-eyeballs IPv6). IPv6 DNS is still intercepted
-                    // (port 53 to fd00::1), so domain blocking still applies
-                    // to IPv6; only IPv6 data flows bypass the tunnel.
+                    // (proven to relay TCP+UDP correctly in logs). No IPv6 at
+                    // all — the TUN has no IPv6 address (see above), so the
+                    // gVisor stack (which can't handle IPv6) never receives
+                    // v6 packets and apps don't stall on happy-eyeballs.
+                    // DNS still flows through the IPv4 fake server (10.0.0.1),
+                    // so ad/domain blocking stays active.
                     b.addRoute("0.0.0.0", 0)
                     val excludeLan = runBlocking { appPrefs.excludeLan.first() }
                     if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
