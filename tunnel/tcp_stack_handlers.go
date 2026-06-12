@@ -105,7 +105,12 @@ func protectedControl(protectFn func(fd int) bool) func(network, address string,
 	}
 	return func(network, address string, c syscall.RawConn) error {
 		return c.Control(func(fd uintptr) {
-			protectFn(int(fd))
+			ok := protectFn(int(fd))
+			if !ok {
+				// Socket NOT protected → its packets loop back into the
+				// VPN TUN → connect can never complete (i/o timeout).
+				logf("[TcpStack] protect(fd=%d) FAILED for %s %s — socket will loop!", int(fd), network, address)
+			}
 		})
 	}
 }
