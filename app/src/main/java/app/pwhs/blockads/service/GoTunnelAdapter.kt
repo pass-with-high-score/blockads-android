@@ -51,6 +51,17 @@ class GoTunnelAdapter(
     @Volatile
     private var isRunning = false
 
+    init {
+        // Route Go engine logs to Timber/logcat. gomobile does NOT redirect
+        // Go's os.Stderr to logcat, so without this the engine's logs
+        // (DnsInterceptor, TcpStack relay, dial results…) are invisible.
+        try {
+            tunnel.Tunnel.setLogger(tunnel.Logger { msg -> Timber.tag("GoEngine").d(msg) })
+        } catch (e: Throwable) {
+            Timber.w(e, "Failed to register Go engine logger")
+        }
+    }
+
     /**
      * Configure the DNS settings for the Go engine.
      */

@@ -1811,9 +1811,35 @@ func (e *Engine) notifyLog(domain string, blocked bool, queryType uint16, respon
 	}
 }
 
-// logf logs a message (will appear in Android logcat via stderr).
+// Logger is implemented by Kotlin so Go engine logs reach Android
+// logcat. gomobile does NOT redirect Go's os.Stderr to logcat, so
+// without a registered logger the engine's logs are invisible (this is
+// why full-route debugging was blind). Kotlin routes Log() to Timber.
+type Logger interface {
+	Log(msg string)
+}
+
+// engineLogger holds the optional Kotlin logger. atomic.Pointer keeps
+// logf race-free on the hot path.
+var engineLogger atomic.Pointer[Logger]
+
+// SetLogger registers the Kotlin logger used by logf. Pass nil to clear.
+func SetLogger(l Logger) {
+	if l == nil {
+		engineLogger.Store(nil)
+		return
+	}
+	engineLogger.Store(&l)
+}
+
+// logf logs a message via the registered Logger (→ Android logcat),
+// falling back to stderr when none is set.
 func logf(format string, args ...interface{}) {
 	msg := fmt.Sprintf("[BlockAds/Go] "+format, args...)
+	if lp := engineLogger.Load(); lp != nil && *lp != nil {
+		(*lp).Log(msg)
+		return
+	}
 	fmt.Fprintln(os.Stderr, msg)
 }
 
