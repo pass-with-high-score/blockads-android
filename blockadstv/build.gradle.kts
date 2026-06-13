@@ -11,15 +11,15 @@ import java.util.Properties
 android {
     namespace = "app.pwhs.blockadstv"
     compileSdk {
-        version = release(37)
+        version = release(36)
     }
 
     defaultConfig {
         applicationId = "app.pwhs.blockadstv"
         minSdk = 24
-        targetSdk = 37
-        versionCode = 49
-        versionName = "6.5.0"
+        targetSdk = 36
+        versionCode = 50
+        versionName = "6.5.1"
     }
 
     // Load signing config from key.properties (CI/CD)
