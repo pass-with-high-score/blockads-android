@@ -13,6 +13,8 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -59,6 +61,19 @@ class TrustedNetworkManager(
         } catch (e: Exception) {
             Timber.e(e, "TrustedNetworkManager register failed")
         }
+
+        // Re-evaluate when the settings change (toggle flipped or an SSID
+        // added/removed) — otherwise enabling the feature while already
+        // connected to a trusted network wouldn't pause until the next
+        // network change.
+        scope.launch {
+            combine(
+                appPrefs.pauseOnTrustedEnabled,
+                appPrefs.trustedSsids
+            ) { enabled, ssids -> enabled to ssids }
+                .distinctUntilChanged()
+                .collect { evaluate() }
+        }
     }
 
     private fun evaluate() {
@@ -73,6 +88,7 @@ class TrustedNetworkManager(
                     val onTrusted = ssid != null && ssid in trusted
                     val running = AdBlockVpnService.isRunning || RootProxyService.isRunning
                     val pausedByUs = appPrefs.getPausedByTrustedSnapshot()
+                    Timber.d("TrustedNet evaluate: ssid=$ssid trusted=$trusted onTrusted=$onTrusted running=$running pausedByUs=$pausedByUs")
 
                     when {
                         // Entered a trusted network while protected → pause.
