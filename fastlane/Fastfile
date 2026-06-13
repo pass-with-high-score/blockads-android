@@ -24,24 +24,31 @@ platform :android do
   desc "Increment version code"
   lane :bump_version do |options|
     version_name = options[:version] || "1.0"
-    # Read current versionCode from build.gradle.kts
-    build_gradle = File.read("../app/build.gradle.kts")
-    current_code = build_gradle.match(/versionCode = (\d+)/)[1].to_i
+    
+    # Files to update
+    files = ["../app/build.gradle.kts", "../blockadstv/build.gradle.kts"]
+    
+    # Get current versionCode from app module as source of truth
+    app_gradle = File.read(files[0])
+    current_code = app_gradle.match(/versionCode = (\d+)/)[1].to_i
     new_code = current_code + 1
 
-    # Update versionCode
-    new_content = build_gradle.gsub(
-      /versionCode = \d+/,
-      "versionCode = #{new_code}"
-    )
-    # Update versionName if provided
-    new_content = new_content.gsub(
-      /versionName = ".*"/,
-      "versionName = \"#{version_name}\""
-    )
-    File.write("../app/build.gradle.kts", new_content)
+    files.each do |file_path|
+      content = File.read(file_path)
+      # Update versionCode
+      content = content.gsub(
+        /versionCode = \d+/,
+        "versionCode = #{new_code}"
+      )
+      # Update versionName
+      content = content.gsub(
+        /versionName = ".*"/,
+        "versionName = \"#{version_name}\""
+      )
+      File.write(file_path, content)
+    end
 
-    UI.success("✅ Bumped to versionCode=#{new_code}, versionName=#{version_name}")
+    UI.success("✅ Bumped to versionCode=#{new_code}, versionName=#{version_name} for all modules")
   end
 
   desc "Trigger GitHub Action to auto-build Go Tunnel"

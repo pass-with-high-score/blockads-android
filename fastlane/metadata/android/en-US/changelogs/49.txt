@@ -1,0 +1,8 @@
+- New: Trusted Wi-Fi networks — auto-pause BlockAds on selected SSIDs.
+- New: Android TV support with full VPN ad-blocking and D-pad navigation.
+- New: Warning when Android Private DNS bypasses filtering.
+- Improved: Support for Android SDK 37.
+- Fix: Per-app whitelist now works in Root Proxy mode.
+- Fix: Preserve protection uptime across silent reconnects.
+- Fix: Mark VPN as unmetered for better app compatibility.
+- Various UI polish and localization updates.

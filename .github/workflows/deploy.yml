@@ -87,11 +87,13 @@ jobs:
           
           # Build tunnel.aar
           mkdir -p app/libs
+          mkdir -p blockadstv/libs
           cd tunnel
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
           gomobile bind -target=android -androidapi 24 -trimpath \
             -ldflags='-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384' \
             -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+          cp ../app/libs/tunnel.aar ../blockadstv/libs/tunnel.aar
 
       - name: Build APK
         run: bundle exec fastlane build_release
@@ -101,7 +103,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-build
-          path: app/build/outputs/apk/release/*.apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            blockadstv/build/outputs/apk/release/*.apk
           retention-days: 30
 
       # Upload assets to existing GitHub Release (or create if missing)
@@ -112,5 +116,7 @@ jobs:
           name: ${{ env.VERSION_NAME }}
           draft: false
           prerelease: false
-          files: app/build/outputs/apk/release/*.apk
+          files: |
+            app/build/outputs/apk/release/*.apk
+            blockadstv/build/outputs/apk/release/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
