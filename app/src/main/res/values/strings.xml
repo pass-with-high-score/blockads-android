@@ -558,4 +558,31 @@
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
     <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Impulse Control &amp; Lockdown</string>
+    <string name="settings_lockdown_section_desc">Force a cooldown timer to disable ad blocking. Helps prevent impulsive relapses.</string>
+    <string name="settings_lockdown_mode_title">VPN Lockdown Mode</string>
+    <string name="settings_lockdown_mode_desc">When enabled, you cannot turn off the VPN or access settings without waiting out the cooldown timer.</string>
+    <string name="settings_lockdown_duration_title">Cooldown Duration</string>
+    <string name="settings_lockdown_duration_desc">Time you must wait to unlock the app</string>
+    <string name="lockdown_duration_1m">1 minute</string>
+    <string name="lockdown_duration_5m">5 minutes</string>
+    <string name="lockdown_duration_10m">10 minutes</string>
+    <string name="lockdown_duration_30m">30 minutes</string>
+    <string name="lockdown_duration_1h">1 hour</string>
+    <string name="lockdown_duration_6h">6 hours</string>
+    <string name="lockdown_duration_12h">12 hours</string>
+    <string name="lockdown_duration_24h">24 hours</string>
+    <string name="lockdown_screen_title">BlockAds is Locked</string>
+    <string name="lockdown_screen_desc">To modify your settings or disable ad blocking, you must initiate the cooldown timer.</string>
+    <string name="lockdown_screen_cancel">Cancel Cooldown</string>
+    <string name="lockdown_screen_cancel_desc">Canceling will reset the timer back to the full duration.</string>
+    <string name="lockdown_screen_duration">Timer Duration: %1$s</string>
+    <string name="lockdown_screen_start">Start Cooldown Timer</string>
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Device Administrator to enforce persistence and policy restrictions for BlockAds.</string>
+    <string name="settings_device_owner_section_title">Device Owner Control</string>
+    <string name="settings_device_owner_section_desc">Manage Device Owner restrictions. Only visible because BlockAds is a Device Owner.</string>
+    <string name="settings_device_owner_enforce_restrictions">Device Restrictions</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Enable to apply app-level restrictions (prevent uninstallation, etc). Disable to clear them.</string>
 </resources>

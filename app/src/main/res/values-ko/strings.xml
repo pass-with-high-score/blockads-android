@@ -524,4 +524,33 @@
     <string name="trusted_networks_paused_text_generic">신뢰할 수 있는 Wi-Fi에서 BlockAds가 일시중지되었습니다. 벗어나면 재개됩니다.</string>
     <string name="status_paused">일시중지됨</string>
     <string name="home_paused_trusted_short">신뢰할 수 있는 네트워크에서 일시중지됨</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">충동 제어 및 잠금</string>
+    <string name="settings_lockdown_section_desc">광고 차단을 해제하기 위해 대기 시간 타이머를 강제합니다. 충동적인 재발을 방지하는 데 도움이 됩니다.</string>
+    <string name="settings_lockdown_mode_title">VPN 잠금 모드</string>
+    <string name="settings_lockdown_mode_desc">활성화되면 대기 시간 타이머를 기다리지 않고는 VPN을 끄거나 설정에 액세스할 수 없습니다.</string>
+    <string name="settings_lockdown_duration_title">대기 시간</string>
+    <string name="settings_lockdown_duration_desc">앱의 잠금을 해제하기 위해 기다려야 하는 시간</string>
+    <string name="lockdown_duration_1m">1분</string>
+    <string name="lockdown_duration_5m">5분</string>
+    <string name="lockdown_duration_10m">10분</string>
+    <string name="lockdown_duration_30m">30분</string>
+    <string name="lockdown_duration_1h">1시간</string>
+    <string name="lockdown_duration_6h">6시간</string>
+    <string name="lockdown_duration_12h">12시간</string>
+    <string name="lockdown_duration_24h">24시간</string>
+    <string name="lockdown_screen_title">BlockAds가 잠겨 있습니다</string>
+    <string name="lockdown_screen_desc">설정을 수정하거나 광고 차단을 해제하려면 대기 시간 타이머를 시작해야 합니다.</string>
+    <string name="lockdown_screen_cancel">대기 취소</string>
+    <string name="lockdown_screen_cancel_desc">취소하면 타이머가 전체 시간으로 초기화됩니다.</string>
+    <string name="lockdown_screen_duration">타이머 시간: %1$s</string>
+    <string name="lockdown_screen_start">대기 시간 타이머 시작</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">BlockAds에 대한 지속성 및 정책 제한을 적용하는 기기 관리자입니다.</string>
+    <string name="settings_device_owner_section_title">기기 소유자 제어</string>
+    <string name="settings_device_owner_section_desc">기기 소유자 제한을 관리합니다. BlockAds가 기기 소유자이기 때문에만 표시됩니다.</string>
+    <string name="settings_device_owner_enforce_restrictions">기기 제한</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">앱 수준 제한(제거 방지 등)을 적용하려면 활성화합니다. 지우려면 비활성화합니다.</string>
 </resources>

@@ -70,6 +70,11 @@ class AppPreferences(private val context: Context) {
         private val KEY_PAUSE_ON_TRUSTED = booleanPreferencesKey("pause_on_trusted")
         private val KEY_PAUSED_BY_TRUSTED = booleanPreferencesKey("paused_by_trusted")
         private val KEY_PAUSED_TRUSTED_SSID = stringPreferencesKey("paused_trusted_ssid")
+        private val KEY_LOCKDOWN_ENABLED = booleanPreferencesKey("lockdown_enabled")
+        private val KEY_LOCKDOWN_DURATION = longPreferencesKey("lockdown_duration")
+        private val KEY_COOLDOWN_START_TIMESTAMP = longPreferencesKey("cooldown_start_timestamp")
+        private val KEY_LAST_ACTIVE_TIMESTAMP = longPreferencesKey("last_active_timestamp")
+        private val KEY_LAST_ACTIVE_REALTIME = longPreferencesKey("last_active_realtime")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
@@ -148,6 +153,26 @@ class AppPreferences(private val context: Context) {
 
     val vpnEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_VPN_ENABLED] ?: false
+    }
+
+    val lockdownEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LOCKDOWN_ENABLED] ?: false
+    }
+
+    val lockdownDuration: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LOCKDOWN_DURATION] ?: 300000L
+    }
+
+    val cooldownStartTimestamp: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_COOLDOWN_START_TIMESTAMP] ?: 0L
+    }
+
+    val lastActiveTimestamp: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LAST_ACTIVE_TIMESTAMP] ?: 0L
+    }
+
+    val lastActiveRealtime: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LAST_ACTIVE_REALTIME] ?: 0L
     }
 
     val autoReconnect: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -380,6 +405,36 @@ class AppPreferences(private val context: Context) {
     suspend fun setVpnEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_VPN_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLockdownEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LOCKDOWN_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLockdownDuration(ms: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LOCKDOWN_DURATION] = ms
+        }
+    }
+
+    suspend fun setCooldownStartTimestamp(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_COOLDOWN_START_TIMESTAMP] = timestamp
+        }
+    }
+
+    suspend fun setLastActiveTimestamp(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_ACTIVE_TIMESTAMP] = timestamp
+        }
+    }
+
+    suspend fun setLastActiveRealtime(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_ACTIVE_REALTIME] = timestamp
         }
     }
 

@@ -34,6 +34,7 @@ import app.pwhs.blockads.ui.logs.dialog.ConfirmClearLogDialog
 import app.pwhs.blockads.ui.settings.component.ApplicationsSection
 import app.pwhs.blockads.ui.settings.component.CommunitySection
 import app.pwhs.blockads.ui.settings.component.DataSection
+import app.pwhs.blockads.ui.settings.component.DeviceOwnerSection
 import app.pwhs.blockads.ui.settings.component.DnsResponseTypeDialog
 import app.pwhs.blockads.ui.settings.component.FilterSetupSection
 import app.pwhs.blockads.ui.settings.component.InformationSection
@@ -60,6 +61,10 @@ fun SettingsScreen(
     onNavigateToDNSProvider: () -> Unit = { },
 ) {
     val autoReconnect by viewModel.autoReconnect.collectAsStateWithLifecycle()
+    val lockdownEnabled by viewModel.lockdownEnabled.collectAsStateWithLifecycle()
+    val isDeviceOwner by viewModel.isDeviceOwner.collectAsStateWithLifecycle()
+    val restrictionsEnforced by viewModel.restrictionsEnforced.collectAsStateWithLifecycle()
+    val lockdownDuration by viewModel.lockdownDuration.collectAsStateWithLifecycle()
     val networkSwitchDelayEnabled by viewModel.networkSwitchDelayEnabled.collectAsStateWithLifecycle()
     val networkSwitchDelaySec by viewModel.networkSwitchDelaySec.collectAsStateWithLifecycle()
     val filterLists by viewModel.filterLists.collectAsStateWithLifecycle()
@@ -136,6 +141,26 @@ fun SettingsScreen(
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Lockdown ─────────────────────────────────────────
+            app.pwhs.blockads.ui.settings.component.LockdownSection(
+                lockdownEnabled = lockdownEnabled,
+                lockdownDuration = lockdownDuration,
+                onSetLockdownEnabled = { viewModel.setLockdownEnabled(it) },
+                onSetLockdownDuration = { viewModel.setLockdownDuration(it) }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Device Owner ─────────────────────────────────────
+            if (isDeviceOwner) {
+                DeviceOwnerSection(
+                    lockdownEnabled = lockdownEnabled,
+                    restrictionsEnforced = restrictionsEnforced,
+                    onSetRestrictionsEnforced = { viewModel.setRestrictionsEnforced(it) }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
             // ── Interface ────────────────────────────────────────
             InterfaceSection(onNavigateToAppearance = onNavigateToAppearance)

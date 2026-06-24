@@ -58,5 +58,11 @@ class BlockAdsApplication : Application() {
 
         // Trusted Wi-Fi networks (#197): auto-pause/resume on SSID change.
         app.pwhs.blockads.service.TrustedNetworkManager(this, appPreferences).start()
+
+        // Device Owner Mode: auto-enforce restrictions if provisioned
+        val deviceOwnerManager = app.pwhs.blockads.service.DeviceOwnerManager(this)
+        if (deviceOwnerManager.isDeviceOwner()) {
+            deviceOwnerManager.enforceRestrictions()
+        }
     }
 }

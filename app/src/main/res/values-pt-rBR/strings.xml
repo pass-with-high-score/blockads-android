@@ -524,4 +524,33 @@
     <string name="trusted_networks_paused_text_generic">O BlockAds está pausado em uma rede Wi-Fi confiável — retoma ao sair.</string>
     <string name="status_paused">Pausado</string>
     <string name="home_paused_trusted_short">Pausado em rede confiável</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Controle de Impulsos e Bloqueio</string>
+    <string name="settings_lockdown_section_desc">Força um temporizador de espera para desativar o bloqueio de anúncios. Ajuda a prevenir recaídas impulsivas.</string>
+    <string name="settings_lockdown_mode_title">Modo de Bloqueio VPN</string>
+    <string name="settings_lockdown_mode_desc">Quando ativado, você não pode desligar a VPN ou acessar as configurações sem aguardar o temporizador de espera.</string>
+    <string name="settings_lockdown_duration_title">Duração da Espera</string>
+    <string name="settings_lockdown_duration_desc">Tempo que você deve esperar para desbloquear o aplicativo</string>
+    <string name="lockdown_duration_1m">1 minuto</string>
+    <string name="lockdown_duration_5m">5 minutos</string>
+    <string name="lockdown_duration_10m">10 minutos</string>
+    <string name="lockdown_duration_30m">30 minutos</string>
+    <string name="lockdown_duration_1h">1 hora</string>
+    <string name="lockdown_duration_6h">6 horas</string>
+    <string name="lockdown_duration_12h">12 horas</string>
+    <string name="lockdown_duration_24h">24 horas</string>
+    <string name="lockdown_screen_title">BlockAds está Bloqueado</string>
+    <string name="lockdown_screen_desc">Para modificar suas configurações ou desativar o bloqueio de anúncios, você deve iniciar o temporizador de espera.</string>
+    <string name="lockdown_screen_cancel">Cancelar Espera</string>
+    <string name="lockdown_screen_cancel_desc">O cancelamento redefinirá o temporizador para a duração total.</string>
+    <string name="lockdown_screen_duration">Duração do Temporizador: %1$s</string>
+    <string name="lockdown_screen_start">Iniciar Temporizador de Espera</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Administrador do dispositivo para impor persistência e restrições de política para BlockAds.</string>
+    <string name="settings_device_owner_section_title">Controle do proprietário do dispositivo</string>
+    <string name="settings_device_owner_section_desc">Gerencie as restrições do proprietário do dispositivo. Visível apenas porque o BlockAds é um proprietário do dispositivo.</string>
+    <string name="settings_device_owner_enforce_restrictions">Restrições do dispositivo</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Ative para aplicar restrições no nível do aplicativo (evitar desinstalação, etc.). Desative para limpá-las.</string>
 </resources>

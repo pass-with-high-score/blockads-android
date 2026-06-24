@@ -148,10 +148,20 @@ class RootProxyService : Service() {
 
         when (intent?.action) {
             ACTION_STOP -> {
+                val isLocked = kotlinx.coroutines.runBlocking { appPrefs.lockdownEnabled.first() }
+                if (isLocked) {
+                    Timber.w("Stop request ignored: Root Proxy is in Lockdown Mode.")
+                    return START_STICKY
+                }
                 stopProxy()
                 return START_NOT_STICKY
             }
             ACTION_PAUSE_1H -> {
+                val isLocked = kotlinx.coroutines.runBlocking { appPrefs.lockdownEnabled.first() }
+                if (isLocked) {
+                    Timber.w("Pause request ignored: Root Proxy is in Lockdown Mode.")
+                    return START_STICKY
+                }
                 pauseProxy()
                 return START_NOT_STICKY
             }

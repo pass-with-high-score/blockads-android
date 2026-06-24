@@ -524,4 +524,33 @@
     <string name="trusted_networks_paused_text_generic">BlockAds está en pausa en una red Wi-Fi de confianza — se reanuda al salir.</string>
     <string name="status_paused">En pausa</string>
     <string name="home_paused_trusted_short">En pausa en red de confianza</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Control de impulsos y Bloqueo</string>
+    <string name="settings_lockdown_section_desc">Forzar un temporizador de enfriamiento para desactivar el bloqueo de anuncios. Ayuda a prevenir recaídas impulsivas.</string>
+    <string name="settings_lockdown_mode_title">Modo de bloqueo VPN</string>
+    <string name="settings_lockdown_mode_desc">Cuando está activado, no puedes apagar la VPN ni acceder a la configuración sin esperar el temporizador de enfriamiento.</string>
+    <string name="settings_lockdown_duration_title">Duración del enfriamiento</string>
+    <string name="settings_lockdown_duration_desc">Tiempo que debes esperar para desbloquear la aplicación</string>
+    <string name="lockdown_duration_1m">1 minuto</string>
+    <string name="lockdown_duration_5m">5 minutos</string>
+    <string name="lockdown_duration_10m">10 minutos</string>
+    <string name="lockdown_duration_30m">30 minutos</string>
+    <string name="lockdown_duration_1h">1 hora</string>
+    <string name="lockdown_duration_6h">6 horas</string>
+    <string name="lockdown_duration_12h">12 horas</string>
+    <string name="lockdown_duration_24h">24 horas</string>
+    <string name="lockdown_screen_title">BlockAds está bloqueado</string>
+    <string name="lockdown_screen_desc">Para modificar la configuración o desactivar el bloqueo de anuncios, debes iniciar el temporizador de enfriamiento.</string>
+    <string name="lockdown_screen_cancel">Cancelar enfriamiento</string>
+    <string name="lockdown_screen_cancel_desc">Al cancelar, el temporizador se restablecerá a la duración completa.</string>
+    <string name="lockdown_screen_duration">Duración del temporizador: %1$s</string>
+    <string name="lockdown_screen_start">Iniciar temporizador de enfriamiento</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Administrador del dispositivo para hacer cumplir la persistencia y las restricciones de política para BlockAds.</string>
+    <string name="settings_device_owner_section_title">Control del propietario del dispositivo</string>
+    <string name="settings_device_owner_section_desc">Administre las restricciones del propietario del dispositivo. Solo visible porque BlockAds es un propietario de dispositivo.</string>
+    <string name="settings_device_owner_enforce_restrictions">Restricciones del dispositivo</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Habilitar para aplicar restricciones a nivel de aplicación (evitar desinstalación, etc.). Deshabilitar para borrarlas.</string>
 </resources>

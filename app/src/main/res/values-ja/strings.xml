@@ -524,4 +524,33 @@
     <string name="trusted_networks_paused_text_generic">BlockAds は信頼する Wi-Fi で一時停止中です。離れると再開します。</string>
     <string name="status_paused">一時停止中</string>
     <string name="home_paused_trusted_short">信頼するネットワークで一時停止中</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">衝動コントロールとロックダウン</string>
+    <string name="settings_lockdown_section_desc">広告ブロックを無効にするためのクールダウンタイマーを強制します。衝動的な再発を防ぐのに役立ちます。</string>
+    <string name="settings_lockdown_mode_title">VPNロックダウンモード</string>
+    <string name="settings_lockdown_mode_desc">有効にすると、クールダウンタイマーの終了を待たずにVPNをオフにしたり設定にアクセスしたりできなくなります。</string>
+    <string name="settings_lockdown_duration_title">クールダウン時間</string>
+    <string name="settings_lockdown_duration_desc">アプリのロックを解除するために待機する必要がある時間</string>
+    <string name="lockdown_duration_1m">1分</string>
+    <string name="lockdown_duration_5m">5分</string>
+    <string name="lockdown_duration_10m">10分</string>
+    <string name="lockdown_duration_30m">30分</string>
+    <string name="lockdown_duration_1h">1時間</string>
+    <string name="lockdown_duration_6h">6時間</string>
+    <string name="lockdown_duration_12h">12時間</string>
+    <string name="lockdown_duration_24h">24時間</string>
+    <string name="lockdown_screen_title">BlockAdsはロックされています</string>
+    <string name="lockdown_screen_desc">設定を変更したり広告ブロックを無効にしたりするには、クールダウンタイマーを開始する必要があります。</string>
+    <string name="lockdown_screen_cancel">クールダウンをキャンセル</string>
+    <string name="lockdown_screen_cancel_desc">キャンセルすると、タイマーは元の時間に戻ります。</string>
+    <string name="lockdown_screen_duration">タイマー時間：%1$s</string>
+    <string name="lockdown_screen_start">クールダウンタイマーを開始</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">BlockAdsの永続性とポリシー制限を適用するデバイス管理者。</string>
+    <string name="settings_device_owner_section_title">デバイス所有者コントロール</string>
+    <string name="settings_device_owner_section_desc">デバイス所有者の制限を管理します。BlockAdsがデバイス所有者であるため、表示されます。</string>
+    <string name="settings_device_owner_enforce_restrictions">デバイス制限</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">アプリレベルの制限（アンインストールの防止など）を適用するには有効にします。クリアするには無効にします。</string>
 </resources>
