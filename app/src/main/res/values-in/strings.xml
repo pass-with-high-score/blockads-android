@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds dijeda di Wi-Fi tepercaya — aktif lagi saat Anda pergi.</string>
     <string name="status_paused">Dijeda</string>
     <string name="home_paused_trusted_short">Dijeda di jaringan tepercaya</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Kontrol Impuls &amp; Kuncian</string>
+    <string name="settings_lockdown_section_desc">Paksa waktu tunggu untuk menonaktifkan pemblokir iklan. Membantu mencegah kekambuhan impulsif.</string>
+    <string name="settings_lockdown_mode_title">Mode Kuncian VPN</string>
+    <string name="settings_lockdown_mode_desc">Saat diaktifkan, Anda tidak dapat mematikan VPN atau mengakses pengaturan tanpa menunggu waktu tunggu habis.</string>
+    <string name="settings_lockdown_duration_title">Durasi Waktu Tunggu</string>
+    <string name="settings_lockdown_duration_desc">Waktu yang harus Anda tunggu untuk membuka kunci aplikasi</string>
+    <string name="lockdown_duration_1m">1 menit</string>
+    <string name="lockdown_duration_5m">5 menit</string>
+    <string name="lockdown_duration_10m">10 menit</string>
+    <string name="lockdown_duration_30m">30 menit</string>
+    <string name="lockdown_duration_1h">1 jam</string>
+    <string name="lockdown_duration_6h">6 jam</string>
+    <string name="lockdown_duration_12h">12 jam</string>
+    <string name="lockdown_duration_24h">24 jam</string>
+    <string name="lockdown_screen_title">BlockAds Terkunci</string>
+    <string name="lockdown_screen_desc">Untuk mengubah pengaturan atau menonaktifkan pemblokiran iklan, Anda harus memulai waktu tunggu.</string>
+    <string name="lockdown_screen_cancel">Batalkan Waktu Tunggu</string>
+    <string name="lockdown_screen_cancel_desc">Membatalkan akan mengatur ulang penghitung waktu kembali ke durasi penuh.</string>
+    <string name="lockdown_screen_duration">Durasi Pengatur Waktu: %1$s</string>
+    <string name="lockdown_screen_start">Mulai Waktu Tunggu</string>
 </resources>

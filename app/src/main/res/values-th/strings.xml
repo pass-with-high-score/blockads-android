@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds หยุดชั่วคราวบน Wi-Fi ที่เชื่อถือได้ — จะกลับมาทำงานเมื่อคุณออกไป</string>
     <string name="status_paused">หยุดชั่วคราว</string>
     <string name="home_paused_trusted_short">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">ควบคุมแรงกระตุ้นและล็อกดาวน์</string>
+    <string name="settings_lockdown_section_desc">บังคับให้มีเวลาพักก่อนปิดใช้งานการบล็อกโฆษณา ช่วยป้องกันการกำเริบจากแรงกระตุ้น</string>
+    <string name="settings_lockdown_mode_title">โหมดล็อกดาวน์ VPN</string>
+    <string name="settings_lockdown_mode_desc">เมื่อเปิดใช้งาน คุณจะไม่สามารถปิด VPN หรือเข้าถึงการตั้งค่าได้จนกว่าเวลาพักจะสิ้นสุดลง</string>
+    <string name="settings_lockdown_duration_title">ระยะเวลาพัก</string>
+    <string name="settings_lockdown_duration_desc">เวลาที่คุณต้องรอเพื่อปลดล็อกแอป</string>
+    <string name="lockdown_duration_1m">1 นาที</string>
+    <string name="lockdown_duration_5m">5 นาที</string>
+    <string name="lockdown_duration_10m">10 นาที</string>
+    <string name="lockdown_duration_30m">30 นาที</string>
+    <string name="lockdown_duration_1h">1 ชั่วโมง</string>
+    <string name="lockdown_duration_6h">6 ชั่วโมง</string>
+    <string name="lockdown_duration_12h">12 ชั่วโมง</string>
+    <string name="lockdown_duration_24h">24 ชั่วโมง</string>
+    <string name="lockdown_screen_title">BlockAds ถูกล็อก</string>
+    <string name="lockdown_screen_desc">หากต้องการแก้ไขการตั้งค่าหรือปิดใช้งานการบล็อกโฆษณา คุณต้องเริ่มตัวนับเวลาพัก</string>
+    <string name="lockdown_screen_cancel">ยกเลิกการพัก</string>
+    <string name="lockdown_screen_cancel_desc">การยกเลิกจะรีเซ็ตตัวนับเวลากลับเป็นระยะเวลาเต็ม</string>
+    <string name="lockdown_screen_duration">ระยะเวลา: %1$s</string>
+    <string name="lockdown_screen_start">เริ่มตัวนับเวลาพัก</string>
 </resources>

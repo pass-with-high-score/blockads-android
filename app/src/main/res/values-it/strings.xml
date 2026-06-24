@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds è in pausa su una rete Wi-Fi attendibile — riprende quando esci.</string>
     <string name="status_paused">In pausa</string>
     <string name="home_paused_trusted_short">In pausa su rete attendibile</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Controllo impulsi e Blocco</string>
+    <string name="settings_lockdown_section_desc">Forza un timer di raffreddamento per disabilitare il blocco degli annunci. Aiuta a prevenire le ricadute impulsive.</string>
+    <string name="settings_lockdown_mode_title">Modalità di blocco VPN</string>
+    <string name="settings_lockdown_mode_desc">Quando abilitato, non puoi spegnere la VPN o accedere alle impostazioni senza aspettare il termine del timer di raffreddamento.</string>
+    <string name="settings_lockdown_duration_title">Durata del raffreddamento</string>
+    <string name="settings_lockdown_duration_desc">Tempo che devi aspettare per sbloccare l\'app</string>
+    <string name="lockdown_duration_1m">1 minuto</string>
+    <string name="lockdown_duration_5m">5 minuti</string>
+    <string name="lockdown_duration_10m">10 minuti</string>
+    <string name="lockdown_duration_30m">30 minuti</string>
+    <string name="lockdown_duration_1h">1 ora</string>
+    <string name="lockdown_duration_6h">6 ore</string>
+    <string name="lockdown_duration_12h">12 ore</string>
+    <string name="lockdown_duration_24h">24 ore</string>
+    <string name="lockdown_screen_title">BlockAds è bloccato</string>
+    <string name="lockdown_screen_desc">Per modificare le impostazioni o disabilitare il blocco degli annunci, devi avviare il timer di raffreddamento.</string>
+    <string name="lockdown_screen_cancel">Annulla raffreddamento</string>
+    <string name="lockdown_screen_cancel_desc">L\'annullamento ripristinerà il timer alla durata intera.</string>
+    <string name="lockdown_screen_duration">Durata del timer: %1$s</string>
+    <string name="lockdown_screen_start">Avvia timer di raffreddamento</string>
 </resources>

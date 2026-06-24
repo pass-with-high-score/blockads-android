@@ -59,6 +59,12 @@ class SettingsViewModel(
     val autoReconnect: StateFlow<Boolean> = appPrefs.autoReconnect
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val lockdownEnabled: StateFlow<Boolean> = appPrefs.lockdownEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val lockdownDuration: StateFlow<Long> = appPrefs.lockdownDuration
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 300000L)
+
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -137,6 +143,22 @@ class SettingsViewModel(
 
     fun setAutoReconnect(enabled: Boolean) {
         viewModelScope.launch { appPrefs.setAutoReconnect(enabled) }
+    }
+
+    fun setLockdownEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setLockdownEnabled(enabled)
+            if (enabled) {
+                val context = getApplication<Application>().applicationContext
+                ServiceController.requestStart(context)
+            }
+        }
+    }
+
+    fun setLockdownDuration(duration: Long) {
+        viewModelScope.launch {
+            appPrefs.setLockdownDuration(duration)
+        }
     }
 
     fun setCrashReportingEnabled(enabled: Boolean) {

@@ -545,4 +545,26 @@ Desteklenen formatlar:
     <string name="trusted_networks_paused_text_generic">BlockAds güvenilir bir Wi-Fi ağında duraklatıldı — ayrıldığınızda devam eder.</string>
     <string name="status_paused">Duraklatıldı</string>
     <string name="home_paused_trusted_short">Güvenilir ağda duraklatıldı</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Dürtü Kontrolü ve Kilitleme</string>
+    <string name="settings_lockdown_section_desc">Reklam engellemeyi devre dışı bırakmak için bir bekleme süresi zorlar. Dürtüsel nüksetmeleri önlemeye yardımcı olur.</string>
+    <string name="settings_lockdown_mode_title">VPN Kilitleme Modu</string>
+    <string name="settings_lockdown_mode_desc">Etkinleştirildiğinde, bekleme süresinin bitmesini beklemeden VPN\'i kapatamaz veya ayarlara erişemezsiniz.</string>
+    <string name="settings_lockdown_duration_title">Bekleme Süresi</string>
+    <string name="settings_lockdown_duration_desc">Uygulamanın kilidini açmak için beklemeniz gereken süre</string>
+    <string name="lockdown_duration_1m">1 dakika</string>
+    <string name="lockdown_duration_5m">5 dakika</string>
+    <string name="lockdown_duration_10m">10 dakika</string>
+    <string name="lockdown_duration_30m">30 dakika</string>
+    <string name="lockdown_duration_1h">1 saat</string>
+    <string name="lockdown_duration_6h">6 saat</string>
+    <string name="lockdown_duration_12h">12 saat</string>
+    <string name="lockdown_duration_24h">24 saat</string>
+    <string name="lockdown_screen_title">BlockAds Kilitli</string>
+    <string name="lockdown_screen_desc">Ayarlarınızı değiştirmek veya reklam engellemeyi devre dışı bırakmak için bekleme sayacını başlatmalısınız.</string>
+    <string name="lockdown_screen_cancel">Beklemeyi İptal Et</string>
+    <string name="lockdown_screen_cancel_desc">İptal etmek sayacı tam süreye sıfırlayacaktır.</string>
+    <string name="lockdown_screen_duration">Sayaç Süresi: %1$s</string>
+    <string name="lockdown_screen_start">Bekleme Sayacını Başlat</string>
 </resources>

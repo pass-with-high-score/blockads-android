@@ -540,4 +540,26 @@
     <string name="trusted_networks_paused_text_generic">تم إيقاف BlockAds مؤقتًا على شبكة Wi-Fi موثوقة — يستأنف عند المغادرة.</string>
     <string name="status_paused">متوقف مؤقتًا</string>
     <string name="home_paused_trusted_short">متوقف مؤقتًا على شبكة موثوقة</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">التحكم في الاندفاع والقفل</string>
+    <string name="settings_lockdown_section_desc">فرض مؤقت للتهدئة لتعطيل حظر الإعلانات. يساعد في منع الانتكاسات الاندفاعية.</string>
+    <string name="settings_lockdown_mode_title">وضع قفل VPN</string>
+    <string name="settings_lockdown_mode_desc">عند التفعيل، لا يمكنك إيقاف تشغيل VPN أو الوصول إلى الإعدادات دون الانتظار لانتهاء مؤقت التهدئة.</string>
+    <string name="settings_lockdown_duration_title">مدة التهدئة</string>
+    <string name="settings_lockdown_duration_desc">الوقت الذي يجب أن تنتظره لفتح التطبيق</string>
+    <string name="lockdown_duration_1m">1 دقيقة</string>
+    <string name="lockdown_duration_5m">5 دقائق</string>
+    <string name="lockdown_duration_10m">10 دقائق</string>
+    <string name="lockdown_duration_30m">30 دقيقة</string>
+    <string name="lockdown_duration_1h">1 ساعة</string>
+    <string name="lockdown_duration_6h">6 ساعات</string>
+    <string name="lockdown_duration_12h">12 ساعة</string>
+    <string name="lockdown_duration_24h">24 ساعة</string>
+    <string name="lockdown_screen_title">BlockAds مقفل</string>
+    <string name="lockdown_screen_desc">لتعديل إعداداتك أو تعطيل حظر الإعلانات، يجب عليك بدء مؤقت التهدئة.</string>
+    <string name="lockdown_screen_cancel">إلغاء التهدئة</string>
+    <string name="lockdown_screen_cancel_desc">سيؤدي الإلغاء إلى إعادة تعيين المؤقت للوقت الكامل.</string>
+    <string name="lockdown_screen_duration">مدة المؤقت: %1$s</string>
+    <string name="lockdown_screen_start">بدء مؤقت التهدئة</string>
 </resources>

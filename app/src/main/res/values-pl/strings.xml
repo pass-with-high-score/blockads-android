@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds jest wstrzymany w zaufanej sieci Wi-Fi — wznowi się po opuszczeniu.</string>
     <string name="status_paused">Wstrzymano</string>
     <string name="home_paused_trusted_short">Wstrzymano w zaufanej sieci</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Kontrola impulsów i Blokada</string>
+    <string name="settings_lockdown_section_desc">Wymuś czas oczekiwania na wyłączenie blokowania reklam. Pomaga zapobiegać impulsywnym nawrotom.</string>
+    <string name="settings_lockdown_mode_title">Tryb blokady VPN</string>
+    <string name="settings_lockdown_mode_desc">Po włączeniu nie można wyłączyć VPN ani uzyskać dostępu do ustawień bez odczekania czasu oczekiwania.</string>
+    <string name="settings_lockdown_duration_title">Czas oczekiwania</string>
+    <string name="settings_lockdown_duration_desc">Czas, który musisz odczekać, aby odblokować aplikację</string>
+    <string name="lockdown_duration_1m">1 minuta</string>
+    <string name="lockdown_duration_5m">5 minut</string>
+    <string name="lockdown_duration_10m">10 minut</string>
+    <string name="lockdown_duration_30m">30 minut</string>
+    <string name="lockdown_duration_1h">1 godzina</string>
+    <string name="lockdown_duration_6h">6 godzin</string>
+    <string name="lockdown_duration_12h">12 godzin</string>
+    <string name="lockdown_duration_24h">24 godziny</string>
+    <string name="lockdown_screen_title">BlockAds jest zablokowany</string>
+    <string name="lockdown_screen_desc">Aby zmienić ustawienia lub wyłączyć blokowanie reklam, musisz uruchomić zegar oczekiwania.</string>
+    <string name="lockdown_screen_cancel">Anuluj oczekiwanie</string>
+    <string name="lockdown_screen_cancel_desc">Anulowanie spowoduje zresetowanie zegara do pełnego czasu.</string>
+    <string name="lockdown_screen_duration">Czas trwania: %1$s</string>
+    <string name="lockdown_screen_start">Uruchom zegar oczekiwania</string>
 </resources>

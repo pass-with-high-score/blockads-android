@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds ist in einem vertrauenswürdigen WLAN pausiert – wird beim Verlassen fortgesetzt.</string>
     <string name="status_paused">Pausiert</string>
     <string name="home_paused_trusted_short">Pausiert in vertrauenswürdigem Netzwerk</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Impulskontrolle &amp; Sperre</string>
+    <string name="settings_lockdown_section_desc">Erzwingen Sie einen Abkling-Timer, um die Werbeblockierung zu deaktivieren. Hilft, impulsive Rückfälle zu verhindern.</string>
+    <string name="settings_lockdown_mode_title">VPN-Sperrmodus</string>
+    <string name="settings_lockdown_mode_desc">Wenn diese Option aktiviert ist, können Sie das VPN nicht deaktivieren oder auf die Einstellungen zugreifen, ohne den Abkling-Timer abzuwarten.</string>
+    <string name="settings_lockdown_duration_title">Abklingzeit</string>
+    <string name="settings_lockdown_duration_desc">Zeit, die Sie warten müssen, um die App zu entsperren</string>
+    <string name="lockdown_duration_1m">1 Minute</string>
+    <string name="lockdown_duration_5m">5 Minuten</string>
+    <string name="lockdown_duration_10m">10 Minuten</string>
+    <string name="lockdown_duration_30m">30 Minuten</string>
+    <string name="lockdown_duration_1h">1 Stunde</string>
+    <string name="lockdown_duration_6h">6 Stunden</string>
+    <string name="lockdown_duration_12h">12 Stunden</string>
+    <string name="lockdown_duration_24h">24 Stunden</string>
+    <string name="lockdown_screen_title">BlockAds ist gesperrt</string>
+    <string name="lockdown_screen_desc">Um Ihre Einstellungen zu ändern oder die Werbeblockierung zu deaktivieren, müssen Sie den Abkling-Timer starten.</string>
+    <string name="lockdown_screen_cancel">Abklingzeit abbrechen</string>
+    <string name="lockdown_screen_cancel_desc">Beim Abbrechen wird der Timer wieder auf die volle Dauer zurückgesetzt.</string>
+    <string name="lockdown_screen_duration">Timer-Dauer: %1$s</string>
+    <string name="lockdown_screen_start">Abkling-Timer starten</string>
 </resources>

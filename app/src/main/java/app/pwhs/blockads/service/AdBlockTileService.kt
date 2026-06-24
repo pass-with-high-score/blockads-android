@@ -11,7 +11,9 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.utils.VpnUtils
 
 import org.koin.android.ext.android.inject
+import org.koin.android.ext.android.inject
 import app.pwhs.blockads.data.datastore.AppPreferences
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class AdBlockTileService : TileService() {
@@ -32,6 +34,12 @@ class AdBlockTileService : TileService() {
 
         val isRootProxyRunning = RootProxyService.isRunning
         val isVpnRunning = AdBlockVpnService.isRunning
+
+        val isLocked = runBlocking { appPrefs.lockdownEnabled.first() }
+        if (isLocked && (isRootProxyRunning || isVpnRunning)) {
+            updateTileState()
+            return
+        }
 
         if (isRootProxyRunning) {
             RootProxyService.stop(this)

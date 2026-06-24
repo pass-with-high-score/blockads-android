@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds je pozastaven v důvěryhodné Wi-Fi — po odchodu se obnoví.</string>
     <string name="status_paused">Pozastaveno</string>
     <string name="home_paused_trusted_short">Pozastaveno v důvěryhodné síti</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Kontrola impulsů a uzamčení</string>
+    <string name="settings_lockdown_section_desc">Vynutit časovač uklidnění pro zakázání blokování reklam. Pomáhá předcházet impulzivním recidivám.</string>
+    <string name="settings_lockdown_mode_title">Režim uzamčení VPN</string>
+    <string name="settings_lockdown_mode_desc">Při povolení nemůžete vypnout VPN ani přistupovat k nastavení, dokud neuplyne časovač uklidnění.</string>
+    <string name="settings_lockdown_duration_title">Doba uklidnění</string>
+    <string name="settings_lockdown_duration_desc">Čas, který musíte počkat na odemknutí aplikace</string>
+    <string name="lockdown_duration_1m">1 minuta</string>
+    <string name="lockdown_duration_5m">5 minut</string>
+    <string name="lockdown_duration_10m">10 minut</string>
+    <string name="lockdown_duration_30m">30 minut</string>
+    <string name="lockdown_duration_1h">1 hodina</string>
+    <string name="lockdown_duration_6h">6 hodin</string>
+    <string name="lockdown_duration_12h">12 hodin</string>
+    <string name="lockdown_duration_24h">24 hodin</string>
+    <string name="lockdown_screen_title">BlockAds je uzamčen</string>
+    <string name="lockdown_screen_desc">Chcete-li upravit nastavení nebo zakázat blokování reklam, musíte spustit časovač uklidnění.</string>
+    <string name="lockdown_screen_cancel">Zrušit uklidnění</string>
+    <string name="lockdown_screen_cancel_desc">Zrušením se časovač resetuje zpět na plnou dobu.</string>
+    <string name="lockdown_screen_duration">Doba trvání časovače: %1$s</string>
+    <string name="lockdown_screen_start">Spustit časovač uklidnění</string>
 </resources>

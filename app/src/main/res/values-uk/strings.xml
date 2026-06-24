@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds призупинено в довіреній мережі Wi-Fi — відновиться, коли ви вийдете.</string>
     <string name="status_paused">Призупинено</string>
     <string name="home_paused_trusted_short">Призупинено в довіреній мережі</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Контроль імпульсів і блокування</string>
+    <string name="settings_lockdown_section_desc">Примусовий таймер очікування для вимкнення блокування реклами. Допомагає запобігти імпульсивним зривам.</string>
+    <string name="settings_lockdown_mode_title">Режим блокування VPN</string>
+    <string name="settings_lockdown_mode_desc">Коли ввімкнено, ви не можете вимкнути VPN або отримати доступ до налаштувань, не дочекавшись закінчення таймера.</string>
+    <string name="settings_lockdown_duration_title">Тривалість очікування</string>
+    <string name="settings_lockdown_duration_desc">Час, який потрібно зачекати, щоб розблокувати програму</string>
+    <string name="lockdown_duration_1m">1 хвилина</string>
+    <string name="lockdown_duration_5m">5 хвилин</string>
+    <string name="lockdown_duration_10m">10 хвилин</string>
+    <string name="lockdown_duration_30m">30 хвилин</string>
+    <string name="lockdown_duration_1h">1 година</string>
+    <string name="lockdown_duration_6h">6 годин</string>
+    <string name="lockdown_duration_12h">12 годин</string>
+    <string name="lockdown_duration_24h">24 години</string>
+    <string name="lockdown_screen_title">BlockAds заблоковано</string>
+    <string name="lockdown_screen_desc">Щоб змінити налаштування або вимкнути блокування реклами, необхідно запустити таймер очікування.</string>
+    <string name="lockdown_screen_cancel">Скасувати очікування</string>
+    <string name="lockdown_screen_cancel_desc">У разі скасування таймер повернеться до повного часу.</string>
+    <string name="lockdown_screen_duration">Тривалість таймера: %1$s</string>
+    <string name="lockdown_screen_start">Запустити таймер</string>
 </resources>

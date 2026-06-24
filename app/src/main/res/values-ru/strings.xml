@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds приостановлен в доверенной сети Wi-Fi — возобновится при выходе.</string>
     <string name="status_paused">Пауза</string>
     <string name="home_paused_trusted_short">Пауза в доверенной сети</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Контроль импульсов и блокировка</string>
+    <string name="settings_lockdown_section_desc">Принудительный таймер ожидания для отключения блокировки рекламы. Помогает предотвратить импульсивные срывы.</string>
+    <string name="settings_lockdown_mode_title">Режим блокировки VPN</string>
+    <string name="settings_lockdown_mode_desc">Если эта функция включена, вы не можете отключить VPN или получить доступ к настройкам, не дождавшись окончания таймера.</string>
+    <string name="settings_lockdown_duration_title">Длительность ожидания</string>
+    <string name="settings_lockdown_duration_desc">Время, которое необходимо подождать, чтобы разблокировать приложение</string>
+    <string name="lockdown_duration_1m">1 минута</string>
+    <string name="lockdown_duration_5m">5 минут</string>
+    <string name="lockdown_duration_10m">10 минут</string>
+    <string name="lockdown_duration_30m">30 минут</string>
+    <string name="lockdown_duration_1h">1 час</string>
+    <string name="lockdown_duration_6h">6 часов</string>
+    <string name="lockdown_duration_12h">12 часов</string>
+    <string name="lockdown_duration_24h">24 часа</string>
+    <string name="lockdown_screen_title">BlockAds заблокирован</string>
+    <string name="lockdown_screen_desc">Чтобы изменить настройки или отключить блокировку рекламы, необходимо запустить таймер ожидания.</string>
+    <string name="lockdown_screen_cancel">Отменить ожидание</string>
+    <string name="lockdown_screen_cancel_desc">При отмене таймер вернется к полному времени.</string>
+    <string name="lockdown_screen_duration">Длительность таймера: %1$s</string>
+    <string name="lockdown_screen_start">Запустить таймер</string>
 </resources>

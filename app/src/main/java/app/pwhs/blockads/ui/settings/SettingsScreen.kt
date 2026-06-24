@@ -60,6 +60,8 @@ fun SettingsScreen(
     onNavigateToDNSProvider: () -> Unit = { },
 ) {
     val autoReconnect by viewModel.autoReconnect.collectAsStateWithLifecycle()
+    val lockdownEnabled by viewModel.lockdownEnabled.collectAsStateWithLifecycle()
+    val lockdownDuration by viewModel.lockdownDuration.collectAsStateWithLifecycle()
     val networkSwitchDelayEnabled by viewModel.networkSwitchDelayEnabled.collectAsStateWithLifecycle()
     val networkSwitchDelaySec by viewModel.networkSwitchDelaySec.collectAsStateWithLifecycle()
     val filterLists by viewModel.filterLists.collectAsStateWithLifecycle()
@@ -133,6 +135,16 @@ fun SettingsScreen(
                 onNavigateToDNSProvider = onNavigateToDNSProvider,
                 onNavigateToWireGuardImport = onNavigateToWireGuardImport,
                 onNavigateToHttpsFiltering = onNavigateToHttpsFiltering
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Lockdown ─────────────────────────────────────────
+            app.pwhs.blockads.ui.settings.component.LockdownSection(
+                lockdownEnabled = lockdownEnabled,
+                lockdownDuration = lockdownDuration,
+                onSetLockdownEnabled = { viewModel.setLockdownEnabled(it) },
+                onSetLockdownDuration = { viewModel.setLockdownDuration(it) }
             )
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds 已在信任的 Wi-Fi 上暂停，离开后自动恢复。</string>
     <string name="status_paused">已暂停</string>
     <string name="home_paused_trusted_short">已在信任的网络上暂停</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">冲动控制与锁定</string>
+    <string name="settings_lockdown_section_desc">强制使用冷却倒计时以禁用广告拦截。有助于防止冲动复发。</string>
+    <string name="settings_lockdown_mode_title">VPN 锁定模式</string>
+    <string name="settings_lockdown_mode_desc">启用后，如果不等待冷却倒计时结束，您将无法关闭 VPN 或访问设置。</string>
+    <string name="settings_lockdown_duration_title">冷却时间</string>
+    <string name="settings_lockdown_duration_desc">解锁应用程序您必须等待的时间</string>
+    <string name="lockdown_duration_1m">1分钟</string>
+    <string name="lockdown_duration_5m">5分钟</string>
+    <string name="lockdown_duration_10m">10分钟</string>
+    <string name="lockdown_duration_30m">30分钟</string>
+    <string name="lockdown_duration_1h">1小时</string>
+    <string name="lockdown_duration_6h">6小时</string>
+    <string name="lockdown_duration_12h">12小时</string>
+    <string name="lockdown_duration_24h">24小时</string>
+    <string name="lockdown_screen_title">BlockAds 已锁定</string>
+    <string name="lockdown_screen_desc">要修改设置或禁用广告拦截，您必须启动冷却倒计时。</string>
+    <string name="lockdown_screen_cancel">取消冷却</string>
+    <string name="lockdown_screen_cancel_desc">取消将使倒计时重置回完整时间。</string>
+    <string name="lockdown_screen_duration">倒计时：%1$s</string>
+    <string name="lockdown_screen_start">启动冷却倒计时</string>
 </resources>

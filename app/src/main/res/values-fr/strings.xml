@@ -524,4 +524,26 @@
     <string name="trusted_networks_paused_text_generic">BlockAds est en pause sur un Wi-Fi de confiance — il reprend quand vous partez.</string>
     <string name="status_paused">En pause</string>
     <string name="home_paused_trusted_short">En pause sur un réseau de confiance</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Contrôle des impulsions et Verrouillage</string>
+    <string name="settings_lockdown_section_desc">Forcer un délai de refroidissement pour désactiver le blocage des publicités. Aide à prévenir les rechutes impulsives.</string>
+    <string name="settings_lockdown_mode_title">Mode de verrouillage VPN</string>
+    <string name="settings_lockdown_mode_desc">Lorsqu\'il est activé, vous ne pouvez pas désactiver le VPN ni accéder aux paramètres sans attendre la fin du délai de refroidissement.</string>
+    <string name="settings_lockdown_duration_title">Durée du refroidissement</string>
+    <string name="settings_lockdown_duration_desc">Temps que vous devez attendre pour déverrouiller l\'application</string>
+    <string name="lockdown_duration_1m">1 minute</string>
+    <string name="lockdown_duration_5m">5 minutes</string>
+    <string name="lockdown_duration_10m">10 minutes</string>
+    <string name="lockdown_duration_30m">30 minutes</string>
+    <string name="lockdown_duration_1h">1 heure</string>
+    <string name="lockdown_duration_6h">6 heures</string>
+    <string name="lockdown_duration_12h">12 heures</string>
+    <string name="lockdown_duration_24h">24 heures</string>
+    <string name="lockdown_screen_title">BlockAds est verrouillé</string>
+    <string name="lockdown_screen_desc">Pour modifier vos paramètres ou désactiver le blocage des publicités, vous devez lancer le minuteur de refroidissement.</string>
+    <string name="lockdown_screen_cancel">Annuler le refroidissement</string>
+    <string name="lockdown_screen_cancel_desc">L\'annulation réinitialisera le minuteur à sa durée totale.</string>
+    <string name="lockdown_screen_duration">Durée du minuteur : %1$s</string>
+    <string name="lockdown_screen_start">Démarrer le minuteur de refroidissement</string>
 </resources>
