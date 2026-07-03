@@ -174,7 +174,7 @@
     <string name="trusted_networks_empty">No trusted networks yet. Add the one you\'re on to pause BlockAds there.</string>
     <string name="home_paused_trusted_short">Paused on a trusted network</string>
     <string name="trusted_networks_paused_title">Paused on trusted network</string>
-    <string name="trusted_networks_paused_text">BlockAds is paused on \"%1$s\" — it resumes automatically when you leave this network.</string>
+    <string name="trusted_networks_paused_text">BlockAds is paused on \&quot;%1$s\&quot; — it resumes automatically when you leave this network.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds is paused on a trusted Wi-Fi network — it resumes automatically when you leave.</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
@@ -491,8 +491,6 @@
     <string name="https_filtering_open_settings">Open Security Settings</string>
     <string name="https_filtering_browser_section">Browser Selection</string>
     <string name="https_filtering_browser_desc">Select browsers to apply cosmetic ad filtering. Only selected apps are filtered.</string>
-    <string name="settings_full_tunnel">Full-tunnel mode</string>
-    <string name="settings_full_tunnel_desc">Route all app traffic through the tunnel (not just DNS). Enables per-app firewall on connections and is required for HTTPS filtering. Uses more battery; turn off for lighter split-tunnel (DNS-only) mode.</string>
     <string name="https_filtering_http3_title">Filter HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Block browser QUIC to force filterable connections for maximum ad filtering. May cause some pages to load partially. Turn off if pages don\'t load fully.</string>
     <string name="https_filtering_settings_desc">Hide ads visually in browsers</string>

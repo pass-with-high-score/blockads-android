@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Reti Wi-Fi attendibili</string>
     <string name="trusted_networks_empty">Nessuna rete attendibile. Aggiungi quella attuale per mettere in pausa BlockAds.</string>
     <string name="trusted_networks_paused_title">In pausa su rete attendibile</string>
-    <string name="trusted_networks_paused_text">BlockAds è in pausa su "%1$s" — riprende automaticamente quando esci da questa rete.</string>
+    <string name="trusted_networks_paused_text">BlockAds è in pausa su &quot;%1$s&quot; — riprende automaticamente quando esci da questa rete.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds è in pausa su una rete Wi-Fi attendibile — riprende quando esci.</string>
     <string name="status_paused">In pausa</string>
     <string name="home_paused_trusted_short">In pausa su rete attendibile</string>
-    <string name="settings_full_tunnel">Modalità tunnel completo</string>
-    <string name="settings_full_tunnel_desc">Indirizza tutto il traffico dell\'app attraverso il tunnel (non solo DNS). Abilita il firewall per singola app sulle connessioni ed è richiesto per il filtraggio HTTPS. Usa più batteria; disattiva per la modalità split-tunnel (solo DNS) più leggera.</string>
     <string name="https_filtering_http3_title">Filtra HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blocca QUIC del browser per forzare le connessioni filtrabili per il massimo filtraggio degli annunci. Potrebbe causare il caricamento parziale di alcune pagine. Disattiva se le pagine non si caricano completamente.</string>
 </resources>

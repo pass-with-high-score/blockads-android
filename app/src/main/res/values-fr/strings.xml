@@ -524,8 +524,6 @@
     <string name="trusted_networks_paused_text_generic">BlockAds est en pause sur un Wi-Fi de confiance — il reprend quand vous partez.</string>
     <string name="status_paused">En pause</string>
     <string name="home_paused_trusted_short">En pause sur un réseau de confiance</string>
-    <string name="settings_full_tunnel">Mode tunnel complet</string>
-    <string name="settings_full_tunnel_desc">Acheminer tout le trafic de l\'application via le tunnel (pas seulement le DNS). Active le pare-feu par application sur les connexions et est requis pour le filtrage HTTPS. Utilise plus de batterie ; désactivez-le pour un mode de tunnel divisé plus léger (DNS uniquement).</string>
     <string name="https_filtering_http3_title">Filtrer HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Bloquer QUIC du navigateur pour forcer les connexions filtrables pour un filtrage maximal des publicités. Peut entraîner le chargement partiel de certaines pages. Désactivez si les pages ne se chargent pas complètement.</string>
 </resources>

@@ -541,12 +541,10 @@ Desteklenen formatlar:
     <string name="trusted_networks_list_header">Güvenilir Wi-Fi ağları</string>
     <string name="trusted_networks_empty">Henüz güvenilir ağ yok. BlockAds\'i duraklatmak için geçerli ağı ekleyin.</string>
     <string name="trusted_networks_paused_title">Güvenilir ağda duraklatıldı</string>
-    <string name="trusted_networks_paused_text">BlockAds "%1$s" ağında duraklatıldı — bu ağdan ayrıldığınızda otomatik olarak devam eder.</string>
+    <string name="trusted_networks_paused_text">BlockAds &quot;%1$s&quot; ağında duraklatıldı — bu ağdan ayrıldığınızda otomatik olarak devam eder.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds güvenilir bir Wi-Fi ağında duraklatıldı — ayrıldığınızda devam eder.</string>
     <string name="status_paused">Duraklatıldı</string>
     <string name="home_paused_trusted_short">Güvenilir ağda duraklatıldı</string>
-    <string name="settings_full_tunnel">Tam tünel modu</string>
-    <string name="settings_full_tunnel_desc">Tüm uygulama trafiğini tünel üzerinden yönlendirir (sadece DNS değil). Bağlantılarda uygulama başına güvenlik duvarını etkinleştirir ve HTTPS filtrelemesi için gereklidir. Daha fazla pil tüketir; daha hafif bölünmüş tünel (sadece DNS) modu için kapatın.</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) Filtrele</string>
     <string name="https_filtering_http3_desc">Maksimum reklam filtrelemesi için filtrelenebilir bağlantıları zorlamak amacıyla tarayıcı QUIC\'ini engelleyin. Bazı sayfaların kısmen yüklenmesine neden olabilir. Sayfalar tam olarak yüklenmiyorsa kapatın.</string>
 </resources>

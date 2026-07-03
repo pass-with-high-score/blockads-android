@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Zaufane sieci Wi-Fi</string>
     <string name="trusted_networks_empty">Brak zaufanych sieci. Dodaj bieżącą, aby wstrzymać w niej BlockAds.</string>
     <string name="trusted_networks_paused_title">Wstrzymano w zaufanej sieci</string>
-    <string name="trusted_networks_paused_text">BlockAds jest wstrzymany w sieci "%1$s" — wznowi się automatycznie po jej opuszczeniu.</string>
+    <string name="trusted_networks_paused_text">BlockAds jest wstrzymany w sieci &quot;%1$s&quot; — wznowi się automatycznie po jej opuszczeniu.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds jest wstrzymany w zaufanej sieci Wi-Fi — wznowi się po opuszczeniu.</string>
     <string name="status_paused">Wstrzymano</string>
     <string name="home_paused_trusted_short">Wstrzymano w zaufanej sieci</string>
-    <string name="settings_full_tunnel">Tryb pełnego tunelu</string>
-    <string name="settings_full_tunnel_desc">Kieruj cały ruch aplikacji przez tunel (nie tylko DNS). Włącza zaporę sieciową dla poszczególnych aplikacji w połączeniach i jest wymagane do filtrowania HTTPS. Zużywa więcej baterii; wyłącz, aby uzyskać lżejszy tryb dzielonego tunelu (tylko DNS).</string>
     <string name="https_filtering_http3_title">Filtruj HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Zablokuj QUIC w przeglądarce, aby wymusić połączenia z możliwością filtrowania dla maksymalnego filtrowania reklam. Może to spowodować częściowe załadowanie niektórych stron. Wyłącz, jeśli strony nie ładują się w pełni.</string>
 </resources>

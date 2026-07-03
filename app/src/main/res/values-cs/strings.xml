@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Důvěryhodné Wi-Fi sítě</string>
     <string name="trusted_networks_empty">Zatím žádné důvěryhodné sítě. Přidejte aktuální a BlockAds se v ní pozastaví.</string>
     <string name="trusted_networks_paused_title">Pozastaveno v důvěryhodné síti</string>
-    <string name="trusted_networks_paused_text">BlockAds je pozastaven v síti "%1$s" — po odchodu se automaticky obnoví.</string>
+    <string name="trusted_networks_paused_text">BlockAds je pozastaven v síti &quot;%1$s&quot; — po odchodu se automaticky obnoví.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds je pozastaven v důvěryhodné Wi-Fi — po odchodu se obnoví.</string>
     <string name="status_paused">Pozastaveno</string>
     <string name="home_paused_trusted_short">Pozastaveno v důvěryhodné síti</string>
-    <string name="settings_full_tunnel">Režim plného tunelu</string>
-    <string name="settings_full_tunnel_desc">Směrovat veškerý provoz aplikace přes tunel (nejen DNS). Umožňuje firewall pro jednotlivé aplikace u připojení a je vyžadován pro filtrování HTTPS. Spotřebovává více baterie; vypněte pro lehčí režim děleného tunelu (pouze DNS).</string>
     <string name="https_filtering_http3_title">Filtrovat HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blokovat QUIC v prohlížeči pro vynucení filtrovatelných připojení pro maximální filtrování reklam. Může způsobit částečné načítání některých stránek. Vypněte, pokud se stránky nenačítají úplně.</string>
 </resources>

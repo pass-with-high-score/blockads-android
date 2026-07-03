@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Wi-Fi tepercaya</string>
     <string name="trusted_networks_empty">Belum ada jaringan tepercaya. Tambahkan yang sedang dipakai untuk menjeda BlockAds.</string>
     <string name="trusted_networks_paused_title">Dijeda di jaringan tepercaya</string>
-    <string name="trusted_networks_paused_text">BlockAds dijeda di "%1$s" — otomatis aktif lagi saat Anda pergi.</string>
+    <string name="trusted_networks_paused_text">BlockAds dijeda di &quot;%1$s&quot; — otomatis aktif lagi saat Anda pergi.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds dijeda di Wi-Fi tepercaya — aktif lagi saat Anda pergi.</string>
     <string name="status_paused">Dijeda</string>
     <string name="home_paused_trusted_short">Dijeda di jaringan tepercaya</string>
-    <string name="settings_full_tunnel">Mode terowongan penuh</string>
-    <string name="settings_full_tunnel_desc">Rutekan semua lalu lintas aplikasi melalui terowongan (bukan hanya DNS). Mengaktifkan firewall per aplikasi pada koneksi dan diperlukan untuk penyaringan HTTPS. Menggunakan lebih banyak baterai; matikan untuk mode terowongan terbagi (hanya DNS) yang lebih ringan.</string>
     <string name="https_filtering_http3_title">Filter HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blokir QUIC browser untuk memaksa koneksi yang dapat disaring agar penyaringan iklan maksimal. Dapat menyebabkan beberapa halaman hanya dimuat sebagian. Matikan jika halaman tidak dimuat sepenuhnya.</string>
 </resources>

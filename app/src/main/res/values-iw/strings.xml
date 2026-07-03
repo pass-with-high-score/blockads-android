@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">רשתות Wi-Fi מהימנות</string>
     <string name="trusted_networks_empty">אין עדיין רשתות מהימנות. הוסיפו את הנוכחית כדי להשהות שם את BlockAds.</string>
     <string name="trusted_networks_paused_title">מושהה ברשת מהימנה</string>
-    <string name="trusted_networks_paused_text">‏BlockAds מושהה ב-"%1$s" — יחזור אוטומטית כשתעזבו את הרשת.</string>
+    <string name="trusted_networks_paused_text">‏BlockAds מושהה ב-&quot;%1$s&quot; — יחזור אוטומטית כשתעזבו את הרשת.</string>
     <string name="trusted_networks_paused_text_generic">‏BlockAds מושהה ברשת Wi-Fi מהימנה — יחזור כשתעזבו.</string>
     <string name="status_paused">מושהה</string>
     <string name="home_paused_trusted_short">מושהה ברשת מהימנה</string>
-    <string name="settings_full_tunnel">מצב מנהרה מלאה</string>
-    <string name="settings_full_tunnel_desc">נתב את כל תעבורת האפליקציה דרך המנהרה (לא רק DNS). מאפשר חומת אש לכל אפליקציה בחיבורים ונדרש לסינון HTTPS. צורך יותר סוללה; כבה עבור מצב מנהרה מפוצלת (DNS בלבד) קל יותר.</string>
     <string name="https_filtering_http3_title">סנן HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">חסום QUIC בדפדפן כדי לאלץ חיבורים ניתנים לסינון לסינון פרסומות מרבי. עלול לגרום לטעינה חלקית של דפים מסוימים. כבה אם דפים לא נטענים במלואם.</string>
 </resources>

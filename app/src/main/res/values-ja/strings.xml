@@ -524,8 +524,6 @@
     <string name="trusted_networks_paused_text_generic">BlockAds は信頼する Wi-Fi で一時停止中です。離れると再開します。</string>
     <string name="status_paused">一時停止中</string>
     <string name="home_paused_trusted_short">信頼するネットワークで一時停止中</string>
-    <string name="settings_full_tunnel">フルトンネルモード</string>
-    <string name="settings_full_tunnel_desc">すべてのアプリトラフィックをトンネル経由でルーティングします（DNSのみではありません）。接続時のアプリごとのファイアウォールを有効にし、HTTPSフィルタリングに必要です。バッテリーの消費が増えます。軽量なスプリットトンネル（DNSのみ）モードにするにはオフにしてください。</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) をフィルタリング</string>
     <string name="https_filtering_http3_desc">ブラウザのQUICをブロックしてフィルタリング可能な接続を強制し、広告のフィルタリングを最大化します。一部のページが部分的にしか読み込まれない場合があります。ページが完全に読み込まれない場合はオフにしてください。</string>
 </resources>

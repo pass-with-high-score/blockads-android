@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Redes Wi-Fi confiáveis</string>
     <string name="trusted_networks_empty">Nenhuma rede confiável ainda. Adicione a atual para pausar o BlockAds nela.</string>
     <string name="trusted_networks_paused_title">Pausado em rede confiável</string>
-    <string name="trusted_networks_paused_text">O BlockAds está pausado em "%1$s" — retoma automaticamente ao sair desta rede.</string>
+    <string name="trusted_networks_paused_text">O BlockAds está pausado em &quot;%1$s&quot; — retoma automaticamente ao sair desta rede.</string>
     <string name="trusted_networks_paused_text_generic">O BlockAds está pausado em uma rede Wi-Fi confiável — retoma ao sair.</string>
     <string name="status_paused">Pausado</string>
     <string name="home_paused_trusted_short">Pausado em rede confiável</string>
-    <string name="settings_full_tunnel">Modo túnel completo</string>
-    <string name="settings_full_tunnel_desc">Encaminha todo o tráfego do aplicativo através do túnel (não apenas DNS). Habilita o firewall por aplicativo nas conexões e é necessário para a filtragem HTTPS. Usa mais bateria; desative para o modo de túnel dividido mais leve (apenas DNS).</string>
     <string name="https_filtering_http3_title">Filtrar HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Bloquear QUIC do navegador para forçar conexões filtráveis para filtragem máxima de anúncios. Pode fazer com que algumas páginas sejam carregadas parcialmente. Desligue se as páginas não carregarem completamente.</string>
 </resources>

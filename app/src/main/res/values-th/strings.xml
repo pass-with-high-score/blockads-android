@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Wi-Fi ที่เชื่อถือได้</string>
     <string name="trusted_networks_empty">ยังไม่มีเครือข่ายที่เชื่อถือได้ เพิ่มเครือข่ายปัจจุบันเพื่อหยุด BlockAds ที่นั่น</string>
     <string name="trusted_networks_paused_title">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
-    <string name="trusted_networks_paused_text">BlockAds หยุดชั่วคราวบน "%1$s" — จะกลับมาทำงานอัตโนมัติเมื่อคุณออกจากเครือข่ายนี้</string>
+    <string name="trusted_networks_paused_text">BlockAds หยุดชั่วคราวบน &quot;%1$s&quot; — จะกลับมาทำงานอัตโนมัติเมื่อคุณออกจากเครือข่ายนี้</string>
     <string name="trusted_networks_paused_text_generic">BlockAds หยุดชั่วคราวบน Wi-Fi ที่เชื่อถือได้ — จะกลับมาทำงานเมื่อคุณออกไป</string>
     <string name="status_paused">หยุดชั่วคราว</string>
     <string name="home_paused_trusted_short">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
-    <string name="settings_full_tunnel">โหมดอุโมงค์เต็มรูปแบบ</string>
-    <string name="settings_full_tunnel_desc">กำหนดเส้นทางการรับส่งข้อมูลแอปทั้งหมดผ่านอุโมงค์ (ไม่ใช่แค่ DNS) เปิดใช้งานไฟร์วอลล์ต่อแอปในการเชื่อมต่อ และจำเป็นสำหรับการกรอง HTTPS ใช้แบตเตอรี่มากขึ้น ปิดหากต้องการใช้โหมดอุโมงค์แยก (เฉพาะ DNS) ที่เบากว่า</string>
     <string name="https_filtering_http3_title">กรอง HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">บล็อก QUIC ของเบราว์เซอร์เพื่อบังคับการเชื่อมต่อที่กรองได้สำหรับการกรองโฆษณาสูงสุด อาจทำให้บางหน้าโหลดเพียงบางส่วน ปิดหากหน้าเว็บโหลดไม่สมบูรณ์</string>
 </resources>

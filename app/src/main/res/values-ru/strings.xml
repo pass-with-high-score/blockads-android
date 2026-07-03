@@ -524,8 +524,6 @@
     <string name="trusted_networks_paused_text_generic">BlockAds приостановлен в доверенной сети Wi-Fi — возобновится при выходе.</string>
     <string name="status_paused">Пауза</string>
     <string name="home_paused_trusted_short">Пауза в доверенной сети</string>
-    <string name="settings_full_tunnel">Режим полного туннелирования</string>
-    <string name="settings_full_tunnel_desc">Направлять весь трафик приложения через туннель (а не только DNS). Включает брандмауэр для каждого приложения и требуется для фильтрации HTTPS. Потребляет больше заряда батареи; выключите для более легкого режима раздельного туннелирования (только DNS).</string>
     <string name="https_filtering_http3_title">Фильтровать HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Блокировать QUIC в браузере для принудительного использования фильтруемых соединений для максимальной фильтрации рекламы. Может привести к частичной загрузке некоторых страниц. Отключите, если страницы загружаются не полностью.</string>
 </resources>

@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">신뢰할 수 있는 Wi-Fi</string>
     <string name="trusted_networks_empty">아직 신뢰할 수 있는 네트워크가 없습니다. 현재 네트워크를 추가하세요.</string>
     <string name="trusted_networks_paused_title">신뢰할 수 있는 네트워크에서 일시중지됨</string>
-    <string name="trusted_networks_paused_text">"%1$s"에서 BlockAds가 일시중지되었습니다. 벗어나면 자동으로 재개됩니다.</string>
+    <string name="trusted_networks_paused_text">&quot;%1$s&quot;에서 BlockAds가 일시중지되었습니다. 벗어나면 자동으로 재개됩니다.</string>
     <string name="trusted_networks_paused_text_generic">신뢰할 수 있는 Wi-Fi에서 BlockAds가 일시중지되었습니다. 벗어나면 재개됩니다.</string>
     <string name="status_paused">일시중지됨</string>
     <string name="home_paused_trusted_short">신뢰할 수 있는 네트워크에서 일시중지됨</string>
-    <string name="settings_full_tunnel">전체 터널 모드</string>
-    <string name="settings_full_tunnel_desc">모든 앱 트래픽을 터널을 통해 라우팅합니다(DNS만이 아님). 연결에 대한 앱별 방화벽을 활성화하며 HTTPS 필터링에 필요합니다. 배터리를 더 많이 사용합니다. 더 가벼운 분할 터널(DNS 전용) 모드를 사용하려면 끄십시오.</string>
     <string name="https_filtering_http3_title">HTTP/3(QUIC) 필터링</string>
     <string name="https_filtering_http3_desc">필터링 가능한 연결을 강제하여 광고 필터링을 극대화하려면 브라우저 QUIC를 차단하세요. 일부 페이지가 부분적으로만 로드될 수 있습니다. 페이지가 완전히 로드되지 않으면 끄십시오.</string>
 </resources>

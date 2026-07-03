@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Wi-Fi tin cậy</string>
     <string name="trusted_networks_empty">Chưa có mạng tin cậy nào. Thêm mạng đang dùng để tạm dừng BlockAds tại đó.</string>
     <string name="trusted_networks_paused_title">Đã tạm dừng ở mạng tin cậy</string>
-    <string name="trusted_networks_paused_text">BlockAds đang tạm dừng ở "%1$s" — tự bật lại khi bạn rời mạng này.</string>
+    <string name="trusted_networks_paused_text">BlockAds đang tạm dừng ở &quot;%1$s&quot; — tự bật lại khi bạn rời mạng này.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds đang tạm dừng ở một Wi-Fi tin cậy — tự bật lại khi bạn rời đi.</string>
     <string name="status_paused">Đã tạm dừng</string>
     <string name="home_paused_trusted_short">Tạm dừng trên mạng tin cậy</string>
-    <string name="settings_full_tunnel">Chế độ toàn đường hầm</string>
-    <string name="settings_full_tunnel_desc">Định tuyến toàn bộ lưu lượng ứng dụng qua đường hầm (không chỉ DNS). Bật tường lửa cho từng ứng dụng trên các kết nối và là bắt buộc để lọc HTTPS. Sử dụng nhiều pin hơn; tắt để sử dụng chế độ chia đường hầm (chỉ DNS) nhẹ hơn.</string>
     <string name="https_filtering_http3_title">Lọc HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Chặn QUIC của trình duyệt để buộc các kết nối có thể lọc nhằm đạt được khả năng lọc quảng cáo tối đa. Có thể khiến một số trang chỉ tải một phần. Hãy tắt nếu các trang không tải hoàn toàn.</string>
 </resources>

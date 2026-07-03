@@ -520,12 +520,10 @@
     <string name="trusted_networks_list_header">Vertrauenswürdige WLANs</string>
     <string name="trusted_networks_empty">Noch keine vertrauenswürdigen Netzwerke. Füge dein aktuelles hinzu, um BlockAds dort zu pausieren.</string>
     <string name="trusted_networks_paused_title">In vertrauenswürdigem Netzwerk pausiert</string>
-    <string name="trusted_networks_paused_text">BlockAds ist in "%1$s" pausiert – wird beim Verlassen automatisch fortgesetzt.</string>
+    <string name="trusted_networks_paused_text">BlockAds ist in &quot;%1$s&quot; pausiert – wird beim Verlassen automatisch fortgesetzt.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds ist in einem vertrauenswürdigen WLAN pausiert – wird beim Verlassen fortgesetzt.</string>
     <string name="status_paused">Pausiert</string>
     <string name="home_paused_trusted_short">Pausiert in vertrauenswürdigem Netzwerk</string>
-    <string name="settings_full_tunnel">Voll-Tunnel-Modus</string>
-    <string name="settings_full_tunnel_desc">Den gesamten App-Verkehr durch den Tunnel leiten (nicht nur DNS). Aktiviert die Firewall pro App für Verbindungen und ist für die HTTPS-Filterung erforderlich. Verbraucht mehr Akku; für den leichteren Split-Tunnel-Modus (nur DNS) deaktivieren.</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) filtern</string>
     <string name="https_filtering_http3_desc">Browser-QUIC blockieren, um filterbare Verbindungen für maximale Werbefilterung zu erzwingen. Kann dazu führen, dass einige Seiten nur teilweise geladen werden. Deaktivieren Sie dies, wenn Seiten nicht vollständig geladen werden.</string>
 </resources>
