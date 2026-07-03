@@ -124,6 +124,9 @@ class RootProxyService : Service() {
     @Volatile
     private var whitelistedUids: List<Int> = emptyList()
 
+    @Volatile
+    private var isRecordDnsLogsEnabled = true
+
     override fun onCreate() {
         super.onCreate()
         val koin = getKoin()
@@ -131,6 +134,13 @@ class RootProxyService : Service() {
         filterRepo = koin.get()
         dnsLogDao = koin.get()
         firewallRuleDao = koin.get()
+
+        serviceScope.launch {
+            appPrefs.recordDnsLogs.collect { enabled ->
+                isRecordDnsLogsEnabled = enabled
+            }
+        }
+
         appNameResolver = AppNameResolver(this)
         goTunnelAdapter = GoTunnelAdapter(
             context = this,
@@ -138,7 +148,8 @@ class RootProxyService : Service() {
             dnsLogDao = dnsLogDao,
             scope = serviceScope,
             appNameResolver = appNameResolver,
-            firewallManagerProvider = { firewallManager }
+            firewallManagerProvider = { firewallManager },
+            recordLogProvider = { isRecordDnsLogsEnabled },
         )
         Timber.d("RootProxyService created")
     }

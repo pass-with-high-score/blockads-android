@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Dns
@@ -87,6 +88,7 @@ fun LogsScreen(
     val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
     val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
     val whitelistedDomains by viewModel.whitelistedDomains.collectAsStateWithLifecycle()
+    val recordDnsLogs by viewModel.recordDnsLogs.collectAsStateWithLifecycle()
     var isSearchVisible by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -239,6 +241,25 @@ fun LogsScreen(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = DangerRed.copy(alpha = 0.15f),
                         selectedLabelColor = DangerRed
+                    )
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+
+                FilterChip(
+                    selected = recordDnsLogs,
+                    onClick = { viewModel.setRecordDnsLogs(!recordDnsLogs) },
+                    label = { Text(stringResource(R.string.log_record_logs)) },
+                    leadingIcon = {
+                        Icon(
+                            if (recordDnsLogs) Icons.Default.Check else Icons.Default.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }

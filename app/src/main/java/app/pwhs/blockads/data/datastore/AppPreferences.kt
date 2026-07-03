@@ -71,6 +71,7 @@ class AppPreferences(private val context: Context) {
         private val KEY_PAUSE_ON_TRUSTED = booleanPreferencesKey("pause_on_trusted")
         private val KEY_PAUSED_BY_TRUSTED = booleanPreferencesKey("paused_by_trusted")
         private val KEY_PAUSED_TRUSTED_SSID = stringPreferencesKey("paused_trusted_ssid")
+        private val KEY_RECORD_DNS_LOGS = booleanPreferencesKey("record_dns_logs")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
@@ -261,6 +262,10 @@ class AppPreferences(private val context: Context) {
         context.dataStore.data.map { prefs ->
             prefs[KEY_ACCENT_COLOR] ?: ACCENT_GREEN
         }
+
+    val recordDnsLogs: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_RECORD_DNS_LOGS] ?: true
+    }
 
     val firewallEnabled: Flow<Boolean> =
         context.dataStore.data.map { prefs ->
@@ -540,6 +545,12 @@ class AppPreferences(private val context: Context) {
     suspend fun setAccentColor(color: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_ACCENT_COLOR] = color
+        }
+    }
+
+    suspend fun setRecordDnsLogs(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_RECORD_DNS_LOGS] = enabled
         }
     }
 

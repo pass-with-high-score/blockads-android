@@ -226,12 +226,21 @@ class AdBlockVpnService : VpnService() {
     var connectingPhase: String = ""
         private set
 
+    @Volatile
+    private var isRecordDnsLogsEnabled = true
+
     override fun onCreate() {
         super.onCreate()
         val koin = org.koin.java.KoinJavaComponent.getKoin()
         filterRepo = koin.get()
         appPrefs = koin.get()
         dnsLogDao = koin.get()
+
+        serviceScope.launch {
+            appPrefs.recordDnsLogs.collect { enabled ->
+                isRecordDnsLogsEnabled = enabled
+            }
+        }
 
         appNameResolver = AppNameResolver(this)
         goTunnelAdapter = GoTunnelAdapter(
@@ -241,6 +250,7 @@ class AdBlockVpnService : VpnService() {
             scope = serviceScope,
             appNameResolver = appNameResolver,
             firewallManagerProvider = { firewallManager },
+            recordLogProvider = { isRecordDnsLogsEnabled },
         )
 
         firewallRuleDao = koin.get()

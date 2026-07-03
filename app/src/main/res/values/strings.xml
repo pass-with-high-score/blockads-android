@@ -560,4 +560,5 @@
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
     <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
+    <string name="log_record_logs">Record Logs</string>
 </resources>

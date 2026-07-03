@@ -45,6 +45,10 @@ class GoTunnelAdapter(
      * This is a lambda so it always reads the latest value from [AdBlockVpnService].
      */
     private val firewallManagerProvider: () -> FirewallManager?,
+    /**
+     * Returns whether DNS logs should be recorded to the database.
+     */
+    private val recordLogProvider: () -> Boolean,
 ) {
     private val engine = tunnel.Tunnel.newEngine()
 
@@ -223,6 +227,8 @@ class GoTunnelAdapter(
      */
     private fun setupLogCallback() {
         engine.setLogCallback { domain, blocked, queryType, responseTimeMs, packageNameOrAppName, resolvedIP, blockedBy ->
+            if (!recordLogProvider()) return@setLogCallback
+
             scope.launch(Dispatchers.IO) {
                 try {
                     // Try to resolve the user-friendly App Name string from the package name

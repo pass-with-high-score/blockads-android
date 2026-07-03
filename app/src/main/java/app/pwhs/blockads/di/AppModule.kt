@@ -134,6 +134,7 @@ val appModule = module {
             whitelistDomainDao = get(),
             customDnsRuleDao = get(),
             filterListRepository = get(),
+            appPrefs = get(),
             application = androidApplication()
         )
     }

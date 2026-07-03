@@ -34,12 +34,16 @@ import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+import app.pwhs.blockads.data.datastore.AppPreferences
+import kotlinx.coroutines.flow.map
+
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
     private val filterListDao: FilterListDao,
     private val whitelistDomainDao: WhitelistDomainDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val filterListRepository: FilterListRepository,
+    private val appPrefs: AppPreferences,
     private val application: Application,
 ) : AndroidViewModel(application) {
 
@@ -57,6 +61,9 @@ class LogViewModel(
 
     private val _appFilter = MutableStateFlow("")
     val appFilter: StateFlow<String> = _appFilter.asStateFlow()
+
+    val recordDnsLogs: StateFlow<Boolean> = appPrefs.recordDnsLogs
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     private val _selectionMode = MutableStateFlow(false)
     val selectionMode: StateFlow<Boolean> = _selectionMode.asStateFlow()
@@ -237,6 +244,12 @@ class LogViewModel(
                 e.printStackTrace()
                 _events.tryEmit(UiEvent.ToastText("Failed to export logs: ${e.message}"))
             }
+        }
+    }
+
+    fun setRecordDnsLogs(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setRecordDnsLogs(enabled)
         }
     }
 }
