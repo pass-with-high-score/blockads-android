@@ -64,6 +64,10 @@ func newMitmTcpHandler(
 		flow := tcpFlowID(conn)
 		uid := resolveFlowUID(uidr, ProtocolTCP, flow)
 
+		if flow.serverIP.IsUnspecified() {
+			return
+		}
+
 		// Connection log (full-tunnel): surface every flow with its owning
 		// app + destination, so apps that barely use DNS (Telegram/WhatsApp
 		// → hard-coded IPs) are visible in the log screen.
