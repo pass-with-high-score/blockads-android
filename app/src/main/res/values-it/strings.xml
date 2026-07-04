@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">In pausa su rete attendibile</string>
     <string name="https_filtering_http3_title">Filtra HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blocca QUIC del browser per forzare le connessioni filtrabili per il massimo filtraggio degli annunci. Potrebbe causare il caricamento parziale di alcune pagine. Disattiva se le pagine non si caricano completamente.</string>
+    <string name="log_record_logs">Registra i log</string>
 </resources>

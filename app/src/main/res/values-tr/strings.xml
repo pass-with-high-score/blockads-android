@@ -547,4 +547,5 @@ Desteklenen formatlar:
     <string name="home_paused_trusted_short">Güvenilir ağda duraklatıldı</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) Filtrele</string>
     <string name="https_filtering_http3_desc">Maksimum reklam filtrelemesi için filtrelenebilir bağlantıları zorlamak amacıyla tarayıcı QUIC\'ini engelleyin. Bazı sayfaların kısmen yüklenmesine neden olabilir. Sayfalar tam olarak yüklenmiyorsa kapatın.</string>
+    <string name="log_record_logs">Günlükleri Kaydet</string>
 </resources>

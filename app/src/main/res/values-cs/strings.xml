@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">Pozastaveno v důvěryhodné síti</string>
     <string name="https_filtering_http3_title">Filtrovat HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blokovat QUIC v prohlížeči pro vynucení filtrovatelných připojení pro maximální filtrování reklam. Může způsobit částečné načítání některých stránek. Vypněte, pokud se stránky nenačítají úplně.</string>
+    <string name="log_record_logs">Zaznamenávat protokoly</string>
 </resources>

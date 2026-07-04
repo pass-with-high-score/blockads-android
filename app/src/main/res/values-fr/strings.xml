@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">En pause sur un réseau de confiance</string>
     <string name="https_filtering_http3_title">Filtrer HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Bloquer QUIC du navigateur pour forcer les connexions filtrables pour un filtrage maximal des publicités. Peut entraîner le chargement partiel de certaines pages. Désactivez si les pages ne se chargent pas complètement.</string>
+    <string name="log_record_logs">Enregistrer les journaux</string>
 </resources>

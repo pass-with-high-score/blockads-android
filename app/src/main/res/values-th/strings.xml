@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
     <string name="https_filtering_http3_title">กรอง HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">บล็อก QUIC ของเบราว์เซอร์เพื่อบังคับการเชื่อมต่อที่กรองได้สำหรับการกรองโฆษณาสูงสุด อาจทำให้บางหน้าโหลดเพียงบางส่วน ปิดหากหน้าเว็บโหลดไม่สมบูรณ์</string>
+    <string name="log_record_logs">บันทึกประวัติ</string>
 </resources>

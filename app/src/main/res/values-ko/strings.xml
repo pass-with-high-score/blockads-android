@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">신뢰할 수 있는 네트워크에서 일시중지됨</string>
     <string name="https_filtering_http3_title">HTTP/3(QUIC) 필터링</string>
     <string name="https_filtering_http3_desc">필터링 가능한 연결을 강제하여 광고 필터링을 극대화하려면 브라우저 QUIC를 차단하세요. 일부 페이지가 부분적으로만 로드될 수 있습니다. 페이지가 완전히 로드되지 않으면 끄십시오.</string>
+    <string name="log_record_logs">로그 기록</string>
 </resources>

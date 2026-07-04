@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">Pausiert in vertrauenswürdigem Netzwerk</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) filtern</string>
     <string name="https_filtering_http3_desc">Browser-QUIC blockieren, um filterbare Verbindungen für maximale Werbefilterung zu erzwingen. Kann dazu führen, dass einige Seiten nur teilweise geladen werden. Deaktivieren Sie dies, wenn Seiten nicht vollständig geladen werden.</string>
+    <string name="log_record_logs">Protokolle aufzeichnen</string>
 </resources>

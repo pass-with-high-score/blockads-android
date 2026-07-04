@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">已在信任的网络上暂停</string>
     <string name="https_filtering_http3_title">过滤 HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">阻止浏览器 QUIC 以强制使用可过滤的连接，从而实现最大程度的广告过滤。可能会导致某些页面加载不完全。如果页面未完全加载，请关闭此选项。</string>
+    <string name="log_record_logs">记录日志</string>
 </resources>

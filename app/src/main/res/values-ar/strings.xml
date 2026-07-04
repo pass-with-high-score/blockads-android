@@ -542,4 +542,5 @@
     <string name="home_paused_trusted_short">متوقف مؤقتًا على شبكة موثوقة</string>
     <string name="https_filtering_http3_title">تصفية HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">حظر QUIC في المتصفح لفرض اتصالات قابلة للتصفية للحصول على أقصى تصفية للإعلانات. قد يتسبب في تحميل بعض الصفحات جزئياً. أوقفه إذا لم يتم تحميل الصفحات بالكامل.</string>
+    <string name="log_record_logs">تسجيل السجلات</string>
 </resources>

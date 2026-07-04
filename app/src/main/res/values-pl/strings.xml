@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">Wstrzymano w zaufanej sieci</string>
     <string name="https_filtering_http3_title">Filtruj HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Zablokuj QUIC w przeglądarce, aby wymusić połączenia z możliwością filtrowania dla maksymalnego filtrowania reklam. Może to spowodować częściowe załadowanie niektórych stron. Wyłącz, jeśli strony nie ładują się w pełni.</string>
+    <string name="log_record_logs">Rejestruj logi</string>
 </resources>

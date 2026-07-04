@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">Пауза в доверенной сети</string>
     <string name="https_filtering_http3_title">Фильтровать HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Блокировать QUIC в браузере для принудительного использования фильтруемых соединений для максимальной фильтрации рекламы. Может привести к частичной загрузке некоторых страниц. Отключите, если страницы загружаются не полностью.</string>
+    <string name="log_record_logs">Записывать журналы</string>
 </resources>

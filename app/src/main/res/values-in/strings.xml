@@ -526,4 +526,5 @@
     <string name="home_paused_trusted_short">Dijeda di jaringan tepercaya</string>
     <string name="https_filtering_http3_title">Filter HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blokir QUIC browser untuk memaksa koneksi yang dapat disaring agar penyaringan iklan maksimal. Dapat menyebabkan beberapa halaman hanya dimuat sebagian. Matikan jika halaman tidak dimuat sepenuhnya.</string>
+    <string name="log_record_logs">Rekam Log</string>
 </resources>
