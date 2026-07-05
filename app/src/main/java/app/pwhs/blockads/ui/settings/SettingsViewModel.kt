@@ -1,9 +1,7 @@
 package app.pwhs.blockads.ui.settings
 
 import android.app.Application
-import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
@@ -22,7 +20,6 @@ import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.data.entities.SettingsBackup
 import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.repository.FilterListRepository
-import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
@@ -30,10 +27,8 @@ import app.pwhs.blockads.utils.CustomRuleParser
 import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import app.pwhs.blockads.service.IptablesManager
-import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.utils.CrashReportingManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -174,35 +169,11 @@ class SettingsViewModel(
     }
 
     private suspend fun applyRoutingMode(mode: String) {
-        val oldMode = appPrefs.routingMode.first()
-        if (oldMode == mode) return
-
-        appPrefs.setRoutingMode(mode)
         val context = getApplication<Application>().applicationContext
-
-        val isRoot = mode == AppPreferences.ROUTING_MODE_ROOT
-
-        if (AdBlockVpnService.isRunning || RootProxyService.isRunning) {
-            if (isRoot) {
-                val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = AdBlockVpnService.ACTION_STOP
-                }
-                context.startService(stopIntent)
-                delay(800)
-                RootProxyService.start(context)
-            } else {
-                RootProxyService.stop(context)
-                delay(800)
-                val startIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = AdBlockVpnService.ACTION_START
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(startIntent)
-                } else {
-                    context.startService(startIntent)
-                }
-            }
+        if (mode == AppPreferences.ROUTING_MODE_ROOT && appPrefs.getHttpsFilteringEnabledSnapshot()) {
+            appPrefs.setHttpsFilteringEnabled(false)
         }
+        ServiceController.reconcileToMode(context, mode)
     }
 
     fun setAutoUpdateEnabled(enabled: Boolean) {

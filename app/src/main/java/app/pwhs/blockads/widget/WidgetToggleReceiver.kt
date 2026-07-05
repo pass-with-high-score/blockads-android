@@ -3,11 +3,11 @@ package app.pwhs.blockads.widget
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.utils.VpnUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,21 +45,7 @@ class WidgetToggleReceiver : BroadcastReceiver() {
     private suspend fun toggleVpn(context: Context) {
         // Stop logic: evaluate running status of both services
         if (AdBlockVpnService.isRunning || RootProxyService.isRunning) {
-            // Stop AdBlockVpnService if running
-            if (AdBlockVpnService.isRunning) {
-                val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = AdBlockVpnService.ACTION_STOP
-                }
-                context.startService(stopIntent)
-            }
-            
-            // Stop RootProxyService if running
-            if (RootProxyService.isRunning) {
-                val stopIntent = Intent(context, RootProxyService::class.java).apply {
-                    action = RootProxyService.ACTION_STOP
-                }
-                context.startService(stopIntent)
-            }
+            ServiceController.requestStop(context)
         } else {
             val appPrefs = AppPreferences(context)
             val routingMode = appPrefs.routingMode.first()
@@ -75,20 +61,8 @@ class WidgetToggleReceiver : BroadcastReceiver() {
                 return
             }
 
-            // Start logic: determine the service class and action dynamically based on routing mode
-            val targetClass = if (isRootMode) RootProxyService::class.java else AdBlockVpnService::class.java
-            val targetAction = if (isRootMode) RootProxyService.ACTION_START else AdBlockVpnService.ACTION_START
-
-            val startIntent = Intent(context, targetClass).apply {
-                action = targetAction
-            }
-            
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(startIntent)
-                } else {
-                    context.startService(startIntent)
-                }
+                ServiceController.requestStart(context)
             } catch (e: Exception) {
                 Timber.w(e, "Cannot start VPN from widget, opening app")
                 val appIntent = Intent(context, MainActivity::class.java).apply {

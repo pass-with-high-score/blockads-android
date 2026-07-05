@@ -23,6 +23,7 @@ import app.pwhs.blockads.utils.LocaleHelper
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.IptablesManager
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.ui.BlockAdsApp
 import app.pwhs.blockads.ui.theme.BlockadsTheme
 import kotlinx.coroutines.flow.first
@@ -159,17 +160,14 @@ class MainActivity : ComponentActivity() {
             val routingMode = runBlocking { appPrefs.routingMode.first() }
 
             if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
-                if (RootProxyService.isRunning) {
-                    RootProxyService.stop(this)
+                if (RootProxyService.isRunning || AdBlockVpnService.isRunning) {
+                    ServiceController.requestStop(this)
                 } else {
                     handleVpnToggle()
                 }
             } else {
-                if (AdBlockVpnService.isRunning) {
-                    val stopIntent = Intent(this, AdBlockVpnService::class.java).apply {
-                        action = AdBlockVpnService.ACTION_STOP
-                    }
-                    startService(stopIntent)
+                if (AdBlockVpnService.isRunning || RootProxyService.isRunning) {
+                    ServiceController.requestStop(this)
                 } else {
                     handleVpnToggle()
                 }
@@ -201,7 +199,7 @@ class MainActivity : ComponentActivity() {
             if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
                 if (IptablesManager.isRootAvailable()) {
                     withContext(Dispatchers.Main) {
-                        RootProxyService.start(this@MainActivity)
+                        ServiceController.requestStart(this@MainActivity)
                     }
                 } else {
                     // If root is lost, fallback to Direct mode and request VPN permission
@@ -229,13 +227,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startVpnService() {
-        val intent = Intent(this, AdBlockVpnService::class.java).apply {
-            action = AdBlockVpnService.ACTION_START
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
+        ServiceController.requestStart(this)
     }
 }

@@ -1,11 +1,11 @@
 package app.pwhs.blockads.worker
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.service.ServiceController
+import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class VpnResumeWorker(
@@ -19,14 +19,12 @@ class VpnResumeWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            val intent = Intent(applicationContext, AdBlockVpnService::class.java).apply {
-                action = AdBlockVpnService.ACTION_START
+            val appPrefs = AppPreferences(applicationContext)
+            if (!appPrefs.protectionDesired.first()) {
+                Timber.d("Skipping VPN resume; protection is no longer desired")
+                return Result.success()
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(intent)
-            } else {
-                applicationContext.startService(intent)
-            }
+            ServiceController.requestStartNow(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Timber.e(e, "Failed to resume VPN")

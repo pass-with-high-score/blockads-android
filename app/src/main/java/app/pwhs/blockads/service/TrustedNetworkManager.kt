@@ -110,7 +110,7 @@ class TrustedNetworkManager(
                         onTrusted && running -> {
                             Timber.d("Trusted network '$ssid' — pausing BlockAds")
                             appPrefs.setPausedByTrusted(true, ssid ?: "")
-                            ServiceController.requestStop(context)
+                            ServiceController.requestPause(context)
                             showPausedNotification(ssid ?: "")
                         }
                         // Left the trusted network and we had paused → resume.

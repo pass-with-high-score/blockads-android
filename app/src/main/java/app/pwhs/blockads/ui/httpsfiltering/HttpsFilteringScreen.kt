@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.httpsfiltering.component.BrowserRow
 import app.pwhs.blockads.ui.httpsfiltering.component.ExplanationCard
 import app.pwhs.blockads.ui.httpsfiltering.component.MasterToggleCard
@@ -68,11 +70,14 @@ fun HttpsFilteringScreen(
     val certExported by viewModel.certExported.collectAsStateWithLifecycle()
     val certStatus by viewModel.certStatus.collectAsStateWithLifecycle()
     val filterHttp3 by viewModel.filterHttp3.collectAsStateWithLifecycle()
+    val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
+    val isRootMode = routingMode == AppPreferences.ROUTING_MODE_ROOT
 
     val wgDisabledMsg = stringResource(R.string.https_filtering_wireguard_disabled)
+    val rootDisabledMsg = stringResource(R.string.https_filtering_root_disabled)
     val certSavedLegacyMsg = stringResource(R.string.https_filtering_cert_saved_legacy)
     val proxyStartedMsg = stringResource(R.string.https_filtering_started)
     val proxyStoppedMsg = stringResource(R.string.https_filtering_stopped)
@@ -126,6 +131,10 @@ fun HttpsFilteringScreen(
                 is HttpsFilteringEvent.WireGuardDisabledForHttps -> {
                     snackbarHostState.showSnackbar(wgDisabledMsg)
                 }
+
+                is HttpsFilteringEvent.RootModeUnsupported -> {
+                    snackbarHostState.showSnackbar(rootDisabledMsg)
+                }
             }
         }
     }
@@ -175,6 +184,38 @@ fun HttpsFilteringScreen(
                         isProxyRunning = isProxyRunning,
                         onToggle = { viewModel.toggleEnabled(it) }
                     )
+                }
+
+                if (isRootMode) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(R.string.https_filtering_root_disabled_desc),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                    }
                 }
 
                 // ── Explanation Card ───────────────────────────────────

@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.home
 
 import android.content.Context
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.dao.DnsLogDao
@@ -14,9 +13,13 @@ import app.pwhs.blockads.data.entities.HourlyStat
 import app.pwhs.blockads.data.entities.ProtectionProfile
 import app.pwhs.blockads.data.entities.TopBlockedDomain
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.service.ActualProtectionMode
 import app.pwhs.blockads.service.AdBlockVpnService
-import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.service.ActualProtectionState
+import app.pwhs.blockads.service.ProtectionHealth
+import app.pwhs.blockads.service.ProtectionProblem
 import app.pwhs.blockads.service.RootProxyService
+import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,9 +27,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -51,28 +52,50 @@ class HomeViewModel(
     val pausedTrustedSsid: StateFlow<String> = appPrefs.pausedTrustedSsid
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
-    // ── Reactive VPN state (derived from the single source of truth) ──
-    val vpnEnabled: StateFlow<Boolean> = combine(
-        AdBlockVpnService.state,
-        RootProxyService.state
-    ) { state1, state2 ->
-        state1 == VpnState.RUNNING || state2 == VpnState.RUNNING
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isRunning || RootProxyService.isRunning)
+    val protectionHealth: StateFlow<ProtectionHealth> = ServiceController
+        .protectionHealthFlow(appPrefs)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ProtectionHealth(
+                serviceRunning = false,
+                engineReady = false,
+                routingActive = false,
+                ipv6RoutingActive = false,
+                lastDnsActivity = null,
+                actualMode = ActualProtectionMode.NONE,
+                desiredMode = AppPreferences.ROUTING_MODE_DIRECT,
+                state = ActualProtectionState.Stopped,
+            )
+        )
 
-    val vpnConnecting: StateFlow<Boolean> = combine(
-        AdBlockVpnService.state,
-        RootProxyService.state
-    ) { state1, state2 ->
-        state1 == VpnState.STARTING || state1 == VpnState.RESTARTING ||
-        state2 == VpnState.STARTING || state2 == VpnState.RESTARTING
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isConnecting)
+    // ── Reactive protection state (derived from the central controller) ──
+    val vpnEnabled: StateFlow<Boolean> = protectionHealth
+        .map { it.serviceRunning }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isRunning || RootProxyService.isRunning)
+
+    val vpnConnecting: StateFlow<Boolean> = protectionHealth
+        .map { it.state == ActualProtectionState.StartingVpn || it.state == ActualProtectionState.StartingRoot }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isConnecting || RootProxyService.isConnecting)
 
     val vpnStopping: StateFlow<Boolean> = combine(
         AdBlockVpnService.state,
         RootProxyService.state
     ) { state1, state2 ->
-        state1 == VpnState.STOPPING || state2 == VpnState.STOPPING
+        state1 == app.pwhs.blockads.service.VpnState.STOPPING || state2 == app.pwhs.blockads.service.VpnState.STOPPING
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val actualProtectionMode: StateFlow<ActualProtectionMode> = protectionHealth
+        .map { it.actualMode }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ActualProtectionMode.NONE)
+
+    val protectionProblem: StateFlow<ProtectionProblem?> = protectionHealth
+        .map { it.problem }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val partialIpv6Warning: StateFlow<Boolean> = protectionHealth
+        .map { it.partialIpv6 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val blockedCount: StateFlow<Int> = dnsLogDao.getBlockedCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
@@ -122,10 +145,10 @@ class HomeViewModel(
     // the warning is VPN-mode only (#145).
     val privateDnsWarning: StateFlow<Boolean> = combine(
         vpnEnabled,
-        routingMode,
+        actualProtectionMode,
         AdBlockVpnService.privateDnsStrict
-    ) { enabled, mode, strict ->
-        enabled && mode != AppPreferences.ROUTING_MODE_ROOT && strict
+    ) { enabled, actualMode, strict ->
+        enabled && actualMode != ActualProtectionMode.ROOT && strict
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     init {
@@ -145,15 +168,7 @@ class HomeViewModel(
     }
 
     fun stopVpn(context: Context) {
-        if (RootProxyService.isRunning) {
-            RootProxyService.stop(context)
-        }
-        if (AdBlockVpnService.isRunning) {
-            val intent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = AdBlockVpnService.ACTION_STOP
-            }
-            context.startService(intent)
-        }
+        ServiceController.requestStop(context)
     }
 
     fun preloadFilter() {

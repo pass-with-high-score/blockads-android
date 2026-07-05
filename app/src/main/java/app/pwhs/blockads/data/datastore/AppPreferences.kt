@@ -152,6 +152,14 @@ class AppPreferences(private val context: Context) {
         prefs[KEY_VPN_ENABLED] ?: false
     }
 
+    /**
+     * Whether the user wants BlockAds protection to stay enabled and be
+     * restored after boot/network changes. Backed by the legacy
+     * "vpn_enabled" key for compatibility; it no longer means that the
+     * Android VpnService itself is currently running.
+     */
+    val protectionDesired: Flow<Boolean> = vpnEnabled
+
     val autoReconnect: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_AUTO_RECONNECT] ?: true
     }
@@ -387,6 +395,10 @@ class AppPreferences(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[KEY_VPN_ENABLED] = enabled
         }
+    }
+
+    suspend fun setProtectionDesired(enabled: Boolean) {
+        setVpnEnabled(enabled)
     }
 
     suspend fun setAutoReconnect(enabled: Boolean) {

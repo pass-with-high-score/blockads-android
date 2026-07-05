@@ -10,18 +10,22 @@ import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.utils.AppNameResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import tunnel.AppResolver
 import tunnel.DomainChecker
 import tunnel.FirewallChecker
 import tunnel.SocketProtector
 import tunnel.UIDResolver
+import java.io.ByteArrayOutputStream
+import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Bridge between Android VpnService and the Go DNS tunnel engine.
@@ -54,6 +58,8 @@ class GoTunnelAdapter(
 
     @Volatile
     private var isRunning = false
+
+    private val lastDnsActivityMillis = AtomicLong(0L)
 
     /**
      * Configure the DNS settings for the Go engine.
@@ -227,6 +233,7 @@ class GoTunnelAdapter(
      */
     private fun setupLogCallback() {
         engine.setLogCallback { domain, blocked, queryType, responseTimeMs, packageNameOrAppName, resolvedIP, blockedBy ->
+            lastDnsActivityMillis.set(System.currentTimeMillis())
             if (!recordLogProvider()) return@setLogCallback
 
             scope.launch(Dispatchers.IO) {
@@ -385,36 +392,25 @@ class GoTunnelAdapter(
         updateCosmeticRules()
 
         Timber.d("Starting Go tunnel engine in STANDALONE mode on port $port")
-        val deferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        val startFailure = AtomicReference<Throwable?>(null)
 
         scope.launch(Dispatchers.IO) {
             try {
-                launch {
-                    delay(500)
-                    if (!deferred.isCompleted) {
-                        isRunning = true
-                        deferred.complete(true)
-                    }
-                }
                 engine.startStandalone(port.toLong())
             } catch (e: Exception) {
                 Timber.e(e, "Go standalone engine crashed or failed to start")
                 isRunning = false
-                if (!deferred.isCompleted) {
-                    deferred.complete(false)
-                }
+                startFailure.compareAndSet(null, e)
             }
         }
 
-        return try {
-            withTimeout(2000) {
-                deferred.await()
-            }
-        } catch (e: TimeoutCancellationException) {
-            Timber.e("Timeout waiting for Go engine to start")
-            isRunning = false
-            false
+        val ready = waitForStandaloneReady(port, startFailure)
+        isRunning = ready
+        if (!ready) {
+            Timber.e("Go standalone engine did not answer readiness probe")
+            engine.stop()
         }
+        return ready
     }
 
     /**
@@ -424,6 +420,15 @@ class GoTunnelAdapter(
         isRunning = false
         engine.stop()
         Timber.d("Go tunnel engine stopped")
+    }
+
+    fun isEngineRunning(): Boolean = isRunning
+
+    fun lastDnsActivityMillis(): Long = lastDnsActivityMillis.get()
+
+    suspend fun isStandaloneHealthy(port: Int = 15353): Boolean {
+        if (!isRunning) return false
+        return probeStandaloneDns(port)
     }
 
     /**
@@ -486,6 +491,9 @@ class GoTunnelAdapter(
     }
 
     companion object {
+        private const val HEALTH_DOMAIN = "local.pwhs.app"
+        private const val HEALTH_QUERY_ID = 0xB1AD
+
         /**
          * Convert DNS query type number to human-readable string.
          * DNS types defined in RFC 1035 & 3596.
@@ -496,5 +504,78 @@ class GoTunnelAdapter(
             5 -> "CNAME"
             else -> "OTHER"
         }
+    }
+
+    private suspend fun waitForStandaloneReady(
+        port: Int,
+        startFailure: AtomicReference<Throwable?>,
+    ): Boolean {
+        val deadline = System.currentTimeMillis() + 2_500L
+        while (System.currentTimeMillis() < deadline) {
+            if (startFailure.get() != null) return false
+            if (probeStandaloneDns(port)) return true
+            delay(100L)
+        }
+        return false
+    }
+
+    private suspend fun probeStandaloneDns(port: Int): Boolean = withContext(Dispatchers.IO) {
+        val query = buildHealthQuery()
+        val socket = DatagramSocket()
+        try {
+            socket.soTimeout = 700
+            socket.send(
+                DatagramPacket(
+                    query,
+                    query.size,
+                    InetAddress.getByName("127.0.0.1"),
+                    port
+                )
+            )
+            val response = ByteArray(512)
+            val packet = DatagramPacket(response, response.size)
+            socket.receive(packet)
+            isValidHealthResponse(response, packet.length)
+        } catch (e: Exception) {
+            false
+        } finally {
+            socket.close()
+        }
+    }
+
+    private fun buildHealthQuery(): ByteArray {
+        val out = ByteArrayOutputStream()
+        out.write((HEALTH_QUERY_ID shr 8) and 0xff)
+        out.write(HEALTH_QUERY_ID and 0xff)
+        out.write(0x01)
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x01)
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x00)
+        HEALTH_DOMAIN.split('.').forEach { label ->
+            out.write(label.length)
+            out.write(label.toByteArray(Charsets.US_ASCII))
+        }
+        out.write(0x00)
+        out.write(0x00)
+        out.write(0x01)
+        out.write(0x00)
+        out.write(0x01)
+        return out.toByteArray()
+    }
+
+    private fun isValidHealthResponse(response: ByteArray, length: Int): Boolean {
+        if (length < 12) return false
+        val id = ((response[0].toInt() and 0xff) shl 8) or (response[1].toInt() and 0xff)
+        if (id != HEALTH_QUERY_ID) return false
+        val flags = ((response[2].toInt() and 0xff) shl 8) or (response[3].toInt() and 0xff)
+        val isResponse = flags and 0x8000 != 0
+        val rcode = flags and 0x000f
+        return isResponse && rcode == 0
     }
 }

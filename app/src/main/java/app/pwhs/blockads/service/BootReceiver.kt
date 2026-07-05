@@ -3,7 +3,6 @@ package app.pwhs.blockads.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,37 +23,13 @@ class BootReceiver : BroadcastReceiver() {
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 val autoReconnect = prefs.autoReconnect.first()
-                val wasEnabled = prefs.vpnEnabled.first()
+                val protectionDesired = prefs.protectionDesired.first()
                 val routingMode = prefs.routingMode.first()
 
-                // Root Mode: iptables rules are volatile (cleared on reboot).
-                // Re-apply rules by starting RootProxyService.
-                // Also restarts after app update (MY_PACKAGE_REPLACED).
-                if (autoReconnect && wasEnabled) {
+                if (autoReconnect && protectionDesired) {
                     val trigger = if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) "app update" else "boot"
-                    if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
-                        Timber.d("Auto-starting Root Proxy mode after $trigger")
-                        val serviceIntent = Intent(context, RootProxyService::class.java).apply {
-                            action = RootProxyService.ACTION_START
-                            putExtra(RootProxyService.EXTRA_STARTED_FROM_BOOT, true)
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            context.startForegroundService(serviceIntent)
-                        } else {
-                            context.startService(serviceIntent)
-                        }
-                    } else {
-                        Timber.d("Auto-reconnecting VPN after $trigger")
-                        val serviceIntent = Intent(context, AdBlockVpnService::class.java).apply {
-                            action = AdBlockVpnService.ACTION_START
-                            putExtra(AdBlockVpnService.EXTRA_STARTED_FROM_BOOT, true)
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            context.startForegroundService(serviceIntent)
-                        } else {
-                            context.startService(serviceIntent)
-                        }
-                    }
+                    Timber.d("Auto-starting protection after $trigger, routingMode=$routingMode")
+                    ServiceController.requestStartNow(context, startedFromBoot = true)
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error starting service after boot")

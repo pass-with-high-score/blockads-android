@@ -15,6 +15,7 @@ import app.pwhs.blockads.R
 import kotlinx.coroutines.flow.asStateFlow
 import app.pwhs.blockads.data.datastore.AppPreferences
 import kotlinx.coroutines.flow.first
+import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FirewallRuleDao
@@ -28,8 +29,11 @@ import app.pwhs.blockads.utils.startOfDayMillis
 import app.pwhs.blockads.worker.RootProxyResumeWorker
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.java.KoinJavaComponent.getKoin
 import timber.log.Timber
 
@@ -42,7 +46,8 @@ import timber.log.Timber
  * - onCreate: Initialize Go engine + Koin dependencies
  * - onStartCommand(ACTION_START): Apply iptables rules + start watchdog
  * - onStartCommand(ACTION_STOP): Teardown iptables + stop engine
- * - onDestroy / onTaskRemoved: Teardown iptables (failsafe)
+ * - onDestroy: Teardown iptables (failsafe)
+ * - onTaskRemoved: Keep the foreground protection active
  */
 class RootProxyService : Service() {
 
@@ -53,21 +58,30 @@ class RootProxyService : Service() {
         const val ACTION_START = "app.pwhs.blockads.ROOT_START"
         const val ACTION_STOP = "app.pwhs.blockads.ROOT_STOP"
         const val ACTION_RESTART = "app.pwhs.blockads.ROOT_RESTART"
+        const val ACTION_RELOAD = "app.pwhs.blockads.ROOT_RELOAD"
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.ROOT_PAUSE_1H"
         const val EXTRA_STARTED_FROM_BOOT = "extra_started_from_boot"
+        const val EXTRA_MARK_PROTECTION_DISABLED = "extra_mark_protection_disabled"
 
         private val _state = kotlinx.coroutines.flow.MutableStateFlow(VpnState.STOPPED)
         val state: kotlinx.coroutines.flow.StateFlow<VpnState> = _state.asStateFlow()
 
+        private val _health = kotlinx.coroutines.flow.MutableStateFlow(RootProxyHealth())
+        val health: kotlinx.coroutines.flow.StateFlow<RootProxyHealth> = _health.asStateFlow()
+
         val isRunning: Boolean get() = _state.value == VpnState.RUNNING
+        val isConnecting: Boolean get() = _state.value == VpnState.STARTING
+        val isRestarting: Boolean get() = _state.value == VpnState.RESTARTING
+        val isStopping: Boolean get() = _state.value == VpnState.STOPPING
 
         @Volatile
         var startTimestamp: Long = 0L
             private set
 
-        fun start(context: Context) {
+        fun start(context: Context, startedFromBoot: Boolean = false) {
             val intent = Intent(context, RootProxyService::class.java).apply {
                 action = ACTION_START
+                putExtra(EXTRA_STARTED_FROM_BOOT, startedFromBoot)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -76,22 +90,27 @@ class RootProxyService : Service() {
             }
         }
 
-        fun stop(context: Context) {
+        fun stop(context: Context, markProtectionDisabled: Boolean = true) {
             val intent = Intent(context, RootProxyService::class.java).apply {
                 action = ACTION_STOP
+                putExtra(EXTRA_MARK_PROTECTION_DISABLED, markProtectionDisabled)
             }
             context.startService(intent)
         }
 
         /**
-         * Request a Root Proxy restart to apply new settings/filter changes.
-         * Only restarts if the service is currently running.
+         * Backward-compatible name for callers that still ask for a restart.
+         * Runtime changes are applied with a reload to avoid tearing down
+         * working protection unnecessarily.
          */
         fun requestRestart(context: Context) {
-            val s = _state.value
-            if (s == VpnState.RUNNING || s == VpnState.RESTARTING) {
+            requestReload(context)
+        }
+
+        fun requestReload(context: Context) {
+            if (_state.value == VpnState.RUNNING) {
                 val intent = Intent(context, RootProxyService::class.java).apply {
-                    action = ACTION_RESTART
+                    action = ACTION_RELOAD
                 }
                 context.startService(intent)
             }
@@ -101,12 +120,14 @@ class RootProxyService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var watchdogJob: Job? = null
     private var notificationUpdateJob: Job? = null
+    private var filterUpdateJob: Job? = null
     private var retryManager = VpnRetryManager(maxRetries = 10, maxDelayMs = 60000L)
 
     @Volatile
     private var todayBlockedCount: Int = 0
     private lateinit var appPrefs: AppPreferences
     private lateinit var filterRepo: FilterListRepository
+    private lateinit var profileManager: ProfileManager
     private lateinit var dnsLogDao: DnsLogDao
     private lateinit var firewallRuleDao: FirewallRuleDao
     private lateinit var appNameResolver: AppNameResolver
@@ -132,6 +153,7 @@ class RootProxyService : Service() {
         val koin = getKoin()
         appPrefs = koin.get()
         filterRepo = koin.get()
+        profileManager = koin.get()
         dnsLogDao = koin.get()
         firewallRuleDao = koin.get()
 
@@ -159,7 +181,8 @@ class RootProxyService : Service() {
 
         when (intent?.action) {
             ACTION_STOP -> {
-                stopProxy()
+                val markProtectionDisabled = intent.getBooleanExtra(EXTRA_MARK_PROTECTION_DISABLED, true)
+                stopProxy(markProtectionDisabled = markProtectionDisabled)
                 return START_NOT_STICKY
             }
             ACTION_PAUSE_1H -> {
@@ -167,13 +190,45 @@ class RootProxyService : Service() {
                 return START_NOT_STICKY
             }
             ACTION_RESTART -> {
+                if (!isRootRoutingAllowed()) {
+                    stopProxy(markProtectionDisabled = false)
+                    return START_NOT_STICKY
+                }
+                stopVpnIfActive()
                 restartProxy()
                 return START_STICKY
             }
+            ACTION_RELOAD -> {
+                if (!isRootRoutingAllowed()) {
+                    stopProxy(markProtectionDisabled = false)
+                    return START_NOT_STICKY
+                }
+                stopVpnIfActive()
+                reloadProxyRuntime()
+                return START_STICKY
+            }
             else -> {
+                if (!isRootRoutingAllowed()) {
+                    Timber.w("Ignoring Root Proxy start while non-root routing mode is selected")
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+                stopVpnIfActive()
                 startProxy(startedFromBoot)
                 return START_STICKY
             }
+        }
+    }
+
+    private fun isRootRoutingAllowed(): Boolean {
+        return runBlocking {
+            appPrefs.getRoutingModeSnapshot() == AppPreferences.ROUTING_MODE_ROOT
+        }
+    }
+
+    private fun stopVpnIfActive() {
+        if (AdBlockVpnService.state.value != VpnState.STOPPED) {
+            AdBlockVpnService.stop(this, markProtectionDisabled = false)
         }
     }
 
@@ -184,6 +239,7 @@ class RootProxyService : Service() {
         }
         
         _state.value = VpnState.STARTING
+        _health.value = RootProxyHealth()
 
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
@@ -202,6 +258,7 @@ class RootProxyService : Service() {
                 filterRepo.loadCustomRules()
                 filterRepo.seedDefaultsIfNeeded()
                 filterRepo.fetchAndSyncRemoteFilterLists()
+                profileManager.reapplyActiveProfile()
                 val result = filterRepo.loadAllEnabledFilters()
                 Timber.d("Filters loaded for Root Proxy mode: ${result.getOrDefault(0)} domains")
 
@@ -256,7 +313,16 @@ class RootProxyService : Service() {
                     } else {
                         val engineStarted = goTunnelAdapter.startStandalone(port = 15353)
                         if (engineStarted) {
-                            if (IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)) {
+                            val setupResult = IptablesManager.setupRulesDetailed(
+                                this@RootProxyService,
+                                whitelistUids = whitelistedUids
+                            )
+                            updateRootHealth(
+                                engineReady = true,
+                                routingActive = setupResult.ipv4Active,
+                                ipv6RoutingActive = setupResult.ipv6Active
+                            )
+                            if (setupResult.usable) {
                                 proxyStarted = true
                             } else {
                                 goTunnelAdapter.stop() // stop engine if iptables fails
@@ -272,7 +338,7 @@ class RootProxyService : Service() {
 
                 if (!proxyStarted) {
                     Timber.e("Failed to start Root Proxy after ${retryManager.getMaxRetries()} attempts")
-                    stopProxy()
+                    stopProxy(markProtectionDisabled = false)
                     showStartFailedNotification()
                     return@launch
                 }
@@ -288,6 +354,7 @@ class RootProxyService : Service() {
                 appNameResolver.startSnapshotter(serviceScope)
 
                 _state.value = VpnState.RUNNING
+                appPrefs.setProtectionDesired(true)
                 if (!preserveUptimeOnRestart || startTimestamp == 0L) {
                     startTimestamp = System.currentTimeMillis()
                 }
@@ -296,31 +363,44 @@ class RootProxyService : Service() {
 
                 updateNotification()
                 startNotificationUpdates()
+                startFilterUpdates()
 
                 // 4. Start watchdog
                 startWatchdog()
             } catch (e: Exception) {
                 Timber.e(e, "Failed to start Root Proxy mode")
-                IptablesManager.teardownRules()
-                stopSelf()
+                stopProxy(markProtectionDisabled = false)
             }
         }
     }
 
-    private fun stopProxy(showPausedNotification: Boolean = false) {
+    private fun stopProxy(
+        showPausedNotification: Boolean = false,
+        markProtectionDisabled: Boolean = true,
+        restorePrivateDns: Boolean = true,
+    ) {
         Timber.d("Stopping Root Proxy mode")
         _state.value = VpnState.STOPPING
         watchdogJob?.cancel()
+        filterUpdateJob?.cancel()
         stopNotificationUpdates()
         appNameResolver.stopSnapshotter()
 
+        if (markProtectionDisabled) {
+            ServiceController.cancelResumeWork(this)
+            runBlocking {
+                appPrefs.setProtectionDesired(false)
+            }
+        }
+
         // Teardown iptables rules (critical — prevents internet loss)
-        IptablesManager.teardownRules()
+        IptablesManager.teardownRules(restorePrivateDns = restorePrivateDns)
 
         // Stop Go engine
         goTunnelAdapter.stop()
 
         _state.value = VpnState.STOPPED
+        _health.value = RootProxyHealth()
         startTimestamp = 0L
         if (showPausedNotification) {
             stopForeground(STOP_FOREGROUND_DETACH)
@@ -345,7 +425,7 @@ class RootProxyService : Service() {
         )
 
         // Stop proxy and show paused notification
-        stopProxy(showPausedNotification = true)
+        stopProxy(showPausedNotification = true, markProtectionDisabled = false)
     }
 
     /**
@@ -361,6 +441,7 @@ class RootProxyService : Service() {
         Timber.d("Restarting Root Proxy to apply new settings")
 
         watchdogJob?.cancel()
+        filterUpdateJob?.cancel()
         stopNotificationUpdates()
         appNameResolver.stopSnapshotter()
 
@@ -369,7 +450,8 @@ class RootProxyService : Service() {
             goTunnelAdapter.stop()
 
             // Teardown iptables
-            IptablesManager.teardownRules()
+            IptablesManager.teardownRules(restorePrivateDns = false)
+            _health.value = RootProxyHealth()
 
             // Brief delay to let resources clean up
             delay(1000L)
@@ -381,6 +463,102 @@ class RootProxyService : Service() {
         }
     }
 
+    private fun reloadProxyRuntime() {
+        if (_state.value != VpnState.RUNNING) return
+        serviceScope.launch(Dispatchers.IO) {
+            reloadProxyRuntimeNow()
+        }
+    }
+
+    private suspend fun reloadProxyRuntimeNow() {
+        try {
+            Timber.d("Reloading Root Proxy runtime configuration")
+            filterRepo.loadWhitelist()
+            filterRepo.loadCustomRules()
+            val result = filterRepo.loadAllEnabledFilters()
+            Timber.d("Reloaded filters for Root Proxy: ${result.getOrDefault(0)} domains")
+            goTunnelAdapter.updateTries()
+            goTunnelAdapter.updateCosmeticRules()
+
+            val protocol = appPrefs.dnsProtocol.first().name
+            val primary = appPrefs.upstreamDns.first()
+            val fallback = appPrefs.fallbackDns.first()
+            val dohUrl = appPrefs.dohUrl.first()
+            val safeSearch = appPrefs.safeSearchEnabled.first()
+            val youtubeSafe = appPrefs.youtubeRestrictedMode.first()
+            val responseType = appPrefs.dnsResponseType.first()
+
+            goTunnelAdapter.configureDns(protocol, primary, fallback, dohUrl)
+            goTunnelAdapter.configureSafeSearch(safeSearch, youtubeSafe)
+            goTunnelAdapter.setBlockResponseType(responseType)
+
+            val firewallEnabled = appPrefs.firewallEnabled.first()
+            if (firewallEnabled) {
+                val fwManager = FirewallManager(this@RootProxyService, firewallRuleDao)
+                fwManager.loadRules()
+                firewallManager = fwManager
+            } else {
+                firewallManager = null
+            }
+
+            whitelistedUids = appPrefs.getWhitelistedAppsSnapshot().mapNotNull { pkg ->
+                try {
+                    packageManager.getApplicationInfo(pkg, 0).uid
+                } catch (e: Exception) {
+                    Timber.w("Whitelisted app not found, skipping: $pkg")
+                    null
+                }
+            }.distinct()
+
+            val setupResult = IptablesManager.setupRulesDetailed(
+                this@RootProxyService,
+                whitelistUids = whitelistedUids
+            )
+            val engineHealthy = goTunnelAdapter.isStandaloneHealthy()
+            updateRootHealth(
+                engineReady = engineHealthy,
+                routingActive = setupResult.ipv4Active,
+                ipv6RoutingActive = setupResult.ipv6Active
+            )
+
+            if (!engineHealthy || !setupResult.usable) {
+                Timber.w("Root Proxy reload left protection unhealthy; restarting")
+                restartProxy()
+                return
+            }
+
+            updateNotification()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to reload Root Proxy runtime")
+            restartProxy()
+        }
+    }
+
+    private fun startFilterUpdates() {
+        filterUpdateJob?.cancel()
+        filterUpdateJob = serviceScope.launch {
+            filterRepo.domainCountFlow.drop(1).collectLatest { count ->
+                if (_state.value == VpnState.RUNNING) {
+                    Timber.d("Root Proxy filter count changed to $count; updating Go tries without restarting")
+                    reloadProxyRuntimeNow()
+                }
+            }
+        }
+    }
+
+    private fun updateRootHealth(
+        engineReady: Boolean,
+        routingActive: Boolean,
+        ipv6RoutingActive: Boolean,
+    ) {
+        _health.value = RootProxyHealth(
+            engineReady = engineReady,
+            routingActive = routingActive,
+            ipv6RoutingActive = ipv6RoutingActive,
+            lastDnsActivity = goTunnelAdapter.lastDnsActivityMillis().takeIf { it > 0L },
+        )
+    }
+
     /**
      * Watchdog monitors Go engine health every 10 seconds.
      * If the engine is dead, teardown iptables to prevent internet loss.
@@ -390,19 +568,39 @@ class RootProxyService : Service() {
         watchdogJob = serviceScope.launch {
             while (isActive && _state.value == VpnState.RUNNING) {
                 delay(10_000)
-                // TODO: Check Go engine health
-                // if (!goEngine.isRunning()) {
-                //     Timber.w("Go engine died — tearing down iptables")
-                //     IptablesManager.teardownRules()
-                //     isRunning = false
-                //     stopSelf()
-                //     break
-                // }
+                val engineHealthy = goTunnelAdapter.isStandaloneHealthy()
+                val status = IptablesManager.getStatus()
+                updateRootHealth(
+                    engineReady = engineHealthy,
+                    routingActive = status.ipv4Active,
+                    ipv6RoutingActive = status.ipv6Active
+                )
 
-                // For now, check if iptables rules are still active
-                if (!IptablesManager.isActive()) {
-                    Timber.w("iptables rules disappeared — re-applying")
-                    IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)
+                if (!engineHealthy) {
+                    Timber.w("Root Proxy Go engine health check failed — restarting")
+                    restartProxy()
+                    break
+                }
+
+                if (!status.ipv4Active) {
+                    Timber.w("Root Proxy IPv4 iptables rules disappeared — re-applying")
+                    val setupResult = IptablesManager.setupRulesDetailed(
+                        this@RootProxyService,
+                        whitelistUids = whitelistedUids
+                    )
+                    val stillHealthy = goTunnelAdapter.isStandaloneHealthy()
+                    updateRootHealth(
+                        engineReady = stillHealthy,
+                        routingActive = setupResult.ipv4Active,
+                        ipv6RoutingActive = setupResult.ipv6Active
+                    )
+                    if (!setupResult.usable || !stillHealthy) {
+                        Timber.w("Root Proxy routing could not be restored — restarting")
+                        restartProxy()
+                        break
+                    }
+                } else if (!status.ipv6Active) {
+                    Timber.w("Root Proxy IPv6 interception inactive; reporting partial protection")
                 }
             }
         }
@@ -413,16 +611,17 @@ class RootProxyService : Service() {
         _state.value = VpnState.STOPPED
         startTimestamp = 0L
         watchdogJob?.cancel()
+        filterUpdateJob?.cancel()
         stopNotificationUpdates()
         if (::appNameResolver.isInitialized) appNameResolver.stopSnapshotter()
-        IptablesManager.teardownRules()
+        _health.value = RootProxyHealth()
+        IptablesManager.teardownRules(restorePrivateDns = true)
         serviceScope.cancel()
         super.onDestroy()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        Timber.d("RootProxyService onTaskRemoved — teardown iptables")
-        IptablesManager.teardownRules()
+        Timber.d("RootProxyService onTaskRemoved — keeping foreground protection active")
         super.onTaskRemoved(rootIntent)
     }
 

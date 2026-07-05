@@ -205,6 +205,7 @@ val appModule = module {
     viewModel {
         OnboardingViewModel(
             appPrefs = get(),
+            profileManager = get(),
             application = androidApplication()
         )
     }
@@ -257,4 +258,3 @@ val appModule = module {
         )
     }
 }
-
