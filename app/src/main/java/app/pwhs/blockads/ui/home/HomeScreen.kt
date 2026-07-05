@@ -3,6 +3,7 @@ package app.pwhs.blockads.ui.home
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,16 +55,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.service.ActualProtectionMode
+import app.pwhs.blockads.service.ProtectionProblem
 import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.HomeAppBar
 import app.pwhs.blockads.ui.home.component.PowerButton
@@ -83,6 +91,8 @@ import app.pwhs.blockads.utils.profileIcon
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
+
+private const val MAGISK_DISABLE_IPV6_URL = "https://github.com/njallam/magisk-disable-ipv6"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,6 +122,9 @@ fun HomeScreen(
     val activeProfile by viewModel.activeProfile.collectAsStateWithLifecycle()
     val securityFilterIds by viewModel.securityFilterIds.collectAsStateWithLifecycle()
     val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
+    val actualProtectionMode by viewModel.actualProtectionMode.collectAsStateWithLifecycle()
+    val protectionProblem by viewModel.protectionProblem.collectAsStateWithLifecycle()
+    val partialIpv6Warning by viewModel.partialIpv6Warning.collectAsStateWithLifecycle()
     val privateDnsWarning by viewModel.privateDnsWarning.collectAsStateWithLifecycle()
     val pausedByTrusted by viewModel.pausedByTrusted.collectAsStateWithLifecycle()
     val pausedTrustedSsid by viewModel.pausedTrustedSsid.collectAsStateWithLifecycle()
@@ -182,11 +195,85 @@ fun HomeScreen(
                 }
             }
 
+            protectionProblem?.let { problem ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.protection_problem_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Text(
+                                text = stringResource(
+                                    when (problem) {
+                                        ProtectionProblem.BOTH_SERVICES_RUNNING -> R.string.protection_problem_both_services
+                                        ProtectionProblem.WRONG_MODE_RUNNING -> R.string.protection_problem_wrong_mode
+                                        ProtectionProblem.ROOT_ENGINE_UNHEALTHY -> R.string.protection_problem_root_engine
+                                        ProtectionProblem.ROOT_ROUTING_INACTIVE -> R.string.protection_problem_root_routing
+                                    }
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (partialIpv6Warning && protectionProblem == null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.protection_partial_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            PartialIpv6WarningText()
+                        }
+                    }
+                }
+            }
+
             // Status text
             Text(
                 text = when {
                     vpnStopping -> stringResource(R.string.status_disconnecting)
                     vpnConnecting -> stringResource(R.string.status_connecting)
+                    protectionProblem != null -> stringResource(R.string.status_protection_issue)
                     vpnEnabled -> stringResource(R.string.status_protected)
                     showTrustedPause -> stringResource(R.string.status_paused)
                     else -> stringResource(R.string.status_unprotected)
@@ -195,6 +282,7 @@ fun HomeScreen(
                 color = when {
                     vpnStopping -> SecurityOrange
                     vpnConnecting -> AccentBlue
+                    protectionProblem != null -> DangerRed
                     vpnEnabled -> MaterialTheme.colorScheme.primary
                     showTrustedPause -> SecurityOrange
                     else -> DangerRed
@@ -209,6 +297,7 @@ fun HomeScreen(
                 text = when {
                     vpnStopping -> stringResource(if (isRootMode) R.string.home_disconnecting_desc_root else R.string.home_disconnecting_desc)
                     vpnConnecting -> stringResource(if (isRootMode) R.string.home_connecting_desc_root else R.string.home_connecting_desc)
+                    protectionProblem != null -> stringResource(R.string.home_protection_issue_desc)
                     vpnEnabled -> stringResource(R.string.home_protected_desc)
                     showTrustedPause -> stringResource(R.string.home_paused_trusted_short)
                     else -> stringResource(R.string.home_unprotected_desc)
@@ -251,10 +340,16 @@ fun HomeScreen(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = when (routingMode) {
-                            AppPreferences.ROUTING_MODE_ROOT -> "Root Proxy Mode"
-                            AppPreferences.ROUTING_MODE_WIREGUARD -> "WireGuard Mode"
-                            else -> "Local VPN Mode"
+                        text = when (actualProtectionMode) {
+                            ActualProtectionMode.ROOT -> "Root Proxy Mode"
+                            ActualProtectionMode.WIREGUARD -> "WireGuard Mode"
+                            ActualProtectionMode.VPN -> "Local VPN Mode"
+                            ActualProtectionMode.CONFLICT -> stringResource(R.string.protection_mode_conflict)
+                            ActualProtectionMode.NONE -> when (routingMode) {
+                                AppPreferences.ROUTING_MODE_ROOT -> "Root Proxy Mode"
+                                AppPreferences.ROUTING_MODE_WIREGUARD -> "WireGuard Mode"
+                                else -> "Local VPN Mode"
+                            }
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -700,4 +795,49 @@ fun HomeScreen(
         }
 
     }
+}
+
+@Composable
+private fun PartialIpv6WarningText(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    val body = stringResource(R.string.protection_partial_ipv6)
+    val linkText = stringResource(R.string.protection_partial_ipv6_magisk_link)
+    val linkColor = MaterialTheme.colorScheme.primary
+    val annotatedText = remember(body, linkText, linkColor) {
+        buildAnnotatedString {
+            val linkStart = body.indexOf(linkText)
+            if (linkStart < 0) {
+                append(body)
+                return@buildAnnotatedString
+            }
+
+            append(body.substring(0, linkStart))
+            pushStringAnnotation(tag = "url", annotation = MAGISK_DISABLE_IPV6_URL)
+            withStyle(
+                SpanStyle(
+                    color = linkColor,
+                    fontWeight = FontWeight.SemiBold,
+                    textDecoration = TextDecoration.Underline
+                )
+            ) {
+                append(linkText)
+            }
+            pop()
+            append(body.substring(linkStart + linkText.length))
+        }
+    }
+
+    ClickableText(
+        text = annotatedText,
+        modifier = modifier,
+        style = MaterialTheme.typography.bodySmall.copy(
+            color = MaterialTheme.colorScheme.onTertiaryContainer
+        ),
+        onClick = { offset ->
+            annotatedText
+                .getStringAnnotations(tag = "url", start = offset, end = offset)
+                .firstOrNull()
+                ?.let { uriHandler.openUri(it.item) }
+        }
+    )
 }

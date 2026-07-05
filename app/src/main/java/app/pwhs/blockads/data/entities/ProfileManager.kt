@@ -147,6 +147,43 @@ class ProfileManager(
         // Store active profile id in preferences
         appPrefs.setActiveProfileId(profileId)
 
+        applyProfileSettings(profile, reloadFilters = true)
+        Timber.d("Switched to profile: ${profile.name}")
+    }
+
+    /**
+     * Switch to the preset profile that matches the protection level selected
+     * during onboarding.
+     */
+    suspend fun switchToProtectionLevel(level: String) = withContext(Dispatchers.IO) {
+        seedPresetsIfNeeded()
+        filterRepo.seedDefaultsIfNeeded()
+
+        val profileType = when (level) {
+            AppPreferences.PROTECTION_STRICT,
+            ProtectionProfile.TYPE_STRICT -> ProtectionProfile.TYPE_STRICT
+            else -> ProtectionProfile.TYPE_DEFAULT
+        }
+        val profile = profileDao.getByType(profileType) ?: run {
+            Timber.w("No preset profile found for onboarding protection level: $level")
+            return@withContext
+        }
+        switchToProfile(profile.id)
+    }
+
+    /**
+     * Re-apply the active profile after filter-list syncs. This keeps freshly
+     * inserted remote filters from reverting the user to remote defaults.
+     */
+    suspend fun reapplyActiveProfile() = withContext(Dispatchers.IO) {
+        val profile = profileDao.getActive() ?: return@withContext
+        applyProfileSettings(profile, reloadFilters = false)
+    }
+
+    private suspend fun applyProfileSettings(
+        profile: ProtectionProfile,
+        reloadFilters: Boolean
+    ) {
         // Apply filter list configuration
         val profileUrls = profile.enabledFilterUrls
             .split(",")
@@ -167,9 +204,9 @@ class ProfileManager(
         appPrefs.setYoutubeRestrictedMode(profile.youtubeRestrictedMode)
 
         // Reload filters
-        filterRepo.loadAllEnabledFilters()
-
-        Timber.d("Switched to profile: ${profile.name}")
+        if (reloadFilters) {
+            filterRepo.loadAllEnabledFilters()
+        }
     }
 
     /**

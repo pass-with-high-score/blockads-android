@@ -18,9 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -65,6 +67,8 @@ sealed class HttpsFilteringEvent {
     data object ProxyStopped : HttpsFilteringEvent()
     /** WireGuard routing was turned off because HTTPS filtering was enabled. */
     data object WireGuardDisabledForHttps : HttpsFilteringEvent()
+    /** Root mode cannot run HTTPS filtering because it uses DNS-only standalone mode. */
+    data object RootModeUnsupported : HttpsFilteringEvent()
 }
 
 // ── ViewModel ───────────────────────────────────────────────────────────────
@@ -80,6 +84,9 @@ class HttpsFilteringViewModel(
 
     private val _isEnabled = MutableStateFlow(false)
     val isEnabled: StateFlow<Boolean> = _isEnabled.asStateFlow()
+
+    val routingMode: StateFlow<String> = appPrefs.routingMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.ROUTING_MODE_DIRECT)
 
     private val _isProxyRunning = MutableStateFlow(false)
     val isProxyRunning: StateFlow<Boolean> = _isProxyRunning.asStateFlow()
@@ -123,6 +130,14 @@ class HttpsFilteringViewModel(
             appPrefs.setHttpsFilteringEnabled(enabled)
 
             if (enabled) {
+                if (appPrefs.getRoutingModeSnapshot() == AppPreferences.ROUTING_MODE_ROOT) {
+                    appPrefs.setHttpsFilteringEnabled(false)
+                    _isEnabled.value = false
+                    stopProxy()
+                    _events.emit(HttpsFilteringEvent.RootModeUnsupported)
+                    return@launch
+                }
+
                 // HTTPS filtering and WireGuard routing are mutually
                 // exclusive: TcpIpStack terminates flows and dials the
                 // destination directly, bypassing the WG tunnel. Turn
@@ -320,7 +335,11 @@ class HttpsFilteringViewModel(
 
             // Load saved preference
             val enabled = appPrefs.getHttpsFilteringEnabledSnapshot()
-            _isEnabled.value = enabled
+            val rootMode = appPrefs.getRoutingModeSnapshot() == AppPreferences.ROUTING_MODE_ROOT
+            _isEnabled.value = enabled && !rootMode
+            if (enabled && rootMode) {
+                appPrefs.setHttpsFilteringEnabled(false)
+            }
             _filterHttp3.value = appPrefs.getFilterHttp3Snapshot()
 
             // Load installed browsers

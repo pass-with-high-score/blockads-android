@@ -441,10 +441,10 @@ fun FilterDetailScreen(
                 }
             }
 
-            // Test a Domain section
+            // Filter-file domain lookup section
             item {
                 Text(
-                    "Test a Domain",
+                    stringResource(R.string.filter_detail_test_domain_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -492,7 +492,11 @@ fun FilterDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = if (isBlocked) "Domain is BLOCKED by this filter" else "Domain is ALLOWED by this filter",
+                                    text = if (isBlocked) {
+                                        stringResource(R.string.filter_detail_domain_in_filter)
+                                    } else {
+                                        stringResource(R.string.filter_detail_domain_not_in_filter)
+                                    },
                                     color = if (isBlocked) DangerRed else Color(0xFF4CAF50),
                                     fontWeight = FontWeight.Bold
                                 )

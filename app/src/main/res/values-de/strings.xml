@@ -32,6 +32,9 @@
     <string name="filter_detail_last_updated">Zuletzt aktualisiert</string>
     <string name="filter_detail_update">Aktualisieren</string>
     <string name="filter_detail_delete">Löschen</string>
+    <string name="filter_detail_test_domain_title">Filterdatei prüfen</string>
+    <string name="filter_detail_domain_in_filter">Domain ist in dieser Filterdatei enthalten</string>
+    <string name="filter_detail_domain_not_in_filter">Domain ist nicht in dieser Filterdatei enthalten</string>
     <string name="logs_empty">Noch keine DNS-Anfragen protokolliert</string>
     <string name="logs_filter_all">Alle</string>
     <string name="logs_filter_blocked">Blockiert</string>
@@ -487,6 +490,8 @@
     <string name="filter_compile_channel_name">Filterkompilierung</string>
     <string name="wireguard_https_filtering_disabled">HTTPS-Filterung deaktiviert (nicht kompatibel mit WireGuard)</string>
     <string name="https_filtering_wireguard_disabled">WireGuard deaktiviert (nicht kompatibel mit HTTPS-Filterung)</string>
+    <string name="https_filtering_root_disabled">HTTPS-Filterung erfordert den lokalen VPN-Modus</string>
+    <string name="https_filtering_root_disabled_desc">Der Root-Proxy-Modus filtert nur DNS. Wechsle in den lokalen VPN-Modus, um kosmetische HTTPS-Filterung zu verwenden.</string>
     <string name="wireguard_imported">\'%1$s\' importiert</string>
     <string name="wireguard_deleted">\'%1$s\' gelöscht</string>
     <string name="wireguard_active">Aktiv: %1$s</string>
@@ -511,6 +516,17 @@
     <string name="root_proxy_start_failed_text">Root-Zugriff zum Starten des Schutzes konnte nicht erlangt werden. Tippe auf Aktivieren, um es erneut zu versuchen.</string>
     <string name="private_dns_warning_title">Privates DNS ist aktiv</string>
     <string name="private_dns_warning_text">Android Privates DNS umgeht BlockAds, daher greift die Filterung evtl. nicht. Stelle Privates DNS in den Systemeinstellungen auf Aus oder Automatisch.</string>
+    <string name="status_protection_issue">Schutzproblem</string>
+    <string name="home_protection_issue_desc">BlockAds benötigt Aufmerksamkeit, bevor der Schutz verlässlich ist</string>
+    <string name="protection_problem_title">Schutz benötigt Aufmerksamkeit</string>
+    <string name="protection_problem_both_services">Lokales VPN und Root Proxy laufen gleichzeitig. BlockAds gleicht auf den ausgewählten Modus ab.</string>
+    <string name="protection_problem_wrong_mode">Der laufende Dienst passt nicht zum ausgewählten Routing-Modus. Schalte den Schutz aus und wieder ein, um ihn abzugleichen.</string>
+    <string name="protection_problem_root_engine">Root Proxy läuft, aber die DNS-Engine antwortet nicht.</string>
+    <string name="protection_problem_root_routing">Root Proxy läuft, aber die DNS-Umleitungsregeln sind nicht aktiv.</string>
+    <string name="protection_partial_title">Teilweiser Schutz</string>
+    <string name="protection_partial_ipv6">IPv4-DNS ist geschützt, aber IPv6-DNS-Umleitung ist auf diesem Gerät nicht aktiv. Einige Anfragen können BlockAds umgehen. Deaktiviere IPv6 am Router, nutze den lokalen VPN-Modus oder prüfe als erfahrener Magisk-Nutzer ein Drittanbieter-Modul wie magisk-disable-ipv6.</string>
+    <string name="protection_partial_ipv6_magisk_link">magisk-disable-ipv6</string>
+    <string name="protection_mode_conflict">Moduskonflikt</string>
     <string name="trusted_networks_title">Vertrauenswürdige Netzwerke</string>
     <string name="trusted_networks_settings_desc">BlockAds in gewählten WLANs automatisch pausieren</string>
     <string name="trusted_networks_toggle">In vertrauenswürdigen Netzwerken pausieren</string>

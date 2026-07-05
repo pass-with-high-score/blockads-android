@@ -13,6 +13,7 @@ import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.data.entities.WireGuardConfig
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.dao.FirewallRuleDao
@@ -102,6 +103,7 @@ class AdBlockVpnService : VpnService() {
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
         const val EXTRA_STARTED_FROM_BOOT = "extra_started_from_boot"
+        const val EXTRA_MARK_PROTECTION_DISABLED = "extra_mark_protection_disabled"
 
         // When a VPN session is (re)established, Android revokes the
         // previous session and delivers onRevoke() to the (single) service
@@ -165,16 +167,18 @@ class AdBlockVpnService : VpnService() {
             }
         }
 
-        fun start(context: Context) {
+        fun start(context: Context, startedFromBoot: Boolean = false) {
             val intent = Intent(context, AdBlockVpnService::class.java).apply {
                 action = ACTION_START
+                putExtra(EXTRA_STARTED_FROM_BOOT, startedFromBoot)
             }
             androidx.core.content.ContextCompat.startForegroundService(context, intent)
         }
 
-        fun stop(context: Context) {
+        fun stop(context: Context, markProtectionDisabled: Boolean = true) {
             val intent = Intent(context, AdBlockVpnService::class.java).apply {
                 action = ACTION_STOP
+                putExtra(EXTRA_MARK_PROTECTION_DISABLED, markProtectionDisabled)
             }
             context.startService(intent)
         }
@@ -187,6 +191,7 @@ class AdBlockVpnService : VpnService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
+    private lateinit var profileManager: ProfileManager
     private lateinit var dnsLogDao: DnsLogDao
     private lateinit var goTunnelAdapter: GoTunnelAdapter
     private var networkMonitor: NetworkMonitor? = null
@@ -234,6 +239,7 @@ class AdBlockVpnService : VpnService() {
         val koin = org.koin.java.KoinJavaComponent.getKoin()
         filterRepo = koin.get()
         appPrefs = koin.get()
+        profileManager = koin.get()
         dnsLogDao = koin.get()
 
         serviceScope.launch {
@@ -291,7 +297,8 @@ class AdBlockVpnService : VpnService() {
 
         when (intent?.action) {
             ACTION_STOP -> {
-                stopVpn()
+                val markProtectionDisabled = intent.getBooleanExtra(EXTRA_MARK_PROTECTION_DISABLED, true)
+                stopVpn(markProtectionDisabled = markProtectionDisabled)
                 return START_NOT_STICKY
             }
 
@@ -301,14 +308,37 @@ class AdBlockVpnService : VpnService() {
             }
 
             ACTION_RESTART -> {
+                if (!isVpnRoutingAllowed()) {
+                    stopVpn(showStoppedNotification = false, markProtectionDisabled = false)
+                    return START_NOT_STICKY
+                }
+                stopRootProxyIfActive()
                 restartVpn()
                 return START_STICKY
             }
 
             else -> {
+                if (!isVpnRoutingAllowed()) {
+                    Timber.w("Ignoring VPN start while Root routing mode is selected")
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+                stopRootProxyIfActive()
                 startVpn(startedFromBoot)
                 return START_STICKY
             }
+        }
+    }
+
+    private fun isVpnRoutingAllowed(): Boolean {
+        return runBlocking {
+            appPrefs.getRoutingModeSnapshot() != AppPreferences.ROUTING_MODE_ROOT
+        }
+    }
+
+    private fun stopRootProxyIfActive() {
+        if (RootProxyService.state.value != VpnState.STOPPED) {
+            RootProxyService.stop(this, markProtectionDisabled = false)
         }
     }
 
@@ -378,6 +408,7 @@ class AdBlockVpnService : VpnService() {
 
                 filterRepo.seedDefaultsIfNeeded()
                 filterRepo.fetchAndSyncRemoteFilterLists()
+                profileManager.reapplyActiveProfile()
                 val result = filterRepo.loadAllEnabledFilters()
                 Timber.d("Filters loaded: ${result.getOrDefault(0)} domains")
 
@@ -451,7 +482,7 @@ class AdBlockVpnService : VpnService() {
                     Timber
                         .e("Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
                     connectingPhase = ""
-                    stopVpn()
+                    stopVpn(markProtectionDisabled = false)
                     return@launch
                 }
 
@@ -465,7 +496,7 @@ class AdBlockVpnService : VpnService() {
                 val resumedFromReconnect = isReconnecting && vpnStartTime > 0L
                 isReconnecting = false
                 _state.value = VpnState.RUNNING
-                appPrefs.setVpnEnabled(true)
+                appPrefs.setProtectionDesired(true)
                 // Initial Private DNS check (callback only fires on change)
                 runCatching {
                     val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -576,7 +607,7 @@ class AdBlockVpnService : VpnService() {
 
             } catch (e: Exception) {
                 Timber.e(e, "VPN startup failed")
-                stopVpn()
+                stopVpn(markProtectionDisabled = false)
             }
         }
     }
@@ -834,7 +865,7 @@ class AdBlockVpnService : VpnService() {
         )
 
         // Stop VPN but show paused notification
-        stopVpn(showStoppedNotification = false)
+        stopVpn(showStoppedNotification = false, markProtectionDisabled = false)
         showPausedNotification()
     }
 
@@ -888,11 +919,18 @@ class AdBlockVpnService : VpnService() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun stopVpn(showStoppedNotification: Boolean = true) {
+    private fun stopVpn(
+        showStoppedNotification: Boolean = true,
+        markProtectionDisabled: Boolean = true,
+    ) {
         _state.value = VpnState.STOPPING
         isReconnecting = false
         networkSwitchJob?.cancel()
         startTimestamp = 0L
+
+        if (markProtectionDisabled) {
+            ServiceController.cancelResumeWork(this)
+        }
 
         // Show "Stopping…" notification immediately
         updateNotification()
@@ -907,8 +945,10 @@ class AdBlockVpnService : VpnService() {
             // Stop Go tunnel engine (this is the heavy native call that was causing ANR)
             goTunnelAdapter.stop()
 
-            runBlocking {
-                appPrefs.setVpnEnabled(false)
+            if (markProtectionDisabled) {
+                runBlocking {
+                    appPrefs.setProtectionDesired(false)
+                }
             }
 
             try {
@@ -956,10 +996,10 @@ class AdBlockVpnService : VpnService() {
         // Update preferences to reflect VPN is no longer enabled
         // Use a non-cancellable context to ensure preference is updated
         serviceScope.launch(NonCancellable) {
-            appPrefs.setVpnEnabled(false)
+            appPrefs.setProtectionDesired(false)
         }
         showRevokedNotification()
-        stopVpn(showStoppedNotification = false)
+        stopVpn(showStoppedNotification = false, markProtectionDisabled = true)
         super.onRevoke()
     }
 
@@ -1194,7 +1234,7 @@ class AdBlockVpnService : VpnService() {
 
         networkSwitchJob = serviceScope.launch {
             val autoReconnect = appPrefs.autoReconnect.first()
-            val vpnWasEnabled = appPrefs.vpnEnabled.first()
+            val protectionDesired = appPrefs.protectionDesired.first()
             val delayEnabled = appPrefs.networkSwitchDelayEnabled.first()
             val delaySec = appPrefs.networkSwitchDelaySec.first()
 
@@ -1232,7 +1272,7 @@ class AdBlockVpnService : VpnService() {
             }
 
             // Case 2: VPN is not running but should be → reconnect
-            if (autoReconnect && vpnWasEnabled && !isRunning && !isConnecting && !isRestarting && !isStopping) {
+            if (autoReconnect && protectionDesired && !isRunning && !isConnecting && !isRestarting && !isStopping) {
                 Timber.d("Auto-reconnecting VPN after network became available")
                 isReconnecting = true
 
@@ -1255,7 +1295,11 @@ class AdBlockVpnService : VpnService() {
 
                 if (!isRunning && !isConnecting && !isStopping) {
                     retryManager.reset()
-                    startVpn()
+                    if (appPrefs.routingMode.first() == AppPreferences.ROUTING_MODE_ROOT) {
+                        ServiceController.requestStart(this@AdBlockVpnService)
+                    } else {
+                        startVpn()
+                    }
                 }
                 isReconnecting = false
             }

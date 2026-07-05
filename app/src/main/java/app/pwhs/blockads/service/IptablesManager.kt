@@ -21,7 +21,31 @@ object IptablesManager {
 
     private const val CHAIN = "BLOCKADS_DNS"
     private const val CHAIN_FILTER = "BLOCKADS_DOT"
+    // Kept only so teardown removes the old fallback chain from previous
+    // debug builds. Do not create this chain: rejecting IPv6 DNS can break
+    // connectivity on IPv6-first networks instead of causing IPv4 fallback.
+    private const val CHAIN_IPV6_DNS_FALLBACK = "BLOCKADS_DNS6_BLOCK"
     private const val LOCAL_DNS_PORT = 15353
+
+    data class SetupResult(
+        val ipv4Active: Boolean,
+        val ipv6Active: Boolean,
+    ) {
+        val usable: Boolean get() = ipv4Active
+    }
+
+    data class RuleStatus(
+        val ipv4Active: Boolean,
+        val ipv6Active: Boolean,
+    )
+
+    private data class PrivateDnsSnapshot(
+        val mode: String?,
+        val specifier: String?,
+    )
+
+    @Volatile
+    private var previousPrivateDns: PrivateDnsSnapshot? = null
 
     /**
      * Ensure the cached libsu main shell actually has root.
@@ -75,17 +99,29 @@ object IptablesManager {
         blockDoT: Boolean = true,
         whitelistUids: Collection<Int> = emptyList()
     ): Boolean {
+        return setupRulesDetailed(context, blockDoT, whitelistUids).usable
+    }
+
+    @Synchronized
+    fun setupRulesDetailed(
+        context: Context,
+        blockDoT: Boolean = true,
+        whitelistUids: Collection<Int> = emptyList()
+    ): SetupResult {
         val uid = context.applicationInfo.uid
         Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT, whitelistUids=$whitelistUids")
 
-        // Always teardown first (idempotent)
-        teardownRules()
+        // Always teardown first (idempotent), but do not restore Private DNS
+        // during internal setup/reload. The original value is restored only
+        // when Root mode really stops.
+        teardownRules(restorePrivateDns = false)
 
         // ══════════════════════════════════════════════════════════════
         // Step 0: Disable Android Private DNS so system uses port 53
         // This is CRITICAL — without this, Android 9+ uses DoT (853)
         // and our port 53 redirect never sees traffic.
         // ══════════════════════════════════════════════════════════════
+        savePrivateDnsIfNeeded()
         Shell.cmd("settings put global private_dns_mode off").exec()
         Timber.d("Disabled Android Private DNS (forced plain DNS mode)")
 
@@ -140,9 +176,12 @@ object IptablesManager {
         }
 
         // ══════════════════════════════════════════════════════════════
-        // IPv6 — try independently, many Android kernels lack ip6tables nat
+        // IPv6 — try NAT independently. Many Android kernels/ROMs lack
+        // ip6tables nat. If NAT is unavailable, report partial protection
+        // rather than blocking IPv6 DNS. Rejecting IPv6 DNS can break
+        // connectivity on IPv6-first networks instead of causing fallback.
         // ══════════════════════════════════════════════════════════════
-        val ipv6Commands = buildList {
+        val ipv6NatCommands = buildList {
             add("ip6tables -t nat -N $CHAIN 2>/dev/null || true")
             add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
             for (wUid in whitelistUids) {
@@ -151,7 +190,18 @@ object IptablesManager {
             add("ip6tables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
             add("ip6tables -t nat -A OUTPUT -j $CHAIN")
+        }
 
+        var ipv6NatSuccess = true
+        for (cmd in ipv6NatCommands) {
+            val result = Shell.cmd(cmd).exec()
+            if (!result.isSuccess) {
+                Timber.w("IPv6 ip6tables NAT cmd FAILED (will use fallback if needed): [$cmd] err=${result.err}")
+                ipv6NatSuccess = false
+            }
+        }
+
+        val ipv6FilterCommands = buildList {
             if (blockDoT) {
                 add("ip6tables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
                 add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
@@ -163,29 +213,39 @@ object IptablesManager {
             }
         }
 
-        for (cmd in ipv6Commands) {
+        for (cmd in ipv6FilterCommands) {
             val result = Shell.cmd(cmd).exec()
             if (!result.isSuccess) {
-                Timber.w("IPv6 ip6tables cmd FAILED (ignoring): [$cmd] err=${result.err}")
+                Timber.w("IPv6 ip6tables filter cmd FAILED (ignoring): [$cmd] err=${result.err}")
             }
         }
 
+        val status = getStatus()
+
         // Verify rules are actually in place
-        val verified = isActive()
-        if (verified) {
+        if (status.ipv4Active) {
             Timber.d("iptables rules verified active")
         } else {
             Timber.e("iptables rules NOT active after setup — root may have been denied")
         }
+        if (status.ipv6Active) {
+            Timber.d("IPv6 DNS path is protected")
+        } else {
+            Timber.w("IPv6 DNS path is not protected; Root protection is IPv4-only")
+        }
 
-        return ipv4Success && verified
+        return SetupResult(
+            ipv4Active = ipv4Success && status.ipv4Active,
+            ipv6Active = ipv6NatSuccess && status.ipv6Active,
+        )
     }
 
     /**
      * Remove all BlockAds iptables rules and restore Private DNS.
      * Safe to call multiple times. Uses 2>/dev/null to suppress errors.
      */
-    fun teardownRules(): Boolean {
+    @Synchronized
+    fun teardownRules(restorePrivateDns: Boolean = true): Boolean {
         val commands = listOf(
             // IPv4 nat chain
             "iptables -t nat -D OUTPUT -j $CHAIN 2>/dev/null",
@@ -203,12 +263,17 @@ object IptablesManager {
             "ip6tables -t filter -D OUTPUT -j $CHAIN_FILTER 2>/dev/null",
             "ip6tables -t filter -F $CHAIN_FILTER 2>/dev/null",
             "ip6tables -t filter -X $CHAIN_FILTER 2>/dev/null",
-            // Restore Android Private DNS to automatic mode
-            "settings put global private_dns_mode opportunistic",
+            // IPv6 DNS fallback block chain
+            "ip6tables -t filter -D OUTPUT -j $CHAIN_IPV6_DNS_FALLBACK 2>/dev/null",
+            "ip6tables -t filter -F $CHAIN_IPV6_DNS_FALLBACK 2>/dev/null",
+            "ip6tables -t filter -X $CHAIN_IPV6_DNS_FALLBACK 2>/dev/null",
         )
 
         Shell.cmd(*commands.toTypedArray()).exec()
-        Timber.d("iptables teardown done, Private DNS restored")
+        if (restorePrivateDns) {
+            restorePrivateDns()
+        }
+        Timber.d("iptables teardown done, restorePrivateDns=$restorePrivateDns")
         return true
     }
 
@@ -220,5 +285,53 @@ object IptablesManager {
             "iptables -t nat -L OUTPUT -n 2>/dev/null | grep $CHAIN"
         ).exec()
         return result.out.any { it.contains(CHAIN) }
+    }
+
+    fun isIpv6Active(): Boolean {
+        val result = Shell.cmd(
+            "ip6tables -t nat -L OUTPUT -n 2>/dev/null | grep $CHAIN"
+        ).exec()
+        return result.out.any { it.contains(CHAIN) }
+    }
+
+    fun getStatus(): RuleStatus = RuleStatus(
+        ipv4Active = isActive(),
+        ipv6Active = isIpv6Active(),
+    )
+
+    private fun savePrivateDnsIfNeeded() {
+        if (previousPrivateDns != null) return
+        val mode = readGlobalSetting("private_dns_mode")
+        val specifier = readGlobalSetting("private_dns_specifier")
+        previousPrivateDns = PrivateDnsSnapshot(mode = mode, specifier = specifier)
+        Timber.d("Saved Private DNS state: mode=$mode, specifier=$specifier")
+    }
+
+    private fun restorePrivateDns() {
+        val snapshot = previousPrivateDns ?: return
+        if (snapshot.mode.isNullOrBlank()) {
+            Shell.cmd("settings delete global private_dns_mode").exec()
+        } else {
+            Shell.cmd("settings put global private_dns_mode ${shellQuote(snapshot.mode)}").exec()
+        }
+
+        if (snapshot.specifier.isNullOrBlank()) {
+            Shell.cmd("settings delete global private_dns_specifier").exec()
+        } else {
+            Shell.cmd("settings put global private_dns_specifier ${shellQuote(snapshot.specifier)}").exec()
+        }
+
+        previousPrivateDns = null
+        Timber.d("Restored Private DNS state")
+    }
+
+    private fun readGlobalSetting(name: String): String? {
+        val result = Shell.cmd("settings get global $name").exec()
+        val value = result.out.firstOrNull()?.trim()
+        return value?.takeUnless { it.isEmpty() || it == "null" }
+    }
+
+    private fun shellQuote(value: String): String {
+        return "'" + value.replace("'", "'\\''") + "'"
     }
 }

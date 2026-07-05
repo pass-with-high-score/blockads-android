@@ -6,6 +6,7 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.data.entities.DnsProvider
 import app.pwhs.blockads.data.entities.DnsProviders
+import app.pwhs.blockads.data.entities.ProfileManager
 import app.pwhs.blockads.ui.onboarding.data.ProtectionLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import androidx.lifecycle.viewModelScope
 
 class OnboardingViewModel(
     private val appPrefs: AppPreferences,
+    private val profileManager: ProfileManager,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -42,7 +44,8 @@ class OnboardingViewModel(
 
     suspend fun completeOnboarding() {
         // Save protection level
-        appPrefs.setProtectionLevel(_selectedProtectionLevel.value.name)
+        val protectionLevel = _selectedProtectionLevel.value.name
+        appPrefs.setProtectionLevel(protectionLevel)
 
         // Save DNS provider
         val provider = _selectedDnsProvider.value
@@ -58,6 +61,10 @@ class OnboardingViewModel(
         }
 
         appPrefs.setFallbackDns(selectFallbackDns(provider).ipAddress)
+
+        // Activate the matching preset profile so the real filter state
+        // matches the protection level shown during onboarding.
+        profileManager.switchToProtectionLevel(protectionLevel)
 
         // Mark onboarding as completed
         appPrefs.setOnboardingCompleted(true)

@@ -34,13 +34,13 @@ class AdBlockTileService : TileService() {
         val isVpnRunning = AdBlockVpnService.isRunning
 
         if (isRootProxyRunning) {
-            RootProxyService.stop(this)
+            ServiceController.requestStop(this)
         } else if (isVpnRunning) {
-            AdBlockVpnService.stop(this)
+            ServiceController.requestStop(this)
         } else {
             val routingMode = runBlocking { appPrefs.getRoutingModeSnapshot() }
             if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
-                RootProxyService.start(this)
+                ServiceController.requestStart(this)
             } else {
                 if (VpnUtils.isOtherVpnActive(this)) {
                     val intent = Intent(this, MainActivity::class.java).apply {
@@ -59,7 +59,7 @@ class AdBlockTileService : TileService() {
                     return
                 }
 
-                AdBlockVpnService.start(this)
+                ServiceController.requestStart(this)
             }
         }
 
