@@ -140,6 +140,7 @@
     <string name="settings_lang_ja" translatable="false">日本語</string>
     <string name="settings_lang_ko" translatable="false">한국어</string>
     <string name="settings_lang_zh" translatable="false">中文</string>
+    <string name="settings_lang_zh-rHK" translatable="false">繁體中文(香港</string>
     <string name="settings_lang_th" translatable="false">ไทย</string>
     <string name="settings_lang_es" translatable="false">Español</string>
     <string name="settings_lang_ru" translatable="false">Русский</string>
