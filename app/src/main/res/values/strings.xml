@@ -154,6 +154,7 @@
     <string name="settings_lang_cs" translatable="false">Čeština</string>
     <string name="settings_lang_iw" translatable="false">עברית</string>
     <string name="settings_lang_fr" translatable="false">Français</string>
+    <string name="settings_lang_kk" translatable="false">Қазақша</string>
     <string name="settings_accent_color">Accent Color</string>
     <string name="settings_accent_color_desc">Customize the app\'s primary color</string>
     <string name="accent_dynamic">Dynamic (Material You)</string>
