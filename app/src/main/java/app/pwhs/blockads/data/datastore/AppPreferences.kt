@@ -127,6 +127,8 @@ class AppPreferences(private val context: Context) {
         const val LANGUAGE_IW = "iw"
         const val LANGUAGE_FR = "fr"
 
+        const val LANGUAGE_KK = "kk"
+
         const val UPDATE_FREQUENCY_6H = "6h"
         const val UPDATE_FREQUENCY_12H = "12h"
         const val UPDATE_FREQUENCY_24H = "24h"

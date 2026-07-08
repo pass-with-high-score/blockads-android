@@ -522,6 +522,11 @@ fun AppearanceScreen(
                             Icons.Default.Language,
                             AppPreferences.LANGUAGE_FR
                         ),
+                        Triple(
+                            R.string.settings_lang_kk,
+                            Icons.Default.Language,
+                            AppPreferences.LANGUAGE_KK
+                        ),
                     )
                     val sortedLanguages =
                         languages.subList(0, 2) + languages.drop(2).sortedBy { it.third }
