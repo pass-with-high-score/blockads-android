@@ -105,7 +105,7 @@
     <string name="home_block_rate">Taux de blocage</string>
     <string name="home_filter_rules">Règles de filtrage</string>
     <string name="home_recent_blocked">Récemment bloqués</string>
-    <string name="home_data_saved">Données enregistrées</string>
+    <string name="home_data_saved">Données économisées</string>
     <string name="home_protection_uptime">Temps de fonctionnement</string>
     <string name="home_chart_24h">24 heures</string>
     <string name="home_chart_7d">7 jours</string>
