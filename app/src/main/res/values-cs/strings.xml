@@ -3,7 +3,7 @@
     <string name="app_tagline">Prohlížení bez reklam</string>
     <string name="notification_channel_name">Služba blokování reklam</string>
     <string name="notification_channel_description">Zobrazuje se, když je aktivní blokování reklam VPN</string>
-    <string name="vpn_notification_title">BlockAds là aktivní</string>
+    <string name="vpn_notification_title">BlockAds je aktivní</string>
     <string name="vpn_notification_text">Chráníme vaše zařízení před reklamami</string>
     <string name="vpn_notification_reconnecting">BlockAds se znovu připojuje</string>
     <string name="vpn_notification_reconnecting_text">Síť se změnila, probíhá opětovné připojení VPN…</string>
@@ -63,7 +63,7 @@
     <string name="onboarding_battery_unsupported">Nepodporováno</string>
     <string name="onboarding_permission_granted">✓ Povolení uděleno</string>
     <string name="onboarding_complete_title">Nyní jste chráněni!</string>
-    <string name="onboarding_complete_desc">Gratulujeme! BlockAds là nakonfigurováno a připraveno chránit vaše zařízení před reklamami a sledovači.</string>
+    <string name="onboarding_complete_desc">Gratulujeme! BlockAds je nakonfigurováno a připraveno chránit vaše zařízení před reklamami a sledovači.</string>
     <string name="onboarding_complete_stats">Klepnutím na „Začít“ aktivujete ochranu</string>
     <string name="whitelist_apps_title">Povolené aplikace</string>
     <string name="whitelist_apps_search">Hledat aplikace…</string>
@@ -99,7 +99,7 @@
     <string name="log_whitelisted">Povoleno: %s</string>
     <string name="log_already_whitelisted">Již je na seznamu povolených</string>
     <string name="home_connecting_desc">Navazování připojení VPN…</string>
-    <string name="home_protected_desc">Vaše zařízení là chráněno před reklamami</string>
+    <string name="home_protected_desc">Vaše zařízení je chráněno před reklamami</string>
     <string name="home_unprotected_desc">Klepnutím na tlačítko zapnete blokování</string>
     <string name="home_block_rate">Míra blokování</string>
     <string name="home_filter_rules">Pravidla filtrů</string>
@@ -174,9 +174,9 @@
     <string name="tap_add_to_create_rule">Klepnutím trên + vytvoříte své první pravidlo</string>
     <string name="rule">Pravidlo</string>
     <string name="rules">Pravidla</string>
-    <string name="add_rule_hint">Zadejte vlastní DNS pravidlo:\n• Blokovat: ||priklad.cz^ hoặc priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit: @@||priklad.cz^\n• Komentář: ! Toto là komentář</string>
+    <string name="add_rule_hint">Zadejte vlastní DNS pravidlo:\n• Blokovat: ||priklad.cz^ hoặc priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit: @@||priklad.cz^\n• Komentář: ! Toto je komentář</string>
     <string name="custom_rules_help">Nápověda k vlastním pravidlům</string>
-    <string name="custom_rules_help_text">Vlastní pravidla se aplikují před seznamy filtrů và mají vyšší prioritu.\n\nPodporované formáty:\n• Blokovat doménu: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit doménu: @@||priklad.cz^\n• Komentář: ! Toto là komentář\n\nPříklady:\n• ||ads.priklad.cz^ - Blokuje ads.priklad.cz và všechny subdomény\n• @@||priklad.cz^ - Povoluje priklad.cz (přebíjí seznamy blokovaných)</string>
+    <string name="custom_rules_help_text">Vlastní pravidla se aplikují před seznamy filtrů và mají vyšší prioritu.\n\nPodporované formáty:\n• Blokovat doménu: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit doménu: @@||priklad.cz^\n• Komentář: ! Toto je komentář\n\nPříklady:\n• ||ads.priklad.cz^ - Blokuje ads.priklad.cz và všechny subdomény\n• @@||priklad.cz^ - Povoluje priklad.cz (přebíjí seznamy blokovaných)</string>
     <string name="add">Přidat</string>
     <string name="delete">Smazat</string>
     <string name="cancel">Zrušit</string>
@@ -239,7 +239,7 @@
     <string name="stats_chart_12m">12 měsíců</string>
     <string name="stats_per_app">Statistiky podle aplikací</string>
     <string name="vpn_conflict_title">Připojení zablokováno</string>
-    <string name="vpn_conflict_desc">Android umožňuje pouze jedno aktivní připojení VPN současně. Ve vašem zařízení là již aktivní jiná VPN.\n\nNež se připojíte k BlockAds, odpojte prosím jinou VPN nebo v Nastavení vypněte funkci „Vždy zapnutá VPN“.</string>
+    <string name="vpn_conflict_desc">Android umožňuje pouze jedno aktivní připojení VPN současně. Ve vašem zařízení je již aktivní jiná VPN.\n\nNež se připojíte k BlockAds, odpojte prosím jinou VPN nebo v Nastavení vypněte funkci „Vždy zapnutá VPN“.</string>
     <string name="open_settings">Otevřít nastavení</string>
     <string name="vpn_phase_loading_filters">Načítání seznamů filtrů…</string>
     <string name="vpn_phase_preparing_dns">Příprava DNS…</string>
@@ -249,7 +249,7 @@
     <string name="vpn_notification_action_pause">Pauza 1h</string>
     <string name="vpn_notification_action_stop">Zastavit</string>
     <string name="vpn_paused_title">BlockAds pozastaveno</string>
-    <string name="vpn_paused_text">Blokování reklam là na 1 hodinu pozastaveno. Poté se automaticky obnoví.</string>
+    <string name="vpn_paused_text">Blokování reklam je na 1 hodinu pozastaveno. Poté se automaticky obnoví.</string>
     <string name="daily_summary_channel_name">Denní souhrn</string>
     <string name="daily_summary_channel_description">Večerní souhrn blokování reklam</string>
     <string name="daily_summary_title">Denní souhrn ochrany</string>
@@ -295,8 +295,8 @@
     <string name="profile_day_sat">So</string>
     <string name="profile_day_sun">Ne</string>
     <string name="accessibility_toggle_vpn">Přepnout ochranu VPN</string>
-    <string name="accessibility_vpn_active">Ochrana VPN là aktivní</string>
-    <string name="accessibility_vpn_inactive">Ochrana VPN là neaktivní</string>
+    <string name="accessibility_vpn_active">Ochrana VPN je aktivní</string>
+    <string name="accessibility_vpn_inactive">Ochrana VPN je neaktivní</string>
     <string name="accessibility_vpn_connecting">VPN se připojuje</string>
     <string name="accessibility_stat_card">%1$s: %2$s</string>
     <string name="accessibility_navigate_back">Zpět</string>
@@ -342,7 +342,7 @@
     <string name="https_filtering_status_active">Aktivní — skrývání reklam</string>
     <string name="https_filtering_status_inactive">Neaktivní</string>
     <string name="https_filtering_explain_title">Jak to funguje?</string>
-    <string name="https_filtering_explain_body">Filtrování HTTPS zachycuje webový provoz z vybraných prohlížečů a aplikuje kosmetická pravidla CSS pro skrytí reklamních bannerů a prvků trực tiếp na stránkách.\n\nK tomu là nutné do zařízení nainstalovat lokální kořenový certifikát CA. Tento certifikát se generuje přímo v telefonu a nikdy jej neopouští. Bankovní aplikace, Google a další citlivé služby nejsou nikdy zachycovány.</string>
+    <string name="https_filtering_explain_body">Filtrování HTTPS zachycuje webový provoz z vybraných prohlížečů a aplikuje kosmetická pravidla CSS pro skrytí reklamních bannerů a prvků trực tiếp na stránkách.\n\nK tomu je nutné do zařízení nainstalovat lokální kořenový certifikát CA. Tento certifikát se generuje přímo v telefonu a nikdy jej neopouští. Bankovní aplikace, Google a další citlivé služby nejsou nikdy zachycovány.</string>
     <string name="https_filtering_ca_title">Průvodce nastavením</string>
     <string name="https_filtering_ca_desc">Postupujte podle těchto kroků k nastavení kosmetického filtrování HTTPS:</string>
     <string name="https_filtering_export_ca">Uložit do složky Stahování</string>
@@ -357,7 +357,7 @@
     <string name="https_filtering_step2_title">Krok 2: Instalovat certifikát</string>
     <string name="https_filtering_step2_desc">Nainstalujte certifikát do systému:</string>
     <string name="https_filtering_step3_title">Krok 3: Ověřit instalaci</string>
-    <string name="https_filtering_step3_desc">Zkontrolujte, zda là certifikát správně nainstalován</string>
+    <string name="https_filtering_step3_desc">Zkontrolujte, zda je certifikát správně nainstalován</string>
     <string name="https_filtering_verify_cert">Ověřit certifikát</string>
     <string name="https_filtering_cert_installed">Certifikát nainstalován ✓</string>
     <string name="https_filtering_cert_not_installed">Certifikát není nainstalován</string>
