@@ -84,7 +84,7 @@
     <string name="domain_rules_tab_whitelist">Povolené</string>
     <string name="domain_rules_tab_blocklist">Blokované</string>
     <string name="about_title">O aplikaci</string>
-    <string name="about_description">Zdarma và open-source blokátor reklam.\nŽádný sběr dat. Žádné sledování.</string>
+    <string name="about_description">Zdarma a open-source blokátor reklam.\nŽádný sběr dat. Žádné sledování.</string>
     <string name="about_version">Verze %s</string>
     <string name="about_github">Zdrojový kód (GitHub)</string>
     <string name="about_website">Webové stránky</string>
@@ -146,7 +146,7 @@
     <string name="settings_safe_search">Bezpečné vyhledávání</string>
     <string name="settings_safe_search_desc">Vynutit bezpečné vyhledávání (Google, Bing)</string>
     <string name="settings_youtube_restricted">Omezený režim YouTube</string>
-    <string name="settings_youtube_restricted_desc">Filtrovat nevhodná videa và skrýt komentáře</string>
+    <string name="settings_youtube_restricted_desc">Filtrovat nevhodná videa a skrýt komentáře</string>
     <string name="settings_fallback_dns">Záložní DNS server</string>
     <string name="settings_fallback_dns_desc">Použije se, když primární DNS server selže.</string>
     <string name="settings_fallback_dns_short_desc">Záloha při selhání primárního DNS</string>
@@ -174,9 +174,9 @@
     <string name="tap_add_to_create_rule">Klepnutím trên + vytvoříte své první pravidlo</string>
     <string name="rule">Pravidlo</string>
     <string name="rules">Pravidla</string>
-    <string name="add_rule_hint">Zadejte vlastní DNS pravidlo:\n• Blokovat: ||priklad.cz^ hoặc priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit: @@||priklad.cz^\n• Komentář: ! Toto je komentář</string>
+    <string name="add_rule_hint">Zadejte vlastní DNS pravidlo:\n• Blokovat: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit: @@||priklad.cz^\n• Komentář: ! Toto je komentář</string>
     <string name="custom_rules_help">Nápověda k vlastním pravidlům</string>
-    <string name="custom_rules_help_text">Vlastní pravidla se aplikují před seznamy filtrů và mají vyšší prioritu.\n\nPodporované formáty:\n• Blokovat doménu: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit doménu: @@||priklad.cz^\n• Komentář: ! Toto je komentář\n\nPříklady:\n• ||ads.priklad.cz^ - Blokuje ads.priklad.cz và všechny subdomény\n• @@||priklad.cz^ - Povoluje priklad.cz (přebíjí seznamy blokovaných)</string>
+    <string name="custom_rules_help_text">Vlastní pravidla se aplikují před seznamy filtrů a mají vyšší prioritu.\n\nPodporované formáty:\n• Blokovat doménu: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit doménu: @@||priklad.cz^\n• Komentář: ! Toto je komentář\n\nPříklady:\n• ||ads.priklad.cz^ - Blokuje ads.priklad.cz a všechny subdomény\n• @@||priklad.cz^ - Povoluje priklad.cz (přebíjí seznamy blokovaných)</string>
     <string name="add">Přidat</string>
     <string name="delete">Smazat</string>
     <string name="cancel">Zrušit</string>
@@ -184,7 +184,7 @@
     <string name="app_management_title">Správa aplikací</string>
     <string name="app_management_subtitle">Aplikací: %d</string>
     <string name="app_management_subtitle_filtered">%1$d z %2$d aplikací</string>
-    <string name="app_management_desc">Správa směrování VPN pro aplikace và statistiky</string>
+    <string name="app_management_desc">Správa směrování VPN pro aplikace a statistiky</string>
     <string name="app_management_search">Hledat aplikace…</string>
     <string name="app_management_loading">Načítání aplikací…</string>
     <string name="app_management_refresh">Obnovit</string>
@@ -218,7 +218,7 @@
     <string name="block_reason_custom_rule">Vlastní pravidlo blokování</string>
     <string name="block_reason_filter_list">Seznam filtrů</string>
     <string name="block_reason_security">Nebezpečný web</string>
-    <string name="widget_description">Zapnout/vypnout blokování và zobrazit statistiky</string>
+    <string name="widget_description">Zapnout/vypnout blokování a zobrazit statistiky</string>
     <string name="widget_blocked_today">Dnes zablokováno</string>
     <string name="widget_protected">Zapnuto</string>
     <string name="widget_unprotected">Vypnuto</string>
@@ -342,7 +342,7 @@
     <string name="https_filtering_status_active">Aktivní — skrývání reklam</string>
     <string name="https_filtering_status_inactive">Neaktivní</string>
     <string name="https_filtering_explain_title">Jak to funguje?</string>
-    <string name="https_filtering_explain_body">Filtrování HTTPS zachycuje webový provoz z vybraných prohlížečů a aplikuje kosmetická pravidla CSS pro skrytí reklamních bannerů a prvků trực tiếp na stránkách.\n\nK tomu je nutné do zařízení nainstalovat lokální kořenový certifikát CA. Tento certifikát se generuje přímo v telefonu a nikdy jej neopouští. Bankovní aplikace, Google a další citlivé služby nejsou nikdy zachycovány.</string>
+    <string name="https_filtering_explain_body">Filtrování HTTPS zachycuje webový provoz z vybraných prohlížečů a aplikuje kosmetická pravidla CSS pro skrytí reklamních bannerů a prvků přímo na stránkách.\n\nK tomu je nutné do zařízení nainstalovat lokální kořenový certifikát CA. Tento certifikát se generuje přímo v telefonu a nikdy jej neopouští. Bankovní aplikace, Google a další citlivé služby nejsou nikdy zachycovány.</string>
     <string name="https_filtering_ca_title">Průvodce nastavením</string>
     <string name="https_filtering_ca_desc">Postupujte podle těchto kroků k nastavení kosmetického filtrování HTTPS:</string>
     <string name="https_filtering_export_ca">Uložit do složky Stahování</string>
