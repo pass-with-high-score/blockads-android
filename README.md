@@ -164,4 +164,4 @@ Open an issue or submit a PR with your translations.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=pass-with-high-score/blockads-android&type=Date)](https://www.star-history.com/#pass-with-high-score/blockads-android&Date)
+[![Star History Chart](https://afterglow.watch/svg?repos=pass-with-high-score/blockads-android&type=Date)](https://afterglow.watch)
