@@ -84,7 +84,7 @@
     <string name="domain_rules_tab_whitelist">Povolené</string>
     <string name="domain_rules_tab_blocklist">Blokované</string>
     <string name="about_title">O aplikaci</string>
-    <string name="about_description">Zdarma a open-source blokátor reklam.\nŽádný sběr dat. Žádné sledování.</string>
+    <string name="about_description">Bezplatný open-source blokátor reklam.\nŽádný sběr dat. Žádné sledování.</string>
     <string name="about_version">Verze %s</string>
     <string name="about_github">Zdrojový kód (GitHub)</string>
     <string name="about_website">Webové stránky</string>
@@ -171,7 +171,7 @@
     <string name="rules_copied_to_clipboard">Pravidla zkopírována do schránky</string>
     <string name="no_rules_to_export">Žádná pravidla k exportu</string>
     <string name="no_custom_rules">Žádná vlastní pravidla</string>
-    <string name="tap_add_to_create_rule">Klepnutím trên + vytvoříte své první pravidlo</string>
+    <string name="tap_add_to_create_rule">Klepnutím na + vytvoříte své první pravidlo</string>
     <string name="rule">Pravidlo</string>
     <string name="rules">Pravidla</string>
     <string name="add_rule_hint">Zadejte vlastní DNS pravidlo:\n• Blokovat: ||priklad.cz^ nebo priklad.cz\n• Blokovat zástupný znak: ||*.ads.priklad.cz^\n• Povolit: @@||priklad.cz^\n• Komentář: ! Toto je komentář</string>
