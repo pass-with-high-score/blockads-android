@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">Penjelajahan Bebas Iklan</string>
     <string name="notification_channel_name">Layanan Pemblokir Iklan</string>
     <string name="notification_channel_description">Ditampilkan saat pemblokir iklan VPN aktif</string>
@@ -524,7 +524,49 @@
     <string name="trusted_networks_paused_text_generic">BlockAds dijeda di Wi-Fi tepercaya — aktif lagi saat Anda pergi.</string>
     <string name="status_paused">Dijeda</string>
     <string name="home_paused_trusted_short">Dijeda di jaringan tepercaya</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Kontrol Impuls &amp; Kuncian</string>
+    <string name="settings_lockdown_section_desc">Paksa waktu tunggu untuk menonaktifkan pemblokir iklan. Membantu mencegah kekambuhan impulsif.</string>
+    <string name="settings_lockdown_mode_title">Mode Kuncian VPN</string>
+    <string name="settings_lockdown_mode_desc">Saat diaktifkan, Anda tidak dapat mematikan VPN atau mengakses pengaturan tanpa menunggu waktu tunggu habis.</string>
+    <string name="settings_lockdown_duration_title">Durasi Waktu Tunggu</string>
+    <string name="settings_lockdown_duration_desc">Waktu yang harus Anda tunggu untuk membuka kunci aplikasi</string>
+    <string name="lockdown_duration_1m">1 menit</string>
+    <string name="lockdown_duration_5m">5 menit</string>
+    <string name="lockdown_duration_10m">10 menit</string>
+    <string name="lockdown_duration_30m">30 menit</string>
+    <string name="lockdown_duration_1h">1 jam</string>
+    <string name="lockdown_duration_6h">6 jam</string>
+    <string name="lockdown_duration_12h">12 jam</string>
+    <string name="lockdown_duration_24h">24 jam</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d jam</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d menit</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds Terkunci</string>
+    <string name="lockdown_screen_desc">Untuk mengubah pengaturan atau menonaktifkan pemblokiran iklan, Anda harus memulai waktu tunggu.</string>
+    <string name="lockdown_screen_cancel">Batalkan Waktu Tunggu</string>
+    <string name="lockdown_screen_cancel_desc">Membatalkan akan mengatur ulang penghitung waktu kembali ke durasi penuh.</string>
+    <string name="lockdown_screen_duration">Durasi Pengatur Waktu: %1$s</string>
+    <string name="lockdown_screen_start">Mulai Waktu Tunggu</string>
+    <string name="lockdown_screen_add_blacklist">Tambahkan Situs Web ke Daftar Hitam</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Administrator Perangkat untuk menegakkan persistensi dan batasan kebijakan untuk BlockAds.</string>
+    <string name="settings_device_owner_section_title">Kontrol Pemilik Perangkat</string>
+    <string name="settings_device_owner_section_desc">Kelola batasan Pemilik Perangkat. Hanya terlihat karena BlockAds adalah Pemilik Perangkat.</string>
+    <string name="settings_device_owner_enforce_restrictions">Batasan Perangkat</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Aktifkan untuk menerapkan batasan tingkat aplikasi (memblokir alat pengembang, dll). Nonaktifkan untuk menghapusnya.</string>
     <string name="https_filtering_http3_title">Filter HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Blokir QUIC browser untuk memaksa koneksi yang dapat disaring agar penyaringan iklan maksimal. Dapat menyebabkan beberapa halaman hanya dimuat sebagian. Matikan jika halaman tidak dimuat sepenuhnya.</string>
     <string name="log_record_logs">Rekam Log</string>
+    <string name="settings_device_owner_clear_owner">Hapus Pemilik Perangkat</string>
+    <string name="settings_device_owner_clear_owner_desc">Mencabut hak akses administratif Pemilik Perangkat dari BlockAds.</string>
+    <string name="clear_device_owner_confirm_title">Hapus Hak Akses Pemilik Perangkat?</string>
+    <string name="clear_device_owner_confirm_message">Apakah Anda yakin ingin menghapus hak akses Pemilik Perangkat? Ini akan menghapus semua kebijakan administratif dan mengizinkan aplikasi diinstal ulang atau dihapus.</string>
+    <string name="device_owner_cleared_success">Hak akses Pemilik Perangkat berhasil dihapus</string>
+    <string name="device_owner_clear_failed">Gagal menghapus hak akses Pemilik Perangkat</string>
 </resources>

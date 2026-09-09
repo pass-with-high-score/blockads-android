@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device-admin>
+    <uses-policies>
+        <!-- Modern Android doesn't need specific tags here for Device Owner functions, 
+             but the file must exist and be valid. -->
+    </uses-policies>
+</device-admin>

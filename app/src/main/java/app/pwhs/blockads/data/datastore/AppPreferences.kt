@@ -71,6 +71,13 @@ class AppPreferences(private val context: Context) {
         private val KEY_PAUSE_ON_TRUSTED = booleanPreferencesKey("pause_on_trusted")
         private val KEY_PAUSED_BY_TRUSTED = booleanPreferencesKey("paused_by_trusted")
         private val KEY_PAUSED_TRUSTED_SSID = stringPreferencesKey("paused_trusted_ssid")
+        private val KEY_LOCKDOWN_ENABLED = booleanPreferencesKey("lockdown_enabled")
+        private val KEY_LOCKDOWN_DURATION = longPreferencesKey("lockdown_duration")
+        private val KEY_COOLDOWN_START_TIMESTAMP = longPreferencesKey("cooldown_start_timestamp")
+        private val KEY_LAST_ACTIVE_TIMESTAMP = longPreferencesKey("last_active_timestamp")
+        private val KEY_LAST_ACTIVE_REALTIME = longPreferencesKey("last_active_realtime")
+        private val KEY_DEVICE_OWNER_RESTRICTIONS_ENABLED =
+            booleanPreferencesKey("device_owner_restrictions_enabled")
         private val KEY_RECORD_DNS_LOGS = booleanPreferencesKey("record_dns_logs")
 
         const val ROUTING_MODE_DIRECT = "direct"
@@ -148,10 +155,46 @@ class AppPreferences(private val context: Context) {
         const val DEFAULT_FALLBACK_DNS = "94.140.14.14"
         const val DEFAULT_DNS_PROTOCOL = "PLAIN"
         const val DEFAULT_DOH_URL = "https://dns.quad9.net/dns-query"
+        const val DEFAULT_LOCKDOWN_DURATION = 300000L
+        val ALLOWED_LOCKDOWN_DURATIONS = setOf(
+            60000L,
+            300000L,
+            600000L,
+            1800000L,
+            3600000L,
+            21600000L,
+            43200000L,
+            86400000L
+        )
     }
 
     val vpnEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[KEY_VPN_ENABLED] ?: false
+    }
+
+    val lockdownEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LOCKDOWN_ENABLED] ?: false
+    }
+
+    val lockdownDuration: Flow<Long> = context.dataStore.data.map { prefs ->
+        val duration = prefs[KEY_LOCKDOWN_DURATION] ?: DEFAULT_LOCKDOWN_DURATION
+        if (duration in ALLOWED_LOCKDOWN_DURATIONS) duration else DEFAULT_LOCKDOWN_DURATION
+    }
+
+    val cooldownStartTimestamp: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_COOLDOWN_START_TIMESTAMP] ?: 0L
+    }
+
+    val lastActiveTimestamp: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LAST_ACTIVE_TIMESTAMP] ?: 0L
+    }
+
+    val lastActiveRealtime: Flow<Long> = context.dataStore.data.map { prefs ->
+        prefs[KEY_LAST_ACTIVE_REALTIME] ?: 0L
+    }
+
+    val deviceOwnerRestrictionsEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_DEVICE_OWNER_RESTRICTIONS_ENABLED] ?: true
     }
 
     val autoReconnect: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -388,6 +431,50 @@ class AppPreferences(private val context: Context) {
     suspend fun setVpnEnabled(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_VPN_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLockdownEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LOCKDOWN_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setDeviceOwnerRestrictionsEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_DEVICE_OWNER_RESTRICTIONS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setLockdownDuration(ms: Long) {
+        val validMs = if (ms in ALLOWED_LOCKDOWN_DURATIONS) ms else DEFAULT_LOCKDOWN_DURATION
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LOCKDOWN_DURATION] = validMs
+        }
+    }
+
+    suspend fun setCooldownStartTimestamp(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_COOLDOWN_START_TIMESTAMP] = timestamp
+        }
+    }
+
+    suspend fun setLastActiveTimestamp(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_ACTIVE_TIMESTAMP] = timestamp
+        }
+    }
+
+    suspend fun setLastActiveRealtime(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_ACTIVE_REALTIME] = timestamp
+        }
+    }
+
+    suspend fun setLastActiveBaselines(wallTimestamp: Long, realtimeTimestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_LAST_ACTIVE_TIMESTAMP] = wallTimestamp
+            prefs[KEY_LAST_ACTIVE_REALTIME] = realtimeTimestamp
         }
     }
 

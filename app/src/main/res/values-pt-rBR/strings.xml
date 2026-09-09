@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">Navegação sem anúncios</string>
     <string name="notification_channel_name">Serviço de bloqueio de anúncios</string>
     <string name="notification_channel_description">Mostra quando o bloqueador de anúncios VPN está ativo</string>
@@ -524,7 +524,51 @@
     <string name="trusted_networks_paused_text_generic">O BlockAds está pausado em uma rede Wi-Fi confiável — retoma ao sair.</string>
     <string name="status_paused">Pausado</string>
     <string name="home_paused_trusted_short">Pausado em rede confiável</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Controle de Impulsos e Bloqueio</string>
+    <string name="settings_lockdown_section_desc">Força um temporizador de espera para desativar o bloqueio de anúncios. Ajuda a prevenir recaídas impulsivas.</string>
+    <string name="settings_lockdown_mode_title">Modo de Bloqueio VPN</string>
+    <string name="settings_lockdown_mode_desc">Quando ativado, você não pode desligar a VPN ou acessar as configurações sem aguardar o temporizador de espera.</string>
+    <string name="settings_lockdown_duration_title">Duração da Espera</string>
+    <string name="settings_lockdown_duration_desc">Tempo que você deve esperar para desbloquear o aplicativo</string>
+    <string name="lockdown_duration_1m">1 minuto</string>
+    <string name="lockdown_duration_5m">5 minutos</string>
+    <string name="lockdown_duration_10m">10 minutos</string>
+    <string name="lockdown_duration_30m">30 minutos</string>
+    <string name="lockdown_duration_1h">1 hora</string>
+    <string name="lockdown_duration_6h">6 horas</string>
+    <string name="lockdown_duration_12h">12 horas</string>
+    <string name="lockdown_duration_24h">24 horas</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d hora</item>
+        <item quantity="other">%1$d horas</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minutos</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds está Bloqueado</string>
+    <string name="lockdown_screen_desc">Para modificar suas configurações ou desativar o bloqueio de anúncios, você deve iniciar o temporizador de espera.</string>
+    <string name="lockdown_screen_cancel">Cancelar Espera</string>
+    <string name="lockdown_screen_cancel_desc">O cancelamento redefinirá o temporizador para a duração total.</string>
+    <string name="lockdown_screen_duration">Duração do Temporizador: %1$s</string>
+    <string name="lockdown_screen_start">Iniciar Temporizador de Espera</string>
+    <string name="lockdown_screen_add_blacklist">Adicionar Site à Lista Negra</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Administrador do dispositivo para impor persistência e restrições de política para BlockAds.</string>
+    <string name="settings_device_owner_section_title">Controle do proprietário do dispositivo</string>
+    <string name="settings_device_owner_section_desc">Gerencie as restrições do proprietário do dispositivo. Visível apenas porque o BlockAds é um proprietário do dispositivo.</string>
+    <string name="settings_device_owner_enforce_restrictions">Restrições do dispositivo</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Ative para aplicar restrições no nível do aplicativo (bloquear ferramentas de desenvolvedor, etc.). Desative para limpá-las.</string>
     <string name="https_filtering_http3_title">Filtrar HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Bloquear QUIC do navegador para forçar conexões filtráveis para filtragem máxima de anúncios. Pode fazer com que algumas páginas sejam carregadas parcialmente. Desligue se as páginas não carregarem completamente.</string>
     <string name="log_record_logs">Gravar registros</string>
+    <string name="settings_device_owner_clear_owner">Remover Proprietário do Dispositivo</string>
+    <string name="settings_device_owner_clear_owner_desc">Revogar privilégios administrativos de Proprietário do Dispositivo do BlockAds.</string>
+    <string name="clear_device_owner_confirm_title">Remover privilégios de Proprietário do Dispositivo?</string>
+    <string name="clear_device_owner_confirm_message">Tem certeza de que deseja remover os privilégios de Proprietário do Dispositivo? Isso limpará todas as políticas administrativas e permitirá desinstalar o aplicativo.</string>
+    <string name="device_owner_cleared_success">Privilégios de Proprietário do Dispositivo removidos</string>
+    <string name="device_owner_clear_failed">Falha ao remover privilégios de Proprietário do Dispositivo</string>
 </resources>

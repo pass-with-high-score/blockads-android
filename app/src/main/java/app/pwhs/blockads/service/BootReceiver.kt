@@ -26,11 +26,12 @@ class BootReceiver : BroadcastReceiver() {
                 val autoReconnect = prefs.autoReconnect.first()
                 val wasEnabled = prefs.vpnEnabled.first()
                 val routingMode = prefs.routingMode.first()
+                val isLocked = prefs.lockdownEnabled.first()
 
                 // Root Mode: iptables rules are volatile (cleared on reboot).
                 // Re-apply rules by starting RootProxyService.
                 // Also restarts after app update (MY_PACKAGE_REPLACED).
-                if (autoReconnect && wasEnabled) {
+                if (isLocked || (autoReconnect && wasEnabled)) {
                     val trigger = if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) "app update" else "boot"
                     if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
                         Timber.d("Auto-starting Root Proxy mode after $trigger")

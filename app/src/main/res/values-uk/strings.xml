@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">Перегляд без реклами</string>
     <string name="notification_channel_name">Служба блокування реклами</string>
     <string name="notification_channel_description">Показує, коли активний VPN-блокувальник реклами</string>
@@ -524,7 +524,55 @@
     <string name="trusted_networks_paused_text_generic">BlockAds призупинено в довіреній мережі Wi-Fi — відновиться, коли ви вийдете.</string>
     <string name="status_paused">Призупинено</string>
     <string name="home_paused_trusted_short">Призупинено в довіреній мережі</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Контроль імпульсів і блокування</string>
+    <string name="settings_lockdown_section_desc">Примусовий таймер очікування для вимкнення блокування реклами. Допомагає запобігти імпульсивним зривам.</string>
+    <string name="settings_lockdown_mode_title">Режим блокування VPN</string>
+    <string name="settings_lockdown_mode_desc">Коли ввімкнено, ви не можете вимкнути VPN або отримати доступ до налаштувань, не дочекавшись закінчення таймера.</string>
+    <string name="settings_lockdown_duration_title">Тривалість очікування</string>
+    <string name="settings_lockdown_duration_desc">Час, який потрібно зачекати, щоб розблокувати програму</string>
+    <string name="lockdown_duration_1m">1 хвилина</string>
+    <string name="lockdown_duration_5m">5 хвилин</string>
+    <string name="lockdown_duration_10m">10 хвилин</string>
+    <string name="lockdown_duration_30m">30 хвилин</string>
+    <string name="lockdown_duration_1h">1 година</string>
+    <string name="lockdown_duration_6h">6 годин</string>
+    <string name="lockdown_duration_12h">12 годин</string>
+    <string name="lockdown_duration_24h">24 години</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d година</item>
+        <item quantity="few">%1$d години</item>
+        <item quantity="many">%1$d годин</item>
+        <item quantity="other">%1$d години</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d хвилина</item>
+        <item quantity="few">%1$d хвилини</item>
+        <item quantity="many">%1$d хвилин</item>
+        <item quantity="other">%1$d хвилини</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds заблоковано</string>
+    <string name="lockdown_screen_desc">Щоб змінити налаштування або вимкнути блокування реклами, необхідно запустити таймер очікування.</string>
+    <string name="lockdown_screen_cancel">Скасувати очікування</string>
+    <string name="lockdown_screen_cancel_desc">У разі скасування таймер повернеться до повного часу.</string>
+    <string name="lockdown_screen_duration">Тривалість таймера: %1$s</string>
+    <string name="lockdown_screen_start">Запустити таймер</string>
+    <string name="lockdown_screen_add_blacklist">Додати сайт до чорного списку</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Адміністратор пристрою для забезпечення стійкості та обмежень політики для BlockAds.</string>
+    <string name="settings_device_owner_section_title">Контроль власника пристрою</string>
+    <string name="settings_device_owner_section_desc">Керування обмеженнями власника пристрою. Видимо лише тому, що BlockAds є власником пристрою.</string>
+    <string name="settings_device_owner_enforce_restrictions">Обмеження пристрою</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Увімкніть, щоб застосувати обмеження на рівні програми (блокувати інструменти розробника тощо). Вимкніть, щоб очистити їх.</string>
     <string name="https_filtering_http3_title">Фільтрувати HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Блокувати QUIC у браузері для примусового використання з\'єднань, що фільтруються, для максимальної фільтрації реклами. Може призвести до часткового завантаження деяких сторінок. Вимкніть, якщо сторінки завантажуються не повністю.</string>
     <string name="log_record_logs">Записувати журнали</string>
+    <string name="settings_device_owner_clear_owner">Видалити власника пристрою</string>
+    <string name="settings_device_owner_clear_owner_desc">Отозвати адміністративні права власника пристрою у BlockAds.</string>
+    <string name="clear_device_owner_confirm_title">Видалити права власника пристрою?</string>
+    <string name="clear_device_owner_confirm_message">Ви впевнені, що хочете видалити права власника пристрою? Це скасує всі адміністративні політики та дозволить видалити програму.</string>
+    <string name="device_owner_cleared_success">Права власника пристрою видалено</string>
+    <string name="device_owner_clear_failed">Не вдалося видалити права власника пристрою</string>
 </resources>

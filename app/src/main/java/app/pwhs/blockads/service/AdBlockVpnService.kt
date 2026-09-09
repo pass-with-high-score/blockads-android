@@ -301,13 +301,27 @@ class AdBlockVpnService : VpnService() {
 
         when (intent?.action) {
             ACTION_STOP -> {
-                stopVpn()
-                return START_NOT_STICKY
+                serviceScope.launch {
+                    val isLocked = appPrefs.lockdownEnabled.first()
+                    if (isLocked) {
+                        Timber.w("Stop request ignored: VPN is in Lockdown Mode.")
+                        return@launch
+                    }
+                    stopVpn()
+                }
+                return START_STICKY
             }
 
             ACTION_PAUSE_1H -> {
-                pauseVpn()
-                return START_NOT_STICKY
+                serviceScope.launch {
+                    val isLocked = appPrefs.lockdownEnabled.first()
+                    if (isLocked) {
+                        Timber.w("Pause request ignored: VPN is in Lockdown Mode.")
+                        return@launch
+                    }
+                    pauseVpn()
+                }
+                return START_STICKY
             }
 
             ACTION_RESTART -> {

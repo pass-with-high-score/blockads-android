@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 /**
  * Unified service controller that dispatches restart/stop requests
@@ -52,11 +53,19 @@ object ServiceController {
      * Stop whichever service is currently running.
      */
     fun requestStop(context: Context) {
-        if (RootProxyService.isRunning) {
-            RootProxyService.stop(context)
-        }
-        if (AdBlockVpnService.isRunning) {
-            AdBlockVpnService.stop(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            val appPrefs = AppPreferences(context)
+            val isLocked = appPrefs.lockdownEnabled.first()
+            if (isLocked) {
+                Timber.w("Stop request ignored: System is in Lockdown Mode.")
+                return@launch
+            }
+            if (RootProxyService.isRunning) {
+                RootProxyService.stop(context)
+            }
+            if (AdBlockVpnService.isRunning) {
+                AdBlockVpnService.stop(context)
+            }
         }
     }
 }

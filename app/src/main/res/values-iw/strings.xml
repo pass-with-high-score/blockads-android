@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">גלישה ללא פרסומות</string>
     <string name="notification_channel_name">שירות חסימת פרסומות</string>
     <string name="notification_channel_description">מציג כאשר חוסם הפרסומות (VPN) פעיל</string>
@@ -524,7 +524,51 @@
     <string name="trusted_networks_paused_text_generic">‏BlockAds מושהה ברשת Wi-Fi מהימנה — יחזור כשתעזבו.</string>
     <string name="status_paused">מושהה</string>
     <string name="home_paused_trusted_short">מושהה ברשת מהימנה</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">שליטה בדחפים ונעילה</string>
+    <string name="settings_lockdown_section_desc">כפה טיימר צינון כדי להשבית את חסימת הפרסומות. מסייע למנוע חזרות אימפולסיביות.</string>
+    <string name="settings_lockdown_mode_title">מצב נעילת VPN</string>
+    <string name="settings_lockdown_mode_desc">כאשר מופעל, אינך יכול לכבות את ה-VPN או לגשת להגדרות מבלי להמתין לסיום טיימר הצינון.</string>
+    <string name="settings_lockdown_duration_title">משך זמן צינון</string>
+    <string name="settings_lockdown_duration_desc">הזמן שעליך להמתין כדי לבטל את נעילת האפליקציה</string>
+    <string name="lockdown_duration_1m">1 דקה</string>
+    <string name="lockdown_duration_5m">5 דקות</string>
+    <string name="lockdown_duration_10m">10 דקות</string>
+    <string name="lockdown_duration_30m">30 דקות</string>
+    <string name="lockdown_duration_1h">1 שעה</string>
+    <string name="lockdown_duration_6h">6 שעות</string>
+    <string name="lockdown_duration_12h">12 שעות</string>
+    <string name="lockdown_duration_24h">24 שעות</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">שעה %1$d</item>
+        <item quantity="other">%1$d שעות</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">דקה %1$d</item>
+        <item quantity="other">%1$d דקות</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds נעול</string>
+    <string name="lockdown_screen_desc">כדי לשנות את ההגדרות שלך או להשבית את חסימת הפרסומות, עליך להפעיל את טיימר הצינון.</string>
+    <string name="lockdown_screen_cancel">בטל צינון</string>
+    <string name="lockdown_screen_cancel_desc">ביטול יאפס את הטיימר בחזרה למשך הזמן המלא.</string>
+    <string name="lockdown_screen_duration">משך הטיימר: %1$s</string>
+    <string name="lockdown_screen_start">הפעל טיימר צינון</string>
+    <string name="lockdown_screen_add_blacklist">הוסף אתר לרשימה השחורה</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">מנהל מכשיר לאכיפת התמדה והגבלות מדיניות עבור BlockAds.</string>
+    <string name="settings_device_owner_section_title">שליטת בעל המכשיר</string>
+    <string name="settings_device_owner_section_desc">נהל את הגבלות בעל המכשיר. נראה רק בגלל ש- BlockAds הוא בעל המכשיר.</string>
+    <string name="settings_device_owner_enforce_restrictions">הגבלות מכשיר</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">הפעל כדי להחיל הגבלות ברמת האפליקציה (חסימת כלי פיתוח וכו\'). השבת כדי למחוק אותן.</string>
     <string name="https_filtering_http3_title">סנן HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">חסום QUIC בדפדפן כדי לאלץ חיבורים ניתנים לסינון לסינון פרסומות מרבי. עלול לגרום לטעינה חלקית של דפים מסוימים. כבה אם דפים לא נטענים במלואם.</string>
     <string name="log_record_logs">רשום יומנים</string>
+    <string name="settings_device_owner_clear_owner">הסר מנהל מכשיר</string>
+    <string name="settings_device_owner_clear_owner_desc">ביטול הרשאות הניהול של מנהל המכשיר עבור BlockAds.</string>
+    <string name="clear_device_owner_confirm_title">להסיר הרשאות מנהל מכשיר?</string>
+    <string name="clear_device_owner_confirm_message">האם אתה בטוח שברצונך להסיר הרשאות מנהל מכשיר? פעולה זו תבטל את כל המדיניות הניהולית ותאפשר את הסרת האפליקציה.</string>
+    <string name="device_owner_cleared_success">הרשאות מנהל המכשיר הוסרו</string>
+    <string name="device_owner_clear_failed">הסרת הרשאות מנהל המכשיר נכשלה</string>
 </resources>

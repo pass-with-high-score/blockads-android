@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">Duyệt Web Không Quảng Cáo</string>
     <string name="notification_channel_name">Dịch vụ chặn quảng cáo</string>
     <string name="notification_channel_description">Hiển thị khi VPN chặn quảng cáo đang hoạt động</string>
@@ -524,7 +524,49 @@
     <string name="trusted_networks_paused_text_generic">BlockAds đang tạm dừng ở một Wi-Fi tin cậy — tự bật lại khi bạn rời đi.</string>
     <string name="status_paused">Đã tạm dừng</string>
     <string name="home_paused_trusted_short">Tạm dừng trên mạng tin cậy</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Kiểm soát bốc đồng &amp; Khóa</string>
+    <string name="settings_lockdown_section_desc">Bắt buộc thời gian chờ để tắt tính năng chặn quảng cáo. Giúp ngăn ngừa tái phát bốc đồng.</string>
+    <string name="settings_lockdown_mode_title">Chế độ khóa VPN</string>
+    <string name="settings_lockdown_mode_desc">Khi được bật, bạn không thể tắt VPN hoặc truy cập cài đặt mà không đợi hết thời gian chờ.</string>
+    <string name="settings_lockdown_duration_title">Thời gian chờ</string>
+    <string name="settings_lockdown_duration_desc">Thời gian bạn phải đợi để mở khóa ứng dụng</string>
+    <string name="lockdown_duration_1m">1 phút</string>
+    <string name="lockdown_duration_5m">5 phút</string>
+    <string name="lockdown_duration_10m">10 phút</string>
+    <string name="lockdown_duration_30m">30 phút</string>
+    <string name="lockdown_duration_1h">1 giờ</string>
+    <string name="lockdown_duration_6h">6 giờ</string>
+    <string name="lockdown_duration_12h">12 giờ</string>
+    <string name="lockdown_duration_24h">24 giờ</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d giờ</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d phút</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds đã bị Khóa</string>
+    <string name="lockdown_screen_desc">Để sửa đổi cài đặt hoặc tắt chặn quảng cáo, bạn phải bắt đầu bộ đếm thời gian chờ.</string>
+    <string name="lockdown_screen_cancel">Hủy thời gian chờ</string>
+    <string name="lockdown_screen_cancel_desc">Việc hủy sẽ đặt lại bộ đếm thời gian về thời lượng đầy đủ.</string>
+    <string name="lockdown_screen_duration">Thời gian: %1$s</string>
+    <string name="lockdown_screen_start">Bắt đầu Bộ đếm thời gian</string>
+    <string name="lockdown_screen_add_blacklist">Thêm trang web vào danh sách đen</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">Quản trị viên thiết bị để thực thi tính bền bỉ và các hạn chế chính sách đối với BlockAds.</string>
+    <string name="settings_device_owner_section_title">Kiểm soát chủ sở hữu thiết bị</string>
+    <string name="settings_device_owner_section_desc">Quản lý các hạn chế của Chủ sở hữu thiết bị. Chỉ hiển thị vì BlockAds là Chủ sở hữu thiết bị.</string>
+    <string name="settings_device_owner_enforce_restrictions">Giới hạn thiết bị</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Bật để áp dụng các hạn chế cấp ứng dụng (chặn công cụ nhà phát triển, v.v.). Tắt để xóa chúng.</string>
     <string name="https_filtering_http3_title">Lọc HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">Chặn QUIC của trình duyệt để buộc các kết nối có thể lọc nhằm đạt được khả năng lọc quảng cáo tối đa. Có thể khiến một số trang chỉ tải một phần. Hãy tắt nếu các trang không tải hoàn toàn.</string>
     <string name="log_record_logs">Ghi nhật ký</string>
+    <string name="settings_device_owner_clear_owner">Xóa Quyền Chủ Thiết Bị</string>
+    <string name="settings_device_owner_clear_owner_desc">Thu hồi quyền quản trị Quyền Chủ Thiết Bị (Device Owner) của BlockAds.</string>
+    <string name="clear_device_owner_confirm_title">Xóa Quyền Chủ Thiết Bị?</string>
+    <string name="clear_device_owner_confirm_message">Bạn có chắc chắn muốn xóa quyền Quyền Chủ Thiết Bị không? Thao tác này sẽ xóa tất cả chính sách quản trị và cho phép gỡ cài đặt ứng dụng.</string>
+    <string name="device_owner_cleared_success">Đã xóa Quyền Chủ Thiết Bị</string>
+    <string name="device_owner_clear_failed">Không thể xóa Quyền Chủ Thiết Bị</string>
 </resources>

@@ -54,6 +54,16 @@ class BlockAdsApplication : Application() {
             if (appPreferences.dailySummaryEnabled.first()) {
                 DailySummaryScheduler.scheduleDailySummary(this@BlockAdsApplication)
             }
+
+            // Device Owner Mode: enforce restrictions if provisioned AND enabled in settings
+            val deviceOwnerManager = app.pwhs.blockads.service.DeviceOwnerManager(this@BlockAdsApplication)
+            if (deviceOwnerManager.isDeviceOwner() && appPreferences.deviceOwnerRestrictionsEnabled.first()) {
+                val success = deviceOwnerManager.enforceRestrictions()
+                if (!success) {
+                    Timber.w("Device Owner restrictions enforcement failed on startup")
+                    appPreferences.setDeviceOwnerRestrictionsEnabled(false)
+                }
+            }
         }
 
         // Trusted Wi-Fi networks (#197): auto-pause/resume on SSID change.

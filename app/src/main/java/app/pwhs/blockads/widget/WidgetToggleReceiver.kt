@@ -45,6 +45,13 @@ class WidgetToggleReceiver : BroadcastReceiver() {
     private suspend fun toggleVpn(context: Context) {
         // Stop logic: evaluate running status of both services
         if (AdBlockVpnService.isRunning || RootProxyService.isRunning) {
+            val appPrefs = AppPreferences(context)
+            val isLocked = appPrefs.lockdownEnabled.first()
+            if (isLocked) {
+                Timber.w("Widget toggle ignored: System is in Lockdown Mode.")
+                return
+            }
+
             // Stop AdBlockVpnService if running
             if (AdBlockVpnService.isRunning) {
                 val stopIntent = Intent(context, AdBlockVpnService::class.java).apply {

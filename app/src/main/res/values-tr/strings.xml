@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">&quot;Reklamsız Tarama&quot;</string>
     <string name="notification_channel_name">&quot;Reklam Engelleyici Hizmeti&quot;</string>
     <string name="notification_channel_description">&quot;VPN reklam engelleyicisinin etkin olup olmadığını gösterir.&quot;</string>
@@ -545,7 +545,51 @@ Desteklenen formatlar:
     <string name="trusted_networks_paused_text_generic">BlockAds güvenilir bir Wi-Fi ağında duraklatıldı — ayrıldığınızda devam eder.</string>
     <string name="status_paused">Duraklatıldı</string>
     <string name="home_paused_trusted_short">Güvenilir ağda duraklatıldı</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">Dürtü Kontrolü ve Kilitleme</string>
+    <string name="settings_lockdown_section_desc">Reklam engellemeyi devre dışı bırakmak için bir bekleme süresi zorlar. Dürtüsel nüksetmeleri önlemeye yardımcı olur.</string>
+    <string name="settings_lockdown_mode_title">VPN Kilitleme Modu</string>
+    <string name="settings_lockdown_mode_desc">Etkinleştirildiğinde, bekleme süresinin bitmesini beklemeden VPN\'i kapatamaz veya ayarlara erişemezsiniz.</string>
+    <string name="settings_lockdown_duration_title">Bekleme Süresi</string>
+    <string name="settings_lockdown_duration_desc">Uygulamanın kilidini açmak için beklemeniz gereken süre</string>
+    <string name="lockdown_duration_1m">1 dakika</string>
+    <string name="lockdown_duration_5m">5 dakika</string>
+    <string name="lockdown_duration_10m">10 dakika</string>
+    <string name="lockdown_duration_30m">30 dakika</string>
+    <string name="lockdown_duration_1h">1 saat</string>
+    <string name="lockdown_duration_6h">6 saat</string>
+    <string name="lockdown_duration_12h">12 saat</string>
+    <string name="lockdown_duration_24h">24 saat</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d saat</item>
+        <item quantity="other">%1$d saat</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="one">%1$d dakika</item>
+        <item quantity="other">%1$d dakika</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds Kilitli</string>
+    <string name="lockdown_screen_desc">Ayarlarınızı değiştirmek veya reklam engellemeyi devre dışı bırakmak için bekleme sayacını başlatmalısınız.</string>
+    <string name="lockdown_screen_cancel">Beklemeyi İptal Et</string>
+    <string name="lockdown_screen_cancel_desc">İptal etmek sayacı tam süreye sıfırlayacaktır.</string>
+    <string name="lockdown_screen_duration">Sayaç Süresi: %1$s</string>
+    <string name="lockdown_screen_start">Bekleme Sayacını Başlat</string>
+    <string name="lockdown_screen_add_blacklist">Web Sitesini Kara Listeye Ekle</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">BlockAds için kalıcılık ve politika kısıtlamalarını zorlayacak cihaz yöneticisi.</string>
+    <string name="settings_device_owner_section_title">Cihaz Sahibi Kontrolü</string>
+    <string name="settings_device_owner_section_desc">Cihaz Sahibi kısıtlamalarını yönetin. Sadece BlockAds Cihaz Sahibi olduğu için görünür.</string>
+    <string name="settings_device_owner_enforce_restrictions">Cihaz Kısıtlamaları</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">Uygulama düzeyinde kısıtlamalar uygulamak için etkinleştirin (geliştirici araçlarını engelleme vb.). Kısıtlamaları kaldırmak için devre dışı bırakın.</string>
     <string name="https_filtering_http3_title">HTTP/3 (QUIC) Filtrele</string>
     <string name="https_filtering_http3_desc">Maksimum reklam filtrelemesi için filtrelenebilir bağlantıları zorlamak amacıyla tarayıcı QUIC\'ini engelleyin. Bazı sayfaların kısmen yüklenmesine neden olabilir. Sayfalar tam olarak yüklenmiyorsa kapatın.</string>
     <string name="log_record_logs">Günlükleri Kaydet</string>
+    <string name="settings_device_owner_clear_owner">Cihaz Sahibini Kaldır</string>
+    <string name="settings_device_owner_clear_owner_desc">BlockAds için Cihaz Sahibi yönetici ayrıcalıklarını geri alın.</string>
+    <string name="clear_device_owner_confirm_title">Cihaz Sahibi Ayrıcalıkları Kaldırılsın mı?</string>
+    <string name="clear_device_owner_confirm_message">Cihaz Sahibi ayrıcalıklarını kaldırmak istediğinizden emin misiniz? Bu işlem tüm yönetim ilkelerini temizleyecek ve uygulamanın kaldırılmasına izin verecektir.</string>
+    <string name="device_owner_cleared_success">Cihaz Sahibi ayrıcalıkları kaldırıldı</string>
+    <string name="device_owner_clear_failed">Cihaz Sahibi ayrıcalıkları kaldırılamadı</string>
 </resources>

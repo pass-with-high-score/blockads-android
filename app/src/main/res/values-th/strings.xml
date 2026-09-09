@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">ท่องเว็บโดยไม่มีโฆษณา</string>
     <string name="notification_channel_name">บริการบล็อกโฆษณา</string>
     <string name="notification_channel_description">แสดงเมื่อตัวบล็อกโฆษณา VPN ทำงานอยู่</string>
@@ -524,7 +524,49 @@
     <string name="trusted_networks_paused_text_generic">BlockAds หยุดชั่วคราวบน Wi-Fi ที่เชื่อถือได้ — จะกลับมาทำงานเมื่อคุณออกไป</string>
     <string name="status_paused">หยุดชั่วคราว</string>
     <string name="home_paused_trusted_short">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">ควบคุมแรงกระตุ้นและล็อกดาวน์</string>
+    <string name="settings_lockdown_section_desc">บังคับให้มีเวลาพักก่อนปิดใช้งานการบล็อกโฆษณา ช่วยป้องกันการกำเริบจากแรงกระตุ้น</string>
+    <string name="settings_lockdown_mode_title">โหมดล็อกดาวน์ VPN</string>
+    <string name="settings_lockdown_mode_desc">เมื่อเปิดใช้งาน คุณจะไม่สามารถปิด VPN หรือเข้าถึงการตั้งค่าได้จนกว่าเวลาพักจะสิ้นสุดลง</string>
+    <string name="settings_lockdown_duration_title">ระยะเวลาพัก</string>
+    <string name="settings_lockdown_duration_desc">เวลาที่คุณต้องรอเพื่อปลดล็อกแอป</string>
+    <string name="lockdown_duration_1m">1 นาที</string>
+    <string name="lockdown_duration_5m">5 นาที</string>
+    <string name="lockdown_duration_10m">10 นาที</string>
+    <string name="lockdown_duration_30m">30 นาที</string>
+    <string name="lockdown_duration_1h">1 ชั่วโมง</string>
+    <string name="lockdown_duration_6h">6 ชั่วโมง</string>
+    <string name="lockdown_duration_12h">12 ชั่วโมง</string>
+    <string name="lockdown_duration_24h">24 ชั่วโมง</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d ชั่วโมง</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d นาที</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds ถูกล็อก</string>
+    <string name="lockdown_screen_desc">หากต้องการแก้ไขการตั้งค่าหรือปิดใช้งานการบล็อกโฆษณา คุณต้องเริ่มตัวนับเวลาพัก</string>
+    <string name="lockdown_screen_cancel">ยกเลิกการพัก</string>
+    <string name="lockdown_screen_cancel_desc">การยกเลิกจะรีเซ็ตตัวนับเวลากลับเป็นระยะเวลาเต็ม</string>
+    <string name="lockdown_screen_duration">ระยะเวลา: %1$s</string>
+    <string name="lockdown_screen_start">เริ่มตัวนับเวลาพัก</string>
+    <string name="lockdown_screen_add_blacklist">เพิ่มเว็บไซต์ในรายการบล็อก</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">ผู้ดูแลอุปกรณ์เพื่อบังคับใช้ความต่อเนื่องและข้อจำกัดนโยบายสำหรับ BlockAds</string>
+    <string name="settings_device_owner_section_title">การควบคุมเจ้าของอุปกรณ์</string>
+    <string name="settings_device_owner_section_desc">จัดการข้อจำกัดของเจ้าของอุปกรณ์ แสดงให้เห็นเนื่องจาก BlockAds เป็นเจ้าของอุปกรณ์</string>
+    <string name="settings_device_owner_enforce_restrictions">ข้อจำกัดอุปกรณ์</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">เปิดใช้งานเพื่อใช้ข้อจำกัดระดับแอป (บล็อกเครื่องมือนักพัฒนา ฯลฯ) ปิดใช้งานเพื่อยกเลิกข้อจำกัด</string>
     <string name="https_filtering_http3_title">กรอง HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">บล็อก QUIC ของเบราว์เซอร์เพื่อบังคับการเชื่อมต่อที่กรองได้สำหรับการกรองโฆษณาสูงสุด อาจทำให้บางหน้าโหลดเพียงบางส่วน ปิดหากหน้าเว็บโหลดไม่สมบูรณ์</string>
     <string name="log_record_logs">บันทึกประวัติ</string>
+    <string name="settings_device_owner_clear_owner">ลบสิทธิ์เจ้าของอุปกรณ์</string>
+    <string name="settings_device_owner_clear_owner_desc">ยกเลิกสิทธิ์การดูแลระบบเจ้าของอุปกรณ์สำหรับ BlockAds</string>
+    <string name="clear_device_owner_confirm_title">ลบสิทธิ์เจ้าของอุปกรณ์หรือไม่?</string>
+    <string name="clear_device_owner_confirm_message">คุณแน่ใจหรือไม่ว่าต้องการลบสิทธิ์เจ้าของอุปกรณ์? การดำเนินการนี้จะยกเลิกนโยบายการดูแลระบบทั้งหมดและอนุญาตให้ถอนการติดตั้งแอปได้</string>
+    <string name="device_owner_cleared_success">ลบสิทธิ์เจ้าของอุปกรณ์เรียบร้อยแล้ว</string>
+    <string name="device_owner_clear_failed">ลบสิทธิ์เจ้าของอุปกรณ์ไม่สำเร็จ</string>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_tagline">无广告浏览</string>
     <string name="notification_channel_name">广告拦截服务</string>
     <string name="notification_channel_description">当VPN广告拦截器处于活动状态时显示</string>
@@ -524,7 +524,49 @@
     <string name="trusted_networks_paused_text_generic">BlockAds 已在信任的 Wi-Fi 上暂停，离开后自动恢复。</string>
     <string name="status_paused">已暂停</string>
     <string name="home_paused_trusted_short">已在信任的网络上暂停</string>
+
+    <!-- Lockdown Mode -->
+    <string name="settings_lockdown_section_title">冲动控制与锁定</string>
+    <string name="settings_lockdown_section_desc">强制使用冷却倒计时以禁用广告拦截。有助于防止冲动复发。</string>
+    <string name="settings_lockdown_mode_title">VPN 锁定模式</string>
+    <string name="settings_lockdown_mode_desc">启用后，如果不等待冷却倒计时结束，您将无法关闭 VPN 或访问设置。</string>
+    <string name="settings_lockdown_duration_title">冷却时间</string>
+    <string name="settings_lockdown_duration_desc">解锁应用程序您必须等待的时间</string>
+    <string name="lockdown_duration_1m">1分钟</string>
+    <string name="lockdown_duration_5m">5分钟</string>
+    <string name="lockdown_duration_10m">10分钟</string>
+    <string name="lockdown_duration_30m">30分钟</string>
+    <string name="lockdown_duration_1h">1小时</string>
+    <string name="lockdown_duration_6h">6小时</string>
+    <string name="lockdown_duration_12h">12小时</string>
+    <string name="lockdown_duration_24h">24 小时</string>
+    <plurals name="lockdown_duration_hours" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d 小时</item>
+    </plurals>
+    <plurals name="lockdown_duration_minutes" tools:ignore="MissingQuantity,MissingTranslation">
+        <item quantity="other">%1$d 分钟</item>
+    </plurals>
+    <string name="lockdown_screen_title">BlockAds 已锁定</string>
+    <string name="lockdown_screen_desc">要修改设置或禁用广告拦截，您必须启动冷却倒计时。</string>
+    <string name="lockdown_screen_cancel">取消冷却</string>
+    <string name="lockdown_screen_cancel_desc">取消将使倒计时重置回完整时间。</string>
+    <string name="lockdown_screen_duration">倒计时：%1$s</string>
+    <string name="lockdown_screen_start">启动冷却倒计时</string>
+    <string name="lockdown_screen_add_blacklist">添加网站至黑名单</string>
+
+    <!-- Device Owner Mode -->
+    <string name="device_admin_description">设备管理员可强制执行 BlockAds 的持久性和策略限制。</string>
+    <string name="settings_device_owner_section_title">设备所有者控制</string>
+    <string name="settings_device_owner_section_desc">管理设备所有者限制。 仅由于 BlockAds 是设备所有者而可见。</string>
+    <string name="settings_device_owner_enforce_restrictions">设备限制</string>
+    <string name="settings_device_owner_enforce_restrictions_desc">启用以应用应用程序级别的限制（阻止开发者工具等）。禁用以清除它们。</string>
     <string name="https_filtering_http3_title">过滤 HTTP/3 (QUIC)</string>
     <string name="https_filtering_http3_desc">阻止浏览器 QUIC 以强制使用可过滤的连接，从而实现最大程度的广告过滤。可能会导致某些页面加载不完全。如果页面未完全加载，请关闭此选项。</string>
     <string name="log_record_logs">记录日志</string>
+    <string name="settings_device_owner_clear_owner">移除设备所有者</string>
+    <string name="settings_device_owner_clear_owner_desc">撤销 BlockAds 的设备所有者（Device Owner）管理权限。</string>
+    <string name="clear_device_owner_confirm_title">移除设备所有者权限？</string>
+    <string name="clear_device_owner_confirm_message">确定要移除设备所有者权限吗？这将清除所有管理策略并允许卸载应用。</string>
+    <string name="device_owner_cleared_success">已移除设备所有者权限</string>
+    <string name="device_owner_clear_failed">移除设备所有者权限失败</string>
 </resources>

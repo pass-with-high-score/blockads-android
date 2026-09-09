@@ -29,13 +29,15 @@ fun SettingsToggleItem(
     subtitle: String,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .toggleable(
                 value = isChecked,
+                enabled = enabled,
                 onValueChange = { onCheckedChange(it) },
                 role = Role.Switch
             )
@@ -55,6 +57,7 @@ fun SettingsToggleItem(
         Switch(
             checked = isChecked,
             onCheckedChange = null,
+            enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary
