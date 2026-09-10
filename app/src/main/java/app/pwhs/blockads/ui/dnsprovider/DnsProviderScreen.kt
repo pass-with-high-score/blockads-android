@@ -167,10 +167,12 @@ fun DnsProviderScreen(
                 customDnsError = null
             },
             onSave = { upstream ->
-                val parsed = viewModel.getParsedHost(upstream)
-                if (parsed.equals(fallbackDns, ignoreCase = true) ||
-                    upstream.trim().equals(fallbackDns, ignoreCase = true)
-                ) {
+                val trimmed = upstream.trim()
+                val parsed = viewModel.getParsedHost(trimmed)
+                val isPlain = !trimmed.startsWith("https://", ignoreCase = true) &&
+                        !trimmed.startsWith("tls://", ignoreCase = true) &&
+                        !trimmed.startsWith("quic://", ignoreCase = true)
+                if (isPlain && parsed.equals(fallbackDns.trim(), ignoreCase = true)) {
                     customDnsError = duplicateErrorMsg
                 } else {
                     viewModel.setCustomDns(upstream)
@@ -191,7 +193,11 @@ fun DnsProviderScreen(
             },
             onSave = { dns ->
                 val trimmed = dns.trim()
-                if (trimmed.equals(upstreamDns, ignoreCase = true)) {
+                val isUpstreamPlain = customDnsDisplay.isBlank() ||
+                        (!customDnsDisplay.startsWith("https://", ignoreCase = true) &&
+                         !customDnsDisplay.startsWith("tls://", ignoreCase = true) &&
+                         !customDnsDisplay.startsWith("quic://", ignoreCase = true))
+                if (isUpstreamPlain && trimmed.equals(upstreamDns.trim(), ignoreCase = true)) {
                     fallbackDnsError = duplicateErrorMsg
                 } else {
                     viewModel.setFallbackDns(dns)

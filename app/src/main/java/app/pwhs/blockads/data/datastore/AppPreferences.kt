@@ -87,6 +87,7 @@ class AppPreferences(context: Context) {
         const val DEFAULT_FALLBACK_DNS = DnsPreferences.DEFAULT_FALLBACK_DNS
         const val DEFAULT_DNS_PROTOCOL = DnsPreferences.DEFAULT_DNS_PROTOCOL
         const val DEFAULT_DOH_URL = DnsPreferences.DEFAULT_DOH_URL
+        const val CUSTOM_DNS_PROVIDER_ID = "custom"
     }
 
     // ── VPN & Security Flows ─────────────────────────────────────────────

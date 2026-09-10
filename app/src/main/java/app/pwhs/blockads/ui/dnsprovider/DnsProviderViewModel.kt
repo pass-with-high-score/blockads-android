@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -47,20 +48,24 @@ class DnsProviderViewModel(
 
     val selectedProviderId: StateFlow<String?> = combine(
         appPrefs.dnsProviderId,
-        appPrefs.upstreamDns
-    ) { providerId, upstreamDns ->
-        // If provider ID is set, use it
-        providerId ?: // Otherwise, try to detect provider from current upstream DNS
-        DnsProviders.getByIp(upstreamDns)?.id
+        appPrefs.upstreamDns,
+        appPrefs.dnsProtocol
+    ) { providerId, upstreamDns, protocol ->
+        when {
+            providerId == AppPreferences.CUSTOM_DNS_PROVIDER_ID -> null
+            providerId != null -> providerId
+            else -> {
+                val match = DnsProviders.getByIp(upstreamDns)
+                if (match != null && protocol == DnsProtocol.PLAIN && match.dohUrl == null) {
+                    match.id
+                } else null
+            }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val customDnsEnabled: StateFlow<Boolean> = combine(
-        appPrefs.dnsProviderId,
-        appPrefs.upstreamDns
-    ) { providerId, upstreamDns ->
-        // Custom DNS is enabled if no provider ID is set and IP doesn't match any preset
-        providerId == null && DnsProviders.getByIp(upstreamDns) == null
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val customDnsEnabled: StateFlow<Boolean> = selectedProviderId
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     /**
      * Unified display value for the custom DNS input.
@@ -126,7 +131,8 @@ class DnsProviderViewModel(
         val trimmed = dns.trim()
         viewModelScope.launch {
             val currentUpstream = appPrefs.upstreamDns.first()
-            if (currentUpstream.equals(trimmed, ignoreCase = true)) {
+            val currentProtocol = appPrefs.dnsProtocol.first()
+            if (currentProtocol == DnsProtocol.PLAIN && currentUpstream.equals(trimmed, ignoreCase = true)) {
                 _events.toast(R.string.dns_error_duplicate)
                 return@launch
             }
@@ -157,14 +163,20 @@ class DnsProviderViewModel(
 
         viewModelScope.launch {
             val parsedHost = getParsedHost(trimmed)
+            val protocol = when {
+                trimmed.startsWith("https://", ignoreCase = true) -> DnsProtocol.DOH
+                trimmed.startsWith("quic://", ignoreCase = true) -> DnsProtocol.DOQ
+                trimmed.startsWith("tls://", ignoreCase = true) -> DnsProtocol.DOT
+                else -> DnsProtocol.PLAIN
+            }
 
-            val currentFallback = appPrefs.fallbackDns.first()
-            if (currentFallback.equals(parsedHost, ignoreCase = true)) {
+            val currentFallback = appPrefs.fallbackDns.first().trim()
+            if (protocol == DnsProtocol.PLAIN && currentFallback.equals(parsedHost, ignoreCase = true)) {
                 _events.toast(R.string.dns_error_duplicate)
                 return@launch
             }
 
-            appPrefs.setDnsProviderId(null)
+            appPrefs.setDnsProviderId(AppPreferences.CUSTOM_DNS_PROVIDER_ID)
             when {
                 trimmed.startsWith("https://", ignoreCase = true) -> {
                     appPrefs.setDnsProtocol(DnsProtocol.DOH)
