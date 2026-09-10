@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FileOpen
@@ -62,6 +63,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.WireGuardProfile
 import app.pwhs.blockads.ui.wireguard.component.EmptyState
 import app.pwhs.blockads.ui.wireguard.component.ProfileRow
+import app.pwhs.blockads.ui.wireguard.component.SettingToggleCard
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,6 +81,7 @@ fun WireGuardImportScreen(
     val isWgActive by viewModel.isWgActive.collectAsStateWithLifecycle()
     val splitDnsZones by viewModel.splitDnsZones.collectAsStateWithLifecycle()
     val excludeLan by viewModel.excludeLan.collectAsStateWithLifecycle()
+    val allowAppBypass by viewModel.allowAppBypass.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
@@ -201,9 +204,22 @@ fun WireGuardImportScreen(
                     }
 
                     item {
-                        ExcludeLanCard(
+                        SettingToggleCard(
+                            icon = Icons.Filled.Lan,
+                            title = stringResource(R.string.exclude_lan_title),
+                            description = stringResource(R.string.exclude_lan_description),
                             checked = excludeLan,
                             onCheckedChange = { viewModel.setExcludeLan(it) },
+                        )
+                    }
+
+                    item {
+                        SettingToggleCard(
+                            icon = Icons.AutoMirrored.Filled.AltRoute,
+                            title = stringResource(R.string.allow_app_bypass_title),
+                            description = stringResource(R.string.allow_app_bypass_description),
+                            checked = allowAppBypass,
+                            onCheckedChange = { viewModel.setAllowAppBypass(it) },
                         )
                     }
 
@@ -353,59 +369,6 @@ private fun SplitDnsCard(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun ExcludeLanCard(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Lan,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = stringResource(R.string.exclude_lan_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = stringResource(R.string.exclude_lan_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
             )
         }
     }

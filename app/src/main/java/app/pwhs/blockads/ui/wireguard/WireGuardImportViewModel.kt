@@ -59,6 +59,10 @@ class WireGuardImportViewModel(
     private val _excludeLan = MutableStateFlow(false)
     val excludeLan: StateFlow<Boolean> = _excludeLan.asStateFlow()
 
+    /** Let apps that bind a socket to a specific network skip the tunnel. */
+    private val _allowAppBypass = MutableStateFlow(false)
+    val allowAppBypass: StateFlow<Boolean> = _allowAppBypass.asStateFlow()
+
     /** One-shot UI events. */
     private val _events = MutableSharedFlow<WireGuardUiEvent>()
     val events: SharedFlow<WireGuardUiEvent> = _events.asSharedFlow()
@@ -77,6 +81,7 @@ class WireGuardImportViewModel(
                 appPrefs.getRoutingModeSnapshot() == AppPreferences.ROUTING_MODE_WIREGUARD
             _splitDnsZones.value = appPrefs.splitDnsZones.first()
             _excludeLan.value = appPrefs.excludeLan.first()
+            _allowAppBypass.value = appPrefs.allowAppBypass.first()
         }
     }
 
@@ -201,6 +206,14 @@ class WireGuardImportViewModel(
     fun setExcludeLan(enabled: Boolean) {
         _excludeLan.value = enabled
         viewModelScope.launch { appPrefs.setExcludeLan(enabled) }
+    }
+
+    fun setAllowAppBypass(enabled: Boolean) {
+        _allowAppBypass.value = enabled
+        viewModelScope.launch {
+            appPrefs.setAllowAppBypass(enabled)
+            ServiceController.requestRestart(getApplication())
+        }
     }
 
     fun setSplitDnsZones(zones: String) {

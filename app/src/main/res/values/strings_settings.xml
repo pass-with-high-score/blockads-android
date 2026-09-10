@@ -226,6 +226,8 @@
     <string name="split_dns_description">Comma-separated domain zones to resolve via WireGuard DNS instead of upstream (e.g., internal,local,lan)</string>
     <string name="exclude_lan_title">Exclude LAN Traffic</string>
     <string name="exclude_lan_description">Allow access to local network devices (printers, NAS, local servers) while WireGuard is active</string>
+    <string name="allow_app_bypass_title">Allow Apps to Bypass VPN</string>
+    <string name="allow_app_bypass_description">Let apps that pin a connection to one network (wireless Android Auto, casting, device setup) reach it directly. Everything else still goes through the tunnel.</string>
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
 </resources>
