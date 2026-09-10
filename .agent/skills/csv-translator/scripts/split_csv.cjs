@@ -1,50 +1,61 @@
+#!/usr/bin/env node
+/**
+ * Split a CSV into chunks, repeating the header in each one.
+ *
+ * Usage:
+ *   node split_csv.cjs <input> <output_prefix> <rows_per_chunk>
+ *   node split_csv.cjs <input> <output_prefix> --by <column>
+ *
+ * Splitting happens per record, not per line, so fields containing newlines
+ * survive the round trip. `--by locale` is usually what you want for Android
+ * string exports: one chunk per language keeps terminology consistent within
+ * a single translation pass.
+ */
+
 const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+const { readCsvFile, toCsv } = require('./csv.cjs');
 
-async function splitCsv(inputPath, outputPrefix, linesPerChunk) {
-    const fileStream = fs.createReadStream(inputPath);
-    const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity
-    });
-
-    let header = '';
-    let lineCount = 0;
-    let chunkCount = 1;
-    let currentChunkLines = [];
-
-    for await (const line of rl) {
-        if (lineCount === 0) {
-            header = line;
-        } else {
-            currentChunkLines.push(line);
-            if (currentChunkLines.length >= linesPerChunk) {
-                writeChunk(outputPrefix, chunkCount++, header, currentChunkLines);
-                currentChunkLines = [];
-            }
-        }
-        lineCount++;
-    }
-
-    if (currentChunkLines.length > 0) {
-        writeChunk(outputPrefix, chunkCount++, header, currentChunkLines);
-    }
-    
-    console.log(`Split into ${chunkCount - 1} chunks.`);
-}
-
-function writeChunk(prefix, index, header, lines) {
-    const fileName = `${prefix}_chunk_${index}.csv`;
-    const content = [header, ...lines].join('\n');
-    fs.writeFileSync(fileName, content);
-    console.log(`Created ${fileName}`);
+function write(prefix, suffix, header, records) {
+    const fileName = `${prefix}_${suffix}.csv`;
+    fs.writeFileSync(fileName, toCsv(header, records));
+    console.log(`Created ${fileName} (${records.length} rows)`);
 }
 
 const args = process.argv.slice(2);
 if (args.length < 3) {
-    console.log('Usage: node split_csv.cjs <input_path> <output_prefix> <lines_per_chunk>');
+    console.log('Usage: node split_csv.cjs <input> <output_prefix> <rows_per_chunk>');
+    console.log('       node split_csv.cjs <input> <output_prefix> --by <column>');
     process.exit(1);
 }
 
-splitCsv(args[0], args[1], parseInt(args[2]));
+const [input, prefix] = args;
+const { header, records } = readCsvFile(input);
+
+if (args[2] === '--by') {
+    const column = args[3];
+    if (!header.includes(column)) {
+        console.error(`Column "${column}" not found. Available: ${header.join(', ')}`);
+        process.exit(1);
+    }
+    const groups = new Map();
+    for (const rec of records) {
+        const key = String(rec[column]).trim();
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(rec);
+    }
+    for (const [key, rows] of groups) {
+        write(prefix, key.replace(/[^A-Za-z0-9._-]/g, '_'), header, rows);
+    }
+    console.log(`Split into ${groups.size} chunks by "${column}".`);
+} else {
+    const perChunk = parseInt(args[2], 10);
+    if (!Number.isFinite(perChunk) || perChunk < 1) {
+        console.error('rows_per_chunk must be a positive integer.');
+        process.exit(1);
+    }
+    let chunk = 0;
+    for (let i = 0; i < records.length; i += perChunk) {
+        write(prefix, `chunk_${++chunk}`, header, records.slice(i, i + perChunk));
+    }
+    console.log(`Split ${records.length} rows into ${chunk} chunks.`);
+}

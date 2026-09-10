@@ -25,7 +25,9 @@ This skill automates the end-to-end process of releasing a new version of the ap
   LAST_TAG=$(git describe --tags --abbrev=0)
   git log $LAST_TAG..HEAD --oneline
   ```
-- Generate a concise changelog and write it to `fastlane/metadata/android/en-US/changelogs/<new-versionCode>.txt`.
+- **Filter commits:** Exclude commits that are only about translations or language updates (e.g., commits with `i18n`, `translation`, `locale`, `strings.xml` in the message). These are not user-facing features and should NOT appear in the changelog.
+- **Strip issue references:** Remove all GitHub issue references (e.g., `#70`, `(#72)`, `#71, #78`) from the changelog text. The changelog is for end users on Google Play, not for developers tracking issues.
+- Generate a concise, user-friendly changelog and write it to `fastlane/metadata/android/en-US/changelogs/<new-versionCode>.txt`.
 - **MANDATORY:** Check the character count of the changelog. It MUST NOT exceed 500 characters (Google Play Store limit). Use `wc -c <file_path>` to verify. If it exceeds the limit, shorten it before proceeding.
 
 ### 4. User Confirmation
@@ -53,3 +55,5 @@ This skill automates the end-to-end process of releasing a new version of the ap
 - **Confirmation:** Always wait for user confirmation on the changelog.
 - **Format:** Ensure the tag matches the `vX.Y.Z` format.
 - **Changelog Limit:** The changelog file MUST be under 500 characters to avoid Google Play API rejection. Always verify with `wc -c`.
+- **No Issue References:** Never include GitHub issue numbers (e.g., `#70`, `(#72)`) in the changelog. End users don't care about issue trackers.
+- **No Translation Commits:** Never include translation/i18n/locale update entries in the changelog. These are routine maintenance, not user-facing features.
