@@ -93,7 +93,11 @@ class DnsProviderViewModel(
 
             // Set protocol based on provider capabilities
             if (provider.dohUrl != null) {
-                appPrefs.setDnsProtocol(DnsProtocol.DOH)
+                if (provider.dohUrl.startsWith("quic://", ignoreCase = true)) {
+                    appPrefs.setDnsProtocol(DnsProtocol.DOQ)
+                } else {
+                    appPrefs.setDnsProtocol(DnsProtocol.DOH)
+                }
                 appPrefs.setDohUrl(provider.dohUrl)
             } else {
                 appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
@@ -103,7 +107,7 @@ class DnsProviderViewModel(
             val currentFallback = appPrefs.fallbackDns.first()
             if (currentFallback == provider.ipAddress) {
                 val fallbackProvider = when (provider.id) {
-                    DnsProviders.QUAD9.id -> DnsProviders.ADGUARD
+                    DnsProviders.QUAD9.id, DnsProviders.QUAD9_DOQ.id -> DnsProviders.ADGUARD
                     DnsProviders.ADGUARD.id -> DnsProviders.QUAD9
                     DnsProviders.SYSTEM.id -> DnsProviders.QUAD9
                     else -> {

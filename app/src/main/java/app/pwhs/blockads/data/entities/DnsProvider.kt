@@ -65,6 +65,15 @@ object DnsProviders {
         description = "Security and privacy-focused DNS"
     )
 
+    val QUAD9_DOQ = DnsProvider(
+        id = "quad9_doq",
+        name = "Quad9 (DoQ)",
+        category = DnsCategory.PRIVACY,
+        ipAddress = "9.9.9.9",
+        dohUrl = "quic://dns.quad9.net",
+        description = "Security and privacy-focused DNS over QUIC"
+    )
+
     val OPENDNS = DnsProvider(
         id = "opendns",
         name = "OpenDNS",
@@ -110,7 +119,8 @@ object DnsProviders {
         MULLVAD,
         OPENDNS,
         OPENDNS_FAMILY,
-        QUAD9
+        QUAD9,
+        QUAD9_DOQ
     )
 
     fun getById(id: String): DnsProvider? = ALL_PROVIDERS.find { it.id == id }

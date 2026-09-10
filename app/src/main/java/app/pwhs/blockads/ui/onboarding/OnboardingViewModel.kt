@@ -51,7 +51,11 @@ class OnboardingViewModel(
 
         // Set protocol based on provider capabilities
         if (provider.dohUrl != null) {
-            appPrefs.setDnsProtocol(DnsProtocol.DOH)
+            if (provider.dohUrl.startsWith("quic://", ignoreCase = true)) {
+                appPrefs.setDnsProtocol(DnsProtocol.DOQ)
+            } else {
+                appPrefs.setDnsProtocol(DnsProtocol.DOH)
+            }
             appPrefs.setDohUrl(provider.dohUrl)
         } else {
             appPrefs.setDnsProtocol(DnsProtocol.PLAIN)
@@ -69,7 +73,7 @@ class OnboardingViewModel(
      */
     private fun selectFallbackDns(primary: DnsProvider): DnsProvider {
         return when (primary.id) {
-            DnsProviders.QUAD9.id -> DnsProviders.ADGUARD
+            DnsProviders.QUAD9.id, DnsProviders.QUAD9_DOQ.id -> DnsProviders.ADGUARD
             DnsProviders.ADGUARD.id -> DnsProviders.QUAD9
             DnsProviders.SYSTEM.id -> DnsProviders.QUAD9
             else -> DnsProviders.ALL_PROVIDERS.firstOrNull {
