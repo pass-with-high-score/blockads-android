@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">총 쿼리</string>
+    <string name="blocked_queries">차단됨</string>
+    <string name="logs_empty">아직 기록된 DNS 쿼리가 없습니다</string>
+    <string name="logs_filter_all">전체</string>
+    <string name="logs_filter_blocked">차단됨</string>
+    <string name="log_action_whitelist">허용 목록에 추가</string>
+    <string name="log_action_copy">도메인 복사</string>
+    <string name="log_search_hint">도메인 검색…</string>
+    <string name="domain_copied">도메인이 복사되었습니다</string>
+    <string name="log_whitelisted">허용 목록에 추가됨: %s</string>
+    <string name="log_already_whitelisted">이미 허용 목록에 있습니다</string>
+    <string name="log_status_blocked">차단됨</string>
+    <string name="log_status_allowed">허용됨</string>
+    <string name="log_status_whitelisted">허용 목록</string>
+    <string name="log_detail_query_type">쿼리 유형</string>
+    <string name="log_detail_response_time">응답 시간</string>
+    <string name="log_detail_app">앱</string>
+    <string name="log_detail_resolved_ip">확인된 IP</string>
+    <string name="log_detail_blocked_by">차단 기준</string>
+    <string name="log_detail_timestamp">시간</string>
+    <string name="log_detail_na">해당 없음</string>
+    <string name="log_time_range_all">전체 기간</string>
+    <string name="log_time_range_1h">1시간</string>
+    <string name="log_time_range_6h">6시간</string>
+    <string name="log_time_range_24h">24시간</string>
+    <string name="log_time_range_7d">7일</string>
+    <string name="log_filter_all_apps">모든 앱</string>
+    <string name="log_bulk_selected">%d개 선택됨</string>
+    <string name="log_wildcard_whitelist_domain">모든 하위 도메인 허용</string>
+    <string name="log_wildcard_whitelisted">도메인 %1$s 및 모든 하위 도메인이 허용되었습니다</string>
+    <string name="log_action_unblock">차단 해제</string>
+    <string name="log_action_block">차단</string>
+    <string name="stats_title">통계</string>
+    <string name="stats_overview">개요</string>
+    <string name="stats_all_time_queries">전체 쿼리</string>
+    <string name="stats_all_time_blocked">전체 차단</string>
+    <string name="stats_today_queries">오늘 쿼리</string>
+    <string name="stats_today_blocked">오늘 차단</string>
+    <string name="stats_today_security">Today Threats</string>
+    <string name="stats_charts">활동 차트</string>
+    <string name="stats_chart_4w">4주</string>
+    <string name="stats_chart_12m">12개월</string>
+    <string name="stats_per_app">앱별 통계</string>
+    <string name="log_record_logs">로그 기록</string>
+</resources>

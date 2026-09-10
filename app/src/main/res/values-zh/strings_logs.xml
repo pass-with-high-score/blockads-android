@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">总查询数</string>
+    <string name="blocked_queries">已拦截</string>
+    <string name="logs_empty">尚无DNS查询记录</string>
+    <string name="logs_filter_all">全部</string>
+    <string name="logs_filter_blocked">已拦截</string>
+    <string name="log_action_whitelist">添加到白名单</string>
+    <string name="log_action_copy">复制域名</string>
+    <string name="log_search_hint">搜索域名…</string>
+    <string name="domain_copied">域名已复制</string>
+    <string name="log_whitelisted">已添加到白名单：%s</string>
+    <string name="log_already_whitelisted">已在白名单中</string>
+    <string name="log_status_blocked">已拦截</string>
+    <string name="log_status_allowed">已允许</string>
+    <string name="log_status_whitelisted">已加入白名单</string>
+    <string name="log_detail_query_type">查询类型</string>
+    <string name="log_detail_response_time">响应时间</string>
+    <string name="log_detail_app">应用</string>
+    <string name="log_detail_resolved_ip">解析IP</string>
+    <string name="log_detail_blocked_by">拦截来源</string>
+    <string name="log_detail_timestamp">时间</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_time_range_all">全部时间</string>
+    <string name="log_time_range_1h">1小时</string>
+    <string name="log_time_range_6h">6小时</string>
+    <string name="log_time_range_24h">24小时</string>
+    <string name="log_time_range_7d">7天</string>
+    <string name="log_filter_all_apps">所有应用</string>
+    <string name="log_bulk_selected">已选择 %d 项</string>
+    <string name="log_wildcard_whitelist_domain">允许所有子域名</string>
+    <string name="log_wildcard_whitelisted">域名 %1$s 及所有子域名已加入白名单</string>
+    <string name="log_action_unblock">取消拦截</string>
+    <string name="log_action_block">拦截</string>
+    <string name="stats_title">统计</string>
+    <string name="stats_overview">概览</string>
+    <string name="stats_all_time_queries">累计查询数</string>
+    <string name="stats_all_time_blocked">累计拦截数</string>
+    <string name="stats_today_queries">今日查询数</string>
+    <string name="stats_today_blocked">今日拦截数</string>
+    <string name="stats_today_security">Today Threats</string>
+    <string name="stats_charts">活动图表</string>
+    <string name="stats_chart_4w">4周</string>
+    <string name="stats_chart_12m">12个月</string>
+    <string name="stats_per_app">各应用统计</string>
+    <string name="log_record_logs">记录日志</string>
+</resources>

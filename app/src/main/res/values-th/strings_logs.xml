@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">คิวรีทั้งหมด</string>
+    <string name="blocked_queries">ถูกบล็อก</string>
+    <string name="logs_empty">ยังไม่มีการบันทึกคิวรี DNS</string>
+    <string name="logs_filter_all">ทั้งหมด</string>
+    <string name="logs_filter_blocked">ถูกบล็อก</string>
+    <string name="log_action_whitelist">เพิ่มในไวท์ลิสต์</string>
+    <string name="log_action_copy">คัดลอกโดเมน</string>
+    <string name="log_search_hint">ค้นหาโดเมน…</string>
+    <string name="domain_copied">คัดลอกโดเมนแล้ว</string>
+    <string name="log_whitelisted">เพิ่มในไวท์ลิสต์แล้ว: %s</string>
+    <string name="log_already_whitelisted">อยู่ในไวท์ลิสต์แล้ว</string>
+    <string name="log_status_blocked">ถูกบล็อก</string>
+    <string name="log_status_allowed">อนุญาต</string>
+    <string name="log_status_whitelisted">อยู่ในไวท์ลิสต์</string>
+    <string name="log_detail_query_type">ประเภทคิวรี</string>
+    <string name="log_detail_response_time">เวลาตอบกลับ</string>
+    <string name="log_detail_app">แอป</string>
+    <string name="log_detail_resolved_ip">IP ที่แปลงแล้ว</string>
+    <string name="log_detail_blocked_by">ถูกบล็อกโดย</string>
+    <string name="log_detail_timestamp">เวลา</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_time_range_all">ทั้งหมด</string>
+    <string name="log_time_range_1h">1 ชั่วโมง</string>
+    <string name="log_time_range_6h">6 ชั่วโมง</string>
+    <string name="log_time_range_24h">24 ชั่วโมง</string>
+    <string name="log_time_range_7d">7 วัน</string>
+    <string name="log_filter_all_apps">ทุกแอป</string>
+    <string name="log_bulk_selected">เลือก %d รายการ</string>
+    <string name="log_wildcard_whitelist_domain">อนุญาตโดเมนย่อยทั้งหมด</string>
+    <string name="log_wildcard_whitelisted">โดเมน %1$s และโดเมนย่อยทั้งหมดถูกอนุญาตแล้ว</string>
+    <string name="log_action_unblock">ปลดบล็อก</string>
+    <string name="log_action_block">บล็อก</string>
+    <string name="stats_title">สถิติ</string>
+    <string name="stats_overview">ภาพรวม</string>
+    <string name="stats_all_time_queries">คิวรีทั้งหมดตลอดเวลา</string>
+    <string name="stats_all_time_blocked">ถูกบล็อกทั้งหมดตลอดเวลา</string>
+    <string name="stats_today_queries">คิวรีวันนี้</string>
+    <string name="stats_today_blocked">ถูกบล็อกวันนี้</string>
+    <string name="stats_today_security">Today Threats</string>
+    <string name="stats_charts">แผนภูมิกิจกรรม</string>
+    <string name="stats_chart_4w">4 สัปดาห์</string>
+    <string name="stats_chart_12m">12 เดือน</string>
+    <string name="stats_per_app">สถิติแต่ละแอป</string>
+    <string name="log_record_logs">บันทึกประวัติ</string>
+</resources>

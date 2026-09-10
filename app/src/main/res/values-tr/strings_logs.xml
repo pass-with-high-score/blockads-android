@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">&quot;Toplam Sorgular&quot;</string>
+    <string name="blocked_queries">&quot;Engellendi&quot;</string>
+    <string name="logs_empty">&quot;Henüz hiçbir DNS sorgusu kaydedilmedi.&quot;</string>
+    <string name="logs_filter_all">&quot;Tüm&quot;</string>
+    <string name="logs_filter_blocked">&quot;Engellendi&quot;</string>
+    <string name="log_action_whitelist">&quot;Beyaz listeye ekle&quot;</string>
+    <string name="log_action_copy">&quot;Alan adını kopyala&quot;</string>
+    <string name="log_search_hint">&quot;Arama alanları…&quot;</string>
+    <string name="domain_copied">&quot;Alan adı kopyalandı&quot;</string>
+    <string name="log_whitelisted">&quot;Beyaz listeye alınmış: %s&quot;</string>
+    <string name="log_already_whitelisted">&quot;Zaten beyaz listeye alınmış&quot;</string>
+    <string name="log_status_blocked">&quot;Engellendi&quot;</string>
+    <string name="log_status_allowed">&quot;İzin verilmiş&quot;</string>
+    <string name="log_status_whitelisted">&quot;Beyaz listeye alınmış&quot;</string>
+    <string name="log_detail_query_type">&quot;Sorgu Türü&quot;</string>
+    <string name="log_detail_response_time">&quot;Yanıt Süresi&quot;</string>
+    <string name="log_detail_app">&quot;Uygulama&quot;</string>
+    <string name="log_detail_resolved_ip">&quot;Çözümlenmiş IP&quot;</string>
+    <string name="log_detail_blocked_by">&quot;Engellendi&quot;</string>
+    <string name="log_detail_timestamp">&quot;Zaman&quot;</string>
+    <string name="log_detail_na">&quot;Yok&quot;</string>
+    <string name="log_time_range_all">&quot;Tüm Zamanlar&quot;</string>
+    <string name="log_time_range_1h">&quot;1 saat&quot;</string>
+    <string name="log_time_range_6h">&quot;6 saat&quot;</string>
+    <string name="log_time_range_24h">&quot;24 saat&quot;</string>
+    <string name="log_time_range_7d">&quot;7d&quot;</string>
+    <string name="log_filter_all_apps">&quot;Tüm Uygulamalar&quot;</string>
+    <string name="log_bulk_selected">&quot;%d seçildi&quot;</string>
+    <string name="log_wildcard_whitelist_domain">Tüm alt alan adlarına izin ver</string>
+    <string name="log_wildcard_whitelisted">%1$s alan adı ve tüm alt alan adları beyaz listeye eklendi</string>
+    <string name="log_action_unblock">Engeli Kaldır</string>
+    <string name="log_action_block">Engelle</string>
+    <string name="stats_title">İstatistikler</string>
+    <string name="stats_overview">Genel Bakış</string>
+    <string name="stats_all_time_queries">Tüm Zamanların Sorguları</string>
+    <string name="stats_all_time_blocked">Tüm Zamanların Engellenenleri</string>
+    <string name="stats_today_queries">Bugünkü Sorgular</string>
+    <string name="stats_today_blocked">Bugün Engellenenler</string>
+    <string name="stats_today_security">Bugünkü Tehditler</string>
+    <string name="stats_charts">Aktivite Grafikleri</string>
+    <string name="stats_chart_4w">4 Hafta</string>
+    <string name="stats_chart_12m">12 Ay</string>
+    <string name="stats_per_app">Uygulama Başına İstatistikler</string>
+    <string name="log_record_logs">Günlükleri Kaydet</string>
+</resources>

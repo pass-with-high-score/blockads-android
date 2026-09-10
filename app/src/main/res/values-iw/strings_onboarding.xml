@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">חסום פרסומות בחכמה</string>
+    <string name="onboarding_desc_1">חסום פרסומות בכל האפליקציות והדפדפנים בלחיצה אחת. משתמש בטכנולוגיית סינון DNS — ללא צורך ב-Root.\n\n🔒 הבטחת פרטיות: אנחנו לעולם לא אוספים, שומרים או מעבירים את נתוני הגלישה שלך. כל העיבוד מתבצע אך ורק על המכשיר שלך.</string>
+    <string name="onboarding_skip">דלג</string>
+    <string name="onboarding_next">הבא</string>
+    <string name="onboarding_get_started">בואו נתחיל</string>
+    <string name="onboarding_recommended">★ מומלץ</string>
+    <string name="onboarding_protection_title">בחר רמת הגנה</string>
+    <string name="onboarding_protection_desc">בחר עד כמה אגרסיבית תהיה חסימת הפרסומות והעוקבים</string>
+    <string name="onboarding_protection_basic">בסיסית</string>
+    <string name="onboarding_protection_basic_desc">חוסם רשתות פרסום גדולות. השפעה מינימלית על תפקוד האתרים.</string>
+    <string name="onboarding_protection_standard">רגילה</string>
+    <string name="onboarding_protection_standard_desc">חוסם פרסומות, עוקבים ומערכות אנליטיקה. איזון טוב בין הגנה לתאימות.</string>
+    <string name="onboarding_protection_strict">מחמירה</string>
+    <string name="onboarding_protection_strict_desc">חסימה מקסימלית. עלול להשפיע על תפקוד של אתרים מסוימים אך מספק את ההגנה החזקה ביותר.</string>
+    <string name="onboarding_dns_title">בחר שרת DNS</string>
+    <string name="onboarding_dns_desc">בחר שרת DNS לפענוח שמות דומיין. תוכל לשנות זאת מאוחר יותר בהגדרות.</string>
+    <string name="onboarding_vpn_title">נדרשת הרשאת VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds משתמשת ב-VPN מקומי כדי לסנן שאילתות DNS ולחסום פרסומות. שום מידע לא יוצא מהמכשיר שלך — ה-VPN הזה פועל באופן מקומי בלבד כדי ליירט ולסנן בקשות DNS.</string>
+    <string name="onboarding_vpn_grant">הענק הרשאת VPN</string>
+    <string name="onboarding_notification_title">הישאר מעודכן</string>
+    <string name="onboarding_notification_desc">אפשר התראות כדי לראות סטטיסטיקות חסימה בזמן אמת ולדעת מתי ההגנה שלך פעילה. נדרש עבור התראת ה-VPN הקבועה ב-Android 13 ומעלה.</string>
+    <string name="onboarding_notification_grant">אפשר התראות</string>
+    <string name="onboarding_battery_title">שמור על ההגנה פעילה</string>
+    <string name="onboarding_battery_desc">החרג את BlockAds מאופטימיזציית הסוללה כדי ששירות ה-VPN יישאר פעיל ברקע ולא ייסגר על ידי המערכת.</string>
+    <string name="onboarding_battery_grant">השבת אופטימיזציית סוללה</string>
+    <string name="onboarding_battery_unsupported">לא נתמך</string>
+    <string name="onboarding_permission_granted">✓ ההרשאה הוענקה</string>
+    <string name="onboarding_complete_title">אתה כעת מוגן!</string>
+    <string name="onboarding_complete_desc">ברכות! BlockAds מוגדרת ומוכנה להגן על המכשיר שלך מפני פרסומות ועוקבים.</string>
+    <string name="onboarding_complete_stats">הקש על \&quot;בואו נתחיל\&quot; כדי להפעיל את ההגנה</string>
+    <string name="onboarding_crash_report_title">עזור לשפר את BlockAds</string>
+    <string name="onboarding_crash_report_desc">הפרטיות נמצאת בראש סדר העדיפויות של BlockAds. נשמח לקבל את רשותך לאסוף דוחות קריסה אנונימיים כדי לעזור לנו לתקן באגים במהירות.\n\nפעולה זו היא לבחירתך בלבד (OPT-IN), אינה מכילה מידע מזהה אישי (PII), וניתן לבטל אותה בכל עת בהגדרות.</string>
+    <string name="onboarding_crash_report_btn_yes">כן, אשמח לעזור לשפר את BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">לא, תודה</string>
+</resources>

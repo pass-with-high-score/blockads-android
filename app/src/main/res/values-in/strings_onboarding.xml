@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Blokir Iklan dengan Cerdas</string>
+    <string name="onboarding_desc_1">Blokir iklan di semua aplikasi dan browser dengan satu ketukan. Menggunakan teknologi penyaringan DNS — tidak perlu akses root.\n\n🔒 Janji privasi: Kami tidak pernah mengumpulkan, menyimpan, atau mengirimkan data penjelajahan Anda. Semua pemrosesan hanya terjadi di perangkat Anda.</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_next">Lanjut</string>
+    <string name="onboarding_get_started">Mulai</string>
+    <string name="onboarding_recommended">★ Direkomendasikan</string>
+    <string name="onboarding_protection_title">Pilih Tingkat Perlindungan</string>
+    <string name="onboarding_protection_desc">Pilih seberapa agresif Anda ingin memblokir iklan dan pelacak</string>
+    <string name="onboarding_protection_basic">Dasar</string>
+    <string name="onboarding_protection_basic_desc">Blokir jaringan iklan utama. Dampak minimal pada fungsionalitas situs web.</string>
+    <string name="onboarding_protection_standard">Standar</string>
+    <string name="onboarding_protection_standard_desc">Blokir iklan, pelacak, dan analitik. Keseimbangan yang baik antara perlindungan dan kompatibilitas.</string>
+    <string name="onboarding_protection_strict">Ketat</string>
+    <string name="onboarding_protection_strict_desc">Pemblokiran maksimal. Mungkin memengaruhi beberapa fungsionalitas situs web tetapi memberikan perlindungan terkuat.</string>
+    <string name="onboarding_dns_title">Pilih Server DNS</string>
+    <string name="onboarding_dns_desc">Pilih server DNS untuk menyelesaikan nama domain. Anda dapat mengubahnya nanti di Pengaturan.</string>
+    <string name="onboarding_vpn_title">Izin VPN Diperlukan</string>
+    <string name="onboarding_vpn_desc">BlockAds menggunakan VPN lokal untuk menyaring kueri DNS dan memblokir iklan. Tidak ada data yang keluar dari perangkat Anda — VPN ini hanya bekerja secara lokal untuk mencegat dan menyaring permintaan DNS.</string>
+    <string name="onboarding_vpn_grant">Berikan Izin VPN</string>
+    <string name="onboarding_notification_title">Tetap Terinformasi</string>
+    <string name="onboarding_notification_desc">Izinkan notifikasi untuk melihat statistik pemblokiran waktu nyata dan mengetahui saat perlindungan Anda aktif. Diperlukan untuk notifikasi VPN persisten di Android 13+.</string>
+    <string name="onboarding_notification_grant">Izinkan Notifikasi</string>
+    <string name="onboarding_battery_title">Biarkan Perlindungan Tetap Berjalan</string>
+    <string name="onboarding_battery_desc">Kecualikan BlockAds dari pengoptimalan baterai agar layanan VPN tetap aktif di latar belakang dan tidak dihentikan oleh sistem.</string>
+    <string name="onboarding_battery_grant">Nonaktifkan Pengoptimalan Baterai</string>
+    <string name="onboarding_permission_granted">✓ Izin diberikan</string>
+    <string name="onboarding_complete_title">Anda Kini Terlindungi!</string>
+    <string name="onboarding_complete_desc">Selamat! BlockAds telah dikonfigurasi dan siap melindungi perangkat Anda dari iklan dan pelacak.</string>
+    <string name="onboarding_complete_stats">Ketuk \&quot;Mulai\&quot; untuk mengaktifkan perlindungan</string>
+    <string name="onboarding_battery_unsupported">Tidak Didukung</string>
+    <string name="onboarding_crash_report_title">Bantu Tingkatkan BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds sangat mengutamakan privasi. Kami meminta izin Anda untuk mengumpulkan laporan kerusakan anonim guna membantu kami memperbaiki bug dengan cepat.\n\nIni sepenuhnya OPSIONAL, TIDAK berisi informasi identitas pribadi (PII), dan dapat dinonaktifkan kapan saja di Pengaturan.</string>
+    <string name="onboarding_crash_report_btn_yes">Ya, bantu tingkatkan BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Tidak, terima kasih</string>
+</resources>

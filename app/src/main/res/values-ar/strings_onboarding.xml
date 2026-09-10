@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_battery_desc">استبعد BlockAds من تحسين البطارية بحيث تظل خدمة VPN نشطة في الخلفية ولا يتم إيقافها بواسطة النظام.</string>
+    <string name="onboarding_battery_grant">تعطيل تحسين البطارية</string>
+    <string name="onboarding_battery_title">حافظ على استمرار الحماية</string>
+    <string name="onboarding_complete_desc">تهانينا! تم تهيئة BlockAds وهو جاهز لحماية جهازك من الإعلانات والمتتبعات.</string>
+    <string name="onboarding_complete_stats">انقر على &quot;البدء&quot; لتمكين الحماية</string>
+    <string name="onboarding_complete_title">أنت محمي الآن!</string>
+    <string name="onboarding_desc_1">حظر الإعلانات عبر جميع التطبيقات والمتصفحات بنقرة واحدة. يستخدم تقنية تصفية DNS - لا يتطلب صلاحيات الجذر.
+
+🔒 وعد الخصوصية: نحن لا نجمع أو نخزن أو ننقل بيانات التصفح الخاصة بك أبدًا. تتم جميع عمليات المعالجة على جهازك فقط.</string>
+    <string name="onboarding_dns_desc">اختر خادم DNS لحل أسماء النطاقات. يمكنك تغيير هذا لاحقًا في الإعدادات.</string>
+    <string name="onboarding_dns_title">اختر خادم DNS</string>
+    <string name="onboarding_get_started">ابدأ</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_notification_desc">اسمح بالإشعارات لرؤية إحصائيات الحظر في الوقت الفعلي ومعرفة متى تكون حمايتك نشطة. مطلوب لإشعار VPN المستمر على Android 13+.</string>
+    <string name="onboarding_notification_grant">السماح بالإشعارات</string>
+    <string name="onboarding_notification_title">ابق على اطلاع</string>
+    <string name="onboarding_permission_granted">✓ تم منح الإذن</string>
+    <string name="onboarding_protection_basic">أساسي</string>
+    <string name="onboarding_protection_basic_desc">حظر شبكات الإعلانات الرئيسية. تأثير ضئيل على وظائف موقع الويب.</string>
+    <string name="onboarding_protection_desc">حدد مدى قوة حظر الإعلانات والمتتبعات التي تريدها</string>
+    <string name="onboarding_protection_standard">قياسي</string>
+    <string name="onboarding_protection_standard_desc">حظر الإعلانات والمتتبعات والتحليلات. توازن جيد بين الحماية والتوافق.</string>
+    <string name="onboarding_protection_strict">صارم</string>
+    <string name="onboarding_protection_strict_desc">أقصى حظر. قد يؤثر على وظائف بعض مواقع الويب ولكنه يوفر أقوى حماية.</string>
+    <string name="onboarding_protection_title">اختر مستوى الحماية</string>
+    <string name="onboarding_recommended">★ موصى به</string>
+    <string name="onboarding_skip">تخطي</string>
+    <string name="onboarding_title_1">حظر الإعلانات بذكاء</string>
+    <string name="onboarding_vpn_desc">يستخدم BlockAds شبكة VPN محلية لتصفية استعلامات DNS وحظر الإعلانات. لا تغادر أي بيانات جهازك - تعمل شبكة VPN هذه محليًا فقط لاعتراض طلبات DNS وتصفيتها.</string>
+    <string name="onboarding_vpn_grant">منح إذن VPN</string>
+    <string name="onboarding_vpn_title">إذن VPN مطلوب</string>
+    <string name="onboarding_battery_unsupported">غير مدعوم</string>
+    <string name="onboarding_crash_report_title">ساعد في تحسين BlockAds</string>
+    <string name="onboarding_crash_report_desc">تطبيق BlockAds يضع الخصوصية أولاً. نود الحصول على إذنك لجمع تقارير الأعطال المجهولة لمساعدتنا في إصلاح الأخطاء على الفور.\n\nهذا اختياري تمامًا، ولا يحتوي على معلومات تعريف شخصية (PII)، ويمكن تعطيله في أي وقت من الإعدادات.</string>
+    <string name="onboarding_crash_report_btn_yes">نعم، سأساعد في تحسين BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">لا، شكرًا</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Жарнаманы ақылмен бұғаттаңыз</string>
+    <string name="onboarding_desc_1">Барлық қолданбалар мен браузерлердегі жарнаманы бір түртумен бұғаттаңыз. DNS сүзу технологиясы қолданылады — root құқығы қажет емес.\n\n🔒 Құпиялылық уәдесі: біз шолу деректеріңізді ешқашан жинамаймыз, сақтамаймыз және жібермейміз. Барлық өңдеу тек құрылғыңызда орындалады.</string>
+    <string name="onboarding_skip">Өткізіп жіберу</string>
+    <string name="onboarding_next">Келесі</string>
+    <string name="onboarding_get_started">Бастау</string>
+    <string name="onboarding_recommended">★ Ұсынылады</string>
+    <string name="onboarding_protection_title">Қорғаныс деңгейін таңдаңыз</string>
+    <string name="onboarding_protection_desc">Жарнама мен трекерлерді қаншалықты қатаң бұғаттағыңыз келетінін таңдаңыз</string>
+    <string name="onboarding_protection_basic">Негізгі</string>
+    <string name="onboarding_protection_basic_desc">Ірі жарнама желілерін бұғаттайды. Сайттардың жұмысына минималды әсер етеді.</string>
+    <string name="onboarding_protection_standard">Стандартты</string>
+    <string name="onboarding_protection_standard_desc">Жарнаманы, трекерлерді және аналитиканы бұғаттайды. Қорғаныс пен үйлесімділіктің жақсы теңгерімі.</string>
+    <string name="onboarding_protection_strict">Қатаң</string>
+    <string name="onboarding_protection_strict_desc">Барынша қатаң бұғаттау. Кейбір сайттардың жұмысына әсер етуі мүмкін, бірақ ең күшті қорғанысты қамтамасыз етеді.</string>
+    <string name="onboarding_dns_title">DNS серверін таңдаңыз</string>
+    <string name="onboarding_dns_desc">Домен атауларын анықтау үшін DNS серверін таңдаңыз. Мұны кейін «Параметрлер» бөлімінде өзгертуге болады.</string>
+    <string name="onboarding_vpn_title">VPN рұқсаты қажет</string>
+    <string name="onboarding_vpn_desc">BlockAds DNS сұрауларын сүзу және жарнаманы бұғаттау үшін жергілікті VPN пайдаланады. Деректер құрылғыдан тыс жіберілмейді — бұл VPN тек DNS сұрауларын ұстап, сүзу үшін жергілікті түрде жұмыс істейді.</string>
+    <string name="onboarding_vpn_grant">VPN рұқсатын беру</string>
+    <string name="onboarding_notification_title">Хабардар болыңыз</string>
+    <string name="onboarding_notification_desc">Бұғаттау статистикасын нақты уақытта көру және қорғанысыңыздың белсенді екенін білу үшін хабарландыруларға рұқсат беріңіз. Android 13+ жүйесінде тұрақты VPN хабарландыруы үшін қажет.</string>
+    <string name="onboarding_notification_grant">Хабарландыруларға рұқсат беру</string>
+    <string name="onboarding_battery_title">Қорғанысты үздіксіз жұмыс істетіңіз</string>
+    <string name="onboarding_battery_desc">VPN қызметі фондық режимде белсенді қалып, жүйе оны тоқтатпауы үшін BlockAds-ты батарея оңтайландыруынан алып тастаңыз.</string>
+    <string name="onboarding_battery_grant">Батарея оңтайландыруын өшіру</string>
+    <string name="onboarding_battery_unsupported">Қолдау көрсетілмейді</string>
+    <string name="onboarding_permission_granted">✓ Рұқсат берілді</string>
+    <string name="onboarding_complete_title">Сіз енді қорғалғансыз!</string>
+    <string name="onboarding_complete_desc">Құттықтаймыз! BlockAds теңшелді және құрылғыңызды жарнама мен трекерлерден қорғауға дайын.</string>
+    <string name="onboarding_complete_stats">«Бастау» түймесін түртіп, қорғанысты қосыңыз</string>
+    <string name="onboarding_crash_report_title">BlockAds-ты жақсартуға көмектесіңіз</string>
+    <string name="onboarding_crash_report_desc">BlockAds толығымен құпиялылыққа негізделген. Қателерді жедел түзетуге көмектесу үшін анонимді құлау есептерін жинауға рұқсатыңызды сұраймыз.\n\nБұл толығымен ЕРІКТІ, жеке басты анықтайтын ешбір ақпаратты (PII) қамтымайды және «Параметрлер» бөлімінде кез келген уақытта өшірілуі мүмкін.</string>
+    <string name="onboarding_crash_report_btn_yes">Иә, BlockAds-ты жақсартуға көмектесемін</string>
+    <string name="onboarding_crash_report_btn_no">Жоқ, рахмет</string>
+</resources>

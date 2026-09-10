@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Blocca gli Annunci in Modo Intelligente</string>
+    <string name="onboarding_desc_1">Blocca gli annunci in tutte le app e browser con un tocco. Utilizza la tecnologia di filtraggio DNS — senza bisogno di root.\n\n🔒 Promessa di privacy: Non raccogliamo, memorizziamo o trasmettiamo mai i tuoi dati di navigazione. Tutta l\'elaborazione avviene solo sul tuo dispositivo.</string>
+    <string name="onboarding_skip">Salta</string>
+    <string name="onboarding_next">Avanti</string>
+    <string name="onboarding_get_started">Inizia</string>
+    <string name="onboarding_recommended">★ Consigliato</string>
+    <string name="onboarding_protection_title">Scegli il Livello di Protezione</string>
+    <string name="onboarding_protection_desc">Seleziona quanto aggressivamente vuoi bloccare annunci e tracker</string>
+    <string name="onboarding_protection_basic">Base</string>
+    <string name="onboarding_protection_basic_desc">Blocca le principali reti pubblicitarie. Impatto minimo sulla funzionalità dei siti.</string>
+    <string name="onboarding_protection_standard">Standard</string>
+    <string name="onboarding_protection_standard_desc">Blocca annunci, tracker e analytics. Buon equilibrio tra protezione e compatibilità.</string>
+    <string name="onboarding_protection_strict">Severo</string>
+    <string name="onboarding_protection_strict_desc">Blocco massimo. Potrebbe influenzare alcune funzionalità dei siti ma offre la protezione più forte.</string>
+    <string name="onboarding_dns_title">Scegli il Server DNS</string>
+    <string name="onboarding_dns_desc">Seleziona un server DNS per la risoluzione dei nomi di dominio. Puoi cambiarlo in seguito nelle Impostazioni.</string>
+    <string name="onboarding_vpn_title">Permesso VPN Richiesto</string>
+    <string name="onboarding_vpn_desc">BlockAds utilizza una VPN locale per filtrare le query DNS e bloccare gli annunci. Nessun dato lascia il tuo dispositivo — questa VPN funziona solo localmente per intercettare e filtrare le richieste DNS.</string>
+    <string name="onboarding_vpn_grant">Concedi Permesso VPN</string>
+    <string name="onboarding_notification_title">Rimani Informato</string>
+    <string name="onboarding_notification_desc">Consenti le notifiche per vedere le statistiche di blocco in tempo reale e sapere quando la tua protezione è attiva. Richiesto per la notifica VPN persistente su Android 13+.</string>
+    <string name="onboarding_notification_grant">Consenti Notifiche</string>
+    <string name="onboarding_battery_title">Mantieni la Protezione Attiva</string>
+    <string name="onboarding_battery_desc">Escludi BlockAds dall\'ottimizzazione della batteria in modo che il servizio VPN rimanga attivo in background e non venga chiuso dal sistema.</string>
+    <string name="onboarding_battery_grant">Disabilita Ottimizzazione Batteria</string>
+    <string name="onboarding_permission_granted">✓ Permesso concesso</string>
+    <string name="onboarding_complete_title">Ora Sei Protetto!</string>
+    <string name="onboarding_complete_desc">Congratulazioni! BlockAds è configurato e pronto a proteggere il tuo dispositivo da annunci e tracker.</string>
+    <string name="onboarding_complete_stats">Tocca \&quot;Inizia\&quot; per attivare la protezione</string>
+    <string name="onboarding_battery_unsupported">Non supportato</string>
+    <string name="onboarding_crash_report_title">Aiuta a migliorare BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds mette la privacy al primo posto. Vorremmo il tuo permesso per raccogliere segnalazioni di arresti anomali in modo anonimo, per aiutarci a risolvere tempestivamente i bug.\n\nQuesto è strettamente FACOLTATIVO, NON contiene informazioni di identificazione personale (PII) e può essere disabilitato in qualsiasi momento nelle Impostazioni.</string>
+    <string name="onboarding_crash_report_btn_yes">Sì, aiuta a migliorare BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">No, grazie</string>
+</resources>

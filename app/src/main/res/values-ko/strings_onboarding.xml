@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">스마트한 광고 차단</string>
+    <string name="onboarding_desc_1">한 번의 탭으로 모든 앱과 브라우저에서 광고를 차단합니다. DNS 필터링 기술을 사용하며 루트 권한이 필요하지 않습니다.\n\n🔒 개인정보 보호 약속: 귀하의 브라우징 데이터를 수집, 저장 또는 전송하지 않습니다. 모든 처리는 기기에서만 이루어집니다.</string>
+    <string name="onboarding_skip">건너뛰기</string>
+    <string name="onboarding_next">다음</string>
+    <string name="onboarding_get_started">시작하기</string>
+    <string name="onboarding_recommended">★ 추천</string>
+    <string name="onboarding_protection_title">보호 수준 선택</string>
+    <string name="onboarding_protection_desc">광고 및 추적기를 얼마나 강력하게 차단할지 선택하세요</string>
+    <string name="onboarding_protection_basic">기본</string>
+    <string name="onboarding_protection_basic_desc">주요 광고 네트워크를 차단합니다. 웹사이트 기능에 최소한의 영향을 줍니다.</string>
+    <string name="onboarding_protection_standard">표준</string>
+    <string name="onboarding_protection_standard_desc">광고, 추적기, 분석 도구를 차단합니다. 보호와 호환성의 적절한 균형을 제공합니다.</string>
+    <string name="onboarding_protection_strict">엄격</string>
+    <string name="onboarding_protection_strict_desc">최대 수준의 차단. 일부 웹사이트 기능에 영향을 줄 수 있지만 가장 강력한 보호를 제공합니다.</string>
+    <string name="onboarding_dns_title">DNS 서버 선택</string>
+    <string name="onboarding_dns_desc">도메인 이름 확인을 위한 DNS 서버를 선택하세요. 나중에 설정에서 변경할 수 있습니다.</string>
+    <string name="onboarding_vpn_title">VPN 권한 필요</string>
+    <string name="onboarding_vpn_desc">BlockAds는 로컬 VPN을 사용하여 DNS 쿼리를 필터링하고 광고를 차단합니다. 데이터가 기기를 벗어나지 않습니다 — 이 VPN은 DNS 요청을 가로채고 필터링하기 위해 로컬에서만 작동합니다.</string>
+    <string name="onboarding_vpn_grant">VPN 권한 허용</string>
+    <string name="onboarding_notification_title">알림 받기</string>
+    <string name="onboarding_notification_desc">실시간 차단 통계를 확인하고 보호가 활성화되어 있는지 알 수 있도록 알림을 허용하세요. Android 13 이상에서 영구 VPN 알림에 필요합니다.</string>
+    <string name="onboarding_notification_grant">알림 허용</string>
+    <string name="onboarding_battery_title">보호 유지</string>
+    <string name="onboarding_battery_desc">VPN 서비스가 백그라운드에서 계속 활성화되고 시스템에 의해 종료되지 않도록 BlockAds를 배터리 최적화에서 제외하세요.</string>
+    <string name="onboarding_battery_grant">배터리 최적화 비활성화</string>
+    <string name="onboarding_permission_granted">✓ 권한이 허용되었습니다</string>
+    <string name="onboarding_complete_title">이제 보호됩니다!</string>
+    <string name="onboarding_complete_desc">축하합니다! BlockAds가 구성되어 광고와 추적기로부터 기기를 보호할 준비가 되었습니다.</string>
+    <string name="onboarding_complete_stats">\&quot;시작하기\&quot;를 탭하여 보호를 활성화하세요</string>
+    <string name="onboarding_battery_unsupported">지원되지 않음</string>
+    <string name="onboarding_crash_report_title">BlockAds 개선에 참여해 주세요</string>
+    <string name="onboarding_crash_report_desc">BlockAds는 개인정보 보호를 최우선으로 생각합니다. 버그를 신속하게 수정할 수 있도록 익명 크래시 보고서 수집에 대한 권한을 요청합니다.\n\n이 기능은 전적으로 선택 사항이며, 개인 식별 정보(PII)를 포함하지 않습니다. 설정에서 언제든지 비활성화할 수 있습니다.</string>
+    <string name="onboarding_crash_report_btn_yes">네, BlockAds 개선에 참여합니다</string>
+    <string name="onboarding_crash_report_btn_no">아니요, 괜찮습니다</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">智能拦截广告</string>
+    <string name="onboarding_desc_1">一键拦截所有应用和浏览器中的广告。使用DNS过滤技术——无需root权限。\n\n🔒 隐私承诺：我们绝不收集、存储或传输您的浏览数据。所有处理均在您的设备上完成。</string>
+    <string name="onboarding_skip">跳过</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_get_started">开始使用</string>
+    <string name="onboarding_recommended">★ 推荐</string>
+    <string name="onboarding_protection_title">选择保护级别</string>
+    <string name="onboarding_protection_desc">选择您希望拦截广告和跟踪器的力度</string>
+    <string name="onboarding_protection_basic">基本</string>
+    <string name="onboarding_protection_basic_desc">拦截主要广告网络。对网站功能影响最小。</string>
+    <string name="onboarding_protection_standard">标准</string>
+    <string name="onboarding_protection_standard_desc">拦截广告、跟踪器和分析工具。在保护和兼容性之间取得良好平衡。</string>
+    <string name="onboarding_protection_strict">严格</string>
+    <string name="onboarding_protection_strict_desc">最大程度拦截。可能影响部分网站功能，但提供最强保护。</string>
+    <string name="onboarding_dns_title">选择DNS服务器</string>
+    <string name="onboarding_dns_desc">选择用于解析域名的DNS服务器。稍后可在设置中更改。</string>
+    <string name="onboarding_vpn_title">需要VPN权限</string>
+    <string name="onboarding_vpn_desc">BlockAds使用本地VPN过滤DNS查询以拦截广告。您的数据不会发送到设备外部——此VPN仅在本地运行，用于拦截和过滤DNS请求。</string>
+    <string name="onboarding_vpn_grant">授予VPN权限</string>
+    <string name="onboarding_notification_title">保持信息同步</string>
+    <string name="onboarding_notification_desc">启用通知以查看实时拦截统计信息并了解保护状态。Android 13及以上版本需要此权限以显示VPN常驻通知。</string>
+    <string name="onboarding_notification_grant">允许通知</string>
+    <string name="onboarding_battery_title">保持持续保护</string>
+    <string name="onboarding_battery_desc">请将BlockAds从电池优化中排除，以确保VPN服务在后台保持运行，不会被系统终止。</string>
+    <string name="onboarding_battery_grant">关闭电池优化</string>
+    <string name="onboarding_permission_granted">✓ 权限已授予</string>
+    <string name="onboarding_complete_title">保护已启用！</string>
+    <string name="onboarding_complete_desc">恭喜！BlockAds已配置完成，准备好保护您的设备免受广告和跟踪器的干扰。</string>
+    <string name="onboarding_complete_stats">点击&quot;开始使用&quot;以启用保护</string>
+    <string name="onboarding_battery_unsupported">暂不支持</string>
+    <string name="onboarding_crash_report_title">帮助改进 BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds 完全以隐私为先。我们希望获得您的许可来收集匿名崩溃报告，以帮助我们及时修复错误。\n\n这完全是自愿的，不包含任何个人身份信息 (PII)，并且可以随时在设置中禁用。</string>
+    <string name="onboarding_crash_report_btn_yes">是的，帮助改进 BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">不，谢谢</string>
+</resources>

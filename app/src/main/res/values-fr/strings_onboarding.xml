@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Bloquez les publicités intelligemment</string>
+    <string name="onboarding_desc_1">Bloquez les publicités dans toutes les applications et tous les navigateurs d\'un simple geste. Utilise la technologie de filtrage DNS — aucun accès root requis.\n\n🔒 Engagement en matière de confidentialité : nous ne collectons, ne stockons ni ne transmettons jamais vos données de navigation. Tout le traitement s\'effectue exclusivement sur votre appareil.</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_get_started">Commencer</string>
+    <string name="onboarding_recommended">★ Recommandé</string>
+    <string name="onboarding_protection_title">Choisissez le niveau de protection</string>
+    <string name="onboarding_protection_desc">Choisissez le niveau d\'intensité avec lequel vous souhaitez bloquer les publicités et les traceurs</string>
+    <string name="onboarding_protection_basic">Basique</string>
+    <string name="onboarding_protection_basic_desc">Bloquez les principaux réseaux publicitaires. Impact minimal sur le fonctionnement du site web.</string>
+    <string name="onboarding_protection_standard">Standard</string>
+    <string name="onboarding_protection_standard_desc">Bloque les publicités, les traceurs et les outils d\'analyse. Offre un bon équilibre entre protection et compatibilité.</string>
+    <string name="onboarding_protection_strict">Strict</string>
+    <string name="onboarding_protection_strict_desc">Blocage maximal. Cela peut affecter certaines fonctionnalités du site web, mais offre la protection la plus efficace.</string>
+    <string name="onboarding_dns_title">Choisissez un serveur DNS</string>
+    <string name="onboarding_dns_desc">Sélectionnez un serveur DNS pour la résolution des noms de domaine. Vous pourrez modifier ce paramètre ultérieurement dans les paramètres.</string>
+    <string name="onboarding_vpn_title">Autorisation VPN requise</string>
+    <string name="onboarding_vpn_desc">BlockAds utilise un VPN local pour filtrer les requêtes DNS et bloquer les publicités. Aucune donnée ne quitte votre appareil : ce VPN fonctionne uniquement en local pour intercepter et filtrer les requêtes DNS.</string>
+    <string name="onboarding_vpn_grant">Accorder l\'autorisation VPN</string>
+    <string name="onboarding_notification_title">Restez informé</string>
+    <string name="onboarding_notification_desc">Autorisez les notifications pour consulter les statistiques de blocage en temps réel et savoir quand votre protection est active. Indispensable pour l\'affichage permanent de la notification VPN sur Android 13 et versions ultérieures.</string>
+    <string name="onboarding_notification_grant">Autoriser les notifications</string>
+    <string name="onboarding_battery_title">Maintenir la protection active</string>
+    <string name="onboarding_battery_desc">Excluez BlockAds de l\'optimisation de la batterie afin que le service VPN reste actif en arrière-plan et ne soit pas interrompu par le système.</string>
+    <string name="onboarding_battery_grant">Désactiver l\'optimisation de la batterie</string>
+    <string name="onboarding_battery_unsupported">Non pris en charge</string>
+    <string name="onboarding_permission_granted">✓ Autorisation accordée</string>
+    <string name="onboarding_complete_title">Vous êtes désormais protégé !</string>
+    <string name="onboarding_complete_desc">Félicitations ! BlockAds est désormais configuré et prêt à protéger votre appareil contre les publicités et les traceurs.</string>
+    <string name="onboarding_complete_stats">Appuyez sur « Commencer » pour activer la protection</string>
+    <string name="onboarding_crash_report_title">Aidez à améliorer BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds respecte votre vie privée. Nous souhaitons obtenir votre autorisation pour collecter des rapports de plantage anonymes afin de nous aider à corriger les bugs rapidement.\n\nCeci est strictement FACULTATIF, ne contient AUCUNE information personnelle identifiable (PII), et peut être désactivé à tout moment dans les Paramètres.</string>
+    <string name="onboarding_crash_report_btn_yes">Oui, aider à améliorer BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Non, merci</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Розумне блокування реклами</string>
+    <string name="onboarding_desc_1">Блокуйте рекламу в усіх додатках і браузерах одним дотиком. Використовує технологію фільтрації DNS — root не потрібен.\n\n🔒 Обіцянка конфіденційності: Ми ніколи не збираємо, не зберігаємо і не передаємо ваші дані перегляду. Вся обробка відбувається лише на вашому пристрої.</string>
+    <string name="onboarding_skip">Пропустити</string>
+    <string name="onboarding_next">Далі</string>
+    <string name="onboarding_get_started">Почати</string>
+    <string name="onboarding_recommended">★ Рекомендовано</string>
+    <string name="onboarding_protection_title">Виберіть рівень захисту</string>
+    <string name="onboarding_protection_desc">Виберіть, наскільки агресивно ви хочете блокувати рекламу та трекери</string>
+    <string name="onboarding_protection_basic">Базовий</string>
+    <string name="onboarding_protection_basic_desc">Блокує основні рекламні мережі. Мінімальний вплив на функціональність вебсайтів.</string>
+    <string name="onboarding_protection_standard">Стандартний</string>
+    <string name="onboarding_protection_standard_desc">Блокує рекламу, трекери та аналітику. Хороший баланс між захистом і сумісністю.</string>
+    <string name="onboarding_protection_strict">Строгий</string>
+    <string name="onboarding_protection_strict_desc">Максимальне блокування. Може вплинути на функціональність деяких сайтів, але забезпечує найсильніший захист.</string>
+    <string name="onboarding_dns_title">Виберіть DNS-сервер</string>
+    <string name="onboarding_dns_desc">Виберіть DNS-сервер для визначення доменних імен. Ви зможете змінити це пізніше в Налаштуваннях.</string>
+    <string name="onboarding_vpn_title">Потрібен дозвіл на VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds використовує локальний VPN для фільтрації DNS-запитів і блокування реклами. Жодні дані не залишають ваш пристрій — цей VPN працює лише локально для перехоплення та фільтрації DNS-запитів.</string>
+    <string name="onboarding_vpn_grant">Надати дозвіл на VPN</string>
+    <string name="onboarding_notification_title">Будьте в курсі</string>
+    <string name="onboarding_notification_desc">Дозвольте сповіщення, щоб бачити статистику блокування в реальному часі та знати, коли ваш захист активний. Обов\'язково для постійного сповіщення VPN на Android 13+.</string>
+    <string name="onboarding_notification_grant">Дозволити сповіщення</string>
+    <string name="onboarding_battery_title">Підтримуйте роботу захисту</string>
+    <string name="onboarding_battery_desc">Виключіть BlockAds з оптимізації батареї, щоб служба VPN залишалася активною у фоновому режимі та не закривалася системою.</string>
+    <string name="onboarding_battery_grant">Вимкнути оптимізацію батареї</string>
+    <string name="onboarding_permission_granted">✓ Дозвіл надано</string>
+    <string name="onboarding_complete_title">Тепер ви під захистом!</string>
+    <string name="onboarding_complete_desc">Вітаємо! BlockAds налаштовано і він готовий захищати ваш пристрій від реклами та трекерів.</string>
+    <string name="onboarding_complete_stats">Натисніть \&quot;Почати\&quot;, щоб увімкнути захист</string>
+    <string name="onboarding_battery_unsupported">Не підтримується</string>
+    <string name="onboarding_crash_report_title">Допоможіть покращити BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds ставить конфіденційність на перше місце. Ми просимо вашого дозволу на збір анонімних звітів про помилки, щоб ми могли швидко їх виправляти.\n\nЦе строго ДОБРОВІЛЬНО, НЕ містить персональних даних (PII) і може бути вимкнено в будь-який час у Налаштуваннях.</string>
+    <string name="onboarding_crash_report_btn_yes">Так, допомогти покращити BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Ні, дякую</string>
+</resources>

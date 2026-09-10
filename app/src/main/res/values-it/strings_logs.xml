@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Query Totali</string>
+    <string name="blocked_queries">Bloccati</string>
+    <string name="logs_empty">Nessuna query DNS registrata finora</string>
+    <string name="logs_filter_all">Tutti</string>
+    <string name="logs_filter_blocked">Bloccati</string>
+    <string name="log_action_whitelist">Aggiungi alla Whitelist</string>
+    <string name="log_action_copy">Copia Dominio</string>
+    <string name="log_search_hint">Cerca domini…</string>
+    <string name="domain_copied">Dominio copiato</string>
+    <string name="log_whitelisted">In whitelist: %s</string>
+    <string name="log_already_whitelisted">Già in whitelist</string>
+    <string name="log_status_blocked">Bloccato</string>
+    <string name="log_status_allowed">Consentito</string>
+    <string name="log_status_whitelisted">In Whitelist</string>
+    <string name="log_detail_query_type">Tipo Query</string>
+    <string name="log_detail_response_time">Tempo di Risposta</string>
+    <string name="log_detail_app">App</string>
+    <string name="log_detail_resolved_ip">IP Risolto</string>
+    <string name="log_detail_blocked_by">Bloccato Da</string>
+    <string name="log_detail_timestamp">Ora</string>
+    <string name="log_detail_na">N/D</string>
+    <string name="log_time_range_all">Sempre</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7g</string>
+    <string name="log_filter_all_apps">Tutte le App</string>
+    <string name="log_bulk_selected">%d selezionati</string>
+    <string name="log_wildcard_whitelist_domain">Consenti tutti i sottodomini</string>
+    <string name="log_wildcard_whitelisted">Dominio %1$s e tutti i sottodomini aggiunti alla lista bianca</string>
+    <string name="log_action_unblock">Sblocca</string>
+    <string name="log_action_block">Blocca</string>
+    <string name="stats_title">Statistiche</string>
+    <string name="stats_overview">Panoramica</string>
+    <string name="stats_all_time_queries">Query Totali</string>
+    <string name="stats_all_time_blocked">Blocchi Totali</string>
+    <string name="stats_today_queries">Query di Oggi</string>
+    <string name="stats_today_blocked">Blocchi di Oggi</string>
+    <string name="stats_today_security">Minacce di Oggi</string>
+    <string name="stats_charts">Grafici Attività</string>
+    <string name="stats_chart_4w">4 Settimane</string>
+    <string name="stats_chart_12m">12 Mesi</string>
+    <string name="stats_per_app">Statistiche per App</string>
+    <string name="log_record_logs">Registra i log</string>
+</resources>

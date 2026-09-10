@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Всього запитів</string>
+    <string name="blocked_queries">Заблоковано</string>
+    <string name="logs_empty">Жодного DNS-запиту ще не зареєстровано</string>
+    <string name="logs_filter_all">Усі</string>
+    <string name="logs_filter_blocked">Заблоковані</string>
+    <string name="log_action_whitelist">Додати до білого списку</string>
+    <string name="log_action_copy">Копіювати домен</string>
+    <string name="log_search_hint">Пошук доменів…</string>
+    <string name="domain_copied">Домен скопійовано</string>
+    <string name="log_whitelisted">У білому списку: %s</string>
+    <string name="log_already_whitelisted">Вже у білому списку</string>
+    <string name="log_status_blocked">Заблоковано</string>
+    <string name="log_status_allowed">Дозволено</string>
+    <string name="log_status_whitelisted">У білому списку</string>
+    <string name="log_detail_query_type">Тип запиту</string>
+    <string name="log_detail_response_time">Час відповіді</string>
+    <string name="log_detail_app">Додаток</string>
+    <string name="log_detail_resolved_ip">Отриманий IP</string>
+    <string name="log_detail_blocked_by">Заблоковано через</string>
+    <string name="log_detail_timestamp">Час</string>
+    <string name="log_detail_na">Н/Д</string>
+    <string name="log_time_range_all">За весь час</string>
+    <string name="log_time_range_1h">1 год</string>
+    <string name="log_time_range_6h">6 год</string>
+    <string name="log_time_range_24h">24 год</string>
+    <string name="log_time_range_7d">7 дн</string>
+    <string name="log_filter_all_apps">Усі додатки</string>
+    <string name="log_bulk_selected">Вибрано: %d</string>
+    <string name="log_wildcard_whitelist_domain">Додати всі піддомени у білий список</string>
+    <string name="log_wildcard_whitelisted">Домен %1$s та всі піддомени додано у білий список</string>
+    <string name="log_action_unblock">Розблокувати</string>
+    <string name="log_action_block">Блокувати</string>
+    <string name="stats_title">Статистика</string>
+    <string name="stats_overview">Огляд</string>
+    <string name="stats_all_time_queries">Запитів за весь час</string>
+    <string name="stats_all_time_blocked">Заблоковано за весь час</string>
+    <string name="stats_today_queries">Запитів сьогодні</string>
+    <string name="stats_today_blocked">Заблоковано сьогодні</string>
+    <string name="stats_today_security">Загроз сьогодні</string>
+    <string name="stats_charts">Графіки активності</string>
+    <string name="stats_chart_4w">4 Тижні</string>
+    <string name="stats_chart_12m">12 Місяців</string>
+    <string name="stats_per_app">Статистика за додатками</string>
+    <string name="log_record_logs">Записувати журнали</string>
+</resources>

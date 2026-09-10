@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">סך כל השאילתות</string>
+    <string name="blocked_queries">נחסמו</string>
+    <string name="logs_empty">עדיין לא תועדו שאילתות DNS</string>
+    <string name="logs_filter_all">הכל</string>
+    <string name="logs_filter_blocked">חסומים</string>
+    <string name="log_action_whitelist">הוסף לרשימה המורשית</string>
+    <string name="log_action_copy">העתק דומיין</string>
+    <string name="log_search_hint">חפש דומיינים…</string>
+    <string name="domain_copied">הדומיין הועתק</string>
+    <string name="log_whitelisted">אושר: %s</string>
+    <string name="log_already_whitelisted">כבר נמצא ברשימה המורשית</string>
+    <string name="log_status_blocked">נחסם</string>
+    <string name="log_status_allowed">אושר</string>
+    <string name="log_status_whitelisted">ברשימה המורשית</string>
+    <string name="log_detail_query_type">סוג שאילתה</string>
+    <string name="log_detail_response_time">זמן תגובה</string>
+    <string name="log_detail_app">אפליקציה</string>
+    <string name="log_detail_resolved_ip">IP מפוענח</string>
+    <string name="log_detail_blocked_by">נחסם על ידי</string>
+    <string name="log_detail_timestamp">זמן</string>
+    <string name="log_detail_na">לא זמין</string>
+    <string name="log_time_range_all">כל הזמן</string>
+    <string name="log_time_range_1h">שעה</string>
+    <string name="log_time_range_6h">6 שעות</string>
+    <string name="log_time_range_24h">24 שעות</string>
+    <string name="log_time_range_7d">7 ימים</string>
+    <string name="log_filter_all_apps">כל האפליקציות</string>
+    <string name="log_bulk_selected">%d נבחרו</string>
+    <string name="log_wildcard_whitelist_domain">אשר את כל תתי-הדומיינים</string>
+    <string name="log_wildcard_whitelisted">הדומיין %1$s וכל תתי-הדומיינים אושרו</string>
+    <string name="log_action_unblock">בטל חסימה</string>
+    <string name="log_action_block">חסום</string>
+    <string name="stats_title">סטטיסטיקות</string>
+    <string name="stats_overview">סקירה כללית</string>
+    <string name="stats_all_time_queries">שאילתות (כל הזמן)</string>
+    <string name="stats_all_time_blocked">חסימות (כל הזמן)</string>
+    <string name="stats_today_queries">שאילתות (היום)</string>
+    <string name="stats_today_blocked">נחסמו היום</string>
+    <string name="stats_today_security">איומים היום</string>
+    <string name="stats_charts">תרשימי פעילות</string>
+    <string name="stats_chart_4w">4 שבועות</string>
+    <string name="stats_chart_12m">12 חודשים</string>
+    <string name="stats_per_app">סטטיסטיקות לפי אפליקציה</string>
+    <string name="log_record_logs">רשום יומנים</string>
+</resources>

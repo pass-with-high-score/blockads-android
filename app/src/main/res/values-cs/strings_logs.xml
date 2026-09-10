@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Dotazy celkem</string>
+    <string name="blocked_queries">Blokováno</string>
+    <string name="logs_empty">Zatím žádné zaznamenané DNS dotazy</string>
+    <string name="logs_filter_all">Vše</string>
+    <string name="logs_filter_blocked">Blokováno</string>
+    <string name="log_action_whitelist">Přidat na seznam povolených</string>
+    <string name="log_action_copy">Kopírovat doménu</string>
+    <string name="log_search_hint">Hledat domény…</string>
+    <string name="domain_copied">Doména zkopírována</string>
+    <string name="log_whitelisted">Povoleno: %s</string>
+    <string name="log_already_whitelisted">Již je na seznamu povolených</string>
+    <string name="log_status_blocked">Blokováno</string>
+    <string name="log_status_allowed">Povoleno</string>
+    <string name="log_status_whitelisted">Na seznamu povolených</string>
+    <string name="log_detail_query_type">Typ dotazu</string>
+    <string name="log_detail_response_time">Doba odezvy</string>
+    <string name="log_detail_app">Aplikace</string>
+    <string name="log_detail_resolved_ip">Přeložená IP</string>
+    <string name="log_detail_blocked_by">Zablokováno filtrem</string>
+    <string name="log_detail_timestamp">Čas</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_time_range_all">Vše</string>
+    <string name="log_time_range_1h">1h</string>
+    <string name="log_time_range_6h">6h</string>
+    <string name="log_time_range_24h">24h</string>
+    <string name="log_time_range_7d">7d</string>
+    <string name="log_filter_all_apps">Všechny aplikace</string>
+    <string name="log_bulk_selected">Vybráno: %d</string>
+    <string name="log_action_unblock">Odblokovat</string>
+    <string name="log_action_block">Zablokovat</string>
+    <string name="stats_title">Statistiky</string>
+    <string name="stats_overview">Přehled</string>
+    <string name="stats_all_time_queries">Dotazy celkem</string>
+    <string name="stats_all_time_blocked">Blokováno celkem</string>
+    <string name="stats_today_queries">Dnešní dotazy</string>
+    <string name="stats_today_blocked">Dnes blokováno</string>
+    <string name="stats_today_security">Dnešní hrozby</string>
+    <string name="stats_charts">Grafy aktivity</string>
+    <string name="stats_chart_4w">4 týdny</string>
+    <string name="stats_chart_12m">12 měsíců</string>
+    <string name="stats_per_app">Statistiky podle aplikací</string>
+    <string name="log_wildcard_whitelist_domain">Povolit všechny subdomény</string>
+    <string name="log_wildcard_whitelisted">Doména %1$s a všechny její subdomény byly přidány na seznam povolených</string>
+    <string name="log_record_logs">Zaznamenávat protokoly</string>
+</resources>

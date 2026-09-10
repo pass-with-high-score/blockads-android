@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Inteligentne blokowanie reklam</string>
+    <string name="onboarding_desc_1">Blokuj reklamy we wszystkich aplikacjach i przeglądarkach jednym dotknięciem. Używa technologii filtrowania DNS — nie wymaga roota.\n\n🔒 Obietnica prywatności: Nigdy nie zbieramy, nie przechowujemy ani nie przesyłamy Twoich danych przeglądania. Całe przetwarzanie odbywa się wyłącznie na Twoim urządzeniu.</string>
+    <string name="onboarding_skip">Pomiń</string>
+    <string name="onboarding_next">Dalej</string>
+    <string name="onboarding_get_started">Rozpocznij</string>
+    <string name="onboarding_recommended">★ Zalecane</string>
+    <string name="onboarding_protection_title">Wybierz poziom ochrony</string>
+    <string name="onboarding_protection_desc">Wybierz, jak agresywnie chcesz blokować reklamy i moduły śledzące</string>
+    <string name="onboarding_protection_basic">Podstawowy</string>
+    <string name="onboarding_protection_basic_desc">Blokuje główne sieci reklamowe. Minimalny wpływ na funkcjonalność stron.</string>
+    <string name="onboarding_protection_standard">Standardowy</string>
+    <string name="onboarding_protection_standard_desc">Blokuje reklamy, śledzenie i analitykę. Dobry balans między ochroną a kompatybilnością.</string>
+    <string name="onboarding_protection_strict">Restrykcyjny</string>
+    <string name="onboarding_protection_strict_desc">Maksymalne blokowanie. Może wpływać na działanie niektórych stron, ale zapewnia najsilniejszą ochronę.</string>
+    <string name="onboarding_dns_title">Wybierz serwer DNS</string>
+    <string name="onboarding_dns_desc">Wybierz serwer DNS do rozwiązywania nazw domen. Możesz to zmienić później w Ustawieniach.</string>
+    <string name="onboarding_vpn_title">Wymagane uprawnienie VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds używa lokalnego VPN do filtrowania zapytań DNS i blokowania reklam. Żadne dane nie opuszczają Twojego urządzenia — ten VPN działa tylko lokalnie, aby przechwytywać i filtrować żądania DNS.</string>
+    <string name="onboarding_vpn_grant">Przyznaj uprawnienie VPN</string>
+    <string name="onboarding_notification_title">Bądź na bieżąco</string>
+    <string name="onboarding_notification_desc">Zezwól na powiadomienia, aby widzieć statystyki blokowania w czasie rzeczywistym i wiedzieć, kiedy ochrona jest aktywna. Wymagane dla stałego powiadomienia VPN w systemie Android 13+.</string>
+    <string name="onboarding_notification_grant">Zezwól na powiadomienia</string>
+    <string name="onboarding_battery_title">Utrzymaj działanie ochrony</string>
+    <string name="onboarding_battery_desc">Wyklucz BlockAds z optymalizacji baterii, aby usługa VPN pozostała aktywna w tle i nie została zabita przez system.</string>
+    <string name="onboarding_battery_grant">Wyłącz optymalizację baterii</string>
+    <string name="onboarding_permission_granted">✓ Uprawnienie przyznane</string>
+    <string name="onboarding_complete_title">Jesteś teraz chroniony!</string>
+    <string name="onboarding_complete_desc">Gratulacje! BlockAds został skonfigurowany i jest gotowy do ochrony Twojego urządzenia przed reklamami i śledzeniem.</string>
+    <string name="onboarding_complete_stats">Dotknij \&quot;Rozpocznij\&quot;, aby włączyć ochronę</string>
+    <string name="onboarding_battery_unsupported">Nieobsługiwane</string>
+    <string name="onboarding_crash_report_title">Pomóż ulepszyć BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds stawia prywatność na pierwszym miejscu. Prosimy o zgodę na zbieranie anonimowych raportów o błędach, co pomoże nam szybko naprawiać usterki.\n\nTa opcja jest całkowicie DOBROWOLNA, NIE zawiera żadnych danych osobowych (PII) i może być w każdej chwili wyłączona w Ustawieniach.</string>
+    <string name="onboarding_crash_report_btn_yes">Tak, pomogę ulepszyć BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Nie, dziękuję</string>
+</resources>

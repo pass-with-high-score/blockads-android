@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Total Kueri</string>
+    <string name="blocked_queries">Diblokiir</string>
+    <string name="logs_empty">Belum ada kueri DNS yang dicatat</string>
+    <string name="logs_filter_all">Semua</string>
+    <string name="logs_filter_blocked">Diblokiir</string>
+    <string name="log_action_whitelist">Tambahkan ke Daftar Putih</string>
+    <string name="log_action_copy">Salin Domain</string>
+    <string name="log_search_hint">Cari domain…</string>
+    <string name="domain_copied">Domain disalin</string>
+    <string name="log_whitelisted">Masuk Daftar Putih: %s</string>
+    <string name="log_already_whitelisted">Sudah ada di daftar putih</string>
+    <string name="log_status_blocked">Diblokir</string>
+    <string name="log_status_allowed">Diizinkan</string>
+    <string name="log_status_whitelisted">Daftar Putih</string>
+    <string name="log_detail_query_type">Tipe Kueri</string>
+    <string name="log_detail_response_time">Waktu Respons</string>
+    <string name="log_detail_app">Aplikasi</string>
+    <string name="log_detail_resolved_ip">IP Diselesaikan</string>
+    <string name="log_detail_blocked_by">Diblokir Oleh</string>
+    <string name="log_detail_timestamp">Waktu</string>
+    <string name="log_detail_na">N/A</string>
+    <string name="log_time_range_all">Semua Waktu</string>
+    <string name="log_time_range_1h">1j</string>
+    <string name="log_time_range_6h">6j</string>
+    <string name="log_time_range_24h">24j</string>
+    <string name="log_time_range_7d">7h</string>
+    <string name="log_filter_all_apps">Semua Aplikasi</string>
+    <string name="log_bulk_selected">%d dipilih</string>
+    <string name="log_wildcard_whitelist_domain">Masukkan semua subdomain ke daftar putih</string>
+    <string name="log_wildcard_whitelisted">Domain %1$s dan semua subdomain masuk daftar putih</string>
+    <string name="log_action_unblock">Buka blokir</string>
+    <string name="log_action_block">Blokir</string>
+    <string name="stats_title">Statistik</string>
+    <string name="stats_overview">Ikhtisar</string>
+    <string name="stats_all_time_queries">Kueri Sepanjang Waktu</string>
+    <string name="stats_all_time_blocked">Diblokir Sepanjang Waktu</string>
+    <string name="stats_today_queries">Kueri Hari Ini</string>
+    <string name="stats_today_blocked">Diblokir Hari Ini</string>
+    <string name="stats_today_security">Ancaman Hari Ini</string>
+    <string name="stats_charts">Bagan Aktivitas</string>
+    <string name="stats_chart_4w">4 Minggu</string>
+    <string name="stats_chart_12m">12 Bulan</string>
+    <string name="stats_per_app">Statistik Per-Aplikasi</string>
+    <string name="log_record_logs">Rekam Log</string>
+</resources>

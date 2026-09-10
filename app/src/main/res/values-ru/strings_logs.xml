@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Всего запросов</string>
+    <string name="blocked_queries">Заблокировано</string>
+    <string name="logs_empty">Записи DNS-запросов пока отсутствуют</string>
+    <string name="logs_filter_all">Все</string>
+    <string name="logs_filter_blocked">Заблокированные</string>
+    <string name="log_action_whitelist">Добавить в белый список</string>
+    <string name="log_action_copy">Скопировать домен</string>
+    <string name="log_search_hint">Поиск доменов…</string>
+    <string name="domain_copied">Домен скопирован</string>
+    <string name="log_whitelisted">Добавлено в белый список: %s</string>
+    <string name="log_already_whitelisted">Уже в белом списке</string>
+    <string name="log_status_blocked">Заблокировано</string>
+    <string name="log_status_allowed">Разрешено</string>
+    <string name="log_status_whitelisted">В белом списке</string>
+    <string name="log_detail_query_type">Тип запроса</string>
+    <string name="log_detail_response_time">Время отклика</string>
+    <string name="log_detail_app">Приложение</string>
+    <string name="log_detail_resolved_ip">Разрешённый IP</string>
+    <string name="log_detail_blocked_by">Заблокировано чем</string>
+    <string name="log_detail_timestamp">Время</string>
+    <string name="log_detail_na">Н/Д</string>
+    <string name="log_time_range_all">За всё время</string>
+    <string name="log_time_range_1h">1ч</string>
+    <string name="log_time_range_6h">6ч</string>
+    <string name="log_time_range_24h">24ч</string>
+    <string name="log_time_range_7d">7д</string>
+    <string name="log_filter_all_apps">Все приложения</string>
+    <string name="log_bulk_selected">Выбрано: %d</string>
+    <string name="log_wildcard_whitelist_domain">Разрешить все поддомены</string>
+    <string name="log_wildcard_whitelisted">Домен %1$s и все поддомены добавлены в белый список</string>
+    <string name="log_action_unblock">Разблокировать</string>
+    <string name="log_action_block">Заблокировать</string>
+    <string name="stats_title">Статистика</string>
+    <string name="stats_overview">Обзор</string>
+    <string name="stats_all_time_queries">Запросы за всё время</string>
+    <string name="stats_all_time_blocked">Заблокировано за всё время</string>
+    <string name="stats_today_queries">Запросов сегодня</string>
+    <string name="stats_today_blocked">Заблокировано сегодня</string>
+    <string name="stats_today_security">Угроз сегодня</string>
+    <string name="stats_charts">Графики активности</string>
+    <string name="stats_chart_4w">4 недели</string>
+    <string name="stats_chart_12m">12 месяцев</string>
+    <string name="stats_per_app">Статистика по приложениям</string>
+    <string name="log_record_logs">Записывать журналы</string>
+</resources>

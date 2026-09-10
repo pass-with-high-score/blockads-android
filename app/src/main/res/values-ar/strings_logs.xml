@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="blocked_queries">محظور</string>
+    <string name="domain_copied">تم نسخ النطاق</string>
+    <string name="log_action_block">حظر</string>
+    <string name="log_action_copy">نسخ النطاق</string>
+    <string name="log_action_unblock">إلغاء الحظر</string>
+    <string name="log_action_whitelist">إضافة إلى القائمة البيضاء</string>
+    <string name="log_already_whitelisted">موجود بالفعل في القائمة البيضاء</string>
+    <string name="log_wildcard_whitelist_domain">السماح بجميع النطاقات الفرعية</string>
+    <string name="log_wildcard_whitelisted">تم السماح بالنطاق %1$s وجميع نطاقاته الفرعية</string>
+    <string name="log_bulk_selected">تم تحديد %d</string>
+    <string name="log_detail_app">التطبيق</string>
+    <string name="log_detail_blocked_by">محظور بواسطة</string>
+    <string name="log_detail_na">غير متوفر</string>
+    <string name="log_detail_query_type">نوع الاستعلام</string>
+    <string name="log_detail_resolved_ip">عنوان IP المحلَل</string>
+    <string name="log_detail_response_time">وقت الاستجابة</string>
+    <string name="log_detail_timestamp">الوقت</string>
+    <string name="log_filter_all_apps">جميع التطبيقات</string>
+    <string name="log_search_hint">البحث في النطاقات…</string>
+    <string name="log_status_allowed">مسموح به</string>
+    <string name="log_status_blocked">محظور</string>
+    <string name="log_status_whitelisted">في القائمة البيضاء</string>
+    <string name="log_time_range_1h">ساعة واحدة</string>
+    <string name="log_time_range_24h">24 ساعة</string>
+    <string name="log_time_range_6h">6 ساعات</string>
+    <string name="log_time_range_7d">7 أيام</string>
+    <string name="log_time_range_all">كل الوقت</string>
+    <string name="log_whitelisted">في القائمة البيضاء: %s</string>
+    <string name="logs_empty">لم يتم تسجيل أي استعلامات DNS بعد</string>
+    <string name="logs_filter_all">الكل</string>
+    <string name="logs_filter_blocked">محظور</string>
+    <string name="stats_all_time_blocked">المحظور طوال الوقت</string>
+    <string name="stats_all_time_queries">جميع الاستعلامات على الإطلاق</string>
+    <string name="stats_chart_12m">12 شهرًا</string>
+    <string name="stats_chart_4w">4 أسابيع</string>
+    <string name="stats_charts">رسوم بيانية للنشاط</string>
+    <string name="stats_overview">نظرة عامة</string>
+    <string name="stats_per_app">إحصائيات لكل تطبيق</string>
+    <string name="stats_title">الإحصائيات</string>
+    <string name="stats_today_blocked">محظور اليوم</string>
+    <string name="stats_today_queries">استعلامات اليوم</string>
+    <string name="stats_today_security">تهديدات اليوم</string>
+    <string name="total_queries">إجمالي الاستعلامات</string>
+    <string name="log_record_logs">تسجيل السجلات</string>
+</resources>

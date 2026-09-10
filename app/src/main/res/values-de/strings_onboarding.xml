@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Werbung intelligent blockieren</string>
+    <string name="onboarding_desc_1">Blockieren Sie Werbung in allen Apps und Browsern mit nur einem Tippen. Nutzt DNS-Filtertechnologie – kein Root erforderlich.\n\n🔒 Datenschutz-Versprechen: Wir sammeln, speichern oder übertragen niemals Ihre Browsing-Daten. Die gesamte Verarbeitung erfolgt ausschließlich auf Ihrem Gerät.</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_get_started">Loslegen</string>
+    <string name="onboarding_recommended">★ Empfohlen</string>
+    <string name="onboarding_protection_title">Schutzstufe wählen</string>
+    <string name="onboarding_protection_desc">Wählen Sie, wie aggressiv Werbung und Tracker blockiert werden sollen</string>
+    <string name="onboarding_protection_basic">Basis</string>
+    <string name="onboarding_protection_basic_desc">Blockiert große Werbenetzwerke. Minimale Auswirkungen auf die Website-Funktionalität.</string>
+    <string name="onboarding_protection_standard">Standard</string>
+    <string name="onboarding_protection_standard_desc">Blockiert Werbung, Tracker und Analyse-Tools. Gute Balance zwischen Schutz und Kompatibilität.</string>
+    <string name="onboarding_protection_strict">Strikt</string>
+    <string name="onboarding_protection_strict_desc">Maximales Blockieren. Kann einige Website-Funktionen beeinträchtigen, bietet aber den stärksten Schutz.</string>
+    <string name="onboarding_dns_title">DNS-Server wählen</string>
+    <string name="onboarding_dns_desc">Wählen Sie einen DNS-Server zur Auflösung von Domainnamen. Sie können dies später in den Einstellungen ändern.</string>
+    <string name="onboarding_vpn_title">VPN-Berechtigung erforderlich</string>
+    <string name="onboarding_vpn_desc">BlockAds verwendet ein lokales VPN, um DNS-Anfragen zu filtern und Werbung zu blockieren. Es verlassen keine Daten Ihr Gerät – dieses VPN arbeitet nur lokal, um DNS-Anfragen abzufangen và zu filtern.</string>
+    <string name="onboarding_vpn_grant">VPN-Berechtigung erteilen</string>
+    <string name="onboarding_notification_title">Auf dem Laufenden bleiben</string>
+    <string name="onboarding_notification_desc">Erlauben Sie Benachrichtigungen, um Echtzeit-Statistiken zu sehen und zu wissen, wann Ihr Schutz aktiv ist. Erforderlich für die dauerhafte VPN-Benachrichtigung ab Android 13+.</string>
+    <string name="onboarding_notification_grant">Benachrichtigungen zulassen</string>
+    <string name="onboarding_battery_title">Schutz aktiv halten</string>
+    <string name="onboarding_battery_desc">Schließen Sie BlockAds von der Akku-Optimierung aus, damit der VPN-Dienst im Hintergrund aktiv bleibt und nicht vom System beendet wird.</string>
+    <string name="onboarding_battery_grant">Akku-Optimierung deaktivieren</string>
+    <string name="onboarding_battery_unsupported">Nicht unterstützt</string>
+    <string name="onboarding_permission_granted">✓ Berechtigung erteilt</string>
+    <string name="onboarding_complete_title">Sie sind jetzt geschützt!</string>
+    <string name="onboarding_complete_desc">Glückwunsch! BlockAds ist konfiguriert und bereit, Ihr Gerät vor Werbung und Trackern zu schützen.</string>
+    <string name="onboarding_complete_stats">Tippen Sie auf \&quot;Loslegen\&quot;, um den Schutz zu aktivieren</string>
+    <string name="onboarding_crash_report_title">Hilf mit, BlockAds zu verbessern</string>
+    <string name="onboarding_crash_report_desc">BlockAds ist zu 100% datenschutzorientiert. Wir bitten um deine Erlaubnis, anonyme Absturzberichte zu sammeln, um Fehler schnell beheben zu können.\n\nDies ist streng OPTIONAL (Opt-in), enthält KEINE personenbezogenen Daten (PII) und kann jederzeit in den Einstellungen deaktiviert werden.</string>
+    <string name="onboarding_crash_report_btn_yes">Ja, BlockAds verbessern</string>
+    <string name="onboarding_crash_report_btn_no">Nein, danke</string>
+</resources>

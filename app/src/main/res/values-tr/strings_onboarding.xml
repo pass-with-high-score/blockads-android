@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">&quot;Reklamları Akıllıca Engelleyin&quot;</string>
+    <string name="onboarding_desc_1">&quot;Tek dokunuşla tüm uygulamalar ve tarayıcılardaki reklamları engelleyin. DNS filtreleme teknolojisini kullanır — root erişimi gerekmez.
+
+🔒 Gizlilik sözü: Tarama verilerinizi asla toplamayız, saklamayız veya iletmeyiz. Tüm işlemler yalnızca cihazınızda gerçekleşir.&quot;</string>
+    <string name="onboarding_skip">&quot;Atlamak&quot;</string>
+    <string name="onboarding_next">&quot;Sonraki&quot;</string>
+    <string name="onboarding_get_started">&quot;Başlayın&quot;</string>
+    <string name="onboarding_recommended">&quot;★ Tavsiye Edilir&quot;</string>
+    <string name="onboarding_protection_title">&quot;Koruma Seviyesini Seçin&quot;</string>
+    <string name="onboarding_protection_desc">&quot;Reklamları ve izleyicileri ne kadar agresif bir şekilde engellemek istediğinizi seçin.&quot;</string>
+    <string name="onboarding_protection_basic">&quot;Temel&quot;</string>
+    <string name="onboarding_protection_basic_desc">&quot;Başlıca reklam ağlarını engeller. Web sitesi işlevselliği üzerinde minimum etki yaratır.&quot;</string>
+    <string name="onboarding_protection_standard">&quot;Standart&quot;</string>
+    <string name="onboarding_protection_standard_desc">&quot;Reklamları, izleyicileri ve analiz araçlarını engelleyin. Koruma ve uyumluluk arasında iyi bir denge.&quot;</string>
+    <string name="onboarding_protection_strict">&quot;Sıkı&quot;</string>
+    <string name="onboarding_protection_strict_desc">&quot;Maksimum engelleme. Bazı web sitesi işlevlerini etkileyebilir ancak en güçlü korumayı sağlar.&quot;</string>
+    <string name="onboarding_dns_title">&quot;DNS Sunucusu Seçin&quot;</string>
+    <string name="onboarding_dns_desc">&quot;Alan adlarını çözümlemek için bir DNS sunucusu seçin. Bunu daha sonra Ayarlar'da değiştirebilirsiniz.&quot;</string>
+    <string name="onboarding_vpn_title">&quot;VPN İzni Gerekli&quot;</string>
+    <string name="onboarding_vpn_desc">&quot;BlockAds, DNS sorgularını filtrelemek ve reklamları engellemek için yerel bir VPN kullanır. Cihazınızdan hiçbir veri dışarı çıkmaz; bu VPN yalnızca yerel olarak çalışarak DNS isteklerini yakalar ve filtreler.&quot;</string>
+    <string name="onboarding_vpn_grant">&quot;VPN İzni Ver&quot;</string>
+    <string name="onboarding_notification_title">&quot;Bilgi sahibi olun&quot;</string>
+    <string name="onboarding_notification_desc">&quot;Gerçek zamanlı engelleme istatistiklerini görmek ve korumanızın ne zaman aktif olduğunu öğrenmek için bildirimlere izin verin. Android 13 ve üzeri sürümlerde kalıcı VPN bildirimi için gereklidir.&quot;</string>
+    <string name="onboarding_notification_grant">&quot;Bildirimlere İzin Ver&quot;</string>
+    <string name="onboarding_battery_title">&quot;Korumayı Çalışır Durumda Tutun&quot;</string>
+    <string name="onboarding_battery_desc">&quot;BlockAds'i pil optimizasyonundan hariç tutun, böylece VPN hizmeti arka planda aktif kalır ve sistem tarafından kapatılmaz.&quot;</string>
+    <string name="onboarding_battery_grant">&quot;Pil Optimizasyonunu Devre Dışı Bırak&quot;</string>
+    <string name="onboarding_permission_granted">&quot;✓ İzin verildi&quot;</string>
+    <string name="onboarding_complete_title">&quot;Artık Koruma Altındasınız!&quot;</string>
+    <string name="onboarding_complete_desc">&quot;Tebrikler! BlockAds yapılandırıldı ve cihazınızı reklamlardan ve izleyicilerden korumaya hazır.&quot;</string>
+    <string name="onboarding_complete_stats">&quot;Korumayı etkinleştirmek için \&quot;Başla\&quot;ya dokunun.&quot;</string>
+    <string name="onboarding_battery_unsupported">Desteklenmiyor</string>
+    <string name="onboarding_crash_report_title">BlockAds\'i Geliştirmeye Yardım Et</string>
+    <string name="onboarding_crash_report_desc">BlockAds tamamen gizlilik odaklıdır. Hataları hızlı bir şekilde düzeltmemize yardımcı olmak için anonim çökme raporları toplama izninizi rica ediyoruz.\n\nBu kesinlikle İSTEĞE BAĞLIDIR, kişisel olarak tanımlanabilir hiçbir bilgi (PII) İÇERMEZ ve Ayarlar\'dan istendiği zaman devre dışı bırakılabilir.</string>
+    <string name="onboarding_crash_report_btn_yes">Evet, BlockAds\'i geliştirmeye yardım et</string>
+    <string name="onboarding_crash_report_btn_no">Hayır, teşekkürler</string>
+</resources>

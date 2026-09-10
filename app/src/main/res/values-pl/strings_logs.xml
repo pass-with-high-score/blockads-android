@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="total_queries">Wszystkie zapytania</string>
+    <string name="blocked_queries">Zablokowane</string>
+    <string name="logs_empty">Nie zarejestrowano jeszcze żadnych zapytań DNS</string>
+    <string name="logs_filter_all">Wszystkie</string>
+    <string name="logs_filter_blocked">Zablokowane</string>
+    <string name="log_action_whitelist">Dodaj do białej listy</string>
+    <string name="log_action_copy">Kopiuj domenę</string>
+    <string name="log_search_hint">Szukaj domen…</string>
+    <string name="domain_copied">Domena skopiowana</string>
+    <string name="log_whitelisted">Dodano do białej listy: %s</string>
+    <string name="log_already_whitelisted">Już jest na białej liście</string>
+    <string name="log_status_blocked">Zablokowane</string>
+    <string name="log_status_allowed">Dozwolone</string>
+    <string name="log_status_whitelisted">Na białej liście</string>
+    <string name="log_detail_query_type">Typ zapytania</string>
+    <string name="log_detail_response_time">Czas odpowiedzi</string>
+    <string name="log_detail_app">Aplikacja</string>
+    <string name="log_detail_resolved_ip">Rozwiązany IP</string>
+    <string name="log_detail_blocked_by">Zablokowane przez</string>
+    <string name="log_detail_timestamp">Czas</string>
+    <string name="log_detail_na">Brak danych</string>
+    <string name="log_time_range_all">Cały czas</string>
+    <string name="log_time_range_1h">1 godz.</string>
+    <string name="log_time_range_6h">6 godz.</string>
+    <string name="log_time_range_24h">24 godz.</string>
+    <string name="log_time_range_7d">7 dni</string>
+    <string name="log_filter_all_apps">Wszystkie aplikacje</string>
+    <string name="log_bulk_selected">Wybrano %d</string>
+    <string name="log_wildcard_whitelist_domain">Dodaj wszystkie subdomeny do białej listy</string>
+    <string name="log_wildcard_whitelisted">Domena %1$s i wszystkie subdomeny dodane do białej listy</string>
+    <string name="log_action_unblock">Odblokuj</string>
+    <string name="log_action_block">Blokuj</string>
+    <string name="stats_title">Statystyki</string>
+    <string name="stats_overview">Przegląd</string>
+    <string name="stats_all_time_queries">Wszystkie zapytania</string>
+    <string name="stats_all_time_blocked">Wszystkie zablokowane</string>
+    <string name="stats_today_queries">Zapytania dzisiaj</string>
+    <string name="stats_today_blocked">Zablokowane dzisiaj</string>
+    <string name="stats_today_security">Zagrożenia dzisiaj</string>
+    <string name="stats_charts">Wykresy aktywności</string>
+    <string name="stats_chart_4w">4 tygodnie</string>
+    <string name="stats_chart_12m">12 miesięcy</string>
+    <string name="stats_per_app">Statystyki aplikacji</string>
+    <string name="log_record_logs">Rejestruj logi</string>
+</resources>

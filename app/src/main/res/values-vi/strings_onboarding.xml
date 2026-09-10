@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Chặn quảng cáo thông minh</string>
+    <string name="onboarding_desc_1">Chặn quảng cáo trên tất cả ứng dụng và trình duyệt chỉ với một chạm. Sử dụng công nghệ lọc DNS — không cần root.\n\n🔒 Cam kết bảo mật: Chúng tôi không bao giờ thu thập, lưu trữ hoặc truyền dữ liệu duyệt web của bạn. Mọi xử lý đều diễn ra trên thiết bị của bạn.</string>
+    <string name="onboarding_skip">Bỏ qua</string>
+    <string name="onboarding_next">Tiếp theo</string>
+    <string name="onboarding_get_started">Bắt đầu</string>
+    <string name="onboarding_recommended">★ Khuyến nghị</string>
+    <string name="onboarding_protection_title">Chọn mức độ bảo vệ</string>
+    <string name="onboarding_protection_desc">Chọn mức độ chặn quảng cáo và trình theo dõi</string>
+    <string name="onboarding_protection_basic">Cơ bản</string>
+    <string name="onboarding_protection_basic_desc">Chặn các mạng quảng cáo lớn. Ít ảnh hưởng đến chức năng trang web.</string>
+    <string name="onboarding_protection_standard">Tiêu chuẩn</string>
+    <string name="onboarding_protection_standard_desc">Chặn quảng cáo, trình theo dõi và phân tích. Cân bằng tốt giữa bảo vệ và tương thích.</string>
+    <string name="onboarding_protection_strict">Nghiêm ngặt</string>
+    <string name="onboarding_protection_strict_desc">Chặn tối đa. Có thể ảnh hưởng một số chức năng trang web nhưng bảo vệ mạnh nhất.</string>
+    <string name="onboarding_dns_title">Chọn máy chủ DNS</string>
+    <string name="onboarding_dns_desc">Chọn máy chủ DNS để phân giải tên miền. Bạn có thể thay đổi sau trong Cài đặt.</string>
+    <string name="onboarding_vpn_title">Cần quyền VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds sử dụng VPN cục bộ để lọc truy vấn DNS và chặn quảng cáo. Không có dữ liệu nào rời khỏi thiết bị — VPN này chỉ hoạt động cục bộ để chặn và lọc các yêu cầu DNS.</string>
+    <string name="onboarding_vpn_grant">Cấp quyền VPN</string>
+    <string name="onboarding_notification_title">Luôn cập nhật</string>
+    <string name="onboarding_notification_desc">Cho phép thông báo để xem thống kê chặn theo thời gian thực và biết khi nào bảo vệ đang hoạt động. Cần thiết cho thông báo VPN trên Android 13+.</string>
+    <string name="onboarding_notification_grant">Cho phép thông báo</string>
+    <string name="onboarding_battery_title">Duy trì bảo vệ</string>
+    <string name="onboarding_battery_desc">Loại trừ BlockAds khỏi tối ưu hóa pin để dịch vụ VPN luôn hoạt động trong nền và không bị hệ thống tắt.</string>
+    <string name="onboarding_battery_grant">Tắt tối ưu hóa pin</string>
+    <string name="onboarding_battery_unsupported">Không hỗ trợ</string>
+    <string name="onboarding_permission_granted">✓ Đã cấp quyền</string>
+    <string name="onboarding_complete_title">Bạn đã được bảo vệ!</string>
+    <string name="onboarding_complete_desc">Chúc mừng! BlockAds đã được cấu hình và sẵn sàng bảo vệ thiết bị của bạn khỏi quảng cáo và trình theo dõi.</string>
+    <string name="onboarding_complete_stats">Nhấn \&quot;Bắt đầu\&quot; để bật bảo vệ</string>
+    <string name="onboarding_crash_report_title">Giúp cải thiện BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds luôn đặt quyền riêng tư lên hàng đầu. Chúng tôi xin phép thu thập các báo cáo sự cố ẩn danh để giúp khắc phục lỗi nhanh chóng.\n\nĐiều này hoàn toàn TỰ NGUYỆN, KHÔNG chứa thông tin cá nhân (PII) và có thể tắt bất cứ lúc nào trong Cài đặt.</string>
+    <string name="onboarding_crash_report_btn_yes">Đồng ý, giúp cải thiện BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Không, cảm ơn</string>
+</resources>

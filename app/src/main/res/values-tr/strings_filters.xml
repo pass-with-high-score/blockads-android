@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="filter_updated">&quot;Filtre listesi güncellendi: %d alan adı&quot;</string>
+    <string name="filter_update_failed">&quot;Filtre listesi güncellenemedi.&quot;</string>
+    <string name="filter_detail_enabled">&quot;Etkinleştirilmiş&quot;</string>
+    <string name="filter_detail_rules">&quot;Tüzük&quot;</string>
+    <string name="filter_detail_last_updated">&quot;Son güncelleme&quot;</string>
+    <string name="filter_detail_update">&quot;Güncelleme&quot;</string>
+    <string name="filter_detail_delete">&quot;Silmek&quot;</string>
+    <string name="whitelist_domains_add">&quot;Alan Adı Ekle&quot;</string>
+    <string name="whitelist_domains_hint">&quot;örneğin example.com&quot;</string>
+    <string name="whitelist_domains_empty">&quot;Beyaz listeye alınmış alan adları yok.&quot;</string>
+    <string name="whitelist_domain_added">&quot;Alan adı beyaz listeye eklendi: %s&quot;</string>
+    <string name="whitelist_domain_removed">&quot;Alan adı beyaz listeden kaldırıldı&quot;</string>
+    <string name="filter_setup_title">&quot;Filtre Ayarları&quot;</string>
+    <string name="filter_built_in">&quot;Dahili&quot;</string>
+    <string name="filter_custom">&quot;Gelenek&quot;</string>
+    <string name="filter_custom_empty">&quot;Henüz özel filtre eklenmedi.&quot;</string>
+    <string name="filter_search_hint">&quot;Arama filtreleri…&quot;</string>
+    <string name="filter_search_no_results">&quot;\&quot;%s\&quot; için hiçbir filtre bulunamadı.&quot;</string>
+    <string name="filter_log_cleared">&quot;Günlük temizlendi&quot;</string>
+    <string name="filter_domain_already_whitelisted">&quot;Alan adı zaten beyaz listeye alınmış.&quot;</string>
+    <string name="filter_settings_export">&quot;Ayarlar dışa aktarıldı&quot;</string>
+    <string name="filter_export_failed">&quot;Dışa aktarma başarısız oldu: %s&quot;</string>
+    <string name="filter_settings_imported">&quot;Ayarlar içe aktarıldı&quot;</string>
+    <string name="filter_import_failed">&quot;İçe aktarma başarısız oldu: %s&quot;</string>
+    <string name="filter_update_success">&quot;Filtre listeleri güncellendi&quot;</string>
+    <string name="filter_update_success_message">&quot;%d alan adı başarıyla güncellendi.&quot;</string>
+    <string name="filter_update_failed_message">&quot;Filtre listeleri güncellenemedi.&quot;</string>
+    <string name="filter_update_notification_channel">&quot;Filtre Güncellemeleri&quot;</string>
+    <string name="filter_update_notification_channel_desc">&quot;Filtre listesi güncellemeleri için bildirimler&quot;</string>
+    <string name="custom_rules">&quot;Özel Kurallar&quot;</string>
+    <string name="add_custom_rule">&quot;Özel Kural Ekle&quot;</string>
+    <string name="import_rules">&quot;İthalat Kuralları&quot;</string>
+    <string name="export_rules">&quot;İhracat Kuralları&quot;</string>
+    <string name="delete_all_rules">&quot;Tüm Kuralları Sil&quot;</string>
+    <string name="delete_all_rules_confirmation">&quot;Tüm özel kuralları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.&quot;</string>
+    <string name="all_rules_deleted">&quot;Tüm kurallar silindi.&quot;</string>
+    <string name="rule_added">&quot;Kural başarıyla eklendi.&quot;</string>
+    <string name="rules_imported">&quot;İçe aktarılan %d kural&quot;</string>
+    <string name="rules_copied_to_clipboard">&quot;Kurallar panoya kopyalandı&quot;</string>
+    <string name="no_rules_to_export">&quot;İhracat için herhangi bir kural yok.&quot;</string>
+    <string name="no_custom_rules">&quot;Özel kurallar yok.&quot;</string>
+    <string name="tap_add_to_create_rule">&quot;İlk özel kuralınızı oluşturmak için + işaretine dokunun.&quot;</string>
+    <string name="rule">&quot;Kural&quot;</string>
+    <string name="rules">&quot;Tüzük&quot;</string>
+    <string name="add_rule_hint">&quot;Özel bir DNS kuralı girin:
+• Engelle: ||example.com^ veya example.com
+• Joker karakteri engelle: ||*.ads.example.com^ veya *.ads.example.com
+• İzin ver: @@||example.com^
+• Yorum: ! Bu bir yorumdur&quot;</string>
+    <string name="import_rules_hint">&quot;Yapıştırma kuralları (her satıra bir tane):&quot;</string>
+    <string name="import_label">&quot;İçe aktarmak&quot;</string>
+    <string name="custom_rules_help">&quot;Özel Kurallar Yardımı&quot;</string>
+    <string name="custom_rules_help_text">&quot;Özel kurallar, filtre listelerinden önce uygulanır ve bu da onlara daha yüksek öncelik verir.
+
+Desteklenen formatlar:
+• Alan adını engelle: ||example.com^ veya example.com
+• Joker karakteri engelle: ||*.ads.example.com^ veya *.ads.example.com
+• Alan adına izin ver: @@||example.com^
+• Joker karaktere izin ver: @@||*.example.com^
+• Yorum: ! Bu bir yorumdur
+
+Örnekler:
+• ||ads.example.com^ - ads.example.com ve tüm alt alan adlarını engeller
+• ||*.tracker.com^ - tracker.com'un herhangi bir alt alan adını engeller (ancak tracker.com'un kendisini değil)
+• @@||example.com^ - example.com'a izin verir (engelleme listelerini geçersiz kılar)
+• *.ads.example.com - x.ads.example.com, y.ads.example.com vb. engeller
+• ! Benim özel kurallarım - Bir yorum satırı&quot;</string>
+    <string name="block_this_domain">&quot;Bu alan adını engelle&quot;</string>
+    <string name="block_reason_upstream_dns">Upstream DNS</string>
+    <string name="block_reason_custom_rule">Özel Engelleme Kuralı</string>
+    <string name="block_reason_filter_list">Filtre Listesi</string>
+    <string name="block_reason_security">Tehlikeli Web Sitesi</string>
+    <string name="filter_category_ad">Reklam Engelleme</string>
+    <string name="filter_category_security">Güvenlik</string>
+    <string name="firewall_title">Güvenlik Duvarı</string>
+    <string name="firewall_count">%d uygulama engellendi</string>
+    <string name="firewall_search">Uygulamaları ara…</string>
+    <string name="firewall_enable">Güvenlik Duvarını Etkinleştir</string>
+    <string name="firewall_enable_desc">DNS aracılığıyla seçilen uygulamalar için internet erişimini engelle</string>
+    <string name="firewall_block_wifi">Wi-Fi\'yi Engelle</string>
+    <string name="firewall_block_mobile">Mobil Veriyi Engelle</string>
+    <string name="firewall_schedule">Plan</string>
+    <string name="firewall_schedule_desc">Sadece belirli saatlerde engelle</string>
+    <string name="firewall_schedule_from">Başlangıç</string>
+    <string name="firewall_schedule_to">Bitiş</string>
+    <string name="firewall_app_blocked">İnternet engellendi</string>
+    <string name="firewall_configure">Kuralı Yapılandır</string>
+    <string name="firewall_network_mobile">Mobil</string>
+    <string name="firewall_network_all">Hepsi</string>
+    <string name="firewall_schedule_hour_plus">Saat +</string>
+    <string name="firewall_schedule_minute_plus">Dak +</string>
+    <string name="block_reason_firewall">Güvenlik Duvarı</string>
+    <string name="filter_setup_active_count">%1$d aktif</string>
+    <string name="filter_error_invalid_url">Lütfen geçerli bir URL girin (http:// veya https://)</string>
+    <string name="filter_error_duplicate_url">Bu filtre listesi zaten mevcut</string>
+    <string name="filter_chip_all">Hepsi</string>
+    <string name="filter_chip_enabled">Etkin</string>
+    <string name="filter_chip_disabled">Devre Dışı</string>
+    <string name="blocklist_domains_empty">Engellenen alan adı yok</string>
+    <string name="blocklist_domain_added">Alan adı engellendi: %s</string>
+    <string name="blocklist_domain_removed">Alan adı engelleme listesinden kaldırıldı</string>
+    <string name="blocklist_domain_already_exists">Alan adı zaten engellenmiş</string>
+    <string name="import_from_file">Dosyadan İçe Aktar</string>
+    <string name="export_to_file">Dosyaya Dışa Aktar</string>
+    <string name="export_format_title">Dışa Aktarım Formatı</string>
+    <string name="export_format_json">JSON (.json)</string>
+    <string name="export_format_txt">Metin (.txt)</string>
+    <string name="rules_exported">%d kural dışa aktarıldı</string>
+    <string name="export_failed">Dışa aktarma başarısız: %s</string>
+    <string name="import_failed">İçe aktarma başarısız: %s</string>
+    <string name="https_filtering_title">HTTPS Filtreleme</string>
+    <string name="https_filtering_toggle_label">HTTPS Kozmetik Filtre</string>
+    <string name="https_filtering_status_active">Aktif — Reklamlar gizleniyor</string>
+    <string name="https_filtering_status_inactive">Pasif</string>
+    <string name="https_filtering_explain_title">Bu nasıl çalışır?</string>
+    <string name="https_filtering_explain_body">HTTPS Filtreleme, seçtiğiniz tarayıcılardan gelen web trafiğini yakalar ve kozmetik CSS kuralları uygulayarak reklam afis̆lerini, katmanları ve diğer görsel reklam öğelerini gizler.\n\nBunu yapmak için cihazınıza yerel bir Kök (Root) CA sertifikası yüklenmelidir. Bu sertifika yerel olarak oluşturulur ve asla telefonunuzdan dışarı çıkmaz. Bankacılık uygulamaları, Google ve diğer hassas hizmetler hiçbir zaman engellenmez.</string>
+    <string name="https_filtering_ca_title">Kök (Root) CA Sertifikası</string>
+    <string name="https_filtering_ca_desc">HTTPS kozmetik filtrelemeyi ayarlamak için aşağıdaki adımları izleyin:</string>
+    <string name="https_filtering_export_ca">1. Adım: Sertifikayı İndirilenlere Kaydet</string>
+    <string name="https_filtering_cert_saved">Sertifika İndirilenlere kaydedildi!</string>
+    <string name="https_filtering_install_steps">2. Adım: Sertifikayı manuel olarak yükleyin:\n\n1. Ayarlar → Güvenlik → Şifreleme &amp; kimlik bilgileri bölümüne gidin\n2. \&quot;Bir sertifika yükle\&quot; → \&quot;CA sertifikası\&quot;na dokunun\n3. İndirilenlerden \&quot;BlockAds-RootCA.crt\&quot;yi seçin\n4. Kurulumu onaylayın</string>
+    <string name="https_filtering_open_settings">Güvenlik Ayarlarını Aç</string>
+    <string name="https_filtering_step1_title">1. Adım: Sertifikayı Kaydet</string>
+    <string name="https_filtering_step1_desc">Kök CA sertifikasını cihazınıza indirin</string>
+    <string name="https_filtering_step2_title">2. Adım: Sertifikayı Yükle</string>
+    <string name="https_filtering_step2_desc">Sertifikayı cihazınıza yükleyin:</string>
+    <string name="https_filtering_step3_title">3. Adım: Kurulumu Doğrula</string>
+    <string name="https_filtering_step3_desc">Sertifikanın doğru yüklenip yüklenmediğini kontrol edin</string>
+    <string name="https_filtering_verify_cert">Sertifikayı Doğrula</string>
+    <string name="https_filtering_cert_installed">Sertifika yüklendi ✓</string>
+    <string name="https_filtering_cert_not_installed">Sertifika yüklenmedi</string>
+    <string name="https_filtering_cert_checking">Kontrol ediliyor…</string>
+    <string name="https_filtering_cert_vpn_required">&quot;Sertifikayı Doğrula&quot;ya dokunarak kontrol edin</string>
+    <string name="https_filtering_browser_section">Tarayıcı Seçimi</string>
+    <string name="https_filtering_browser_desc">Kozmetik reklam filtreleme uygulanacak tarayıcıları seçin. Yalnızca seçilen uygulamalar filtrelenir.</string>
+    <string name="domain_rules_title">Alan Adı Kuralları</string>
+    <string name="domain_rules_tab_whitelist">Beyaz Liste</string>
+    <string name="domain_rules_tab_blocklist">Kara Liste</string>
+    <string name="https_filtering_settings_desc">Tarayıcılarda reklamları görsel olarak gizle</string>
+    <string name="edit_custom_filter">Özel Filtreyi Düzenle</string>
+    <string name="filter_name">Filtre Adı</string>
+    <string name="filter_url_domain">Filtre URL/Alan Adı</string>
+    <string name="add_blocklist_domains_title">Engellenen Alan Adlarını Ekle</string>
+    <string name="add_whitelisted_domain_title">İzin Verilen Alan Adını Ekle</string>
+    <string name="filter_build_locally">Yerel olarak derle (sunucu yok)</string>
+    <string name="filter_build_mode">Derleme Modu</string>
+    <string name="filter_build_mode_local">Cihazda derlendi</string>
+    <string name="filter_build_mode_server">Sunucu üzerinden derlendi</string>
+    <string name="filter_switch_to_server">Sunucuya Geç</string>
+    <string name="filter_switch_to_local">Yerele Geç</string>
+    <string name="filter_compile_enqueued">Filtre arka planda oluşturuluyor…</string>
+    <string name="filter_compile_progress_title">Filtre derleniyor…</string>
+    <string name="filter_compile_success_title">Filtre derlendi</string>
+    <string name="filter_compile_failed_title">Filtre derlemesi başarısız oldu</string>
+    <string name="filter_compile_channel_name">Filtre Derlemesi</string>
+    <string name="https_filtering_wireguard_disabled">WireGuard devre dışı (HTTPS filtreleme ile uyumsuz)</string>
+    <string name="https_filtering_cert_saved_downloads">✅ Sertifika Downloads/%1$s konumuna kaydedildi</string>
+    <string name="https_filtering_cert_saved_legacy">Sertifika kaydedildi. Dosya yöneticisinden yükleyin.</string>
+    <string name="https_filtering_started">HTTPS filtreleme başlatıldı</string>
+    <string name="https_filtering_stopped">HTTPS filtreleme durduruldu</string>
+    <string name="https_filtering_http3_title">HTTP/3 (QUIC) Filtrele</string>
+    <string name="https_filtering_http3_desc">Maksimum reklam filtrelemesi için filtrelenebilir bağlantıları zorlamak amacıyla tarayıcı QUIC\'ini engelleyin. Bazı sayfaların kısmen yüklenmesine neden olabilir. Sayfalar tam olarak yüklenmiyorsa kapatın.</string>
+</resources>

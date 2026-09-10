@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Blokujte reklamy chytře</string>
+    <string name="onboarding_desc_1">Blokujte reklamy ve všech aplikacích a prohlížečích jedním klepnutím. Využívá technologii DNS filtrování – není vyžadován root.\n\n🔒 Slib soukromí: Nikdy neshromažďujeme, neukládáme ani nepřenášíme vaše data o prohlížení. Veškeré zpracování probíhá pouze ve vašem zařízení.</string>
+    <string name="onboarding_skip">Přeskočit</string>
+    <string name="onboarding_next">Další</string>
+    <string name="onboarding_get_started">Začít</string>
+    <string name="onboarding_recommended">★ Doporučeno</string>
+    <string name="onboarding_protection_title">Zvolte úroveň ochrany</string>
+    <string name="onboarding_protection_desc">Vyberte, jak agresivně chcete blokovat reklamy a sledovače</string>
+    <string name="onboarding_protection_basic">Základní</string>
+    <string name="onboarding_protection_basic_desc">Blokuje hlavní reklamní sítě. Minimální dopad na funkčnost webu.</string>
+    <string name="onboarding_protection_standard">Standardní</string>
+    <string name="onboarding_protection_standard_desc">Blokuje reklamy, sledovače a analytiku. Dobrá rovnováha mezi ochranou a kompatibilitou.</string>
+    <string name="onboarding_protection_strict">Striktní</string>
+    <string name="onboarding_protection_strict_desc">Maximální blokování. Může ovlivnit funkčnost některých webů, ale poskytuje nejsilnější ochranu.</string>
+    <string name="onboarding_dns_title">Zvolte DNS server</string>
+    <string name="onboarding_dns_desc">Vyberte DNS server pro překlad doménových jmen. To můžete později změnit v Nastavení.</string>
+    <string name="onboarding_vpn_title">Vyžadováno povolení VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds používá lokální VPN k filtrování DNS dotazů a blokování reklam. Žádná data neopouštějí vaše zařízení – tato VPN funguje pouze lokálně k zachycení a filtrování DNS požadavků.</string>
+    <string name="onboarding_vpn_grant">Udělit povolení VPN</string>
+    <string name="onboarding_notification_title">Zůstaňte v obraze</string>
+    <string name="onboarding_notification_desc">Povolte oznámení, abyste viděli statistiky blokování v reálném čase a věděli, kdy je ochrana aktivní. Vyžadováno pro trvalé oznámení VPN v Androidu 13+.</string>
+    <string name="onboarding_notification_grant">Povolit oznámení</string>
+    <string name="onboarding_battery_title">Udržujte ochranu v chodu</string>
+    <string name="onboarding_battery_desc">Vylučte BlockAds z optimalizace baterie, aby služba VPN zůstala aktivní na pozadí a nebyla ukončena systémem.</string>
+    <string name="onboarding_battery_grant">Vypnout optimalizaci baterie</string>
+    <string name="onboarding_battery_unsupported">Nepodporováno</string>
+    <string name="onboarding_permission_granted">✓ Povolení uděleno</string>
+    <string name="onboarding_complete_title">Nyní jste chráněni!</string>
+    <string name="onboarding_complete_desc">Gratulujeme! BlockAds je nakonfigurováno a připraveno chránit vaše zařízení před reklamami a sledovači.</string>
+    <string name="onboarding_complete_stats">Klepnutím na „Začít“ aktivujete ochranu</string>
+    <string name="onboarding_crash_report_title">Pomozte vylepšit BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds klade soukromí na první místo. Rádi bychom vás požádali o svolení shromažďovat anonymní zprávy o chybách, které nám pomohou rychle řešit problémy.\n\nTato volba je přísně DOBROVOLNÁ, neobsahuje ŽÁDNÉ osobní identifikační údaje (PII) a lze ji kdykoli vypnout v Nastavení.</string>
+    <string name="onboarding_crash_report_btn_yes">Ano, chci pomoci vylepšit BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">Ne, děkuji</string>
+</resources>

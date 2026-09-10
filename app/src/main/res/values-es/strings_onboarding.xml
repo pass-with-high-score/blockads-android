@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Bloquea anuncios de forma inteligente</string>
+    <string name="onboarding_desc_1">Bloquea anuncios en todas las aplicaciones y navegadores con un solo toque. Usa tecnología de filtrado DNS — sin necesidad de root.\n\n🔒 Compromiso de privacidad: Nunca recopilamos, almacenamos ni transmitimos tus datos de navegación. Todo el procesamiento se realiza exclusivamente en tu dispositivo.</string>
+    <string name="onboarding_skip">Omitir</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_get_started">Comenzar</string>
+    <string name="onboarding_recommended">★ Recomendado</string>
+    <string name="onboarding_protection_title">Elige el nivel de protección</string>
+    <string name="onboarding_protection_desc">Selecciona qué tan agresivamente deseas bloquear anuncios y rastreadores</string>
+    <string name="onboarding_protection_basic">Básico</string>
+    <string name="onboarding_protection_basic_desc">Bloquea las principales redes de anuncios. Impacto mínimo en la funcionalidad de los sitios web.</string>
+    <string name="onboarding_protection_standard">Estándar</string>
+    <string name="onboarding_protection_standard_desc">Bloquea anuncios, rastreadores y analíticas. Buen equilibrio entre protección y compatibilidad.</string>
+    <string name="onboarding_protection_strict">Estricto</string>
+    <string name="onboarding_protection_strict_desc">Bloqueo máximo. Puede afectar algunas funciones de sitios web, pero ofrece la protección más sólida.</string>
+    <string name="onboarding_dns_title">Elige un servidor DNS</string>
+    <string name="onboarding_dns_desc">Selecciona un servidor DNS para resolver nombres de dominio. Puedes cambiarlo más tarde en los ajustes.</string>
+    <string name="onboarding_vpn_title">Se requiere permiso de VPN</string>
+    <string name="onboarding_vpn_desc">BlockAds usa una VPN local para filtrar consultas DNS y bloquear anuncios. Ningún dato sale de tu dispositivo — esta VPN funciona exclusivamente de forma local para interceptar y filtrar solicitudes DNS.</string>
+    <string name="onboarding_vpn_grant">Conceder permiso de VPN</string>
+    <string name="onboarding_notification_title">Mantente informado</string>
+    <string name="onboarding_notification_desc">Permite las notificaciones para ver estadísticas de bloqueo en tiempo real y saber que tu protección está activa. Requerido en Android 13+ para la notificación persistente de la VPN.</string>
+    <string name="onboarding_notification_grant">Permitir notificaciones</string>
+    <string name="onboarding_battery_title">Mantén la protección activa</string>
+    <string name="onboarding_battery_desc">Excluye BlockAds de la optimización de batería para que el servicio VPN permanezca activo en segundo plano y no sea detenido por el sistema.</string>
+    <string name="onboarding_battery_grant">Desactivar optimización de batería</string>
+    <string name="onboarding_permission_granted">✓ Permiso concedido</string>
+    <string name="onboarding_complete_title">¡La protección está activa!</string>
+    <string name="onboarding_complete_desc">¡Felicidades! BlockAds está configurado y listo para proteger tu dispositivo de anuncios y rastreadores.</string>
+    <string name="onboarding_complete_stats">Toca \&quot;Comenzar\&quot; para activar la protección</string>
+    <string name="onboarding_battery_unsupported">No compatible</string>
+    <string name="onboarding_crash_report_title">Ayuda a mejorar BlockAds</string>
+    <string name="onboarding_crash_report_desc">BlockAds prioriza la privacidad. Nos gustaría pedir tu permiso para recopilar informes de fallos anónimos y ayudarnos a corregir errores rápidamente.\n\nEsto es estrictamente OPCIONAL, NO contiene información de identificación personal (PII) y puede desactivarse en cualquier momento en los Ajustes.</string>
+    <string name="onboarding_crash_report_btn_yes">Sí, ayudar a mejorar BlockAds</string>
+    <string name="onboarding_crash_report_btn_no">No, gracias</string>
+</resources>

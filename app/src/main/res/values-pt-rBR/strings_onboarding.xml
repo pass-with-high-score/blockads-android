@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Bloqueie anúncios de forma inteligente</string>
+    <string name="onboarding_desc_1">Bloqueie anúncios em todos os aplicativos e navegadores com um toque. Usa tecnologia de filtragem de DNS — não é necessário root.\n\n🔒 Promessa de privacidade: Nunca coletamos, armazenamos ou transmitimos seus dados de navegação. Todo o processamento ocorre apenas no seu dispositivo.</string>
+    <string name="onboarding_skip">Pular</string>
+    <string name="onboarding_next">Próximo</string>
+    <string name="onboarding_get_started">Começar</string>
+    <string name="onboarding_recommended">★ Recomendado</string>
+    <string name="onboarding_protection_title">Escolha o nível de proteção</string>
+    <string name="onboarding_protection_desc">Selecione o quão agressivamente você deseja bloquear anúncios e rastreadores</string>
+    <string name="onboarding_protection_basic">Básico</string>
+    <string name="onboarding_protection_basic_desc">Bloqueia as principais redes de anúncios. Impacto mínimo na funcionalidade dos sites.</string>
+    <string name="onboarding_protection_standard">Padrão</string>
+    <string name="onboarding_protection_standard_desc">Bloqueia anúncios, rastreadores e análises. Bom equilíbrio entre proteção e compatibilidade.</string>
+    <string name="onboarding_protection_strict">Rigoroso</string>
+    <string name="onboarding_protection_strict_desc">Bloqueio máximo. Pode afetar algumas funcionalidades de sites, mas oferece a proteção mais forte.</string>
+    <string name="onboarding_dns_title">Escolha o servidor DNS</string>
+    <string name="onboarding_dns_desc">Selecione um servidor DNS para resolver nomes de domínio. Você pode alterar isso mais tarde nas Configurações.</string>
+    <string name="onboarding_vpn_title">Permissão de VPN necessária</string>
+    <string name="onboarding_vpn_desc">O BlockAds usa uma VPN local para filtrar consultas DNS e bloquear anúncios. Nenhum dado sai do seu dispositivo — esta VPN funciona apenas localmente para interceptar e filtrar solicitações DNS.</string>
+    <string name="onboarding_vpn_grant">Conceder permissão de VPN</string>
+    <string name="onboarding_notification_title">Mantenha-se informado</string>
+    <string name="onboarding_notification_desc">Permita que as notificações vejam as estatísticas de bloqueio em tempo real e saibam quando sua proteção está ativa. Necessário para a notificação de VPN persistente no Android 13+.</string>
+    <string name="onboarding_notification_grant">Permitir notificações</string>
+    <string name="onboarding_battery_title">Mantenha a proteção em execução</string>
+    <string name="onboarding_battery_desc">Exclua o BlockAds da otimização de bateria para que o serviço VPN permaneça ativo em segundo plano e não seja encerrado pelo sistema.</string>
+    <string name="onboarding_battery_grant">Desativar otimização de bateria</string>
+    <string name="onboarding_permission_granted">✓ Permissão concedida</string>
+    <string name="onboarding_complete_title">Você agora está protegido!</string>
+    <string name="onboarding_complete_desc">Parabéns! O BlockAds está configurado e pronto para proteger seu dispositivo contra anúncios e rastreadores.</string>
+    <string name="onboarding_complete_stats">Toque em \&quot;Começar\&quot; para ativar a proteção</string>
+    <string name="onboarding_battery_unsupported">Não suportado</string>
+    <string name="onboarding_crash_report_title">Ajude a melhorar o BlockAds</string>
+    <string name="onboarding_crash_report_desc">O BlockAds prioriza a privacidade. Gostaríamos da sua permissão para coletar relatórios anônimos de falhas e nos ajudar a corrigir bugs rapidamente.\n\nIsto é estritamente OPCIONAL, NÃO contém informações de identificação pessoal (PII) e pode ser desativado a qualquer momento nas Configurações.</string>
+    <string name="onboarding_crash_report_btn_yes">Sim, ajudar a melhorar</string>
+    <string name="onboarding_crash_report_btn_no">Não, obrigado</string>
+</resources>

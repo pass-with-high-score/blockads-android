@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whitelist_apps_title">Whitelisted Apps</string>
+    <string name="whitelist_apps_search">Search apps…</string>
+    <string name="whitelist_apps_empty">No apps installed</string>
+    <string name="whitelist_apps_count">%d apps whitelisted</string>
+    <string name="whitelist_tab_user">User Apps</string>
+    <string name="whitelist_tab_system">System Apps</string>
+    <string name="about_title">About</string>
+    <string name="about_description">Free, open-source ad blocker.\nNo data collection. No tracking.</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_github">Source Code (GitHub)</string>
+    <string name="about_website">Website</string>
+    <string name="about_privacy_policy">Privacy Policy</string>
+    <string name="about_contact">Contact Us</string>
+    <string name="about_licenses">Open Source Licenses</string>
+    <string name="about_no_data">🔒 This app does not collect any personal data</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_category_protection">Protection</string>
+    <string name="settings_category_protection_desc">DNS server, protocol, auto-reconnect</string>
+    <string name="settings_category_interface">Interface</string>
+    <string name="settings_category_interface_desc">Theme, language</string>
+    <string name="settings_category_apps">Applications</string>
+    <string name="settings_category_apps_desc">App whitelist, per-app settings</string>
+    <string name="settings_category_filters">Filters</string>
+    <string name="settings_category_filters_desc">Filter management, auto-update, custom rules</string>
+    <string name="settings_category_data">Data</string>
+    <string name="settings_category_data_desc">Export/Import, clear logs</string>
+    <string name="settings_category_info">Information</string>
+    <string name="settings_category_info_desc">About, privacy policy, source code</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_show_bottom_nav_labels">Show Bottom Navigation Labels</string>
+    <string name="settings_show_bottom_nav_labels_desc">Display text under icons in the bottom navigation</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_lang_system">System</string>
+    <string name="settings_lang_en" translatable="false">English</string>
+    <string name="settings_lang_vi" translatable="false">Tiếng Việt</string>
+    <string name="settings_lang_ja" translatable="false">日本語</string>
+    <string name="settings_lang_ko" translatable="false">한국어</string>
+    <string name="settings_lang_zh" translatable="false">中文</string>
+    <string name="settings_lang_th" translatable="false">ไทย</string>
+    <string name="settings_lang_es" translatable="false">Español</string>
+    <string name="settings_lang_ru" translatable="false">Русский</string>
+    <string name="settings_lang_it" translatable="false">Italiano</string>
+    <string name="settings_lang_ar" translatable="false">العربية</string>
+    <string name="settings_lang_tr" translatable="false">Türkçe</string>
+    <string name="settings_lang_pl" translatable="false">Polski</string>
+    <string name="settings_lang_in" translatable="false">Bahasa Indonesia</string>
+    <string name="settings_lang_pt_br" translatable="false">Português (Brasil)</string>
+    <string name="settings_lang_uk" translatable="false">Українська</string>
+    <string name="settings_lang_de" translatable="false">Deutsch</string>
+    <string name="settings_lang_cs" translatable="false">Čeština</string>
+    <string name="settings_lang_iw" translatable="false">עברית</string>
+    <string name="settings_lang_fr" translatable="false">Français</string>
+    <string name="settings_lang_kk" translatable="false">Қазақша</string>
+    <string name="settings_accent_color">Accent Color</string>
+    <string name="settings_accent_color_desc">Customize the app\'s primary color</string>
+    <string name="accent_dynamic">Dynamic (Material You)</string>
+    <string name="accent_dynamic_desc">Uses your wallpaper colors</string>
+    <string name="settings_filter_lists">Filter Lists (%d active)</string>
+    <string name="settings_add_custom_filter">Add Custom Filter List</string>
+    <string name="settings_updating">Updating…</string>
+    <string name="settings_update_all">Update All Filters</string>
+    <string name="settings_whitelist_apps">Whitelisted Apps</string>
+    <string name="settings_whitelist_apps_desc">Exclude apps from ad blocking</string>
+    <string name="trusted_networks_title">Trusted networks</string>
+    <string name="trusted_networks_settings_desc">Auto-pause BlockAds on chosen Wi-Fi networks</string>
+    <string name="trusted_networks_toggle">Pause on trusted networks</string>
+    <string name="trusted_networks_desc">BlockAds turns off on these Wi-Fi networks and back on when you leave.</string>
+    <string name="trusted_networks_add_current">Add current Wi-Fi network</string>
+    <string name="trusted_networks_no_wifi">Not connected to Wi-Fi (or location permission needed)</string>
+    <string name="trusted_networks_list_header">Trusted Wi-Fi networks</string>
+    <string name="trusted_networks_empty">No trusted networks yet. Add the one you\'re on to pause BlockAds there.</string>
+    <string name="trusted_networks_paused_title">Paused on trusted network</string>
+    <string name="trusted_networks_paused_text">BlockAds is paused on \&quot;%1$s\&quot; — it resumes automatically when you leave this network.</string>
+    <string name="trusted_networks_paused_text_generic">BlockAds is paused on a trusted Wi-Fi network — it resumes automatically when you leave.</string>
+    <string name="settings_whitelist_domains">Whitelisted Domains</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_import">Import</string>
+    <string name="settings_about">About</string>
+    <string name="settings_about_desc">Version, privacy policy, source code</string>
+    <string name="settings_add_filter_title">Add Filter List</string>
+    <string name="settings_add_filter_name">Name</string>
+    <string name="settings_add_filter_url">URL (hosts format)</string>
+    <string name="settings_add">Add</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_add_domain_hint">Domain (e.g. example.com)</string>
+    <string name="settings_auto_reconnect">Auto-reconnect</string>
+    <string name="settings_auto_reconnect_desc">Restart ad blocker on device boot</string>
+    <string name="settings_safe_search">SafeSearch</string>
+    <string name="settings_safe_search_desc">Force safe search on supported search engines (Google, Bing)</string>
+    <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
+    <string name="settings_youtube_restricted_desc">Filter out mature videos on YouTube, block embedded mature videos on other sites, and hide all comments</string>
+    <string name="settings_fallback_dns">Fallback DNS Server</string>
+    <string name="settings_fallback_dns_placeholder" translatable="false">1.1.1.1</string>
+    <string name="settings_fallback_dns_desc">Fallback DNS is used when your primary DNS server fails. Enter the IP address of a backup DNS server.</string>
+    <string name="settings_fallback_dns_short_desc">Used as backup when primary DNS fails</string>
+    <string name="dns_error_duplicate">Fallback DNS cannot be the same as Custom DNS</string>
+    <string name="dns_category_fallback">Fallback</string>
+    <string name="settings_fallback_dns_not_set">Not set (no backup)</string>
+    <string name="settings_custom_dns_server">Custom DNS Server</string>
+    <string name="settings_custom_dns_placeholder" translatable="false">8.8.8.8, https://…, tls://…, quic://…</string>
+    <string name="settings_custom_dns_hint">Enter IP for Plain DNS, https:// for DoH, tls:// for DoT, or quic:// for DoQ</string>
+    <string name="settings_detected_plain">Plain DNS</string>
+    <string name="settings_detected_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="settings_detected_dot">DNS-over-TLS (DoT)</string>
+    <string name="settings_detected_doq">DNS-over-QUIC (DoQ)</string>
+    <string name="settings_dns_response_type">DNS response type</string>
+    <string name="dns_response_nxdomain" translatable="false">NXDOMAIN</string>
+    <string name="dns_response_nxdomain_desc">Domain does not exist (standard)</string>
+    <string name="dns_response_refused" translatable="false">REFUSED</string>
+    <string name="dns_response_refused_desc">Query refused (better compatibility)</string>
+    <string name="dns_response_custom_ip">Custom IP (0.0.0.0)</string>
+    <string name="dns_response_custom_ip_desc">Return a null route address (default)</string>
+    <string name="settings_clear_logs">Clear All Logs</string>
+    <string name="clear_logs_confirm_message">Are you sure you want to clear all DNS logs? This action cannot be undone.</string>
+    <string name="settings_auto_update_enabled">Enable auto-update</string>
+    <string name="settings_auto_update_enabled_desc">Automatically update filter lists in background</string>
+    <string name="settings_auto_update_frequency">Update frequency</string>
+    <string name="settings_auto_update_frequency_6h">Every 6 hours</string>
+    <string name="settings_auto_update_frequency_12h">Every 12 hours</string>
+    <string name="settings_auto_update_frequency_24h">Every 24 hours</string>
+    <string name="settings_auto_update_frequency_48h">Every 48 hours</string>
+    <string name="settings_auto_update_frequency_manual">Manual only</string>
+    <string name="settings_auto_update_wifi_only">Wi-Fi only</string>
+    <string name="settings_auto_update_wifi_only_desc">Only update when connected to Wi-Fi</string>
+    <string name="settings_auto_update_notification">Update notifications</string>
+    <string name="settings_auto_update_notification_normal">Normal</string>
+    <string name="settings_auto_update_notification_silent">Silent</string>
+    <string name="settings_auto_update_notification_none">None</string>
+    <string name="dns_provider_title">DNS Server</string>
+    <string name="dns_category_standard">Standard</string>
+    <string name="dns_category_privacy">Privacy-focused</string>
+    <string name="dns_category_family">Family-safe</string>
+    <string name="dns_category_custom">Custom</string>
+    <string name="dns_custom_title">Custom DNS</string>
+    <string name="dns_custom_description">Enter your own DNS server addresses</string>
+    <string name="dns_custom_save">Save</string>
+    <string name="dns_custom_cancel">Cancel</string>
+    <string name="dns_doh_badge" translatable="false">DoH</string>
+    <string name="app_management_title">App Management</string>
+    <string name="app_management_subtitle">%d apps</string>
+    <string name="app_management_subtitle_filtered">%1$d of %2$d apps</string>
+    <string name="app_management_desc">Manage per-app VPN routing and view stats</string>
+    <string name="app_management_search">Search apps…</string>
+    <string name="app_management_loading">Loading apps…</string>
+    <string name="app_management_refresh">Refresh</string>
+    <string name="app_management_sort">Sort</string>
+    <string name="app_management_sort_name">Sort by Name</string>
+    <string name="app_management_sort_queries">Sort by Queries</string>
+    <string name="app_management_sort_blocked">Sort by Blocked</string>
+    <string name="app_management_queries">Queries: %d</string>
+    <string name="app_management_blocked">Blocked: %d</string>
+    <string name="app_management_system">System</string>
+    <string name="app_management_vpn_toggle">VPN routing for %s</string>
+    <string name="daily_summary_channel_name">Daily Summary</string>
+    <string name="daily_summary_channel_description">End-of-day ad blocking summary</string>
+    <string name="daily_summary_title">Daily Protection Summary</string>
+    <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
+    <string name="milestone_channel_name">Milestones</string>
+    <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
+    <string name="milestone_title">🎉 Milestone reached!</string>
+    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="settings_category_notifications">Notifications</string>
+    <string name="settings_category_notifications_desc">Daily summary, milestones</string>
+    <string name="settings_daily_summary">Daily summary</string>
+    <string name="settings_daily_summary_desc">Show end-of-day blocking summary</string>
+    <string name="settings_milestone_notifications">Milestone notifications</string>
+    <string name="settings_milestone_notifications_desc">Notify when you reach blocking milestones</string>
+    <string name="profile_title">Protection Profiles</string>
+    <string name="profile_section_profiles">Profiles</string>
+    <string name="profile_section_schedules">Schedules</string>
+    <string name="profile_name_default">Default</string>
+    <string name="profile_desc_strict_family">Maximum blocking: ads, trackers, adult content &amp; gambling</string>
+    <string name="profile_desc_default">Balanced blocking: basic ads and trackers</string>
+    <string name="profile_desc_strict">Aggressive blocking: ads, trackers, analytics, telemetry</string>
+    <string name="profile_desc_family">Safe browsing: ads, adult content, gambling</string>
+    <string name="profile_desc_gaming">Light blocking: basic ads only, optimized for low latency</string>
+    <string name="profile_desc_custom">Your personalized protection rules</string>
+    <string name="profile_active">Active</string>
+    <string name="profile_switched">Profile switched</string>
+    <string name="profile_created">Profile created</string>
+    <string name="profile_deleted">Profile deleted</string>
+    <string name="profile_create_custom">Create Custom Profile</string>
+    <string name="profile_name_label">Profile Name</string>
+    <string name="profile_add_schedule">Add Schedule</string>
+    <string name="profile_schedule_start">Start Time</string>
+    <string name="profile_schedule_end">End Time</string>
+    <string name="profile_schedule_days">Days</string>
+    <string name="profile_schedule_added">Schedule added</string>
+    <string name="profile_schedule_deleted">Schedule deleted</string>
+    <string name="profile_schedule_every_day">Every day</string>
+    <string name="profile_day_mon">Mon</string>
+    <string name="profile_day_tue">Tue</string>
+    <string name="profile_day_wed">Wed</string>
+    <string name="profile_day_thu">Thu</string>
+    <string name="profile_day_fri">Fri</string>
+    <string name="profile_day_sat">Sat</string>
+    <string name="profile_day_sun">Sun</string>
+    <string name="settings_firewall">Firewall</string>
+    <string name="settings_sponsor">Sponsor Us</string>
+    <string name="settings_sponsor_desc">Support BlockAds development on GitHub</string>
+    <string name="settings_community">Community</string>
+    <string name="settings_reddit" translatable="false">Reddit</string>
+    <string name="settings_reddit_desc">Join our community on Reddit</string>
+    <string name="settings_telegram" translatable="false">Telegram</string>
+    <string name="settings_telegram_desc">Join our chat on Telegram</string>
+    <string name="settings_network_switch_delay">Network Switch Delay</string>
+    <string name="settings_network_switch_delay_desc">Pause VPN reconnect after network changes (useful for Wi-Fi Calling)</string>
+    <string name="settings_network_switch_delay_value">Delay: %1$d seconds</string>
+    <string name="settings_root_proxy">Root Proxy Mode</string>
+    <string name="settings_root_proxy_desc">Redirect DNS via iptables instead of VPN (requires Root)</string>
+    <string name="settings_privacy_diagnostics_title">Privacy &amp; Diagnostics</string>
+    <string name="settings_privacy_diagnostics_desc">Manage crash reporting and local logs</string>
+    <string name="settings_crash_reporting_title">Anonymous Crash Reporting</string>
+    <string name="settings_crash_reporting_subtitle">Automatically send error logs to help us fix issues. No personal data is included.</string>
+    <string name="settings_export_logs_title">Export Local Logs</string>
+    <string name="settings_export_logs_subtitle">Share offline debug logs directly via Email, Telegram, etc.</string>
+    <string name="settings_export_logs_chooser_title">Share Logs</string>
+    <string name="settings_export_logs_not_found">No logs found to export</string>
+    <string name="custom_color_title">Custom Color</string>
+    <string name="split_dns_title">Split DNS Zones</string>
+    <string name="split_dns_description">Comma-separated domain zones to resolve via WireGuard DNS instead of upstream (e.g., internal,local,lan)</string>
+    <string name="exclude_lan_title">Exclude LAN Traffic</string>
+    <string name="exclude_lan_description">Allow access to local network devices (printers, NAS, local servers) while WireGuard is active</string>
+    <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
+    <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
+</resources>

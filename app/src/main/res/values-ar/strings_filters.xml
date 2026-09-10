@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_custom_rule">إضافة قاعدة مخصصة</string>
+    <string name="add_rule_hint">أدخل قاعدة DNS مخصصة:
+• حظر: ||example.com^ أو example.com
+• سماح: @@||example.com^
+• تعليق: ! هذا تعليق</string>
+    <string name="all_rules_deleted">تم حذف جميع القواعد</string>
+    <string name="block_reason_custom_rule">قاعدة حظر مخصصة</string>
+    <string name="block_reason_filter_list">قائمة التصفية</string>
+    <string name="block_reason_firewall">جدار الحماية</string>
+    <string name="block_reason_security">موقع ويب خطير</string>
+    <string name="block_this_domain">حظر هذا النطاق</string>
+    <string name="custom_rules">قواعد مخصصة</string>
+    <string name="custom_rules_help">مساعدة القواعد المخصصة</string>
+    <string name="custom_rules_help_text">يتم تطبيق القواعد المخصصة قبل قوائم التصفية، مما يمنحها أولوية أعلى.
+
+التنسيقات المدعومة:
+• حظر النطاق: ||example.com^ أو example.com
+• السماح بالنطاق: @@||example.com^
+• تعليق: ! هذا تعليق
+
+أمثلة:
+• ||ads.example.com^ - يحظر ads.example.com
+• @@||example.com^ - يسمح بـ example.com (يتجاوز قوائم الحظر)
+• ! قواعدي المخصصة - سطر تعليق</string>
+    <string name="delete_all_rules">حذف جميع القواعد</string>
+    <string name="delete_all_rules_confirmation">هل أنت متأكد أنك تريد حذف جميع القواعد المخصصة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="export_rules">تصدير القواعد</string>
+    <string name="filter_built_in">مضمن</string>
+    <string name="filter_category_ad">حظر الإعلانات</string>
+    <string name="filter_category_security">الأمان</string>
+    <string name="filter_custom">مخصص</string>
+    <string name="filter_custom_empty">لم تتم إضافة أي فلاتر مخصصة بعد</string>
+    <string name="filter_detail_delete">حذف</string>
+    <string name="filter_detail_enabled">ممكّن</string>
+    <string name="filter_detail_last_updated">آخر تحديث</string>
+    <string name="filter_detail_rules">القواعد</string>
+    <string name="filter_detail_update">تحديث</string>
+    <string name="filter_domain_already_whitelisted">النطاق موجود بالفعل في القائمة البيضاء</string>
+    <string name="filter_error_duplicate_url">قائمة التصفية هذه موجودة بالفعل</string>
+    <string name="filter_error_invalid_url">يرجى إدخال عنوان URL صالح (http:// أو https://)</string>
+    <string name="filter_export_failed">فشل التصدير: %s</string>
+    <string name="filter_import_failed">فشل الاستيراد: %s</string>
+    <string name="filter_log_cleared">تم مسح السجل</string>
+    <string name="filter_search_hint">البحث عن الفلاتر…</string>
+    <string name="filter_search_no_results">لم يتم العثور على فلاتر لـ &quot;%s&quot;</string>
+    <string name="filter_settings_export">تم تصدير الإعدادات</string>
+    <string name="filter_settings_imported">تم استيراد الإعدادات</string>
+    <string name="filter_setup_active_count">%1$d نشط</string>
+    <string name="filter_setup_title">إعداد الفلاتر</string>
+    <string name="filter_update_failed">فشل تحديث قائمة التصفية</string>
+    <string name="filter_update_failed_message">فشل تحديث قوائم التصفية</string>
+    <string name="filter_update_notification_channel">تحديثات الفلاتر</string>
+    <string name="filter_update_notification_channel_desc">إشعارات لتحديثات قائمة التصفية</string>
+    <string name="filter_update_success">تم تحديث قوائم التصفية</string>
+    <string name="filter_update_success_message">تم تحديث %d نطاقًا بنجاح</string>
+    <string name="filter_updated">تم تحديث قائمة التصفية: %d نطاقًا</string>
+    <string name="firewall_app_blocked">الإنترنت محظور</string>
+    <string name="firewall_block_mobile">حظر بيانات الجوال</string>
+    <string name="firewall_block_wifi">حظر Wi-Fi</string>
+    <string name="firewall_configure">تكوين القاعدة</string>
+    <string name="firewall_count">تم حظر %d تطبيق</string>
+    <string name="firewall_enable">تمكين جدار الحماية</string>
+    <string name="firewall_enable_desc">حظر الوصول إلى الإنترنت للتطبيقات المحددة عبر DNS</string>
+    <string name="firewall_network_all">الكل</string>
+    <string name="firewall_network_mobile">الجوال</string>
+    <string name="firewall_schedule">الجدول الزمني</string>
+    <string name="firewall_schedule_desc">الحظر خلال ساعات محددة فقط</string>
+    <string name="firewall_schedule_from">من</string>
+    <string name="firewall_schedule_hour_plus">ساعة +</string>
+    <string name="firewall_schedule_minute_plus">دقيقة +</string>
+    <string name="firewall_schedule_to">إلى</string>
+    <string name="firewall_search">البحث في التطبيقات…</string>
+    <string name="firewall_title">جدار الحماية</string>
+    <string name="import_label">استيراد</string>
+    <string name="import_rules">استيراد القواعد</string>
+    <string name="import_rules_hint">الصق القواعد (واحدة لكل سطر):</string>
+    <string name="block_reason_upstream_dns">DNS الرئيسي</string>
+    <string name="no_custom_rules">لا توجد قواعد مخصصة</string>
+    <string name="no_rules_to_export">لا توجد قواعد للتصدير</string>
+    <string name="rule">قاعدة</string>
+    <string name="rule_added">تمت إضافة القاعدة بنجاح</string>
+    <string name="rules">القواعد</string>
+    <string name="rules_copied_to_clipboard">تم نسخ القواعد إلى الحافظة</string>
+    <string name="rules_imported">تم استيراد %d قاعدة</string>
+    <string name="tap_add_to_create_rule">انقر على + لإنشاء أول قاعدة مخصصة لك</string>
+    <string name="whitelist_domains_add">إضافة نطاق</string>
+    <string name="whitelist_domains_empty">لا توجد نطاقات في القائمة البيضاء</string>
+    <string name="whitelist_domains_hint">مثال: example.com</string>
+    <string name="whitelist_domain_added">تمت إضافة النطاق إلى القائمة البيضاء: %s</string>
+    <string name="whitelist_domain_removed">تمت إزالة النطاق من القائمة البيضاء</string>
+    <string name="filter_chip_all">الكل</string>
+    <string name="filter_chip_enabled">مفعّل</string>
+    <string name="filter_chip_disabled">معطّل</string>
+    <string name="blocklist_domains_empty">لا توجد نطاقات محظورة</string>
+    <string name="blocklist_domain_added">تم حظر النطاق: %s</string>
+    <string name="blocklist_domain_removed">تم إزالة النطاق من قائمة الحظر</string>
+    <string name="blocklist_domain_already_exists">النطاق محظور بالفعل</string>
+    <string name="import_from_file">استيراد من ملف</string>
+    <string name="export_to_file">تصدير إلى ملف</string>
+    <string name="export_format_title">تنسيق التصدير</string>
+    <string name="export_format_json">JSON (.json)</string>
+    <string name="export_format_txt">نص (.txt)</string>
+    <string name="rules_exported">تم تصدير %d من القواعد</string>
+    <string name="export_failed">فشل التصدير: %s</string>
+    <string name="import_failed">فشل الاستيراد: %s</string>
+    <string name="https_filtering_title">تصفية HTTPS</string>
+    <string name="https_filtering_toggle_label">فلتر الإعلانات HTTPS</string>
+    <string name="https_filtering_status_active">نشط — جاري إخفاء الإعلانات</string>
+    <string name="https_filtering_status_inactive">غير نشط</string>
+    <string name="https_filtering_explain_title">كيف يعمل هذا؟</string>
+    <string name="https_filtering_explain_body">تعمل تصفية HTTPS على اعتراض حركة مرور الويب من المتصفحات المحددة وتطبق قواعد CSS تجميلية لإخفاء لافتات الإعلانات والطبقات المتراكبة وعناصر الإعلانات المرئية الأخرى.\n\nللقيام بذلك، يجب تثبيت شهادة Root CA محلية على جهازك. يتم إنشاء هذه الشهادة محليًا ولا تترك هاتفك أبدًا. لا يتم اعتراض تطبيقات البنوك و Google والخدمات الحساسة الأخرى أبدًا.</string>
+    <string name="https_filtering_ca_title">شهادة Root CA</string>
+    <string name="https_filtering_ca_desc">اتبع هذه الخطوات لإعداد فلتر الإعلانات HTTPS:</string>
+    <string name="https_filtering_export_ca">الخطوة 1: حفظ الشهادة في التنزيلات</string>
+    <string name="https_filtering_cert_saved">تم حفظ الشهادة في التنزيلات!</string>
+    <string name="https_filtering_install_steps">الخطوة 2: تثبيت الشهادة يدويًا:\n\n1. انتقل إلى الإعدادات → الأمان → التشفير &amp; بيانات الاعتماد\n2. اضغط على \&quot;تثبيت شهادة\&quot; → \&quot;شهادة CA\&quot;\n3. حدد \&quot;BlockAds-RootCA.crt\&quot; من التنزيلات\n4. تأكيد التثبيت</string>
+    <string name="https_filtering_open_settings">فتح إعدادات الأمان</string>
+    <string name="https_filtering_step1_title">الخطوة 1: حفظ الشهادة</string>
+    <string name="https_filtering_step1_desc">قم بتنزيل شهادة Root CA على جهازك</string>
+    <string name="https_filtering_step2_title">الخطوة 2: تثبيت الشهادة</string>
+    <string name="https_filtering_step2_desc">قم بتثبيت الشهادة على جهازك:</string>
+    <string name="https_filtering_step3_title">الخطوة 3: التحقق من التثبيت</string>
+    <string name="https_filtering_step3_desc">تحقق مما إذا كانت الشهادة مثبتة بشكل صحيح</string>
+    <string name="https_filtering_verify_cert">التحقق من الشهادة</string>
+    <string name="https_filtering_cert_installed">الشهادة مثبتة ✓</string>
+    <string name="https_filtering_cert_not_installed">الشهادة غير مثبتة</string>
+    <string name="https_filtering_cert_checking">جاري التحقق…</string>
+    <string name="https_filtering_cert_vpn_required">اضغط على &quot;التحقق من الشهادة&quot; للتحقق</string>
+    <string name="https_filtering_browser_section">اختيار المتصفح</string>
+    <string name="https_filtering_browser_desc">حدد المتصفحات لتطبيق فلتر الإعلانات. يتم تصفية التطبيقات المحددة فقط.</string>
+    <string name="https_filtering_settings_desc">إخفاء الإعلانات بصريًا في المتصفحات</string>
+    <string name="domain_rules_title">قواعد النطاق</string>
+    <string name="domain_rules_tab_whitelist">القائمة البيضاء</string>
+    <string name="domain_rules_tab_blocklist">قائمة الحظر</string>
+    <string name="edit_custom_filter">تعديل الفلتر المخصص</string>
+    <string name="filter_name">اسم الفلتر</string>
+    <string name="filter_url_domain">رابط/نطاق الفلتر</string>
+    <string name="add_blocklist_domains_title">إضافة نطاقات محظورة</string>
+    <string name="add_whitelisted_domain_title">إضافة نطاق مسموح به</string>
+    <string name="filter_build_locally">البناء محلياً (بدون خادم)</string>
+    <string name="filter_build_mode">وضع البناء</string>
+    <string name="filter_build_mode_local">تم البناء على الجهاز</string>
+    <string name="filter_build_mode_server">تم البناء عبر الخادم</string>
+    <string name="filter_switch_to_server">التبديل إلى الخادم</string>
+    <string name="filter_switch_to_local">التبديل إلى المحلي</string>
+    <string name="filter_compile_enqueued">جاري بناء الفلتر في الخلفية…</string>
+    <string name="filter_compile_progress_title">جاري تجميع الفلتر…</string>
+    <string name="filter_compile_success_title">تم تجميع الفلتر</string>
+    <string name="filter_compile_failed_title">فشل تجميع الفلتر</string>
+    <string name="filter_compile_channel_name">تجميع الفلتر</string>
+    <string name="https_filtering_wireguard_disabled">تعطيل WireGuard (غير متوافق مع تصفية HTTPS)</string>
+    <string name="https_filtering_cert_saved_downloads">✅ تم حفظ الشهادة في Downloads/%1$s</string>
+    <string name="https_filtering_cert_saved_legacy">تم حفظ الشهادة. ثبتها من مدير الملفات.</string>
+    <string name="https_filtering_started">بدأت تصفية HTTPS</string>
+    <string name="https_filtering_stopped">توقفت تصفية HTTPS</string>
+    <string name="https_filtering_http3_title">تصفية HTTP/3 (QUIC)</string>
+    <string name="https_filtering_http3_desc">حظر QUIC في المتصفح لفرض اتصالات قابلة للتصفية للحصول على أقصى تصفية للإعلانات. قد يتسبب في تحميل بعض الصفحات جزئياً. أوقفه إذا لم يتم تحميل الصفحات بالكامل.</string>
+</resources>

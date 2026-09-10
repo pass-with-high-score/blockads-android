@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">スマートに広告をブロック</string>
+    <string name="onboarding_desc_1">ワンタップですべてのアプリとブラウザの広告をブロックします。DNSフィルタリング技術を使用 — root不要。\n\n🔒 プライバシーの約束: 閲覧データを収集、保存、送信することは一切ありません。すべての処理はデバイス上でのみ行われます。</string>
+    <string name="onboarding_skip">スキップ</string>
+    <string name="onboarding_next">次へ</string>
+    <string name="onboarding_get_started">始める</string>
+    <string name="onboarding_recommended">★ おすすめ</string>
+    <string name="onboarding_protection_title">保護レベルを選択</string>
+    <string name="onboarding_protection_desc">広告やトラッカーをどの程度強力にブロックするか選択してください</string>
+    <string name="onboarding_protection_basic">基本</string>
+    <string name="onboarding_protection_basic_desc">主要な広告ネットワークをブロックします。ウェブサイトの機能への影響は最小限です。</string>
+    <string name="onboarding_protection_standard">標準</string>
+    <string name="onboarding_protection_standard_desc">広告、トラッカー、アナリティクスをブロックします。保護と互換性のバランスが良好です。</string>
+    <string name="onboarding_protection_strict">厳格</string>
+    <string name="onboarding_protection_strict_desc">最大限のブロック。一部のウェブサイト機能に影響する場合がありますが、最も強力な保護を提供します。</string>
+    <string name="onboarding_dns_title">DNSサーバーを選択</string>
+    <string name="onboarding_dns_desc">ドメイン名を解決するDNSサーバーを選択してください。後で設定から変更できます。</string>
+    <string name="onboarding_vpn_title">VPN権限が必要です</string>
+    <string name="onboarding_vpn_desc">BlockAdsはローカルVPNを使用してDNSクエリをフィルタリングし、広告をブロックします。データがデバイス外に送信されることはありません — このVPNはDNSリクエストの傍受とフィルタリングのためにローカルでのみ動作します。</string>
+    <string name="onboarding_vpn_grant">VPN権限を許可</string>
+    <string name="onboarding_notification_title">最新情報を受け取る</string>
+    <string name="onboarding_notification_desc">リアルタイムのブロック統計情報を確認し、保護が有効であることを知るために通知を許可してください。Android 13以降ではVPNの常駐通知に必要です。</string>
+    <string name="onboarding_notification_grant">通知を許可</string>
+    <string name="onboarding_battery_title">保護を継続的に実行</string>
+    <string name="onboarding_battery_desc">VPNサービスがバックグラウンドで有効な状態を維持し、システムによって停止されないよう、BlockAdsをバッテリー最適化から除外してください。</string>
+    <string name="onboarding_battery_grant">バッテリー最適化を無効にする</string>
+    <string name="onboarding_permission_granted">✓ 権限が許可されました</string>
+    <string name="onboarding_complete_title">保護が有効になりました！</string>
+    <string name="onboarding_complete_desc">おめでとうございます！BlockAdsが設定され、広告やトラッカーからデバイスを保護する準備ができました。</string>
+    <string name="onboarding_complete_stats">「始める」をタップして保護を有効にしてください</string>
+    <string name="onboarding_battery_unsupported">非対応</string>
+    <string name="onboarding_crash_report_title">BlockAdsの改善にご協力ください</string>
+    <string name="onboarding_crash_report_desc">BlockAdsはプライバシーを第一に考えています。バグを迅速に修正するため、匿名のクラッシュレポートを収集する許可を頂けないでしょうか。\n\nこれは完全に任意（オプトイン）であり、個人を特定できる情報（PII）は一切含まれません。設定からいつでも無効にできます。</string>
+    <string name="onboarding_crash_report_btn_yes">はい、改善に協力します</string>
+    <string name="onboarding_crash_report_btn_no">いいえ、結構です</string>
+</resources>
