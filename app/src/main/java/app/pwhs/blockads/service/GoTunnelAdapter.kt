@@ -305,7 +305,18 @@ class GoTunnelAdapter(
         // source-UID visibility, so per-app scoping (MITM only the
         // selected browsers) actually works on Android 10+. The legacy
         // VpnService HTTP proxy path is no longer used.
-        if (httpsFilteringEnabled && certDir.isNotEmpty()) {
+        // WireGuard and the userspace TCP/IP stack are mutually exclusive:
+        // the stack terminates each flow and dials it directly, bypassing the
+        // WG tunnel. The engine is created once (onCreate) and reused across
+        // VPN restarts, so a `useTcpStack=true` left over from an earlier
+        // HTTPS-filtering session would silently hijack all non-DNS WireGuard
+        // traffic — the handshake still completes, but SSH/ping never enter
+        // the tunnel. Set the flag explicitly on every start from the current
+        // mode so stale state can't leak across a mode switch.
+        val mitmMode = httpsFilteringEnabled && certDir.isNotEmpty() && wgConfigJson.isEmpty()
+        engine.setUseTcpStack(mitmMode)
+
+        if (mitmMode) {
             try {
                 val pm = context.packageManager
                 val uids = selectedBrowsers.mapNotNull { pkg ->
@@ -316,8 +327,7 @@ class GoTunnelAdapter(
                     }
                 }.joinToString(",")
 
-                // Enable the stack, init CA + filter, register UIDs.
-                engine.setUseTcpStack(true)
+                // Init CA + filter, register UIDs.
                 engine.startStackMitm(certDir)
                 engine.setMitmAllowedUIDs(uids)
                 engine.setFilterHttp3(filterHttp3)
@@ -374,7 +384,7 @@ class GoTunnelAdapter(
             Timber.d("Starting Go tunnel engine in WIREGUARD mode (fd=$fd)")
             engine.start(fd.toLong(), protector, wgConfigJson)
         } else {
-            Timber.d("Starting Go tunnel engine in FULL-TUNNEL mode (fd=$fd, mitm=${httpsFilteringEnabled && certDir.isNotEmpty()})")
+            Timber.d("Starting Go tunnel engine in FULL-TUNNEL mode (fd=$fd, mitm=$mitmMode)")
             engine.startFull(fd.toLong(), protector)
         }
     }
