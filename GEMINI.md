@@ -9,21 +9,32 @@ This file serves as the primary instructions and workspace rules for AI assistan
   - Android 15 compatibility requires 16KB page size alignment (`-extldflags=-Wl,-z,max-page-size=16384`).
 - **Privacy Standard**: 100% on-device filtering, zero telemetry without explicit user opt-in, no data selling or third-party ad tracking.
 
-## Development Workflow & Rules
+## Development Workflow & Code Rules
 
-### 1. Kotlin & Jetpack Compose
+### 1. File Length & Structural Rules
+- **Max 500 lines per file**: No single file may exceed 500 lines. Decompose large files into smaller, focused files, sub-composables, or delegates.
+- **Single Responsibility Principle (SRP)**: Each file has exactly one responsibility. Never lump models, contracts, ViewModels, and UI composables into the same file.
+- **Flat Structure (No deep nesting)**: Avoid deep nesting in composable hierarchies, conditional logic, and nested inner classes.
+- **Clean Code & Reusability (DRY)**: Reusable components (cards, items, dialogs, utils) must be extracted into shared packages instead of duplicating code across screens.
+
+### 2. MVI Architecture Standard
+Each screen must strictly follow the **MVI pattern** separated across dedicated files:
+- **Contract (`*Contract.kt`)**: Defines `UiState` (immutable data class), `UiIntent` / `UiEvent` (sealed interface for user actions), and `UiEffect` (one-off side effects like navigation/snackbars).
+- **ViewModel (`*ViewModel.kt`)**: Handles business logic, exposes `StateFlow<UiState>` and `SharedFlow<UiEffect>`, processes `UiIntent` via a single entry point, and injects dependencies via Koin constructor injection.
+- **Screen (`*Screen.kt`)**: Pure, stateless Jetpack Compose UI receiving `UiState` and `(UiIntent) -> Unit` event dispatcher. Handle one-off `UiEffect` via `LaunchedEffect`.
+
+### 3. Kotlin & Jetpack Compose
 - Always use **Material 3** components (`androidx.compose.material3`).
 - Follow unidirectional data flow with `StateFlow<UiState>` and `collectAsStateWithLifecycle()`.
-- Inject dependencies via Koin constructor injection.
 - Keep composables stateless where possible and supply `@Preview` for Light/Dark themes.
 
-### 2. Go Tunnel & Gomobile Interop
+### 4. Go Tunnel & Gomobile Interop
 - All exported functions, structs, and interfaces in `tunnel/` must use **strictly gomobile-compatible types** (primitives, basic interfaces, `[]byte`).
 - Avoid passing slices of structs, maps, or non-byte slices directly across JNI boundaries (serialize via JSON string or iterator callback).
 - Ensure hot path performance (DNS interception, Bloom filters) has zero unnecessary heap allocations.
 - When changing `tunnel/*.go`, recompile via `./scripts/build_tunnel.sh` or `./gradlew buildGoTunnel`.
 
-### 3. Git & Commits
+### 5. Git & Commits
 - Commit messages must strictly adhere to **Conventional Commits** (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `perf:`).
 - Verify code integrity with `./gradlew assembleDebug` or relevant unit tests before finalizing.
 
