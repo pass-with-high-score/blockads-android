@@ -115,6 +115,42 @@ def check_gomobile_compatibility():
 
     return issues
 
+def check_verbose_comments():
+    issues = []
+    targets = [ROOT_DIR / "app" / "src" / "main" / "java", ROOT_DIR / "blockadstv" / "src" / "main" / "java"]
+
+    for target in targets:
+        if not target.exists():
+            continue
+        for path in target.rglob("*.kt"):
+            rel = path.relative_to(ROOT_DIR)
+            try:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+                
+                consecutive_comments = 0
+                start_line = 0
+                for i, line in enumerate(lines):
+                    stripped = line.strip()
+                    # Check single line comments (excluding license header at top of file)
+                    if stripped.startswith("//") and not stripped.startswith("///"):
+                        if consecutive_comments == 0:
+                            start_line = i + 1
+                        consecutive_comments += 1
+                    else:
+                        if consecutive_comments > 5 and start_line > 20:
+                            issues.append({
+                                "file": str(rel),
+                                "line": start_line,
+                                "count": consecutive_comments,
+                                "preview": lines[start_line - 1].strip()[:60]
+                            })
+                        consecutive_comments = 0
+            except Exception:
+                pass
+
+    return issues
+
 def main():
     print("# BlockAds Codebase Audit Report\n")
 
@@ -153,13 +189,24 @@ def main():
             print(f"- `{g['file']}`: `func {g['func']}`: {g['issue']}")
         print()
 
-    print("## 4. Prioritized Refactoring Recommendations")
+    comment_issues = check_verbose_comments()
+    print("## 4. Verbose Comments & Dead Code Check")
+    if not comment_issues:
+        print("✅ No excessive comment blocks detected (> 5 consecutive lines).\n")
+    else:
+        print(f"Found **{len(comment_issues)}** large comment blocks to review/clean up:\n")
+        for c in comment_issues[:10]:
+            print(f"- `{c['file']}` (Line {c['line']}): {c['count']} consecutive comment lines (`{c['preview']}...`)")
+        print()
+
+    print("## 5. Prioritized Refactoring Recommendations")
     if line_violations:
         top_violator = line_violations[0]
         print(f"1. **Priority 1 (God-Class Decomposition)**: Refactor `{top_violator['file']}` ({top_violator['lines']} lines) into focused delegates/services.")
     if mvi_issues:
         print(f"2. **Priority 2 (MVI Standardization)**: Extract `*Contract.kt` for UI screens currently missing dedicated contract files.")
     print("3. **Priority 3 (Component Reuse)**: Consolidate repeated UI cards, preference items, and dialogs into `ui/components/`.")
+
 
 if __name__ == "__main__":
     main()

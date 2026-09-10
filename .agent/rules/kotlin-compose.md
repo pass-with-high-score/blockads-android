@@ -23,6 +23,11 @@ Each screen must strictly follow the **MVI (Model-View-Intent)** pattern separat
 ## Clean Code & High Reusability (DRY)
 - **Shared Components**: Do not duplicate UI elements or business logic. Extract reusable composables (cards, headers, toggle items, empty states) into shared UI packages.
 - **Extensions & Utils**: Place repetitive logic (formatting, permissions check, flow extensions) into dedicated utility files.
+- **Concise Comments (No Verbose / Long Comments)**:
+  - Code must be self-explanatory with clean, descriptive naming for variables, classes, and functions.
+  - Avoid writing obvious comments that describe *what* code does (e.g., `// set state to true`).
+  - Only write brief (1-2 lines max) comments when explaining *why* an unusual or non-obvious decision was made.
+  - Never commit commented-out dead code or lengthy comment blocks.
 
 ## Compose & Material 3 Standards
 - **Material 3**: Exclusively use `androidx.compose.material3` components and color schemes.
