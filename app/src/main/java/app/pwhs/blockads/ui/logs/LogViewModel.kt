@@ -14,6 +14,7 @@ import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.utils.CustomRuleParser
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 import app.pwhs.blockads.data.datastore.AppPreferences
-import kotlinx.coroutines.flow.map
 
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
@@ -47,8 +47,12 @@ class LogViewModel(
     private val application: Application,
 ) : AndroidViewModel(application) {
 
-    private val _showBlockedOnly = MutableStateFlow(false)
-    val showBlockedOnly: StateFlow<Boolean> = _showBlockedOnly.asStateFlow()
+    private val _filterStatus = MutableStateFlow(LogFilterStatus.ALL)
+    val filterStatus: StateFlow<LogFilterStatus> = _filterStatus.asStateFlow()
+
+    val showBlockedOnly: StateFlow<Boolean> = _filterStatus
+        .map { it == LogFilterStatus.BLOCKED }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -84,17 +88,20 @@ class LogViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val logs: StateFlow<List<DnsLogEntry>> = combine(
-        _showBlockedOnly,
+        _filterStatus,
         _timeRange
-    ) { blockedOnly, range -> Pair(blockedOnly, range) }
-        .flatMapLatest { (blockedOnly, range) ->
+    ) { status, range -> Pair(status, range) }
+        .flatMapLatest { (status, range) ->
             val since = if (range == TimeRange.ALL) 0L
             else System.currentTimeMillis() - range.millis
-            when {
-                blockedOnly && since > 0 -> dnsLogDao.getBlockedOnlySince(since)
-                blockedOnly -> dnsLogDao.getBlockedOnly()
-                since > 0 -> dnsLogDao.getAllSince(since)
-                else -> dnsLogDao.getAll()
+            when (status) {
+                LogFilterStatus.ALL -> if (since > 0) dnsLogDao.getAllSince(since) else dnsLogDao.getAll()
+                LogFilterStatus.BLOCKED -> if (since > 0) dnsLogDao.getBlockedOnlySince(since) else dnsLogDao.getBlockedOnly()
+                LogFilterStatus.THREATS -> if (since > 0) {
+                    dnsLogDao.getBlockedByReasonSince(FilterListRepository.BLOCK_REASON_SECURITY, since)
+                } else {
+                    dnsLogDao.getBlockedByReason(FilterListRepository.BLOCK_REASON_SECURITY)
+                }
             }
         }
         .combine(_searchQuery) { logs, query ->
@@ -110,8 +117,16 @@ class LogViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    fun setFilterStatus(status: LogFilterStatus) {
+        _filterStatus.value = status
+    }
+
     fun toggleFilter() {
-        _showBlockedOnly.value = !_showBlockedOnly.value
+        _filterStatus.value = if (_filterStatus.value == LogFilterStatus.BLOCKED) {
+            LogFilterStatus.ALL
+        } else {
+            LogFilterStatus.BLOCKED
+        }
     }
 
     fun setSearchQuery(query: String) {

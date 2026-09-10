@@ -72,6 +72,7 @@ import app.pwhs.blockads.ui.home.component.StatsChart
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.SecurityOrange
+import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.utils.AppConstants.AVG_AD_SIZE_KB
 import app.pwhs.blockads.utils.VpnUtils
@@ -92,7 +93,7 @@ fun HomeScreen(
     onRequestVpnPermission: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
     onNavigateToStatisticsScreen: () -> Unit = {},
-    onNavigateToLogScreen: () -> Unit = {},
+    onNavigateToLogScreen: (LogFilterStatus) -> Unit = {},
     onNavigateToProfileScreen: () -> Unit = {},
 ) {
     val vpnEnabled by viewModel.vpnEnabled.collectAsStateWithLifecycle()
@@ -131,7 +132,7 @@ fun HomeScreen(
                 filterLoadFailed = filterLoadFailed,
                 viewModel = viewModel,
                 onNavigateToStatisticsScreen = onNavigateToStatisticsScreen,
-                onNavigateToLogScreen = onNavigateToLogScreen
+                onNavigateToLogScreen = { onNavigateToLogScreen(LogFilterStatus.ALL) }
             )
         }
     ) { innerPadding ->
@@ -344,7 +345,8 @@ fun HomeScreen(
                     icon = Icons.Default.QueryStats,
                     label = stringResource(R.string.total_queries),
                     value = formatCount(totalCount),
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.secondary,
+                    onClick = { onNavigateToLogScreen(LogFilterStatus.ALL) }
                 )
                 StatCard(
                     modifier = Modifier
@@ -353,7 +355,8 @@ fun HomeScreen(
                     icon = Icons.Default.Block,
                     label = stringResource(R.string.blocked_queries),
                     value = formatCount(blockedCount),
-                    color = DangerRed
+                    color = DangerRed,
+                    onClick = { onNavigateToLogScreen(LogFilterStatus.BLOCKED) }
                 )
                 StatCard(
                     modifier = Modifier
@@ -362,7 +365,8 @@ fun HomeScreen(
                     icon = Icons.Default.GppGood,
                     label = stringResource(R.string.home_security_threats),
                     value = formatCount(securityThreatsBlocked),
-                    color = SecurityOrange
+                    color = SecurityOrange,
+                    onClick = { onNavigateToLogScreen(LogFilterStatus.THREATS) }
                 )
             }
 

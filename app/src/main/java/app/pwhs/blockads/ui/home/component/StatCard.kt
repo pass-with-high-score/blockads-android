@@ -1,6 +1,7 @@
 package app.pwhs.blockads.ui.home.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,16 +30,15 @@ fun StatCard(
     label: String,
     value: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val cardDescription = stringResource(R.string.accessibility_stat_card, label, value)
-    Card(
-        modifier = modifier.semantics { contentDescription = cardDescription },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
+    val cardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+    val cardShape = RoundedCornerShape(16.dp)
+    val content: @Composable ColumnScope.() -> Unit = {
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
@@ -61,5 +61,22 @@ fun StatCard(
                 color = TextSecondary
             )
         }
+    }
+
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = modifier.semantics { contentDescription = cardDescription },
+            colors = cardColors,
+            shape = cardShape,
+            content = content
+        )
+    } else {
+        Card(
+            modifier = modifier.semantics { contentDescription = cardDescription },
+            colors = cardColors,
+            shape = cardShape,
+            content = content
+        )
     }
 }

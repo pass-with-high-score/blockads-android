@@ -203,4 +203,24 @@ interface DnsLogDao {
         """
     )
     fun getBlockedCountByReasonSince(reason: String, since: Long): Flow<Int>
+
+    @Query(
+        """
+        SELECT * FROM dns_logs WHERE isBlocked = 1
+        AND (INSTR(',' || blockedBy || ',', ',' || :reason || ',') > 0
+             OR blockedBy IN (SELECT CAST(id AS TEXT) FROM filter_lists WHERE category = :reason))
+        ORDER BY timestamp DESC
+        """
+    )
+    fun getBlockedByReason(reason: String): Flow<List<DnsLogEntry>>
+
+    @Query(
+        """
+        SELECT * FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since
+        AND (INSTR(',' || blockedBy || ',', ',' || :reason || ',') > 0
+             OR blockedBy IN (SELECT CAST(id AS TEXT) FROM filter_lists WHERE category = :reason))
+        ORDER BY timestamp DESC
+        """
+    )
+    fun getBlockedByReasonSince(reason: String, since: Long): Flow<List<DnsLogEntry>>
 }

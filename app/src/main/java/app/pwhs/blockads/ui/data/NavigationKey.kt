@@ -1,6 +1,7 @@
 package app.pwhs.blockads.ui.data
 
 import androidx.navigation3.runtime.NavKey
+import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -31,7 +32,7 @@ data object SettingsKey : NavKey
 data object StatisticsKey : NavKey
 
 @Serializable
-data object LogsKey : NavKey
+data class LogsKey(val filterStatus: LogFilterStatus = LogFilterStatus.ALL) : NavKey
 
 @Serializable
 data object ProfileKey : NavKey

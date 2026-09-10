@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GppGood
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +47,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,9 +66,11 @@ import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
+import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.logs.dialog.ConfirmClearLogDialog
 import app.pwhs.blockads.ui.theme.DangerRed
+import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber
 import org.koin.androidx.compose.koinViewModel
@@ -75,11 +79,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun LogsScreen(
     modifier: Modifier = Modifier,
+    initialFilterStatus: LogFilterStatus = LogFilterStatus.ALL,
     viewModel: LogViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = { }
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
-    val showBlockedOnly by viewModel.showBlockedOnly.collectAsStateWithLifecycle()
+    val filterStatus by viewModel.filterStatus.collectAsStateWithLifecycle()
     val filterNames by viewModel.filterNames.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
@@ -96,6 +101,12 @@ fun LogsScreen(
     val resource = LocalResources.current
 
     UiEventEffect(viewModel.events)
+
+    LaunchedEffect(initialFilterStatus) {
+        if (initialFilterStatus != LogFilterStatus.ALL) {
+            viewModel.setFilterStatus(initialFilterStatus)
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -204,64 +215,86 @@ fun LogsScreen(
                 )
             }
 
-            // Filter chips row: status + time range
-            Row(
+            // Filter chips row: status + record logs
+            LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                FilterChip(
-                    selected = !showBlockedOnly,
-                    onClick = { if (showBlockedOnly) viewModel.toggleFilter() },
-                    label = { Text(stringResource(R.string.logs_filter_all)) },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Dns,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                item {
+                    FilterChip(
+                        selected = filterStatus == LogFilterStatus.ALL,
+                        onClick = { viewModel.setFilterStatus(LogFilterStatus.ALL) },
+                        label = { Text(stringResource(R.string.logs_filter_all)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Dns,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
-                )
-                FilterChip(
-                    selected = showBlockedOnly,
-                    onClick = { if (!showBlockedOnly) viewModel.toggleFilter() },
-                    label = { Text(stringResource(R.string.logs_filter_blocked)) },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Block,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                }
+                item {
+                    FilterChip(
+                        selected = filterStatus == LogFilterStatus.BLOCKED,
+                        onClick = { viewModel.setFilterStatus(LogFilterStatus.BLOCKED) },
+                        label = { Text(stringResource(R.string.logs_filter_blocked)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Block,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = DangerRed.copy(alpha = 0.15f),
+                            selectedLabelColor = DangerRed
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = DangerRed.copy(alpha = 0.15f),
-                        selectedLabelColor = DangerRed
                     )
-                )
-                
-                Spacer(modifier = Modifier.weight(1f))
-
-                FilterChip(
-                    selected = recordDnsLogs,
-                    onClick = { viewModel.setRecordDnsLogs(!recordDnsLogs) },
-                    label = { Text(stringResource(R.string.log_record_logs)) },
-                    leadingIcon = {
-                        Icon(
-                            if (recordDnsLogs) Icons.Default.Check else Icons.Default.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                }
+                item {
+                    FilterChip(
+                        selected = filterStatus == LogFilterStatus.THREATS,
+                        onClick = { viewModel.setFilterStatus(LogFilterStatus.THREATS) },
+                        label = { Text(stringResource(R.string.home_security_threats)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.GppGood,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = SecurityOrange.copy(alpha = 0.15f),
+                            selectedLabelColor = SecurityOrange
                         )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
                     )
-                )
+                }
+                item {
+                    FilterChip(
+                        selected = recordDnsLogs,
+                        onClick = { viewModel.setRecordDnsLogs(!recordDnsLogs) },
+                        label = { Text(stringResource(R.string.log_record_logs)) },
+                        leadingIcon = {
+                            Icon(
+                                if (recordDnsLogs) Icons.Default.Check else Icons.Default.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
             }
 
             // Time range filter chips

@@ -174,9 +174,9 @@ fun HomeApp(
                     HomeScreen(
                         onShowVpnConflictDialog = onShowVpnConflictDialog,
                         onRequestVpnPermission = onRequestVpnPermission,
-                        onNavigateToLogScreen = {
+                        onNavigateToLogScreen = { filterStatus ->
                             showBottomBar = false
-                            homeStack.add(LogsKey)
+                            homeStack.add(LogsKey(filterStatus))
                         },
                         onNavigateToStatisticsScreen = {
                             showBottomBar = false
@@ -254,6 +254,7 @@ fun HomeApp(
                 }
                 entry<LogsKey> {
                     LogsScreen(
+                        initialFilterStatus = it.filterStatus,
                         onNavigateBack = {
                             safePop(homeStack)
                         }
