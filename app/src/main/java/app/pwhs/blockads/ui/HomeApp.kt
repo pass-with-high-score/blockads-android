@@ -101,6 +101,13 @@ fun HomeApp(
         BottomBarScreen.Settings
     )
     var showBottomBar by rememberSaveable { mutableStateOf(true) }
+    fun safePop(stack: MutableList<*>) {
+        if (stack.size > 1) {
+            stack.removeLastOrNull()
+        }
+        showBottomBar = stack.size <= 1
+    }
+
     Scaffold(
         bottomBar = {
             if (!showBottomBar) return@Scaffold
@@ -160,8 +167,7 @@ fun HomeApp(
         NavDisplay(
             backStack = currentBackStack,
             onBack = {
-                if (currentBackStack.size > 1) currentBackStack.removeLastOrNull()
-                showBottomBar = currentBackStack.size <= 1
+                safePop(currentBackStack)
             },
             entryProvider = entryProvider {
                 entry<HomeKey> {
@@ -242,24 +248,21 @@ fun HomeApp(
                 entry<StatisticsKey> {
                     StatisticsScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            homeStack.removeLastOrNull()
+                            safePop(homeStack)
                         }
                     )
                 }
                 entry<LogsKey> {
                     LogsScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            homeStack.removeLastOrNull()
+                            safePop(homeStack)
                         }
                     )
                 }
                 entry<ProfileKey> {
                     ProfileScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            homeStack.removeLastOrNull()
+                            safePop(homeStack)
                         }
                     )
                 }
@@ -267,72 +270,63 @@ fun HomeApp(
                     FilterDetailScreen(
                         filterId = it.filterId,
                         onNavigateBack = {
-                            showBottomBar = true
-                            filterStack.removeLastOrNull()
+                            safePop(filterStack)
                         }
                     )
                 }
                 entry<CustomRuleKey> {
                     CustomRulesScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            filterStack.removeLastOrNull()
+                            safePop(filterStack)
                         }
                     )
                 }
                 entry<AboutKey> {
                     AboutScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<AppearanceKey> {
                     AppearanceScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<AppManagementKey> {
                     AppManagementScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<DnsProviderKey> {
                     DnsProviderScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<WhiteListAppKey> {
                     AppWhitelistScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<TrustedNetworksKey> {
                     app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }
                 entry<WireGuardImportKey> {
                     WireGuardImportScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         },
                         onEditProfile = { profileId ->
                             settingsStack.add(WireGuardEditKey(profileId))
@@ -343,15 +337,14 @@ fun HomeApp(
                     WireGuardEditScreen(
                         profileId = key.profileId,
                         onNavigateBack = {
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         },
                     )
                 }
                 entry<HttpsFilteringKey> {
                     HttpsFilteringScreen(
                         onNavigateBack = {
-                            showBottomBar = true
-                            settingsStack.removeLastOrNull()
+                            safePop(settingsStack)
                         }
                     )
                 }

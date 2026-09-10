@@ -37,20 +37,20 @@ fun BlockAdsApp(
             entry<SplashKey> {
                 SplashScreen(
                     onNavigateToHome = {
-                        backStack.removeLastOrNull()
                         backStack.add(HomeAppKey)
+                        backStack.remove(SplashKey)
                     },
                     onNavigateToOnboarding = {
-                        backStack.removeLastOrNull()
                         backStack.add(OnboardingKey)
+                        backStack.remove(SplashKey)
                     }
                 )
             }
             entry<OnboardingKey> {
                 OnboardingScreen(
                     onNavigateToHome = {
-                        backStack.removeLastOrNull()
                         backStack.add(HomeAppKey)
+                        backStack.remove(OnboardingKey)
                     }
                 )
             }
