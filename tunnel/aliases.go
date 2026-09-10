@@ -63,11 +63,18 @@ var (
 	NewBloomBuilder     = bloom.NewBloomBuilder
 	LoadBloomFilter     = bloom.LoadBloomFilter
 	LoadMmapTrie        = trie.LoadMmapTrie
-	CompileFilterList   = trie.CompileFilterList
 	NewSafeSearch       = safesearch.NewSafeSearch
 	buildScriptletStore = scriptlet.BuildStore
 	parseScriptletRules = scriptlet.ParseRules
 	scriptletRuntimeJS  = scriptlet.RuntimeJS
+)
+
+// CompileFilterList compiles a raw filter list into Trie and Bloom filter binary artifacts.
+func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
+	return trie.CompileFilterList(inputPath, triePath, bloomPath)
+}
+
+var (
 
 	NewCertManager       = mitm.NewCertManager
 	NewMitmFilter        = mitm.NewMitmFilter
