@@ -16,6 +16,7 @@ This file serves as the primary instructions and workspace rules for AI assistan
 - **Single Responsibility Principle (SRP)**: Each file has exactly one responsibility. Never lump models, contracts, ViewModels, and UI composables into the same file.
 - **Flat Structure (No deep nesting)**: Avoid deep nesting in composable hierarchies, conditional logic, and nested inner classes.
 - **Clean Code & Reusability (DRY)**: Reusable components (cards, items, dialogs, utils) must be extracted into shared packages instead of duplicating code across screens.
+- **Concise Comments (No long comments)**: Code must be self-documenting through clear, expressive naming. Do not write lengthy comments or explain obvious code. Only write brief (1-2 lines) notes explaining *why* (non-obvious rationale), never *what*. Never leave commented-out dead code.
 
 ### 2. MVI Architecture Standard
 Each screen must strictly follow the **MVI pattern** separated across dedicated files:
