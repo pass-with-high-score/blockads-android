@@ -433,13 +433,15 @@ class SettingsViewModel(
                 }
 
                 // Restore active profile LAST — after all filter/rule data is in place.
-                // switchToProfile() overwrites filter isEnabled states based on profile
-                // template, so it must run after the filter list import above.
                 if (backup.activeProfileType.isNotBlank()) {
                     val profile = profileDao.getByType(backup.activeProfileType)
                     if (profile != null) {
+                        val enabledUrls = backup.filterLists.filter { it.isEnabled }.map { it.url }.joinToString(",")
+                        profileDao.update(profile.copy(enabledFilterUrls = enabledUrls))
                         profileManager.switchToProfile(profile.id)
                     }
+                } else {
+                    profileManager.saveActiveProfileFilterUrls()
                 }
 
                 _events.toast(R.string.filter_settings_imported)

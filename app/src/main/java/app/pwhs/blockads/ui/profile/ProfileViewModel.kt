@@ -70,7 +70,8 @@ class ProfileViewModel(
                 safeSearchEnabled = safeSearchEnabled,
                 youtubeRestrictedMode = youtubeRestrictedMode
             )
-            profileDao.insert(profile)
+            val newId = profileDao.insert(profile)
+            profileManager.switchToProfile(newId)
             _events.toast(R.string.profile_created)
         }
     }

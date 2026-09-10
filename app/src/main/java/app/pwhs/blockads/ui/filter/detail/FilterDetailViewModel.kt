@@ -23,11 +23,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+import app.pwhs.blockads.data.entities.ProfileManager
+
 class FilterDetailViewModel(
     private val filterId: Long,
     private val filterListDao: FilterListDao,
     private val dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
+    private val profileManager: ProfileManager,
     private val application: Application,
     private val customFilterManager: CustomFilterManager
 ) : ViewModel() {
@@ -88,6 +91,7 @@ class FilterDetailViewModel(
         viewModelScope.launch {
             val f = filter.value ?: return@launch
             filterListDao.setEnabled(f.id, !f.isEnabled)
+            profileManager.saveActiveProfileFilterUrls()
             ServiceController.requestRestart(application.applicationContext)
         }
     }
@@ -159,6 +163,7 @@ class FilterDetailViewModel(
             val f = filter.value ?: return@launch
             if (!f.isBuiltIn) {
                 filterListDao.delete(f)
+                profileManager.saveActiveProfileFilterUrls()
                 ServiceController.requestRestart(application.applicationContext)
             }
         }

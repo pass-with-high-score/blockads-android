@@ -157,6 +157,7 @@ val appModule = module {
             filterRepo = get(),
             filterListDao = get(),
             customFilterManager = get(),
+            profileManager = get(),
             application = androidApplication()
         )
     }
@@ -166,6 +167,7 @@ val appModule = module {
             filterListDao = get(),
             dnsLogDao = get(),
             filterRepo = get(),
+            profileManager = get(),
             application = androidApplication(),
             customFilterManager = get()
         )

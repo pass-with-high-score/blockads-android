@@ -102,23 +102,6 @@ class ProfileManager(
             Timber.d("Seeded ${missingPresets.size} missing preset profiles")
         }
 
-        // Sync existing presets to ensure obsolete filters are removed and new ones added
-        val existingPresets = existing.filter { ProtectionProfile.isPreset(it.profileType) }
-        for (existingProfile in existingPresets) {
-            val expectedUrls = getFilterUrlsForType(existingProfile.profileType).joinToString(",")
-            val hasObsoleteUrls = existingProfile.enabledFilterUrls != expectedUrls
-            
-            // Only update if the URLs don't match exactly (this covers both additions and removals to the base preset)
-            if (hasObsoleteUrls) {
-                profileDao.update(
-                    existingProfile.copy(
-                        enabledFilterUrls = expectedUrls
-                    )
-                )
-                Timber.d("Updated URLs for existing preset profile: ${existingProfile.name}")
-            }
-        }
-
         // Ensure the Default profile is fully activated via the standard switch logic during initial seed
         if (existing.isEmpty()) {
             val allProfiles = profileDao.getAllSync()
@@ -133,43 +116,73 @@ class ProfileManager(
     }
 
     /**
-     * Switch to a profile: update filter list enabled states, SafeSearch, YouTube Restricted Mode,
-     * and reload filters.
+     * Save the currently enabled filter URLs to the active profile in the database.
+     */
+    suspend fun saveActiveProfileFilterUrls() = withContext(Dispatchers.IO) {
+        val activeProfile = profileDao.getActive() ?: return@withContext
+        val enabledUrls = filterListDao.getEnabled()
+            .map { it.url }
+            .toSet()
+        val urlsString = enabledUrls.joinToString(",")
+        if (activeProfile.enabledFilterUrls != urlsString) {
+            profileDao.update(activeProfile.copy(enabledFilterUrls = urlsString))
+            Timber.d("Saved enabled filter URLs for active profile '${activeProfile.name}': ${enabledUrls.size} filters")
+        }
+    }
+
+    /**
+     * Switch to a profile: save current profile's filter list configuration,
+     * update active profile in DB & preferences, apply target profile's filter list
+     * enabled states, SafeSearch, YouTube Restricted Mode, and reload filters.
      */
     suspend fun switchToProfile(profileId: Long) = withContext(Dispatchers.IO) {
-        val profile = profileDao.getById(profileId) ?: return@withContext
-        Timber.d("Switching to profile: ${profile.name} (${profile.profileType})")
+        val targetProfile = profileDao.getById(profileId) ?: return@withContext
+        Timber.d("Switching to profile: ${targetProfile.name} (${targetProfile.profileType})")
 
-        // Deactivate all and activate the chosen profile
+        // 1. Save currently enabled filters to the outgoing active profile before switching
+        val currentActive = profileDao.getActive()
+        if (currentActive != null && currentActive.id != profileId) {
+            val enabledUrls = filterListDao.getEnabled()
+                .map { it.url }
+                .toSet()
+            profileDao.update(currentActive.copy(enabledFilterUrls = enabledUrls.joinToString(",")))
+            Timber.d("Saved ${enabledUrls.size} filter URLs to outgoing profile: ${currentActive.name}")
+        }
+
+        // 2. Deactivate all and activate target profile
         profileDao.deactivateAll()
         profileDao.activate(profileId)
 
-        // Store active profile id in preferences
+        // 3. Store active profile id in preferences
         appPrefs.setActiveProfileId(profileId)
 
-        // Apply filter list configuration
-        val profileUrls = profile.enabledFilterUrls
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet()
+        // 4. Apply target profile's filter list configuration
+        val targetUrls = if (targetProfile.enabledFilterUrls.isBlank() && ProtectionProfile.isPreset(targetProfile.profileType)) {
+            getFilterUrlsForType(targetProfile.profileType)
+        } else {
+            targetProfile.enabledFilterUrls
+                .split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .toSet()
+        }
 
         val allFilters = filterListDao.getAllSync()
         for (filter in allFilters) {
-            val shouldBeEnabled = filter.url in profileUrls
+            val shouldBeEnabled = filter.url in targetUrls
             if (filter.isEnabled != shouldBeEnabled) {
                 filterListDao.setEnabled(filter.id, shouldBeEnabled)
             }
         }
 
-        // Apply SafeSearch & YouTube Restricted Mode
-        appPrefs.setSafeSearchEnabled(profile.safeSearchEnabled)
-        appPrefs.setYoutubeRestrictedMode(profile.youtubeRestrictedMode)
+        // 5. Apply SafeSearch & YouTube Restricted Mode
+        appPrefs.setSafeSearchEnabled(targetProfile.safeSearchEnabled)
+        appPrefs.setYoutubeRestrictedMode(targetProfile.youtubeRestrictedMode)
 
-        // Reload filters
+        // 6. Reload filters
         filterRepo.loadAllEnabledFilters()
 
-        Timber.d("Switched to profile: ${profile.name}")
+        Timber.d("Switched to profile: ${targetProfile.name}")
     }
 
     /**
