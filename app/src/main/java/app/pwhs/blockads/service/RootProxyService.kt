@@ -288,6 +288,7 @@ class RootProxyService : Service() {
                 appNameResolver.startSnapshotter(serviceScope)
 
                 _state.value = VpnState.RUNNING
+                appPrefs.setVpnEnabled(true)
                 if (!preserveUptimeOnRestart || startTimestamp == 0L) {
                     startTimestamp = System.currentTimeMillis()
                 }
@@ -321,6 +322,9 @@ class RootProxyService : Service() {
         goTunnelAdapter.stop()
 
         _state.value = VpnState.STOPPED
+        serviceScope.launch {
+            appPrefs.setVpnEnabled(false)
+        }
         startTimestamp = 0L
         if (showPausedNotification) {
             stopForeground(STOP_FOREGROUND_DETACH)
