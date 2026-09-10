@@ -62,9 +62,6 @@ class SettingsViewModel(
     val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     val crashReportingEnabled: StateFlow<Boolean> = appPrefs.crashReportingEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -308,10 +305,10 @@ class SettingsViewModel(
                     milestoneNotificationsEnabled = appPrefs.milestoneNotificationsEnabled.first(),
                     activeProfileType = activeProfile?.profileType ?: "",
                     firewallEnabled = appPrefs.firewallEnabled.first(),
-                    filterLists = filterLists.value.map { f ->
+                    filterLists = filterListDao.getAllSync().map { f ->
                         FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
                     },
-                    whitelistDomains = whitelistDomains.value.map { it.domain },
+                    whitelistDomains = whitelistDomainDao.getAllDomains(),
                     whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList(),
                     customRules = customDnsRuleDao.getAll().map { it.rule },
                     firewallRules = firewallRuleDao.getEnabledRules().map { r ->
@@ -377,7 +374,7 @@ class SettingsViewModel(
 
                 // Filter lists — add new AND update isEnabled for existing
                 backup.filterLists.forEach { f ->
-                    val existing = filterLists.value.firstOrNull { it.url == f.url }
+                    val existing = filterListDao.getByUrl(f.url)
                     if (existing != null) {
                         // Update isEnabled state if it differs
                         if (existing.isEnabled != f.isEnabled) {
