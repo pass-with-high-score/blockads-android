@@ -56,8 +56,13 @@ class HomeViewModel(
         AdBlockVpnService.state,
         RootProxyService.state
     ) { state1, state2 ->
-        state1 == VpnState.RUNNING || state2 == VpnState.RUNNING
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AdBlockVpnService.isRunning || RootProxyService.isRunning)
+        state1 == VpnState.RUNNING || state1 == VpnState.STOPPING ||
+        state2 == VpnState.RUNNING || state2 == VpnState.STOPPING
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        AdBlockVpnService.isRunning || AdBlockVpnService.isStopping || RootProxyService.isRunning
+    )
 
     val vpnConnecting: StateFlow<Boolean> = combine(
         AdBlockVpnService.state,

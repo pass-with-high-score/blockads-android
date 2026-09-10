@@ -310,7 +310,8 @@ fun HomeScreen(
             // Power button — never blocked by filter loading
             PowerButton(
                 isActive = vpnEnabled,
-                isConnecting = vpnConnecting || vpnStopping,
+                isConnecting = vpnConnecting,
+                isStopping = vpnStopping,
                 onClick = {
                     if (!vpnConnecting && !vpnStopping) {
                         if (vpnEnabled) {

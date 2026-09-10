@@ -5,6 +5,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.VpnState
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 object VpnUtils {
     /**
@@ -41,5 +43,45 @@ object VpnUtils {
             }
         }
         return false
+    }
+
+    /**
+     * Returns true if any network currently has TRANSPORT_VPN.
+     * Android's status bar VPN key icon is displayed whenever this is true.
+     */
+    fun isVpnTransportActive(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val activeNetwork = cm.activeNetwork
+        val allNetworks = cm.allNetworks.toMutableList()
+        if (activeNetwork != null && !allNetworks.contains(activeNetwork)) {
+            allNetworks.add(0, activeNetwork)
+        }
+        return allNetworks.any { network ->
+            cm.getNetworkCapabilities(network)?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+        }
+    }
+
+    /**
+     * Suspends until the OS has completely dropped the VPN transport and removed the key icon.
+     */
+    suspend fun awaitVpnTransportTeardown(context: Context, timeoutMs: Long = 6000L) {
+        val startWait = android.os.SystemClock.elapsedRealtime()
+        while (isVpnTransportActive(context) &&
+            android.os.SystemClock.elapsedRealtime() - startWait < timeoutMs
+        ) {
+            kotlinx.coroutines.delay(100L)
+        }
+    }
+
+    /**
+     * Runs awaitVpnTransportTeardown on IO dispatcher and dispatches onFinalized on Main dispatcher.
+     */
+    fun scheduleStopFinalization(context: Context, onFinalized: () -> Unit) {
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            awaitVpnTransportTeardown(context)
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                onFinalized()
+            }
+        }
     }
 }

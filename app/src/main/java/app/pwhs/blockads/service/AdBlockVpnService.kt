@@ -21,6 +21,7 @@ import app.pwhs.blockads.service.vpn.VpnNotificationManager
 import app.pwhs.blockads.service.vpn.VpnTunnelBuilder
 import app.pwhs.blockads.utils.AppNameResolver
 import app.pwhs.blockads.utils.BatteryMonitor
+import app.pwhs.blockads.utils.VpnUtils
 import app.pwhs.blockads.utils.startOfDayMillis
 import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.worker.VpnResumeWorker
@@ -45,7 +46,9 @@ class AdBlockVpnService : VpnService() {
 
     companion object {
         private const val RESTART_CLEANUP_DELAY_MS = 1000L
-        private const val GO_STOP_TIMEOUT_MS = 5_000L
+        // How long stopVpn() waits for the native Go engine teardown before
+        // completing the service shutdown regardless (see stopVpn, #232).
+        private const val GO_STOP_TIMEOUT_MS = 300L
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
@@ -194,7 +197,7 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val startedFromBoot = intent?.getBooleanExtra(EXTRA_STARTED_BOOT_EXTRA, false) ?: false
+        val startedFromBoot = intent?.getBooleanExtra(EXTRA_STARTED_FROM_BOOT, false) ?: false
 
         when (intent?.action) {
             ACTION_STOP -> {
@@ -359,13 +362,10 @@ class AdBlockVpnService : VpnService() {
 
     private fun pauseVpn() {
         Timber.d("Pausing VPN for 1 hour")
-        val resumeWork = OneTimeWorkRequestBuilder<VpnResumeWorker>()
-            .setInitialDelay(1, TimeUnit.HOURS)
-            .build()
         WorkManager.getInstance(this).enqueueUniqueWork(
             VpnResumeWorker.WORK_NAME,
             androidx.work.ExistingWorkPolicy.REPLACE,
-            resumeWork
+            OneTimeWorkRequestBuilder<VpnResumeWorker>().setInitialDelay(1, TimeUnit.HOURS).build()
         )
         stopVpn(showStoppedNotification = false)
         vpnNotificationManager.showPausedNotification()
@@ -400,10 +400,6 @@ class AdBlockVpnService : VpnService() {
                     Timber.w("Shutdown superseded by ${_state.value} — leaving the new session alone")
                     return@withContext
                 }
-                _state.value = VpnState.STOPPED
-                lastStoppedTimestamp = System.currentTimeMillis()
-                _privateDnsStrict.value = false
-
                 if (showStoppedNotification) {
                     stopForeground(STOP_FOREGROUND_DETACH)
                     vpnNotificationManager.showStoppedNotification()
@@ -411,8 +407,17 @@ class AdBlockVpnService : VpnService() {
                     stopForeground(STOP_FOREGROUND_REMOVE)
                 }
                 stopSelf()
-                Timber.d("VPN stopped")
-                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
+                Timber.d("VPN service stopSelf called, waiting for OS transport teardown")
+            }
+
+            VpnUtils.scheduleStopFinalization(applicationContext) {
+                if (_state.value == VpnState.STOPPING) {
+                    _state.value = VpnState.STOPPED
+                    lastStoppedTimestamp = System.currentTimeMillis()
+                    _privateDnsStrict.value = false
+                    Timber.d("VPN fully stopped (OS transport cleared)")
+                    AdBlockWidgetProvider.sendUpdateBroadcast(applicationContext)
+                }
             }
         }
     }
@@ -434,8 +439,10 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onDestroy() {
-        _state.value = VpnState.STOPPED
-        lastStoppedTimestamp = System.currentTimeMillis()
+        if (_state.value != VpnState.STOPPING) {
+            _state.value = VpnState.STOPPED
+            lastStoppedTimestamp = System.currentTimeMillis()
+        }
         isReconnecting = false
         startTimestamp = 0L
 
@@ -490,5 +497,3 @@ class AdBlockVpnService : VpnService() {
         return protect(fd)
     }
 }
-
-private const val EXTRA_STARTED_BOOT_EXTRA = AdBlockVpnService.EXTRA_STARTED_FROM_BOOT

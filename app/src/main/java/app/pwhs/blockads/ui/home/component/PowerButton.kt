@@ -41,15 +41,19 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
+import app.pwhs.blockads.ui.theme.SecurityOrange
 
 @Composable
 fun PowerButton(
     isActive: Boolean,
     isConnecting: Boolean,
+    isStopping: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isBusy = isConnecting || isStopping
     val vpnStateDescription = when {
+        isStopping -> stringResource(R.string.status_disconnecting)
         isConnecting -> stringResource(R.string.accessibility_vpn_connecting)
         isActive -> stringResource(R.string.accessibility_vpn_active)
         else -> stringResource(R.string.accessibility_vpn_inactive)
@@ -58,6 +62,7 @@ fun PowerButton(
 
     val buttonColor by animateColorAsState(
         targetValue = when {
+            isStopping -> SecurityOrange
             isConnecting -> AccentBlue
             isActive -> MaterialTheme.colorScheme.primary
             else -> DangerRed
@@ -67,14 +72,14 @@ fun PowerButton(
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isActive || isConnecting) 1f else 0.95f,
+        targetValue = if (isActive || isBusy) 1f else 0.95f,
         animationSpec = tween(300),
         label = "scale"
     )
 
     val glowAlpha by animateFloatAsState(
         targetValue = when {
-            isConnecting -> 0.3f
+            isBusy -> 0.3f
             isActive -> 0.4f
             else -> 0.2f
         },
@@ -86,7 +91,7 @@ fun PowerButton(
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = if (isActive && !isConnecting) 1.08f else 1f,
+        targetValue = if (isActive && !isBusy) 1.08f else 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -140,7 +145,7 @@ fun PowerButton(
                 .size(140.dp)
                 .graphicsLayer { scaleX = scale; scaleY = scale }
                 .shadow(
-                    elevation = if (isActive || isConnecting) 20.dp else 8.dp,
+                    elevation = if (isActive || isBusy) 20.dp else 8.dp,
                     shape = CircleShape,
                     ambientColor = buttonColor.copy(alpha = 0.3f),
                     spotColor = buttonColor.copy(alpha = 0.3f)
@@ -167,7 +172,7 @@ fun PowerButton(
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
-                    enabled = !isConnecting
+                    enabled = !isBusy
                 ) { onClick() }
                 .semantics {
                     contentDescription = toggleDescription
@@ -175,7 +180,7 @@ fun PowerButton(
                     role = Role.Button
                 }
         ) {
-            if (isConnecting) {
+            if (isBusy) {
                 CircularProgressIndicator(
                     color = buttonColor,
                     modifier = Modifier.size(56.dp),
