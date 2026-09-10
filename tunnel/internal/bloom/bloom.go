@@ -1,4 +1,4 @@
-package tunnel
+package bloom
 
 import (
 	"encoding/binary"

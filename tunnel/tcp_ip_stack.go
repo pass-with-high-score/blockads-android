@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
 	"github.com/xjasonlyu/tun2socks/v2/core"
 	"github.com/xjasonlyu/tun2socks/v2/core/adapter"
 	"github.com/xjasonlyu/tun2socks/v2/core/device/iobased"
@@ -42,12 +43,12 @@ import (
 // are the source (the app's ephemeral socket). The conn's Write and
 // Read are relative to the stack — writing sends bytes back to the
 // app, reading consumes bytes from the app.
-type TcpFlowHandler func(conn adapter.TCPConn)
+type TcpFlowHandler = mitm.TcpFlowHandler
 
 // UdpFlowHandler is invoked on its own goroutine for every UDP flow.
 // Same ownership semantics as TcpFlowHandler — the handler runs for
 // the flow's lifetime and must Close() when finished.
-type UdpFlowHandler func(conn adapter.UDPConn)
+type UdpFlowHandler = mitm.UdpFlowHandler
 
 // TcpIpStack wraps the gVisor-backed userspace TCP/IP stack provided by
 // tun2socks. A single instance manages one TUN file descriptor and

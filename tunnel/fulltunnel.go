@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -258,6 +259,22 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 		engine.logConnection(flow, ProtocolTCP)
 		relayDirectFromFlow(conn, flow, engine, protectFn)
 	}
+}
+
+func relayDirectFromFlow(clientConn net.Conn, flow flowID, engine *Engine, protectFn func(fd int) bool) {
+	dialer := &net.Dialer{
+		Timeout: flowDialTimeout,
+		Control: protectedControl(protectFn),
+	}
+	dst := net.JoinHostPort(flow.serverIP.String(), strconv.Itoa(flow.serverPort))
+	remote, err := dialer.Dial("tcp", dst)
+	if err != nil {
+		logf("[FullTunnel] upstream dial %s failed: %v", dst, err)
+		return
+	}
+	defer remote.Close()
+
+	bidiCopyFlow(clientConn, remote)
 }
 
 // SetFilterHttp3 toggles HTTP/3 (QUIC) filtering. When true, browser QUIC

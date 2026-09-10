@@ -1,4 +1,4 @@
-package tunnel
+package mitm
 
 import (
 	"crypto/ecdsa"
@@ -32,8 +32,10 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 const (
-	caCertFile = "ca.crt"
-	caKeyFile  = "ca.key"
+	CACertFile = "ca.crt"
+	CAKeyFile  = "ca.key"
+	caCertFile = CACertFile
+	caKeyFile  = CAKeyFile
 )
 
 // CertManager handles Root CA lifecycle and per-host certificate generation.

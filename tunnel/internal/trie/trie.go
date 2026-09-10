@@ -1,4 +1,4 @@
-package tunnel
+package trie
 
 import (
 	"encoding/binary"

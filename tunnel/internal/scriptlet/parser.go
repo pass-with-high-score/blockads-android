@@ -1,35 +1,27 @@
-package tunnel
+package scriptlet
 
 import (
 	"strings"
 )
 
-// ─────────────────────────────────────────────────────────────────────────────
-// scriptlet_parser.go — parses scriptlet rules from filter lists.
-//
-// Two dialect formats are recognised:
-//
-//   uBlock Origin style:
-//     ##+js(name, arg1, arg2)
-//     domain1.com,domain2.com##+js(name, args)
-//
-//   AdGuard native style:
-//     #%#//scriptlet('name', 'arg1', 'arg2')
-//     domain1.com,domain2.com#%#//scriptlet("name", "args")
-//
-// AdGuard filters (filter list IDs 2/11/14 from filters.adtidy.org)
-// use the second form exclusively; uBlock exports use the first. Both
-// engines recognise the other's syntax in practice, so we accept both.
-//
-// Invalid rules are skipped silently rather than failing the whole
-// filter list.
-// ─────────────────────────────────────────────────────────────────────────────
+// Rule is a single parsed +js() rule.
+type Rule struct {
+	// Domains the rule applies to. Empty = all domains. Entries
+	// starting with "~" are NEGATED (exclude).
+	Domains []string
 
-// parseScriptletRules takes the raw text of a filter list and extracts
+	// Scriptlet name (e.g., "set-constant").
+	Name string
+
+	// Positional args.
+	Args []string
+}
+
+// ParseRules takes the raw text of a filter list and extracts
 // every +js() rule it can parse. Lines that aren't +js() rules are
 // ignored.
-func parseScriptletRules(content string) []ScriptletRule {
-	var out []ScriptletRule
+func ParseRules(content string) []Rule {
+	var out []Rule
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -49,7 +41,7 @@ func parseScriptletRules(content string) []ScriptletRule {
 // success or zero value + false otherwise. Recognises both uBlock
 // (##+js) and AdGuard (#%#//scriptlet) syntaxes; exception variants
 // (#@#+js, #@%#//scriptlet) are deliberately ignored.
-func parseOneScriptletRule(line string) (ScriptletRule, bool) {
+func parseOneScriptletRule(line string) (Rule, bool) {
 	var domainsStr, body string
 
 	if idx := strings.Index(line, "##+js("); idx >= 0 {
@@ -57,7 +49,7 @@ func parseOneScriptletRule(line string) (ScriptletRule, bool) {
 		rest := line[idx+len("##+js("):]
 		closeIdx := strings.LastIndex(rest, ")")
 		if closeIdx < 0 {
-			return ScriptletRule{}, false
+			return Rule{}, false
 		}
 		body = rest[:closeIdx]
 	} else if idx := strings.Index(line, "#%#//scriptlet("); idx >= 0 {
@@ -65,22 +57,20 @@ func parseOneScriptletRule(line string) (ScriptletRule, bool) {
 		rest := line[idx+len("#%#//scriptlet("):]
 		closeIdx := strings.LastIndex(rest, ")")
 		if closeIdx < 0 {
-			return ScriptletRule{}, false
+			return Rule{}, false
 		}
 		body = rest[:closeIdx]
 	} else {
-		return ScriptletRule{}, false
+		return Rule{}, false
 	}
 
-	// Split body by comma — naive but matches AdGuard's parser for
-	// scriptlets that don't take comma-bearing args (the common case).
 	parts := splitArgs(body)
 	if len(parts) == 0 {
-		return ScriptletRule{}, false
+		return Rule{}, false
 	}
 	name := strings.TrimSpace(parts[0])
 	if name == "" {
-		return ScriptletRule{}, false
+		return Rule{}, false
 	}
 
 	args := make([]string, 0, len(parts)-1)
@@ -98,16 +88,13 @@ func parseOneScriptletRule(line string) (ScriptletRule, bool) {
 		}
 	}
 
-	return ScriptletRule{
+	return Rule{
 		Domains: domains,
 		Name:    name,
 		Args:    args,
 	}, true
 }
 
-// splitArgs splits a +js() body by comma, honouring single-quoted
-// segments so 'foo, bar' counts as one arg. Whitespace is left to the
-// caller to trim.
 func splitArgs(s string) []string {
 	var out []string
 	var cur strings.Builder
@@ -136,28 +123,26 @@ func splitArgs(s string) []string {
 	return out
 }
 
-// buildScriptletStore organises parsed rules into the lookup structure
+// BuildStore organises parsed rules into the lookup structure
 // used by the per-host invocation builder.
-func buildScriptletStore(rules []ScriptletRule) *scriptletStore {
-	s := &scriptletStore{
-		byHost: make(map[string][]ScriptletRule),
+func BuildStore(rules []Rule) *Store {
+	s := &Store{
+		ByHost: make(map[string][]Rule),
 	}
 	for _, r := range rules {
 		positive := positiveDomains(r)
 		if len(positive) == 0 {
-			s.all = append(s.all, r)
+			s.All = append(s.All, r)
 			continue
 		}
 		for _, d := range positive {
-			s.byHost[d] = append(s.byHost[d], r)
+			s.ByHost[d] = append(s.ByHost[d], r)
 		}
 	}
 	return s
 }
 
-// positiveDomains filters rule.Domains to entries that don't start
-// with "~" (the negation prefix).
-func positiveDomains(r ScriptletRule) []string {
+func positiveDomains(r Rule) []string {
 	var out []string
 	for _, d := range r.Domains {
 		if !strings.HasPrefix(d, "~") {

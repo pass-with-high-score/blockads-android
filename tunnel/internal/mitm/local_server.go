@@ -1,4 +1,4 @@
-package tunnel
+package mitm
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/nqmgaming/blockads-tunnel/internal/scriptlet"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,8 +73,8 @@ func serveCSS(req *http.Request) *http.Response {
 var (
 	scriptletsMu sync.RWMutex
 	// Default to the S-B runtime; can be overridden via SetScriptletsRuntime.
-	scriptletsJS  = scriptletRuntimeJS
-	scriptletDb   *scriptletStore
+	scriptletsJS = scriptlet.RuntimeJS
+	scriptletDb  *scriptlet.Store
 )
 
 // SetScriptletsRuntime replaces the runtime JS served at /scriptlets.js.
@@ -88,12 +90,12 @@ func SetScriptletsRuntime(js string) {
 // SetScriptletStore replaces the scriptlet rule database used to
 // generate per-host invocations. Called by the engine after parsing
 // filter lists for +js() rules. Passing nil clears the store.
-func SetScriptletStore(s *scriptletStore) {
+func SetScriptletStore(s *scriptlet.Store) {
 	scriptletsMu.Lock()
 	scriptletDb = s
 	scriptletsMu.Unlock()
 	if s != nil {
-		logf("Scriptlet store updated: %d global, %d host-bound", len(s.all), len(s.byHost))
+		logf("Scriptlet store updated: %d global, %d host-bound", len(s.All), len(s.ByHost))
 	}
 }
 
@@ -119,7 +121,7 @@ func servePerHostScriptlets(req *http.Request) *http.Response {
 
 	js := ""
 	if store != nil {
-		js = store.buildHostInvocations(host)
+		js = store.BuildHostInvocations(host)
 	}
 	if js == "" {
 		js = "/* BlockAds: no scriptlets for " + host + " */"

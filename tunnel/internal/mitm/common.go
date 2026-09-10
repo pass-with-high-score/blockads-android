@@ -1,40 +1,136 @@
-package tunnel
+package mitm
 
 import (
 	"bytes"
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
+
+	"github.com/xjasonlyu/tun2socks/v2/core/adapter"
 )
 
-// ─────────────────────────────────────────────────────────────────────────────
-// mitm_common.go — helpers shared between the userspace-stack MITM
-// handler (mitm_handler.go) and any future alternative paths.
-//
-// Originally these lived in mitm_proxy.go alongside the legacy
-// CONNECT-based proxy. When the userspace TCP/IP stack became the
-// production path (Phase E), the CONNECT proxy was deleted but these
-// primitives remained useful and moved here.
-// ─────────────────────────────────────────────────────────────────────────────
+const flowDialTimeout = 10 * time.Second
+
+func logf(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, "[BlockAds/Go] "+format+"\n", args...)
+}
+
+func protectedControl(protectFn func(fd int) bool) func(network, address string, c syscall.RawConn) error {
+	if protectFn == nil {
+		return nil
+	}
+	return func(network, address string, c syscall.RawConn) error {
+		return c.Control(func(fd uintptr) {
+			protectFn(int(fd))
+		})
+	}
+}
+
+func bidiCopyFlow(a, b net.Conn) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		io.Copy(b, a)
+		if cw, ok := b.(interface{ CloseWrite() error }); ok {
+			cw.CloseWrite()
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		io.Copy(a, b)
+		if cw, ok := a.(interface{ CloseWrite() error }); ok {
+			cw.CloseWrite()
+		}
+	}()
+
+	wg.Wait()
+}
+
+// FlowID identifies a network connection tuple.
+type FlowID struct {
+	clientIP   net.IP
+	clientPort uint16
+	serverIP   net.IP
+	serverPort uint16
+}
+
+type flowID = FlowID
+
+func (f FlowID) ClientIP() net.IP   { return f.clientIP }
+func (f FlowID) ClientPort() uint16 { return f.clientPort }
+func (f FlowID) ServerIP() net.IP   { return f.serverIP }
+func (f FlowID) ServerPort() uint16 { return f.serverPort }
+
+// UIDResolver maps connection flows to Android UID.
+type UIDResolver interface {
+	ResolveUID(protocol int, srcIP string, srcPort int, destIP string, destPort int) int
+}
+
+// TcpFlowHandler handles a TCP connection in userspace stack.
+type TcpFlowHandler func(conn adapter.TCPConn)
+
+// UdpFlowHandler handles a UDP packet flow in userspace stack.
+type UdpFlowHandler func(conn adapter.UDPConn)
 
 const (
-	dialTimeout     = 5 * time.Second  // Short — fail fast on Android mobile networks.
-	idleTimeout     = 30 * time.Second
-	maxConnLifetime = 3 * time.Minute
+	ProtocolTCP = 6
+	ProtocolUDP = 17
+	UIDUnknown  = -1
+	UIDRoot     = 0
 )
 
-// adBlockChecker is the interface the MITM handler uses to query the
-// ad-block engine. The Engine implements this (IsDomainBlocked via the
-// Trie, lookupIP via the configured resolver).
-type adBlockChecker interface {
-	IsDomainBlocked(host string) bool
-	lookupIP(host string) (net.IP, error)
+func resolveFlowUID(uidr UIDResolver, protocol int, flow flowID) int {
+	if uidr == nil {
+		return UIDUnknown
+	}
+	return uidr.ResolveUID(protocol, flow.clientIP.String(), int(flow.clientPort), flow.serverIP.String(), int(flow.serverPort))
 }
+
+func tcpFlowID(conn adapter.TCPConn) flowID {
+	var f flowID
+	if addr, ok := conn.LocalAddr().(*net.TCPAddr); ok {
+		f.clientIP = addr.IP
+		f.clientPort = uint16(addr.Port)
+	}
+	if addr, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
+		f.serverIP = addr.IP
+		f.serverPort = uint16(addr.Port)
+	}
+	return f
+}
+
+func udpFlowID(conn adapter.UDPConn) flowID {
+	var f flowID
+	if addr, ok := conn.LocalAddr().(*net.UDPAddr); ok {
+		f.clientIP = addr.IP
+		f.clientPort = uint16(addr.Port)
+	}
+	if addr, ok := conn.RemoteAddr().(*net.UDPAddr); ok {
+		f.serverIP = addr.IP
+		f.serverPort = uint16(addr.Port)
+	}
+	return f
+}
+
+// AdBlockChecker is the interface the MITM handler uses to query the ad-block engine.
+type AdBlockChecker interface {
+	IsDomainBlocked(host string) bool
+	LookupIP(host string) (net.IP, error)
+	LogConnection(flow FlowID, protocol int)
+}
+
+type adBlockChecker = AdBlockChecker
 
 // requestAcceptsHTML returns true when the request's Accept header
 // explicitly includes text/html — i.e., the client is requesting an

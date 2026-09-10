@@ -1,37 +1,15 @@
-package tunnel
+package scriptlet
 
 import (
 	"encoding/json"
 	"strings"
 )
 
-// ─────────────────────────────────────────────────────────────────────────────
-// scriptlet_runtime.go — minimal JS scriptlet runtime served at
-// https://local.pwhs.app/scriptlets.js, plus per-host invocation
-// builders. Phase S-B of the scriptlet feature.
-//
-// Why hand-written rather than @adguard/scriptlets or
-// uBlock-Origin/scriptlets: both upstream libraries are now ESM-only
-// and require a JS build step we can't run inside the Go tunnel. The
-// scriptlets covered here are a deliberately small subset (~6) chosen
-// to handle the majority of EasyList +js rules people actually hit:
-//
-//   - set-constant            — pin window.<path> to a value
-//   - abort-on-property-read  — throw when window.<path> is read
-//   - abort-on-property-write — throw when window.<path> is written
-//   - prevent-fetch           — block fetch() calls matching pattern
-//   - prevent-xhr             — block XHR.open() matching pattern
-//   - noeval                  — disable eval()
-//
-// Naming and argument conventions follow AdGuard's so existing
-// EasyList +js() rules apply without rewriting.
-// ─────────────────────────────────────────────────────────────────────────────
-
-// scriptletRuntimeJS is the runtime injected into every MITM'd HTML
+// RuntimeJS is the runtime injected into every MITM'd HTML
 // page via /scriptlets.js. It exposes window.__ba.invoke(name, args)
 // which per-host invocation blocks call. Keep it small — every byte
 // here loads on every page.
-const scriptletRuntimeJS = `(function(){"use strict";
+const RuntimeJS = `(function(){"use strict";
 if(window.__ba)return;
 var ns=Object.create(null);
 
@@ -103,32 +81,19 @@ window.__ba={
 })();
 `
 
-// ScriptletRule is a single parsed +js() rule.
-type ScriptletRule struct {
-	// Domains the rule applies to. Empty = all domains. Entries
-	// starting with "~" are NEGATED (exclude).
-	Domains []string
-
-	// Scriptlet name (e.g., "set-constant").
-	Name string
-
-	// Positional args.
-	Args []string
-}
-
-// scriptletStore holds parsed rules. Built once per filter-list update
+// Store holds parsed rules. Built once per filter-list update
 // from Kotlin; consulted on every per-host scriptlet request.
-type scriptletStore struct {
-	all    []ScriptletRule    // global rules (no domain restriction)
-	byHost map[string][]ScriptletRule
+type Store struct {
+	All    []Rule
+	ByHost map[string][]Rule
 }
 
-// matches returns the rules that apply to the given hostname.
-func (s *scriptletStore) matches(host string) []ScriptletRule {
+// Matches returns the rules that apply to the given hostname.
+func (s *Store) Matches(host string) []Rule {
 	host = strings.ToLower(host)
-	var out []ScriptletRule
-	out = append(out, s.all...)
-	for d, rules := range s.byHost {
+	var out []Rule
+	out = append(out, s.All...)
+	for d, rules := range s.ByHost {
 		if host == d || strings.HasSuffix(host, "."+d) {
 			for _, r := range rules {
 				if !ruleNegatedFor(r, host) {
@@ -140,10 +105,11 @@ func (s *scriptletStore) matches(host string) []ScriptletRule {
 	return out
 }
 
-// ruleNegatedFor returns true if the host is in the rule's negation
-// list (entry starting with "~"), in which case the rule should NOT
-// fire even though one of its positive domain entries matched.
-func ruleNegatedFor(r ScriptletRule, host string) bool {
+func (s *Store) buildHostInvocations(host string) string {
+	return s.BuildHostInvocations(host)
+}
+
+func ruleNegatedFor(r Rule, host string) bool {
 	for _, d := range r.Domains {
 		if !strings.HasPrefix(d, "~") {
 			continue
@@ -156,12 +122,10 @@ func ruleNegatedFor(r ScriptletRule, host string) bool {
 	return false
 }
 
-// buildHostInvocations returns the JS string that, when executed,
+// BuildHostInvocations returns the JS string that, when executed,
 // invokes every applicable scriptlet against window.__ba.invoke.
-// Args are JSON-encoded for safe escaping; if window.__ba is not yet
-// defined (runtime still loading) the invocations are queued.
-func (s *scriptletStore) buildHostInvocations(host string) string {
-	rules := s.matches(host)
+func (s *Store) BuildHostInvocations(host string) string {
+	rules := s.Matches(host)
 	if len(rules) == 0 {
 		return ""
 	}
