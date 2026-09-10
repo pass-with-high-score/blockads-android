@@ -20,6 +20,7 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_WG_PROFILES_JSON = stringPreferencesKey("wg_profiles_json")
         val KEY_WG_ACTIVE_PROFILE_ID = stringPreferencesKey("wg_active_profile_id")
         val KEY_EXCLUDE_LAN = booleanPreferencesKey("exclude_lan")
+        val KEY_ALLOW_APP_BYPASS = booleanPreferencesKey("allow_app_bypass")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_WIREGUARD = "wireguard"
@@ -42,6 +43,10 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
 
     val excludeLan: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_EXCLUDE_LAN] ?: false
+    }
+
+    val allowAppBypass: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_ALLOW_APP_BYPASS] ?: false
     }
 
     private fun readProfilesFromPrefs(prefs: Preferences): List<WireGuardProfile> {
@@ -164,6 +169,12 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
     suspend fun setExcludeLan(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[KEY_EXCLUDE_LAN] = enabled
+        }
+    }
+
+    suspend fun setAllowAppBypass(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[KEY_ALLOW_APP_BYPASS] = enabled
         }
     }
 }

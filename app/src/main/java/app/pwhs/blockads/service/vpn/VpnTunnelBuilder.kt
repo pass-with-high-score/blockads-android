@@ -123,7 +123,10 @@ class VpnTunnelBuilder(
                 }
             }
 
-            if (wgConfig == null) {
+            // A non-bypassable tunnel refuses an app's explicit bind to an
+            // underlying network, which is what breaks wireless Android Auto.
+            val allowAppBypass = runBlocking { appPrefs.allowAppBypass.first() }
+            if (wgConfig == null || allowAppBypass) {
                 builder.allowBypass()
             }
 

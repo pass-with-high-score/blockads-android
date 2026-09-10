@@ -141,6 +141,7 @@ class AppPreferences(context: Context) {
     val wgProfiles: Flow<List<WireGuardProfile>> get() = wireguard.wgProfiles
     val wgActiveProfileId: Flow<String?> get() = wireguard.wgActiveProfileId
     val excludeLan: Flow<Boolean> get() = wireguard.excludeLan
+    val allowAppBypass: Flow<Boolean> get() = wireguard.allowAppBypass
 
     // ── Mutator & Snapshot Delegates ─────────────────────────────────────
     suspend fun setVpnEnabled(enabled: Boolean) = vpnSecurity.setVpnEnabled(enabled)
@@ -208,4 +209,5 @@ class AppPreferences(context: Context) {
     suspend fun clearAllWgProfiles() = wireguard.clearAllWgProfiles()
     suspend fun migrateLegacyWgConfigIfNeeded() = wireguard.migrateLegacyWgConfigIfNeeded()
     suspend fun setExcludeLan(enabled: Boolean) = wireguard.setExcludeLan(enabled)
+    suspend fun setAllowAppBypass(enabled: Boolean) = wireguard.setAllowAppBypass(enabled)
 }
