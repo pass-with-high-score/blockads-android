@@ -124,6 +124,9 @@ class SettingsViewModel(
     val routingMode: StateFlow<String> = appPrefs.routingMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.ROUTING_MODE_DIRECT)
 
+    val excludeLan: StateFlow<Boolean> = appPrefs.excludeLan
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -154,6 +157,13 @@ class SettingsViewModel(
 
     fun setNetworkSwitchDelaySec(seconds: Int) {
         viewModelScope.launch { appPrefs.setNetworkSwitchDelaySec(seconds) }
+    }
+
+    fun setExcludeLan(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setExcludeLan(enabled)
+            requestVpnRestart()
+        }
     }
 
     fun setRoutingModeEnabled(enabled: Boolean) {

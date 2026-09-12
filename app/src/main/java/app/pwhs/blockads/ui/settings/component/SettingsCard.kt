@@ -14,19 +14,30 @@ fun SettingsCard(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    val cardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+    )
+    val cardBorder = androidx.compose.foundation.BorderStroke(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+    )
+    val cardShape = RoundedCornerShape(16.dp)
+
     if (onClick != null) {
         Card(
             onClick = onClick,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(16.dp),
+            colors = cardColors,
+            border = cardBorder,
+            shape = cardShape,
             modifier = modifier
         ) {
             content()
         }
     } else {
         Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(16.dp),
+            colors = cardColors,
+            border = cardBorder,
+            shape = cardShape,
             modifier = modifier
         ) {
             content()

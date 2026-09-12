@@ -3,16 +3,18 @@ package app.pwhs.blockads.ui.settings.component
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -31,41 +33,47 @@ fun PrivacySection(
 ) {
     val context = LocalContext.current
     val resource = LocalResources.current
+    val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
 
     Column(modifier = modifier) {
         SectionHeader(
             title = stringResource(id = R.string.settings_privacy_diagnostics_title),
-            icon = Icons.Default.PrivacyTip,
             description = stringResource(id = R.string.settings_privacy_diagnostics_desc)
         )
+        Spacer(modifier = Modifier.height(10.dp))
+
         SettingsCard {
             Column {
+                // 1. Hide from recents
                 SettingsToggleItem(
                     icon = Icons.Default.VisibilityOff,
+                    iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_hide_from_recents_title),
                     subtitle = stringResource(id = R.string.settings_hide_from_recents_subtitle),
                     isChecked = hideFromRecents,
                     onCheckedChange = onSetHideFromRecents
                 )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
+
+                // 2. Crash reporting
                 SettingsToggleItem(
                     icon = Icons.Default.BugReport,
+                    iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_crash_reporting_title),
                     subtitle = stringResource(id = R.string.settings_crash_reporting_subtitle),
                     isChecked = crashReportingEnabled,
                     onCheckedChange = onSetCrashReportingEnabled
                 )
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                )
-                SettingsClickItem(
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
+
+                // 3. Export diagnostics logs
+                SettingItem(
                     icon = Icons.Default.Upload,
+                    iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_export_logs_title),
-                    subtitle = stringResource(id = R.string.settings_export_logs_subtitle),
+                    desc = stringResource(id = R.string.settings_export_logs_subtitle),
                     onClick = {
                         try {
                             val logFile = File(context.cacheDir, "logs/blockads_logs.txt")
