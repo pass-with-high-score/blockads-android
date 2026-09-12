@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardConfig
+import app.pwhs.blockads.utils.SubnetDecomposer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -72,10 +73,10 @@ class VpnTunnelBuilder(
                     }
                 }
 
-                b.addRoute("0.0.0.0", 0)
+                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                addIpv4Routes(b, excludeLan)
                 b.addRoute("::", 0)
 
-                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
                 if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     try {
                         b.excludeRoute(IpPrefix(InetAddress.getByName("10.0.0.0"), 8))
@@ -93,7 +94,8 @@ class VpnTunnelBuilder(
                 b.addRoute("100.64.100.1", 32)
                 b
             } else {
-                Timber.d("Establishing VPN in direct mode (fullTunnel=true)")
+                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan)")
                 val b = vpnService.Builder()
                     .setSession("BlockAds")
                     .addAddress("100.64.100.2", 32)
@@ -104,7 +106,7 @@ class VpnTunnelBuilder(
                     .addDnsServer("fd00::1")
                     .setBlocking(false)
                     .setMtu(1350)
-                    .addRoute("0.0.0.0", 0)
+                addIpv4Routes(b, excludeLan)
                 b
             }
 
@@ -186,5 +188,17 @@ class VpnTunnelBuilder(
         }
 
         return config.copy(peers = resolvedPeers)
+    }
+
+    private fun addIpv4Routes(builder: VpnService.Builder, excludeLan: Boolean) {
+        if (excludeLan) {
+            val routes = SubnetDecomposer.lanBypassRoutes
+            Timber.d("Applying LAN bypass: adding ${routes.size} decomposed CIDR routes")
+            for (route in routes) {
+                builder.addRoute(route.ipString, route.prefix)
+            }
+        } else {
+            builder.addRoute("0.0.0.0", 0)
+        }
     }
 }

@@ -15,23 +15,34 @@ import timber.log.Timber
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED &&
-            intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+        val intentAction = intent.action
+        if (intentAction != Intent.ACTION_BOOT_COMPLETED &&
+            intentAction != Intent.ACTION_MY_PACKAGE_REPLACED &&
+            intentAction != Intent.ACTION_LOCKED_BOOT_COMPLETED
+        ) return
 
         val pendingResult = goAsync()
-        val prefs = AppPreferences(context)
 
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
-                val autoReconnect = prefs.autoReconnect.first()
-                val wasEnabled = prefs.vpnEnabled.first()
-                val routingMode = prefs.routingMode.first()
+                val userManager = context.getSystemService(Context.USER_SERVICE) as? android.os.UserManager
+                val isLocked = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+                        userManager != null && !userManager.isUserUnlocked
 
-                // Root Mode: iptables rules are volatile (cleared on reboot).
-                // Re-apply rules by starting RootProxyService.
-                // Also restarts after app update (MY_PACKAGE_REPLACED).
+                val (autoReconnect, wasEnabled, routingMode) = if (isLocked) {
+                    val directPrefs = app.pwhs.blockads.data.datastore.DirectBootPreferences(context)
+                    Triple(directPrefs.autoReconnect, directPrefs.wasVpnEnabled, directPrefs.routingMode)
+                } else {
+                    val prefs = AppPreferences(context)
+                    Triple(prefs.autoReconnect.first(), prefs.vpnEnabled.first(), prefs.routingMode.first())
+                }
+
                 if (autoReconnect && wasEnabled) {
-                    val trigger = if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) "app update" else "boot"
+                    val trigger = when (intentAction) {
+                        Intent.ACTION_MY_PACKAGE_REPLACED -> "app update"
+                        Intent.ACTION_LOCKED_BOOT_COMPLETED -> "locked direct boot"
+                        else -> "boot"
+                    }
                     if (routingMode == AppPreferences.ROUTING_MODE_ROOT) {
                         Timber.d("Auto-starting Root Proxy mode after $trigger")
                         val serviceIntent = Intent(context, RootProxyService::class.java).apply {

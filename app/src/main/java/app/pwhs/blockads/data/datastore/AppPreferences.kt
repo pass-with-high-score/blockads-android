@@ -18,6 +18,7 @@ val Context.blockAdsDataStore: DataStore<Preferences> by preferencesDataStore(na
 class AppPreferences(context: Context) {
 
     private val dataStore = context.blockAdsDataStore
+    private val directBootPrefs = DirectBootPreferences(context)
     val dns = DnsPreferences(dataStore)
     val appearance = AppearancePreferences(dataStore)
     val filter = FilterPreferences(dataStore)
@@ -144,8 +145,14 @@ class AppPreferences(context: Context) {
     val excludeLan: Flow<Boolean> get() = wireguard.excludeLan
 
     // ── Mutator & Snapshot Delegates ─────────────────────────────────────
-    suspend fun setVpnEnabled(enabled: Boolean) = vpnSecurity.setVpnEnabled(enabled)
-    suspend fun setAutoReconnect(enabled: Boolean) = vpnSecurity.setAutoReconnect(enabled)
+    suspend fun setVpnEnabled(enabled: Boolean) {
+        vpnSecurity.setVpnEnabled(enabled)
+        directBootPrefs.wasVpnEnabled = enabled
+    }
+    suspend fun setAutoReconnect(enabled: Boolean) {
+        vpnSecurity.setAutoReconnect(enabled)
+        directBootPrefs.autoReconnect = enabled
+    }
     suspend fun setNetworkSwitchDelayEnabled(enabled: Boolean) = vpnSecurity.setNetworkSwitchDelayEnabled(enabled)
     suspend fun setNetworkSwitchDelaySec(seconds: Int) = vpnSecurity.setNetworkSwitchDelaySec(seconds)
     suspend fun setOnboardingCompleted(completed: Boolean) = vpnSecurity.setOnboardingCompleted(completed)
@@ -198,7 +205,10 @@ class AppPreferences(context: Context) {
     suspend fun setSafeSearchEnabled(enabled: Boolean) = filter.setSafeSearchEnabled(enabled)
     suspend fun setYoutubeRestrictedMode(enabled: Boolean) = filter.setYoutubeRestrictedMode(enabled)
 
-    suspend fun setRoutingMode(mode: String) = wireguard.setRoutingMode(mode)
+    suspend fun setRoutingMode(mode: String) {
+        wireguard.setRoutingMode(mode)
+        directBootPrefs.routingMode = mode
+    }
     suspend fun getRoutingModeSnapshot(): String = wireguard.getRoutingModeSnapshot()
     suspend fun getWgConfigJsonSnapshot(): String? = wireguard.getWgConfigJsonSnapshot()
     suspend fun getWgProfilesSnapshot(): List<WireGuardProfile> = wireguard.getWgProfilesSnapshot()

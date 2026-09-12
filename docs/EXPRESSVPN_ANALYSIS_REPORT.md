@@ -132,19 +132,51 @@ Trong `XVVpnServiceImpl`:
 #### 🔹 B. Quick App Shortcuts trên màn hình Connected
 * Bảng SQLite `Shortcut` (`packageName`, `shortcutName`, `iconUrl`): Sau khi VPN kết nối thành công, màn hình chính hiển thị ngay danh sách các ứng dụng giải trí/lướt web phổ biến (YouTube, Chrome, Game...) để người dùng click mở ngay với 1 chạm.
 
-#### 🔹 C. Room Database Aggregator (`AdvanceProtectionStats`)
-* Không lưu trữ từng log request DNS chi tiết vĩnh viễn (gây nặng máy, phình SQLite).
-* Bảng `AdvanceProtectionStats`:
-  ```sql
-  CREATE TABLE `AdvanceProtectionStats` (
-      `connectionStartTime` INTEGER NOT NULL, 
-      `connectionEndTime` INTEGER NOT NULL, 
-      `numberOfBlock` INTEGER NOT NULL, 
-      `cumulativeNumberOfBlock` INTEGER, 
-      `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-  );
-  ```
-* Sử dụng `AdvanceProtectionStatWorker` (`CoroutineWorker`) chạy định kỳ mỗi 24h để tổng hợp số lượng tracker/ads đã chặn theo ngày và xóa log chi tiết cũ. Màn hình báo cáo thống kê tải siêu nhanh.
+#### 🔹 D. Direct Boot Aware (`android:directBootAware="true"`)
+* **Vấn đề thực tế:** Khi điện thoại reboot (do sập nguồn, cập nhật hệ điều hành qua đêm), máy rơi vào trạng thái Direct Boot trước khi người dùng nhập mã PIN/vân tay. Toàn bộ Credential Encrypted (CE) storage bị khóa. Các app bình thường sẽ không khởi động được, dẫn đến việc thiết bị kết nối mạng mà **hoàn toàn không có VPN/Adblocker**, gây rò rỉ DNS và dữ liệu mạng.
+* **Giải pháp của ExpressVPN:**
+  1. Khai báo trong `AndroidManifest.xml`:
+     ```xml
+     <service
+         android:name="com.kape.android.vpn.service.XVVpnServiceImpl"
+         android:directBootAware="true"
+         android:permission="android.permission.BIND_VPN_SERVICE" />
+     <receiver
+         android:name=".service.BootReceiver"
+         android:directBootAware="true">
+         <intent-filter>
+             <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+             <action android:name="android.intent.action.BOOT_COMPLETED" />
+         </intent-filter>
+     </receiver>
+     ```
+  2. **Device Protected Storage (DE Storage):**
+     * Di chuyển các cấu hình tối thiểu cần thiết để start VPN (`isVpnEnabled`, `selectedDnsProvider`) sang context an toàn:
+       ```kotlin
+       val directBootContext = context.createDeviceProtectedStorageContext()
+       val dePrefs = directBootContext.getSharedPreferences("boot_vpn_prefs", Context.MODE_PRIVATE)
+       ```
+     * Khi nhận intent `LOCKED_BOOT_COMPLETED`, nếu `isVpnEnabled == true`, app khởi động ngay `AdBlockVpnService` mà không cần đợi người dùng mở khóa màn hình.
+
+---
+
+### 2.5. Cơ chế Split Kill Switch & Thuật toán Trừ Subnet LAN (CIDR Decomposition)
+
+* **Vấn đề của Kill Switch thông thường:**
+  * Nếu chặn cứng toàn bộ mạng khi VPN mất kết nối, người dùng sẽ **bị ngắt luôn kết nối đến các thiết bị nội bộ trong nhà**: Smart TV, Chromecast, loa Google Home/Sonos, máy in Wi-Fi, và các hệ thống IoT/Home Assistant.
+* **Giải pháp của ExpressVPN (`NetworkLock` & `lxc.java`):**
+  * Tách biệt 2 thiết lập rõ ràng:
+    1. `Block internet when unable to connect or reconnect to VPN` (Kill Switch Internet).
+    2. `Allow access to local network devices` (Bật/tắt cho phép truy cập LAN).
+  * **Thuật toán phân rã Subnet (CIDR Decomposition):**
+    * Thay vì phụ thuộc vào hàm `builder.excludeRoute()` (vốn chỉ hỗ trợ từ Android 13+ và thường xuyên bị lỗi/crash trên một số ROM hãng như MIUI, ColorOS, OriginOS), ExpressVPN tính toán dải bù trừ trực tiếp vào `builder.addRoute()`:
+    * Thay vì add `0.0.0.0/0`, bộ định tuyến sẽ tự động chia nhỏ dải IPv4 toàn cầu để **loại trừ chính xác**:
+      * `10.0.0.0/8` (Private Class A)
+      * `172.16.0.0/12` (Private Class B)
+      * `192.168.0.0/16` (Private Class C)
+      * `169.254.0.0/16` (Link-Local / APIPA)
+      * `224.0.0.0/24` (Multicast discovery - SSDP/mDNS cho Chromecast & thiết bị thông minh)
+    * Kết quả: Lưu lượng Internet bắt buộc phải đi qua VPN, nhưng mọi thao tác Cast màn hình, in ấn, điều khiển nhà thông minh vẫn thông suốt 100% trên mọi phiên bản Android từ 7.0 đến 15+.
 
 ---
 
@@ -153,25 +185,25 @@ Trong `XVVpnServiceImpl`:
 Khi bạn chuyển qua **AGY IDE** để tạo Plan và triển khai, đây là thứ tự ưu tiên đề xuất:
 
 ### 🎯 Giai đoạn 1: Quick Wins (Ổn định kết nối & Fix Issue #145)
-- [ ] **Task 1.1:** Đổi IP TUN trong `AdBlockVpnService.kt` sang `100.64.100.2/32` (CGNAT range).
-- [ ] **Task 1.2:** Điều chỉnh MTU xuống `1350` (hoặc cấu hình adaptive MTU 1280-1350) để chống drop packet trên 4G/5G.
-- [ ] **Task 1.3:** Thêm `builder.setMetered(false)` (trên Android 10+) để tránh bị bóp băng thông tải nền.
-- [ ] **Task 1.4:** Tích hợp danh sách **DoH Blacklist** (chặn/NXDOMAIN các endpoint DoH nổi tiếng: Cloudflare, Google DNS, NextDNS) để triệt tiêu việc bypass DNS adblock.
+- [x] **Task 1.1:** Đổi IP TUN trong `AdBlockVpnService.kt` sang `100.64.100.2/32` (CGNAT range).
+- [x] **Task 1.2:** Điều chỉnh MTU xuống `1350` (hoặc cấu hình adaptive MTU 1280-1350) để chống drop packet trên 4G/5G.
+- [x] **Task 1.3:** Thêm `builder.setMetered(false)` (trên Android 10+) để tránh bị bóp băng thông tải nền.
+- [x] **Task 1.4:** Tích hợp danh sách **DoH Blacklist** (chặn/NXDOMAIN các endpoint DoH nổi tiếng: Cloudflare, Google DNS, NextDNS) để triệt tiêu việc bypass DNS adblock.
 
 ### 🎯 Giai đoạn 2: Tối ưu hoá Engine & Quản lý Bộ nhớ
-- [ ] **Task 2.1:** Thêm hàm native fcntl đưa TUN fd về `O_NONBLOCK` để ngăn ngừa tình trạng thread đọc TUN bị deadlock.
-- [ ] **Task 2.2:** Nghiên cứu cơ chế nạp file filter list bằng `FileDescriptor` / `mmap` trong Go core (`tunnel/compiler.go`) thay vì cấp phát slice buffer lớn trên Go heap.
+- [x] **Task 2.1:** Thêm hàm native fcntl đưa TUN fd về `O_NONBLOCK` để ngăn ngừa tình trạng thread đọc TUN bị deadlock.
+- [x] **Task 2.2:** Nghiên cứu cơ chế nạp file filter list bằng `FileDescriptor` / `mmap` trong Go core (`tunnel/compiler.go`) thay vì cấp phát slice buffer lớn trên Go heap.
 
-### 🎯 Giai đoạn 3: Hệ thống Chẩn đoán (Connection Quality Probe)
-- [ ] **Task 3.1:** Xây dựng một module `ConnectionDiagnostics` nhỏ bằng Kotlin Coroutines:
-  * Tạo socket được bảo vệ bằng `protect()` để ping kiểm tra mạng ngoài.
-  * Thử truy vấn 1 domain test qua DNS cục bộ của BlockAds.
-- [ ] **Task 3.2:** Nếu DNS cục bộ không phản hồi sau 3 giây (nhưng mạng ngoài vẫn sống), tự động restart Go resolver hoặc reload socket.
+### 🎯 Giai đoạn 3: Hệ thống Chẩn đoán & Direct Boot (Reliability)
+- [x] **Task 3.1:** Xây dựng module `ConnectionDiagnostics` nhỏ bằng Kotlin Coroutines (kiểm tra socket ngoài qua `protect()` và test DNS local).
+- [x] **Task 3.2:** Hỗ trợ **Direct Boot Aware** (`directBootAware="true"`, lắng nghe `LOCKED_BOOT_COMPLETED`, lưu state VPN vào `createDeviceProtectedStorageContext()`).
+- [x] **Task 3.3:** Hoàn thiện thuật toán **Split Kill Switch** (cho phép traffic LAN `192.168.x.x`, `10.x.x.x` và mDNS Chromecast không bị chặn khi ngắt Internet ngoài).
 
 ### 🎯 Giai đoạn 4: Nâng cấp UX/UI & Thống kê
-- [ ] **Task 4.1:** Bổ sung các nút hành động (`Disconnect`, `Pause`) ngay trên thanh Thông báo (Notification).
-- [ ] **Task 4.2:** Tách biệt rõ trạng thái "Mất mạng do Wi-Fi/4G rớt" vs "Lỗi đường hầm VPN".
-- [ ] **Task 4.3:** Tối ưu hoá bảng thống kê Room DB theo dạng aggregated daily record.
+- [ ] **Task 4.1:** Bổ sung tính năng **Snooze / Pause VPN 5 - 15 phút** với WorkManager tự động kết nối lại.
+- [ ] **Task 4.2:** Bổ sung các nút hành động (`Disconnect`, `Pause`, `Retry`) trực tiếp trên thanh Notification.
+- [ ] **Task 4.3:** Tách biệt rõ trạng thái "Mất mạng do Wi-Fi/4G rớt" vs "Lỗi đường hầm VPN".
+- [ ] **Task 4.4:** Tối ưu hoá bảng thống kê Room DB theo dạng aggregated daily record và pop-up cột mốc chặn quảng cáo (Milestone summary).
 
 ---
 *Tài liệu này được tạo tự động sau quá trình decompile và phân tích chuyên sâu mã nguồn ExpressVPN Android.*

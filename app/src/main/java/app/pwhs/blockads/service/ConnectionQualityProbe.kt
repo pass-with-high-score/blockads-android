@@ -39,8 +39,9 @@ class ConnectionQualityProbe(
 ) {
     companion object {
         private const val PROBE_TIMEOUT_MS = 2500
-        // Reliable public DNS IP for physical internet TCP connectivity test
+        // Reliable public DNS IPs for physical internet TCP connectivity test
         private const val CANARY_IP = "1.1.1.1"
+        private const val SECONDARY_CANARY_IP = "8.8.8.8"
         private const val CANARY_PORT = 53
         // Local fake DNS IP of BlockAds TUN (RFC 6598 CGNAT)
         private const val TUN_DNS_IP = "100.64.100.1"
@@ -52,8 +53,13 @@ class ConnectionQualityProbe(
      * Returns true if socket connects successfully, false otherwise.
      */
     suspend fun probePhysicalInternet(): Boolean = withContext(Dispatchers.IO) {
+        if (probeSocket(CANARY_IP, CANARY_PORT)) return@withContext true
+        probeSocket(SECONDARY_CANARY_IP, CANARY_PORT)
+    }
+
+    private fun probeSocket(ip: String, port: Int): Boolean {
         var socket: Socket? = null
-        try {
+        return try {
             socket = Socket()
             socketProtector?.let { protector ->
                 try {
@@ -64,11 +70,11 @@ class ConnectionQualityProbe(
                     Timber.w(e, "Failed to protect probe socket")
                 }
             }
-            val endpoint = InetSocketAddress(InetAddress.getByName(CANARY_IP), CANARY_PORT)
+            val endpoint = InetSocketAddress(InetAddress.getByName(ip), port)
             socket.connect(endpoint, PROBE_TIMEOUT_MS)
             true
         } catch (e: Exception) {
-            Timber.d("Physical internet probe failed: ${e.message}")
+            Timber.d("Physical internet probe failed for $ip: ${e.message}")
             false
         } finally {
             try {
