@@ -98,9 +98,10 @@ type Engine struct {
 	adBlooms  []*BloomFilter
 	secBlooms []*BloomFilter
 
-	mu      sync.Mutex
-	running bool
-	tunFile *os.File
+	mu         sync.Mutex
+	running    bool
+	tunFile    *os.File
+	dohDomains map[string]struct{}
 
 	// Pipeline components
 	router      *Router
@@ -338,6 +339,55 @@ func (e *Engine) SetConnLogEnabled(enabled bool) {
 
 // IsConnLogEnabled reports the current value.
 func (e *Engine) IsConnLogEnabled() bool { return e.connLogEnabled.Load() }
+
+// SetDoHBlocklist parses newline-separated domains of known DoH endpoints
+// (e.g. from assets/blocklist_doh.txt). When client apps or browsers
+// attempt to resolve these domains, the engine returns NXDOMAIN immediately,
+// forcing them to fall back to plain DNS on port 53 (mitigating Issue #145).
+func (e *Engine) SetDoHBlocklist(content string) {
+	m := make(map[string]struct{})
+	count := 0
+	for _, line := range strings.Split(content, "\n") {
+		domain := strings.TrimSpace(strings.ToLower(line))
+		if domain == "" || strings.HasPrefix(domain, "#") || strings.HasPrefix(domain, "//") {
+			continue
+		}
+		m[domain] = struct{}{}
+		count++
+	}
+	e.mu.Lock()
+	e.dohDomains = m
+	e.mu.Unlock()
+	logf("DoH Blocklist loaded: %d domains", count)
+}
+
+// IsDoHBlockingEnabled reports whether DoH blocking is currently active.
+func (e *Engine) IsDoHBlockingEnabled() bool {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return len(e.dohDomains) > 0
+}
+
+func (e *Engine) isDoHDomain(domain string) bool {
+	e.mu.Lock()
+	m := e.dohDomains
+	e.mu.Unlock()
+	if len(m) == 0 {
+		return false
+	}
+	d := strings.ToLower(domain)
+	for {
+		if _, ok := m[d]; ok {
+			return true
+		}
+		idx := strings.IndexByte(d, '.')
+		if idx < 0 {
+			break
+		}
+		d = d[idx+1:]
+	}
+	return false
+}
 
 // SetDNS configures the DNS settings.
 // protocol: "PLAIN", "DOH", "DOT", "DOQ"

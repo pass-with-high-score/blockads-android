@@ -200,4 +200,17 @@ class DnsProviderViewModel(
             ServiceController.requestRestart(getApplication<Application>().applicationContext)
         }
     }
+
+    val blockDohBypass: StateFlow<Boolean> = appPrefs.blockDohBypass
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
+
+    fun setBlockDohBypass(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setBlockDohBypass(enabled)
+        }
+    }
 }

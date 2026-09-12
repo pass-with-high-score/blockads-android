@@ -236,6 +236,25 @@ class GoTunnelAdapter(
     }
 
     /**
+     * Update DoH bypass blocking setting.
+     * When enabled, known DoH endpoints and direct IPs are blocked, forcing
+     * apps and browsers to fall back to system DNS.
+     */
+    fun setBlockDohBypass(enabled: Boolean) {
+        try {
+            val list = if (enabled) {
+                context.assets.open("blocklist_doh.txt").bufferedReader().use { it.readText() }
+            } else {
+                ""
+            }
+            engine.setDoHBlocklist(list)
+            Timber.d("DoH blocklist updated in Go engine (enabled=$enabled)")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to update DoH blocklist")
+        }
+    }
+
+    /**
      * Set the DNS log callback.
      */
     private fun setupLogCallback() {
@@ -294,6 +313,7 @@ class GoTunnelAdapter(
         selectedBrowsers: Set<String> = emptySet(),
         certDir: String = "",
         filterHttp3: Boolean = false,
+        blockDohBypass: Boolean = false,
         socketProtector: ((Int) -> Boolean)? = null
     ) {
         if (isRunning) return
@@ -347,6 +367,9 @@ class GoTunnelAdapter(
         setupLogCallback()
         setupUidResolver()
         setupAppUidResolver()
+
+        // Load DoH blacklist asset to prevent DNS-over-HTTPS bypass if enabled (Issue #145)
+        setBlockDohBypass(blockDohBypass)
 
         // Give Go the paths to the Mmap logs so it can read them natively for max speed
         updateTries()

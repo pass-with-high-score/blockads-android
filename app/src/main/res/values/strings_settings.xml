@@ -228,4 +228,10 @@
     <string name="exclude_lan_description">Allow access to local network devices (printers, NAS, local servers) while WireGuard is active</string>
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
+
+    <!-- DNS Leak Protection / DoH Bypass -->
+    <string name="dns_category_advanced_security">Advanced DNS Security</string>
+    <string name="dns_block_doh_bypass_title">Block DNS-over-HTTPS (DoH) Bypass</string>
+    <string name="dns_block_doh_bypass_desc">Prevent apps and browsers from bypassing local filtering using encrypted DoH/DoT</string>
+    <string name="dns_block_doh_bypass_notice">Note: If your browser (e.g. Chrome) shows a connection error (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), set \"Use secure DNS\" in your browser settings to \"Automatic\".</string>
 </resources>

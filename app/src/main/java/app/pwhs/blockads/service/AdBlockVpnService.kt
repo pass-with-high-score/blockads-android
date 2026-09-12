@@ -46,8 +46,6 @@ class AdBlockVpnService : VpnService() {
 
     companion object {
         private const val RESTART_CLEANUP_DELAY_MS = 1000L
-        // How long stopVpn() waits for the native Go engine teardown before
-        // completing the service shutdown regardless (see stopVpn, #232).
         private const val GO_STOP_TIMEOUT_MS = 300L
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
@@ -71,35 +69,23 @@ class AdBlockVpnService : VpnService() {
         val privateDnsStrict: StateFlow<Boolean> = _privateDnsStrict.asStateFlow()
 
         fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?) {
-            _privateDnsStrict.value = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            _privateDnsStrict.value = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                 linkProperties?.privateDnsServerName != null
-            } else {
-                false
-            }
         }
 
         fun requestRestart(context: Context) {
             val s = _state.value
             if (s == VpnState.RUNNING || s == VpnState.STARTING) {
-                val intent = Intent(context, AdBlockVpnService::class.java).apply {
-                    action = ACTION_RESTART
-                }
-                context.startService(intent)
+                context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_RESTART })
             }
         }
 
         fun start(context: Context) {
-            val intent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = ACTION_START
-            }
-            context.startService(intent)
+            context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_START })
         }
 
         fun stop(context: Context) {
-            val intent = Intent(context, AdBlockVpnService::class.java).apply {
-                action = ACTION_STOP
-            }
-            context.startService(intent)
+            context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_STOP })
         }
     }
 
@@ -127,6 +113,7 @@ class AdBlockVpnService : VpnService() {
     private val allTimeBlockedCount = AtomicLong(0)
     @Volatile private var nextMilestoneThreshold: Long? = null
     @Volatile private var isReconnecting = false
+    @Volatile private var isPhysicalNetworkLost = false
 
     @Volatile
     var connectingPhase: String = ""
@@ -166,6 +153,7 @@ class AdBlockVpnService : VpnService() {
             batteryMonitor = batteryMonitor,
             isRunningProvider = { isRunning },
             isIdleProvider = { !isRunning && !isConnecting && !isRestarting && !isStopping },
+            socketProtector = { fd -> protect(fd) },
             onTearDownForRestart = { tearDownForRestart() },
             onStartVpn = {
                 retryManager.reset()
@@ -182,40 +170,45 @@ class AdBlockVpnService : VpnService() {
                 serviceScope.launch {
                     engineCoordinator.handleLinkPropertiesChanged(goTunnelAdapter, linkProperties)
                 }
-            }
+            },
+            onPhysicalNetworkLostChanged = { lost ->
+                if (isPhysicalNetworkLost != lost) {
+                    isPhysicalNetworkLost = lost
+                    updateNotification()
+                }
+            },
+            onNetworkActiveChanged = { network ->
+                try {
+                    setUnderlyingNetworks(if (network != null) arrayOf(network) else null)
+                    Timber.d("Updated underlying network: $network")
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to set underlying network")
+                }
+            },
+            onRequestRestart = { requestRestart(this@AdBlockVpnService) }
         )
         connectionSupervisor.initializeNetworkMonitor()
 
         serviceScope.launch {
             appPrefs.recordDnsLogs.collect { enabled ->
                 isRecordDnsLogsEnabled = enabled
-                if (::goTunnelAdapter.isInitialized) {
-                    goTunnelAdapter.setConnLogEnabled(enabled)
-                }
+                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setConnLogEnabled(enabled)
+            }
+        }
+        serviceScope.launch {
+            appPrefs.blockDohBypass.collect { enabled ->
+                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setBlockDohBypass(enabled)
             }
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val startedFromBoot = intent?.getBooleanExtra(EXTRA_STARTED_FROM_BOOT, false) ?: false
-
-        when (intent?.action) {
-            ACTION_STOP -> {
-                stopVpn()
-                return START_NOT_STICKY
-            }
-            ACTION_PAUSE_1H -> {
-                pauseVpn()
-                return START_NOT_STICKY
-            }
-            ACTION_RESTART -> {
-                restartVpn()
-                return START_STICKY
-            }
-            else -> {
-                startVpn(startedFromBoot)
-                return START_STICKY
-            }
+        return when (intent?.action) {
+            ACTION_STOP -> { stopVpn(); START_NOT_STICKY }
+            ACTION_PAUSE_1H -> { pauseVpn(); START_NOT_STICKY }
+            ACTION_RESTART -> { restartVpn(); START_STICKY }
+            else -> { startVpn(startedFromBoot); START_STICKY }
         }
     }
 
@@ -374,6 +367,7 @@ class AdBlockVpnService : VpnService() {
     private fun stopVpn(showStoppedNotification: Boolean = true) {
         _state.value = VpnState.STOPPING
         isReconnecting = false
+        isPhysicalNetworkLost = false
         connectionSupervisor.cancelNetworkSwitch()
         startTimestamp = 0L
 
@@ -444,6 +438,7 @@ class AdBlockVpnService : VpnService() {
             lastStoppedTimestamp = System.currentTimeMillis()
         }
         isReconnecting = false
+        isPhysicalNetworkLost = false
         startTimestamp = 0L
 
         connectionSupervisor.stopNetworkMonitoring()
@@ -468,7 +463,8 @@ class AdBlockVpnService : VpnService() {
             retryCount = retryManager.getRetryCount(),
             maxRetries = retryManager.getMaxRetries(),
             vpnStartTime = vpnStartTime,
-            todayBlockedCount = todayBlockedCount
+            todayBlockedCount = todayBlockedCount,
+            isPhysicalNetworkLost = isPhysicalNetworkLost
         )
     }
 
@@ -481,6 +477,7 @@ class AdBlockVpnService : VpnService() {
     private suspend fun tearDownForRestart() {
         _state.value = VpnState.RESTARTING
         isReconnecting = true
+        isPhysicalNetworkLost = false
 
         connectionSupervisor.stopNetworkMonitoring()
         connectionSupervisor.stopPeriodicMonitoring()

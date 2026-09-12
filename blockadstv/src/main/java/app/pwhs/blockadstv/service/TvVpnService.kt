@@ -214,14 +214,14 @@ class TvVpnService : VpnService() {
         return try {
             val builder = Builder()
                 .setSession("BlockAds TV")
-                .addAddress("10.0.0.2", 32)
-                .addRoute("10.0.0.1", 32)
-                .addDnsServer("10.0.0.1")
+                .addAddress("100.64.100.2", 32)
+                .addRoute("100.64.100.1", 32)
+                .addDnsServer("100.64.100.1")
                 .addAddress("fd00::2", 128)
                 .addRoute("fd00::1", 128)
                 .addDnsServer("fd00::1")
-                .setBlocking(true)
-                .setMtu(1500)
+                .setBlocking(false)
+                .setMtu(1350)
 
             // Exclude our own app
             try {
@@ -250,6 +250,20 @@ class TvVpnService : VpnService() {
             }
 
             vpnInterface = builder.establish()
+            if (vpnInterface != null) {
+                try {
+                    val fd = vpnInterface!!.fileDescriptor
+                    val flags = android.system.Os.fcntlInt(fd, android.system.OsConstants.F_GETFL, 0)
+                    android.system.Os.fcntlInt(
+                        fd,
+                        android.system.OsConstants.F_SETFL,
+                        flags or android.system.OsConstants.O_NONBLOCK
+                    )
+                    Timber.d("TV TUN file descriptor set to O_NONBLOCK successfully")
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to enforce O_NONBLOCK on TV TUN fd")
+                }
+            }
             Timber.d("VPN interface established: ${vpnInterface != null}")
             vpnInterface != null
         } catch (e: Exception) {

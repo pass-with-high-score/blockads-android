@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">DNS riêng tư đang bật</string>
     <string name="private_dns_warning_text">DNS riêng tư của Android bỏ qua BlockAds nên việc lọc có thể không áp dụng. Hãy đặt DNS riêng tư về Tắt hoặc Tự động trong cài đặt hệ thống.</string>
     <string name="status_paused">Đã tạm dừng</string>
+    <string name="vpn_notification_action_retry">Thử lại</string>
+    <string name="vpn_notification_no_internet_title">Mất kết nối Internet</string>
+    <string name="vpn_notification_no_internet_text">Đang chờ mạng khả dụng…</string>
 </resources>

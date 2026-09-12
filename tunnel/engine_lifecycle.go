@@ -35,6 +35,9 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 		e.running = false
 		return
 	}
+	if err := syscall.SetNonblock(dupFd, true); err != nil {
+		logf("Failed to set TUN fd %d non-blocking: %v", dupFd, err)
+	}
 
 	e.tunFile = os.NewFile(uintptr(dupFd), "tun")
 	if e.tunFile == nil {

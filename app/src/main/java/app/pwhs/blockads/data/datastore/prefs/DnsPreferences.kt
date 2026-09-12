@@ -2,10 +2,12 @@ package app.pwhs.blockads.data.datastore.prefs
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.pwhs.blockads.data.entities.DnsProtocol
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class DnsPreferences(private val dataStore: DataStore<Preferences>) {
@@ -18,6 +20,7 @@ class DnsPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_DNS_PROVIDER_ID = stringPreferencesKey("dns_provider_id")
         val KEY_DNS_RESPONSE_TYPE = stringPreferencesKey("dns_response_type")
         val KEY_SPLIT_DNS_ZONES = stringPreferencesKey("split_dns_zones")
+        val KEY_BLOCK_DOH_BYPASS = booleanPreferencesKey("block_doh_bypass")
 
         const val DNS_RESPONSE_NXDOMAIN = "nxdomain"
         const val DNS_RESPONSE_REFUSED = "refused"
@@ -107,4 +110,17 @@ class DnsPreferences(private val dataStore: DataStore<Preferences>) {
             prefs[KEY_SPLIT_DNS_ZONES] = zones
         }
     }
+
+    val blockDohBypass: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_BLOCK_DOH_BYPASS] ?: false
+    }
+
+    suspend fun setBlockDohBypass(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[KEY_BLOCK_DOH_BYPASS] = enabled
+        }
+    }
+
+    suspend fun getBlockDohBypassSnapshot(): Boolean =
+        dataStore.data.map { it[KEY_BLOCK_DOH_BYPASS] ?: false }.first()
 }

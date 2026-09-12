@@ -58,7 +58,7 @@ class VpnTunnelBuilder(
                 Timber.d("Establishing VPN in WireGuard mode")
                 val b = vpnService.Builder()
                     .setSession("BlockAds WireGuard")
-                    .setBlocking(true)
+                    .setBlocking(false)
                     .setMtu(1280)
 
                 for (addr in wgConfig.interfaceConfig.address) {
@@ -88,22 +88,22 @@ class VpnTunnelBuilder(
                     }
                 }
 
-                b.addAddress("10.255.255.2", 32)
-                b.addDnsServer("10.255.255.1")
-                b.addRoute("10.255.255.1", 32)
+                b.addAddress("100.64.100.2", 32)
+                b.addDnsServer("100.64.100.1")
+                b.addRoute("100.64.100.1", 32)
                 b
             } else {
                 Timber.d("Establishing VPN in direct mode (fullTunnel=true)")
                 val b = vpnService.Builder()
                     .setSession("BlockAds")
-                    .addAddress("10.0.0.2", 32)
-                    .addRoute("10.0.0.1", 32)
-                    .addDnsServer("10.0.0.1")
+                    .addAddress("100.64.100.2", 32)
+                    .addRoute("100.64.100.1", 32)
+                    .addDnsServer("100.64.100.1")
                     .addAddress("fd00::2", 128)
                     .addRoute("fd00::1", 128)
                     .addDnsServer("fd00::1")
-                    .setBlocking(true)
-                    .setMtu(1500)
+                    .setBlocking(false)
+                    .setMtu(1350)
                     .addRoute("0.0.0.0", 0)
                 b
             }
@@ -134,6 +134,12 @@ class VpnTunnelBuilder(
 
             val pfd = builder.establish()
             if (pfd != null) {
+                try {
+                    val flags = android.system.Os.fcntlInt(pfd.fileDescriptor, android.system.OsConstants.F_GETFL, 0)
+                    android.system.Os.fcntlInt(pfd.fileDescriptor, android.system.OsConstants.F_SETFL, flags or android.system.OsConstants.O_NONBLOCK)
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to set TUN O_NONBLOCK via fcntl")
+                }
                 TunnelResult.Success(pfd, resolvedWgConfigJson)
             } else {
                 Timber.e("Failed to establish VPN interface")

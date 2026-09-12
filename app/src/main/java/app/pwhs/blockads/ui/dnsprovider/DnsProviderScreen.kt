@@ -33,6 +33,7 @@ import app.pwhs.blockads.ui.dnsprovider.component.CategoryHeader
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsCard
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsDialog
 import app.pwhs.blockads.ui.dnsprovider.component.DnsProviderCard
+import app.pwhs.blockads.ui.dnsprovider.component.DohBypassCard
 import app.pwhs.blockads.ui.dnsprovider.component.FallbackDnsCard
 import app.pwhs.blockads.ui.dnsprovider.component.FallbackDnsDialog
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -50,6 +51,7 @@ fun DnsProviderScreen(
     val customDnsDisplay by viewModel.customDnsDisplay.collectAsStateWithLifecycle()
     val upstreamDns by viewModel.upstreamDns.collectAsStateWithLifecycle()
     val fallbackDns by viewModel.fallbackDns.collectAsStateWithLifecycle()
+    val blockDohBypass by viewModel.blockDohBypass.collectAsStateWithLifecycle()
 
     var showCustomDialog by remember { mutableStateOf(false) }
     var showFallbackDialog by remember { mutableStateOf(false) }
@@ -148,6 +150,18 @@ fun DnsProviderScreen(
                 FallbackDnsCard(
                     fallbackDns = fallbackDns,
                     onClick = { showFallbackDialog = true }
+                )
+            }
+
+            // Advanced DNS Security (DoH Leak Protection)
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                CategoryHeader(stringResource(R.string.dns_category_advanced_security))
+            }
+            item {
+                DohBypassCard(
+                    enabled = blockDohBypass,
+                    onCheckedChange = { viewModel.setBlockDohBypass(it) }
                 )
             }
 

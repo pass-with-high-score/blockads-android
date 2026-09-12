@@ -322,6 +322,10 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		return false
 	}
 
+	if e.isDoHDomain(host) {
+		return true
+	}
+
 	// ── Custom rule allow/block override ──
 	if e.domainChecker != nil {
 		override := e.domainChecker.HasCustomRule(host)

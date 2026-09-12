@@ -127,6 +127,7 @@ func udpFlowID(conn adapter.UDPConn) flowID {
 type AdBlockChecker interface {
 	IsDomainBlocked(host string) bool
 	LookupIP(host string) (net.IP, error)
+	IsDoHBlockingEnabled() bool
 	LogConnection(flow FlowID, protocol int)
 }
 
@@ -225,4 +226,18 @@ func isPrivateIP(ip net.IP) bool {
 		}
 	}
 	return false
+}
+
+// IsKnownPublicDoHIP returns true if the destination IP matches a well-known
+// public DNS-over-HTTPS resolver (Cloudflare, Google, Quad9, AdGuard).
+func IsKnownPublicDoHIP(ip net.IP) bool {
+	ipStr := ip.String()
+	switch ipStr {
+	case "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112",
+		"94.140.14.14", "94.140.15.15", "2606:4700:4700::1111", "2606:4700:4700::1001",
+		"2001:4860:4860::8888", "2001:4860:4860::8844", "2620:fe::fe", "2620:fe::9":
+		return true
+	default:
+		return false
+	}
 }

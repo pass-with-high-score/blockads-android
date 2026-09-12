@@ -1,9 +1,13 @@
 package app.pwhs.blockads.service.vpn
 
 import android.content.Context
+import android.net.LinkProperties
+import android.net.Network
 import android.os.PowerManager
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.service.ConnectionQualityProbe
+import app.pwhs.blockads.service.ConnectionStatus
 import app.pwhs.blockads.service.NetworkMonitor
 import app.pwhs.blockads.utils.BatteryMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -21,18 +25,23 @@ class VpnConnectionSupervisor(
     private val batteryMonitor: BatteryMonitor,
     private val isRunningProvider: () -> Boolean,
     private val isIdleProvider: () -> Boolean,
+    private val socketProtector: (Int) -> Boolean,
     private val onTearDownForRestart: suspend () -> Unit,
     private val onStartVpn: () -> Unit,
     private val onPhaseChanged: (String) -> Unit,
     private val onRefreshStats: suspend () -> Unit,
     private val onUpdateNotification: () -> Unit,
-    private val onLinkPropertiesChanged: (android.net.LinkProperties?) -> Unit
+    private val onLinkPropertiesChanged: (LinkProperties?) -> Unit,
+    private val onPhysicalNetworkLostChanged: (Boolean) -> Unit,
+    private val onNetworkActiveChanged: (Network?) -> Unit,
+    private val onRequestRestart: () -> Unit
 ) {
 
     companion object {
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
         private const val BATTERY_CHECK_INTERVAL_MS = 5 * 60 * 1000L
         private const val NOTIFICATION_UPDATE_INTERVAL_MS = 30_000L
+        private const val CONNECTION_PROBE_INTERVAL_MS = 60_000L
     }
 
     val networkAvailableFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -41,13 +50,22 @@ class VpnConnectionSupervisor(
     private var networkSwitchJob: Job? = null
     private var batteryMonitoringJob: Job? = null
     private var notificationUpdateJob: Job? = null
+    private var connectionQualityProbe: ConnectionQualityProbe? = null
+    private var connectionProbeJob: Job? = null
 
     fun initializeNetworkMonitor() {
         networkMonitor = NetworkMonitor(
             context = context,
-            onNetworkAvailable = { onNetworkAvailable() },
-            onNetworkLost = { Timber.d("Network lost") },
-            onLinkPropertiesChanged = onLinkPropertiesChanged
+            onNetworkAvailable = {
+                onPhysicalNetworkLostChanged(false)
+                onNetworkAvailable()
+            },
+            onNetworkLost = {
+                Timber.d("Network lost")
+                onPhysicalNetworkLostChanged(true)
+            },
+            onLinkPropertiesChanged = onLinkPropertiesChanged,
+            onNetworkActiveChanged = onNetworkActiveChanged
         )
     }
 
@@ -114,11 +132,57 @@ class VpnConnectionSupervisor(
     fun startPeriodicMonitoring() {
         startBatteryMonitoring()
         startNotificationUpdates()
+        startConnectionProbing()
     }
 
     fun stopPeriodicMonitoring() {
         stopBatteryMonitoring()
         stopNotificationUpdates()
+        stopConnectionProbing()
+    }
+
+    private fun startConnectionProbing() {
+        connectionProbeJob?.cancel()
+        connectionQualityProbe = ConnectionQualityProbe(socketProtector)
+
+        connectionProbeJob = scope.launch {
+            var consecutiveVpnStalls = 0
+            while (isRunningProvider()) {
+                delay(CONNECTION_PROBE_INTERVAL_MS)
+                if (!isRunningProvider()) break
+
+                val probe = connectionQualityProbe ?: break
+                val result = probe.runDiagnosis()
+                Timber.d("ConnectionQualityProbe result: ${result.status} (physical=${result.physicalOk}, vpnDns=${result.vpnDnsOk}, latency=${result.latencyMs}ms)")
+
+                when (result.status) {
+                    ConnectionStatus.NO_PHYSICAL_INTERNET -> {
+                        consecutiveVpnStalls = 0
+                        onPhysicalNetworkLostChanged(true)
+                    }
+                    ConnectionStatus.HEALTHY -> {
+                        consecutiveVpnStalls = 0
+                        onPhysicalNetworkLostChanged(false)
+                    }
+                    ConnectionStatus.VPN_TUNNEL_STALLED -> {
+                        onPhysicalNetworkLostChanged(false)
+                        consecutiveVpnStalls++
+                        Timber.w("VPN tunnel or DNS probe failed (consecutive failures=$consecutiveVpnStalls)")
+                        if (consecutiveVpnStalls >= 2) {
+                            Timber.w("VPN tunnel is stalled while physical internet is healthy - restarting VPN session")
+                            consecutiveVpnStalls = 0
+                            onRequestRestart()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopConnectionProbing() {
+        connectionProbeJob?.cancel()
+        connectionProbeJob = null
+        connectionQualityProbe = null
     }
 
     private fun startBatteryMonitoring() {

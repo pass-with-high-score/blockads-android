@@ -81,7 +81,16 @@ func NewMitmTcpHandler(
 		// immediately so Android falls back to plaintext DNS on port 53,
 		// which the engine intercepts and filters. Mirrors the fake-DNS /
 		// force-port-53 approach already used in WireGuard mode.
-		if flow.serverPort == 853 {
+		// Gate -1 — DoT (port 853). If DoH/DoT blocking is enabled, close connection
+		// so client falls back to port 53 DNS.
+		if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 853 {
+			return
+		}
+
+		// Gate -1.5 — Hardcoded DoH Direct-IP (port 443). If DoH/DoT blocking is enabled
+		// and an app tries to connect directly to known public DoH server IPs,
+		// close immediately so it falls back to system DNS on port 53.
+		if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 443 && IsKnownPublicDoHIP(flow.serverIP) {
 			return
 		}
 

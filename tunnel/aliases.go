@@ -104,4 +104,5 @@ var (
 	buildIPv4UDPPacket     = packet.BuildIPv4UDPPacket
 	buildIPv6UDPPacket     = packet.BuildIPv6UDPPacket
 	newPacketPipe          = packet.NewPacketPipe
+	isKnownPublicDoHIP     = mitm.IsKnownPublicDoHIP
 )

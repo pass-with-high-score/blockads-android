@@ -75,4 +75,7 @@
     <string name="status_disconnecting">Disconnecting</string>
     <string name="vpn_notification_stopping">BlockAds is stopping</string>
     <string name="vpn_notification_stopping_text">Closing VPN tunnel…</string>
+    <string name="vpn_notification_action_retry">Retry</string>
+    <string name="vpn_notification_no_internet_title">No internet connection</string>
+    <string name="vpn_notification_no_internet_text">Waiting for network connection…</string>
 </resources>

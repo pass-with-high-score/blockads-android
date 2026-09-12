@@ -201,4 +201,10 @@
     <string name="trusted_networks_paused_title">Đã tạm dừng ở mạng tin cậy</string>
     <string name="trusted_networks_paused_text">BlockAds đang tạm dừng ở &quot;%1$s&quot; — tự bật lại khi bạn rời mạng này.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds đang tạm dừng ở một Wi-Fi tin cậy — tự bật lại khi bạn rời đi.</string>
+
+    <!-- DNS Leak Protection / DoH Bypass -->
+    <string name="dns_category_advanced_security">Bảo mật DNS nâng cao</string>
+    <string name="dns_block_doh_bypass_title">Chặn rò rỉ DNS qua DoH/DoT</string>
+    <string name="dns_block_doh_bypass_desc">Ngăn chặn ứng dụng và trình duyệt sử dụng DoH để lách qua bộ lọc quảng cáo</string>
+    <string name="dns_block_doh_bypass_notice">Lưu ý: Nếu trình duyệt (như Chrome) báo lỗi kết nối bảo mật (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), vui lòng chuyển cài đặt \"Sử dụng DNS an toàn\" trong trình duyệt về chế độ \"Tự động\".</string>
 </resources>

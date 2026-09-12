@@ -38,3 +38,5 @@ sentry.properties
 .ruby-lsp
 adguard.apk
 adguard
+.claude/
+.agents/

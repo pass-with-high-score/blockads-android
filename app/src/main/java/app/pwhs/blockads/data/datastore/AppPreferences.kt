@@ -119,6 +119,7 @@ class AppPreferences(context: Context) {
     val dnsProviderId: Flow<String?> get() = dns.dnsProviderId
     val dnsResponseType: Flow<String> get() = dns.dnsResponseType
     val splitDnsZones: Flow<String> get() = dns.splitDnsZones
+    val blockDohBypass: Flow<Boolean> get() = dns.blockDohBypass
 
     // ── Appearance Flows ─────────────────────────────────────────────────
     val themeMode: Flow<String> get() = appearance.themeMode
@@ -180,6 +181,8 @@ class AppPreferences(context: Context) {
     suspend fun setDnsProviderId(providerId: String?) = dns.setDnsProviderId(providerId)
     suspend fun setDnsResponseType(responseType: String) = dns.setDnsResponseType(responseType)
     suspend fun setSplitDnsZones(zones: String) = dns.setSplitDnsZones(zones)
+    suspend fun setBlockDohBypass(enabled: Boolean) = dns.setBlockDohBypass(enabled)
+    suspend fun getBlockDohBypassSnapshot(): Boolean = dns.getBlockDohBypassSnapshot()
 
     suspend fun setThemeMode(mode: String) = appearance.setThemeMode(mode)
     suspend fun setAppLanguage(language: String) = appearance.setAppLanguage(language)
