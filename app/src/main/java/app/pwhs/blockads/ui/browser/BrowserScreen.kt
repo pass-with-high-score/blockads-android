@@ -412,6 +412,9 @@ fun BrowserScreen(
             blockedCount = uiState.blockedCount,
             adBlockEnabled = uiState.adBlockEnabled,
             isDesktopMode = uiState.isDesktopMode,
+            ruleVersion = uiState.ruleVersion,
+            ruleDomainsCount = uiState.ruleDomainsCount,
+            isCheckingRuleUpdates = uiState.isCheckingRuleUpdates,
             onDismiss = { showShieldSheet = false },
             onToggleAdBlock = {
                 viewModel.processIntent(BrowserUiIntent.ToggleAdBlock)
@@ -439,6 +442,9 @@ fun BrowserScreen(
                 viewModel.processIntent(BrowserUiIntent.LoadUrl(uiState.displayUrl))
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uiState.displayUrl))
                 context.startActivity(intent)
+            },
+            onCheckRuleUpdates = {
+                viewModel.processIntent(BrowserUiIntent.CheckRuleUpdates)
             }
         )
     }

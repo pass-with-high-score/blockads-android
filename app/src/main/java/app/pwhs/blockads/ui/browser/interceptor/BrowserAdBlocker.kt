@@ -5,6 +5,8 @@ import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import app.pwhs.blockads.ui.browser.rules.BrowserRuleDefaults
+import app.pwhs.blockads.ui.browser.rules.BrowserRulePackage
 import java.io.ByteArrayInputStream
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -17,129 +19,68 @@ object BrowserAdBlocker {
 
     private val scriptCache = ConcurrentHashMap<String, String>()
 
-    private val AD_HOST_SUFFIXES = listOf(
-        "doubleclick.net",
-        "googleadservices.com",
-        "googlesyndication.com",
-        "adnxs.com",
-        "criteo.com",
-        "criteo.net",
-        "taboola.com",
-        "outbrain.com",
-        "popads.net",
-        "popcash.net",
-        "propellerads.com",
-        "propellerclick.com",
-        "adsterra.com",
-        "exoclick.com",
-        "ezoic.net",
-        "ezoic.com",
-        "mgid.com",
-        "clickadu.com",
-        "revenuehits.com",
-        "bidvertiser.com",
-        "hilltopads.net",
-        "scorecardresearch.com",
-        "zedo.com",
-        "admob.com",
-        "ads.youtube.com",
-        "advertising.com",
-        "rubiconproject.com",
-        "pubmatic.com",
-        "casalemedia.com",
-        "openx.net",
-        "adroll.com",
-        "smartadserver.com",
-        "moatads.com",
-        "quantserve.com",
-        "serving-sys.com",
-        "fls-na.amazon.com",
-        "fls-eu.amazon.com",
-        // Regional Vietnamese ad networks
-        "admicro.vn",
-        "vcmedia.vn",
-        "eclick.vn",
-        "adtima.vn",
-        "novanet.vn",
-        // Popunder, 18+ and streaming ad networks (AdGuard filter sets)
-        "adxcontent.com",
-        "adxmedia.com",
-        "vlit.site",
-        "vlit.xyz",
-        "exosrv.com",
-        "tsyndicate.com",
-        "tsyndication.com",
-        "realsrv.com",
-        "trafficjunky.com",
-        "trafficstars.com",
-        "ero-advertising.com",
-        "juicyads.com",
-        "hilltopads.com",
-        "ad-maven.com",
-        "adcash.com",
-        "monetag.com",
-        "yepads.com",
-        "richpush.co",
-        "richads.com",
-        "clarium.io",
-        // Fake video ads & ad network redirectors
-        "clumsy-whereas.com",
-        "ttwstatic.com",
-        "bytedapm.com",
-        // Vietnamese streaming ad network
-        "adcenter.cx"
-    )
+    @Volatile
+    private var activeHostSuffixes: Set<String> = BrowserRuleDefaults.AD_HOST_SUFFIXES.toSet()
 
-    private val GAMBLING_POPUNDER_KEYWORDS = listOf(
-        "lu88", "hbet", "vu88", "man88", "k88.", "tx88", "du88", "x1bet",
-        "bet88", "kubet", "shbet", "789bet", "okvip", "jun88", "hi88",
-        "f8bet", "mb66", "123b", "fun88", "bk8", "rikvip", "cm88",
-        "bom88", "vsbet", "78win", "gem88", "win79"
-    )
+    @Volatile
+    private var activeGamblingKeywords: List<String> = BrowserRuleDefaults.GAMBLING_POPUNDER_KEYWORDS
 
-    private val AD_PATH_PATTERNS = listOf(
-        "/ads.js",
-        "/pagead/",
-        "/doubleclick/",
-        "/ad_status",
-        "/get_midroll_info",
-        "/api/stats/ads",
-        "/youtubei/v1/player/ad_break",
-        "googletagservices.com/tag/js/gpt.js",
-        "/static/doubleclick/instream",
-        "/popunder",
-        "/popads",
-        "/advertisement",
-        "/adserver",
-        "-adx.js",
-        "/vl-top-adx",
-        "/vl-main-adx",
-        "/vl-underplayer-adx",
-        "/vl-native-adx",
-        "/catfish"
-    )
+    @Volatile
+    private var activeAdPathPatterns: List<String> = BrowserRuleDefaults.AD_PATH_PATTERNS
+
+    @Volatile
+    private var activeCosmeticCss: String? = null
+
+    @Volatile
+    private var activeScriptletsJs: String? = null
+
+    val domainsCount: Int get() = activeHostSuffixes.size
+    val keywordsCount: Int get() = activeGamblingKeywords.size
+
+    /**
+     * Updates active in-memory rules from dynamic package and invalidates script caches.
+     */
+    fun applyRulePackage(rulePackage: BrowserRulePackage) {
+        if (rulePackage.adDomains.isNotEmpty()) {
+            activeHostSuffixes = rulePackage.adDomains.toSet()
+        }
+        if (rulePackage.gamblingKeywords.isNotEmpty()) {
+            activeGamblingKeywords = rulePackage.gamblingKeywords
+        }
+        if (rulePackage.adPathPatterns.isNotEmpty()) {
+            activeAdPathPatterns = rulePackage.adPathPatterns
+        }
+        if (!rulePackage.cosmeticCss.isNullOrBlank()) {
+            activeCosmeticCss = rulePackage.cosmeticCss
+            scriptCache.remove("adblock_cosmetic_wrapped.js")
+        }
+        if (!rulePackage.scriptletsJs.isNullOrBlank()) {
+            activeScriptletsJs = rulePackage.scriptletsJs
+            scriptCache.remove("adguard_scriptlets.js")
+        }
+    }
 
     fun shouldBlock(request: WebResourceRequest): Boolean {
         val url = request.url ?: return false
         val host = url.host?.lowercase(Locale.US) ?: return false
         val fullUrl = url.toString().lowercase(Locale.US)
 
-        // 1. Fast host suffix match
-        for (suffix in AD_HOST_SUFFIXES) {
+        // 1. Fast host suffix match (Set contains is O(1))
+        for (suffix in activeHostSuffixes) {
             if (host == suffix || host.endsWith(".$suffix")) {
                 return true
             }
         }
 
         // 2. Gambling popunder domain keyword match
-        for (keyword in GAMBLING_POPUNDER_KEYWORDS) {
+        for (keyword in activeGamblingKeywords) {
             if (host.contains(keyword)) {
                 return true
             }
         }
 
         // 3. Specific ad path patterns match
-        for (pattern in AD_PATH_PATTERNS) {
+        for (pattern in activeAdPathPatterns) {
             if (fullUrl.contains(pattern)) {
                 return true
             }
@@ -281,9 +222,10 @@ object BrowserAdBlocker {
     }
 
     fun getAdguardScriptlets(context: Context): String {
-        return scriptCache.getOrPut("adguard_scriptlets.js") {
-            readAsset(context, "browser/adguard_scriptlets.js")
-        }
+        return activeScriptletsJs?.takeIf { it.isNotBlank() }
+            ?: scriptCache.getOrPut("adguard_scriptlets.js") {
+                readAsset(context, "browser/adguard_scriptlets.js")
+            }
     }
 
     fun getBackgroundPlayScript(context: Context): String {
@@ -294,8 +236,11 @@ object BrowserAdBlocker {
 
     fun getCosmeticCssScript(context: Context): String {
         return scriptCache.getOrPut("adblock_cosmetic.css") {
-            val rawCss = readAsset(context, "browser/adblock_cosmetic.css")
+            val rawCss = (activeCosmeticCss?.takeIf { it.isNotBlank() }
+                ?: readAsset(context, "browser/adblock_cosmetic.css"))
+                .replace("\\", "\\\\")
                 .replace("\n", " ")
+                .replace("\r", "")
                 .replace("\"", "\\\"")
             """
             (function() {

@@ -106,6 +106,15 @@ val appModule = module {
         )
     }
 
+    // Browser Dynamic Rules
+    single { app.pwhs.blockads.ui.browser.rules.BrowserRuleStorage(androidContext()) }
+    single<app.pwhs.blockads.ui.browser.rules.BrowserRuleRepository> {
+        app.pwhs.blockads.ui.browser.rules.BrowserRuleRepositoryImpl(
+            storage = get(),
+            client = get()
+        )
+    }
+
     // Profile Manager
     single {
         ProfileManager(
@@ -260,7 +269,8 @@ val appModule = module {
     }
     viewModel {
         app.pwhs.blockads.ui.browser.BrowserViewModel(
-            application = androidApplication()
+            application = androidApplication(),
+            ruleRepository = get()
         )
     }
 }

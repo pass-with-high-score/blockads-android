@@ -18,10 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -57,6 +59,10 @@ fun BrowserShieldSheet(
     onEnterPip: () -> Unit,
     onClearData: () -> Unit,
     onOpenExternal: () -> Unit,
+    ruleVersion: Long = 1L,
+    ruleDomainsCount: Int = 0,
+    isCheckingRuleUpdates: Boolean = false,
+    onCheckRuleUpdates: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val host = runCatching {
@@ -248,6 +254,63 @@ fun BrowserShieldSheet(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Xóa dữ liệu")
+                }
+            }
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+
+            // Dynamic filter rule status & update trigger
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Bộ lọc trình duyệt",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Phiên bản v$ruleVersion • $ruleDomainsCount tên miền",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    FilledTonalButton(
+                        onClick = onCheckRuleUpdates,
+                        enabled = !isCheckingRuleUpdates,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        if (isCheckingRuleUpdates) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Cập nhật", fontSize = 13.sp)
+                        }
+                    }
                 }
             }
 

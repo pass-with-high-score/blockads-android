@@ -49,6 +49,7 @@ class BlockAdsApplication : Application() {
             appPreferences.migrateLegacyWgConfigIfNeeded()
 
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
+            app.pwhs.blockads.ui.browser.rules.BrowserRuleUpdateWorker.schedule(this@BlockAdsApplication)
 
             // Schedule daily summary only if enabled
             if (appPreferences.dailySummaryEnabled.first()) {

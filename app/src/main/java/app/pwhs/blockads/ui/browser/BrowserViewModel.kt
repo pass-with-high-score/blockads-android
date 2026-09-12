@@ -6,6 +6,7 @@ import android.webkit.WebStorage
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.ui.browser.interceptor.BrowserAdBlocker
+import app.pwhs.blockads.ui.browser.rules.BrowserRuleRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,14 +16,35 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class BrowserViewModel(
-    application: Application
+    application: Application,
+    private val ruleRepository: BrowserRuleRepository
 ) : AndroidViewModel(application) {
 
-    private val _uiState = MutableStateFlow(BrowserUiState())
+    private val _uiState = MutableStateFlow(
+        BrowserUiState(
+            ruleVersion = ruleRepository.currentRules.value.version,
+            ruleDomainsCount = ruleRepository.currentRules.value.adDomains.ifEmpty {
+                listOf(BrowserAdBlocker.domainsCount.toString())
+            }.size
+        )
+    )
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
 
     private val _uiEffect = Channel<BrowserUiEffect>(Channel.BUFFERED)
     val uiEffect = _uiEffect.receiveAsFlow()
+
+    init {
+        viewModelScope.launch {
+            ruleRepository.currentRules.collect { pkg ->
+                _uiState.update {
+                    it.copy(
+                        ruleVersion = pkg.version,
+                        ruleDomainsCount = if (pkg.adDomains.isNotEmpty()) pkg.adDomains.size else BrowserAdBlocker.domainsCount
+                    )
+                }
+            }
+        }
+    }
 
     fun processIntent(intent: BrowserUiIntent) {
         when (intent) {
@@ -85,6 +107,35 @@ class BrowserViewModel(
             is BrowserUiIntent.AdBlocked -> {
                 _uiState.update { it.copy(blockedCount = it.blockedCount + 1) }
             }
+            is BrowserUiIntent.CheckRuleUpdates -> {
+                checkForRuleUpdates()
+            }
+        }
+    }
+
+    private fun checkForRuleUpdates() {
+        if (_uiState.value.isCheckingRuleUpdates) return
+
+        _uiState.update { it.copy(isCheckingRuleUpdates = true) }
+        viewModelScope.launch {
+            val result = ruleRepository.checkAndUpdate()
+            _uiState.update { it.copy(isCheckingRuleUpdates = false) }
+
+            result.fold(
+                onSuccess = { updated ->
+                    val message = if (updated) {
+                        "Đã cập nhật bộ lọc lên phiên bản v${_uiState.value.ruleVersion} (${_uiState.value.ruleDomainsCount} tên miền)"
+                    } else {
+                        "Bộ lọc trình duyệt đã ở phiên bản mới nhất (v${_uiState.value.ruleVersion})"
+                    }
+                    _uiEffect.send(BrowserUiEffect.ShowToast(message))
+                },
+                onFailure = { error ->
+                    _uiEffect.send(
+                        BrowserUiEffect.ShowToast("Không thể tải bản cập nhật: ${error.localizedMessage ?: "Lỗi kết nối"}")
+                    )
+                }
+            )
         }
     }
 

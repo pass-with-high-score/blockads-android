@@ -12,7 +12,10 @@ data class BrowserUiState(
     val adBlockEnabled: Boolean = true,
     val blockedCount: Int = 0,
     val isIncognito: Boolean = true,
-    val showShortcuts: Boolean = false
+    val showShortcuts: Boolean = false,
+    val ruleVersion: Long = 1L,
+    val ruleDomainsCount: Int = 0,
+    val isCheckingRuleUpdates: Boolean = false
 )
 
 sealed interface BrowserUiIntent {
@@ -28,6 +31,7 @@ sealed interface BrowserUiIntent {
     data class PageStarted(val url: String) : BrowserUiIntent
     data class PageFinished(val url: String, val title: String) : BrowserUiIntent
     data object AdBlocked : BrowserUiIntent
+    data object CheckRuleUpdates : BrowserUiIntent
 }
 
 sealed interface BrowserUiEffect {
