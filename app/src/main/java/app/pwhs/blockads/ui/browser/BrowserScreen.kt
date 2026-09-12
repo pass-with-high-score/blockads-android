@@ -325,31 +325,7 @@ fun BrowserScreen(
                                 url?.let { viewModel.processIntent(BrowserUiIntent.PageStarted(it)) }
 
                                 if (uiState.adBlockEnabled) {
-                                    // 1. General AdGuard Scriptlets (Defuse popups, synthetic clicks, invisible overlays)
-                                    val scriptlets = BrowserAdBlocker.getAdguardScriptlets(context)
-                                    if (scriptlets.isNotEmpty()) {
-                                        view?.evaluateJavascript(scriptlets, null)
-                                    }
-
-                                    // 2. Kill Service Workers
-                                    val swScript = BrowserAdBlocker.getServiceWorkerKillerScript(context)
-                                    if (swScript.isNotEmpty()) {
-                                        view?.evaluateJavascript(swScript, null)
-                                    }
-
-                                    // 3. Enable Background Playback
-                                    val bgPlayScript = BrowserAdBlocker.getBackgroundPlayScript(context)
-                                    if (bgPlayScript.isNotEmpty()) {
-                                        view?.evaluateJavascript(bgPlayScript, null)
-                                    }
-
-                                    // 4. YouTube JSON Sanitizer
-                                    if (url?.contains("youtube.com") == true) {
-                                        val ytScript = BrowserAdBlocker.getYoutubeSanitizerScript(context)
-                                        if (ytScript.isNotEmpty()) {
-                                            view?.evaluateJavascript(ytScript, null)
-                                        }
-                                    }
+                                    BrowserAdBlocker.injectEarlyScripts(context, view, url)
                                 }
                             }
 
@@ -359,31 +335,7 @@ fun BrowserScreen(
                                 url?.let { viewModel.processIntent(BrowserUiIntent.PageFinished(it, currentTitle)) }
 
                                 if (uiState.adBlockEnabled) {
-                                    // 1. Cosmetic CSS (AdSense, Floating Banners, MGID, Vietnamese Ad Networks)
-                                    val cssScript = BrowserAdBlocker.getCosmeticCssScript(context)
-                                    if (cssScript.isNotEmpty()) {
-                                        view?.evaluateJavascript(cssScript, null)
-                                    }
-
-                                    // 2. Re-enforce AdGuard Scriptlets & Overlay Removal
-                                    val scriptlets = BrowserAdBlocker.getAdguardScriptlets(context)
-                                    if (scriptlets.isNotEmpty()) {
-                                        view?.evaluateJavascript(scriptlets, null)
-                                    }
-
-                                    // 3. Background Playback reinforcement
-                                    val bgPlayScript = BrowserAdBlocker.getBackgroundPlayScript(context)
-                                    if (bgPlayScript.isNotEmpty()) {
-                                        view?.evaluateJavascript(bgPlayScript, null)
-                                    }
-
-                                    // 4. YouTube Sanitizer reinforcement
-                                    if (url?.contains("youtube.com") == true) {
-                                        val ytScript = BrowserAdBlocker.getYoutubeSanitizerScript(context)
-                                        if (ytScript.isNotEmpty()) {
-                                            view?.evaluateJavascript(ytScript, null)
-                                        }
-                                    }
+                                    BrowserAdBlocker.injectLateScripts(context, view, url)
                                 }
                             }
                         }

@@ -228,8 +228,14 @@ div#banner_ad {
     left: -9999px !important;
     top: -9999px !important;
     width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
     height: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
     opacity: 1 !important;
     pointer-events: none !important;
 }
+
+
 

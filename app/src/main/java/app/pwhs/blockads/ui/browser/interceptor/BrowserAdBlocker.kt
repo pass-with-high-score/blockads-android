@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebView
 import java.io.ByteArrayInputStream
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -311,6 +312,46 @@ object BrowserAdBlocker {
             trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
             trimmed.contains(".") && !trimmed.contains(" ") -> "https://$trimmed"
             else -> "https://www.google.com/search?q=" + Uri.encode(trimmed)
+        }
+    }
+
+    fun injectEarlyScripts(context: Context, view: WebView?, url: String?) {
+        // 1. Cosmetic CSS injected early so layout never renders ad gaps
+        val cssScript = getCosmeticCssScript(context)
+        if (cssScript.isNotEmpty()) view?.evaluateJavascript(cssScript, null)
+
+        // 2. AdGuard Scriptlets (anti-adblock, synthetic clicks, overlays)
+        val scriptlets = getAdguardScriptlets(context)
+        if (scriptlets.isNotEmpty()) view?.evaluateJavascript(scriptlets, null)
+
+        // 3. Kill Service Workers
+        val swScript = getServiceWorkerKillerScript(context)
+        if (swScript.isNotEmpty()) view?.evaluateJavascript(swScript, null)
+
+        // 4. Background Playback
+        val bgPlay = getBackgroundPlayScript(context)
+        if (bgPlay.isNotEmpty()) view?.evaluateJavascript(bgPlay, null)
+
+        // 5. YouTube Sanitizer
+        if (url?.contains("youtube.com") == true) {
+            val ytScript = getYoutubeSanitizerScript(context)
+            if (ytScript.isNotEmpty()) view?.evaluateJavascript(ytScript, null)
+        }
+    }
+
+    fun injectLateScripts(context: Context, view: WebView?, url: String?) {
+        val cssScript = getCosmeticCssScript(context)
+        if (cssScript.isNotEmpty()) view?.evaluateJavascript(cssScript, null)
+
+        val scriptlets = getAdguardScriptlets(context)
+        if (scriptlets.isNotEmpty()) view?.evaluateJavascript(scriptlets, null)
+
+        val bgPlay = getBackgroundPlayScript(context)
+        if (bgPlay.isNotEmpty()) view?.evaluateJavascript(bgPlay, null)
+
+        if (url?.contains("youtube.com") == true) {
+            val ytScript = getYoutubeSanitizerScript(context)
+            if (ytScript.isNotEmpty()) view?.evaluateJavascript(ytScript, null)
         }
     }
 

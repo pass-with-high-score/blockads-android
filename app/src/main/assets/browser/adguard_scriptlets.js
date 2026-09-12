@@ -182,7 +182,7 @@
             var candidates = document.querySelectorAll('a, div, span, section');
             for (var k = 0; k < candidates.length; k++) {
                 var c = candidates[k];
-                if (c.id === '__blockads_pip_box') continue;
+                if (c.id === '__blockads_pip_box' || c.querySelector('[role="dialog"]') || c.getAttribute('role') === 'dialog') continue;
 
                 var style = window.getComputedStyle(c);
                 if (style.position === 'fixed' || style.position === 'absolute') {
@@ -201,15 +201,18 @@
                 }
             }
 
-            // D. Remove Anti-Adblock popup modals & unlock page scroll
+            // D. Remove Anti-Adblock popup modals only (never touch navigation menus/drawers)
             var dialogs = document.querySelectorAll('[role="dialog"], [role="alertdialog"]');
             for (var m = 0; m < dialogs.length; m++) {
                 var dlg = dialogs[m];
                 var txt = (dlg.innerText || '');
-                if (txt.indexOf('Ad Blocker Detected') > -1 || txt.indexOf('ad blocker') > -1 || txt.indexOf('Adblock') > -1) {
-                    dlg.remove();
-                    var backdrops = document.querySelectorAll('.backdrop-blur-md.fixed, [class*="backdrop-blur"][class*="fixed"]');
-                    for (var b = 0; b < backdrops.length; b++) backdrops[b].remove();
+                if (txt.indexOf('Ad Blocker') > -1 || txt.indexOf('ad blocker') > -1 || txt.indexOf('Adblock') > -1) {
+                    var parentModal = dlg.closest('[tabindex="-1"]') || dlg.parentElement;
+                    if (parentModal && parentModal.parentNode) parentModal.parentNode.removeChild(parentModal);
+                    var modalBackdrops = document.querySelectorAll('.z-50.backdrop-blur-md.bg-black\\/80, .z-50.backdrop-blur-md.bg-black\\/70');
+                    for (var b = 0; b < modalBackdrops.length; b++) {
+                        modalBackdrops[b].remove();
+                    }
                     document.documentElement.style.overflow = 'auto';
                     document.body.style.overflow = 'auto';
                     var hiddenNodes = document.querySelectorAll('[aria-hidden="true"]');
@@ -250,7 +253,7 @@
         // Anti-Adblock Bait Unhide (defeat geometry detection on #banner_ad)
         try {
             var baitStyle = document.createElement('style');
-            baitStyle.textContent = '#banner_ad { display: block !important; visibility: visible !important; width: 300px !important; height: 250px !important; left: -9999px !important; }';
+            baitStyle.textContent = '#banner_ad, div#banner_ad { display: block !important; visibility: visible !important; width: 300px !important; min-width: 300px !important; max-width: 300px !important; height: 250px !important; min-height: 250px !important; max-height: 250px !important; left: -9999px !important; position: absolute !important; }';
             (document.head || document.documentElement).appendChild(baitStyle);
         } catch(e) {}
 
