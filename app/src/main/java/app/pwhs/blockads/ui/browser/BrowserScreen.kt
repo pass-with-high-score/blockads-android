@@ -69,9 +69,10 @@ fun BrowserScreen(
     val shieldSheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showShieldSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        if (initialUrl.isNotEmpty() && initialUrl != uiState.currentUrl) {
+    LaunchedEffect(initialUrl) {
+        if (initialUrl.isNotBlank() && initialUrl != uiState.currentUrl) {
             viewModel.processIntent(BrowserUiIntent.LoadUrl(initialUrl))
+            webViewInstance?.loadUrl(initialUrl)
         }
     }
 
@@ -371,7 +372,8 @@ fun BrowserScreen(
                             }
                         }
 
-                        loadUrl(uiState.currentUrl)
+                        val startUrl = if (initialUrl.isNotBlank()) initialUrl else uiState.currentUrl
+                        loadUrl(startUrl)
                         webViewInstance = this
                     }
                 },

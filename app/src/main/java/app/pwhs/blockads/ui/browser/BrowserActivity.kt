@@ -37,12 +37,22 @@ class BrowserActivity : ComponentActivity() {
     }
 
     private val _isInPipMode = mutableStateOf(false)
+    private val _currentUrl = mutableStateOf("https://m.youtube.com")
     private var audioFocusRequest: AudioFocusRequest? = null
 
     override fun attachBaseContext(newBase: Context) {
         val appPrefs = AppPreferences(newBase)
         val savedLang = runBlocking { appPrefs.appLanguage.first() }
         super.attachBaseContext(LocaleHelper.wrapContext(newBase, savedLang))
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val newUrl = intent.getStringExtra(EXTRA_URL) ?: intent.dataString
+        if (!newUrl.isNullOrBlank()) {
+            _currentUrl.value = newUrl
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +63,8 @@ class BrowserActivity : ComponentActivity() {
 
         requestMediaAudioFocus()
 
-        val targetUrl = intent.getStringExtra(EXTRA_URL) ?: "https://m.youtube.com"
+        val targetUrl = intent.getStringExtra(EXTRA_URL) ?: intent.dataString ?: "https://m.youtube.com"
+        _currentUrl.value = targetUrl
 
         setContent {
             val appPrefs: AppPreferences = getKoin().get()
@@ -62,7 +73,7 @@ class BrowserActivity : ComponentActivity() {
 
             BlockadsTheme(themeMode = themeMode, accentColor = accentColor) {
                 BrowserScreen(
-                    initialUrl = targetUrl,
+                    initialUrl = _currentUrl.value,
                     isInPipMode = _isInPipMode.value,
                     onEnterPip = { enterPipMode() },
                     onCloseBrowser = { finish() }
