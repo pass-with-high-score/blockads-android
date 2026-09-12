@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -30,17 +31,19 @@ fun BrowserBottomBar(
     onHome: () -> Unit,
     onToggleAdBlock: () -> Unit,
     onShare: () -> Unit,
+    onOpenShieldSheet: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 3.dp,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp)
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .height(56.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -74,10 +77,10 @@ fun BrowserBottomBar(
                 )
             }
 
-            IconButton(onClick = onToggleAdBlock) {
+            IconButton(onClick = onOpenShieldSheet) {
                 Icon(
                     imageVector = if (adBlockEnabled) Icons.Default.Shield else Icons.Outlined.Shield,
-                    contentDescription = "AdBlock Toggle",
+                    contentDescription = "AdBlock Shield",
                     tint = if (adBlockEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }

@@ -2,6 +2,9 @@ package app.pwhs.blockads.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -17,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +39,7 @@ import app.pwhs.blockads.ui.customrules.CustomRulesScreen
 import app.pwhs.blockads.ui.data.AboutKey
 import app.pwhs.blockads.ui.data.AppManagementKey
 import app.pwhs.blockads.ui.data.AppearanceKey
+import app.pwhs.blockads.ui.browser.BrowserActivity
 import app.pwhs.blockads.ui.browser.BrowserScreen
 import app.pwhs.blockads.ui.data.BottomBarScreen
 import app.pwhs.blockads.ui.data.BrowserKey
@@ -76,6 +81,7 @@ fun HomeApp(
     onRequestVpnPermission: () -> Unit = {},
     onShowVpnConflictDialog: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val appPrefs: AppPreferences = koinInject()
     val showBottomNavLabels by appPrefs.showBottomNavLabels.collectAsStateWithLifecycle(
         initialValue = true,
@@ -114,6 +120,7 @@ fun HomeApp(
         bottomBar = {
             if (!showBottomBar) return@Scaffold
             NavigationBar(
+                windowInsets = WindowInsets.navigationBars,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
@@ -159,7 +166,7 @@ fun HomeApp(
                 }
             }
         }
-    ) {
+    ) { innerPadding ->
         // When on a non-Home tab root, back should switch to Home tab instead of exiting
         BackHandler(enabled = currentTab != BottomBarScreen.Home && currentBackStack.size <= 1) {
             currentTab = BottomBarScreen.Home
@@ -171,6 +178,7 @@ fun HomeApp(
             onBack = {
                 safePop(currentBackStack)
             },
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
             entryProvider = entryProvider {
                 entry<HomeKey> {
                     HomeScreen(
@@ -189,8 +197,7 @@ fun HomeApp(
                             homeStack.add(ProfileKey)
                         },
                         onNavigateToBrowser = { url ->
-                            showBottomBar = false
-                            homeStack.add(BrowserKey(url))
+                            context.startActivity(BrowserActivity.createIntent(context, url))
                         }
                     )
                 }

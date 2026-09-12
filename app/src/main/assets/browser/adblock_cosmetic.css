@@ -1,0 +1,235 @@
+/* BlockAds ExtendedCSS Cosmetic Filter */
+
+/* ========================================================
+   1. YouTube Mobile Web Ad Elements
+   ======================================================== */
+ytd-promoted-video-renderer,
+ytd-display-ad-renderer,
+ytd-statement-banner-renderer,
+ytd-banner-promo-renderer,
+ytd-in-feed-ad-layout-renderer,
+ytm-promoted-sparkles-web-renderer,
+ytm-companion-ad-renderer,
+ytm-promoted-sparkles-text-search-web-renderer,
+ytm-ad-slot-renderer,
+.ytp-ad-module,
+.ytp-ad-overlay-container,
+.ytp-ad-player-overlay,
+.ytp-ad-image-overlay,
+.ytp-ad-overlay-slot,
+#player-ads,
+.sparkles-light-cta,
+#masthead-ad,
+ytd-merch-shelf-renderer,
+.video-ads,
+
+/* ========================================================
+   2. Google AdSense, DoubleClick & Publisher Tags
+   ======================================================== */
+.adsbygoogle,
+ins.adsbygoogle,
+iframe[id^="aswift_"],
+iframe[id^="google_ads_frame"],
+iframe[name^="google_ads_frame"],
+div[id^="google_ads_iframe"],
+div[id^="div-gpt-ad"],
+div[id*="google_ads"],
+div[class*="google_ads"],
+
+/* ========================================================
+   3. Generic Banner, Box, Container & Sponsored Elements
+   ======================================================== */
+.ad-banner,
+.ad-banners,
+.ad-box,
+.ad-boxes,
+.ad-container,
+.ad-wrapper,
+.ad-holder,
+.ad-slot,
+.ad-space,
+.ad-placement,
+.ad-label,
+.advertisement,
+.advertisements,
+.advertising,
+.sponsor-banner,
+.sponsor-box,
+.sponsored-post,
+.sponsored-content,
+.sponsored-label,
+div[class*="ad-container"],
+div[class*="ad-wrapper"],
+div[class*="banner-ads"],
+div[class*="ads-holder"],
+div[class*="native-ad"],
+div[class*="sponsor-ad"],
+div[id^="ad_"],
+div[id^="ads_"],
+div[class^="ad_"],
+
+/* ========================================================
+   4. Floating Ads, Sticky Bottom Banners & Popups
+   ======================================================== */
+.floating-ad,
+.floating-ads,
+.floating-banner,
+.sticky-ad,
+.sticky-ads,
+.sticky-banner,
+.bottom-ad,
+.bottom-ads,
+.bottom-fixed-ad,
+.top-banner-ad,
+.popup-banner,
+.popup-ad,
+.interstitial-ad,
+.overlay-ad,
+div[class*="floating-ad"],
+div[class*="sticky-banner"],
+div[class*="bottom-fixed-ad"],
+div[id*="floating_ad"],
+div[id*="sticky_ad"],
+div[id*="popup-banner"],
+
+/* ========================================================
+   5. Popular Ad Networks (MGID, Taboola, Outbrain, Criteo)
+   ======================================================== */
+div[id*="taboola"],
+.taboola-container,
+div[id*="outbrain"],
+.outbrain-container,
+div[id^="M"][id*="Child"],
+.mgid-container,
+.criteo-ad,
+.criteo-slider,
+
+/* ========================================================
+   6. Regional & Vietnamese Ad Networks (Admicro, eClick, Adtima)
+   ======================================================== */
+div[id^="adm_"],
+.adm-banner,
+.adm-floating,
+.adm-holder,
+div[id^="eclick_"],
+.eclick-ads,
+div[id^="adtima_"],
+.adtima-ads,
+/* VnExpress Ad Placeholders & Sections */
+#banner_top,
+#TOP_BANNER,
+.section_ads_300x250,
+.section_ads,
+.banner_mobile_300x250,
+.inner_ads,
+.article_ads,
+.ads_content,
+.vne_footer_ads,
+div[id^="sis_"],
+ins.adsbyeclick,
+span.text_ads,
+span.txt_qc,
+[class*="section_ads"],
+[class*="banner_mobile"],
+
+/* ========================================================
+   7. Catfish, Popunder, Streaming & 18+ Web Ad Elements
+   ======================================================== */
+.catfish-top,
+.catfish-bottom,
+.banner-catfish-top,
+.banner-catfish-bottom,
+.banner-preload,
+.banner-preload-container,
+.banner-preload-close,
+.float-ck,
+.banner-floating,
+.floating-banner,
+.ads-floating,
+#vl-top-adx,
+#vl-native-adx,
+#vl-underplayer-adx,
+#adx,
+div[id*="-adx"],
+div[id*="adx-"],
+div[class*="adx-"],
+div[class*="catfish"],
+div[id*="catfish"],
+a[id^="bb"],
+a[style*="1px"],
+a[style*="opacity:0"],
+a[style*="opacity: 0"],
+a[href*="lu88"],
+a[href*="hbet"],
+a[href*="vu88"],
+a[href*="man88"],
+a[href*="k88"],
+a[href*="tx88"],
+a[href*="du88"],
+a[href*="x1bet"],
+a[href*="bet88"],
+a[href*="kubet"],
+a[href*="shbet"],
+a[href*="789bet"],
+a[href*="okvip"],
+a[href*="jun88"],
+a[href*="hi88"],
+a[href*="f8bet"],
+a[href*="mb66"],
+a[href*="123b"],
+a[href*="w88"],
+a[href*="fb88"],
+a[href*="fun88"],
+a[href*="bk8"],
+.▶,
+.▶__wrap,
+.▶__iframe,
+[class*="▶"],
+iframe[src*="clumsy-whereas"],
+iframe[class*="▶"],
+
+/* ========================================================
+   8. APKMirror & Tech Download Ad Elements & Promos
+   ======================================================== */
+#bottom-slider,
+.apkm-timed-slider,
+.ains,
+[class*="ains-"],
+.ains-has-label,
+.advertisement-text,
+.membership-text,
+[id*="ai_widget"],
+.block-widget {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* ========================================================
+   Anti-Adblock Bait Unhide
+   Keeps off-screen bait element visible to defeat geometry detection
+   ======================================================== */
+#banner_ad,
+div#banner_ad {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 300px !important;
+    height: 250px !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+

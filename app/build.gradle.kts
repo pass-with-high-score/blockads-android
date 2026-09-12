@@ -95,11 +95,7 @@ android {
             }
         }
         debug {
-            // Distinct applicationId so the debug test build installs
-            // alongside a release install (different signature) without
-            // wiping the user's configured app. FileProvider authority is
-            // ${applicationId}.fileprovider, so it stays unique too.
-            applicationIdSuffix = ".debug"
+            // Debug build shares standard applicationId for unified testing and deployment
         }
     }
 

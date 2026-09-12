@@ -51,6 +51,15 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <activity
+            android:name=".ui.browser.BrowserActivity"
+            android:exported="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
+            android:theme="@style/Theme.Blockads"
+            android:launchMode="singleTask" />
+
         <service
             android:name=".service.AdBlockVpnService"
             android:exported="false"

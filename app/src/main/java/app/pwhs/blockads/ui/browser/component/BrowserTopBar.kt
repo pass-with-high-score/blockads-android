@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.browser.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,11 +47,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.pwhs.blockads.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,21 +69,31 @@ fun BrowserTopBar(
     onClearData: () -> Unit,
     onOpenExternal: () -> Unit,
     onCloseBrowser: () -> Unit,
+    onEnterPip: () -> Unit = {},
+    onOpenShieldSheet: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var text by remember(displayUrl) { mutableStateOf(displayUrl) }
     var menuExpanded by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
+    val domain = remember(displayUrl) {
+        runCatching {
+            val uri = android.net.Uri.parse(displayUrl)
+            uri.host?.removePrefix("www.") ?: displayUrl
+        }.getOrDefault(displayUrl)
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         TopAppBar(
             title = {
                 Surface(
                     shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
+                        .height(44.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -88,39 +101,64 @@ fun BrowserTopBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = null,
+                            contentDescription = "Secure Connection",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(15.dp)
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        BasicTextField(
-                            value = text,
-                            onValueChange = { text = it },
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                            keyboardActions = KeyboardActions(
-                                onGo = {
-                                    focusManager.clearFocus()
-                                    onUrlSubmit(text)
-                                }
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (!isEditing && text == displayUrl) {
+                                Text(
+                                    text = domain,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable { isEditing = true }
+                                )
+                            } else {
+                                BasicTextField(
+                                    value = text,
+                                    onValueChange = { text = it },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    ),
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                                    keyboardActions = KeyboardActions(
+                                        onGo = {
+                                            isEditing = false
+                                            focusManager.clearFocus()
+                                            onUrlSubmit(text)
+                                        }
+                                    ),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
 
-                        if (text.isNotEmpty() && text != displayUrl) {
+                        if (text.isNotEmpty() && (isEditing || text != displayUrl)) {
                             IconButton(
-                                onClick = { text = "" },
+                                onClick = {
+                                    text = ""
+                                    isEditing = true
+                                },
                                 modifier = Modifier.size(24.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
-                                    contentDescription = null,
+                                    contentDescription = "Clear",
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -128,19 +166,32 @@ fun BrowserTopBar(
 
                         // Shield blocked count badge
                         if (blockedCount > 0) {
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Box(
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    .clickable { onOpenShieldSheet() }
                             ) {
-                                Text(
-                                    text = "$blockedCount",
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Shield,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "$blockedCount",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -174,6 +225,20 @@ fun BrowserTopBar(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("Chế độ Thu nhỏ (PiP)") },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_pip),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onEnterPip()
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text(if (isDesktopMode) "Giao diện Di động" else "Giao diện Máy tính (Desktop)") },
                             leadingIcon = { Icon(Icons.Default.DesktopWindows, null) },
