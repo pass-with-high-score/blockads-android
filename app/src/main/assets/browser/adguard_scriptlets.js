@@ -18,6 +18,24 @@
         }
     } catch(e) {}
 
+    // Protect React / Next.js / Vue SPAs from removeChild NotFoundError during client-side hydration
+    try {
+        var origRemoveChild = Node.prototype.removeChild;
+        Node.prototype.removeChild = function(child) {
+            if (child && child.parentNode !== this) {
+                return child;
+            }
+            return origRemoveChild.apply(this, arguments);
+        };
+        var origInsertBefore = Node.prototype.insertBefore;
+        Node.prototype.insertBefore = function(newNode, referenceNode) {
+            if (referenceNode && referenceNode.parentNode !== this) {
+                return this.appendChild(newNode);
+            }
+            return origInsertBefore.apply(this, arguments);
+        };
+    } catch(e) {}
+
     // --- 0. ADGUARD CONSTANT DEFUSER (set-constant) ---
     try {
         // Defuse Vietnamese streaming/18+ ad engines (adxcontent, vlit, etc.)
@@ -166,20 +184,22 @@
                 var el = adEls[i];
                 el.style.setProperty('display', 'none', 'important');
                 el.style.setProperty('pointer-events', 'none', 'important');
-                if (el.parentNode) el.parentNode.removeChild(el);
+                el.style.setProperty('height', '0px', 'important');
+                el.style.setProperty('min-height', '0px', 'important');
             }
 
-            // B. Remove any anchors pointing to gambling or ad networks
+            // B. Hide any anchors pointing to gambling or ad networks
             var links = document.querySelectorAll('a[href]');
             for (var j = 0; j < links.length; j++) {
                 var link = links[j];
                 if (isAdOrMaliciousUrl(link.href)) {
-                    // If it is a floating or standalone banner link, remove parent container
                     var parent = link.closest('.catfish-top, .catfish-bottom, .banner-preload, [class*="catfish"], [class*="banner"]');
-                    if (parent && parent.parentNode) {
-                        parent.parentNode.removeChild(parent);
-                    } else if (link.parentNode) {
-                        link.parentNode.removeChild(link);
+                    if (parent) {
+                        parent.style.setProperty('display', 'none', 'important');
+                        parent.style.setProperty('pointer-events', 'none', 'important');
+                    } else {
+                        link.style.setProperty('display', 'none', 'important');
+                        link.style.setProperty('pointer-events', 'none', 'important');
                     }
                 }
             }
@@ -202,10 +222,9 @@
                     if (zIndex >= 50 && (opacity <= 0.1 || style.visibility === 'hidden' || style.backgroundColor === 'rgba(0, 0, 0, 0)')) {
                         var r = c.getBoundingClientRect();
                         if ((r.width * r.height) >= minArea) {
-                            c.style.pointerEvents = 'none';
-                            c.style.display = 'none';
-                            if (c.parentNode) c.parentNode.removeChild(c);
-                            console.info('[BlockAds] Removed clickjacking overlay');
+                            c.style.setProperty('pointer-events', 'none', 'important');
+                            c.style.setProperty('display', 'none', 'important');
+                            console.info('[BlockAds] Defused clickjacking overlay');
                         }
                     }
                 }
@@ -218,10 +237,13 @@
                 var txt = (dlg.innerText || '');
                 if (txt.indexOf('Ad Blocker') > -1 || txt.indexOf('ad blocker') > -1 || txt.indexOf('Adblock') > -1) {
                     var parentModal = dlg.closest('[tabindex="-1"]') || dlg.parentElement;
-                    if (parentModal && parentModal.parentNode) parentModal.parentNode.removeChild(parentModal);
+                    if (parentModal) {
+                        parentModal.style.setProperty('display', 'none', 'important');
+                        parentModal.style.setProperty('pointer-events', 'none', 'important');
+                    }
                     var modalBackdrops = document.querySelectorAll('.z-50.backdrop-blur-md.bg-black\\/80, .z-50.backdrop-blur-md.bg-black\\/70');
                     for (var b = 0; b < modalBackdrops.length; b++) {
-                        modalBackdrops[b].remove();
+                        modalBackdrops[b].style.setProperty('display', 'none', 'important');
                     }
                     document.documentElement.style.overflow = 'auto';
                     document.body.style.overflow = 'auto';
@@ -249,11 +271,11 @@
             }
             var cookieModals = document.querySelectorAll('[data-role="cookies-modal"], [data-role="dialog-manager"]');
             for (var cm = 0; cm < cookieModals.length; cm++) {
-                cookieModals[cm].remove();
+                cookieModals[cm].style.setProperty('display', 'none', 'important');
             }
             var adWidgets = document.querySelectorAll('.thumb-list-mobile-item--widget, [class*="thumb-list-mobile-item--widget"], [data-role="promo-messages-wrapper"]');
             for (var aw = 0; aw < adWidgets.length; aw++) {
-                adWidgets[aw].remove();
+                adWidgets[aw].style.setProperty('display', 'none', 'important');
             }
 
             // F. Hide streaming gambling popups & auto-skip video ads
