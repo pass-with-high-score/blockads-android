@@ -185,6 +185,8 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, blocker adB
 			req.Header.Del("Accept-Encoding")
 		}
 
+		SanitizeRequest(req, hostname)
+
 		if err := req.Write(serverConn); err != nil {
 			return
 		}

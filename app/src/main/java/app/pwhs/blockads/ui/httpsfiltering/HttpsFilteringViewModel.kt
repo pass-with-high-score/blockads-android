@@ -299,6 +299,28 @@ class HttpsFilteringViewModel(
     }
 
     /**
+     * Installs the CA certificate directly to the Android System CA store on rooted devices.
+     */
+    fun installToSystemStore() {
+        viewModelScope.launch {
+            val pem = _caCertPem.value
+            if (pem.isNullOrEmpty()) {
+                _events.emit(HttpsFilteringEvent.Error("CA certificate is not ready. Enable HTTPS filtering first."))
+                return@launch
+            }
+            val result = withContext(Dispatchers.IO) {
+                app.pwhs.blockads.utils.SystemCertificateInstaller.installToSystemStore(pem)
+            }
+            if (result.isSuccess) {
+                _certStatus.value = CertStatus.INSTALLED
+                _events.emit(HttpsFilteringEvent.CaCertSavedToDownloads("System Store (${result.getOrNull()}.0)"))
+            } else {
+                _events.emit(HttpsFilteringEvent.Error("Root install failed: ${result.exceptionOrNull()?.message}"))
+            }
+        }
+    }
+
+    /**
      * Open Android Security Settings where user can install the certificate.
      */
     fun createSecuritySettingsIntent(): Intent {
@@ -409,6 +431,18 @@ class HttpsFilteringViewModel(
 
         // Load saved selected browsers from prefs
         val savedSelected = appPrefs.getSelectedBrowsersSnapshot()
+        val curatedBrowsers = try {
+            getApplication<Application>().assets.open("preset/browsers.txt")
+                .bufferedReader()
+                .useLines { lines ->
+                    lines.map { it.trim() }
+                        .filter { it.isNotEmpty() && !it.startsWith("#") }
+                        .toSet()
+                }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load preset/browsers.txt")
+            emptySet()
+        }
 
         return activities
             .mapNotNull { resolveInfo ->
@@ -416,12 +450,17 @@ class HttpsFilteringViewModel(
                 val pkgName = activityInfo.packageName
                 try {
                     val appInfo = pm.getApplicationInfo(pkgName, 0)
+                    val isSelected = if (savedSelected.isEmpty()) {
+                        pkgName in curatedBrowsers
+                    } else {
+                        pkgName in savedSelected
+                    }
                     BrowserInfo(
                         packageName = pkgName,
                         appName = pm.getApplicationLabel(appInfo).toString(),
                         uid = appInfo.uid,
                         icon = try { pm.getApplicationIcon(pkgName) } catch (_: Exception) { null },
-                        isSelected = pkgName in savedSelected
+                        isSelected = isSelected
                     )
                 } catch (_: PackageManager.NameNotFoundException) {
                     null
