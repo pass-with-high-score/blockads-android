@@ -34,6 +34,7 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_show_bottom_nav_labels">Show Bottom Navigation Labels</string>
     <string name="settings_show_bottom_nav_labels_desc">Display text under icons in the bottom navigation</string>
+    <string name="settings_navigation">Navigation</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_lang_system">System</string>
     <string name="settings_lang_en" translatable="false">English</string>

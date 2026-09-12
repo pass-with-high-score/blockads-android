@@ -169,6 +169,7 @@
     <string name="settings_telegram_desc">Tham gia nhóm chat trên Telegram</string>
     <string name="settings_show_bottom_nav_labels">Hiển thị chữ ở thanh điều hướng</string>
     <string name="settings_show_bottom_nav_labels_desc">Hiển thị văn bản bên dưới biểu tượng ở thanh điều hướng dưới cùng</string>
+    <string name="settings_navigation">Điều hướng</string>
     <string name="clear_logs_confirm_message">Bạn có chắc chắn muốn xóa tất cả nhật ký DNS không? Hành động này không thể hoàn tác.</string>
     <string name="settings_network_switch_delay">Độ trễ khi chuyển mạng</string>
     <string name="settings_network_switch_delay_desc">Tạm dừng kết nối lại VPN sau khi chuyển mạng (hữu ích cho Gọi qua Wi-Fi)</string>

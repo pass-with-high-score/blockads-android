@@ -3,32 +3,37 @@ package app.pwhs.blockads.ui.about
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -48,7 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
-import app.pwhs.blockads.ui.about.component.AboutLinkItem
+import app.pwhs.blockads.ui.settings.component.SettingIconBadge
+import app.pwhs.blockads.ui.settings.component.SettingsCard
 import app.pwhs.blockads.ui.theme.DarkBackground
 import app.pwhs.blockads.ui.theme.TextSecondary
 
@@ -59,6 +65,7 @@ fun AboutScreen(
     onNavigateBack: () -> Unit = { }
 ) {
     val context = LocalContext.current
+    val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
 
     Scaffold(
         modifier = modifier,
@@ -74,7 +81,7 @@ fun AboutScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.accessibility_navigate_back)
                         )
                     }
                 },
@@ -89,19 +96,20 @@ fun AboutScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.background)
-                .padding(24.dp),
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
             // App icon with glow
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(96.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
                                 Color.Transparent
                             )
                         )
@@ -118,117 +126,167 @@ fun AboutScreen(
                     Image(
                         painter = painterResource(R.drawable.ic_launcher_foreground),
                         contentDescription = null,
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(44.dp),
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "BlockAds",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Text(
-                text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary
-            )
+            Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.about_description),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Privacy badge
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                ),
-                shape = RoundedCornerShape(12.dp)
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.about_no_data),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary
+                    text = "v${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Links
-            AboutLinkItem(
-                icon = Icons.Filled.Code,
-                title = stringResource(R.string.about_github),
-                onClick = {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        "https://github.com/pass-with-high-score/blockads-android".toUri()
+            Text(
+                text = stringResource(R.string.about_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Privacy promise card
+            SettingsCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SettingIconBadge(
+                        painter = painterResource(R.drawable.ic_settings_https),
+                        tint = Color(0xFF059669)
                     )
-                    context.startActivity(intent)
-                }
-            )
-
-            AboutLinkItem(
-                icon = Icons.Filled.Language,
-                title = stringResource(R.string.about_website),
-                onClick = {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        "https://blockads.pwhs.app/".toUri()
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Text(
+                        text = stringResource(R.string.about_no_data),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    context.startActivity(intent)
                 }
-            )
+            }
 
-            AboutLinkItem(
-                icon = Icons.Filled.PrivacyTip,
-                title = stringResource(R.string.about_privacy_policy),
-                onClick = {
-                    val intent =
-                        Intent(Intent.ACTION_VIEW, "https://blockads.pwhs.app/privacy".toUri())
-                    context.startActivity(intent)
-                }
-            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-            AboutLinkItem(
-                icon = Icons.Filled.Email,
-                title = stringResource(R.string.about_contact),
-                onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = "mailto:support@pwhs.app".toUri()
+            // Links in a single Grouped Card
+            SettingsCard(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    val linkItems = listOf(
+                        LinkConfig(
+                            icon = Icons.Filled.Code,
+                            tint = Color(0xFF2563EB),
+                            title = stringResource(R.string.about_github),
+                            onClick = {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/pass-with-high-score/blockads-android".toUri()))
+                            }
+                        ),
+                        LinkConfig(
+                            icon = Icons.Filled.Language,
+                            tint = Color(0xFF059669),
+                            title = stringResource(R.string.about_website),
+                            onClick = {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "https://blockads.pwhs.app/".toUri()))
+                            }
+                        ),
+                        LinkConfig(
+                            icon = Icons.Filled.PrivacyTip,
+                            tint = Color(0xFF7C3AED),
+                            title = stringResource(R.string.about_privacy_policy),
+                            onClick = {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "https://blockads.pwhs.app/privacy".toUri()))
+                            }
+                        ),
+                        LinkConfig(
+                            icon = Icons.Filled.Email,
+                            tint = Color(0xFFEA580C),
+                            title = stringResource(R.string.about_contact),
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = "mailto:support@pwhs.app".toUri()
+                                }
+                                context.startActivity(intent)
+                            }
+                        ),
+                        LinkConfig(
+                            icon = Icons.Filled.Gavel,
+                            tint = Color(0xFF64748B),
+                            title = stringResource(R.string.about_licenses),
+                            onClick = {
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/pass-with-high-score/blockads-android?tab=GPL-3.0-1-ov-file".toUri()))
+                            }
+                        ),
+                    )
+
+                    linkItems.forEachIndexed { index, item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { item.onClick() }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SettingIconBadge(
+                                icon = item.icon,
+                                tint = item.tint
+                            )
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        if (index < linkItems.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = dividerColor
+                            )
+                        }
                     }
-                    context.startActivity(intent)
                 }
-            )
+            }
 
-            AboutLinkItem(
-                icon = Icons.Filled.Gavel,
-                title = stringResource(R.string.about_licenses),
-                onClick = {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        "https://github.com/pass-with-high-score/blockads-android?tab=GPL-3.0-1-ov-file".toUri()
-                    )
-                    context.startActivity(intent)
-                }
-            )
+            Spacer(modifier = Modifier.height(96.dp))
         }
     }
 }
+
+private data class LinkConfig(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val tint: Color,
+    val title: String,
+    val onClick: () -> Unit
+)
+
