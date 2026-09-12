@@ -163,8 +163,13 @@
     <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
     <string name="milestone_channel_name">Milestones</string>
     <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
-    <string name="milestone_title">🎉 Milestone reached!</string>
-    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="milestone_title">🎉 Milestone Reached!</string>
+    <string name="milestone_text">You\'ve blocked %1$s ads! Keep it up!</string>
+    <string name="milestone_sheet_title">Protection Milestone Reached!</string>
+    <string name="milestone_sheet_subtitle">You have successfully blocked %1$s ads and trackers with BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Estimated Data Saved</string>
+    <string name="milestone_sheet_time_saved">Estimated Time Saved</string>
+    <string name="milestone_sheet_action">Awesome!</string>
     <string name="settings_category_notifications">Notifications</string>
     <string name="settings_category_notifications_desc">Daily summary, milestones</string>
     <string name="settings_daily_summary">Daily summary</string>

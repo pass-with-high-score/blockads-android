@@ -114,7 +114,9 @@
     <string name="https_filtering_cert_installed">Đã cài đặt chứng chỉ ✓</string>
     <string name="https_filtering_cert_not_installed">Chưa cài đặt chứng chỉ</string>
     <string name="https_filtering_cert_checking">Đang kiểm tra…</string>
-    <string name="https_filtering_cert_vpn_required">Nhấn \&quot;Xác minh chứng chỉ\&quot; để kiểm tra</string>
+    <string name="https_filtering_cert_vpn_required">Nhấn \"Xác minh chứng chỉ\" để kiểm tra</string>
+    <string name="https_filtering_root_install">Cài vào System Store (Root)</string>
+    <string name="https_filtering_root_install_desc">Thiết bị có quyền Root (Magisk/KernelSU). Cài trực tiếp chứng chỉ vào hệ thống để tự động tin cậy bộ lọc.</string>
     <string name="https_filtering_browser_section">Lựa chọn trình duyệt</string>
     <string name="https_filtering_browser_desc">Chọn trình duyệt để áp dụng lọc quảng cáo. Chỉ các ứng dụng được chọn mới được lọc.</string>
     <string name="https_filtering_settings_desc">Ẩn quảng cáo trực quan trong trình duyệt</string>

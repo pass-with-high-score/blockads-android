@@ -64,11 +64,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
-import app.pwhs.blockads.ui.home.component.DailyStatsChart
 import app.pwhs.blockads.ui.home.component.HomeAppBar
+import app.pwhs.blockads.ui.home.component.HomeActivityChart
+import app.pwhs.blockads.ui.home.component.MilestoneBottomSheet
 import app.pwhs.blockads.ui.home.component.PowerButton
+import app.pwhs.blockads.ui.home.component.RecentBlockedSection
 import app.pwhs.blockads.ui.home.component.StatCard
-import app.pwhs.blockads.ui.home.component.StatsChart
+import app.pwhs.blockads.ui.home.component.TopBlockedSection
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.SecurityOrange
@@ -95,6 +97,7 @@ fun HomeScreen(
     onNavigateToStatisticsScreen: () -> Unit = {},
     onNavigateToLogScreen: (LogFilterStatus) -> Unit = {},
     onNavigateToProfileScreen: () -> Unit = {},
+    onNavigateToBrowser: (String) -> Unit = {},
 ) {
     val vpnEnabled by viewModel.vpnEnabled.collectAsStateWithLifecycle()
     val vpnConnecting by viewModel.vpnConnecting.collectAsStateWithLifecycle()
@@ -108,6 +111,7 @@ fun HomeScreen(
     val recentBlocked by viewModel.recentBlocked.collectAsStateWithLifecycle()
     val hourlyStats by viewModel.hourlyStats.collectAsStateWithLifecycle()
     val dailyStats by viewModel.dailyStats.collectAsStateWithLifecycle()
+    val milestoneReached by viewModel.milestoneReached.collectAsStateWithLifecycle()
     val topBlockedDomains by viewModel.topBlockedDomains.collectAsStateWithLifecycle()
     val protectionUptimeMs by viewModel.protectionUptimeMs.collectAsStateWithLifecycle()
     val activeProfile by viewModel.activeProfile.collectAsStateWithLifecycle()
@@ -132,7 +136,8 @@ fun HomeScreen(
                 filterLoadFailed = filterLoadFailed,
                 viewModel = viewModel,
                 onNavigateToStatisticsScreen = onNavigateToStatisticsScreen,
-                onNavigateToLogScreen = { onNavigateToLogScreen(LogFilterStatus.ALL) }
+                onNavigateToLogScreen = { onNavigateToLogScreen(LogFilterStatus.ALL) },
+                onNavigateToBrowser = onNavigateToBrowser
             )
         }
     ) { innerPadding ->
@@ -454,255 +459,28 @@ fun HomeScreen(
             }
 
             // Activity Chart with time range selector
-            if (hourlyStats.isNotEmpty() || dailyStats.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                var selectedChartTab by rememberSaveable { mutableIntStateOf(0) }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 4.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = selectedChartTab == 0,
-                        onClick = { selectedChartTab = 0 },
-                        label = {
-                            Text(
-                                text = stringResource(R.string.home_chart_24h),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentBlue.copy(alpha = 0.2f),
-                            selectedLabelColor = AccentBlue
-                        )
-                    )
-                    FilterChip(
-                        selected = selectedChartTab == 1,
-                        onClick = { selectedChartTab = 1 },
-                        label = {
-                            Text(
-                                text = stringResource(R.string.home_chart_7d),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentBlue.copy(alpha = 0.2f),
-                            selectedLabelColor = AccentBlue
-                        )
-                    )
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    when (selectedChartTab) {
-                        0 -> {
-                            if (hourlyStats.isNotEmpty()) {
-                                StatsChart(
-                                    stats = hourlyStats,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp)
-                                        .padding(16.dp)
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.home_chart_no_data),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextSecondary
-                                    )
-                                }
-                            }
-                        }
-
-                        1 -> {
-                            if (dailyStats.isNotEmpty()) {
-                                DailyStatsChart(
-                                    stats = dailyStats,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp)
-                                        .padding(16.dp)
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.home_chart_no_data),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = TextSecondary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            HomeActivityChart(
+                hourlyStats = hourlyStats,
+                dailyStats = dailyStats
+            )
 
             // Top blocked domains
-            if (topBlockedDomains.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = stringResource(R.string.home_top_blocked),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 4.dp, bottom = 8.dp)
-                )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        topBlockedDomains.forEachIndexed { index, entry ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "${index + 1}",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = TextSecondary,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.width(24.dp)
-                                )
-                                Text(
-                                    text = entry.domain,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Text(
-                                    text = formatCount(entry.count),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = DangerRed,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            TopBlockedSection(topBlockedDomains = topBlockedDomains)
 
             // Recent blocked domains
-            if (recentBlocked.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = stringResource(R.string.home_recent_blocked),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 4.dp, bottom = 8.dp)
-                )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        recentBlocked.forEach { entry ->
-                            val blockedByIds = entry.blockedBy.split(",")
-                            val dotColor =
-                                if (blockedByIds.any { it == FilterListRepository.BLOCK_REASON_SECURITY || securityFilterIds.contains(it) })
-                                    SecurityOrange else DangerRed
-                            val recentAppIcon: Drawable? = remember(entry.packageName) {
-                                if (entry.packageName.isNotEmpty() && entry.packageName.contains(".")) {
-                                    try {
-                                        context.packageManager.getApplicationIcon(entry.packageName)
-                                    } catch (e: Exception) {
-                                        null
-                                    }
-                                } else null
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                if (recentAppIcon != null) {
-                                    Image(
-                                        painter = rememberDrawablePainter(drawable = recentAppIcon),
-                                        contentDescription = entry.appName,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                    )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(CircleShape)
-                                            .background(dotColor)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = entry.domain,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onBackground,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    if (entry.appName.isNotEmpty()) {
-                                        Text(
-                                            text = entry.appName,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = TextSecondary,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                                Text(
-                                    text = formatTimeSince(entry.timestamp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            RecentBlockedSection(
+                recentBlocked = recentBlocked,
+                securityFilterIds = securityFilterIds
+            )
 
             Spacer(modifier = Modifier.height(200.dp))
         }
 
+        milestoneReached?.let { milestone ->
+            MilestoneBottomSheet(
+                milestone = milestone,
+                onDismiss = { viewModel.dismissMilestoneDialog(milestone) }
+            )
+        }
     }
 }

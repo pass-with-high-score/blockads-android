@@ -125,6 +125,11 @@
     <string name="milestone_channel_description">Thông báo khi đạt cột mốc chặn quảng cáo</string>
     <string name="milestone_title">🎉 Đạt cột mốc!</string>
     <string name="milestone_text">Bạn đã chặn %1$s quảng cáo! Tiếp tục nhé!</string>
+    <string name="milestone_sheet_title">Đạt Cột Mốc Bảo Vệ Mới!</string>
+    <string name="milestone_sheet_subtitle">Bạn đã ngăn chặn thành công %1$s quảng cáo &amp; trình theo dõi với BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Dung lượng ước tính tiết kiệm</string>
+    <string name="milestone_sheet_time_saved">Thời gian tải trang tiết kiệm</string>
+    <string name="milestone_sheet_action">Tuyệt vời!</string>
     <string name="settings_category_notifications">Thông báo</string>
     <string name="settings_category_notifications_desc">Tóm tắt hàng ngày, cột mốc</string>
     <string name="settings_daily_summary">Tóm tắt hàng ngày</string>

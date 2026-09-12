@@ -37,8 +37,10 @@ import app.pwhs.blockads.ui.httpsfiltering.CertStatus
 fun SetupGuideCard(
     certExported: Boolean,
     certStatus: CertStatus,
+    isRootAvailable: Boolean = false,
     onExport: () -> Unit,
     onOpenSettings: () -> Unit,
+    onInstallRoot: () -> Unit = {},
     onVerifyCert: () -> Unit
 ) {
     Card(
@@ -136,6 +138,30 @@ fun SetupGuideCard(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            if (isRootAvailable && certStatus != CertStatus.INSTALLED) {
+                Button(
+                    onClick = onInstallRoot,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Security,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.https_filtering_root_install),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             OutlinedButton(
                 onClick = onOpenSettings,

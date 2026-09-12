@@ -101,6 +101,7 @@ class AppPreferences(context: Context) {
     val dailySummaryEnabled: Flow<Boolean> get() = vpnSecurity.dailySummaryEnabled
     val milestoneNotificationsEnabled: Flow<Boolean> get() = vpnSecurity.milestoneNotificationsEnabled
     val lastMilestoneBlocked: Flow<Long> get() = vpnSecurity.lastMilestoneBlocked
+    val lastSeenMilestoneDialog: Flow<Long> get() = vpnSecurity.lastSeenMilestoneDialog
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId
     val recordDnsLogs: Flow<Boolean> get() = vpnSecurity.recordDnsLogs
     val firewallEnabled: Flow<Boolean> get() = vpnSecurity.firewallEnabled
@@ -162,6 +163,7 @@ class AppPreferences(context: Context) {
     suspend fun setDailySummaryEnabled(enabled: Boolean) = vpnSecurity.setDailySummaryEnabled(enabled)
     suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) = vpnSecurity.setMilestoneNotificationsEnabled(enabled)
     suspend fun setLastMilestoneBlocked(count: Long) = vpnSecurity.setLastMilestoneBlocked(count)
+    suspend fun setLastSeenMilestoneDialog(milestone: Long) = vpnSecurity.setLastSeenMilestoneDialog(milestone)
     suspend fun setActiveProfileId(id: Long) = vpnSecurity.setActiveProfileId(id)
     suspend fun setRecordDnsLogs(enabled: Boolean) = vpnSecurity.setRecordDnsLogs(enabled)
     suspend fun setFirewallEnabled(enabled: Boolean) = vpnSecurity.setFirewallEnabled(enabled)

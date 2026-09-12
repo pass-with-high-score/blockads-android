@@ -130,6 +130,8 @@
     <string name="https_filtering_cert_not_installed">Certificate not installed</string>
     <string name="https_filtering_cert_checking">Checking…</string>
     <string name="https_filtering_cert_vpn_required">Tap \&quot;Verify Certificate\&quot; to check</string>
+    <string name="https_filtering_root_install">Install to System Store (Root)</string>
+    <string name="https_filtering_root_install_desc">Device has root access (Magisk/KernelSU). Install directly to system store for automatic trusted filtering.</string>
     <string name="edit_custom_filter">Edit Custom Filter</string>
     <string name="filter_name">Filter Name</string>
     <string name="filter_url_domain">Filter URL/Domain</string>

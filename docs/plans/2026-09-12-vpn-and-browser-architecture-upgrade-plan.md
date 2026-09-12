@@ -44,10 +44,11 @@
 
 ---
 
-### 🛡️ GIAI ĐOẠN 2: TINH CHỈNH BỘ LỌC TRÌNH DUYỆT (Học từ AdGuard)
+### 🛡️ GIAI ĐOẠN 2: TINH CHỈNH BỘ LỌC TRÌNH DUYỆT & IN-APP PRIVATE BROWSER (Học từ AdGuard)
 - [x] **Task 2.1: Danh sách Trình duyệt được phép lọc HTTPS (Browser Inclusions)** — Đã tạo `app/src/main/assets/preset/browsers.txt` và tích hợp auto-select trong `HttpsFilteringViewModel.kt`.
 - [x] **Task 2.2: Tự động gỡ bỏ Tracking Headers & URL Parameters** — Đã tạo `tunnel/internal/mitm/privacy.go` xóa `X-Client-Data`, bóc tách `utm_*`, `fbclid`, sanitize Referer, và gán `DNT/Sec-GPC`.
-- [x] **Task 2.3: Tự động chuyển chứng chỉ CA vào System Store cho máy Root** — Đã tạo `app/src/main/java/app/pwhs/blockads/utils/SystemCertificateInstaller.kt` tương thích Magisk, KernelSU, APatch.
+- [x] **Task 2.3: Tự động chuyển chứng chỉ CA vào System Store cho máy Root** — Đã tạo `app/src/main/java/app/pwhs/blockads/utils/SystemCertificateInstaller.kt` tương thích Magisk, KernelSU, APatch và tích hợp UI cài đặt 1 chạm trong `SetupGuideCard.kt`.
+- [x] **Task 2.4: In-App Private Browser (YouTube Ad-Free & Request Interceptor)** — Đã tạo module MVI `app/src/main/java/app/pwhs/blockads/ui/browser/` tích hợp chặn request quảng cáo qua `WebViewClient.shouldInterceptRequest()`, tiêm CSS cosmetic và scriptlet tự động bỏ qua quảng cáo YouTube, tích hợp vào `HomeAppBar` và navigation stack.
 
 ---
 
@@ -61,8 +62,8 @@
 ### 🎨 GIAI ĐOẠN 4: TRẢI NGHIỆM NGƯỜI DÙNG & GIỮ CHÂN (UX & Retention)
 - [x] **Task 4.1: Tính năng "Snooze / Pause VPN" (Tạm dừng 1 giờ / hẹn giờ)** — Đã thực hiện qua `VpnResumeWorker` và `ACTION_PAUSE_1H`.
 - [x] **Task 4.2: Actionable Notification (Tương tác 2 chiều)** — Đã bổ sung Action buttons Stop, Pause, Retry trong `VpnNotificationManager.kt`.
-- [ ] **Task 4.3: Bảng thống kê tổng hợp theo ngày (Room Aggregator)** — Đang tối ưu bảng dữ liệu thống kê.
-- [ ] **Task 4.4: Protection Milestone Popup (BottomSheet chúc mừng)** — Sắp ra mắt.
+- [x] **Task 4.3: Bảng thống kê tổng hợp theo ngày (Room Aggregator)** — Đã bổ sung query `deleteLogsOlderThan` và tích hợp tự động dọn dẹp log cũ > 14 ngày vào `DailySummaryWorker.kt`.
+- [x] **Task 4.4: Protection Milestone Popup (BottomSheet chúc mừng)** — Đã tạo `MilestoneBottomSheet.kt` hiển thị số ad đã chặn, ước tính dung lượng & thời gian tiết kiệm, kết nối reactive vào `HomeViewModel.kt` và `HomeScreen.kt`.
 
 ---
 

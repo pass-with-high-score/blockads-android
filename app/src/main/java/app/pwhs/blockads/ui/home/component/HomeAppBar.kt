@@ -43,7 +43,8 @@ fun HomeAppBar(
     filterLoadFailed: Boolean,
     viewModel: HomeViewModel,
     onNavigateToStatisticsScreen: () -> Unit,
-    onNavigateToLogScreen: () -> Unit
+    onNavigateToLogScreen: () -> Unit,
+    onNavigateToBrowser: (String) -> Unit = {}
 ) {
     val telegramUri = stringResource(R.string.telegram_link).toUri()
     val testBlockUri = stringResource(R.string.test_block_link).toUri()
@@ -124,6 +125,14 @@ fun HomeAppBar(
             }
         },
         actions = {
+            IconButton(onClick = { onNavigateToBrowser("https://m.youtube.com") }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_settings_youtube),
+                    contentDescription = "YouTube Ad-Free",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
             IconButton(onClick = onNavigateToStatisticsScreen) {
                 Icon(
                     painter = painterResource(R.drawable.ic_chart_bar),

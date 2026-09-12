@@ -258,5 +258,10 @@ val appModule = module {
             application = androidApplication()
         )
     }
+    viewModel {
+        app.pwhs.blockads.ui.browser.BrowserViewModel(
+            application = androidApplication()
+        )
+    }
 }
 

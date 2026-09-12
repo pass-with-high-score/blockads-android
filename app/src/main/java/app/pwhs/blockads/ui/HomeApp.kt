@@ -35,7 +35,9 @@ import app.pwhs.blockads.ui.customrules.CustomRulesScreen
 import app.pwhs.blockads.ui.data.AboutKey
 import app.pwhs.blockads.ui.data.AppManagementKey
 import app.pwhs.blockads.ui.data.AppearanceKey
+import app.pwhs.blockads.ui.browser.BrowserScreen
 import app.pwhs.blockads.ui.data.BottomBarScreen
+import app.pwhs.blockads.ui.data.BrowserKey
 import app.pwhs.blockads.ui.data.CustomRuleKey
 import app.pwhs.blockads.ui.data.DnsProviderKey
 import app.pwhs.blockads.ui.data.DomainRulesKey
@@ -185,6 +187,10 @@ fun HomeApp(
                         onNavigateToProfileScreen = {
                             showBottomBar = false
                             homeStack.add(ProfileKey)
+                        },
+                        onNavigateToBrowser = { url ->
+                            showBottomBar = false
+                            homeStack.add(BrowserKey(url))
                         }
                     )
                 }
@@ -346,6 +352,14 @@ fun HomeApp(
                     HttpsFilteringScreen(
                         onNavigateBack = {
                             safePop(settingsStack)
+                        }
+                    )
+                }
+                entry<BrowserKey> { key ->
+                    BrowserScreen(
+                        initialUrl = key.initialUrl,
+                        onCloseBrowser = {
+                            safePop(currentBackStack)
                         }
                     )
                 }
