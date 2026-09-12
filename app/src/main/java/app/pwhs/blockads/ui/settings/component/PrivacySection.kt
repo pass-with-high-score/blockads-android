@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -46,7 +43,7 @@ fun PrivacySection(
             Column {
                 // 1. Hide from recents
                 SettingsToggleItem(
-                    icon = Icons.Default.VisibilityOff,
+                    iconPainter = painterResource(R.drawable.ic_settings_incognito),
                     iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_hide_from_recents_title),
                     subtitle = stringResource(id = R.string.settings_hide_from_recents_subtitle),
@@ -58,7 +55,7 @@ fun PrivacySection(
 
                 // 2. Crash reporting
                 SettingsToggleItem(
-                    icon = Icons.Default.BugReport,
+                    iconPainter = painterResource(R.drawable.ic_settings_diagnostics),
                     iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_crash_reporting_title),
                     subtitle = stringResource(id = R.string.settings_crash_reporting_subtitle),
@@ -70,7 +67,7 @@ fun PrivacySection(
 
                 // 3. Export diagnostics logs
                 SettingItem(
-                    icon = Icons.Default.Upload,
+                    iconPainter = painterResource(R.drawable.ic_settings_export),
                     iconTint = Color(0xFF64748B),
                     title = stringResource(id = R.string.settings_export_logs_title),
                     desc = stringResource(id = R.string.settings_export_logs_subtitle),

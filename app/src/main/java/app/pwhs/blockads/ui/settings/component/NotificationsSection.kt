@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
@@ -35,7 +33,7 @@ fun NotificationsSection(
         SettingsCard {
             Column {
                 SettingsToggleItem(
-                    icon = Icons.Default.Notifications,
+                    iconPainter = painterResource(R.drawable.ic_settings_notification_bell),
                     iconTint = Color(0xFF3B82F6),
                     title = stringResource(R.string.settings_daily_summary),
                     subtitle = stringResource(R.string.settings_daily_summary_desc),
@@ -47,7 +45,7 @@ fun NotificationsSection(
                     color = dividerColor
                 )
                 SettingsToggleItem(
-                    icon = Icons.Default.Celebration,
+                    iconPainter = painterResource(R.drawable.ic_settings_milestone),
                     iconTint = Color(0xFFF59E0B),
                     title = stringResource(R.string.settings_milestone_notifications),
                     subtitle = stringResource(R.string.settings_milestone_notifications_desc),

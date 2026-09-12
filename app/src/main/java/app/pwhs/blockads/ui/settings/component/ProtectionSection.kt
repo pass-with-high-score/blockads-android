@@ -13,16 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Lan
-import androidx.compose.material.icons.filled.OndemandVideo
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,7 +62,7 @@ fun ProtectionSection(
             Column {
                 // 1. DNS Provider
                 SettingItem(
-                    icon = Icons.Default.Dns,
+                    iconPainter = painterResource(R.drawable.ic_settings_dns),
                     iconTint = Color(0xFF2563EB),
                     title = stringResource(R.string.dns_provider_title),
                     statusValue = upstreamDNS,
@@ -82,7 +73,7 @@ fun ProtectionSection(
 
                 // 2. DNS Response Type
                 SettingItem(
-                    icon = Icons.Default.Block,
+                    iconPainter = painterResource(R.drawable.ic_settings_block_mode),
                     iconTint = Color(0xFFEA580C),
                     title = stringResource(R.string.settings_dns_response_type),
                     desc = when (dnsResponseType) {
@@ -97,7 +88,7 @@ fun ProtectionSection(
 
                 // 3. HTTPS Filtering
                 SettingItem(
-                    icon = Icons.Default.Shield,
+                    iconPainter = painterResource(R.drawable.ic_settings_https),
                     iconTint = Color(0xFF7C3AED),
                     title = stringResource(R.string.https_filtering_title) + " (BETA)",
                     desc = stringResource(R.string.https_filtering_settings_desc),
@@ -108,7 +99,7 @@ fun ProtectionSection(
 
                 // 4. WireGuard Import
                 SettingItem(
-                    icon = Icons.Default.VpnKey,
+                    iconPainter = painterResource(R.drawable.ic_settings_wireguard),
                     iconTint = Color(0xFF7C3AED),
                     title = stringResource(R.string.wireguard_import_title) + " (BETA)",
                     desc = stringResource(R.string.wireguard_empty_desc),
@@ -119,7 +110,7 @@ fun ProtectionSection(
 
                 // 5. Auto-reconnect
                 SettingsToggleItem(
-                    icon = Icons.Default.Replay,
+                    iconPainter = painterResource(R.drawable.ic_settings_auto_reconnect),
                     iconTint = Color(0xFF2563EB),
                     title = stringResource(R.string.settings_auto_reconnect),
                     subtitle = stringResource(R.string.settings_auto_reconnect_desc),
@@ -131,13 +122,14 @@ fun ProtectionSection(
 
                 // 6. Network Switch Delay
                 SettingsToggleItem(
-                    icon = Icons.Default.Lan,
+                    iconPainter = painterResource(R.drawable.ic_settings_network_delay),
                     iconTint = Color(0xFF2563EB),
                     title = stringResource(R.string.settings_network_switch_delay),
                     subtitle = stringResource(R.string.settings_network_switch_delay_desc),
                     isChecked = networkSwitchDelayEnabled,
                     onCheckedChange = onSetNetworkSwitchDelayEnabled
                 )
+
                 AnimatedVisibility(
                     visible = networkSwitchDelayEnabled,
                     enter = expandVertically() + fadeIn(),
@@ -175,7 +167,7 @@ fun ProtectionSection(
 
                 // 7. Safe Search
                 SettingsToggleItem(
-                    icon = Icons.Default.Search,
+                    iconPainter = painterResource(R.drawable.ic_settings_safesearch),
                     iconTint = Color(0xFF059669),
                     title = stringResource(R.string.settings_safe_search),
                     subtitle = stringResource(R.string.settings_safe_search_desc),
@@ -187,7 +179,7 @@ fun ProtectionSection(
 
                 // 8. YouTube Restricted
                 SettingsToggleItem(
-                    icon = Icons.Default.OndemandVideo,
+                    iconPainter = painterResource(R.drawable.ic_settings_youtube),
                     iconTint = Color(0xFFE11D48),
                     title = stringResource(R.string.settings_youtube_restricted),
                     subtitle = stringResource(R.string.settings_youtube_restricted_desc),
@@ -199,7 +191,7 @@ fun ProtectionSection(
 
                 // 9. Root Proxy
                 SettingsToggleItem(
-                    icon = Icons.Default.Security,
+                    iconPainter = painterResource(R.drawable.ic_settings_root_proxy),
                     iconTint = Color(0xFF7C3AED),
                     title = stringResource(R.string.settings_root_proxy),
                     subtitle = stringResource(R.string.settings_root_proxy_desc),

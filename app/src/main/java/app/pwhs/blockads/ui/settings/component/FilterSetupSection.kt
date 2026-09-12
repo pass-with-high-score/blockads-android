@@ -4,12 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -19,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
@@ -55,7 +50,7 @@ fun FilterSetupSection(
                 // 1. Filter list navigation
                 val enabledFilterCount = filterLists.count { it.isEnabled }
                 SettingItem(
-                    icon = Icons.Default.FilterList,
+                    iconPainter = painterResource(R.drawable.ic_settings_filter_lists),
                     iconTint = Color(0xFF059669),
                     title = stringResource(R.string.filter_setup_title),
                     desc = stringResource(R.string.settings_category_filters_desc),
@@ -67,7 +62,7 @@ fun FilterSetupSection(
 
                 // 2. Auto-update toggle
                 SettingsToggleItem(
-                    icon = Icons.Default.Download,
+                    iconPainter = painterResource(R.drawable.ic_settings_auto_update),
                     iconTint = Color(0xFF059669),
                     title = stringResource(R.string.settings_auto_update_enabled),
                     subtitle = stringResource(R.string.settings_auto_update_enabled_desc),
@@ -88,7 +83,7 @@ fun FilterSetupSection(
                         else -> stringResource(R.string.settings_auto_update_frequency_24h)
                     }
                     SettingItem(
-                        icon = Icons.Default.Schedule,
+                        iconPainter = painterResource(R.drawable.ic_settings_network_delay),
                         iconTint = Color(0xFF059669),
                         title = stringResource(R.string.settings_auto_update_frequency),
                         desc = frequencyDesc,
@@ -99,7 +94,7 @@ fun FilterSetupSection(
 
                     // 4. Wi-Fi only
                     SettingsToggleItem(
-                        icon = Icons.Default.Wifi,
+                        iconPainter = painterResource(R.drawable.ic_settings_trusted_wifi),
                         iconTint = Color(0xFF059669),
                         title = stringResource(R.string.settings_auto_update_wifi_only),
                         subtitle = stringResource(R.string.settings_auto_update_wifi_only_desc),
@@ -117,7 +112,7 @@ fun FilterSetupSection(
                         else -> stringResource(R.string.settings_auto_update_notification_normal)
                     }
                     SettingItem(
-                        icon = Icons.Default.Notifications,
+                        iconPainter = painterResource(R.drawable.ic_settings_notification_bell),
                         iconTint = Color(0xFF059669),
                         title = stringResource(R.string.settings_auto_update_notification),
                         desc = notificationDesc,

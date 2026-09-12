@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Diagonal Slash -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M3,3l18,18" />
+    <!-- Eye Top and Bottom Arcs -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M10.5,5.5C11,5.33 11.5,5.25 12,5.25c4.5,0 8.32,2.78 9.9,6.75 -0.63,1.58 -1.63,2.97 -2.9,4M6.6,6.6C4.6,7.9 3.05,9.8 2.1,12c1.58,3.97 5.4,6.75 9.9,6.75 1.7,0 3.3,-0.4 4.7,-1.1" />
+    <!-- Pupil Partial -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M9.9,9.9a3,3 0,0 0,4.2 4.2" />
+</vector>

@@ -4,16 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AppBlocking
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Lan
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
@@ -40,7 +36,7 @@ fun ApplicationsSection(
             Column {
                 // 1. App Whitelist
                 SettingItem(
-                    icon = Icons.Default.AppBlocking,
+                    iconPainter = painterResource(R.drawable.ic_settings_whitelist_apps),
                     iconTint = Color(0xFFEA580C),
                     title = stringResource(R.string.settings_whitelist_apps),
                     desc = stringResource(R.string.settings_whitelist_apps_desc),
@@ -51,7 +47,7 @@ fun ApplicationsSection(
 
                 // 2. App Management
                 SettingItem(
-                    icon = Icons.Default.Apps,
+                    iconPainter = painterResource(R.drawable.ic_settings_app_management),
                     iconTint = Color(0xFFEA580C),
                     title = stringResource(R.string.app_management_title),
                     desc = stringResource(R.string.app_management_desc),
@@ -62,7 +58,7 @@ fun ApplicationsSection(
 
                 // 3. Trusted Wi-Fi Networks
                 SettingItem(
-                    icon = Icons.Default.Wifi,
+                    iconPainter = painterResource(R.drawable.ic_settings_trusted_wifi),
                     iconTint = Color(0xFF059669),
                     title = stringResource(R.string.trusted_networks_title),
                     desc = stringResource(R.string.trusted_networks_settings_desc),
@@ -73,7 +69,7 @@ fun ApplicationsSection(
 
                 // 4. Exclude LAN Traffic (Split Kill Switch)
                 SettingsToggleItem(
-                    icon = Icons.Default.Lan,
+                    iconPainter = painterResource(R.drawable.ic_settings_exclude_lan),
                     iconTint = Color(0xFF059669),
                     title = stringResource(R.string.exclude_lan_title),
                     subtitle = stringResource(R.string.exclude_lan_description),
