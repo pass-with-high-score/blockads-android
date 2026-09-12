@@ -8,6 +8,16 @@
     if (window.__blockads_scriptlets_injected) return;
     window.__blockads_scriptlets_injected = true;
 
+    // Immediate unblur & scroll unlock
+    try {
+        if (document.documentElement) document.documentElement.classList.remove('xh-thumb-disabled');
+        if (document.body) {
+            document.body.classList.remove('xh-scroll-disabled');
+            document.body.style.position = 'static';
+            document.body.style.overflow = 'auto';
+        }
+    } catch(e) {}
+
     // --- 0. ADGUARD CONSTANT DEFUSER (set-constant) ---
     try {
         // Defuse Vietnamese streaming/18+ ad engines (adxcontent, vlit, etc.)
@@ -222,6 +232,47 @@
                         }
                     }
                 }
+            }
+
+            // E. Remove forced page blur & locked scroll (xHamster, age verification gates)
+            if (document.documentElement && document.documentElement.classList.contains('xh-thumb-disabled')) {
+                document.documentElement.classList.remove('xh-thumb-disabled');
+            }
+            if (document.body && document.body.classList.contains('xh-scroll-disabled')) {
+                document.body.classList.remove('xh-scroll-disabled');
+                document.body.style.position = 'static';
+                document.body.style.overflow = 'auto';
+            }
+            var blurredWraps = document.querySelectorAll('.main-wrap[style*="blur"]');
+            for (var bw = 0; bw < blurredWraps.length; bw++) {
+                blurredWraps[bw].style.filter = 'none';
+            }
+            var cookieModals = document.querySelectorAll('[data-role="cookies-modal"], [data-role="dialog-manager"]');
+            for (var cm = 0; cm < cookieModals.length; cm++) {
+                cookieModals[cm].remove();
+            }
+            var adWidgets = document.querySelectorAll('.thumb-list-mobile-item--widget, [class*="thumb-list-mobile-item--widget"], [data-role="promo-messages-wrapper"]');
+            for (var aw = 0; aw < adWidgets.length; aw++) {
+                adWidgets[aw].remove();
+            }
+
+            // F. Hide streaming gambling popups & auto-skip video ads
+            var motphimAds = document.querySelectorAll('div.fixed.inset-0.z-\\[9999\\], div[class*="fixed"][class*="inset-0"]:has(button), div[class*="fixed"]:has(img[src*="offa"]), div:has(> a.no-ads-under)');
+            for (var ma = 0; ma < motphimAds.length; ma++) {
+                motphimAds[ma].style.setProperty('display', 'none', 'important');
+                motphimAds[ma].style.setProperty('pointer-events', 'none', 'important');
+            }
+            var skipBtn = document.querySelector('.jw-skip, .videoAdUiSkipButton, .ytp-ad-skip-button, .ytp-skip-ad-button');
+            if (skipBtn) {
+                try { skipBtn.click(); } catch(e) {}
+            }
+            if (window.jwplayer && typeof window.jwplayer === 'function') {
+                try {
+                    var jp = window.jwplayer();
+                    if (jp && typeof jp.skipAd === 'function') {
+                        jp.skipAd();
+                    }
+                } catch(e) {}
             }
         } catch(e) {}
     }

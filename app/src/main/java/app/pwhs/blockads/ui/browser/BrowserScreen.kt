@@ -354,6 +354,9 @@ fun BrowserScreen(
                             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                                 super.onProgressChanged(view, newProgress)
                                 viewModel.processIntent(BrowserUiIntent.UpdateProgress(newProgress))
+                                if (newProgress in 15..25 && uiState.adBlockEnabled) {
+                                    BrowserAdBlocker.injectEarlyScripts(context, view, view?.url)
+                                }
                             }
 
                             override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {

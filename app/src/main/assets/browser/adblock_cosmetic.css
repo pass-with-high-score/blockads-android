@@ -237,5 +237,60 @@ div#banner_ad {
     pointer-events: none !important;
 }
 
+/* ========================================================
+   xHamster / xhstream Unblur & Anti-Ad
+   ======================================================== */
+html.xh-thumb-disabled,
+html.xh-thumb-disabled body,
+html.xh-thumb-disabled .main-wrap,
+html.xh-thumb-disabled * {
+    filter: none !important;
+}
 
+body.xh-scroll-disabled {
+    overflow: auto !important;
+    position: static !important;
+}
+
+[data-role="cookies-modal"],
+[data-role="dialog-manager"],
+[data-role="promo-messages-wrapper"],
+[data-role*="promo"],
+[class*="FYjf-gW"],
+[class*="prePopunderLabel"],
+.mn-outer,
+.mn-thumbnails,
+.thumb-list-mobile-item--widget,
+[class*="thumb-list-mobile-item--widget"],
+[class*="thumb-list-mobile-item"]:has(a[href*="/ff/out"]),
+[class*="thumb-list-mobile-item"]:has(a[href*="xlivesex.com"]),
+.wrapper-dab84,
+[class*="promo-message"],
+div[class*="bannerContainer"] {
+    display: none !important;
+}
+
+/* ========================================================
+   MotPhim / Motchill / Vietnamese Streaming Sites
+   ======================================================== */
+#top-banner,
+.ads-banner,
+[class*="ads-banner"],
+.no-ads-under,
+[src*="adcenter.cx"],
+a[href*="adcenter.cx"],
+div.fixed.inset-0.z-\[9999\],
+div[class*="fixed"][class*="inset-0"][class*="z-"]:has(button),
+div[class*="fixed"][class*="right-"]:has(button[aria-label*="ads"]),
+div[class*="fixed"]:has(img[src*="offa"]),
+button[aria-label*="hide all ads"],
+div:has(> a.no-ads-under) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+}
 

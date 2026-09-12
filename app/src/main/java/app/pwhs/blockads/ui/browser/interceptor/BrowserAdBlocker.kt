@@ -85,13 +85,16 @@ object BrowserAdBlocker {
         // Fake video ads & ad network redirectors
         "clumsy-whereas.com",
         "ttwstatic.com",
-        "bytedapm.com"
+        "bytedapm.com",
+        // Vietnamese streaming ad network
+        "adcenter.cx"
     )
 
     private val GAMBLING_POPUNDER_KEYWORDS = listOf(
         "lu88", "hbet", "vu88", "man88", "k88.", "tx88", "du88", "x1bet",
         "bet88", "kubet", "shbet", "789bet", "okvip", "jun88", "hi88",
-        "f8bet", "mb66", "123b", "fun88", "bk8"
+        "f8bet", "mb66", "123b", "fun88", "bk8", "rikvip", "cm88",
+        "bom88", "vsbet", "78win", "gem88", "win79"
     )
 
     private val AD_PATH_PATTERNS = listOf(
@@ -296,11 +299,19 @@ object BrowserAdBlocker {
                 .replace("\"", "\\\"")
             """
             (function() {
-                if (window.__blockads_css_injected) return;
-                window.__blockads_css_injected = true;
-                var style = document.createElement('style');
-                style.textContent = "$rawCss";
-                (document.head || document.documentElement).appendChild(style);
+                function inject() {
+                    if (document.getElementById('__blockads_cosmetic_style')) return;
+                    var target = document.head || document.documentElement;
+                    if (!target) {
+                        requestAnimationFrame(inject);
+                        return;
+                    }
+                    var style = document.createElement('style');
+                    style.id = '__blockads_cosmetic_style';
+                    style.textContent = "$rawCss";
+                    target.appendChild(style);
+                }
+                inject();
             })();
             """.trimIndent()
         }
