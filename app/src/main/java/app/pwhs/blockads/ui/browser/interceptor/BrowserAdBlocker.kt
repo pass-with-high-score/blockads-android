@@ -91,27 +91,10 @@ object BrowserAdBlocker {
 
     /**
      * Evaluates whether an outgoing page navigation should be blocked.
-     * Blocks known ad/gambling URLs and unauthorized automatic redirects.
+     * Blocks known ad/gambling/tracking URLs according to active rules.
      */
     fun shouldBlockNavigation(request: WebResourceRequest, currentUrl: String?): Boolean {
-        if (shouldBlock(request)) return true
-
-        if (request.isForMainFrame && !request.hasGesture()) {
-            val currentUri = currentUrl?.let { Uri.parse(it) }
-            val targetUri = request.url ?: return false
-            val currentHost = currentUri?.host?.lowercase(Locale.US)
-            val targetHost = targetUri.host?.lowercase(Locale.US)
-            if (currentHost != null && targetHost != null && currentHost != targetHost &&
-                !targetHost.endsWith(".$currentHost") && !currentHost.endsWith(".$targetHost")
-            ) {
-                val isKnownSameSite = currentHost.removePrefix("www.").replace(Regex("\\d+"), "") ==
-                    targetHost.removePrefix("www.").replace(Regex("\\d+"), "")
-                if (!isKnownSameSite) {
-                    return true
-                }
-            }
-        }
-        return false
+        return shouldBlock(request)
     }
 
     /**

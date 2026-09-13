@@ -97,7 +97,7 @@ fun BrowserScreen(
                     }
                 }
                 is BrowserUiEffect.NavigateUrl -> {
-                    webViewInstance?.loadUrl(BrowserAdBlocker.sanitizeSearchUrl(effect.url))
+                    webViewInstance?.loadUrl(effect.url)
                 }
             }
         }
@@ -190,7 +190,7 @@ fun BrowserScreen(
                             loadWithOverviewMode = true
                             mediaPlaybackRequiresUserGesture = false
                             javaScriptCanOpenWindowsAutomatically = false
-                            setSupportMultipleWindows(false)
+                            setSupportMultipleWindows(true)
                             cacheMode = WebSettings.LOAD_DEFAULT
                             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
@@ -289,8 +289,26 @@ fun BrowserScreen(
                                 isUserGesture: Boolean,
                                 resultMsg: android.os.Message?
                             ): Boolean {
-                                // Block all window creation requests from ads/scripts
-                                return false
+                                if (!isUserGesture) return false
+                                val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
+                                val tempWebView = WebView(view?.context ?: return false)
+                                tempWebView.webViewClient = object : WebViewClient() {
+                                    override fun shouldOverrideUrlLoading(
+                                        view: WebView?,
+                                        request: WebResourceRequest?
+                                    ): Boolean {
+                                        val targetUrl = request?.url?.toString() ?: return false
+                                        if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlock(request)) {
+                                            viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                            return true
+                                        }
+                                        viewModel.processIntent(BrowserUiIntent.LoadUrl(targetUrl))
+                                        return true
+                                    }
+                                }
+                                transport.webView = tempWebView
+                                resultMsg.sendToTarget()
+                                return true
                             }
 
                             override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -365,7 +383,6 @@ fun BrowserScreen(
                     BrowserShortcuts(
                         onSelectShortcut = { url ->
                             viewModel.processIntent(BrowserUiIntent.LoadUrl(url))
-                            webViewInstance?.loadUrl(url)
                         },
                         onOpenSearch = { viewModel.processIntent(BrowserUiIntent.ToggleSearchSheet(true)) },
                         onOpenMenu = { viewModel.processIntent(BrowserUiIntent.ToggleBentoMenu(true)) }
