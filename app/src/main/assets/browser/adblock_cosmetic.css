@@ -156,9 +156,6 @@ div[class*="adx-"],
 div[class*="catfish"],
 div[id*="catfish"],
 a[id^="bb"],
-a[style*="1px"],
-a[style*="opacity:0"],
-a[style*="opacity: 0"],
 a[href*="lu88"],
 a[href*="hbet"],
 a[href*="vu88"],
@@ -294,3 +291,60 @@ div:has(> a.no-ads-under) {
     pointer-events: none !important;
 }
 
+/* ========================================================
+   APKPure & App Store Sites
+   ======================================================== */
+.js-ad-slot,
+.ad-adsense,
+[class*="js-ad-slot"],
+[class*="ad-adsense"],
+[data-dt-ga-name*="resp_download_"],
+.share-open,
+.float-request-notification-permission-button,
+.float-button-second,
+.download-vip-subscribe-wrap,
+a.telegram-btn,
+.telegram-btn,
+/* ========================================================
+   Tech / Mod APK Download Sites (LeeAPK, etc.)
+   ======================================================== */
+#acrp-sticky-wrap,
+#acrp-sticky-inner,
+.acrp-sticky-close,
+.acrp-ad-box-1,
+[class*="acrp-ad"],
+[id*="acrp-sticky"],
+#random-ad,
+[id*="random-ad"],
+iframe[src*="a-ads.com"],
+a[href*="invl.me"],
+/* ========================================================
+   AdBlocker Test Suites & Sponsored Elements (d3ward, etc.)
+   ======================================================== */
+#cts_test,
+#ad_ctd,
+.textads,
+.adsbox,
+.banner_ads,
+.banner-ads,
+.adbox,
+.ad-unit,
+.afs_ads,
+.ad-zone,
+.ad-space,
+.adSocial,
+.ADBox,
+.AdBox,
+.adbox-wrapper,
+a[rel*="sponsored"],
+a[data-umami-event*="banner click"],
+a[data-umami-event-partner] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

@@ -83,7 +83,12 @@ class BrowserRuleStorage(private val context: Context) {
      * Returns the currently active package (cached dynamic package or baseline defaults).
      */
     fun getActivePackage(): BrowserRulePackage {
-        return loadCachedPackage() ?: loadDefaultPackage()
+        val cached = loadCachedPackage()
+        val defaultPkg = loadDefaultPackage()
+        if (cached == null || defaultPkg.version > cached.version) {
+            return defaultPkg
+        }
+        return cached
     }
 
     /**

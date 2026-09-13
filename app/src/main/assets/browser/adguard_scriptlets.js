@@ -58,6 +58,13 @@
             launch: function() {},
             stop: function() {}
         };
+
+        // Anti-Adblock defusers (ACRP plugin on tech/mod apk sites like LeeAPK)
+        window.__acrpGuard = true;
+        window.acrpAdsAllowed = true;
+        try {
+            document.cookie = "acrp_is_premium=1; path=/";
+        } catch(e) {}
     } catch(e) {}
 
     // --- 1. POPUP & POPUNDER DEFUSER ---
@@ -73,17 +80,17 @@
     window.addEventListener('keydown', recordUserInteraction, true);
 
     var BLOCKED_PATTERNS = [
-        'shopee', 'lazada', 'tiki', 'affiliate', 'tracking',
-        'popads', 'popcash', 'propeller', 'adsterra', 'clickadu',
+        'shopee://', 'lazada://', 'tiki://', 'snssdk://', 'snssdk1128://', 'tiktok://', 'musically://',
+        'affiliate', 'popads', 'popcash', 'propeller', 'adsterra', 'clickadu',
         'exoclick', 'exosrv', 'doubleclick', 'adnxs', 'mgid', 'taboola',
-        'adxcontent', 'adxmedia', 'vlit', 'catfish', 'popunder', 'clumsy-whereas',
-        // External social app hijacking from ads (TikTok / Snack / etc)
-        'tiktok', 'snssdk', 'bytedance', 'musically', 'douyin',
+        'adxcontent', 'adxmedia', 'vlit', 'catfish', 'popunder', 'clumsy-whereas', 'bytedapm.com',
         // Gambling & Betting networks commonly injected via popunders
-        'lu88', 'hbet', 'vu88', 'man88', 'k88', 'tx88', 'du88', 'x1bet',
+        'lu88', 'hbet', 'vu88', 'man88', 'k88.', 'tx88', 'du88', 'x1bet',
         'bet88', 'kubet', 'shbet', '789bet', 'okvip', 'jun88', 'hi88',
-        'f8bet', 'mb66', '123b', 'w88', 'fb88', 'fun88', 'bk8', 'casino',
-        'gamebaidoithuong', 'taixiu', 'nổ hũ', 'baccarat'
+        'f8bet', 'mb66', '123b', 'fun88', 'bk8', 'rikvip', 'cm88', 'bc.game',
+        'gamebaidoithuong', 'taixiu', 'baccarat',
+        // Crypto & Affiliate ad networks
+        'a-ads.com', 'invl.me', 'involve.asia'
     ];
 
     function isAdOrMaliciousUrl(url) {
@@ -143,9 +150,23 @@
         return origDispatch.apply(this, arguments);
     };
 
+    function isDownloadAnchor(el) {
+        if (!el) return false;
+        var href = (el.href || '').toLowerCase();
+        if (el.hasAttribute && el.hasAttribute('download')) return true;
+        if (/\.(apk|xapk|zip|rar|7z|tar|gz|pdf|mp3|mp4|bin|iso)(\?.*)?$/i.test(href)) return true;
+        if (href.indexOf('d.apkpure.com') !== -1 || href.indexOf('winudf.com') !== -1 || href.indexOf('/download/') !== -1) return true;
+        var cls = (el.className || '').toString().toLowerCase();
+        if (cls.indexOf('download') !== -1) return true;
+        var txt = (el.innerText || '').toLowerCase();
+        if (txt.indexOf('download') !== -1) return true;
+        return false;
+    }
+
     var origAnchorClick = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function() {
-        var isRecentUserAction = (Date.now() - lastUserInteractionTime) < 1200;
+        var isRecentUserAction = (Date.now() - lastUserInteractionTime) < 5000;
+        var isDownload = isDownloadAnchor(this);
 
         // Check for hidden popunder triggers (e.g. <a id="bb0" style="opacity:0; width:1px">)
         var isHiddenPopunder = false;
@@ -158,6 +179,12 @@
         } catch(e) {}
 
         if (this.id && this.id.indexOf('bb') === 0) isHiddenPopunder = true;
+
+        // Legitimate download links must never be blocked as popunders
+        if (isDownload && !isAdOrMaliciousUrl(this.href) && !isHiddenPopunder) {
+            console.info('[BlockAds] Allowing download click:', this.href);
+            return origAnchorClick.apply(this, arguments);
+        }
 
         if (!isRecentUserAction || isHiddenPopunder || isAdOrMaliciousUrl(this.href)) {
             console.info('[BlockAds] Blocked programmatic anchor popunder click:', this.href);
@@ -174,10 +201,17 @@
                 '.catfish-top', '.catfish-bottom', '.banner-catfish-top', '.banner-catfish-bottom',
                 '.banner-preload', '.banner-preload-container', '.banner-preload-close',
                 '#vl-top-adx', '#vl-native-adx', '#vl-underplayer-adx', '#adx',
-                'a[id^="bb"]', 'a[style*="1px"]', 'a[style*="opacity:0"]', 'a[style*="opacity: 0"]',
+                'a[id^="bb"]',
                 '.▶', '.▶__wrap', '.▶__iframe', '[class*="▶"]', 'iframe[src*="clumsy-whereas"]',
                 '.section_ads_300x250', '.section_ads', '.banner_mobile_300x250', '#banner_top', '#TOP_BANNER', 'div[id^="sis_"]',
-                '#bottom-slider', '.apkm-timed-slider', '.ains', '[class*="ains-"]', '.advertisement-text', '[id*="ai_widget"]'
+                '#bottom-slider', '.apkm-timed-slider', '.ains', '[class*="ains-"]', '.advertisement-text', '[id*="ai_widget"]',
+                // APKPure ad containers & floating trackers
+                '.js-ad-slot', '.ad-adsense', '[data-dt-ga-name*="resp_download_"]',
+                '.share-open', '.float-request-notification-permission-button', '.float-button-second',
+                '.download-vip-subscribe-wrap', 'a.telegram-btn',
+                // LeeAPK / ACRP & affiliate ad banners
+                '#acrp-sticky-wrap', '#acrp-sticky-inner', '.acrp-sticky-close', '.acrp-ad-box-1',
+                '[class*="acrp-ad"]', '[id*="acrp-sticky"]', '#random-ad', '[id*="random-ad"]', 'iframe[src*="a-ads.com"]'
             ];
             var adEls = document.querySelectorAll(adSelectors.join(','));
             for (var i = 0; i < adEls.length; i++) {
@@ -193,7 +227,7 @@
             for (var j = 0; j < links.length; j++) {
                 var link = links[j];
                 if (isAdOrMaliciousUrl(link.href)) {
-                    var parent = link.closest('.catfish-top, .catfish-bottom, .banner-preload, [class*="catfish"], [class*="banner"]');
+                    var parent = link.closest('.catfish-top, .catfish-bottom, .banner-preload, [class*="catfish"], [class*="banner-ad"], [class*="banner-catfish"], [class*="banner-preload"], [class*="ads-banner"], .floating-banner');
                     if (parent) {
                         parent.style.setProperty('display', 'none', 'important');
                         parent.style.setProperty('pointer-events', 'none', 'important');
@@ -254,6 +288,14 @@
                         }
                     }
                 }
+            }
+
+            // Also remove shadow-root anti-adblock hosts & restore overflow (e.g. ACRP guard)
+            var acrpHolster = document.querySelectorAll("[data-n^='s']");
+            for (var aH = 0; aH < acrpHolster.length; aH++) {
+                acrpHolster[aH].remove();
+                if (document.documentElement) document.documentElement.style.overflow = 'auto';
+                if (document.body) document.body.style.overflow = 'auto';
             }
 
             // E. Remove forced page blur & locked scroll (xHamster, age verification gates)

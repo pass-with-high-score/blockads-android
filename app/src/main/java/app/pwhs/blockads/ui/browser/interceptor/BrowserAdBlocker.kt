@@ -90,20 +90,18 @@ object BrowserAdBlocker {
     }
 
     /**
-     * Creates HTTP 204 No Content response to stop client retry loops.
+     * Creates a blocked response that aborts the network connection with net::ERR_BLOCKED_BY_CLIENT,
+     * ensuring JavaScript fetch/XHR and test suites properly detect the network block.
      */
     fun createBlockedResponse(): WebResourceResponse {
-        val headers = mapOf(
-            "Cache-Control" to "no-store, no-cache, must-revalidate",
-            "Pragma" to "no-cache"
-        )
+        val errorStream = object : java.io.InputStream() {
+            override fun read(): Int = throw java.io.IOException("ERR_BLOCKED_BY_CLIENT")
+            override fun read(b: ByteArray, off: Int, len: Int): Int = throw java.io.IOException("ERR_BLOCKED_BY_CLIENT")
+        }
         return WebResourceResponse(
             "text/plain",
             "UTF-8",
-            204,
-            "No Content",
-            headers,
-            ByteArrayInputStream(ByteArray(0))
+            errorStream
         )
     }
 

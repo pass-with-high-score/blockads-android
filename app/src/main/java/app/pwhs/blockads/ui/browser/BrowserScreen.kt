@@ -1,13 +1,17 @@
 package app.pwhs.blockads.ui.browser
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
+import android.webkit.URLUtil
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -15,6 +19,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import timber.log.Timber
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -299,26 +304,24 @@ fun BrowserScreen(
                             ): Boolean {
                                 val url = request?.url ?: return false
                                 val scheme = url.scheme?.lowercase(java.util.Locale.US) ?: return false
-                                val fullUrl = url.toString().lowercase(java.util.Locale.US)
 
-                                // Block unwanted app opening to TikTok/Shopee/Lazada from ad scripts
-                                val blockedAppPatterns = listOf("tiktok", "snssdk", "musically", "bytedance", "shopee", "lazada")
-                                if (blockedAppPatterns.any { fullUrl.contains(it) }) {
-                                    return true
+                                if (scheme != "http" && scheme != "https") {
+                                    // Block unwanted app scheme hijacking from ad scripts
+                                    val blockedSchemes = listOf("snssdk", "tiktok", "musically", "shopee", "lazada")
+                                    if (blockedSchemes.any { scheme.startsWith(it) }) {
+                                        return true
+                                    }
+                                    // Block malicious non-user gesture redirects (e.g. ad apps/stores)
+                                    if (request.hasGesture().not()) {
+                                        return true
+                                    }
+                                    return runCatching {
+                                        val intent = Intent(Intent.ACTION_VIEW, url)
+                                        context.startActivity(intent)
+                                        true
+                                    }.getOrDefault(true)
                                 }
-
-                                if (scheme == "http" || scheme == "https") {
-                                    return false
-                                }
-                                // Block malicious non-user gesture redirects (e.g. ad apps/stores)
-                                if (request.hasGesture().not()) {
-                                    return true
-                                }
-                                return runCatching {
-                                    val intent = Intent(Intent.ACTION_VIEW, url)
-                                    context.startActivity(intent)
-                                    true
-                                }.getOrDefault(true)
+                                return false
                             }
 
                             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -369,6 +372,31 @@ fun BrowserScreen(
                                 customView = null
                                 customViewCallback?.onCustomViewHidden()
                                 customViewCallback = null
+                            }
+                        }
+
+                        setDownloadListener { downloadUrl, userAgent, contentDisposition, mimetype, _ ->
+                            try {
+                                val fileName = extractFileName(downloadUrl, contentDisposition, mimetype)
+                                val request = DownloadManager.Request(Uri.parse(downloadUrl)).apply {
+                                    setTitle(fileName)
+                                    setDescription("Đang tải tệp $fileName...")
+                                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                    setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                                    addRequestHeader("User-Agent", userAgent)
+                                    CookieManager.getInstance().getCookie(downloadUrl)?.let { cookie ->
+                                        if (cookie.isNotBlank()) addRequestHeader("Cookie", cookie)
+                                    }
+                                }
+                                val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
+                                dm?.enqueue(request)
+                                Toast.makeText(context, "Bắt đầu tải: $fileName", Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                Timber.e(e, "DownloadManager failed for url: %s", downloadUrl)
+                                runCatching {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                                    context.startActivity(intent)
+                                }
                             }
                         }
 
