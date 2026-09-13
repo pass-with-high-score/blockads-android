@@ -321,6 +321,12 @@ fun BrowserScreen(
                                         true
                                     }.getOrDefault(true)
                                 }
+
+                                if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlockNavigation(request, view?.url)) {
+                                    viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                    return true
+                                }
+
                                 return false
                             }
 

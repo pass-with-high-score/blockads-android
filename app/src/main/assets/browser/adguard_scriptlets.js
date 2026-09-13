@@ -52,6 +52,13 @@
         // Falsify timeclick so popunder engines believe user click quota is maxed out
         window.timeclick = Date.now() + 864000000;
 
+        // Defuse HentaiVN WASM popunder / fallback caller (qyuuby)
+        Object.defineProperty(window, 'qyuuby', {
+            get: function() { return function() {}; },
+            set: function() {},
+            configurable: false
+        });
+
         // Neutralize common anti-debugger / devtools traps
         window.devtoolsDetector = {
             addListener: function() {},
@@ -90,7 +97,11 @@
         'f8bet', 'mb66', '123b', 'fun88', 'bk8', 'rikvip', 'cm88', 'bc.game',
         'gamebaidoithuong', 'taixiu', 'baccarat',
         // Crypto & Affiliate ad networks
-        'a-ads.com', 'invl.me', 'involve.asia'
+        'a-ads.com', 'invl.me', 'involve.asia',
+        // HentaiVN & manga popunders, redirects, Adsterra/Clickadu
+        'campfirecroutondecorator', 'beholdjarhypnotize', 'gigglegrowlworrisome',
+        'portalfluently', 'thedirecthor', 'vivodemisrentas', 'bionomysolera',
+        'bundlemoviepumice', 'fagoklaer', 'gahakoleir', 'atoptions'
     ];
 
     function isAdOrMaliciousUrl(url) {
@@ -211,7 +222,9 @@
                 '.download-vip-subscribe-wrap', 'a.telegram-btn',
                 // LeeAPK / ACRP & affiliate ad banners
                 '#acrp-sticky-wrap', '#acrp-sticky-inner', '.acrp-sticky-close', '.acrp-ad-box-1',
-                '[class*="acrp-ad"]', '[id*="acrp-sticky"]', '#random-ad', '[id*="random-ad"]', 'iframe[src*="a-ads.com"]'
+                '[class*="acrp-ad"]', '[id*="acrp-sticky"]', '#random-ad', '[id*="random-ad"]', 'iframe[src*="a-ads.com"]',
+                // HentaiVN & manga detail ad slots
+                '[id^="__clb-spot"]', '[class*="__clb-spot"]', '.banners-all', '.my_banner', '[class*="my_banner"]', '.test_hihihi'
             ];
             var adEls = document.querySelectorAll(adSelectors.join(','));
             for (var i = 0; i < adEls.length; i++) {
@@ -338,6 +351,17 @@
                     }
                 } catch(e) {}
             }
+            // G. Anti-adblock siteNotice & ad popups
+            var siteNotice = document.getElementById('siteNotice');
+            if (siteNotice) {
+                siteNotice.remove();
+                if (document.body && document.body.style.overflow === 'hidden') document.body.style.overflow = '';
+                if (document.documentElement && document.documentElement.style.overflow === 'hidden') document.documentElement.style.overflow = '';
+            }
+            var adPopup = document.getElementById('ad-popup');
+            if (adPopup) {
+                adPopup.remove();
+            }
         } catch(e) {}
     }
 
@@ -373,6 +397,37 @@
             runAutoTag: function() {},
             runBanner: function() {}
         };
+
+        // Defeat getComputedStyle & offsetHeight inspection on bait elements
+        try {
+            var origGetComputedStyle = window.getComputedStyle;
+            window.getComputedStyle = function(el, pseudo) {
+                var style = origGetComputedStyle.apply(this, arguments);
+                if (el && el.className && typeof el.className === 'string' && (el.className.indexOf('adsbox') !== -1 || el.className.indexOf('pub_300x250') !== -1 || el.className.indexOf('ad-placement') !== -1 || el.className.indexOf('banner_ad') !== -1)) {
+                    return new Proxy(style, {
+                        get: function(target, prop) {
+                            if (prop === 'display') return 'block';
+                            if (prop === 'visibility') return 'visible';
+                            return typeof target[prop] === 'function' ? target[prop].bind(target) : target[prop];
+                        }
+                    });
+                }
+                return style;
+            };
+
+            var origOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight');
+            if (origOffsetHeight && origOffsetHeight.get) {
+                Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+                    get: function() {
+                        if (this.className && typeof this.className === 'string' && (this.className.indexOf('adsbox') !== -1 || this.className.indexOf('pub_300x250') !== -1 || this.className.indexOf('banner_ad') !== -1)) {
+                            return 250;
+                        }
+                        return origOffsetHeight.get.apply(this);
+                    },
+                    configurable: true
+                });
+            }
+        } catch(e) {}
 
         // Anti-Adblock Bait Unhide (defeat geometry detection on #banner_ad, .pub_300x250, etc.)
         try {

@@ -363,7 +363,18 @@ a[data-umami-event-partner],
 [data-shb],
 [class*="D1BnW"],
 div:has(> iframe[srcdoc*="Please prove you are human"]),
-iframe[srcdoc*="Please prove you are human"] {
+iframe[srcdoc*="Please prove you are human"],
+/* ========================================================
+   FapManga Anti-Adblock & Manga Ad Slots
+   ======================================================== */
+#siteNotice,
+#ad-popup,
+.ad-popup,
+.ad-header,
+.ad-footer,
+.ad-slot,
+.ad-slot-wrap,
+.card-grid-ad {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -375,7 +386,53 @@ iframe[srcdoc*="Please prove you are human"] {
 }
 
 body:has(.adblock-overlay),
+body:has(#siteNotice),
 body.styletwo {
     overflow: auto !important;
 }
+
+/* ========================================================
+   HentaiVN & Manga Sites Popunder & Grid Gaps Fix
+   ======================================================== */
+.pop-all,
+.pop-cl,
+.banners-all,
+.my_banner,
+[class*="my_banner"],
+[id^="__clb-spot"],
+[class*="__clb-spot"],
+.test_hihihi,
+iframe[id^="__clb-spot"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.items.clearfix {
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.items.clearfix > .item {
+    float: none !important;
+}
+
+.items .item:nth-child(2n+1) {
+    clear: both !important;
+}
+
+@media (min-width: 480px) {
+    .items .item:nth-child(2n+1) {
+        clear: none !important;
+    }
+    .items .item:nth-child(3n+1) {
+        clear: both !important;
+    }
+}
+
 

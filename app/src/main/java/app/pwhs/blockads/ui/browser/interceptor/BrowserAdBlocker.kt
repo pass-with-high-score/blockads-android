@@ -90,6 +90,31 @@ object BrowserAdBlocker {
     }
 
     /**
+     * Evaluates whether an outgoing page navigation should be blocked.
+     * Blocks known ad/gambling URLs and unauthorized automatic redirects.
+     */
+    fun shouldBlockNavigation(request: WebResourceRequest, currentUrl: String?): Boolean {
+        if (shouldBlock(request)) return true
+
+        if (request.isForMainFrame && !request.hasGesture()) {
+            val currentUri = currentUrl?.let { Uri.parse(it) }
+            val targetUri = request.url ?: return false
+            val currentHost = currentUri?.host?.lowercase(Locale.US)
+            val targetHost = targetUri.host?.lowercase(Locale.US)
+            if (currentHost != null && targetHost != null && currentHost != targetHost &&
+                !targetHost.endsWith(".$currentHost") && !currentHost.endsWith(".$targetHost")
+            ) {
+                val isKnownSameSite = currentHost.removePrefix("www.").replace(Regex("\\d+"), "") ==
+                    targetHost.removePrefix("www.").replace(Regex("\\d+"), "")
+                if (!isKnownSameSite) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    /**
      * Creates a blocked response that aborts the network connection with net::ERR_BLOCKED_BY_CLIENT,
      * ensuring JavaScript fetch/XHR and test suites properly detect the network block.
      */
@@ -152,11 +177,30 @@ object BrowserAdBlocker {
             fullUrl.contains("adsbygoogle.js") -> {
                 getMockAdsByGoogleResponse()
             }
+            fullUrl.contains("/ads.js") || fullUrl.contains("/banner-ads.js") -> {
+                getMockEmptyJsResponse()
+            }
             fullUrl.contains("google-analytics.com/collect") || fullUrl.contains("/collect?v=") -> {
                 getTransparentPixelResponse()
             }
             else -> null
         }
+    }
+
+    private fun getMockEmptyJsResponse(): WebResourceResponse {
+        val headers = mapOf(
+            "Access-Control-Allow-Origin" to "*",
+            "Cache-Control" to "no-store, no-cache, must-revalidate",
+            "Content-Type" to "application/javascript; charset=UTF-8"
+        )
+        return WebResourceResponse(
+            "application/javascript",
+            "UTF-8",
+            200,
+            "OK",
+            headers,
+            ByteArrayInputStream(ByteArray(0))
+        )
     }
 
     private fun getMockAdsByGoogleResponse(): WebResourceResponse {

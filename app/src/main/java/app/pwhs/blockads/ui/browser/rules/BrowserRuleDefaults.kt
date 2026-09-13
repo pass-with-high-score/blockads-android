@@ -6,7 +6,7 @@ package app.pwhs.blockads.ui.browser.rules
  */
 object BrowserRuleDefaults {
 
-    const val INITIAL_VERSION = 4L
+    const val INITIAL_VERSION = 7L
 
     val AD_HOST_SUFFIXES = listOf(
         "doubleclick.net",
@@ -215,7 +215,18 @@ object BrowserRuleDefaults {
         "acscdn.com",
         "cathaytrash.com",
         "chatmate.tv",
-        "glandunmoist.qpon"
+        "glandunmoist.qpon",
+        // HentaiVN & manga popunder networks
+        "bundlemoviepumice.com",
+        "campfirecroutondecorator.com",
+        "beholdjarhypnotize.com",
+        "gigglegrowlworrisome.com",
+        "portalfluently.com",
+        "thedirecthor.com",
+        "vivodemisrentas.net",
+        "bionomysolera.com",
+        "fagoklaer.ru",
+        "gahakoleir.ru"
     )
 
     val GAMBLING_POPUNDER_KEYWORDS = listOf(
@@ -252,6 +263,11 @@ object BrowserRuleDefaults {
         "/videoSliderAlt.js",
         "/inpagepush.js",
         "/aclib.js",
-        "/suv5.js"
+        "/suv5.js",
+        "/js/cla/",
+        "/invoke.js",
+        "/bn.js",
+        "/sfp.js",
+        "/on.js"
     )
 }
