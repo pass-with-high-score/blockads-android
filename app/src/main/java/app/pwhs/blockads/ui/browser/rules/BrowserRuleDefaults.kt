@@ -6,7 +6,7 @@ package app.pwhs.blockads.ui.browser.rules
  */
 object BrowserRuleDefaults {
 
-    const val INITIAL_VERSION = 3L
+    const val INITIAL_VERSION = 4L
 
     val AD_HOST_SUFFIXES = listOf(
         "doubleclick.net",
@@ -210,7 +210,12 @@ object BrowserRuleDefaults {
         // APKCombo ad and push networks
         "militarfagot.com",
         "push-sdk.com",
-        "a-zzz.com"
+        "a-zzz.com",
+        // DonghuaWorld / Adcash / Cathaytrash ad networks
+        "acscdn.com",
+        "cathaytrash.com",
+        "chatmate.tv",
+        "glandunmoist.qpon"
     )
 
     val GAMBLING_POPUNDER_KEYWORDS = listOf(
@@ -242,6 +247,11 @@ object BrowserRuleDefaults {
         "/vl-underplayer-adx",
         "/vl-native-adx",
         "/catfish",
-        "/static/js/ads-"
+        "/static/js/ads-",
+        "/no-adblock-access/",
+        "/videoSliderAlt.js",
+        "/inpagepush.js",
+        "/aclib.js",
+        "/suv5.js"
     )
 }

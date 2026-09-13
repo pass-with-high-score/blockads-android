@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "updatedAt": 1726200000000,
   "adDomains": [
     "doubleclick.net",
@@ -202,7 +202,11 @@
     "notes-analytics-events.apple.com",
     "militarfagot.com",
     "push-sdk.com",
-    "a-zzz.com"
+    "a-zzz.com",
+    "acscdn.com",
+    "cathaytrash.com",
+    "chatmate.tv",
+    "glandunmoist.qpon"
   ],
   "gamblingKeywords": [
     "lu88",
@@ -256,7 +260,12 @@
     "/vl-underplayer-adx",
     "/vl-native-adx",
     "/catfish",
-    "/static/js/ads-"
+    "/static/js/ads-",
+    "/no-adblock-access/",
+    "/videoSliderAlt.js",
+    "/inpagepush.js",
+    "/aclib.js",
+    "/suv5.js"
   ],
   "cosmeticCss": null,
   "scriptletsJs": null

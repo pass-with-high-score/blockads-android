@@ -352,7 +352,18 @@ a[data-umami-event-partner],
 [class*="ad-pss"],
 [class*="apkcombo_"],
 .adsbypubpower,
-#elgoogybsda2 {
+#elgoogybsda2,
+/* ========================================================
+   DonghuaWorld & Video Streaming Anti-Adblock & Video Ads
+   ======================================================== */
+.adblock-overlay,
+.adblock-message,
+#vid-sld-cont,
+[id*="vid-sld"],
+[data-shb],
+[class*="D1BnW"],
+div:has(> iframe[srcdoc*="Please prove you are human"]),
+iframe[srcdoc*="Please prove you are human"] {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -362,3 +373,9 @@ a[data-umami-event-partner],
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
+body:has(.adblock-overlay),
+body.styletwo {
+    overflow: auto !important;
+}
+

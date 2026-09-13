@@ -365,10 +365,19 @@
         window.adsbygoogle.loaded = true;
         window.adsbygoogle.push = function() {};
 
-        // Anti-Adblock Bait Unhide (defeat geometry detection on #banner_ad)
+        // Defeat WordPress no-adblock-access detector & Adcash/Propeller ads
+        window.showAdblockMessage = function() {};
+        window.aclib = window.aclib || {
+            runPop: function() {},
+            runInPagePush: function() {},
+            runAutoTag: function() {},
+            runBanner: function() {}
+        };
+
+        // Anti-Adblock Bait Unhide (defeat geometry detection on #banner_ad, .pub_300x250, etc.)
         try {
             var baitStyle = document.createElement('style');
-            baitStyle.textContent = '#banner_ad, div#banner_ad { display: block !important; visibility: visible !important; width: 300px !important; min-width: 300px !important; max-width: 300px !important; height: 250px !important; min-height: 250px !important; max-height: 250px !important; left: -9999px !important; position: absolute !important; }';
+            baitStyle.textContent = '#banner_ad, div#banner_ad, .pub_300x250, .adsbox, .adunit, .ad-zone, .ad-space { display: block !important; visibility: visible !important; width: 300px !important; min-width: 300px !important; max-width: 300px !important; height: 250px !important; min-height: 250px !important; max-height: 250px !important; left: -9999px !important; position: absolute !important; }';
             (document.head || document.documentElement).appendChild(baitStyle);
         } catch(e) {}
 
