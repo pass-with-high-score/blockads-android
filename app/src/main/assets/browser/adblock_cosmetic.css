@@ -343,7 +343,16 @@ a[data-umami-event-partner],
    APKCombo Ad Wrappers & Banners
    ======================================================== */
 .column.is-main > div[style*="max-height: 260px"],
-.column.is-main > div[style*="min-height: 260px"] {
+.column.is-main > div[style*="min-height: 260px"],
+.diseanmevrtt,
+#ads-mid,
+.calc-container,
+.calc-box-square,
+.ad-pss,
+[class*="ad-pss"],
+[class*="apkcombo_"],
+.adsbypubpower,
+#elgoogybsda2 {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
