@@ -46,9 +46,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import app.pwhs.blockads.ui.browser.component.BrowserBottomOmnibox
 import app.pwhs.blockads.ui.browser.component.BrowserBentoMenuSheet
 import app.pwhs.blockads.ui.browser.component.BrowserShortcuts
+import app.pwhs.blockads.ui.browser.component.NestedScrollWebView
 import app.pwhs.blockads.ui.browser.component.SearchSuggestionSheet
 import app.pwhs.blockads.ui.browser.interceptor.BrowserAdBlocker
 import kotlinx.coroutines.flow.collectLatest
@@ -74,6 +79,7 @@ fun BrowserScreen(
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var customView by remember { mutableStateOf<View?>(null) }
     var customViewCallback by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
+    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(initialUrl) {
         if (initialUrl.isNotBlank() && initialUrl != uiState.currentUrl) {
@@ -171,198 +177,214 @@ fun BrowserScreen(
                 .fillMaxSize()
                 .padding(if (customView == null && !isInPipMode) padding else PaddingValues())
         ) {
-            AndroidView(
-                factory = { ctx ->
-                    WebView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                        setBackgroundColor(android.graphics.Color.BLACK)
-                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            PullToRefreshBox(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { webViewInstance?.reload() },
+                state = pullToRefreshState,
+                indicator = {
+                    PullToRefreshDefaults.Indicator(
+                        state = pullToRefreshState,
+                        isRefreshing = uiState.isLoading,
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                AndroidView(
+                    factory = { ctx ->
+                        NestedScrollWebView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            setBackgroundColor(android.graphics.Color.BLACK)
+                            setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
-                        settings.apply {
-                            javaScriptEnabled = true
-                            domStorageEnabled = true
-                            @Suppress("DEPRECATION")
-                            databaseEnabled = true
-                            useWideViewPort = true
-                            loadWithOverviewMode = true
-                            mediaPlaybackRequiresUserGesture = false
-                            javaScriptCanOpenWindowsAutomatically = false
-                            setSupportMultipleWindows(true)
-                            cacheMode = WebSettings.LOAD_DEFAULT
-                            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                            settings.apply {
+                                javaScriptEnabled = true
+                                domStorageEnabled = true
+                                @Suppress("DEPRECATION")
+                                databaseEnabled = true
+                                useWideViewPort = true
+                                loadWithOverviewMode = true
+                                mediaPlaybackRequiresUserGesture = false
+                                javaScriptCanOpenWindowsAutomatically = false
+                                setSupportMultipleWindows(true)
+                                cacheMode = WebSettings.LOAD_DEFAULT
+                                mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
-                            // AdGuard Chrome UA Spoofing
-                            val defaultUa = userAgentString
-                            userAgentString = BrowserAdBlocker.spoofChromeUserAgent(defaultUa)
+                                // AdGuard Chrome UA Spoofing
+                                val defaultUa = userAgentString
+                                userAgentString = BrowserAdBlocker.spoofChromeUserAgent(defaultUa)
 
-                            // Algorithmic Darkening for Android 13+
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                isAlgorithmicDarkeningAllowed = true
-                            }
-                        }
-
-                        val webView = this
-                        CookieManager.getInstance().apply {
-                            setAcceptCookie(true)
-                            setAcceptThirdPartyCookies(webView, true)
-                        }
-
-                        webViewClient = object : WebViewClient() {
-                            override fun shouldInterceptRequest(
-                                view: WebView?,
-                                request: WebResourceRequest?
-                            ): WebResourceResponse? {
-                                if (request != null && uiState.adBlockEnabled) {
-                                    val fullUrl = request.url?.toString()?.lowercase(java.util.Locale.US) ?: ""
-                                    val surrogate = BrowserAdBlocker.getSurrogateResponse(fullUrl)
-                                    if (surrogate != null) {
-                                        viewModel.processIntent(BrowserUiIntent.AdBlocked)
-                                        return surrogate
-                                    }
-                                    if (BrowserAdBlocker.shouldBlock(request)) {
-                                        viewModel.processIntent(BrowserUiIntent.AdBlocked)
-                                        return BrowserAdBlocker.createBlockedResponse()
-                                    }
+                                // Algorithmic Darkening for Android 13+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    isAlgorithmicDarkeningAllowed = true
                                 }
-                                return super.shouldInterceptRequest(view, request)
                             }
 
-                            override fun shouldOverrideUrlLoading(
-                                view: WebView?,
-                                request: WebResourceRequest?
-                            ): Boolean {
-                                val url = request?.url ?: return false
-                                val scheme = url.scheme?.lowercase(java.util.Locale.US) ?: return false
+                            val webView = this
+                            CookieManager.getInstance().apply {
+                                setAcceptCookie(true)
+                                setAcceptThirdPartyCookies(webView, true)
+                            }
 
-                                if (scheme != "http" && scheme != "https") {
-                                    // Block unwanted app scheme hijacking from ad scripts
-                                    val blockedSchemes = listOf("snssdk", "tiktok", "musically", "shopee", "lazada")
-                                    if (blockedSchemes.any { scheme.startsWith(it) }) {
-                                        return true
+                            webViewClient = object : WebViewClient() {
+                                override fun shouldInterceptRequest(
+                                    view: WebView?,
+                                    request: WebResourceRequest?
+                                ): WebResourceResponse? {
+                                    if (request != null && uiState.adBlockEnabled) {
+                                        val fullUrl = request.url?.toString()?.lowercase(java.util.Locale.US) ?: ""
+                                        val surrogate = BrowserAdBlocker.getSurrogateResponse(fullUrl)
+                                        if (surrogate != null) {
+                                            viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                            return surrogate
+                                        }
+                                        if (BrowserAdBlocker.shouldBlock(request)) {
+                                            viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                            return BrowserAdBlocker.createBlockedResponse()
+                                        }
                                     }
-                                    // Block malicious non-user gesture redirects (e.g. ad apps/stores)
-                                    if (request.hasGesture().not()) {
-                                        return true
-                                    }
-                                    return runCatching {
-                                        val intent = Intent(Intent.ACTION_VIEW, url)
-                                        context.startActivity(intent)
-                                        true
-                                    }.getOrDefault(true)
+                                    return super.shouldInterceptRequest(view, request)
                                 }
 
-                                if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlockNavigation(request, view?.url)) {
-                                    viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                override fun shouldOverrideUrlLoading(
+                                    view: WebView?,
+                                    request: WebResourceRequest?
+                                ): Boolean {
+                                    val url = request?.url ?: return false
+                                    val scheme = url.scheme?.lowercase(java.util.Locale.US) ?: return false
+
+                                    if (scheme != "http" && scheme != "https") {
+                                        // Block unwanted app scheme hijacking from ad scripts
+                                        val blockedSchemes = listOf("snssdk", "tiktok", "musically", "shopee", "lazada")
+                                        if (blockedSchemes.any { scheme.startsWith(it) }) {
+                                            return true
+                                        }
+                                        // Block malicious non-user gesture redirects (e.g. ad apps/stores)
+                                        if (request.hasGesture().not()) {
+                                            return true
+                                        }
+                                        return runCatching {
+                                            val intent = Intent(Intent.ACTION_VIEW, url)
+                                            context.startActivity(intent)
+                                            true
+                                        }.getOrDefault(true)
+                                    }
+
+                                    if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlockNavigation(request, view?.url)) {
+                                        viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                        return true
+                                    }
+
+                                    return false
+                                }
+
+                                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                                    super.onPageStarted(view, url, favicon)
+                                    url?.let { viewModel.processIntent(BrowserUiIntent.PageStarted(it)) }
+
+                                    if (uiState.adBlockEnabled) {
+                                        BrowserAdBlocker.injectEarlyScripts(context, view, url)
+                                    }
+                                }
+
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    val currentTitle = view?.title ?: ""
+                                    url?.let { viewModel.processIntent(BrowserUiIntent.PageFinished(it, currentTitle)) }
+
+                                    if (uiState.adBlockEnabled) {
+                                        BrowserAdBlocker.injectLateScripts(context, view, url)
+                                    }
+                                }
+                            }
+
+                            webChromeClient = object : WebChromeClient() {
+                                override fun onCreateWindow(
+                                    view: WebView?,
+                                    isDialog: Boolean,
+                                    isUserGesture: Boolean,
+                                    resultMsg: android.os.Message?
+                                ): Boolean {
+                                    if (!isUserGesture) return false
+                                    val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
+                                    val tempWebView = WebView(view?.context ?: return false)
+                                    tempWebView.webViewClient = object : WebViewClient() {
+                                        override fun shouldOverrideUrlLoading(
+                                            view: WebView?,
+                                            request: WebResourceRequest?
+                                        ): Boolean {
+                                            val targetUrl = request?.url?.toString() ?: return false
+                                            if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlock(request)) {
+                                                viewModel.processIntent(BrowserUiIntent.AdBlocked)
+                                                return true
+                                            }
+                                            viewModel.processIntent(BrowserUiIntent.LoadUrl(targetUrl))
+                                            return true
+                                        }
+                                    }
+                                    transport.webView = tempWebView
+                                    resultMsg.sendToTarget()
                                     return true
                                 }
 
-                                return false
-                            }
+                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                    super.onProgressChanged(view, newProgress)
+                                    viewModel.processIntent(BrowserUiIntent.UpdateProgress(newProgress))
+                                    if (newProgress in 15..25 && uiState.adBlockEnabled) {
+                                        BrowserAdBlocker.injectEarlyScripts(context, view, view?.url)
+                                    }
+                                }
 
-                            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                                super.onPageStarted(view, url, favicon)
-                                url?.let { viewModel.processIntent(BrowserUiIntent.PageStarted(it)) }
+                                override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+                                    customView = view
+                                    customViewCallback = callback
+                                }
 
-                                if (uiState.adBlockEnabled) {
-                                    BrowserAdBlocker.injectEarlyScripts(context, view, url)
+                                override fun onHideCustomView() {
+                                    customView = null
+                                    customViewCallback?.onCustomViewHidden()
+                                    customViewCallback = null
                                 }
                             }
 
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                super.onPageFinished(view, url)
-                                val currentTitle = view?.title ?: ""
-                                url?.let { viewModel.processIntent(BrowserUiIntent.PageFinished(it, currentTitle)) }
-
-                                if (uiState.adBlockEnabled) {
-                                    BrowserAdBlocker.injectLateScripts(context, view, url)
-                                }
-                            }
-                        }
-
-                        webChromeClient = object : WebChromeClient() {
-                            override fun onCreateWindow(
-                                view: WebView?,
-                                isDialog: Boolean,
-                                isUserGesture: Boolean,
-                                resultMsg: android.os.Message?
-                            ): Boolean {
-                                if (!isUserGesture) return false
-                                val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
-                                val tempWebView = WebView(view?.context ?: return false)
-                                tempWebView.webViewClient = object : WebViewClient() {
-                                    override fun shouldOverrideUrlLoading(
-                                        view: WebView?,
-                                        request: WebResourceRequest?
-                                    ): Boolean {
-                                        val targetUrl = request?.url?.toString() ?: return false
-                                        if (uiState.adBlockEnabled && BrowserAdBlocker.shouldBlock(request)) {
-                                            viewModel.processIntent(BrowserUiIntent.AdBlocked)
-                                            return true
+                            setDownloadListener { downloadUrl, userAgent, contentDisposition, mimetype, _ ->
+                                try {
+                                    val fileName = extractFileName(downloadUrl, contentDisposition, mimetype)
+                                    val request = DownloadManager.Request(Uri.parse(downloadUrl)).apply {
+                                        setTitle(fileName)
+                                        setDescription("Đang tải tệp $fileName...")
+                                        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                                        addRequestHeader("User-Agent", userAgent)
+                                        CookieManager.getInstance().getCookie(downloadUrl)?.let { cookie ->
+                                            if (cookie.isNotBlank()) addRequestHeader("Cookie", cookie)
                                         }
-                                        viewModel.processIntent(BrowserUiIntent.LoadUrl(targetUrl))
-                                        return true
+                                    }
+                                    val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
+                                    dm?.enqueue(request)
+                                    Toast.makeText(context, "Bắt đầu tải: $fileName", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    Timber.e(e, "DownloadManager failed for url: %s", downloadUrl)
+                                    runCatching {
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                                        context.startActivity(intent)
                                     }
                                 }
-                                transport.webView = tempWebView
-                                resultMsg.sendToTarget()
-                                return true
                             }
 
-                            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                super.onProgressChanged(view, newProgress)
-                                viewModel.processIntent(BrowserUiIntent.UpdateProgress(newProgress))
-                                if (newProgress in 15..25 && uiState.adBlockEnabled) {
-                                    BrowserAdBlocker.injectEarlyScripts(context, view, view?.url)
-                                }
-                            }
-
-                            override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-                                customView = view
-                                customViewCallback = callback
-                            }
-
-                            override fun onHideCustomView() {
-                                customView = null
-                                customViewCallback?.onCustomViewHidden()
-                                customViewCallback = null
-                            }
+                            val startUrl = if (initialUrl.isNotBlank()) initialUrl else uiState.currentUrl
+                            loadUrl(startUrl)
+                            webViewInstance = this
                         }
-
-                        setDownloadListener { downloadUrl, userAgent, contentDisposition, mimetype, _ ->
-                            try {
-                                val fileName = extractFileName(downloadUrl, contentDisposition, mimetype)
-                                val request = DownloadManager.Request(Uri.parse(downloadUrl)).apply {
-                                    setTitle(fileName)
-                                    setDescription("Đang tải tệp $fileName...")
-                                    setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                                    setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                                    addRequestHeader("User-Agent", userAgent)
-                                    CookieManager.getInstance().getCookie(downloadUrl)?.let { cookie ->
-                                        if (cookie.isNotBlank()) addRequestHeader("Cookie", cookie)
-                                    }
-                                }
-                                val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
-                                dm?.enqueue(request)
-                                Toast.makeText(context, "Bắt đầu tải: $fileName", Toast.LENGTH_SHORT).show()
-                            } catch (e: Exception) {
-                                Timber.e(e, "DownloadManager failed for url: %s", downloadUrl)
-                                runCatching {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
-                                    context.startActivity(intent)
-                                }
-                            }
-                        }
-
-                        val startUrl = if (initialUrl.isNotBlank()) initialUrl else uiState.currentUrl
-                        loadUrl(startUrl)
-                        webViewInstance = this
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
             // Fullscreen video overlay
             customView?.let { fullView ->
