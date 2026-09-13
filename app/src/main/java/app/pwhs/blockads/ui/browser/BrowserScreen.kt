@@ -53,7 +53,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import app.pwhs.blockads.ui.browser.component.BrowserBottomOmnibox
 import app.pwhs.blockads.ui.browser.component.BrowserBentoMenuSheet
 import app.pwhs.blockads.ui.browser.component.BrowserShortcuts
-import app.pwhs.blockads.ui.browser.component.NestedScrollWebView
+import app.pwhs.blockads.ui.browser.component.PullRefreshWebView
 import app.pwhs.blockads.ui.browser.component.SearchSuggestionSheet
 import app.pwhs.blockads.ui.browser.interceptor.BrowserAdBlocker
 import kotlinx.coroutines.flow.collectLatest
@@ -80,6 +80,13 @@ fun BrowserScreen(
     var customView by remember { mutableStateOf<View?>(null) }
     var customViewCallback by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
     val pullToRefreshState = rememberPullToRefreshState()
+    // Local refresh flag — separate from isLoading to avoid false positives on normal navigation
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    // Reset isRefreshing once the page finishes loading
+    LaunchedEffect(uiState.isLoading) {
+        if (!uiState.isLoading) isRefreshing = false
+    }
 
     LaunchedEffect(initialUrl) {
         if (initialUrl.isNotBlank() && initialUrl != uiState.currentUrl) {
@@ -178,13 +185,16 @@ fun BrowserScreen(
                 .padding(if (customView == null && !isInPipMode) padding else PaddingValues())
         ) {
             PullToRefreshBox(
-                isRefreshing = uiState.isLoading,
-                onRefresh = { webViewInstance?.reload() },
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    webViewInstance?.reload()
+                },
                 state = pullToRefreshState,
                 indicator = {
                     PullToRefreshDefaults.Indicator(
                         state = pullToRefreshState,
-                        isRefreshing = uiState.isLoading,
+                        isRefreshing = isRefreshing,
                         modifier = Modifier.align(Alignment.TopCenter),
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         color = MaterialTheme.colorScheme.primary
@@ -194,7 +204,11 @@ fun BrowserScreen(
             ) {
                 AndroidView(
                     factory = { ctx ->
-                        NestedScrollWebView(ctx).apply {
+                        PullRefreshWebView(ctx).apply {
+                            onPullToRefreshTrigger = {
+                                isRefreshing = true
+                                reload()
+                            }
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
