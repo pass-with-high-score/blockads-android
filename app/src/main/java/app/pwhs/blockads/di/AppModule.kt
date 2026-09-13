@@ -106,11 +106,16 @@ val appModule = module {
         )
     }
 
-    // Browser Dynamic Rules
+    // Browser Dynamic Rules & Search Suggestions
     single { app.pwhs.blockads.ui.browser.rules.BrowserRuleStorage(androidContext()) }
     single<app.pwhs.blockads.ui.browser.rules.BrowserRuleRepository> {
         app.pwhs.blockads.ui.browser.rules.BrowserRuleRepositoryImpl(
             storage = get(),
+            client = get()
+        )
+    }
+    single<app.pwhs.blockads.ui.browser.data.SearchSuggestionRepository> {
+        app.pwhs.blockads.ui.browser.data.SearchSuggestionRepositoryImpl(
             client = get()
         )
     }
@@ -270,7 +275,8 @@ val appModule = module {
     viewModel {
         app.pwhs.blockads.ui.browser.BrowserViewModel(
             application = androidApplication(),
-            ruleRepository = get()
+            ruleRepository = get(),
+            suggestionRepository = get()
         )
     }
 }

@@ -1,5 +1,7 @@
 package app.pwhs.blockads.ui.browser
 
+import app.pwhs.blockads.ui.browser.data.SearchEngine
+
 data class BrowserUiState(
     val currentUrl: String = "https://m.youtube.com",
     val displayUrl: String = "https://m.youtube.com",
@@ -15,7 +17,13 @@ data class BrowserUiState(
     val showShortcuts: Boolean = false,
     val ruleVersion: Long = 1L,
     val ruleDomainsCount: Int = 0,
-    val isCheckingRuleUpdates: Boolean = false
+    val isCheckingRuleUpdates: Boolean = false,
+    val searchQuery: String = "",
+    val suggestions: List<String> = emptyList(),
+    val selectedSearchEngine: SearchEngine = SearchEngine.GOOGLE,
+    val isSearchSheetVisible: Boolean = false,
+    val isBottomBarVisible: Boolean = true,
+    val isBentoMenuVisible: Boolean = false
 )
 
 sealed interface BrowserUiIntent {
@@ -32,9 +40,16 @@ sealed interface BrowserUiIntent {
     data class PageFinished(val url: String, val title: String) : BrowserUiIntent
     data object AdBlocked : BrowserUiIntent
     data object CheckRuleUpdates : BrowserUiIntent
+    data class UpdateSearchQuery(val query: String) : BrowserUiIntent
+    data class SelectSearchEngine(val engine: SearchEngine) : BrowserUiIntent
+    data class ToggleSearchSheet(val visible: Boolean) : BrowserUiIntent
+    data class ToggleBentoMenu(val visible: Boolean) : BrowserUiIntent
+    data class SubmitSearch(val query: String) : BrowserUiIntent
+    data class UpdateBottomBarVisibility(val visible: Boolean) : BrowserUiIntent
 }
 
 sealed interface BrowserUiEffect {
     data class ShowToast(val message: String) : BrowserUiEffect
     data class OpenExternal(val url: String) : BrowserUiEffect
+    data class NavigateUrl(val url: String) : BrowserUiEffect
 }

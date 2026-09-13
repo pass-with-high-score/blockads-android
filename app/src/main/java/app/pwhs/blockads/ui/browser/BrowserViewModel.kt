@@ -15,9 +15,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import app.pwhs.blockads.ui.browser.data.SearchEngine
+import app.pwhs.blockads.ui.browser.data.SearchSuggestionRepository
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+
+@OptIn(FlowPreview::class)
 class BrowserViewModel(
     application: Application,
-    private val ruleRepository: BrowserRuleRepository
+    private val ruleRepository: BrowserRuleRepository,
+    private val suggestionRepository: SearchSuggestionRepository
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(
@@ -44,18 +53,38 @@ class BrowserViewModel(
                 }
             }
         }
+
+        // Live search autocomplete debounced at 250ms
+        viewModelScope.launch {
+            _uiState
+                .map { it.searchQuery }
+                .distinctUntilChanged()
+                .debounce(250)
+                .collect { query ->
+                    if (query.length >= 2) {
+                        val suggestions = suggestionRepository.getSuggestions(query)
+                        _uiState.update { it.copy(suggestions = suggestions) }
+                    } else {
+                        _uiState.update { it.copy(suggestions = emptyList()) }
+                    }
+                }
+        }
     }
 
     fun processIntent(intent: BrowserUiIntent) {
         when (intent) {
             is BrowserUiIntent.LoadUrl -> {
-                val targetUrl = BrowserAdBlocker.sanitizeSearchUrl(intent.url)
+                val targetUrl = resolveUrl(intent.url, _uiState.value.selectedSearchEngine)
                 _uiState.update {
                     it.copy(
                         currentUrl = targetUrl,
                         displayUrl = targetUrl,
-                        showShortcuts = false
+                        showShortcuts = false,
+                        isSearchSheetVisible = false
                     )
+                }
+                viewModelScope.launch {
+                    _uiEffect.send(BrowserUiEffect.NavigateUrl(targetUrl))
                 }
             }
             is BrowserUiIntent.Reload -> {
@@ -110,6 +139,50 @@ class BrowserViewModel(
             is BrowserUiIntent.CheckRuleUpdates -> {
                 checkForRuleUpdates()
             }
+            is BrowserUiIntent.UpdateSearchQuery -> {
+                _uiState.update { it.copy(searchQuery = intent.query) }
+            }
+            is BrowserUiIntent.SelectSearchEngine -> {
+                _uiState.update { it.copy(selectedSearchEngine = intent.engine) }
+            }
+            is BrowserUiIntent.ToggleSearchSheet -> {
+                _uiState.update {
+                    it.copy(
+                        isSearchSheetVisible = intent.visible,
+                        searchQuery = if (intent.visible) it.displayUrl else "",
+                        suggestions = emptyList()
+                    )
+                }
+            }
+            is BrowserUiIntent.SubmitSearch -> {
+                val targetUrl = resolveUrl(intent.query, _uiState.value.selectedSearchEngine)
+                _uiState.update {
+                    it.copy(
+                        currentUrl = targetUrl,
+                        displayUrl = targetUrl,
+                        isSearchSheetVisible = false,
+                        showShortcuts = false
+                    )
+                }
+                viewModelScope.launch {
+                    _uiEffect.send(BrowserUiEffect.NavigateUrl(targetUrl))
+                }
+            }
+            is BrowserUiIntent.ToggleBentoMenu -> {
+                _uiState.update { it.copy(isBentoMenuVisible = intent.visible) }
+            }
+            is BrowserUiIntent.UpdateBottomBarVisibility -> {
+                _uiState.update { it.copy(isBottomBarVisible = intent.visible) }
+            }
+        }
+    }
+
+    private fun resolveUrl(input: String, engine: SearchEngine): String {
+        val trimmed = input.trim()
+        return when {
+            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+            trimmed.contains(".") && !trimmed.contains(" ") -> "https://$trimmed"
+            else -> engine.buildSearchUrl(trimmed)
         }
     }
 
