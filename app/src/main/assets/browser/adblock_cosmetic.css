@@ -338,7 +338,12 @@ a[href*="invl.me"],
 .adbox-wrapper,
 a[rel*="sponsored"],
 a[data-umami-event*="banner click"],
-a[data-umami-event-partner] {
+a[data-umami-event-partner],
+/* ========================================================
+   APKCombo Ad Wrappers & Banners
+   ======================================================== */
+.column.is-main > div[style*="max-height: 260px"],
+.column.is-main > div[style*="min-height: 260px"] {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;

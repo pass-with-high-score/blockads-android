@@ -206,7 +206,11 @@ object BrowserRuleDefaults {
         "api-adservices.apple.com",
         "books-analytics-events.apple.com",
         "weather-analytics-events.apple.com",
-        "notes-analytics-events.apple.com"
+        "notes-analytics-events.apple.com",
+        // APKCombo ad and push networks
+        "militarfagot.com",
+        "push-sdk.com",
+        "a-zzz.com"
     )
 
     val GAMBLING_POPUNDER_KEYWORDS = listOf(
