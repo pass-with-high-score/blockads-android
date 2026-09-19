@@ -18,5 +18,5 @@ When modifying or exporting functions, structs, or methods in `tunnel/`:
 - **Zero Allocations in Hot Paths**: DNS packet parsing and Bloom filter lookups run at high frequency. Reuse buffers and avoid allocating objects per DNS query.
 - **Thread Safety**: The Go engine handles concurrent DNS and TCP requests across goroutines. Protect shared states with `sync.RWMutex` or atomic operations.
 - **Rebuilding the Tunnel**:
-  - After modifying `tunnel/*.go`, rebuild the AAR using `./scripts/build_tunnel.sh` or `./gradlew buildGoTunnel`.
-  - Output binary is placed at `app/libs/tunnel.aar`.
+  - After modifying `tunnel/*.go`, rebuild the AAR using `./scripts/build_tunnel.sh` or `./gradlew -Ptunnel.source=local buildGoTunnel`, and build the app with `-Ptunnel.source=local` so it picks up your build.
+  - Output binary is placed at `build/tunnel/tunnel.aar` and is never committed. CI publishes it as a GitHub Release asset once the change lands on `main`; see [docs/TUNNEL.md](../../docs/TUNNEL.md).

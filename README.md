@@ -105,15 +105,15 @@ improve the app.
    gomobile init
    ```
 
-3. **(Optional)** Build the Go tunnel AAR/JAR (with Android 15 16KB page size support):
+3. **(Optional)** Build the Go tunnel AAR/JAR from source (with Android 15 16KB page size support):
    ```bash
    ./scripts/build_tunnel.sh
    ```
    Or
     ```
-   ./gradlew buildGoTunnel
+   ./gradlew -Ptunnel.source=local buildGoTunnel
    ```
-   *Note: A pre-built version is already included in `app/libs/`.*
+   *Note: this is optional. Gradle downloads a prebuilt, checksum-pinned `tunnel.aar` by default, so you need neither Go nor the NDK. Build from source only when changing `tunnel/`. See [docs/TUNNEL.md](docs/TUNNEL.md).*
 
 4. Open the project in Android Studio
 

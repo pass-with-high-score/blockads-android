@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      # Forks set a repository variable TUNNEL_REPO pointing at their own
+      # releases; unset resolves from upstream (see settings.gradle.kts).
+      TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
 
     steps:
       - name: Checkout
@@ -56,16 +59,23 @@ jobs:
       - name: Add gomobile to PATH
         run: echo "$HOME/go/bin" >> $GITHUB_PATH
 
+      # CI builds the tunnel from source so PRs touching tunnel/ are actually
+      # compiled, rather than resolving the last published artifact.
       - name: Build Go Tunnel (tunnel.aar)
-        run: ./gradlew buildGoTunnel
+        run: ./gradlew -Ptunnel.source=local buildGoTunnel
+
+      # Separately, prove the pinned release artifact still resolves and matches
+      # gradle/tunnel.aar.sha256.
+      - name: Verify published tunnel.aar
+        run: ./gradlew verifyTunnelAar
 
       - name: Lint
-        run: ./gradlew lint
+        run: ./gradlew -Ptunnel.source=local lint
 
       - name: Build debug APK
         run: |
           ./gradlew --stop
-          ./gradlew assembleDebug
+          ./gradlew -Ptunnel.source=local assembleDebug
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4

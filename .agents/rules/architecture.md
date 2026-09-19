@@ -17,7 +17,7 @@ BlockAds is a privacy-first, open-source Android ad blocker with dual routing mo
 ## Project Structure
 - `app/`: Primary Android phone/tablet application.
 - `blockadstv/`: Android TV companion module.
-- `tunnel/`: Go source code compiled to `app/libs/tunnel.aar` via gomobile.
+- `tunnel/`: Go source code compiled to `tunnel.aar` via gomobile, consumed as the published `app.pwhs:tunnel` artifact rather than a committed binary.
 - `scripts/`: Build and automation scripts (e.g., `build_tunnel.sh`).
 - `.agent/`: Agent workflows, skills, and rule sets.
 

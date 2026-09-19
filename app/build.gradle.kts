@@ -10,39 +10,19 @@ plugins {
     alias(libs.plugins.sentry)
 }
 
-tasks.register<Exec>("buildGoTunnel") {
-    val libsDir = file("libs")
-    val aarFile = file("libs/tunnel.aar")
-    val tunnelDir = rootProject.file("tunnel")
-    
-    // Only rebuild if the tunnel source code changes (or if aar is missing)
-    inputs.dir(tunnelDir)
-    outputs.file(aarFile)
+// Where the Go tunnel comes from. See the root build file and docs/TUNNEL.md.
+//   unset      the published app.pwhs:tunnel release artifact, checksum-verified
+//   local      built from tunnel/ by :buildGoTunnel
+//   prebuilt   an aar already sitting at build/tunnel/tunnel.aar, used as-is
+val tunnelSource = providers.gradleProperty("tunnel.source").orNull
+val tunnelFromFile = tunnelSource == "local" || tunnelSource == "prebuilt"
 
-    workingDir = tunnelDir
-    
-    // For local development, gomobile might not be in PATH for Gradle, so we use bash
-    // to load user's profile which usually exports GOPATH/bin to PATH.
-    commandLine(
-        "bash", "-c",
-        "mkdir -p \"${libsDir.absolutePath}\" && " +
-        "export GOFLAGS=\"-buildvcs=false\" && " +
-        "export PATH=\"\$PATH:\$GOPATH/bin:\$HOME/go/bin:/usr/local/go/bin\" && " +
-        "gomobile bind -target=android -androidapi 24 -trimpath " +
-        "-ldflags=\"-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384\" " +
-        "-o ${aarFile.absolutePath} github.com/nqmgaming/blockads-tunnel"
-    )
-
-    doFirst {
-        if (!libsDir.exists()) {
-            libsDir.mkdirs()
-        }
-        println("Building Go tunnel for Android...")
-    }
-    
-    doLast {
-        println("Go tunnel built successfully.")
-    }
+when (tunnelSource) {
+    "local" -> tasks.named("preBuild") { dependsOn(":buildGoTunnel") }
+    // "prebuilt" means the caller already produced the aar, so there is nothing
+    // to run first; building it here would just repeat their work.
+    "prebuilt" -> Unit
+    else -> tasks.named("preBuild") { dependsOn(":verifyTunnelAar") }
 }
 
 android {
@@ -177,7 +157,19 @@ dependencies {
     implementation(libs.ktor.client.logging)
     
     // Go Tunnel backend
-    implementation(files("libs/tunnel.aar"))
+    if (tunnelFromFile) {
+        implementation(files(rootProject.layout.buildDirectory.file("tunnel/tunnel.aar")))
+    } else {
+        implementation(libs.tunnel) {
+            // No Ivy/Maven metadata on a release asset, so name the artifact
+            // explicitly; otherwise Gradle looks for tunnel-<version>.jar.
+            artifact {
+                name = "tunnel"
+                type = "aar"
+                extension = "aar"
+            }
+        }
+    }
 
     implementation(libs.timber)
 
