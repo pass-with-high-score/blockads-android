@@ -26,6 +26,7 @@ class VpnConnectionSupervisor(
     private val isRunningProvider: () -> Boolean,
     private val isIdleProvider: () -> Boolean,
     private val socketProtector: (Int) -> Boolean,
+    private val isEngineRunning: () -> Boolean,
     private val onTearDownForRestart: suspend () -> Unit,
     private val onStartVpn: () -> Unit,
     private val onPhaseChanged: (String) -> Unit,
@@ -143,7 +144,7 @@ class VpnConnectionSupervisor(
 
     private fun startConnectionProbing() {
         connectionProbeJob?.cancel()
-        connectionQualityProbe = ConnectionQualityProbe(socketProtector)
+        connectionQualityProbe = ConnectionQualityProbe(socketProtector, isEngineRunning)
 
         connectionProbeJob = scope.launch {
             var consecutiveVpnStalls = 0
@@ -153,7 +154,7 @@ class VpnConnectionSupervisor(
 
                 val probe = connectionQualityProbe ?: break
                 val result = probe.runDiagnosis()
-                Timber.d("ConnectionQualityProbe result: ${result.status} (physical=${result.physicalOk}, vpnDns=${result.vpnDnsOk}, latency=${result.latencyMs}ms)")
+                Timber.d("ConnectionQualityProbe result: ${result.status} (physical=${result.physicalOk}, engine=${result.engineOk}, latency=${result.latencyMs}ms)")
 
                 when (result.status) {
                     ConnectionStatus.NO_PHYSICAL_INTERNET -> {
@@ -167,9 +168,9 @@ class VpnConnectionSupervisor(
                     ConnectionStatus.VPN_TUNNEL_STALLED -> {
                         onPhysicalNetworkLostChanged(false)
                         consecutiveVpnStalls++
-                        Timber.w("VPN tunnel or DNS probe failed (consecutive failures=$consecutiveVpnStalls)")
+                        Timber.w("Tunnel engine not running (consecutive failures=$consecutiveVpnStalls)")
                         if (consecutiveVpnStalls >= 2) {
-                            Timber.w("VPN tunnel is stalled while physical internet is healthy - restarting VPN session")
+                            Timber.w("Tunnel engine stopped while physical internet is healthy - restarting VPN session")
                             consecutiveVpnStalls = 0
                             onRequestRestart()
                         }

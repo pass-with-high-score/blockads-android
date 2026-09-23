@@ -416,6 +416,8 @@ class GoTunnelAdapter(
     /**
      * Stop the Go tunnel engine.
      */
+    fun isEngineRunning(): Boolean = engine.isRunning
+
     fun stop() {
         isRunning = false
         engine.stop()

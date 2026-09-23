@@ -80,12 +80,12 @@ func (w *WgOutbound) Start() error {
 	return nil
 }
 
-// Stop shuts down the WireGuard device.
+// Stop shuts down the WireGuard device, including one whose Start failed.
 func (w *WgOutbound) Stop() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
-	if !w.running || w.dev == nil {
+	if w.dev == nil {
 		return
 	}
 

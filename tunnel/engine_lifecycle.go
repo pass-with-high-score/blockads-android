@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"syscall"
 )
@@ -39,43 +40,28 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 		logf("Failed to set TUN fd %d non-blocking: %v", dupFd, err)
 	}
 
-	e.tunFile = os.NewFile(uintptr(dupFd), "tun")
-	if e.tunFile == nil {
+	tunFile := os.NewFile(uintptr(dupFd), "tun")
+	if tunFile == nil {
 		logf("Failed to open TUN fd %d", fd)
 		e.running = false
 		return
 	}
+	// Publish under e.mu: Stop() closes and clears tunFile under it, and
+	// endSession compares against it to tell this session from a newer one.
+	e.mu.Lock()
+	e.tunFile = tunFile
+	e.mu.Unlock()
 
 	logf("Engine started, reading from TUN fd=%d", fd)
 
 	if wgConfigJSON != "" {
 		logf("WireGuard config provided, initializing...")
-
-		wgCfg, err := ParseWgConfigJSON(wgConfigJSON)
-		if err != nil {
-			logf("WireGuard config parse error: %v", err)
-		} else {
-			ipcConfig, err := BuildIpcConfig(wgCfg)
-			if err != nil {
-				logf("WireGuard IPC config build error: %v", err)
-			} else {
-				tunDevice := newChannelTUN(e.tunFile)
-				wgAdapter, err := NewWgOutbound(tunDevice, ipcConfig, e.protectFn)
-				if err != nil {
-					logf("WireGuard adapter create error: %v", err)
-				} else {
-					if err := wgAdapter.Start(); err != nil {
-						logf("WireGuard adapter start error: %v", err)
-					} else {
-						e.router.SetAdapter(wgAdapter)
-						logf("WireGuard adapter fully initialized and active")
-
-						if len(wgCfg.Interface.DNS) > 0 && e.splitZones != "" {
-							e.applySplitDNS(wgCfg.Interface.DNS[0])
-						}
-					}
-				}
-			}
+		if err := e.startWireGuard(tunFile, wgConfigJSON); err != nil {
+			// Fail closed: with no adapter every non-DNS packet is dropped, so
+			// carrying on would report a running engine over a dead tunnel.
+			logf("WireGuard init failed, stopping engine: %v", err)
+			e.endSession(tunFile)
+			return
 		}
 	} else {
 		logf("No WireGuard config, running in DNS-only mode")
@@ -87,9 +73,53 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 		}
 	}
 
-	e.interceptor.Run(e.tunFile)
+	e.interceptor.Run(tunFile)
 
+	// Run also returns on a TUN read error, not just Stop(); clear the
+	// running state so IsRunning reflects a dead engine.
+	e.endSession(tunFile)
 	logf("Engine stopped")
+}
+
+// startWireGuard parses the config and brings up the WireGuard adapter on
+// tunFile.
+func (e *Engine) startWireGuard(tunFile *os.File, wgConfigJSON string) error {
+	wgCfg, err := ParseWgConfigJSON(wgConfigJSON)
+	if err != nil {
+		return fmt.Errorf("config parse: %w", err)
+	}
+	ipcConfig, err := BuildIpcConfig(wgCfg)
+	if err != nil {
+		return fmt.Errorf("IPC config build: %w", err)
+	}
+	wgAdapter, err := NewWgOutbound(newChannelTUN(tunFile), ipcConfig, e.protectFn)
+	if err != nil {
+		return fmt.Errorf("adapter create: %w", err)
+	}
+	if err := wgAdapter.Start(); err != nil {
+		wgAdapter.Stop()
+		return fmt.Errorf("adapter start: %w", err)
+	}
+	e.router.SetAdapter(wgAdapter)
+	logf("WireGuard adapter fully initialized and active")
+
+	if len(wgCfg.Interface.DNS) > 0 && e.splitZones != "" {
+		e.applySplitDNS(wgCfg.Interface.DNS[0])
+	}
+	return nil
+}
+
+// endSession marks the engine stopped and closes tunFile, unless Stop() has
+// already torn this session down (and a new Start may own the engine).
+func (e *Engine) endSession(tunFile *os.File) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if tunFile == nil || e.tunFile != tunFile {
+		return
+	}
+	e.running = false
+	e.tunFile = nil
+	tunFile.Close()
 }
 
 // Stop stops the engine and cleans up all running resources.
