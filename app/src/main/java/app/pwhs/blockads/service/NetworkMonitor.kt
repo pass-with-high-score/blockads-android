@@ -18,7 +18,8 @@ class NetworkMonitor(
     context: Context,
     private val onNetworkAvailable: () -> Unit,
     private val onNetworkLost: () -> Unit,
-    private val onLinkPropertiesChanged: ((android.net.LinkProperties) -> Unit)? = null
+    private val onLinkPropertiesChanged: ((android.net.LinkProperties) -> Unit)? = null,
+    private val onNetworkActiveChanged: ((android.net.Network?) -> Unit)? = null
 ) {
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -27,11 +28,13 @@ class NetworkMonitor(
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             Timber.d("Network available: $network")
+            onNetworkActiveChanged?.invoke(network)
             onNetworkAvailable()
         }
 
         override fun onLost(network: Network) {
             Timber.d("Network lost: $network")
+            onNetworkActiveChanged?.invoke(connectivityManager.activeNetwork)
             onNetworkLost()
         }
 

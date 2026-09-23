@@ -201,4 +201,14 @@
     <string name="exclude_lan_description">WireGuard белсенді кезде жергілікті желі құрылғыларына (принтерлер, NAS, жергілікті серверлер) қатынауға рұқсат ету</string>
     <string name="settings_hide_from_recents_title">Соңғы қолданбалардан жасыру</string>
     <string name="settings_hide_from_recents_subtitle">BlockAds-ты соңғы қолданбалар экранынан жасыру</string>
+    <string name="settings_navigation">Навигация</string>
+    <string name="milestone_sheet_title">Қорғаудың жаңа кезеңіне қол жеткізілді!</string>
+    <string name="milestone_sheet_subtitle">BlockAds арқылы %1$s жарнама мен трекерді сәтті бұғаттадыңыз.</string>
+    <string name="milestone_sheet_data_saved">Үнемделген деректер көлемі</string>
+    <string name="milestone_sheet_time_saved">Үнемделген уақыт</string>
+    <string name="milestone_sheet_action">Керемет!</string>
+    <string name="dns_category_advanced_security">Кеңейтілген DNS қауіпсіздігі</string>
+    <string name="dns_block_doh_bypass_title">DNS-over-HTTPS (DoH) айналып өтуін бұғаттау</string>
+    <string name="dns_block_doh_bypass_desc">Қолданбалар мен браузерлердің шифрланған DoH/DoT арқылы сүзгіні айналып өтуіне жол бермеу</string>
+    <string name="dns_block_doh_bypass_notice">Ескертпе: Егер браузеріңіз (мысалы, Chrome) қосылым қатесін (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG) көрсетсе, браузер параметрлеріндегі \"Қауіпсіз DNS пайдалану\" параметрін \"Автоматты\" күйіне орнатыңыз.</string>
 </resources>

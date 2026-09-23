@@ -18,6 +18,7 @@ val Context.blockAdsDataStore: DataStore<Preferences> by preferencesDataStore(na
 class AppPreferences(context: Context) {
 
     private val dataStore = context.blockAdsDataStore
+    private val directBootPrefs = DirectBootPreferences(context)
     val dns = DnsPreferences(dataStore)
     val appearance = AppearancePreferences(dataStore)
     val filter = FilterPreferences(dataStore)
@@ -100,6 +101,7 @@ class AppPreferences(context: Context) {
     val dailySummaryEnabled: Flow<Boolean> get() = vpnSecurity.dailySummaryEnabled
     val milestoneNotificationsEnabled: Flow<Boolean> get() = vpnSecurity.milestoneNotificationsEnabled
     val lastMilestoneBlocked: Flow<Long> get() = vpnSecurity.lastMilestoneBlocked
+    val lastSeenMilestoneDialog: Flow<Long> get() = vpnSecurity.lastSeenMilestoneDialog
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId
     val recordDnsLogs: Flow<Boolean> get() = vpnSecurity.recordDnsLogs
     val firewallEnabled: Flow<Boolean> get() = vpnSecurity.firewallEnabled
@@ -119,6 +121,7 @@ class AppPreferences(context: Context) {
     val dnsProviderId: Flow<String?> get() = dns.dnsProviderId
     val dnsResponseType: Flow<String> get() = dns.dnsResponseType
     val splitDnsZones: Flow<String> get() = dns.splitDnsZones
+    val blockDohBypass: Flow<Boolean> get() = dns.blockDohBypass
 
     // ── Appearance Flows ─────────────────────────────────────────────────
     val themeMode: Flow<String> get() = appearance.themeMode
@@ -143,8 +146,14 @@ class AppPreferences(context: Context) {
     val excludeLan: Flow<Boolean> get() = wireguard.excludeLan
 
     // ── Mutator & Snapshot Delegates ─────────────────────────────────────
-    suspend fun setVpnEnabled(enabled: Boolean) = vpnSecurity.setVpnEnabled(enabled)
-    suspend fun setAutoReconnect(enabled: Boolean) = vpnSecurity.setAutoReconnect(enabled)
+    suspend fun setVpnEnabled(enabled: Boolean) {
+        vpnSecurity.setVpnEnabled(enabled)
+        directBootPrefs.wasVpnEnabled = enabled
+    }
+    suspend fun setAutoReconnect(enabled: Boolean) {
+        vpnSecurity.setAutoReconnect(enabled)
+        directBootPrefs.autoReconnect = enabled
+    }
     suspend fun setNetworkSwitchDelayEnabled(enabled: Boolean) = vpnSecurity.setNetworkSwitchDelayEnabled(enabled)
     suspend fun setNetworkSwitchDelaySec(seconds: Int) = vpnSecurity.setNetworkSwitchDelaySec(seconds)
     suspend fun setOnboardingCompleted(completed: Boolean) = vpnSecurity.setOnboardingCompleted(completed)
@@ -154,6 +163,7 @@ class AppPreferences(context: Context) {
     suspend fun setDailySummaryEnabled(enabled: Boolean) = vpnSecurity.setDailySummaryEnabled(enabled)
     suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) = vpnSecurity.setMilestoneNotificationsEnabled(enabled)
     suspend fun setLastMilestoneBlocked(count: Long) = vpnSecurity.setLastMilestoneBlocked(count)
+    suspend fun setLastSeenMilestoneDialog(milestone: Long) = vpnSecurity.setLastSeenMilestoneDialog(milestone)
     suspend fun setActiveProfileId(id: Long) = vpnSecurity.setActiveProfileId(id)
     suspend fun setRecordDnsLogs(enabled: Boolean) = vpnSecurity.setRecordDnsLogs(enabled)
     suspend fun setFirewallEnabled(enabled: Boolean) = vpnSecurity.setFirewallEnabled(enabled)
@@ -180,6 +190,8 @@ class AppPreferences(context: Context) {
     suspend fun setDnsProviderId(providerId: String?) = dns.setDnsProviderId(providerId)
     suspend fun setDnsResponseType(responseType: String) = dns.setDnsResponseType(responseType)
     suspend fun setSplitDnsZones(zones: String) = dns.setSplitDnsZones(zones)
+    suspend fun setBlockDohBypass(enabled: Boolean) = dns.setBlockDohBypass(enabled)
+    suspend fun getBlockDohBypassSnapshot(): Boolean = dns.getBlockDohBypassSnapshot()
 
     suspend fun setThemeMode(mode: String) = appearance.setThemeMode(mode)
     suspend fun setAppLanguage(language: String) = appearance.setAppLanguage(language)
@@ -195,7 +207,10 @@ class AppPreferences(context: Context) {
     suspend fun setSafeSearchEnabled(enabled: Boolean) = filter.setSafeSearchEnabled(enabled)
     suspend fun setYoutubeRestrictedMode(enabled: Boolean) = filter.setYoutubeRestrictedMode(enabled)
 
-    suspend fun setRoutingMode(mode: String) = wireguard.setRoutingMode(mode)
+    suspend fun setRoutingMode(mode: String) {
+        wireguard.setRoutingMode(mode)
+        directBootPrefs.routingMode = mode
+    }
     suspend fun getRoutingModeSnapshot(): String = wireguard.getRoutingModeSnapshot()
     suspend fun getWgConfigJsonSnapshot(): String? = wireguard.getWgConfigJsonSnapshot()
     suspend fun getWgProfilesSnapshot(): List<WireGuardProfile> = wireguard.getWgProfilesSnapshot()

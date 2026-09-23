@@ -34,6 +34,7 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_show_bottom_nav_labels">Show Bottom Navigation Labels</string>
     <string name="settings_show_bottom_nav_labels_desc">Display text under icons in the bottom navigation</string>
+    <string name="settings_navigation">Navigation</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_lang_system">System</string>
     <string name="settings_lang_en" translatable="false">English</string>
@@ -162,8 +163,13 @@
     <string name="daily_summary_text">Today we blocked %1$d ads for you!</string>
     <string name="milestone_channel_name">Milestones</string>
     <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
-    <string name="milestone_title">🎉 Milestone reached!</string>
-    <string name="milestone_text">You\'ve blocked %1$s ads! Keep going!</string>
+    <string name="milestone_title">🎉 Milestone Reached!</string>
+    <string name="milestone_text">You\'ve blocked %1$s ads! Keep it up!</string>
+    <string name="milestone_sheet_title">Protection Milestone Reached!</string>
+    <string name="milestone_sheet_subtitle">You have successfully blocked %1$s ads and trackers with BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Estimated Data Saved</string>
+    <string name="milestone_sheet_time_saved">Estimated Time Saved</string>
+    <string name="milestone_sheet_action">Awesome!</string>
     <string name="settings_category_notifications">Notifications</string>
     <string name="settings_category_notifications_desc">Daily summary, milestones</string>
     <string name="settings_daily_summary">Daily summary</string>
@@ -228,4 +234,10 @@
     <string name="exclude_lan_description">Allow access to local network devices (printers, NAS, local servers) while WireGuard is active</string>
     <string name="settings_hide_from_recents_title">Hide from Recent Apps</string>
     <string name="settings_hide_from_recents_subtitle">Hide BlockAds from the recent apps screen</string>
+
+    <!-- DNS Leak Protection / DoH Bypass -->
+    <string name="dns_category_advanced_security">Advanced DNS Security</string>
+    <string name="dns_block_doh_bypass_title">Block DNS-over-HTTPS (DoH) Bypass</string>
+    <string name="dns_block_doh_bypass_desc">Prevent apps and browsers from bypassing local filtering using encrypted DoH/DoT</string>
+    <string name="dns_block_doh_bypass_notice">Note: If your browser (e.g. Chrome) shows a connection error (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), set \"Use secure DNS\" in your browser settings to \"Automatic\".</string>
 </resources>

@@ -39,7 +39,7 @@ class FilterListRepository(
         const val BLOCK_REASON_UPSTREAM_DNS = "upstream_dns"
 
         private const val FILTER_LIST_JSON_URL =
-            "https://raw.githubusercontent.com/pass-with-high-score/blockads-default-filter/refs/heads/main/output/filter_lists.json"
+            "https://complier.pwhs.app/api/filters/default"
     }
 
     // Paths to pre-compiled binary files for Go Native Engine (CSV strings)
@@ -82,6 +82,23 @@ class FilterListRepository(
     fun getCosmeticCssPath(): String? {
         val file = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
         return if (file.exists() && file.length() > 0) file.absolutePath else null
+    }
+
+    /** Returns adPathPatterns from browser_rules.json as newline-separated string. */
+    fun getAdPathPatterns(): String {
+        return try {
+            val json = context.assets.open("browser_rules.json").bufferedReader().use { it.readText() }
+            // Simple extraction: find "adPathPatterns":[...] and parse the strings
+            val match = """"adPathPatterns"\s*:\s*\[(.*?)]""".toRegex(RegexOption.DOT_MATCHES_ALL)
+                .find(json)?.groupValues?.get(1) ?: return ""
+            """"(.*?)"""".toRegex().findAll(match)
+                .map { it.groupValues[1] }
+                .filter { it.isNotBlank() }
+                .joinToString("\n")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to read ad path patterns from browser_rules.json")
+            ""
+        }
     }
 
     private inline fun checkDomainAndParents(

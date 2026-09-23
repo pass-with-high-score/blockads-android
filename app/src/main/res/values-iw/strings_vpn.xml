@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">‏DNS פרטי פעיל</string>
     <string name="private_dns_warning_text">‏DNS פרטי של Android עוקף את BlockAds, ולכן הסינון עלול לא לחול. הגדירו את ה-DNS הפרטי לכבוי או אוטומטי בהגדרות המערכת.</string>
     <string name="status_paused">מושהה</string>
+    <string name="vpn_notification_action_retry">נסה שוב</string>
+    <string name="vpn_notification_no_internet_title">אין חיבור לאינטרנט</string>
+    <string name="vpn_notification_no_internet_text">ממתין לחיבור רשת...</string>
 </resources>

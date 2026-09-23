@@ -33,6 +33,8 @@ import app.pwhs.blockads.ui.dnsprovider.component.CategoryHeader
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsCard
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsDialog
 import app.pwhs.blockads.ui.dnsprovider.component.DnsProviderCard
+import app.pwhs.blockads.ui.dnsprovider.component.DnsProviderGroupCard
+import app.pwhs.blockads.ui.dnsprovider.component.DohBypassCard
 import app.pwhs.blockads.ui.dnsprovider.component.FallbackDnsCard
 import app.pwhs.blockads.ui.dnsprovider.component.FallbackDnsDialog
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -50,6 +52,7 @@ fun DnsProviderScreen(
     val customDnsDisplay by viewModel.customDnsDisplay.collectAsStateWithLifecycle()
     val upstreamDns by viewModel.upstreamDns.collectAsStateWithLifecycle()
     val fallbackDns by viewModel.fallbackDns.collectAsStateWithLifecycle()
+    val blockDohBypass by viewModel.blockDohBypass.collectAsStateWithLifecycle()
 
     var showCustomDialog by remember { mutableStateOf(false) }
     var showFallbackDialog by remember { mutableStateOf(false) }
@@ -92,11 +95,11 @@ fun DnsProviderScreen(
             item {
                 CategoryHeader(stringResource(R.string.dns_category_standard))
             }
-            items(DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.STANDARD }) { provider ->
-                DnsProviderCard(
-                    provider = provider,
-                    isSelected = provider.id == selectedProviderId,
-                    onClick = { viewModel.selectProvider(provider) }
+            item {
+                DnsProviderGroupCard(
+                    providers = DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.STANDARD },
+                    selectedProviderId = selectedProviderId,
+                    onSelectProvider = { viewModel.selectProvider(it) }
                 )
             }
 
@@ -105,11 +108,11 @@ fun DnsProviderScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 CategoryHeader(stringResource(R.string.dns_category_privacy))
             }
-            items(DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.PRIVACY }) { provider ->
-                DnsProviderCard(
-                    provider = provider,
-                    isSelected = provider.id == selectedProviderId,
-                    onClick = { viewModel.selectProvider(provider) }
+            item {
+                DnsProviderGroupCard(
+                    providers = DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.PRIVACY },
+                    selectedProviderId = selectedProviderId,
+                    onSelectProvider = { viewModel.selectProvider(it) }
                 )
             }
 
@@ -118,11 +121,11 @@ fun DnsProviderScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 CategoryHeader(stringResource(R.string.dns_category_family))
             }
-            items(DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.FAMILY }) { provider ->
-                DnsProviderCard(
-                    provider = provider,
-                    isSelected = provider.id == selectedProviderId,
-                    onClick = { viewModel.selectProvider(provider) }
+            item {
+                DnsProviderGroupCard(
+                    providers = DnsProviders.ALL_PROVIDERS.filter { it.category == DnsCategory.FAMILY },
+                    selectedProviderId = selectedProviderId,
+                    onSelectProvider = { viewModel.selectProvider(it) }
                 )
             }
 
@@ -151,10 +154,19 @@ fun DnsProviderScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            // Advanced DNS Security (DoH Leak Protection)
             item {
-                Spacer(modifier = Modifier.height(200.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                CategoryHeader(stringResource(R.string.dns_category_advanced_security))
             }
+            item {
+                DohBypassCard(
+                    enabled = blockDohBypass,
+                    onCheckedChange = { viewModel.setBlockDohBypass(it) }
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
 

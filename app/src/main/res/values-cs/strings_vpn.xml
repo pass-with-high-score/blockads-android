@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">Soukromé DNS je zapnuté</string>
     <string name="private_dns_warning_text">Soukromé DNS systému Android obchází BlockAds, takže filtrování nemusí fungovat. Nastavte soukromé DNS na Vypnuto nebo Automaticky v nastavení systému.</string>
     <string name="status_paused">Pozastaveno</string>
+    <string name="vpn_notification_action_retry">Opakovat</string>
+    <string name="vpn_notification_no_internet_title">Žádné připojení k internetu</string>
+    <string name="vpn_notification_no_internet_text">Čekání na síťové připojení...</string>
 </resources>

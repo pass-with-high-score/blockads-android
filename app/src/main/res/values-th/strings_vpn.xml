@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">เปิด DNS ส่วนตัวอยู่</string>
     <string name="private_dns_warning_text">DNS ส่วนตัวของ Android จะข้าม BlockAds การกรองจึงอาจไม่ทำงาน โปรดตั้งค่า DNS ส่วนตัวเป็นปิดหรืออัตโนมัติในการตั้งค่าระบบ</string>
     <string name="status_paused">หยุดชั่วคราว</string>
+    <string name="vpn_notification_action_retry">ลองอีกครั้ง</string>
+    <string name="vpn_notification_no_internet_title">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</string>
+    <string name="vpn_notification_no_internet_text">กำลังรอการเชื่อมต่อเครือข่าย...</string>
 </resources>

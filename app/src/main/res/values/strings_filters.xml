@@ -130,6 +130,8 @@
     <string name="https_filtering_cert_not_installed">Certificate not installed</string>
     <string name="https_filtering_cert_checking">Checking…</string>
     <string name="https_filtering_cert_vpn_required">Tap \&quot;Verify Certificate\&quot; to check</string>
+    <string name="https_filtering_root_install">Install to System Store (Root)</string>
+    <string name="https_filtering_root_install_desc">Device has root access (Magisk/KernelSU). Install directly to system store for automatic trusted filtering.</string>
     <string name="edit_custom_filter">Edit Custom Filter</string>
     <string name="filter_name">Filter Name</string>
     <string name="filter_url_domain">Filter URL/Domain</string>
@@ -146,4 +148,58 @@
     <string name="filter_compile_success_title">Filter compiled</string>
     <string name="filter_compile_failed_title">Filter compilation failed</string>
     <string name="filter_compile_channel_name">Filter Compilation</string>
+
+    <!-- HTTPS Wizard Strings -->
+    <string name="https_wizard_title">Certificate Setup</string>
+    <string name="https_wizard_step_indicator_format">Step %1$d of %2$d: %3$s</string>
+    <string name="https_wizard_overview_title">Overview &amp; Privacy</string>
+    <string name="https_wizard_overview_subtitle">Why BlockAds needs a local certificate</string>
+    <string name="https_wizard_security_title">Security &amp; Privacy</string>
+    <string name="https_wizard_security_desc">The Root CA certificate is generated locally on your device and never leaves your phone. BlockAds uses it strictly to remove cosmetic ads on websites. Sensitive services such as banking apps and Google accounts are never intercepted.</string>
+    <string name="https_wizard_explain_title">Why HTTPS Filtering?</string>
+    <string name="https_wizard_explain_desc">Most modern websites and ads use encrypted HTTPS connections. To hide visual ad placeholders, banners, and floating popups, BlockAds requires a local certificate to inspect and filter web pages safely on your device.</string>
+    <string name="https_wizard_benefits_title">Key Benefits</string>
+    <string name="https_wizard_benefit_1">Eliminate ads on video platforms &amp; news websites</string>
+    <string name="https_wizard_benefit_2">Hide blank placeholders, banners, and intrusive popups</string>
+    <string name="https_wizard_benefit_3">Execute Scriptlets to defeat anti-adblock mechanisms</string>
+    <string name="https_wizard_privacy_title">Strict Privacy Safeguards</string>
+    <string name="https_wizard_privacy_on_device_title" formatted="false">100% On-Device</string>
+    <string name="https_wizard_privacy_on_device_desc">Keys and certificate are generated locally on your phone and never transmitted anywhere.</string>
+    <string name="https_wizard_privacy_bypass_title">Bypasses Banking &amp; Financial Apps</string>
+    <string name="https_wizard_privacy_bypass_desc">Sensitive domains (banks, identification, Google) are directly forwarded and never decrypted.</string>
+    <string name="https_wizard_privacy_browser_title">Controlled Browser Scope</string>
+    <string name="https_wizard_privacy_browser_desc">You have full control over which browsers use HTTPS filtering, and can disable it anytime.</string>
+    <string name="https_wizard_cert_file_label">CA Certificate File</string>
+    <string name="https_wizard_cert_file_type">X.509 CA Certificate (.crt)</string>
+    <string name="https_wizard_cert_status_exported">Saved to Downloads</string>
+    <string name="https_wizard_cert_status_not_exported">Ready to save</string>
+    <string name="https_wizard_cert_save_note">The certificate file will be saved in your device\'s Downloads folder. You will install it in the next step.</string>
+    <string name="https_wizard_device_brand_format">Target Device: %1$s</string>
+    <string name="https_wizard_device_brand_generic">Your Android Device</string>
+    <string name="https_wizard_install_instructions_title">Step-by-step Guide</string>
+    <string name="https_wizard_install_instructions_desc">Follow these steps in your phone\'s Security Settings:</string>
+    <string name="https_wizard_root_detected_title">Root Access Detected (Recommended)</string>
+    <string name="https_wizard_root_detected_desc">Your device has root access. You can install the CA certificate automatically without manual configuration.</string>
+    <string name="https_wizard_checking_title">Verifying Certificate…</string>
+    <string name="https_wizard_checking_desc">Scanning the Android trust store for BlockAds CA…</string>
+    <string name="https_wizard_installed_desc">BlockAds Root CA is verified and active in your device\'s trust store. Advanced HTTPS filtering is ready to go!</string>
+    <string name="https_wizard_not_installed_title">Certificate Not Detected</string>
+    <string name="https_wizard_not_installed_desc">BlockAds has not found the certificate in your trust store yet. If you just finished installing it in Settings, tap below to check again.</string>
+    <string name="https_wizard_troubleshooting_title">Troubleshooting Tips</string>
+    <string name="https_wizard_troubleshooting_tip1">Make sure you selected \"CA Certificate\" in Settings (not User Certificate or VPN &amp; app user certificate).</string>
+    <string name="https_wizard_troubleshooting_tip2">If installing via Magisk/KernelSU module, a device reboot is required.</string>
+    <string name="https_wizard_troubleshooting_tip3">Check that the certificate file was downloaded correctly into your Downloads folder.</string>
+    <string name="https_wizard_retry_verify">Verify Again</string>
+    <string name="https_wizard_back_to_install">Back to Installation</string>
+    <string name="https_wizard_next">Continue</string>
+    <string name="https_wizard_prev">Back</string>
+    <string name="https_wizard_finish">Finish &amp; Enable</string>
+    <string name="https_wizard_root_title">Root Installation</string>
+    <string name="https_wizard_root_fast">Quick Install</string>
+    <string name="https_wizard_root_fast_desc">Installed directly into user cert store. Takes effect immediately without needing a reboot.</string>
+    <string name="https_wizard_root_module">Magisk Module</string>
+    <string name="https_wizard_root_module_desc">Creates a Magisk/KernelSU system module. Requires a device reboot to activate as a system CA.</string>
+    <string name="https_wizard_copy_filename">Copy filename</string>
+    <string name="https_wizard_filename_copied">Certificate filename copied to clipboard</string>
+    <string name="https_wizard_verified_success">Certificate is verified and ready to use!</string>
 </resources>

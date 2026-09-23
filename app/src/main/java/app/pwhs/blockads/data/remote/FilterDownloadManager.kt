@@ -28,10 +28,8 @@ class FilterDownloadManager(
     }
 
     /**
-     * Downloads the required filter files (.bloom, .trie, and optional .css).
-     * @param filter The FilterList to download.
-     * @param forceUpdate Forces re-download even if the file exists locally.
-     * @return Result containing the local paths to the downloaded files.
+     * Downloads the required filter files (.bloom, .trie, and optional .css / .scriptlets).
+     * Automatically handles .zip archives if downloadUrl is provided.
      */
     suspend fun downloadFilterList(
         filter: FilterList,
@@ -42,6 +40,39 @@ class FilterDownloadManager(
             val trieFile = File(filterDir, "${filter.id}.trie")
             val cssFile = File(filterDir, "${filter.id}.css")
             val scriptletFile = File(filterDir, "${filter.id}.scriptlets")
+
+            if (!forceUpdate && bloomFile.exists() && bloomFile.length() > 0 && trieFile.exists() && trieFile.length() > 0) {
+                Timber.d("Filter ${filter.id} already cached locally")
+                return@withContext Result.success(
+                    DownloadedFilterPaths(
+                        bloomPath = bloomFile.absolutePath,
+                        triePath = trieFile.absolutePath,
+                        cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                        scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+                    )
+                )
+            }
+
+            val zipUrl = when {
+                filter.url.contains(".zip") -> filter.url
+                filter.bloomUrl.contains(".bloom") -> filter.bloomUrl.replace(".bloom", ".zip")
+                filter.trieUrl.contains(".trie") -> filter.trieUrl.replace(".trie", ".zip")
+                else -> ""
+            }
+
+            if (zipUrl.isNotEmpty()) {
+                val zipSuccess = downloadAndExtractZip(zipUrl, bloomFile, trieFile, cssFile, scriptletFile)
+                if (zipSuccess && bloomFile.exists() && trieFile.exists()) {
+                    return@withContext Result.success(
+                        DownloadedFilterPaths(
+                            bloomPath = bloomFile.absolutePath,
+                            triePath = trieFile.absolutePath,
+                            cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                            scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+                        )
+                    )
+                }
+            }
 
             val bloomPath = if (filter.bloomUrl.isNotEmpty()) downloadFile(filter.bloomUrl, bloomFile, forceUpdate) else null
             val triePath = if (filter.trieUrl.isNotEmpty()) downloadFile(filter.trieUrl, trieFile, forceUpdate) else null
@@ -67,6 +98,61 @@ class FilterDownloadManager(
         }
     }
 
+    private suspend fun downloadAndExtractZip(
+        url: String,
+        bloomFile: File,
+        trieFile: File,
+        cssFile: File,
+        scriptletFile: File
+    ): Boolean = withContext(Dispatchers.IO) {
+        val tempZip = File(filterDir, "temp_${System.currentTimeMillis()}.zip")
+        try {
+            Timber.d("Downloading filter zip from $url")
+            val response = client.get(url)
+            if (response.status.value !in 200..299) {
+                Timber.e("HTTP ${response.status.value} downloading zip $url")
+                return@withContext false
+            }
+
+            val channel = response.bodyAsChannel()
+            FileOutputStream(tempZip).use { output ->
+                val buffer = ByteArray(16 * 1024)
+                var bytesRead: Int
+                while (channel.readAvailable(buffer).also { bytesRead = it } >= 0) {
+                    if (bytesRead > 0) output.write(buffer, 0, bytesRead)
+                }
+            }
+
+            java.util.zip.ZipFile(tempZip).use { zip ->
+                val entries = zip.entries()
+                while (entries.hasMoreElements()) {
+                    val entry = entries.nextElement()
+                    val targetFile = when {
+                        entry.name.endsWith(".bloom") -> bloomFile
+                        entry.name.endsWith(".trie") -> trieFile
+                        entry.name.endsWith(".css") -> cssFile
+                        entry.name.endsWith(".scriptlets") -> scriptletFile
+                        else -> null
+                    }
+                    targetFile?.let { out ->
+                        zip.getInputStream(entry).use { input ->
+                            FileOutputStream(out).use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                }
+            }
+            Timber.d("Successfully extracted zip for filter")
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to download and extract filter zip: $url")
+            false
+        } finally {
+            tempZip.delete()
+        }
+    }
+
     /**
      * Downloads a single file from the given URL and saves it to [destFile].
      * Uses a temporary file during download to prevent partial corruption.
@@ -85,6 +171,10 @@ class FilterDownloadManager(
         return try {
             Timber.d("Downloading from $url to ${destFile.name}")
             val response = client.get(url)
+            if (response.status.value !in 200..299) {
+                Timber.e("HTTP ${response.status.value} downloading $url")
+                return null
+            }
             val channel = response.bodyAsChannel()
 
             val tempFile = File(destFile.parent, "${destFile.name}.tmp")
@@ -126,8 +216,15 @@ class FilterDownloadManager(
         val cssBuilder = StringBuilder()
         try {
             file.forEachLine { line ->
-                val selector = line.trim()
-                if (selector.isNotEmpty()) {
+                var selector = line.trim()
+                if (selector.isEmpty() || selector.startsWith("!") || (selector.startsWith("#") && !selector.startsWith("##"))) {
+                    return@forEachLine
+                }
+                if (selector.startsWith("##")) {
+                    selector = selector.removePrefix("##").trim()
+                }
+                // Skip unhandled domain-specific rules (e.g. domain.com##...) or complex rules
+                if (selector.isNotEmpty() && !selector.contains("##")) {
                     cssBuilder.append(selector).append(" { display: none !important; }\n")
                 }
             }

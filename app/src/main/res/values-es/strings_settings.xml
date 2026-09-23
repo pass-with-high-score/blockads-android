@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">En pausa en red de confianza</string>
     <string name="trusted_networks_paused_text">BlockAds está en pausa en &quot;%1$s&quot; — se reanuda automáticamente al salir de esta red.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds está en pausa en una red Wi-Fi de confianza — se reanuda al salir.</string>
+    <string name="settings_navigation">Navegación</string>
+    <string name="milestone_sheet_title">¡Hito de protección alcanzado!</string>
+    <string name="milestone_sheet_subtitle">Has bloqueado con éxito %1$s anuncios y rastreadores con BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Datos ahorrados estimados</string>
+    <string name="milestone_sheet_time_saved">Tiempo ahorrado estimado</string>
+    <string name="milestone_sheet_action">¡Genial!</string>
+    <string name="dns_category_advanced_security">Seguridad DNS avanzada</string>
+    <string name="dns_block_doh_bypass_title">Bloquear evasión de DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">Evita que las aplicaciones y navegadores eludan el filtrado local mediante DoH/DoT cifrado</string>
+    <string name="dns_block_doh_bypass_notice">Nota: Si tu navegador (p. ej., Chrome) muestra un error de conexión (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), establece \"Usar DNS seguro\" en la configuración del navegador en \"Automático\".</string>
 </resources>

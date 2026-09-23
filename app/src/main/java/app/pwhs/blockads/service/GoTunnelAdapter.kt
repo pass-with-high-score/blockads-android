@@ -8,6 +8,7 @@ import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.utils.AppNameResolver
+import app.pwhs.blockads.utils.BlocklistInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -25,14 +26,6 @@ import java.net.InetSocketAddress
 
 /**
  * Bridge between Android VpnService and the Go DNS tunnel engine.
- *
- * Responsibilities:
- * - Pass TUN file descriptor to Go engine
- * - Implement [DomainChecker] so Go calls Kotlin's mmap'd Trie for blocking decisions
- * - Implement [FirewallChecker] so Go calls Kotlin's FirewallManager for per-app blocking
- * - Implement [SocketProtector] so Go can protect sockets from VPN routing loop
- * - Receive DNS log events from Go and write to Room DB
- * - Pass WireGuard config JSON to Go engine on startup (unified pipeline)
  */
 class GoTunnelAdapter(
     private val context: Context,
@@ -40,14 +33,7 @@ class GoTunnelAdapter(
     private val dnsLogDao: DnsLogDao,
     private val scope: CoroutineScope,
     private val appNameResolver: AppNameResolver,
-    /**
-     * Returns the current [FirewallManager] if firewall is enabled, or null if disabled.
-     * This is a lambda so it always reads the latest value from [AdBlockVpnService].
-     */
     private val firewallManagerProvider: () -> FirewallManager?,
-    /**
-     * Returns whether DNS logs should be recorded to the database.
-     */
     private val recordLogProvider: () -> Boolean,
 ) {
     private val engine = tunnel.Tunnel.newEngine()
@@ -105,44 +91,17 @@ class GoTunnelAdapter(
         engine.setUseTcpStack(enabled)
     }
 
-    /**
-     * Set up the domain checker (uses Kotlin's FilterListRepository).
-     */
     private fun setupDomainChecker() {
         engine.setDomainChecker(object : DomainChecker {
-            override fun isBlocked(domain: String): Boolean {
-                return filterRepo.isBlocked(domain)
-            }
-
-            override fun getBlockReason(domain: String): String {
-                return filterRepo.getBlockReason(domain)
-            }
-
-            override fun hasCustomRule(domain: String): Long {
-                return filterRepo.hasCustomRule(domain)
-            }
+            override fun isBlocked(domain: String): Boolean = filterRepo.isBlocked(domain)
+            override fun getBlockReason(domain: String): String = filterRepo.getBlockReason(domain)
+            override fun hasCustomRule(domain: String): Long = filterRepo.hasCustomRule(domain)
         })
     }
 
-    /**
-     * Set up the UID resolver used by the userspace TCP/IP stack
-     * (HTTPS filtering refactor, Phase B). For each terminated TCP/UDP
-     * flow the stack calls [resolveUID] with the 5-tuple and expects
-     * back the UID of the owning app, so downstream code can scope MITM
-     * decisions per-app.
-     *
-     * Uses the official [ConnectivityManager.getConnectionOwnerUid] API
-     * on Android 10+ (API 29+). On older devices the API is missing
-     * and /proc/net/{tcp,udp} is SELinux-blocked, so we return
-     * UIDUnknown (-1) and the stack treats the flow conservatively.
-     */
     private fun setupUidResolver() {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        if (cm == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            // No resolver available — stack will see UIDUnknown for every flow.
-            Timber.d("UID resolver unavailable (API<29 or no ConnectivityManager)")
-            return
-        }
+        if (cm == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
         engine.setUIDResolver(UIDResolver { protocol, localIP, localPort, remoteIP, remotePort ->
             try {
                 val proto = when (protocol.toInt()) {
@@ -154,20 +113,11 @@ class GoTunnelAdapter(
                 val remote = InetSocketAddress(InetAddress.getByName(remoteIP), remotePort.toInt())
                 cm.getConnectionOwnerUid(proto, local, remote).toLong()
             } catch (e: Exception) {
-                // Race against socket teardown or invalid input — return
-                // UIDUnknown so the stack can fall back gracefully.
                 -1L
             }
         })
     }
 
-    /**
-     * UID→package resolver for full-tunnel per-app attribution + connection
-     * logging. Takes only an int (no byte[]), so it's safe from Go's
-     * concurrent flow hot path (unlike [AppResolver], whose byte[] args
-     * panic under cgocheck). Returns the package name; the log callback maps
-     * it to a friendly label.
-     */
     private fun setupAppUidResolver() {
         engine.setAppUidResolver(tunnel.AppUidResolver { uid ->
             try {
@@ -235,6 +185,26 @@ class GoTunnelAdapter(
         engine.setConnLogEnabled(enabled)
     }
 
+    fun setBlockDohBypass(enabled: Boolean) {
+        try {
+            if (enabled) {
+                val loaded = BlocklistInfo.fromAsset(context, "blocklist_doh.txt")?.use { info ->
+                    engine.setDoHBlocklistFromFd(info.fd, info.startOffset, info.length)
+                    true
+                } ?: false
+                if (!loaded) {
+                    val list = context.assets.open("blocklist_doh.txt").bufferedReader().use { it.readText() }
+                    engine.setDoHBlocklist(list)
+                }
+            } else {
+                engine.setDoHBlocklist("")
+            }
+            Timber.d("DoH blocklist updated in Go engine (enabled=$enabled)")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to update DoH blocklist")
+        }
+    }
+
     /**
      * Set the DNS log callback.
      */
@@ -294,6 +264,7 @@ class GoTunnelAdapter(
         selectedBrowsers: Set<String> = emptySet(),
         certDir: String = "",
         filterHttp3: Boolean = false,
+        blockDohBypass: Boolean = false,
         socketProtector: ((Int) -> Boolean)? = null
     ) {
         if (isRunning) return
@@ -319,12 +290,9 @@ class GoTunnelAdapter(
         if (mitmMode) {
             try {
                 val pm = context.packageManager
-                val uids = selectedBrowsers.mapNotNull { pkg ->
-                    try {
-                        pm.getPackageUid(pkg, 0)
-                    } catch (e: Exception) {
-                        null
-                    }
+                val browsers = selectedBrowsers.ifEmpty { loadPresetBrowsers() }
+                val uids = browsers.mapNotNull { pkg ->
+                    runCatching { pm.getPackageUid(pkg, 0) }.getOrNull()
                 }.joinToString(",")
 
                 // Init CA + filter, register UIDs.
@@ -332,20 +300,21 @@ class GoTunnelAdapter(
                 engine.setMitmAllowedUIDs(uids)
                 engine.setFilterHttp3(filterHttp3)
 
-                // Load curated passthrough domains (banking, payment,
-                // gov, secure messaging, etc.) from assets so cert-
-                // pinned apps and security-critical traffic don't
-                // attempt MITM. Sourced from
-                // github.com/pass-with-high-score/HttpsExclusions.
                 try {
-                    val passthrough = context.assets.open("https_passthrough.txt")
-                        .bufferedReader().use { it.readText() }
-                    engine.setExtraPassthroughSuffixes(passthrough)
+                    val loaded = BlocklistInfo.fromAsset(context, "https_passthrough.txt")?.use { info ->
+                        engine.setExtraPassthroughSuffixesFromFd(info.fd, info.startOffset, info.length)
+                        true
+                    } ?: false
+                    if (!loaded) {
+                        val passthrough = context.assets.open("https_passthrough.txt")
+                            .bufferedReader().use { it.readText() }
+                        engine.setExtraPassthroughSuffixes(passthrough)
+                    }
                 } catch (e: Exception) {
                     Timber.w(e, "Failed to load https_passthrough.txt asset")
                 }
 
-                Timber.d("HTTPS filtering via userspace TCP/IP stack (browsers=${selectedBrowsers.size})")
+                Timber.d("HTTPS filtering via userspace TCP/IP stack (browsers=${browsers.size}, uids=$uids)")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to init stack MITM on VPN boot")
             }
@@ -357,6 +326,9 @@ class GoTunnelAdapter(
         setupLogCallback()
         setupUidResolver()
         setupAppUidResolver()
+
+        // Load DoH blacklist asset to prevent DNS-over-HTTPS bypass if enabled (Issue #145)
+        setBlockDohBypass(blockDohBypass)
 
         // Give Go the paths to the Mmap logs so it can read them natively for max speed
         updateTries()
@@ -469,36 +441,43 @@ class GoTunnelAdapter(
      */
     fun updateCosmeticRules() {
         try {
-            val cssPath = filterRepo.getCosmeticCssPath()
-            if (cssPath != null) {
-                val file = java.io.File(cssPath)
-                if (file.exists() && file.length() > 0) {
-                    val cssSnippet = file.readText()
-                    engine.setCosmeticCSS(cssSnippet)
-                    Timber.d("Sent ${cssSnippet.length} bytes of cosmetic CSS to Go engine")
-                } else {
-                    engine.setCosmeticCSS("")
-                }
-            } else {
-                engine.setCosmeticCSS("")
-            }
+            val css = TunnelRuleLoader.loadCosmeticCss(context)
+            engine.setCosmeticCSS(css)
+            Timber.d("Cosmetic CSS updated for engine: %d bytes", css.length)
         } catch (e: Exception) {
             Timber.e(e, "Failed to load cosmetic CSS for engine")
             engine.setCosmeticCSS("")
         }
 
         try {
+            val js = TunnelRuleLoader.loadScriptletsJs(context)
+            engine.setScriptletsRuntime(js)
+            Timber.d("Scriptlets runtime updated for engine: %d bytes", js.length)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to load scriptlets JS for engine")
+        }
+
+        try {
             val sp = filterRepo.getScriptletsPath()
-            if (sp != null) {
-                val text = java.io.File(sp).readText()
-                engine.setScriptletRules(text)
-                Timber.d("Sent ${text.length} bytes of scriptlet rules to Go engine")
+            if (sp != null && java.io.File(sp).exists()) {
+                engine.setScriptletRulesFromFile(sp)
             } else {
                 engine.setScriptletRules("")
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to load scriptlet rules for engine")
             engine.setScriptletRules("")
+        }
+
+        try {
+            val patterns = TunnelRuleLoader.loadAdPathPatterns(context)
+            engine.setAdPathPatterns(patterns)
+            if (patterns.isNotEmpty()) {
+                Timber.d("Ad path patterns loaded: ${patterns.lines().size} patterns")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to load ad path patterns for engine")
+            engine.setAdPathPatterns("")
         }
     }
 
@@ -509,16 +488,15 @@ class GoTunnelAdapter(
         return engine.stats
     }
 
+    private fun loadPresetBrowsers(): Set<String> = runCatching {
+        context.assets.open("preset/browsers.txt").bufferedReader().useLines { lines ->
+            lines.map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }.toSet()
+        }
+    }.getOrDefault(setOf("com.android.chrome", "org.mozilla.firefox", "com.brave.browser"))
+
     companion object {
-        /**
-         * Convert DNS query type number to human-readable string.
-         * DNS types defined in RFC 1035 & 3596.
-         */
         private fun dnsQueryTypeToString(type: Int): String = when (type) {
-            1 -> "A"
-            28 -> "AAAA"
-            5 -> "CNAME"
-            else -> "OTHER"
+            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; else -> "OTHER"
         }
     }
 }

@@ -28,9 +28,11 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/app-universal-release-unsigned.apk
-    rm:
-      - app/libs
     build:
+      # tunnel.aar is not committed; it is normally resolved from a GitHub
+      # Release. F-Droid builds it from tunnel/ below instead, and tells Gradle
+      # to consume that build rather than fetching or rebuilding it.
+      - echo "tunnel.source=prebuilt" >> ../gradle.properties
       - pushd $$go$$/src
       - ./make.bash
       - popd
@@ -42,10 +44,10 @@ Builds:
       - go version
       - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
       - gomobile init
-      - mkdir -p libs
+      - mkdir -p ../build/tunnel
       - cd ../tunnel
       - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
-        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../build/tunnel/tunnel.aar github.com/nqmgaming/blockads-tunnel
     ndk: r26b
 
 AllowedAPKSigningKeys: 229ea49584360b22a8c7e7e530cfb7e1103faa1b6ba5f32837691fb96fdcfe5a

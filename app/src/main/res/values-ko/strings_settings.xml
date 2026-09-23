@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">신뢰할 수 있는 네트워크에서 일시중지됨</string>
     <string name="trusted_networks_paused_text">&quot;%1$s&quot;에서 BlockAds가 일시중지되었습니다. 벗어나면 자동으로 재개됩니다.</string>
     <string name="trusted_networks_paused_text_generic">신뢰할 수 있는 Wi-Fi에서 BlockAds가 일시중지되었습니다. 벗어나면 재개됩니다.</string>
+    <string name="settings_navigation">탐색</string>
+    <string name="milestone_sheet_title">보호 마일스톤 달성!</string>
+    <string name="milestone_sheet_subtitle">BlockAds로 %1$s개의 광고와 트래커를 성공적으로 차단했습니다.</string>
+    <string name="milestone_sheet_data_saved">예상 절약 데이터</string>
+    <string name="milestone_sheet_time_saved">예상 절약 시간</string>
+    <string name="milestone_sheet_action">멋져요!</string>
+    <string name="dns_category_advanced_security">고급 DNS 보안</string>
+    <string name="dns_block_doh_bypass_title">DNS-over-HTTPS (DoH) 우회 차단</string>
+    <string name="dns_block_doh_bypass_desc">앱과 브라우저가 암호화된 DoH/DoT를 사용하여 로컬 필터링을 우회하지 못하도록 방지</string>
+    <string name="dns_block_doh_bypass_notice">참고: 브라우저(예: Chrome)에서 연결 오류(DNS_PROBE_FINISHED_BAD_SECURE_CONFIG)가 표시되는 경우 브라우저 설정에서 \"보안 DNS 사용\"을 \"자동\"으로 설정하세요.</string>
 </resources>

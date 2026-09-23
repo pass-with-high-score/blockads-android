@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">DNS Pribadi aktif</string>
     <string name="private_dns_warning_text">DNS Pribadi Android melewati BlockAds, sehingga pemfilteran mungkin tidak diterapkan. Setel DNS Pribadi ke Nonaktif atau Otomatis di setelan sistem.</string>
     <string name="status_paused">Dijeda</string>
+    <string name="vpn_notification_action_retry">Coba lagi</string>
+    <string name="vpn_notification_no_internet_title">Tidak ada koneksi internet</string>
+    <string name="vpn_notification_no_internet_text">Menunggu konektivitas jaringan...</string>
 </resources>

@@ -202,4 +202,14 @@ Veri toplama yok. İzleme yok.&quot;</string>
     <string name="trusted_networks_paused_title">Güvenilir ağda duraklatıldı</string>
     <string name="trusted_networks_paused_text">BlockAds &quot;%1$s&quot; ağında duraklatıldı — bu ağdan ayrıldığınızda otomatik olarak devam eder.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds güvenilir bir Wi-Fi ağında duraklatıldı — ayrıldığınızda devam eder.</string>
+    <string name="settings_navigation">Gezinme</string>
+    <string name="milestone_sheet_title">Koruma Kilometre Taşına Ulaşıldı!</string>
+    <string name="milestone_sheet_subtitle">BlockAds ile %1$s reklamı ve izleyiciyi başarıyla engellediniz.</string>
+    <string name="milestone_sheet_data_saved">Tahmini Tasarruf Edilen Veri</string>
+    <string name="milestone_sheet_time_saved">Tahmini Tasarruf Edilen Zaman</string>
+    <string name="milestone_sheet_action">Harika!</string>
+    <string name="dns_category_advanced_security">Gelişmiş DNS Güvenliği</string>
+    <string name="dns_block_doh_bypass_title">DNS-over-HTTPS (DoH) Atlamasını Engelle</string>
+    <string name="dns_block_doh_bypass_desc">Uygulamaların ve tarayıcıların şifreli DoH/DoT kullanarak yerel filtrelemeyi atlamasını önleyin</string>
+    <string name="dns_block_doh_bypass_notice">Not: Tarayıcınız (ör. Chrome) bir bağlantı hatası (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG) gösteriyorsa tarayıcı ayarlarından \"Güvenli DNS kullan\" seçeneğini \"Otomatik\" olarak ayarlayın.</string>
 </resources>

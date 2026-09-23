@@ -2,6 +2,12 @@ package app.pwhs.blockads.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -17,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,7 +42,12 @@ import app.pwhs.blockads.ui.customrules.CustomRulesScreen
 import app.pwhs.blockads.ui.data.AboutKey
 import app.pwhs.blockads.ui.data.AppManagementKey
 import app.pwhs.blockads.ui.data.AppearanceKey
+import app.pwhs.blockads.ui.browser.BrowserActivity
+import app.pwhs.blockads.ui.browser.BrowserScreen
+import app.pwhs.blockads.ui.browser.elementrules.ElementRulesScreen
 import app.pwhs.blockads.ui.data.BottomBarScreen
+import app.pwhs.blockads.ui.data.BrowserKey
+import app.pwhs.blockads.ui.data.ElementRulesKey
 import app.pwhs.blockads.ui.data.CustomRuleKey
 import app.pwhs.blockads.ui.data.DnsProviderKey
 import app.pwhs.blockads.ui.data.DomainRulesKey
@@ -44,6 +56,8 @@ import app.pwhs.blockads.ui.data.FilterKey
 import app.pwhs.blockads.ui.data.FireWallKey
 import app.pwhs.blockads.ui.data.HomeKey
 import app.pwhs.blockads.ui.data.HttpsFilteringKey
+import app.pwhs.blockads.ui.data.CertInstallationWizardKey
+import app.pwhs.blockads.ui.httpsfiltering.wizard.CertInstallationWizardScreen
 import app.pwhs.blockads.ui.data.LogsKey
 import app.pwhs.blockads.ui.data.ProfileKey
 import app.pwhs.blockads.ui.data.SettingsKey
@@ -74,6 +88,7 @@ fun HomeApp(
     onRequestVpnPermission: () -> Unit = {},
     onShowVpnConflictDialog: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val appPrefs: AppPreferences = koinInject()
     val showBottomNavLabels by appPrefs.showBottomNavLabels.collectAsStateWithLifecycle(
         initialValue = true,
@@ -109,9 +124,11 @@ fun HomeApp(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (!showBottomBar) return@Scaffold
             NavigationBar(
+                windowInsets = WindowInsets.navigationBars,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
@@ -157,7 +174,7 @@ fun HomeApp(
                 }
             }
         }
-    ) {
+    ) { innerPadding ->
         // When on a non-Home tab root, back should switch to Home tab instead of exiting
         BackHandler(enabled = currentTab != BottomBarScreen.Home && currentBackStack.size <= 1) {
             currentTab = BottomBarScreen.Home
@@ -169,6 +186,10 @@ fun HomeApp(
             onBack = {
                 safePop(currentBackStack)
             },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding())
+                .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding())),
             entryProvider = entryProvider {
                 entry<HomeKey> {
                     HomeScreen(
@@ -185,6 +206,9 @@ fun HomeApp(
                         onNavigateToProfileScreen = {
                             showBottomBar = false
                             homeStack.add(ProfileKey)
+                        },
+                        onNavigateToBrowser = { url ->
+                            context.startActivity(BrowserActivity.createIntent(context, url))
                         }
                     )
                 }
@@ -346,6 +370,34 @@ fun HomeApp(
                     HttpsFilteringScreen(
                         onNavigateBack = {
                             safePop(settingsStack)
+                        },
+                        onNavigateToWizard = {
+                            settingsStack.add(CertInstallationWizardKey)
+                        }
+                    )
+                }
+                entry<CertInstallationWizardKey> {
+                    CertInstallationWizardScreen(
+                        onNavigateBack = {
+                            safePop(settingsStack)
+                        }
+                    )
+                }
+                entry<BrowserKey> { key ->
+                    BrowserScreen(
+                        initialUrl = key.initialUrl,
+                        onCloseBrowser = {
+                            safePop(currentBackStack)
+                        },
+                        onNavigateToElementRules = {
+                            currentBackStack.add(ElementRulesKey)
+                        }
+                    )
+                }
+                entry<ElementRulesKey> {
+                    ElementRulesScreen(
+                        onNavigateBack = {
+                            safePop(currentBackStack)
                         }
                     )
                 }

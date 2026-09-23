@@ -417,7 +417,7 @@ fun LogsScreen(
                             onQuickWhitelist = { viewModel.addToWhitelist(entry.domain) }
                         )
                     }
-                    item { Spacer(modifier = Modifier.height(200.dp)) }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
             }
         }

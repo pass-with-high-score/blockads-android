@@ -68,6 +68,7 @@ func NewCertManager(certDir string) (*CertManager, error) {
 	if err := cm.initCA(certDir); err != nil {
 		return nil, err
 	}
+	SetLocalAssetCertManager(cm)
 	return cm, nil
 }
 

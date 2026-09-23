@@ -32,8 +32,8 @@ import (
 //     parsing the host server-side: the runtime fetch happens once
 //     per host, browser caches the response.
 const injectionTags = `<link rel="stylesheet" href="https://local.pwhs.app/cosmetic.css">` +
-	`<script src="https://local.pwhs.app/scriptlets.js" async></script>` +
-	`<script>(function(){var s=document.createElement('script');s.async=true;` +
+	`<script src="https://local.pwhs.app/scriptlets.js"></script>` +
+	`<script>(function(){var s=document.createElement('script');` +
 	`s.src='https://local.pwhs.app/sl-'+encodeURIComponent(location.hostname)+'.js';` +
 	`(document.head||document.documentElement).appendChild(s);})();</script>`
 
@@ -116,25 +116,24 @@ func (r *injectingReader) Read(p []byte) (int, error) {
 		copy(data, p[:n])
 	}
 
-	// Check scan limit — stop trying to inject after 16KB
-	r.scannedBytes += len(data)
-	if r.scannedBytes > scanLimit {
-		r.injected = true
-		nn := copy(p, data)
-		if nn < len(data) {
-			r.pending = data[nn:]
-		}
-		if err == io.EOF && len(r.pending) > 0 {
-			return nn, nil
-		}
-		return nn, err
-	}
-
-	// Search for <head in the data (case-insensitive)
+	// Search for <head in the data first (case-insensitive)
 	lower := bytes.ToLower(data)
 	idx := bytes.Index(lower, headTagBytes) // finds "<head"
 
 	if idx < 0 {
+		// Check scan limit — stop trying to inject after 16KB if <head not found
+		r.scannedBytes += len(data)
+		if r.scannedBytes > scanLimit {
+			r.injected = true
+			nn := copy(p, data)
+			if nn < len(data) {
+				r.pending = data[nn:]
+			}
+			if err == io.EOF && len(r.pending) > 0 {
+				return nn, nil
+			}
+			return nn, err
+		}
 		// No match found. However, the end of data might contain a partial
 		// match (e.g., "<he" could be the start of "<head>").
 		// Carry the last len(headTagBytes)-1 bytes to the next read.
@@ -208,6 +207,7 @@ func (r *injectingReader) Read(p []byte) (int, error) {
 // doInject splices the lightweight asset tags into the data buffer right at tagEnd.
 func (r *injectingReader) doInject(p []byte, data []byte, tagEnd int, upstreamErr error) (int, error) {
 	r.injected = true
+	logf("[MITM Inject] Injected cosmetic & scriptlet tags into HTML")
 
 	script := []byte(injectionTags)
 

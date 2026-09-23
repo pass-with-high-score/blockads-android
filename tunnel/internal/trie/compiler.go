@@ -2,6 +2,7 @@ package trie
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -27,7 +28,14 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 	scanner := bufio.NewScanner(f)
 	scanner.Buffer(make([]byte, 256*1024), 256*1024)
 	for scanner.Scan() {
-		d := parseDomainLine(scanner.Text())
+		lineBytes := bytes.TrimSpace(scanner.Bytes())
+		if len(lineBytes) == 0 || lineBytes[0] == '#' || lineBytes[0] == '!' {
+			continue
+		}
+		if bytes.HasPrefix(lineBytes, []byte("@@")) {
+			continue
+		}
+		d := parseDomainLine(string(lineBytes))
 		if d != "" {
 			domains[d] = struct{}{}
 		}

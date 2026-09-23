@@ -77,11 +77,26 @@ func NewMitmTcpHandler(
 		// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
 		// system's Private DNS resolver probes DoT against our fake DNS
 		// server (10.0.0.1 / fd00::1), which isn't a real host — the dial
+		// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
+		// system's Private DNS resolver probes DoT against our fake DNS
+		// server (100.64.100.1 / fd00::1), which isn't a real host — the dial
 		// would hang for flowDialTimeout (10s) and stall all DNS. Close
 		// immediately so Android falls back to plaintext DNS on port 53,
 		// which the engine intercepts and filters. Mirrors the fake-DNS /
 		// force-port-53 approach already used in WireGuard mode.
 		if flow.serverPort == 853 {
+			return
+		}
+
+		// Never attempt to dial our virtual TUN DNS IPs on non-DNS ports
+		if flow.serverIP.String() == "100.64.100.1" || flow.serverIP.String() == "fd00::1" {
+			return
+		}
+
+		// Gate -1.5 — Hardcoded DoH Direct-IP (port 443). If DoH/DoT blocking is enabled
+		// and an app tries to connect directly to known public DoH server IPs,
+		// close immediately so it falls back to system DNS on port 53.
+		if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 443 && IsKnownPublicDoHIP(flow.serverIP) {
 			return
 		}
 
@@ -99,16 +114,7 @@ func NewMitmTcpHandler(
 			return
 		}
 
-		// Gate 2 — browser allowlist (UID). When Kotlin has configured
-		// an allowlist, non-allowed UIDs get passthrough. If UID is
-		// unknown (API < 29, resolver failure), err on the safe side:
-		// passthrough rather than MITM an unknown app.
-		if filter.HasAllowedUIDs() && (uid == UIDUnknown || !filter.IsUIDAllowed(uid)) {
-			relayDirectFromFlow(conn, flow, blocker, protectFn)
-			return
-		}
-
-		// Gate 3 — peek first bytes to classify and extract SNI / Host.
+		// Gate 2 — peek first bytes to classify and extract SNI / Host.
 		peeked, peekedReader, err := peekFlow(conn, peekSize, peekTimeout)
 		if err != nil || len(peeked) == 0 {
 			return
@@ -133,18 +139,8 @@ func NewMitmTcpHandler(
 		}
 		hostname = strings.ToLower(strings.TrimSpace(hostname))
 
-		// Gate 4 — ad-block blocker.
-		if blocker != nil && blocker.IsDomainBlocked(hostname) {
-			return
-		}
-
-		// Gate 5 — sensitive / cert-pinned domain.
-		if !filter.IsInterceptionAllowed(hostname) {
-			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
-			return
-		}
-
-		// Gate 6 — local asset server.
+		// Gate 3 — local asset server (local.pwhs.app).
+		// Always intercepted and served locally from memory regardless of UID allowlist.
 		if IsLocalAssetHost(hostname) {
 			if classification == classTLS {
 				serveLocalAssetTLS(conn, peekedReader, certMgr, hostname)
@@ -154,11 +150,33 @@ func NewMitmTcpHandler(
 			return
 		}
 
+		// Gate 4 — ad-block blocker (by SNI / Host).
+		// Must run BEFORE browser UID allowlist check so ad/tracker domains
+		// are blocked for ALL apps (both browsers and non-browsers like SayDuo).
+		if blocker != nil && blocker.IsDomainBlocked(hostname) {
+			return
+		}
+
+		// Gate 5 — browser allowlist (UID). When Kotlin has configured
+		// an allowlist, non-allowed UIDs get passthrough (no MITM decryption / cosmetic injection).
+		// If UID is unknown (API < 29, resolver failure), err on the safe side:
+		// passthrough rather than MITM an unknown app.
+		if filter.HasAllowedUIDs() && (uid == UIDUnknown || !filter.IsUIDAllowed(uid)) {
+			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
+			return
+		}
+
+		// Gate 6 — sensitive / cert-pinned domain.
+		if !filter.IsInterceptionAllowed(hostname) {
+			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
+			return
+		}
+
 		// Gate 7 — MITM.
 		if classification == classTLS {
 			mitmTLSFlow(conn, peekedReader, certMgr, filter, blocker, hostname, flow, protectFn)
 		} else {
-			mitmHTTPFlow(conn, peekedReader, blocker, hostname, flow, protectFn)
+			mitmHTTPFlow(conn, peekedReader, filter, blocker, hostname, flow, protectFn)
 		}
 	}
 }
@@ -168,9 +186,14 @@ func NewMitmTcpHandler(
 func NewMitmUdpHandler(filter *MitmFilter, uidr UIDResolver, baseRelay UdpFlowHandler) UdpFlowHandler {
 	return func(conn adapter.UDPConn) {
 		flow := udpFlowID(conn)
-		if flow.serverPort == 443 && filter != nil && filter.HasAllowedUIDs() {
-			uid := resolveFlowUID(uidr, ProtocolUDP, flow)
-			if uid != UIDUnknown && filter.IsUIDAllowed(uid) {
+		if flow.serverPort == 443 {
+			if filter != nil && filter.HasAllowedUIDs() {
+				uid := resolveFlowUID(uidr, ProtocolUDP, flow)
+				if uid == UIDUnknown || filter.IsUIDAllowed(uid) {
+					_ = conn.Close()
+					return
+				}
+			} else {
 				_ = conn.Close()
 				return
 			}

@@ -1,4 +1,4 @@
-name: Auto-Build Go Tunnel
+name: Publish Go Tunnel
 
 on:
   push:
@@ -7,10 +7,13 @@ on:
     paths:
       - 'tunnel/**'
       - '.github/workflows/update_tunnel.yml'
-  workflow_dispatch: # Cho phép click tự chạy bằng tay trên Github
+  workflow_dispatch: # Can also be run by hand from the Actions tab.
 
+# Builds tunnel.aar reproducibly, publishes it as a GitHub Release asset, then
+# opens a PR bumping the pinned version and checksum. The aar itself is never
+# committed — see docs/TUNNEL.md.
 jobs:
-  build-and-commit:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,16 +23,64 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Dùng token mặc định. Commit sinh ra từ token này sẽ KHÔNG vô tình
-          # kích hoạt các workflow khác (tránh trường hợp loop vô tận).
+          # The default token on purpose: commits it creates do NOT trigger other
+          # workflows, which is what keeps this from looping on its own PR.
           token: ${{ secrets.GITHUB_TOKEN }}
+          # This job installs and runs gomobile, so don't leave a write-capable
+          # token in .git/config for it to read. The gh steps take GH_TOKEN
+          # explicitly, and create-pull-request configures its own credential
+          # from its token input.
+          persist-credentials: false
+
+      - name: Compute tunnel version
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Content-addressed: the git tree hash of tunnel/ changes if and only if
+          # the tunnel source changes, so rebuilding unchanged source is a no-op.
+          # tunnel/ holds Go source only: the pin lives in gradle/ so that
+          # publishing a new checksum neither changes this hash nor re-triggers
+          # this workflow through the tunnel/** path filter.
+          TREE=$(git rev-parse HEAD:tunnel | cut -c1-8)
+          CURRENT=$(sed -n 's/^tunnel = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
+
+          # A release is identified by the source it was built from, not by the day
+          # it was cut, so look one up by tree hash rather than deriving a fresh
+          # dated tag. Deriving one would make a second dispatch on the same day
+          # recompute an identical tag, which `gh release create` then rejects.
+          EXISTING=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name' \
+            | grep -E "^tunnel-[0-9]{4}\.[0-9]{2}\.[0-9]{2}\.${TREE}$" | head -1 || true)
+
+          if [ -n "$EXISTING" ]; then
+            # This source is already published: never cut a second release for it,
+            # and never replace the assets of one that exists.
+            VERSION=${EXISTING#tunnel-}
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            if [ "$CURRENT" = "$VERSION" ]; then
+              echo "$EXISTING is published and already pinned — nothing to do."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$EXISTING is already published; bumping the pin to it without rebuilding."
+              echo "skip=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            VERSION=$(date -u +%Y.%m.%d).$TREE
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Set up Go
+        if: steps.version.outputs.publish == 'true'
         uses: actions/setup-go@v5
         with:
           go-version: '1.23.5'
 
       - name: Build tunnel.aar natively
+        if: steps.version.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           # Install NDK r26b using sdkmanager
           mkdir -p $ANDROID_HOME/cmdline-tools
@@ -41,24 +92,63 @@ jobs:
           export GOFLAGS='-buildvcs=false'
           go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
           gomobile init
-          
-          mkdir -p app/libs
+
+          mkdir -p dist
           cd tunnel
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
+          # gomobile also emits tunnel-$VERSION-sources.jar next to the aar.
           gomobile bind -target=android -androidapi 24 -trimpath \
             -ldflags='-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384' \
-            -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+            -o "../dist/tunnel-$VERSION.aar" github.com/nqmgaming/blockads-tunnel
+
+      - name: Fetch the published tunnel.aar
+        if: steps.version.outputs.skip == 'false' && steps.version.outputs.publish == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Reusing an existing release, so pin against what is actually published
+          # rather than against a local rebuild that is merely expected to match.
+          mkdir -p dist
+          gh release download "tunnel-$VERSION" --pattern '*.aar' \
+            --output "dist/tunnel-$VERSION.aar" --clobber
+
+      - name: Pin version and checksum
+        if: steps.version.outputs.skip == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          sha256sum "dist/tunnel-$VERSION.aar" | awk '{print $1}' > gradle/tunnel.aar.sha256
+          sed -i "s/^tunnel = \".*\"$/tunnel = \"$VERSION\"/" gradle/libs.versions.toml
+          echo "tunnel $VERSION  sha256 $(cat gradle/tunnel.aar.sha256)"
+
+      - name: Publish release
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Published before the PR so CI on the PR can resolve the new version.
+          gh release create "tunnel-$VERSION" \
+            --title "Go tunnel $VERSION" \
+            --notes "Reproducible \`tunnel.aar\` built from \`tunnel/\` at ${GITHUB_SHA}.
+
+          sha256: \`$(cat gradle/tunnel.aar.sha256)\`
+
+          Consumed as \`app.pwhs:tunnel:$VERSION\`; see docs/TUNNEL.md." \
+            "dist/tunnel-$VERSION.aar" \
+            "dist/tunnel-$VERSION-sources.jar"
 
       - name: Create Pull Request
+        if: steps.version.outputs.skip == 'false'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: auto-update reproducible tunnel.aar from CI"
-          title: "🤖 Auto-update Reproducible tunnel.aar"
-          body: "Bản cập nhật tự động cho thư viện `tunnel.aar` được biên dịch chuẩn môi trường Linux/Ubuntu (cho Reproducible Builds)."
+          commit-message: "chore(tunnel): publish tunnel ${{ steps.version.outputs.version }}"
+          title: "🤖 Bump Go tunnel to ${{ steps.version.outputs.version }}"
+          body: "Automated `tunnel.aar` update (reproducible build). The artifact is already published as release `tunnel-${{ steps.version.outputs.version }}`; this PR only bumps the version pin and its checksum."
           branch: "auto-update-tunnel"
           base: "main"
           add-paths: |
-            app/libs/tunnel.aar
-            app/libs/tunnel-sources.jar
-
+            gradle/libs.versions.toml
+            gradle/tunnel.aar.sha256

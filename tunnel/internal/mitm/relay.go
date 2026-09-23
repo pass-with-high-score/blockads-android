@@ -119,7 +119,7 @@ func mitmTLSFlow(
 	}
 	defer clientTLS.Close()
 
-	relayHTTPFlow(clientTLS, serverConn, hostname, blocker)
+	relayHTTPFlow(clientTLS, serverConn, hostname, filter, blocker)
 }
 
 // mitmHTTPFlow handles plaintext HTTP (port 80) flows. Same gates
@@ -127,6 +127,7 @@ func mitmTLSFlow(
 func mitmHTTPFlow(
 	clientConn net.Conn,
 	clientReader io.Reader,
+	filter *MitmFilter,
 	blocker adBlockChecker,
 	hostname string,
 	flow flowID,
@@ -138,13 +139,13 @@ func mitmHTTPFlow(
 	}
 	defer serverConn.Close()
 
-	relayHTTPFlow(&peekReplayConn{Conn: clientConn, r: clientReader}, serverConn, hostname, blocker)
+	relayHTTPFlow(&peekReplayConn{Conn: clientConn, r: clientReader}, serverConn, hostname, filter, blocker)
 }
 
 // relayHTTPFlow reads HTTP requests from the client connection, forwards to
 // the server, decompresses and injects into HTML responses, and supports
 // local.pwhs.app sub-requests inside the same session.
-func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, blocker adBlockChecker) {
+func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *MitmFilter, blocker adBlockChecker) {
 	cr := bufio.NewReader(clientConn)
 	sr := bufio.NewReader(serverConn)
 
@@ -170,10 +171,12 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, blocker adB
 
 		if blocker != nil && reqHost != hostname && blocker.IsDomainBlocked(reqHost) {
 			blockedResp := &http.Response{
-				StatusCode: 403,
-				ProtoMajor: 1, ProtoMinor: 1,
-				Header: make(http.Header),
-				Body:   io.NopCloser(strings.NewReader("Blocked by BlockAds")),
+				StatusCode:    403,
+				ProtoMajor:    1,
+				ProtoMinor:    1,
+				ContentLength: 19,
+				Header:        make(http.Header),
+				Body:          io.NopCloser(strings.NewReader("Blocked by BlockAds")),
 			}
 			blockedResp.Header.Set("Connection", "keep-alive")
 			blockedResp.Header.Set("Content-Length", "19")
@@ -181,9 +184,42 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, blocker adB
 			continue
 		}
 
+		// Block ad path patterns (e.g. /pagead, /ads.js). Return 204 instead
+		// of 403 so browsers don't show broken-image or error indicators.
+		// For JSON endpoints (e.g. /ad_break, /get_midroll_info), return 200 with "{}"
+		// so JSON clients don't fail with JSON syntax errors or stall on black screen.
+		if filter != nil && filter.IsAdPathBlocked(req.URL.Path) {
+			if strings.Contains(req.URL.Path, "/ad_break") || strings.Contains(req.URL.Path, "/get_midroll_info") || strings.HasSuffix(req.URL.Path, ".json") {
+				jsonResp := &http.Response{
+					StatusCode: 200,
+					ProtoMajor: 1, ProtoMinor: 1,
+					Header:     make(http.Header),
+					Body:       io.NopCloser(strings.NewReader("{}")),
+				}
+				jsonResp.Header.Set("Content-Type", "application/json; charset=utf-8")
+				jsonResp.Header.Set("Content-Length", "2")
+				jsonResp.Header.Set("Connection", "keep-alive")
+				jsonResp.Write(clientConn)
+				continue
+			}
+			noContentResp := &http.Response{
+				StatusCode: 204,
+				ProtoMajor: 1, ProtoMinor: 1,
+				Header:     make(http.Header),
+				Body:       io.NopCloser(strings.NewReader("")),
+			}
+			noContentResp.Header.Set("Connection", "keep-alive")
+			noContentResp.Write(clientConn)
+			continue
+		}
+
 		if requestAcceptsHTML(req) {
 			req.Header.Del("Accept-Encoding")
+		} else if ae := req.Header.Get("Accept-Encoding"); ae != "" {
+			req.Header.Set("Accept-Encoding", "gzip, deflate")
 		}
+
+		SanitizeRequest(req, hostname)
 
 		if err := req.Write(serverConn); err != nil {
 			return

@@ -39,6 +39,12 @@ type MitmFilter struct {
 	// match works the same way as the hardcoded list.
 	extraPassthroughSuffixes []string
 
+	// adPathPatterns is a list of URL path prefixes/substrings from
+	// browser_rules.json (adPathPatterns). Any request whose URL path
+	// matches one of these is blocked with 204 No Content so the browser
+	// never receives ad payload but also never shows a broken-image icon.
+	adPathPatterns []string
+
 	// blacklistPath, when non-empty, is the file the auto-blacklist is
 	// persisted to (one domain per line). Persisting matters: a
 	// cert-pinned or EV domain is discovered by a failed/skip probe, and
@@ -82,7 +88,6 @@ var minimalPassthroughSuffixes = []string{
 	".googleapis.com",
 	".gstatic.com",
 	".android.com",
-	".youtube.com",
 	".googlevideo.com",
 	".googleusercontent.com",
 	// Apple
@@ -152,6 +157,38 @@ func (f *MitmFilter) HasAllowedUIDs() bool {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	return len(f.allowedUIDs) > 0
+}
+
+// SetAdPathPatterns replaces the list of URL path patterns to block.
+// Patterns are matched as substrings against the request path (case-insensitive).
+// Pass nil or an empty slice to clear. Called from Kotlin with patterns
+// parsed from browser_rules.json → adPathPatterns.
+func (f *MitmFilter) SetAdPathPatterns(patterns []string) {
+	clean := make([]string, 0, len(patterns))
+	for _, p := range patterns {
+		p = strings.ToLower(strings.TrimSpace(p))
+		if p != "" {
+			clean = append(clean, p)
+		}
+	}
+	f.mu.Lock()
+	f.adPathPatterns = clean
+	f.mu.Unlock()
+	logf("MITM Filter: loaded %d ad path patterns", len(clean))
+}
+
+// IsAdPathBlocked returns true if the given URL path matches any ad path pattern.
+func (f *MitmFilter) IsAdPathBlocked(urlPath string) bool {
+	urlPath = strings.ToLower(urlPath)
+	f.mu.RLock()
+	patterns := f.adPathPatterns
+	f.mu.RUnlock()
+	for _, p := range patterns {
+		if strings.Contains(urlPath, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // SetExtraPassthroughSuffixes replaces the runtime-loaded passthrough

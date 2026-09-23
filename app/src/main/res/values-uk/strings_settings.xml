@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">Призупинено в довіреній мережі</string>
     <string name="trusted_networks_paused_text">BlockAds призупинено в «%1$s» — відновиться автоматично, коли ви залишите мережу.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds призупинено в довіреній мережі Wi-Fi — відновиться, коли ви вийдете.</string>
+    <string name="settings_navigation">Навігація</string>
+    <string name="milestone_sheet_title">Досягнуто новий рубіж захисту!</string>
+    <string name="milestone_sheet_subtitle">Ви успішно заблокували %1$s реклами та трекерів за допомогою BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Орієнтовно зекономлено трафіку</string>
+    <string name="milestone_sheet_time_saved">Орієнтовно зекономлено часу</string>
+    <string name="milestone_sheet_action">Чудово!</string>
+    <string name="dns_category_advanced_security">Розширена безпека DNS</string>
+    <string name="dns_block_doh_bypass_title">Блокувати обхід через DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">Запобігає обходу локальної фільтрації додатками та браузерами через зашифрований DoH/DoT</string>
+    <string name="dns_block_doh_bypass_notice">Примітка: Якщо ваш браузер (наприклад, Chrome) показує помилку підключення (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), установіть перемикач «Використовувати безпечний DNS» у налаштуваннях браузера в режим «Автоматично».</string>
 </resources>

@@ -312,6 +312,50 @@ func (e *Engine) SetCosmeticCSS(css string) {
 	SetCosmeticCSS(css)
 }
 
+// SetScriptletsRuntime sets the custom scriptlets JS (from browser_rules.json)
+// to be served at https://local.pwhs.app/scriptlets.js alongside Go's built-in runtime.
+func (e *Engine) SetScriptletsRuntime(js string) {
+	if js == "" {
+		SetScriptletsRuntime(scriptletRuntimeJS)
+		return
+	}
+	combined := scriptletRuntimeJS + "\n;\n" + js
+	SetScriptletsRuntime(combined)
+	logf("Scriptlets runtime updated: %d bytes (custom JS: %d bytes)", len(combined), len(js))
+}
+
+// SetAdPathPatterns loads URL path patterns that will be blocked (returning
+// 204 No Content) when intercepted by the HTTPS MITM proxy. Patterns are
+// matched as case-insensitive substrings of the request path so simple
+// prefixes like "/pagead" or filename patterns like "/ads.js" both work.
+//
+// patternsCsv: newline-separated list, e.g. "/pagead\n/ads.js\n/doubleclick/"
+// Blank lines and lines starting with # are ignored. Pass an empty string
+// to clear all patterns.
+//
+// Kotlin usage:
+//
+//	val patterns = browserRuleRepo.getAdPathPatterns().joinToString("\n")
+//	engine.setAdPathPatterns(patterns)
+func (e *Engine) SetAdPathPatterns(patternsCsv string) {
+	e.mu.Lock()
+	filter := e.stackMitmFilter
+	e.mu.Unlock()
+	if filter == nil {
+		logf("SetAdPathPatterns: stack MITM not active")
+		return
+	}
+	var patterns []string
+	for _, line := range strings.Split(patternsCsv, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		patterns = append(patterns, line)
+	}
+	filter.SetAdPathPatterns(patterns)
+}
+
 // ── AdBlockChecker implementation ────────────────────────────────────────────
 // IsDomainBlocked satisfies the AdBlockChecker interface used by the MITM
 // proxy.  It replicates the exact same blocking pipeline used for DNS queries:
@@ -320,6 +364,10 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 	host = strings.ToLower(strings.TrimSpace(host))
 	if host == "" {
 		return false
+	}
+
+	if e.isDoHDomain(host) {
+		return true
 	}
 
 	// ── Custom rule allow/block override ──

@@ -87,39 +87,37 @@ improve the app.
 * [Android Studio](https://developer.android.com/studio) Ladybug or newer
 * JDK 17 or higher
 * Android SDK 36 (min SDK 24)
-* [Go](https://go.dev/doc/install) 1.21 or higher
-* [gomobile](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)
+* *(Optional - only needed if modifying Go tunnel)* [Go](https://go.dev/doc/install) 1.23+ and [gomobile](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)
 
 ### Steps
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/pass-with-high-score/blockads-android.git 
-   cd blockads-android 
-   ```
 
-2. Initialize gomobile (one-time setup):
-   ```bash
-   go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20240404231514-09dbf07665ed
-   export PATH=$PATH:$(go env GOPATH)/bin
-   gomobile init
-   ```
+   > [!TIP]
+   > Historical versions of the Go binary (`tunnel.aar`) were committed in the past before being moved to GitHub Releases. To avoid downloading ~1.2GB of old binaries, **use blobless clone** to download only ~20MB:
+   > ```bash
+   > git clone --filter=blob:limit=1m https://github.com/pass-with-high-score/blockads-android.git
+   > cd blockads-android
+   > ```
+   > Or for a shallow clone (latest commit only):
+   > ```bash
+   > git clone --depth=1 https://github.com/pass-with-high-score/blockads-android.git
+   > cd blockads-android
+   > ```
 
-3. **(Optional)** Build the Go tunnel AAR/JAR (with Android 15 16KB page size support):
+2. **(Optional)** Build the Go tunnel AAR/JAR from source (with Android 15 16KB page size support):
    ```bash
    ./scripts/build_tunnel.sh
+   # Or
+   ./gradlew -Ptunnel.source=local buildGoTunnel
    ```
-   Or
-    ```
-   ./gradlew buildGoTunnel
-   ```
-   *Note: A pre-built version is already included in `app/libs/`.*
+   *Note: This is completely optional. Gradle automatically resolves a prebuilt, checksum-pinned `tunnel.aar` from GitHub Releases by default. You do not need Go or NDK unless you are modifying Go code in `tunnel/`. See [docs/TUNNEL.md](docs/TUNNEL.md).*
 
-4. Open the project in Android Studio
+3. Open the project in Android Studio
 
-5. Sync Gradle and run the app on a device or emulator
+4. Sync Gradle and run the app on a device or emulator
 
-6. Build from command line:
+5. Build from command line:
    ```bash
    ./gradlew assembleDebug
    ./gradlew bundleRelease   # requires signing key

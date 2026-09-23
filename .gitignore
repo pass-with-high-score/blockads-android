@@ -29,6 +29,12 @@ keystore.txt
 play-store-key.json
 .kotlin
 
+# Prebuilt Go tunnel. Resolved from GitHub Releases as app.pwhs:tunnel, or built
+# into build/tunnel/ by ./gradlew -Ptunnel.source=local. Never commit the aar:
+# it is ~19MB of non-deltifiable binary per revision.
+app/libs/
+blockadstv/libs/
+
 # Bundled filter lists – committed to repo for reproducible builds
 # Run ./scripts/bundle_filters.sh before tagging a release to update
 
@@ -38,3 +44,5 @@ sentry.properties
 .ruby-lsp
 adguard.apk
 adguard
+.claude/
+.playwright-mcp/

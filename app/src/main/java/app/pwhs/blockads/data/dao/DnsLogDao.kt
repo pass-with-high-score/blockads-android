@@ -78,6 +78,9 @@ interface DnsLogDao {
     @Query("DELETE FROM dns_logs")
     suspend fun clearAll()
 
+    @Query("DELETE FROM dns_logs WHERE timestamp < :beforeTimestamp")
+    suspend fun deleteLogsOlderThan(beforeTimestamp: Long): Int
+
     @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 ORDER BY timestamp DESC LIMIT :limit")
     fun getRecentBlocked(limit: Int = 5): Flow<List<DnsLogEntry>>
 
