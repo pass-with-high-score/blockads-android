@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">מושהה ברשת מהימנה</string>
     <string name="trusted_networks_paused_text">‏BlockAds מושהה ב-&quot;%1$s&quot; — יחזור אוטומטית כשתעזבו את הרשת.</string>
     <string name="trusted_networks_paused_text_generic">‏BlockAds מושהה ברשת Wi-Fi מהימנה — יחזור כשתעזבו.</string>
+    <string name="settings_navigation">ניווט</string>
+    <string name="milestone_sheet_title">הגעת לאבן דרך בהגנה!</string>
+    <string name="milestone_sheet_subtitle">חסמת בהצלחה %1$s מודעות ומעקבים באמצעות BlockAds.</string>
+    <string name="milestone_sheet_data_saved">נתונים משוערים שנחסכו</string>
+    <string name="milestone_sheet_time_saved">זמן משוער שנחסך</string>
+    <string name="milestone_sheet_action">מעולה!</string>
+    <string name="dns_category_advanced_security">אבטחת DNS מתקדמת</string>
+    <string name="dns_block_doh_bypass_title">חסום עקיפת DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">מנע מאפליקציות ודפדפנים לעקוף סינון מקומי באמצעות DoH/DoT מוצפן</string>
+    <string name="dns_block_doh_bypass_notice">הערה: אם הדפדפן שלך (למשל Chrome) מציג שגיאת חיבור (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), הגדר את \"השתמש ב-DNS מאובטח\" בהגדרות הדפדפן ל-\"אוטומטי\".</string>
 </resources>

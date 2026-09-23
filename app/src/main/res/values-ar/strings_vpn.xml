@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">‏DNS الخاص مُفعّل</string>
     <string name="private_dns_warning_text">‏يتجاوز DNS الخاص في Android تطبيق BlockAds، لذا قد لا تُطبَّق التصفية. اضبط DNS الخاص على إيقاف أو تلقائي من إعدادات النظام.</string>
     <string name="status_paused">متوقف مؤقتًا</string>
+    <string name="vpn_notification_action_retry">إعادة المحاولة</string>
+    <string name="vpn_notification_no_internet_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="vpn_notification_no_internet_text">في انتظار الاتصال بالشبكة...</string>
 </resources>

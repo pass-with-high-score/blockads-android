@@ -70,9 +70,37 @@ kotlin {
         freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
+
+// Where the Go tunnel comes from. See the root build file and docs/TUNNEL.md.
+//   unset      the published app.pwhs:tunnel release artifact, checksum-verified
+//   local      built from tunnel/ by :buildGoTunnel
+//   prebuilt   an aar already sitting at build/tunnel/tunnel.aar, used as-is
+val tunnelSource = providers.gradleProperty("tunnel.source").orNull
+val tunnelFromFile = tunnelSource == "local" || tunnelSource == "prebuilt"
+
+when (tunnelSource) {
+    "local" -> tasks.named("preBuild") { dependsOn(":buildGoTunnel") }
+    // "prebuilt" means the caller already produced the aar, so there is nothing
+    // to run first; building it here would just repeat their work.
+    "prebuilt" -> Unit
+    else -> tasks.named("preBuild") { dependsOn(":verifyTunnelAar") }
+}
+
 dependencies {
     // Go tunnel engine
-    implementation(files("libs/tunnel.aar"))
+    if (tunnelFromFile) {
+        implementation(files(rootProject.layout.buildDirectory.file("tunnel/tunnel.aar")))
+    } else {
+        implementation(libs.tunnel) {
+            // No Ivy/Maven metadata on a release asset, so name the artifact
+            // explicitly; otherwise Gradle looks for tunnel-<version>.jar.
+            artifact {
+                name = "tunnel"
+                type = "aar"
+                extension = "aar"
+            }
+        }
+    }
 
     // Core Android
     implementation(libs.androidx.core.ktx)

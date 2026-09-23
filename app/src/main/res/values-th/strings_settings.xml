@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">หยุดชั่วคราวบนเครือข่ายที่เชื่อถือได้</string>
     <string name="trusted_networks_paused_text">BlockAds หยุดชั่วคราวบน &quot;%1$s&quot; — จะกลับมาทำงานอัตโนมัติเมื่อคุณออกจากเครือข่ายนี้</string>
     <string name="trusted_networks_paused_text_generic">BlockAds หยุดชั่วคราวบน Wi-Fi ที่เชื่อถือได้ — จะกลับมาทำงานเมื่อคุณออกไป</string>
+    <string name="settings_navigation">การนำทาง</string>
+    <string name="milestone_sheet_title">บรรลุเป้าหมายการป้องกันแล้ว!</string>
+    <string name="milestone_sheet_subtitle">คุณบล็อกโฆษณาและตัวติดตามสำเร็จแล้ว %1$s รายการด้วย BlockAds</string>
+    <string name="milestone_sheet_data_saved">ปริมาณข้อมูลที่ประหยัดได้โดยประมาณ</string>
+    <string name="milestone_sheet_time_saved">เวลาที่ประหยัดได้โดยประมาณ</string>
+    <string name="milestone_sheet_action">ยอดเยี่ยม!</string>
+    <string name="dns_category_advanced_security">ความปลอดภัย DNS ขั้นสูง</string>
+    <string name="dns_block_doh_bypass_title">บล็อกการข้ามผ่าน DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">ป้องกันไม่ให้แอปและเบราว์เซอร์ข้ามการกรองในเครื่องโดยใช้ DoH/DoT ที่เข้ารหัส</string>
+    <string name="dns_block_doh_bypass_notice">หมายเหตุ: หากเบราว์เซอร์ของคุณ (เช่น Chrome) แสดงข้อผิดพลาดในการเชื่อมต่อ (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG) ให้ตั้งค่า \"ใช้ DNS ที่ปลอดภัย\" ในการตั้งค่าเบราว์เซอร์เป็น \"อัตโนมัติ\"</string>
 </resources>

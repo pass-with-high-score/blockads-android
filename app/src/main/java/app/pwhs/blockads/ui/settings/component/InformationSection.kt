@@ -2,6 +2,8 @@ package app.pwhs.blockads.ui.settings.component
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -23,27 +25,29 @@ fun InformationSection(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
 
     Column(modifier = modifier) {
         SectionHeader(
             title = stringResource(R.string.settings_category_info),
-            icon = Icons.Default.Info,
             description = stringResource(R.string.settings_category_info_desc)
         )
+        Spacer(modifier = Modifier.height(10.dp))
         SettingsCard {
             SettingItem(
                 icon = Icons.Default.Info,
+                iconTint = Color(0xFF64748B),
                 title = stringResource(R.string.settings_about),
                 desc = stringResource(R.string.settings_about_desc),
                 onClick = onNavigateToAbout
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                color = dividerColor
             )
             SettingItem(
                 icon = Icons.Default.Favorite,
-                iconTint = Color(0xFFE91E63),
+                iconTint = Color(0xFFE11D48),
                 title = stringResource(R.string.settings_sponsor),
                 desc = stringResource(R.string.settings_sponsor_desc),
                 onClick = {

@@ -30,10 +30,11 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import app.pwhs.blockads.service.NotificationHelper
 import timber.log.Timber
 
 class HomeViewModel(
-    appPrefs: AppPreferences,
+    private val appPrefs: AppPreferences,
     dnsLogDao: DnsLogDao,
     private val filterRepo: FilterListRepository,
     profileDao: ProtectionProfileDao,
@@ -104,6 +105,20 @@ class HomeViewModel(
 
     val activeProfile: StateFlow<ProtectionProfile?> = profileDao.getActiveFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val milestoneReached: StateFlow<Long?> = combine(
+        blockedCount,
+        appPrefs.lastSeenMilestoneDialog
+    ) { blocked, lastSeen ->
+        val reached = NotificationHelper.MILESTONES.filter { it <= blocked.toLong() }.maxOrNull()
+        if (reached != null && reached > lastSeen) reached else null
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun dismissMilestoneDialog(milestone: Long) {
+        viewModelScope.launch {
+            appPrefs.setLastSeenMilestoneDialog(milestone)
+        }
+    }
 
     val securityFilterIds: StateFlow<Set<String>> = filterListDao.getAll()
         .map { list -> list.filter { it.category == FilterList.CATEGORY_SECURITY }.map { it.id.toString() }.toSet() }

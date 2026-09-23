@@ -50,7 +50,7 @@ func (r *recordingLogCallback) count() int {
 
 func testFlow(port int) flowID {
 	return flowID{
-		appIP:      net.ParseIP("10.0.0.2"),
+		appIP:      net.ParseIP("100.64.100.2"),
 		appPort:    port,
 		serverIP:   net.ParseIP("93.184.216.34"),
 		serverPort: 443,

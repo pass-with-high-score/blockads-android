@@ -15,6 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # Forks set a repository variable TUNNEL_REPO pointing at their own
+      # releases; unset resolves from upstream (see settings.gradle.kts).
+      TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
 
     steps:
       - name: Checkout
@@ -66,34 +70,6 @@ jobs:
       # Build & Deploy
       - name: Grant execute permission
         run: chmod +x gradlew
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.5'
-
-      - name: Build tunnel.aar natively
-        run: |
-          # Install NDK r26b using sdkmanager
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
-          yes | sdkmanager --licenses > /dev/null 2>&1
-          sdkmanager "ndk;26.1.10909125" "platforms;android-24"
-
-          # Install patched gomobile from SagerNet (to strip paths)
-          export GOFLAGS='-buildvcs=false'
-          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
-          gomobile init
-          
-          # Build tunnel.aar
-          mkdir -p app/libs
-          mkdir -p blockadstv/libs
-          cd tunnel
-          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
-          gomobile bind -target=android -androidapi 24 -trimpath \
-            -ldflags='-s -w -buildid= -extldflags=-Wl,-z,max-page-size=16384' \
-            -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
-          cp ../app/libs/tunnel.aar ../blockadstv/libs/tunnel.aar
 
       - name: Build APK
         run: bundle exec fastlane build_release

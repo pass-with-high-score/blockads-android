@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">Приватний DNS увімкнено</string>
     <string name="private_dns_warning_text">Приватний DNS Android обходить BlockAds, тож фільтрування може не застосовуватися. Установіть приватний DNS на «Вимкнено» або «Автоматично» в налаштуваннях системи.</string>
     <string name="status_paused">Призупинено</string>
+    <string name="vpn_notification_action_retry">Повторити</string>
+    <string name="vpn_notification_no_internet_title">Немає з\'єднання з інтернетом</string>
+    <string name="vpn_notification_no_internet_text">Очікування підключення до мережі...</string>
 </resources>

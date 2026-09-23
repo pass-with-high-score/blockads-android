@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Lid Line -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M3,6h18M8,6V4c0,-0.55 0.45,-1 1,-1h6c0.55,0 1,0.45 1,1v2" />
+    <!-- Bin Body -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M19,6v14c0,1.1 -0.9,2 -2,2H7c-1.1,0 -2,-0.9 -2,-2V6" />
+    <!-- Vertical Slits -->
+    <path
+        android:strokeWidth="1.8"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M10,11v6M14,11v6" />
+</vector>

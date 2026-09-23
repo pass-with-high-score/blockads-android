@@ -102,6 +102,12 @@ func (e *Engine) serveDNS(w dns.ResponseWriter, r *dns.Msg, appOverride string) 
 		}
 	}
 
+	// DoH Bypass Protection (Issue #145): block DoH bootstrap queries so clients fall back to plaintext DNS
+	if e.isDoHDomain(domain) {
+		e.standaloneBlock(w, r, "doh_bypass_protection", appName, startTime)
+		return
+	}
+
 	// 0. Firewall (App Blocker) Check
 	if e.firewallChecker != nil && appName != "" && appName != "RootProxy" {
 		if e.firewallChecker.ShouldBlock(appName) {

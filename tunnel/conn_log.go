@@ -37,6 +37,8 @@ func (e *Engine) appNameForFlow(flow flowID, protocol int) string {
 	return packageForUidCached(r, uid)
 }
 
+var pkgLookupMu sync.Mutex
+
 // packageForUidCached resolves a UID to its package name through
 // [uidPackageCache], so repeated flows from the same app don't each pay a
 // getPackagesForUid binder call.
@@ -46,6 +48,12 @@ func (e *Engine) appNameForFlow(flow flowID, protocol int) string {
 // the empty result would pin a UID to "unknown" for the whole session over a
 // single transient failure.
 func packageForUidCached(r AppUidResolver, uid int) string {
+	if cached, ok := uidPackageCache.Load(uid); ok {
+		return cached.(string)
+	}
+	pkgLookupMu.Lock()
+	defer pkgLookupMu.Unlock()
+	// Double check after lock
 	if cached, ok := uidPackageCache.Load(uid); ok {
 		return cached.(string)
 	}

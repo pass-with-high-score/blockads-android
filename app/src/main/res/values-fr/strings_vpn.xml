@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">DNS privé activé</string>
     <string name="private_dns_warning_text">Le DNS privé d\'Android contourne BlockAds, le filtrage peut donc ne pas s\'appliquer. Réglez le DNS privé sur Désactivé ou Automatique dans les paramètres système.</string>
     <string name="status_paused">En pause</string>
+    <string name="vpn_notification_action_retry">Réessayer</string>
+    <string name="vpn_notification_no_internet_title">Pas de connexion Internet</string>
+    <string name="vpn_notification_no_internet_text">En attente d\'une connexion réseau...</string>
 </resources>

@@ -504,7 +504,7 @@ fun FilterDetailScreen(
 
             // Bottom spacing
             item {
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

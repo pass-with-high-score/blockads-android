@@ -28,8 +28,13 @@ sentry-android = "8.41.0"
 appcompat = "1.7.1"
 tvFoundation = "1.0.0-alpha07"
 tvMaterial = "1.0.0-alpha07"
+# Prebuilt Go tunnel. Published as a GitHub Release asset by
+# .github/workflows/update_tunnel.yml; the checksum is pinned in gradle/tunnel.aar.sha256.
+# Format: <release date>.<short git tree hash of tunnel/>
+tunnel = "2026.09.23.e5f916c2"
 
 [libraries]
+tunnel = { module = "app.pwhs:tunnel", version.ref = "tunnel" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 core = { module = "com.github.topjohnwu.libsu:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

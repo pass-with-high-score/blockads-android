@@ -2,6 +2,8 @@ package app.pwhs.blockads.ui.settings.component
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
@@ -24,13 +26,14 @@ fun CommunitySection(
     val context = LocalContext.current
     val redditUri = stringResource(R.string.reddit_link).toUri()
     val telegramUri = stringResource(R.string.telegram_link).toUri()
+    val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
 
     Column(modifier = modifier) {
         SectionHeader(
             title = stringResource(R.string.settings_community),
-            icon = Icons.AutoMirrored.Filled.Chat,
             description = stringResource(R.string.settings_category_info_desc)
         )
+        Spacer(modifier = Modifier.height(10.dp))
         SettingsCard {
             SettingItem(
                 iconPainter = painterResource(R.drawable.ic_reddit),
@@ -43,7 +46,7 @@ fun CommunitySection(
             )
             HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                color = dividerColor
             )
             SettingItem(
                 iconPainter = painterResource(R.drawable.ic_telegram),

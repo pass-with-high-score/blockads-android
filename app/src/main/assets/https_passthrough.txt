@@ -34,7 +34,6 @@ sharepoint.com
 windowsupdate.com
 windows.com
 xboxlive.com
-youtube.com
 ytimg.com
 
 # ─── Major CDN / infrastructure ──────────────────────────────────────

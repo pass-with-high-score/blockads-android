@@ -98,35 +98,30 @@ func resolveFlowUID(uidr UIDResolver, protocol int, flow flowID) int {
 }
 
 func tcpFlowID(conn adapter.TCPConn) flowID {
-	var f flowID
-	if addr, ok := conn.LocalAddr().(*net.TCPAddr); ok {
-		f.clientIP = addr.IP
-		f.clientPort = uint16(addr.Port)
+	id := conn.ID()
+	return flowID{
+		clientIP:   net.IP(id.RemoteAddress.AsSlice()),
+		clientPort: uint16(id.RemotePort),
+		serverIP:   net.IP(id.LocalAddress.AsSlice()),
+		serverPort: uint16(id.LocalPort),
 	}
-	if addr, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
-		f.serverIP = addr.IP
-		f.serverPort = uint16(addr.Port)
-	}
-	return f
 }
 
 func udpFlowID(conn adapter.UDPConn) flowID {
-	var f flowID
-	if addr, ok := conn.LocalAddr().(*net.UDPAddr); ok {
-		f.clientIP = addr.IP
-		f.clientPort = uint16(addr.Port)
+	id := conn.ID()
+	return flowID{
+		clientIP:   net.IP(id.RemoteAddress.AsSlice()),
+		clientPort: uint16(id.RemotePort),
+		serverIP:   net.IP(id.LocalAddress.AsSlice()),
+		serverPort: uint16(id.LocalPort),
 	}
-	if addr, ok := conn.RemoteAddr().(*net.UDPAddr); ok {
-		f.serverIP = addr.IP
-		f.serverPort = uint16(addr.Port)
-	}
-	return f
 }
 
 // AdBlockChecker is the interface the MITM handler uses to query the ad-block engine.
 type AdBlockChecker interface {
 	IsDomainBlocked(host string) bool
 	LookupIP(host string) (net.IP, error)
+	IsDoHBlockingEnabled() bool
 	LogConnection(flow FlowID, protocol int)
 }
 
@@ -137,8 +132,15 @@ type adBlockChecker = AdBlockChecker
 // HTML document, not a subresource. Used to decide when to strip
 // Accept-Encoding so responses arrive uncompressed for injection.
 func requestAcceptsHTML(req *http.Request) bool {
-	accept := req.Header.Get("Accept")
-	return strings.Contains(strings.ToLower(accept), "text/html")
+	accept := strings.ToLower(req.Header.Get("Accept"))
+	if strings.Contains(accept, "text/html") {
+		return true
+	}
+	if req.Header.Get("Upgrade-Insecure-Requests") == "1" {
+		return true
+	}
+	path := strings.ToLower(req.URL.Path)
+	return path == "" || path == "/" || strings.HasSuffix(path, ".html") || strings.HasSuffix(path, ".htm") || !strings.Contains(path, ".")
 }
 
 // wrapResponseForInjection prepares an HTML response for in-stream
@@ -179,9 +181,11 @@ func wrapResponseForInjection(resp *http.Response) {
 			bodyReader = flate.NewReader(bytes.NewReader(raw))
 		}
 	default:
+		logf("[MITM Wrap] Unsupported Content-Encoding %q; skipping HTML injection", encoding)
 		return
 	}
 
+	logf("[MITM Wrap] Wrapped HTML response for injection (encoding=%q)", encoding)
 	resp.Body = io.NopCloser(NewInjectingReader(bodyReader))
 	resp.ContentLength = -1
 	resp.Header.Del("Content-Length")
@@ -189,7 +193,7 @@ func wrapResponseForInjection(resp *http.Response) {
 	resp.Header.Del("Transfer-Encoding")
 	resp.Header.Del("Content-Security-Policy")
 	resp.Header.Del("Content-Security-Policy-Report-Only")
-	resp.TransferEncoding = nil
+	resp.TransferEncoding = []string{"chunked"}
 	resp.Uncompressed = true
 }
 
@@ -225,4 +229,18 @@ func isPrivateIP(ip net.IP) bool {
 		}
 	}
 	return false
+}
+
+// IsKnownPublicDoHIP returns true if the destination IP matches a well-known
+// public DNS-over-HTTPS resolver (Cloudflare, Google, Quad9, AdGuard).
+func IsKnownPublicDoHIP(ip net.IP) bool {
+	ipStr := ip.String()
+	switch ipStr {
+	case "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112",
+		"94.140.14.14", "94.140.15.15", "2606:4700:4700::1111", "2606:4700:4700::1001",
+		"2001:4860:4860::8888", "2001:4860:4860::8844", "2620:fe::fe", "2620:fe::9":
+		return true
+	default:
+		return false
+	}
 }

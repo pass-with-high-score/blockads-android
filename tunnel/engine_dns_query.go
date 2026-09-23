@@ -69,6 +69,12 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 		}
 	}
 
+	// DoH Bypass Protection (Issue #145): block DoH bootstrap queries so clients fall back to plaintext DNS
+	if e.isDoHDomain(domain) {
+		e.handleBlockedDomain(queryInfo, "doh_bypass_protection", appName, startTime)
+		return
+	}
+
 	// SafeSearch check
 	ssResult := e.safeSearch.Check(domain, queryInfo.QueryType)
 	if ssResult.Action == ActionRedirect {
@@ -175,7 +181,7 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 }
 
 // handleSafeSearchRedirect handles a SafeSearch/YouTube redirect.
-func (e *Engine) handleSafeSearchRedirect(queryInfo *DNSQueryInfo, redirectDomain, appName string, startTime time.Time) bool {
+func (e *Engine) handleSafeSearchRedirect(queryInfo *DNSQueryInfo, redirectDomain string, appName string, startTime time.Time) bool {
 	// Check cache first
 	ip := e.safeSearch.GetCachedIP(redirectDomain)
 	if ip == nil {

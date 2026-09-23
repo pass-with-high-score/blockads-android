@@ -223,7 +223,7 @@ fun WireGuardImportScreen(
                         )
                     }
 
-                    item { Spacer(Modifier.height(80.dp)) }
+                    item { Spacer(Modifier.height(24.dp)) }
                 }
             }
         }

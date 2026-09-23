@@ -61,7 +61,8 @@ class VpnNotificationManager(private val context: Context) {
         retryCount: Int,
         maxRetries: Int,
         vpnStartTime: Long,
-        todayBlockedCount: Int
+        todayBlockedCount: Int,
+        isPhysicalNetworkLost: Boolean = false
     ): Notification {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -87,6 +88,21 @@ class VpnNotificationManager(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val retryIntent = Intent(context, AdBlockVpnService::class.java).apply {
+            action = AdBlockVpnService.ACTION_RESTART
+        }
+        val retryPendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            PendingIntent.getForegroundService(
+                context, 5, retryIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else {
+            PendingIntent.getService(
+                context, 5, retryIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(context, CHANNEL_ID)
         } else {
@@ -96,6 +112,7 @@ class VpnNotificationManager(private val context: Context) {
 
         val title = when {
             isStopping -> context.getString(R.string.vpn_notification_stopping)
+            isPhysicalNetworkLost -> context.getString(R.string.vpn_notification_no_internet_title)
             isReconnecting && connectingPhase.isNotEmpty() -> context.getString(R.string.vpn_notification_reconnecting)
             isReconnecting -> context.getString(R.string.vpn_notification_reconnecting)
             retryCount > 0 -> context.getString(R.string.vpn_notification_retrying)
@@ -105,6 +122,7 @@ class VpnNotificationManager(private val context: Context) {
 
         val text = when {
             isStopping -> context.getString(R.string.vpn_notification_stopping_text)
+            isPhysicalNetworkLost -> context.getString(R.string.vpn_notification_no_internet_text)
             isReconnecting && connectingPhase.isNotEmpty() -> connectingPhase
             isReconnecting -> context.getString(R.string.vpn_notification_reconnecting_text)
             retryCount > 0 -> context.getString(
@@ -120,23 +138,42 @@ class VpnNotificationManager(private val context: Context) {
             else -> context.getString(R.string.vpn_notification_text)
         }
 
-        return builder
+        builder
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .setContentIntent(pendingIntent)
-            .addAction(
-                Notification.Action.Builder(
-                    null, context.getString(R.string.vpn_notification_action_pause), pausePendingIntent
-                ).build()
-            )
-            .addAction(
+
+        if (isPhysicalNetworkLost) {
+            builder.addAction(
                 Notification.Action.Builder(
                     null, context.getString(R.string.vpn_notification_action_stop), stopPendingIntent
                 ).build()
             )
-            .build()
+        } else if (isReconnecting || retryCount > 0) {
+            builder.addAction(
+                Notification.Action.Builder(
+                    null, context.getString(R.string.vpn_notification_action_retry), retryPendingIntent
+                ).build()
+            ).addAction(
+                Notification.Action.Builder(
+                    null, context.getString(R.string.vpn_notification_action_stop), stopPendingIntent
+                ).build()
+            )
+        } else {
+            builder.addAction(
+                Notification.Action.Builder(
+                    null, context.getString(R.string.vpn_notification_action_pause), pausePendingIntent
+                ).build()
+            ).addAction(
+                Notification.Action.Builder(
+                    null, context.getString(R.string.vpn_notification_action_stop), stopPendingIntent
+                ).build()
+            )
+        }
+
+        return builder.build()
     }
 
     fun showPausedNotification() {

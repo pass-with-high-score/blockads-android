@@ -74,4 +74,7 @@
     <string name="private_dns_warning_title">Özel DNS açık</string>
     <string name="private_dns_warning_text">Android Özel DNS, BlockAds\'i atlar; bu nedenle filtreleme uygulanmayabilir. Sistem ayarlarından Özel DNS\'i Kapalı veya Otomatik yapın.</string>
     <string name="status_paused">Duraklatıldı</string>
+    <string name="vpn_notification_action_retry">Yeniden dene</string>
+    <string name="vpn_notification_no_internet_title">İnternet bağlantısı yok</string>
+    <string name="vpn_notification_no_internet_text">Ağ bağlantısı bekleniyor...</string>
 </resources>

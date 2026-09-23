@@ -51,9 +51,19 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <activity
+            android:name=".ui.browser.BrowserActivity"
+            android:exported="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
+            android:theme="@style/Theme.Blockads"
+            android:launchMode="singleTask" />
+
         <service
             android:name=".service.AdBlockVpnService"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
@@ -67,12 +77,15 @@
         <service
             android:name=".service.RootProxyService"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="specialUse" />
 
         <receiver
             android:name=".service.BootReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:directBootAware="true">
             <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>

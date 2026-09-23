@@ -74,4 +74,7 @@
     <string name="status_disconnecting">Ажыратылуда</string>
     <string name="vpn_notification_stopping">BlockAds тоқтатылуда</string>
     <string name="vpn_notification_stopping_text">VPN туннелі жабылуда…</string>
+    <string name="vpn_notification_action_retry">Қайталау</string>
+    <string name="vpn_notification_no_internet_title">Интернет байланысы жоқ</string>
+    <string name="vpn_notification_no_internet_text">Желі байланысы күтілуде...</string>
 </resources>

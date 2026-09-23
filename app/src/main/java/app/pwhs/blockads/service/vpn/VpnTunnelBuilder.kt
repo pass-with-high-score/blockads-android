@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardConfig
+import app.pwhs.blockads.utils.SubnetDecomposer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -58,7 +59,7 @@ class VpnTunnelBuilder(
                 Timber.d("Establishing VPN in WireGuard mode")
                 val b = vpnService.Builder()
                     .setSession("BlockAds WireGuard")
-                    .setBlocking(true)
+                    .setBlocking(false)
                     .setMtu(1280)
 
                 for (addr in wgConfig.interfaceConfig.address) {
@@ -72,10 +73,10 @@ class VpnTunnelBuilder(
                     }
                 }
 
-                b.addRoute("0.0.0.0", 0)
+                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                addIpv4Routes(b, excludeLan)
                 b.addRoute("::", 0)
 
-                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
                 if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     try {
                         b.excludeRoute(IpPrefix(InetAddress.getByName("10.0.0.0"), 8))
@@ -88,23 +89,25 @@ class VpnTunnelBuilder(
                     }
                 }
 
-                b.addAddress("10.255.255.2", 32)
-                b.addDnsServer("10.255.255.1")
-                b.addRoute("10.255.255.1", 32)
+                b.addAddress("100.64.100.2", 32)
+                b.addDnsServer("100.64.100.1")
+                b.addRoute("100.64.100.1", 32)
                 b
             } else {
-                Timber.d("Establishing VPN in direct mode (fullTunnel=true)")
+                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan)")
                 val b = vpnService.Builder()
                     .setSession("BlockAds")
-                    .addAddress("10.0.0.2", 32)
-                    .addRoute("10.0.0.1", 32)
-                    .addDnsServer("10.0.0.1")
+                    .addAddress("100.64.100.2", 32)
+                    .addRoute("100.64.100.1", 32)
+                    .addDnsServer("100.64.100.1")
                     .addAddress("fd00::2", 128)
                     .addRoute("fd00::1", 128)
                     .addDnsServer("fd00::1")
-                    .setBlocking(true)
-                    .setMtu(1500)
-                    .addRoute("0.0.0.0", 0)
+                    .addRoute("::", 0)
+                    .setBlocking(false)
+                    .setMtu(1350)
+                addIpv4Routes(b, excludeLan)
                 b
             }
 
@@ -137,6 +140,14 @@ class VpnTunnelBuilder(
 
             val pfd = builder.establish()
             if (pfd != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    try {
+                        val flags = android.system.Os.fcntlInt(pfd.fileDescriptor, android.system.OsConstants.F_GETFL, 0)
+                        android.system.Os.fcntlInt(pfd.fileDescriptor, android.system.OsConstants.F_SETFL, flags or android.system.OsConstants.O_NONBLOCK)
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to set TUN O_NONBLOCK via fcntl")
+                    }
+                }
                 TunnelResult.Success(pfd, resolvedWgConfigJson)
             } else {
                 Timber.e("Failed to establish VPN interface")
@@ -183,5 +194,17 @@ class VpnTunnelBuilder(
         }
 
         return config.copy(peers = resolvedPeers)
+    }
+
+    private fun addIpv4Routes(builder: VpnService.Builder, excludeLan: Boolean) {
+        if (excludeLan) {
+            val routes = SubnetDecomposer.lanBypassRoutes
+            Timber.d("Applying LAN bypass: adding ${routes.size} decomposed CIDR routes")
+            for (route in routes) {
+                builder.addRoute(route.ipString, route.prefix)
+            }
+        } else {
+            builder.addRoute("0.0.0.0", 0)
+        }
     }
 }

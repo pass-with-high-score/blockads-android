@@ -39,16 +39,17 @@ fun SectionHeader(
         }
         Column {
             Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                color = TextSecondary,
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
             )
             if (description != null) {
+                Spacer(modifier = Modifier.padding(top = 2.dp))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary.copy(alpha = 0.7f),
+                    color = TextSecondary.copy(alpha = 0.8f),
                 )
             }
         }

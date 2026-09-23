@@ -162,6 +162,9 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 		fail("StartFull: dup TUN fd %d failed: %v", fd, err)
 		return
 	}
+	if err := syscall.SetNonblock(dupFd, true); err != nil {
+		logf("StartFull: set nonblock on dup TUN fd %d: %v", dupFd, err)
+	}
 	tunFile := os.NewFile(uintptr(dupFd), "tun")
 	if tunFile == nil {
 		fail("StartFull: open TUN fd %d failed", dupFd)
@@ -230,9 +233,14 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 		// when HTTP/3 filtering is enabled from the UI. Default off →
 		// relay QUIC so pages load fully. DNS-level blocking still applies
 		// either way.
-		if engine.quicDrop.Load() && flow.serverPort == 443 && filter != nil && filter.HasAllowedUIDs() {
-			uid := resolveFlowUID(uidr, ProtocolUDP, flow)
-			if uid != UIDUnknown && filter.IsUIDAllowed(uid) {
+		if engine.quicDrop.Load() && flow.serverPort == 443 {
+			if filter != nil && filter.HasAllowedUIDs() {
+				uid := resolveFlowUID(uidr, ProtocolUDP, flow)
+				if uid == UIDUnknown || filter.IsUIDAllowed(uid) {
+					_ = conn.Close()
+					return
+				}
+			} else {
 				_ = conn.Close()
 				return
 			}
@@ -256,6 +264,17 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 	return func(conn adapter.TCPConn) {
 		defer conn.Close()
 		flow := tcpFlowID(conn)
+		// Gate -1: DoT (port 853) - close to force fallback to port 53 DNS
+		if flow.serverPort == 853 {
+			return
+		}
+		if flow.serverIP.String() == "100.64.100.1" || flow.serverIP.String() == "fd00::1" {
+			return
+		}
+		// Gate -1.5: Hardcoded DoH Direct-IP (port 443) - close to force fallback if DoH/DoT blocking is enabled
+		if engine.IsDoHBlockingEnabled() && flow.serverPort == 443 && isKnownPublicDoHIP(flow.serverIP) {
+			return
+		}
 		engine.logConnection(flow, ProtocolTCP)
 		relayDirectFromFlow(conn, flow, engine, protectFn)
 	}

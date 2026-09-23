@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">信頼するネットワークで一時停止中</string>
     <string name="trusted_networks_paused_text">BlockAds は「%1$s」で一時停止中です。離れると自動的に再開します。</string>
     <string name="trusted_networks_paused_text_generic">BlockAds は信頼する Wi-Fi で一時停止中です。離れると再開します。</string>
+    <string name="settings_navigation">ナビゲーション</string>
+    <string name="milestone_sheet_title">保護マイルストーン達成！</string>
+    <string name="milestone_sheet_subtitle">BlockAdsで %1$s 件の広告とトラッカーをブロックしました。</string>
+    <string name="milestone_sheet_data_saved">推定データ節約量</string>
+    <string name="milestone_sheet_time_saved">推定時間短縮</string>
+    <string name="milestone_sheet_action">素晴らしい！</string>
+    <string name="dns_category_advanced_security">高度なDNSセキュリティ</string>
+    <string name="dns_block_doh_bypass_title">DNS-over-HTTPS (DoH) による回避をブロック</string>
+    <string name="dns_block_doh_bypass_desc">アプリやブラウザが暗号化されたDoH/DoTを使用してローカルフィルタリングを回避するのを防止します</string>
+    <string name="dns_block_doh_bypass_notice">注意: ブラウザ (Chromeなど) で接続エラー (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG) が表示される場合は、ブラウザ設定の「セキュア DNS を使用する」を「自動」に設定してください。</string>
 </resources>

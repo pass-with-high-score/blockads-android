@@ -5,7 +5,7 @@ This file serves as the primary instructions and workspace rules for AI assistan
 ## Core Architecture & Stack
 - **Languages**: Kotlin (Android UI & Services), Go (DNS & VPN Tunnel engine).
 - **Android Framework**: Jetpack Compose (Material 3, Navigation 3), Room DB, DataStore, Koin DI, Ktor CIO client, Timber.
-- **Go Engine (`tunnel/`)**: Compiled into `app/libs/tunnel.aar` via `gomobile bind`.
+- **Go Engine (`tunnel/`)**: Compiled into `tunnel.aar` via `gomobile bind`, published as a versioned GitHub Release asset (`app.pwhs:tunnel`) and resolved by Gradle; never committed. Build it locally with `-Ptunnel.source=local`. See [docs/TUNNEL.md](docs/TUNNEL.md).
   - Android 15 compatibility requires 16KB page size alignment (`-extldflags=-Wl,-z,max-page-size=16384`).
 - **Privacy Standard**: 100% on-device filtering, zero telemetry without explicit user opt-in, no data selling or third-party ad tracking.
 
@@ -40,7 +40,7 @@ Each screen must strictly follow the **MVI pattern** separated across dedicated 
 - Verify code integrity with `./gradlew assembleDebug` or relevant unit tests before finalizing.
 
 ## Detailed Rule References
-- Architecture & Stack: `.agent/rules/architecture.md`
-- Kotlin & Compose: `.agent/rules/kotlin-compose.md`
-- Go Tunnel & Gomobile: `.agent/rules/go-tunnel.md`
-- Git & Workflow: `.agent/rules/git-workflow.md`
+- Architecture & Stack: `.agents/rules/architecture.md`
+- Kotlin & Compose: `.agents/rules/kotlin-compose.md`
+- Go Tunnel & Gomobile: `.agents/rules/go-tunnel.md`
+- Git & Workflow: `.agents/rules/git-workflow.md`

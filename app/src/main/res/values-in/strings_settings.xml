@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">Dijeda di jaringan tepercaya</string>
     <string name="trusted_networks_paused_text">BlockAds dijeda di &quot;%1$s&quot; — otomatis aktif lagi saat Anda pergi.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds dijeda di Wi-Fi tepercaya — aktif lagi saat Anda pergi.</string>
+    <string name="settings_navigation">Navigasi</string>
+    <string name="milestone_sheet_title">Pencapaian Perlindungan Tercapai!</string>
+    <string name="milestone_sheet_subtitle">Anda telah berhasil memblokir %1$s iklan dan pelacak dengan BlockAds.</string>
+    <string name="milestone_sheet_data_saved">Perkiraan Data Tersimpan</string>
+    <string name="milestone_sheet_time_saved">Perkiraan Waktu Tersimpan</string>
+    <string name="milestone_sheet_action">Luar biasa!</string>
+    <string name="dns_category_advanced_security">Keamanan DNS Tingkat Lanjut</string>
+    <string name="dns_block_doh_bypass_title">Blokir Bypass DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">Cegah aplikasi dan browser melewati pemfilteran lokal menggunakan DoH/DoT terenkripsi</string>
+    <string name="dns_block_doh_bypass_notice">Catatan: Jika browser Anda (mis. Chrome) menampilkan kesalahan koneksi (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), atur \"Gunakan DNS aman\" di setelan browser ke \"Otomatis\".</string>
 </resources>

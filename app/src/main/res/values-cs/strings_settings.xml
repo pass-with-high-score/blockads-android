@@ -201,4 +201,14 @@
     <string name="trusted_networks_paused_title">Pozastaveno v důvěryhodné síti</string>
     <string name="trusted_networks_paused_text">BlockAds je pozastaven v síti &quot;%1$s&quot; — po odchodu se automaticky obnoví.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds je pozastaven v důvěryhodné Wi-Fi — po odchodu se obnoví.</string>
+    <string name="settings_navigation">Navigace</string>
+    <string name="milestone_sheet_title">Dosažen milník ochrany!</string>
+    <string name="milestone_sheet_subtitle">Pomocí BlockAds jste úspěšně zablokovali %1$s reklam a sledovačů.</string>
+    <string name="milestone_sheet_data_saved">Odhadovaná úspora dat</string>
+    <string name="milestone_sheet_time_saved">Odhadovaná úspora času</string>
+    <string name="milestone_sheet_action">Skvělé!</string>
+    <string name="dns_category_advanced_security">Pokročilé zabezpečení DNS</string>
+    <string name="dns_block_doh_bypass_title">Blokovat obcházení DNS-over-HTTPS (DoH)</string>
+    <string name="dns_block_doh_bypass_desc">Zabraňuje aplikacím a prohlížečům obcházet místní filtrování pomocí šifrovaného DoH/DoT</string>
+    <string name="dns_block_doh_bypass_notice">Poznámka: Pokud váš prohlížeč (např. Chrome) zobrazí chybu připojení (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), nastavte v nastavení prohlížeče možnost „Používat zabezpečený DNS“ na „Automaticky“.</string>
 </resources>

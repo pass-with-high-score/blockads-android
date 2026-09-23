@@ -28,6 +28,58 @@ class FilterDownloadManager(
             val bloomFile = File(filterDir, "${filter.id}.bloom")
             val trieFile = File(filterDir, "${filter.id}.trie")
 
+            if (!forceUpdate && bloomFile.exists() && bloomFile.length() > 0 && trieFile.exists() && trieFile.length() > 0) {
+                Timber.d("Filter ${filter.id} already cached locally")
+                return@withContext Result.success(DownloadedFilterPaths(bloomFile.absolutePath, trieFile.absolutePath))
+            }
+
+            val zipUrl = when {
+                filter.url.contains(".zip") -> filter.url
+                filter.bloomUrl.contains(".bloom") -> filter.bloomUrl.replace(".bloom", ".zip")
+                filter.trieUrl.contains(".trie") -> filter.trieUrl.replace(".trie", ".zip")
+                else -> ""
+            }
+
+            if (zipUrl.isNotEmpty()) {
+                val tempZip = File(filterDir, "temp_${System.currentTimeMillis()}.zip")
+                try {
+                    val response = client.get(zipUrl)
+                    if (response.status.value in 200..299) {
+                        val channel = response.bodyAsChannel()
+                        FileOutputStream(tempZip).use { output ->
+                            val buffer = ByteArray(16 * 1024)
+                            var bytesRead: Int
+                            while (channel.readAvailable(buffer).also { bytesRead = it } >= 0) {
+                                if (bytesRead > 0) output.write(buffer, 0, bytesRead)
+                            }
+                        }
+                        java.util.zip.ZipFile(tempZip).use { zip ->
+                            val entries = zip.entries()
+                            while (entries.hasMoreElements()) {
+                                val entry = entries.nextElement()
+                                val target = when {
+                                    entry.name.endsWith(".bloom") -> bloomFile
+                                    entry.name.endsWith(".trie") -> trieFile
+                                    else -> null
+                                }
+                                target?.let { out ->
+                                    zip.getInputStream(entry).use { input ->
+                                        FileOutputStream(out).use { output -> input.copyTo(output) }
+                                    }
+                                }
+                            }
+                        }
+                        if (bloomFile.exists() && trieFile.exists()) {
+                            return@withContext Result.success(DownloadedFilterPaths(bloomFile.absolutePath, trieFile.absolutePath))
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error extracting zip for ${filter.id}")
+                } finally {
+                    tempZip.delete()
+                }
+            }
+
             val bloomPath = if (filter.bloomUrl.isNotEmpty()) downloadFile(filter.bloomUrl, bloomFile, forceUpdate) else null
             val triePath = if (filter.trieUrl.isNotEmpty()) downloadFile(filter.trieUrl, trieFile, forceUpdate) else null
 
@@ -55,6 +107,10 @@ class FilterDownloadManager(
         return try {
             Timber.d("Downloading: $url")
             val response = client.get(url)
+            if (response.status.value !in 200..299) {
+                Timber.e("HTTP ${response.status.value} downloading $url")
+                return null
+            }
             val channel = response.bodyAsChannel()
 
             val tempFile = File(destFile.parent, "${destFile.name}.tmp")
