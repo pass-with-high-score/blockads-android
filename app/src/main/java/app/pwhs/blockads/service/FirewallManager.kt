@@ -71,19 +71,21 @@ class FirewallManager(
 
     private fun isWithinSchedule(rule: FirewallRule): Boolean {
         val now = Calendar.getInstance()
-        val currentHour = now.get(Calendar.HOUR_OF_DAY)
-        val currentMinute = now.get(Calendar.MINUTE)
-        val currentTime = currentHour * 60 + currentMinute
+        return isWithinSchedule(rule, now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE))
+    }
 
-        val startTime = rule.scheduleStartHour * 60 + rule.scheduleStartMinute
-        val endTime = rule.scheduleEndHour * 60 + rule.scheduleEndMinute
+    companion object {
+        internal fun isWithinSchedule(rule: FirewallRule, currentTime: Int): Boolean {
+            val startTime = rule.scheduleStartHour * 60 + rule.scheduleStartMinute
+            val endTime = rule.scheduleEndHour * 60 + rule.scheduleEndMinute
 
-        return if (startTime <= endTime) {
-            // Same day schedule (e.g., 08:00 - 17:00)
-            currentTime in startTime..endTime
-        } else {
-            // Overnight schedule (e.g., 22:00 - 06:00)
-            currentTime !in (endTime + 1)..<startTime
+            return if (startTime <= endTime) {
+                // Same day schedule (e.g., 08:00 - 17:00)
+                currentTime in startTime..endTime
+            } else {
+                // Overnight schedule (e.g., 22:00 - 06:00)
+                currentTime !in (endTime + 1)..<startTime
+            }
         }
     }
 }

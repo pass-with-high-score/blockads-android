@@ -52,7 +52,7 @@ CI builds from source on every PR, so changes to `tunnel/` are always compiled a
 
 `.github/workflows/update_tunnel.yml` does this automatically when `tunnel/` changes on `main`. It builds the AAR reproducibly, publishes it as a release, and opens a PR bumping the version and checksum — two lines of text rather than 19MB of binary.
 
-The version is `<release date>.<short git tree hash of tunnel/>`, for example `2026.09.19.e5f916c2`. The tree hash is the identity; the date is only there to read. The workflow looks for an existing release whose tag ends in the current tree hash rather than deriving a tag from today's date, which gives it three outcomes:
+The version is `<release date>.<short source hash of tunnel/>`, for example `2026.09.19.e5f916c2`. The source hash (`scripts/tunnel_source_hash.sh`) covers every tracked file under `tunnel/` except test-only ones (`*_test.go`, `testdata/`, `internal/testnet/`), so adding or changing tests never cuts a release. It is the identity; the date is only there to read. The workflow looks for an existing release whose tag ends in the current tree hash rather than deriving a tag from today's date, which gives it three outcomes:
 
 - no release for this source — build it, publish it, and bump the pin
 - a release exists but the pin is stale — bump the pin to it, without rebuilding or touching the published assets

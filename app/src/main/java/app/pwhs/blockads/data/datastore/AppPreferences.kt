@@ -15,10 +15,13 @@ import kotlinx.coroutines.flow.Flow
 
 val Context.blockAdsDataStore: DataStore<Preferences> by preferencesDataStore(name = "blockads_prefs")
 
-class AppPreferences(context: Context) {
+class AppPreferences internal constructor(
+    dataStore: DataStore<Preferences>,
+    private val directBootPrefs: DirectBootPreferences,
+) {
 
-    private val dataStore = context.blockAdsDataStore
-    private val directBootPrefs = DirectBootPreferences(context)
+    constructor(context: Context) : this(context.blockAdsDataStore, DirectBootPreferences(context))
+
     val dns = DnsPreferences(dataStore)
     val appearance = AppearancePreferences(dataStore)
     val filter = FilterPreferences(dataStore)

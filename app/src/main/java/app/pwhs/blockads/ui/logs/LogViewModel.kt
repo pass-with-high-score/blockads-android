@@ -45,6 +45,7 @@ class LogViewModel(
     private val filterListRepository: FilterListRepository,
     private val appPrefs: AppPreferences,
     private val application: Application,
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : AndroidViewModel(application) {
 
     private val _filterStatus = MutableStateFlow(LogFilterStatus.ALL)
@@ -93,7 +94,7 @@ class LogViewModel(
     ) { status, range -> Pair(status, range) }
         .flatMapLatest { (status, range) ->
             val since = if (range == TimeRange.ALL) 0L
-            else System.currentTimeMillis() - range.millis
+            else clock() - range.millis
             when (status) {
                 LogFilterStatus.ALL -> if (since > 0) dnsLogDao.getAllSince(since) else dnsLogDao.getAll()
                 LogFilterStatus.BLOCKED -> if (since > 0) dnsLogDao.getBlockedOnlySince(since) else dnsLogDao.getBlockedOnly()

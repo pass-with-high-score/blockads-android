@@ -68,6 +68,9 @@ func TestInjectGzipHTML(t *testing.T) {
 }
 
 func TestInjectLiveLeeAPK(t *testing.T) {
+	if testing.Short() {
+		t.Skip("fetches a live third-party page")
+	}
 	req, _ := http.NewRequest("GET", "https://leeapk.com/proton-mail-mod-apk/", nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")

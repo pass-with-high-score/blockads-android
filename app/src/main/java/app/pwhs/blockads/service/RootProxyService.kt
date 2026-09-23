@@ -188,12 +188,7 @@ class RootProxyService : Service() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification())
 
-        // On boot the su daemon (Magisk/KernelSU) can take well over the
-        // normal retry window to come up — allow a much longer budget.
-        retryManager = VpnRetryManager(
-            maxRetries = if (startedFromBoot) 30 else 10,
-            maxDelayMs = 60000L
-        )
+        retryManager = RootProxyStartup.retryManagerFor(startedFromBoot)
 
         serviceScope.launch {
             try {
@@ -244,31 +239,13 @@ class RootProxyService : Service() {
 
                 // 3. Retry loop for Standalone mode and IPTables setup
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
-                var proxyStarted = false
-                while (!proxyStarted && retryManager.shouldRetry()) {
-                    // Recreate the libsu shell if a non-root one got cached
-                    // (happens when the first shell command ran before the
-                    // su daemon was ready — see #179). Without this, every
-                    // retry reuses the poisoned non-root shell and iptables
-                    // can never succeed.
-                    if (!IptablesManager.ensureRootShell()) {
-                        Timber.w("Root shell not available yet")
-                    } else {
-                        val engineStarted = goTunnelAdapter.startStandalone(port = 15353)
-                        if (engineStarted) {
-                            if (IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)) {
-                                proxyStarted = true
-                            } else {
-                                goTunnelAdapter.stop() // stop engine if iptables fails
-                            }
-                        }
-                    }
-
-                    if (!proxyStarted && retryManager.shouldRetry()) {
-                         Timber.w("Root Proxy establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
-                         retryManager.waitForRetry()
-                    }
-                }
+                val proxyStarted = RootProxyStartup.establish(
+                    retryManager = { retryManager },
+                    ensureRootShell = IptablesManager::ensureRootShell,
+                    startEngine = { goTunnelAdapter.startStandalone(port = 15353) },
+                    setupRules = { IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids) },
+                    stopEngine = { goTunnelAdapter.stop() },
+                )
 
                 if (!proxyStarted) {
                     Timber.e("Failed to start Root Proxy after ${retryManager.getMaxRetries()} attempts")

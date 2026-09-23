@@ -256,7 +256,7 @@ class FilterListRepository(
     /**
      * Simple JSON parser for the filter_lists.json array.
      */
-    private fun parseRemoteFilterJson(json: String): List<app.pwhs.blockads.data.remote.models.FilterList> {
+    internal fun parseRemoteFilterJson(json: String): List<app.pwhs.blockads.data.remote.models.FilterList> {
         return try {
             val results = mutableListOf<app.pwhs.blockads.data.remote.models.FilterList>()
             val objects = json.split("},").map {

@@ -35,7 +35,7 @@ class VpnConnectionSupervisor(
     private val onPhysicalNetworkLostChanged: (Boolean) -> Unit,
     private val onNetworkActiveChanged: (Network?) -> Unit,
     private val onRequestRestart: () -> Unit
-) {
+) : VpnNetworkWatch {
 
     companion object {
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
@@ -44,7 +44,7 @@ class VpnConnectionSupervisor(
         private const val CONNECTION_PROBE_INTERVAL_MS = 60_000L
     }
 
-    val networkAvailableFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    override val networkAvailableFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private var networkMonitor: NetworkMonitor? = null
     private var networkSwitchJob: Job? = null
@@ -69,15 +69,15 @@ class VpnConnectionSupervisor(
         )
     }
 
-    fun startNetworkMonitoring() {
+    override fun startNetworkMonitoring() {
         networkMonitor?.startMonitoring()
     }
 
-    fun stopNetworkMonitoring() {
+    override fun stopNetworkMonitoring() {
         networkMonitor?.stopMonitoring()
     }
 
-    fun isNetworkAvailable(): Boolean {
+    override fun isNetworkAvailable(): Boolean {
         return networkMonitor?.isNetworkAvailable() ?: true
     }
 
@@ -124,18 +124,18 @@ class VpnConnectionSupervisor(
         }
     }
 
-    fun cancelNetworkSwitch() {
+    override fun cancelNetworkSwitch() {
         networkSwitchJob?.cancel()
         networkSwitchJob = null
     }
 
-    fun startPeriodicMonitoring() {
+    override fun startPeriodicMonitoring() {
         startBatteryMonitoring()
         startNotificationUpdates()
         startConnectionProbing()
     }
 
-    fun stopPeriodicMonitoring() {
+    override fun stopPeriodicMonitoring() {
         stopBatteryMonitoring()
         stopNotificationUpdates()
         stopConnectionProbing()

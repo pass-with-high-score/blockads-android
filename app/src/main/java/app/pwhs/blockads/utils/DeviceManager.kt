@@ -20,10 +20,12 @@ object DeviceManager {
         GENERIC
     }
 
-    val currentManufacturer: Manufacturer by lazy {
-        val m = Build.MANUFACTURER.lowercase(Locale.US)
-        val b = Build.BRAND.lowercase(Locale.US)
-        when {
+    val currentManufacturer: Manufacturer by lazy { detectManufacturer(Build.MANUFACTURER, Build.BRAND) }
+
+    internal fun detectManufacturer(manufacturer: String, brand: String): Manufacturer {
+        val m = manufacturer.lowercase(Locale.US)
+        val b = brand.lowercase(Locale.US)
+        return when {
             m.contains("samsung") || b.contains("samsung") -> Manufacturer.SAMSUNG
             m.contains("google") || b.contains("google") -> Manufacturer.GOOGLE
             m.contains("xiaomi") || m.contains("redmi") || m.contains("poco") -> Manufacturer.XIAOMI
@@ -41,9 +43,10 @@ object DeviceManager {
     /**
      * Returns a list of steps tailored to the current device and Android version.
      */
-    fun getInstallSteps(): List<String> {
-        val sdk = Build.VERSION.SDK_INT
-        return when (currentManufacturer) {
+    fun getInstallSteps(): List<String> = installStepsFor(currentManufacturer, Build.VERSION.SDK_INT)
+
+    internal fun installStepsFor(manufacturer: Manufacturer, sdk: Int): List<String> {
+        return when (manufacturer) {
             Manufacturer.SAMSUNG -> when {
                 sdk >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> listOf(
                     "Mở Cài đặt hệ thống (Settings)",

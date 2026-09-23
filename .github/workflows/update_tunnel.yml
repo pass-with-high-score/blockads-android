@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - 'tunnel/**'
+      # Test-only files are excluded from the source hash too (scripts/tunnel_source_hash.sh).
+      - '!tunnel/**/*_test.go'
+      - '!tunnel/**/testdata/**'
+      - '!tunnel/internal/testnet/**'
+      - 'scripts/tunnel_source_hash.sh'
       - '.github/workflows/update_tunnel.yml'
   workflow_dispatch: # Can also be run by hand from the Actions tab.
 
@@ -37,16 +42,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Content-addressed: the git tree hash of tunnel/ changes if and only if
-          # the tunnel source changes, so rebuilding unchanged source is a no-op.
+          # Content-addressed: the hash of tunnel/ (minus test-only files) changes if
+          # and only if the tunnel source changes, so rebuilding unchanged source is a no-op.
           # tunnel/ holds Go source only: the pin lives in gradle/ so that
           # publishing a new checksum neither changes this hash nor re-triggers
           # this workflow through the tunnel/** path filter.
-          TREE=$(git rev-parse HEAD:tunnel | cut -c1-8)
+          TREE=$(scripts/tunnel_source_hash.sh HEAD)
           CURRENT=$(sed -n 's/^tunnel = "\(.*\)"$/\1/p' gradle/libs.versions.toml)
 
           # A release is identified by the source it was built from, not by the day
-          # it was cut, so look one up by tree hash rather than deriving a fresh
+          # it was cut, so look one up by source hash rather than deriving a fresh
           # dated tag. Deriving one would make a second dispatch on the same day
           # recompute an identical tag, which `gh release create` then rejects.
           EXISTING=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name' \
@@ -76,6 +81,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.23.5'
+
+      - name: Test tunnel
+        if: steps.version.outputs.publish == 'true'
+        working-directory: tunnel
+        run: go vet ./... && go test -race -short ./...
 
       - name: Build tunnel.aar natively
         if: steps.version.outputs.publish == 'true'

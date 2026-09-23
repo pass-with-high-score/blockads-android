@@ -16,10 +16,12 @@ import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
 
 class StatisticsViewModel(
-    dnsLogDao: DnsLogDao
+    dnsLogDao: DnsLogDao,
+    clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
 
     private val todayStart: Long = Calendar.getInstance().apply {
+        timeInMillis = clock()
         set(Calendar.HOUR_OF_DAY, 0)
         set(Calendar.MINUTE, 0)
         set(Calendar.SECOND, 0)

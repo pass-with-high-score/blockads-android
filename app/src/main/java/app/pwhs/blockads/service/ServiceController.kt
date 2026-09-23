@@ -51,11 +51,14 @@ object ServiceController {
     /**
      * Stop whichever service is currently running.
      */
-    fun requestStop(context: Context) {
-        if (RootProxyService.isRunning) {
+    fun requestStop(context: Context) =
+        requestStop(context, AdBlockVpnService.state.value, RootProxyService.state.value)
+
+    internal fun requestStop(context: Context, vpnState: VpnState, rootState: VpnState) {
+        if (rootState == VpnState.RUNNING) {
             RootProxyService.stop(context)
         }
-        if (AdBlockVpnService.isRunning) {
+        if (vpnState == VpnState.RUNNING) {
             AdBlockVpnService.stop(context)
         }
     }

@@ -1,0 +1,238 @@
+const ActionNone internal/safesearch.SafeSearchAction = 0
+const ActionRedirect internal/safesearch.SafeSearchAction = 1
+type AppResolver interface
+	method AppResolver.ResolveApp(sourcePort int, sourceIP []byte, destIP []byte, destPort int) string
+type AppUidResolver interface
+	method AppUidResolver.PackageForUid(uid int) string
+type BlockResult struct
+	field BlockResult.Blocked bool
+	field BlockResult.BlockedBy string
+type Blocker struct
+	method Blocker.IsBlocked(domain string) BlockResult
+	method Blocker.LoadCustomRules(allowData string, blockData string)
+	method Blocker.LoadDomains(data string) int
+	method Blocker.LoadSecurityDomains(data string) int
+	method Blocker.LoadWhitelist(data string)
+type BloomBuilder = internal/bloom.BloomBuilder
+	method BloomBuilder.Add(domain string)
+	method BloomBuilder.MightContain(domain string) bool
+	method BloomBuilder.SaveToFile(path string) error
+type BloomFilter = internal/bloom.BloomFilter
+	method BloomFilter.Close()
+	method BloomFilter.MightContain(domain string) bool
+	method BloomFilter.MightContainDomainOrParent(domain string) bool
+var BuildBlockedResponse func(queryInfo *internal/packet.DNSQueryInfo) []byte
+var BuildForwardedResponse func(queryInfo *internal/packet.DNSQueryInfo, dnsResp []byte) []byte
+var BuildIpcConfig func(cfg *internal/wireguard.WgConfig) (string, error)
+var BuildNXDomainResponse func(queryInfo *internal/packet.DNSQueryInfo) []byte
+var BuildRedirectResponse func(queryInfo *internal/packet.DNSQueryInfo, ip net.IP) []byte
+var BuildRefusedResponse func(queryInfo *internal/packet.DNSQueryInfo) []byte
+var BuildServfailResponse func(queryInfo *internal/packet.DNSQueryInfo) []byte
+type CertManager = internal/mitm.CertManager
+	method CertManager.GetCACertPEM() string
+	method CertManager.GetDynamicTLSConfigForHost(defaultHost string) *crypto/tls.Config
+	method CertManager.WarmLocalAssetCert()
+func CheckDomainInTrieFile(filePath string, domain string) bool
+func CompileFilterList(inputPath string, triePath string, bloomPath string) (int, error)
+type DNSProtocol = internal/dns.DNSProtocol
+type DNSQueryInfo = internal/packet.DNSQueryInfo
+	field DNSQueryInfo.SourceIP net.IP
+	field DNSQueryInfo.DestIP net.IP
+	field DNSQueryInfo.SourcePort uint16
+	field DNSQueryInfo.DestPort uint16
+	field DNSQueryInfo.RawDNSPayload []byte
+	field DNSQueryInfo.Domain string
+	field DNSQueryInfo.QueryType uint16
+	field DNSQueryInfo.IsIPv6 bool
+type DirectOutbound struct
+	method DirectOutbound.HandlePacket(packet []byte, length int)
+	method DirectOutbound.Name() string
+	method DirectOutbound.Start() error
+	method DirectOutbound.Stop()
+	method DirectOutbound.SupportsStreams() bool
+type DnsInterceptor struct
+	method DnsInterceptor.IsRunning() bool
+	method DnsInterceptor.Run(tunFile *os.File)
+	method DnsInterceptor.Stop()
+type DomainChecker interface
+	method DomainChecker.GetBlockReason(domain string) string
+	method DomainChecker.HasCustomRule(domain string) int
+	method DomainChecker.IsBlocked(domain string) bool
+type Engine struct
+	method Engine.GetMitmCACert(certDir string) string
+	method Engine.GetRouter() *Router
+	method Engine.GetStats() string
+	method Engine.IsConnLogEnabled() bool
+	method Engine.IsDoHBlockingEnabled() bool
+	method Engine.IsDomainBlocked(host string) bool
+	method Engine.IsMitmActive() bool
+	method Engine.IsRunning() bool
+	method Engine.IsUsingTcpStack() bool
+	method Engine.LogConnection(flow internal/mitm.FlowID, protocol int)
+	method Engine.LookupIP(host string) (net.IP, error)
+	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
+	method Engine.SetAdPathPatterns(patternsCsv string)
+	method Engine.SetAppResolver(resolver AppResolver)
+	method Engine.SetAppUidResolver(resolver AppUidResolver)
+	method Engine.SetBlockResponseType(responseType string)
+	method Engine.SetConnLogEnabled(enabled bool)
+	method Engine.SetCosmeticCSS(css string)
+	method Engine.SetCosmeticCSSFromFile(filePath string) error
+	method Engine.SetDNS(protocol string, primary string, fallback string, dohURL string)
+	method Engine.SetDoHBlocklist(content string)
+	method Engine.SetDoHBlocklistFromFd(fd int, offset int64, length int64) error
+	method Engine.SetDomainChecker(checker DomainChecker)
+	method Engine.SetExtraPassthroughSuffixes(content string)
+	method Engine.SetExtraPassthroughSuffixesFromFd(fd int, offset int64, length int64) error
+	method Engine.SetFilterHttp3(enabled bool)
+	method Engine.SetFirewallChecker(checker FirewallChecker)
+	method Engine.SetLogCallback(cb LogCallback)
+	method Engine.SetMitmAllowedUIDs(uidsCsv string)
+	method Engine.SetOutboundAdapter(adapter OutboundAdapter)
+	method Engine.SetSafeSearch(enabled bool)
+	method Engine.SetScriptletRules(content string)
+	method Engine.SetScriptletRulesFromFile(filePath string) error
+	method Engine.SetScriptletsRuntime(js string)
+	method Engine.SetSplitDNSZones(zones string)
+	method Engine.SetTries(adTriePathsCsv string, secTriePathsCsv string, adBloomPathsCsv string, secBloomPathsCsv string)
+	method Engine.SetUIDResolver(r UIDResolver)
+	method Engine.SetUseTcpStack(enabled bool)
+	method Engine.SetYouTubeRestricted(enabled bool)
+	method Engine.Start(fd int, protector SocketProtector, wgConfigJSON string)
+	method Engine.StartFull(fd int, protector SocketProtector)
+	method Engine.StartStackMitm(certDir string) string
+	method Engine.StartStandalone(port int) error
+	method Engine.Stop()
+	method Engine.StopStackMitm()
+type FirewallChecker interface
+	method FirewallChecker.ShouldBlock(appName string) bool
+var LoadBloomFilter func(path string) (*internal/bloom.BloomFilter, error)
+var LoadMmapTrie func(path string) (*internal/trie.MmapTrie, error)
+const LocalAssetHost untyped string = "local.pwhs.app"
+type LogCallback interface
+	method LogCallback.OnDNSQuery(domain string, blocked bool, queryType int, responseTimeMs int64, appName string, resolvedIP string, blockedBy string)
+type MitmFilter = internal/mitm.MitmFilter
+	method MitmFilter.BlacklistDomain(host string)
+	method MitmFilter.GetBlacklistCount() int
+	method MitmFilter.HasAllowedUIDs() bool
+	method MitmFilter.IsAdPathBlocked(urlPath string) bool
+	method MitmFilter.IsInterceptionAllowed(host string) bool
+	method MitmFilter.IsUIDAllowed(uid int) bool
+	method MitmFilter.LoadPersistentBlacklist(path string)
+	method MitmFilter.SetAdPathPatterns(patterns []string)
+	method MitmFilter.SetAllowedUIDs(uids []int)
+	method MitmFilter.SetExtraPassthroughSuffixes(suffixes []string)
+type MmapTrie = internal/trie.MmapTrie
+	method MmapTrie.Close()
+	method MmapTrie.ContainsOrParent(domain string) bool
+func NewBlocker() *Blocker
+var NewBloomBuilder func(expectedItems int, fpRate float64) *internal/bloom.BloomBuilder
+var NewCertManager func(certDir string) (*internal/mitm.CertManager, error)
+func NewDirectOutbound() *DirectOutbound
+func NewDnsInterceptor(engine *Engine, router *Router) *DnsInterceptor
+func NewEngine() *Engine
+var NewMitmFilter func() *internal/mitm.MitmFilter
+var NewResolver func(protectFn func(fd int) bool) *internal/dns.Resolver
+func NewRouter() *Router
+var NewSafeSearch func() *internal/safesearch.SafeSearch
+func NewTcpIpStack() *TcpIpStack
+var NewWgOutbound func(tunDev golang.zx2c4.com/wireguard/tun.Device, ipcConfig string, protectFn func(fd int) bool) (*internal/wireguard.WgOutbound, error)
+type OutboundAdapter interface
+	method OutboundAdapter.HandlePacket(packet []byte, length int)
+	method OutboundAdapter.Name() string
+	method OutboundAdapter.Start() error
+	method OutboundAdapter.Stop()
+	method OutboundAdapter.SupportsStreams() bool
+var ParseProtocol func(s string) internal/dns.DNSProtocol
+var ParseResponseType func(s string) internal/packet.ResponseType
+var ParseTUNPacket func(packet []byte, length int) *internal/packet.DNSQueryInfo
+var ParseWgConfigJSON func(jsonStr string) (*internal/wireguard.WgConfig, error)
+const ProtocolDoH internal/dns.DNSProtocol = 1
+const ProtocolDoQ internal/dns.DNSProtocol = 3
+const ProtocolDoT internal/dns.DNSProtocol = 2
+const ProtocolPlain internal/dns.DNSProtocol = 0
+const ProtocolTCP untyped int = 6
+const ProtocolUDP untyped int = 17
+func ResolveHostForProtection(hostname string) string
+type Resolver = internal/dns.Resolver
+	method Resolver.Configure(protocol internal/dns.DNSProtocol, primary string, fallback string, dohURL string)
+	method Resolver.MatchesSplitZone(domain string) bool
+	method Resolver.Resolve(rawQuery []byte) ([]byte, error)
+	method Resolver.ResolveARecord(domain string, dnsServer string) (net.IP, error)
+	method Resolver.SetSplitDNS(dnsServer string, zones []string)
+	method Resolver.Shutdown()
+	method Resolver.SplitDNS() string
+	method Resolver.SplitZones() []string
+const ResponseCustomIP internal/packet.ResponseType = 0
+const ResponseNXDomain internal/packet.ResponseType = 1
+const ResponseRefused internal/packet.ResponseType = 2
+type ResponseType = internal/packet.ResponseType
+type Router struct
+	method Router.GetAdapter() OutboundAdapter
+	method Router.RoutePacket(packet []byte, length int)
+	method Router.SetAdapter(adapter OutboundAdapter)
+	method Router.SetTunFile(f *os.File)
+	method Router.Stop()
+	method Router.WriteToTun(data []byte)
+type SafeSearch = internal/safesearch.SafeSearch
+	method SafeSearch.CacheIP(domain string, ip net.IP)
+	method SafeSearch.Check(domain string, queryType uint16) internal/safesearch.SafeSearchResult
+	method SafeSearch.CheckYouTube(domain string, queryType uint16) (bool, string)
+	method SafeSearch.ClearCache()
+	method SafeSearch.GetCachedIP(domain string) net.IP
+	method SafeSearch.SetEnabled(enabled bool)
+	method SafeSearch.SetYouTubeRestricted(enabled bool)
+type SafeSearchAction = internal/safesearch.SafeSearchAction
+type SafeSearchResult = internal/safesearch.SafeSearchResult
+	field SafeSearchResult.Action internal/safesearch.SafeSearchAction
+	field SafeSearchResult.RedirectDomain string
+type ScriptletRule = internal/scriptlet.Rule
+	field ScriptletRule.Domains []string
+	field ScriptletRule.Name string
+	field ScriptletRule.Args []string
+var ServeLocalAsset func(req *net/http.Request) *net/http.Response
+var SetCosmeticCSS func(css string)
+var SetScriptletStore func(s *internal/scriptlet.Store)
+var SetScriptletsRuntime func(js string)
+type SocketProtector interface
+	method SocketProtector.Protect(fd int) bool
+type Stats struct
+	field Stats.TotalQueries int64
+	field Stats.BlockedQueries int64
+type TcpFlowHandler = internal/mitm.TcpFlowHandler
+type TcpIpStack struct
+	method TcpIpStack.HandleTCP(conn github.com/xjasonlyu/tun2socks/v2/core/adapter.TCPConn)
+	method TcpIpStack.HandleUDP(conn github.com/xjasonlyu/tun2socks/v2/core/adapter.UDPConn)
+	method TcpIpStack.IsRunning() bool
+	method TcpIpStack.SetTcpHandler(h TcpFlowHandler)
+	method TcpIpStack.SetUIDResolver(r UIDResolver)
+	method TcpIpStack.SetUdpHandler(h UdpFlowHandler)
+	method TcpIpStack.Start(rw io.ReadWriter, mtu uint32) error
+	method TcpIpStack.Stop()
+	method TcpIpStack.TcpFlowCount() int64
+	method TcpIpStack.UdpFlowCount() int64
+type UIDResolver interface
+	method UIDResolver.ResolveUID(protocol int, localIP string, localPort int, remoteIP string, remotePort int) int
+const UIDUnknown untyped int = -1
+type UdpFlowHandler = internal/mitm.UdpFlowHandler
+type WgConfig = internal/wireguard.WgConfig
+	field WgConfig.Interface internal/wireguard.WgInterface
+	field WgConfig.Peers []internal/wireguard.WgPeer
+type WgInterface = internal/wireguard.WgInterface
+	field WgInterface.PrivateKey string
+	field WgInterface.Address []string
+	field WgInterface.ListenPort *int
+	field WgInterface.DNS []string
+type WgOutbound = internal/wireguard.WgOutbound
+	method WgOutbound.HandlePacket(packet []byte, length int)
+	method WgOutbound.IsRunning() bool
+	method WgOutbound.Name() string
+	method WgOutbound.Start() error
+	method WgOutbound.Stop()
+	method WgOutbound.SupportsStreams() bool
+type WgPeer = internal/wireguard.WgPeer
+	field WgPeer.PublicKey string
+	field WgPeer.PresharedKey *string
+	field WgPeer.Endpoint *string
+	field WgPeer.AllowedIPs []string
+	field WgPeer.PersistentKeepalive *int

@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.sentry)
+    alias(libs.plugins.kover)
 }
 
 // Where the Go tunnel comes from. See the root build file and docs/TUNNEL.md.
@@ -82,6 +83,43 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        // MigrationTestHelper reads exported schemas as assets.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric's SDK 36 runtime pokes FileDescriptor internals.
+            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+            // Robolectric's SDK 36 runtime needs Java 21; the build itself stays on the CI JDK.
+            it.javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) })
+            // A non-UTC, half-hour zone so local-vs-UTC date bugs fail on UTC CI runners too.
+            it.environment("TZ", "Asia/Kolkata")
+            it.systemProperty("user.timezone", "Asia/Kolkata")
+        }
+    }
+
+    lint {
+        checkReleaseBuilds = true
+        // Existing findings live in the baseline; anything new fails the build.
+        // Regenerate with ./gradlew :app:updateLintBaseline after fixing baselined issues.
+        baseline = file("lint-baseline.xml")
+        error += setOf(
+            "SetJavaScriptEnabled",
+            "JavascriptInterface",
+            "AddJavascriptInterface",
+            "AllowBackup",
+            "ExportedReceiver",
+            "ExportedService",
+            "SetWorldReadable",
+            "SetWorldWritable",
+            "WorldReadableFiles",
+            "WorldWriteableFiles",
+        )
     }
 
     buildFeatures {
@@ -201,12 +239,41 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.ktor.client.mock)
+    testImplementation(platform(libs.koin.bom))
+    testImplementation(libs.koin.test.junit4)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.androidx.test.core.ktx)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.okhttp.tls)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+kover {
+    currentProject {
+        createVariant("unit") { add("debug") }
+    }
+    reports {
+        filters {
+            excludes {
+                classes("*_Impl", "*_Impl\$*", "*.BuildConfig", "*ComposableSingletons*", "*.R", "*.R\$*")
+                annotatedBy("androidx.compose.ui.tooling.preview.Preview", "androidx.compose.runtime.Composable")
+            }
+        }
+    }
 }
 
 sentry {

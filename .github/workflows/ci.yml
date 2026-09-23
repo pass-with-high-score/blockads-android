@@ -11,6 +11,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  go-test:
+    name: Go vet & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tunnel
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+          cache-dependency-path: tunnel/go.sum
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race -short -cover ./...
+
+      # Each Fuzz* target must run against its own package, so enumerate per package.
+      # Keep going after a crash so one run reports every failing target.
+      - name: Fuzz smoke (30s per target)
+        shell: bash
+        run: |
+          failed=0
+          for pkg in $(go list ./...); do
+            listing=$(go test -list '^Fuzz' "$pkg")
+            for target in $(grep '^Fuzz' <<<"$listing" || true); do
+              echo "::group::$target ($pkg)"
+              go test -run='^$' -fuzz="^${target}\$" -fuzztime="${FUZZTIME:-30s}" "$pkg" || failed=1
+              echo "::endgroup::"
+            done
+          done
+          exit $failed
+
+      # A crash writes its input under testdata/fuzz/; commit it as a regression seed.
+      - name: Upload fuzz crashers
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crashers
+          path: tunnel/**/testdata/fuzz/
+          retention-days: 7
+
   build:
     name: Build & Lint
     runs-on: ubuntu-latest
@@ -27,7 +74,10 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          # 21 for the unit-test toolchain (Robolectric's SDK 36 runtime); 17, listed last, stays the default.
+          java-version: |
+            21
+            17
           distribution: 'temurin'
 
       - name: Cache Gradle
@@ -68,6 +118,26 @@ jobs:
       # gradle/tunnel.aar.sha256.
       - name: Verify published tunnel.aar
         run: ./gradlew verifyTunnelAar
+
+      - name: Unit tests
+        run: ./gradlew -Ptunnel.source=local :app:testDebugUnitTest :app:koverXmlReportUnit :app:koverLogUnit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: app/build/reports/kover/reportUnit.xml
+          retention-days: 7
+
+      - name: Upload unit test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: |
+            app/build/reports/tests/
+            app/build/test-results/
+          retention-days: 7
 
       - name: Lint
         run: ./gradlew -Ptunnel.source=local lint

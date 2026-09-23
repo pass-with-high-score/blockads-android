@@ -1,6 +1,5 @@
 package app.pwhs.blockads.utils
 
-import com.topjohnwu.superuser.Shell
 import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
@@ -20,9 +19,12 @@ object SystemCertificateInstaller {
     private const val MODULE_ID = "blockads_ca"
     private const val MODULE_DIR = "/data/adb/modules/$MODULE_ID"
 
+    @Volatile
+    internal var shell: RootShell = LibsuRootShell
+
     fun isRootAvailable(): Boolean {
         return try {
-            Shell.isAppGrantedRoot() == true || Shell.cmd("id").exec().isSuccess
+            shell.isAppGrantedRoot() == true || shell.exec("id").isSuccess
         } catch (e: Exception) {
             Timber.w(e, "Failed to check root availability")
             false
@@ -86,7 +88,7 @@ object SystemCertificateInstaller {
                 "rm -f $removedPath"
             )
 
-            val res = Shell.cmd(*commands.toTypedArray()).exec()
+            val res = shell.exec(*commands.toTypedArray())
             if (res.isSuccess) {
                 Timber.d("CA installed to user store via root successfully: $certPath")
                 Result.success(hashOld)
@@ -167,7 +169,7 @@ object SystemCertificateInstaller {
             commands.add("chmod 644 $userStoreDir/$hashOld.0")
             commands.add("chown system:system $userStoreDir/$hashOld.0 2>/dev/null || true")
 
-            val res = Shell.cmd(*commands.toTypedArray()).exec()
+            val res = shell.exec(*commands.toTypedArray())
             if (res.isSuccess) {
                 Timber.d("CA installed to system store module successfully (hashOld=$hashOld, hashSha1=$hashSha1)")
                 Result.success(hashOld)

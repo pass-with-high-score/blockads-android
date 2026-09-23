@@ -9,15 +9,18 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
-import app.pwhs.blockads.service.vpn.TunnelResult
+import app.pwhs.blockads.service.vpn.StartupConfig
 import app.pwhs.blockads.service.vpn.VpnConnectionSupervisor
 import app.pwhs.blockads.service.vpn.VpnEngineCoordinator
 import app.pwhs.blockads.service.vpn.VpnNotificationManager
+import app.pwhs.blockads.service.vpn.VpnSessionController
+import app.pwhs.blockads.service.vpn.VpnSessionEngine
+import app.pwhs.blockads.service.vpn.VpnSessionHost
+import app.pwhs.blockads.service.vpn.VpnStatusStore
 import app.pwhs.blockads.service.vpn.VpnTunnelBuilder
 import app.pwhs.blockads.utils.AppNameResolver
 import app.pwhs.blockads.utils.BatteryMonitor
@@ -27,54 +30,46 @@ import app.pwhs.blockads.widget.AdBlockWidgetProvider
 import app.pwhs.blockads.worker.VpnResumeWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
 
 class AdBlockVpnService : VpnService() {
 
     companion object {
-        private const val RESTART_CLEANUP_DELAY_MS = 1000L
-        private const val GO_STOP_TIMEOUT_MS = 300L
         const val ACTION_START = "app.pwhs.blockads.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockads.STOP_VPN"
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
         const val EXTRA_STARTED_FROM_BOOT = "extra_started_from_boot"
-        private const val REVOKE_GRACE_MS = 10_000L
 
-        private val _state = MutableStateFlow(VpnState.STOPPED)
-        val state: StateFlow<VpnState> = _state.asStateFlow()
+        internal val status = VpnStatusStore()
+        val state: StateFlow<VpnState> = status.state.asStateFlow()
 
-        val isRunning: Boolean get() = _state.value == VpnState.RUNNING
-        val isConnecting: Boolean get() = _state.value == VpnState.STARTING
-        val isRestarting: Boolean get() = _state.value == VpnState.RESTARTING
-        val isStopping: Boolean get() = _state.value == VpnState.STOPPING
+        val isRunning: Boolean get() = status.state.value == VpnState.RUNNING
+        val isConnecting: Boolean get() = status.state.value == VpnState.STARTING
+        val isRestarting: Boolean get() = status.state.value == VpnState.RESTARTING
+        val isStopping: Boolean get() = status.state.value == VpnState.STOPPING
 
-        var startTimestamp = 0L
-        var lastStoppedTimestamp = 0L
+        var startTimestamp: Long
+            get() = status.startTimestamp
+            set(value) { status.startTimestamp = value }
+        var lastStoppedTimestamp: Long
+            get() = status.lastStoppedTimestamp
+            set(value) { status.lastStoppedTimestamp = value }
 
-        private val _privateDnsStrict = MutableStateFlow(false)
-        val privateDnsStrict: StateFlow<Boolean> = _privateDnsStrict.asStateFlow()
+        val privateDnsStrict: StateFlow<Boolean> = status.privateDnsStrict.asStateFlow()
 
         fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?) {
-            _privateDnsStrict.value = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+            status.privateDnsStrict.value = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                 linkProperties?.privateDnsServerName != null
         }
 
         fun requestRestart(context: Context) {
-            val s = _state.value
+            val s = status.state.value
             if (s == VpnState.RUNNING || s == VpnState.STARTING) {
                 context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_RESTART })
             }
@@ -89,35 +84,22 @@ class AdBlockVpnService : VpnService() {
         }
     }
 
-    private var vpnInterface: ParcelFileDescriptor? = null
-    @Volatile private var lastVpnEstablishedAt: Long = 0L
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var filterRepo: FilterListRepository
     private lateinit var appPrefs: AppPreferences
     private lateinit var dnsLogDao: DnsLogDao
     private lateinit var goTunnelAdapter: GoTunnelAdapter
-    private val retryManager = VpnRetryManager(maxRetries = 5, maxDelayMs = 60000L)
     private lateinit var batteryMonitor: BatteryMonitor
     private lateinit var notificationHelper: NotificationHelper
     private lateinit var vpnNotificationManager: VpnNotificationManager
     private lateinit var tunnelBuilder: VpnTunnelBuilder
     private lateinit var connectionSupervisor: VpnConnectionSupervisor
     private lateinit var engineCoordinator: VpnEngineCoordinator
-    private var firewallManager: FirewallManager? = null
     private lateinit var firewallRuleDao: FirewallRuleDao
     private lateinit var appNameResolver: AppNameResolver
+    private lateinit var session: VpnSessionController
 
-    @Volatile private var resolvedWgConfigJson: String = ""
-    private var vpnStartTime: Long = 0L
-    @Volatile private var todayBlockedCount: Int = 0
-    private val allTimeBlockedCount = AtomicLong(0)
-    @Volatile private var nextMilestoneThreshold: Long? = null
-    @Volatile private var isReconnecting = false
-    @Volatile private var isPhysicalNetworkLost = false
-
-    @Volatile
-    var connectingPhase: String = ""
-        private set
+    val connectingPhase: String get() = if (::session.isInitialized) session.connectingPhase else ""
 
     @Volatile private var isRecordDnsLogsEnabled = true
 
@@ -142,7 +124,7 @@ class AdBlockVpnService : VpnService() {
             dnsLogDao = dnsLogDao,
             scope = serviceScope,
             appNameResolver = appNameResolver,
-            firewallManagerProvider = { firewallManager },
+            firewallManagerProvider = { session.firewallManager },
             recordLogProvider = { isRecordDnsLogsEnabled },
         )
 
@@ -154,15 +136,11 @@ class AdBlockVpnService : VpnService() {
             isRunningProvider = { isRunning },
             isIdleProvider = { !isRunning && !isConnecting && !isRestarting && !isStopping },
             socketProtector = { fd -> protect(fd) },
-            onTearDownForRestart = { tearDownForRestart() },
-            onStartVpn = {
-                retryManager.reset()
-                startVpn()
-                isReconnecting = false
-            },
-            onPhaseChanged = { phase -> connectingPhase = phase },
+            onTearDownForRestart = { session.tearDownForRestart() },
+            onStartVpn = { session.startFromSupervisor() },
+            onPhaseChanged = { phase -> session.connectingPhase = phase },
             onRefreshStats = {
-                todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
+                session.todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
             },
             onUpdateNotification = { updateNotification() },
             onLinkPropertiesChanged = { linkProperties ->
@@ -171,12 +149,7 @@ class AdBlockVpnService : VpnService() {
                     engineCoordinator.handleLinkPropertiesChanged(goTunnelAdapter, linkProperties)
                 }
             },
-            onPhysicalNetworkLostChanged = { lost ->
-                if (isPhysicalNetworkLost != lost) {
-                    isPhysicalNetworkLost = lost
-                    updateNotification()
-                }
-            },
+            onPhysicalNetworkLostChanged = { lost -> session.onPhysicalNetworkLostChanged(lost) },
             onNetworkActiveChanged = { network ->
                 try {
                     setUnderlyingNetworks(if (network != null) arrayOf(network) else null)
@@ -186,6 +159,17 @@ class AdBlockVpnService : VpnService() {
                 }
             },
             onRequestRestart = { requestRestart(this@AdBlockVpnService) }
+        )
+        session = VpnSessionController(
+            scope = serviceScope,
+            status = status,
+            host = sessionHost,
+            engine = sessionEngine,
+            network = connectionSupervisor,
+            appPrefs = appPrefs,
+            dnsLogDao = dnsLogDao,
+            nextMilestoneThreshold = notificationHelper::nextMilestoneThreshold,
+            establishTunnel = tunnelBuilder::establish,
         )
         connectionSupervisor.initializeNetworkMonitor()
 
@@ -205,151 +189,10 @@ class AdBlockVpnService : VpnService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val startedFromBoot = intent?.getBooleanExtra(EXTRA_STARTED_FROM_BOOT, false) ?: false
         return when (intent?.action) {
-            ACTION_STOP -> { stopVpn(); START_NOT_STICKY }
+            ACTION_STOP -> { session.stop(); START_NOT_STICKY }
             ACTION_PAUSE_1H -> { pauseVpn(); START_NOT_STICKY }
-            ACTION_RESTART -> { restartVpn(); START_STICKY }
-            else -> { startVpn(startedFromBoot); START_STICKY }
-        }
-    }
-
-    private fun restartVpn() {
-        if (_state.value == VpnState.RESTARTING) return
-        val s = _state.value
-        if (s != VpnState.RUNNING && s != VpnState.STARTING) return
-
-        Timber.d("Restarting VPN to apply new settings")
-        serviceScope.launch(Dispatchers.IO) {
-            tearDownForRestart()
-            retryManager.reset()
-            delay(RESTART_CLEANUP_DELAY_MS)
-            startVpn()
-        }
-    }
-
-    private fun startVpn(startedFromBoot: Boolean = false) {
-        val s = _state.value
-        if (s == VpnState.RUNNING || s == VpnState.STARTING) return
-        _state.value = VpnState.STARTING
-
-        vpnNotificationManager.createChannels()
-        startForeground(VpnNotificationManager.NOTIFICATION_ID, buildCurrentNotification())
-        connectionSupervisor.startNetworkMonitoring()
-
-        serviceScope.launch {
-            try {
-                val startupTime = System.currentTimeMillis()
-
-                connectingPhase = getString(R.string.vpn_phase_loading_filters)
-                updateNotification()
-
-                val config = engineCoordinator.prepareStartupConfig()
-                firewallManager = config.firewallManager
-
-                connectingPhase = getString(R.string.vpn_phase_preparing_dns)
-                updateNotification()
-
-                val httpsFilteringEnabled = appPrefs.getHttpsFilteringEnabledSnapshot()
-
-                if (startedFromBoot && !connectionSupervisor.isNetworkAvailable()) {
-                    connectingPhase = getString(R.string.vpn_phase_waiting_network)
-                    updateNotification()
-                    Timber.d("Waiting for network before establishing VPN tunnel...")
-                    connectionSupervisor.networkAvailableFlow.first()
-                    Timber.d("Network is now available, proceeding with VPN establishment")
-                }
-
-                connectingPhase = getString(R.string.vpn_phase_establishing)
-                updateNotification()
-
-                var vpnEstablished = false
-                while (!vpnEstablished && retryManager.shouldRetry()) {
-                    when (val tunnelRes = tunnelBuilder.establish(config.whitelistedApps)) {
-                        is TunnelResult.Success -> {
-                            vpnInterface = tunnelRes.vpnInterface
-                            resolvedWgConfigJson = tunnelRes.resolvedWgConfigJson
-                            lastVpnEstablishedAt = android.os.SystemClock.elapsedRealtime()
-                            vpnEstablished = true
-                        }
-                        is TunnelResult.PermissionRevoked -> {
-                            stopVpn(showStoppedNotification = false)
-                            vpnNotificationManager.showRevokedNotification()
-                            return@launch
-                        }
-                        is TunnelResult.Failure -> {
-                            vpnEstablished = false
-                        }
-                    }
-
-                    if (!vpnEstablished && retryManager.shouldRetry()) {
-                        Timber.w("VPN establishment failed, retrying... (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})")
-                        updateNotification()
-                        retryManager.waitForRetry()
-                    }
-                }
-
-                if (!vpnEstablished) {
-                    Timber.e("Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
-                    connectingPhase = ""
-                    stopVpn()
-                    return@launch
-                }
-
-                retryManager.reset()
-                connectingPhase = ""
-                val resumedFromReconnect = isReconnecting && vpnStartTime > 0L
-                isReconnecting = false
-                _state.value = VpnState.RUNNING
-                appPrefs.setVpnEnabled(true)
-
-                runCatching {
-                    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                    updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) })
-                }
-                if (!resumedFromReconnect) {
-                    vpnStartTime = System.currentTimeMillis()
-                }
-                startTimestamp = vpnStartTime
-
-                val startupElapsed = System.currentTimeMillis() - startupTime
-                Timber.d("VPN startup completed in ${startupElapsed}ms")
-
-                val cachedTotal = dnsLogDao.getBlockedCountSync().toLong()
-                allTimeBlockedCount.set(cachedTotal)
-                val lastMilestone = appPrefs.lastMilestoneBlocked.first()
-                nextMilestoneThreshold = notificationHelper.nextMilestoneThreshold(lastMilestone)
-
-                updateNotification()
-                Timber.d("VPN established successfully")
-
-                AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
-                batteryMonitor.logBatteryStatus()
-                connectionSupervisor.startPeriodicMonitoring()
-
-                engineCoordinator.configureEngine(goTunnelAdapter, config)
-                engineCoordinator.startFilterUpdateWatcher(this, goTunnelAdapter)
-
-                vpnInterface?.let { pfd ->
-                    engineCoordinator.startTunnel(
-                        goTunnelAdapter = goTunnelAdapter,
-                        vpnInterface = pfd,
-                        resolvedWgConfigJson = resolvedWgConfigJson,
-                        httpsFilteringEnabled = httpsFilteringEnabled,
-                        certDir = filesDir.absolutePath,
-                        socketProtector = { fd ->
-                            try {
-                                protect(fd)
-                            } catch (e: Exception) {
-                                Timber.e(e, "Failed to protect socket $fd")
-                                false
-                            }
-                        }
-                    )
-                }
-
-            } catch (e: Exception) {
-                Timber.e(e, "VPN startup failed")
-                stopVpn()
-            }
+            ACTION_RESTART -> { session.restart(); START_STICKY }
+            else -> { session.start(startedFromBoot); START_STICKY }
         }
     }
 
@@ -360,111 +203,33 @@ class AdBlockVpnService : VpnService() {
             androidx.work.ExistingWorkPolicy.REPLACE,
             OneTimeWorkRequestBuilder<VpnResumeWorker>().setInitialDelay(1, TimeUnit.HOURS).build()
         )
-        stopVpn(showStoppedNotification = false)
+        session.stop(showStoppedNotification = false)
         vpnNotificationManager.showPausedNotification()
     }
 
-    private fun stopVpn(showStoppedNotification: Boolean = true) {
-        _state.value = VpnState.STOPPING
-        isReconnecting = false
-        isPhysicalNetworkLost = false
-        connectionSupervisor.cancelNetworkSwitch()
-        startTimestamp = 0L
-
-        updateNotification()
-        connectionSupervisor.stopNetworkMonitoring()
-        connectionSupervisor.stopPeriodicMonitoring()
-
-        serviceScope.launch(Dispatchers.IO) {
-            appPrefs.setVpnEnabled(false)
-            try {
-                vpnInterface?.close()
-            } catch (e: Exception) {
-                Timber.e("Error closing VPN interface: $e")
-            }
-            vpnInterface = null
-
-            val goStop = serviceScope.launch(NonCancellable) { goTunnelAdapter.stop() }
-            if (withTimeoutOrNull(GO_STOP_TIMEOUT_MS) { goStop.join() } == null) {
-                Timber.w("Go tunnel stop still running after ${GO_STOP_TIMEOUT_MS}ms — finishing shutdown anyway")
-            }
-
-            withContext(Dispatchers.Main) {
-                if (_state.value != VpnState.STOPPING) {
-                    Timber.w("Shutdown superseded by ${_state.value} — leaving the new session alone")
-                    return@withContext
-                }
-                if (showStoppedNotification) {
-                    stopForeground(STOP_FOREGROUND_DETACH)
-                    vpnNotificationManager.showStoppedNotification()
-                } else {
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                }
-                stopSelf()
-                Timber.d("VPN service stopSelf called, waiting for OS transport teardown")
-            }
-
-            VpnUtils.scheduleStopFinalization(applicationContext) {
-                if (_state.value == VpnState.STOPPING) {
-                    _state.value = VpnState.STOPPED
-                    lastStoppedTimestamp = System.currentTimeMillis()
-                    _privateDnsStrict.value = false
-                    Timber.d("VPN fully stopped (OS transport cleared)")
-                    AdBlockWidgetProvider.sendUpdateBroadcast(applicationContext)
-                }
-            }
-        }
-    }
-
     override fun onRevoke() {
-        val sinceEstablish = android.os.SystemClock.elapsedRealtime() - lastVpnEstablishedAt
-        if (sinceEstablish in 0 until REVOKE_GRACE_MS) {
-            Timber.w("Ignoring stale onRevoke (${sinceEstablish}ms after establish — superseded session)")
-            return
-        }
-
-        Timber.w("VPN revoked by system or user")
-        serviceScope.launch(NonCancellable) {
-            appPrefs.setVpnEnabled(false)
-        }
-        vpnNotificationManager.showRevokedNotification()
-        stopVpn(showStoppedNotification = false)
+        if (!session.onRevoke()) return
         super.onRevoke()
     }
 
     override fun onDestroy() {
-        if (_state.value != VpnState.STOPPING) {
-            _state.value = VpnState.STOPPED
-            lastStoppedTimestamp = System.currentTimeMillis()
-        }
-        isReconnecting = false
-        isPhysicalNetworkLost = false
-        startTimestamp = 0L
-
-        connectionSupervisor.stopNetworkMonitoring()
-        connectionSupervisor.stopPeriodicMonitoring()
-
-        serviceScope.cancel()
-        try {
-            vpnInterface?.close()
-        } catch (_: Exception) { }
-        vpnInterface = null
+        session.onDestroy()
         super.onDestroy()
     }
 
     private fun buildCurrentNotification(): Notification {
         return vpnNotificationManager.buildForegroundNotification(
-            state = _state.value,
+            state = status.state.value,
             isConnecting = isConnecting,
-            isReconnecting = isReconnecting,
+            isReconnecting = session.isReconnecting,
             isStopping = isStopping,
             isRunning = isRunning,
-            connectingPhase = connectingPhase,
-            retryCount = retryManager.getRetryCount(),
-            maxRetries = retryManager.getMaxRetries(),
-            vpnStartTime = vpnStartTime,
-            todayBlockedCount = todayBlockedCount,
-            isPhysicalNetworkLost = isPhysicalNetworkLost
+            connectingPhase = session.connectingPhase,
+            retryCount = session.retryManager.getRetryCount(),
+            maxRetries = session.retryManager.getMaxRetries(),
+            vpnStartTime = session.vpnStartTime,
+            todayBlockedCount = session.todayBlockedCount,
+            isPhysicalNetworkLost = session.isPhysicalNetworkLost
         )
     }
 
@@ -474,20 +239,69 @@ class AdBlockVpnService : VpnService() {
         AdBlockWidgetProvider.sendUpdateBroadcast(this)
     }
 
-    private suspend fun tearDownForRestart() {
-        _state.value = VpnState.RESTARTING
-        isReconnecting = true
-        isPhysicalNetworkLost = false
+    private val sessionHost = object : VpnSessionHost {
+        override fun getString(resId: Int): String = this@AdBlockVpnService.getString(resId)
 
-        connectionSupervisor.stopNetworkMonitoring()
-        connectionSupervisor.stopPeriodicMonitoring()
-        goTunnelAdapter.stop()
-        try {
-            vpnInterface?.close()
-        } catch (e: Exception) {
-            Timber.e(e, "Error closing VPN interface during network switch")
+        override fun enterForeground() {
+            vpnNotificationManager.createChannels()
+            startForeground(VpnNotificationManager.NOTIFICATION_ID, buildCurrentNotification())
         }
-        vpnInterface = null
+
+        override fun updateNotification() = this@AdBlockVpnService.updateNotification()
+        override fun showRevokedNotification() = vpnNotificationManager.showRevokedNotification()
+        override fun showStoppedNotification() = vpnNotificationManager.showStoppedNotification()
+
+        override fun stopForeground(removeNotification: Boolean) =
+            this@AdBlockVpnService.stopForeground(if (removeNotification) STOP_FOREGROUND_REMOVE else STOP_FOREGROUND_DETACH)
+
+        override fun stopSelf() = this@AdBlockVpnService.stopSelf()
+
+        override fun refreshPrivateDnsState() {
+            runCatching {
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) })
+            }
+        }
+
+        override fun broadcastWidgetUpdate() = AdBlockWidgetProvider.sendUpdateBroadcast(this@AdBlockVpnService)
+        override fun logBatteryStatus() = batteryMonitor.logBatteryStatus()
+
+        override fun scheduleStopFinalization(onFinalized: () -> Unit) =
+            VpnUtils.scheduleStopFinalization(applicationContext, onFinalized)
+
+        override fun onFullyStopped() = AdBlockWidgetProvider.sendUpdateBroadcast(applicationContext)
+    }
+
+    private val sessionEngine = object : VpnSessionEngine {
+        override suspend fun prepareStartupConfig(): StartupConfig = engineCoordinator.prepareStartupConfig()
+
+        override suspend fun configure(config: StartupConfig) =
+            engineCoordinator.configureEngine(goTunnelAdapter, config)
+
+        override fun startFilterUpdateWatcher(scope: CoroutineScope) =
+            engineCoordinator.startFilterUpdateWatcher(scope, goTunnelAdapter)
+
+        override suspend fun startTunnel(
+            vpnInterface: ParcelFileDescriptor,
+            resolvedWgConfigJson: String,
+            httpsFilteringEnabled: Boolean,
+        ) = engineCoordinator.startTunnel(
+            goTunnelAdapter = goTunnelAdapter,
+            vpnInterface = vpnInterface,
+            resolvedWgConfigJson = resolvedWgConfigJson,
+            httpsFilteringEnabled = httpsFilteringEnabled,
+            certDir = filesDir.absolutePath,
+            socketProtector = { fd ->
+                try {
+                    protect(fd)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to protect socket $fd")
+                    false
+                }
+            }
+        )
+
+        override fun stop() = goTunnelAdapter.stop()
     }
 
     fun protectSocket(fd: Int): Boolean {

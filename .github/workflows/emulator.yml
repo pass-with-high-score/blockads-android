@@ -1,0 +1,143 @@
+name: Emulator tests
+
+# Instrumented tests (browser, navigation, VPN smoke, CA storage, Room migrations) on real emulators.
+# Too slow for every push: nightly, on demand, and on PRs carrying the run-emulator label.
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  # Labels other than run-emulator get a throwaway group so they can't cancel a real run.
+  group: emulator-${{ github.ref }}-${{ (github.event.action == 'labeled' && github.event.label.name != 'run-emulator') && github.run_id || 'run' }}
+  cancel-in-progress: true
+
+jobs:
+  tunnel:
+    name: Build tunnel.aar
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-emulator')
+    runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+          cache: true
+
+      - name: Install gomobile
+        run: |
+          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+          "$HOME/go/bin/gomobile" init
+
+      # Built from source, like ci.yml, so the tests exercise this revision's Go engine.
+      - name: Build Go Tunnel (tunnel.aar)
+        run: ./gradlew -Ptunnel.source=local buildGoTunnel
+
+      - name: Upload tunnel.aar
+        uses: actions/upload-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel/tunnel.aar
+          retention-days: 1
+
+  instrumented:
+    name: Instrumented tests
+    needs: tunnel
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [30, 34]
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+      TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Download tunnel.aar
+        uses: actions/download-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build app and test APKs
+        run: ./gradlew -Ptunnel.source=prebuilt :app:assembleDebug :app:assembleDebugAndroidTest
+
+      # The tests grant VPN consent themselves (appops ACTIVATE_VPN allow) and resolve DNS from the shell UID.
+      - name: Run instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          # Cold boot every run: a restored snapshot can report boot_completed before the input service is up, and the
+          # runner's unlock keyevent then fails the job before any test runs.
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: ./gradlew -Ptunnel.source=prebuilt :app:connectedDebugAndroidTest
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-test-reports-api${{ matrix.api-level }}
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/connected/
+          retention-days: 7

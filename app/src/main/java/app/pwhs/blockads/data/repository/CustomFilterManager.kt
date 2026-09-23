@@ -573,7 +573,7 @@ class CustomFilterManager(
 
     // ── Helpers ────────────────────────────────────────────────────────
 
-    private data class FilterInfo(
+    internal data class FilterInfo(
         val name: String,
         val url: String,
         val ruleCount: Int,
@@ -584,7 +584,7 @@ class CustomFilterManager(
      * Parses the info.json file from the extracted ZIP.
      * Expected format: { "name": "...", "url": "...", "ruleCount": 123, "updatedAt": "..." }
      */
-    private fun parseInfoJson(json: String): FilterInfo {
+    internal fun parseInfoJson(json: String): FilterInfo {
         fun extractString(key: String): String? {
             val pattern = "\"$key\"\\s*:\\s*\"(.*?)\"".toRegex()
             return pattern.find(json)?.groupValues?.get(1)

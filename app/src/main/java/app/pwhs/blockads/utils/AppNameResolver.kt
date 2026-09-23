@@ -185,30 +185,14 @@ class AppNameResolver(private val context: Context) {
      * of a redirected query).
      */
     private fun readProcNetViaRoot(): Map<Int, Int> {
-        val map = HashMap<Int, Int>()
         val result = com.topjohnwu.superuser.Shell.cmd(
             "cat /proc/net/udp /proc/net/udp6 2>/dev/null"
         ).exec()
-        if (!result.isSuccess) return map
-        for (line in result.out) {
-            try {
-                val parts = line.trim().split("\\s+".toRegex())
-                if (parts.size < 8) continue
-                val localAddress = parts[1]
-                val colonIndex = localAddress.lastIndexOf(':')
-                if (colonIndex < 0) continue
-                val port = localAddress.substring(colonIndex + 1).toInt(16)
-                val uid = parts[7].toIntOrNull() ?: continue
-                if (uid == ownUid) continue
-                map.putIfAbsent(port, uid)
-            } catch (_: Exception) {
-                // Skip header / malformed lines
-            }
-        }
-        return map
+        if (!result.isSuccess) return emptyMap()
+        return parseProcNetUdp(result.out, ownUid)
     }
 
-    private fun findUidInProcFile(path: String, hexPort: String): Int? {
+    internal fun findUidInProcFile(path: String, hexPort: String): Int? {
         try {
             File(path).bufferedReader(Charsets.UTF_8).use { reader ->
                 // Skip header line
@@ -240,7 +224,7 @@ class AppNameResolver(private val context: Context) {
         return null
     }
 
-    private fun getAppNameForUid(uid: Int): String {
+    internal fun getAppNameForUid(uid: Int): String {
         uidToAppNameCache[uid]?.let { return it }
 
         val pm = context.packageManager
@@ -273,7 +257,7 @@ class AppNameResolver(private val context: Context) {
     // Cache UID -> package name
     private val uidToPackageNameCache = ConcurrentHashMap<Int, String>()
 
-    private fun getPackageNameForUid(uid: Int): String {
+    internal fun getPackageNameForUid(uid: Int): String {
         uidToPackageNameCache[uid]?.let { return it }
 
         val pm = context.packageManager
@@ -291,4 +275,25 @@ class AppNameResolver(private val context: Context) {
         // is well under the per-query rate that caused issue #130.
         const val SNAPSHOT_INTERVAL_MS = 100L
     }
+}
+
+/** Port → UID map from `/proc/net/udp{,6}` lines, first writer wins, skipping [ownUid]. */
+internal fun parseProcNetUdp(lines: List<String>, ownUid: Int): Map<Int, Int> {
+    val map = HashMap<Int, Int>()
+    for (line in lines) {
+        try {
+            val parts = line.trim().split("\\s+".toRegex())
+            if (parts.size < 8) continue
+            val localAddress = parts[1]
+            val colonIndex = localAddress.lastIndexOf(':')
+            if (colonIndex < 0) continue
+            val port = localAddress.substring(colonIndex + 1).toInt(16)
+            val uid = parts[7].toIntOrNull() ?: continue
+            if (uid == ownUid) continue
+            map.putIfAbsent(port, uid)
+        } catch (_: Exception) {
+            // Skip header / malformed lines
+        }
+    }
+    return map
 }

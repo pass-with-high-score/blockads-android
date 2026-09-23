@@ -79,3 +79,37 @@ func TestSanitizeRequestSameOriginReferer(t *testing.T) {
 		t.Errorf("expected same-origin Referer to be preserved, got %q", req.Header.Get("Referer"))
 	}
 }
+
+func TestSanitizeRequestEdgeCases(t *testing.T) {
+	SanitizeRequest(nil, "example.com") // must not panic
+
+	req := httptest.NewRequest("GET", "https://example.com/p?b=2&a=1&a=0", nil)
+	req.RequestURI = "/p?b=2&a=1&a=0"
+	req.Header.Set("Referer", "::not a url")
+	SanitizeRequest(req, "example.com:443")
+	if req.URL.RawQuery != "b=2&a=1&a=0" || req.RequestURI != "/p?b=2&a=1&a=0" {
+		t.Errorf("query without tracking params was rewritten: %q %q", req.URL.RawQuery, req.RequestURI)
+	}
+	if req.Header.Get("Referer") != "::not a url" {
+		t.Errorf("unparsable Referer changed to %q", req.Header.Get("Referer"))
+	}
+
+	// Target host with a port still counts as same-origin.
+	req = httptest.NewRequest("GET", "https://example.com/", nil)
+	req.Header.Set("Referer", "https://EXAMPLE.com/deep/path")
+	SanitizeRequest(req, "example.com:443")
+	if req.Header.Get("Referer") != "https://EXAMPLE.com/deep/path" {
+		t.Errorf("same-origin Referer with port target rewritten: %q", req.Header.Get("Referer"))
+	}
+}
+
+// Plan Phase 2.1: cleanQuery re-encodes with url.Values.Encode, which sorts
+// keys, so untouched params are reordered (and re-escaped).
+func TestCleanQueryPreservesOrder(t *testing.T) {
+	t.Skip("known bug: cleanQuery sorts the remaining params (url.Values.Encode)")
+	req := httptest.NewRequest("GET", "https://example.com/p?z=1&utm_source=x&a=2&m=%7E", nil)
+	cleanQuery(req)
+	if req.URL.RawQuery != "z=1&a=2&m=%7E" {
+		t.Fatalf("RawQuery = %q, want z=1&a=2&m=%%7E", req.URL.RawQuery)
+	}
+}
