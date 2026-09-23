@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">重命名</string>
     <string name="wireguard_more_options">更多选项</string>
     <string name="wireguard_no_peer">(无对等端)</string>
+    <string name="wireguard_issue_no_allowed_ips">没有任何对等端设置 Allowed IPs，因此不会有流量通过隧道</string>
+    <string name="wireguard_issue_malformed_allowed_ips">无效的 Allowed IPs：%1$s</string>
+    <string name="wireguard_issue_fix_first">请先修复“%1$s”：%2$s</string>
+    <string name="wireguard_config_invalid_title">WireGuard 配置文件需要修复</string>
+    <string name="wireguard_config_invalid_text">%1$s。BlockAds 已停止，而不是在没有隧道的情况下运行。</string>
     <string name="wireguard_rename_dialog_title">重命名配置</string>
     <string name="root_proxy_start_failed_title">BlockAds 启动失败</string>
     <string name="root_proxy_start_failed_text">无法获取 Root 权限以启动防护。点按“启用”重试。</string>

@@ -9,6 +9,7 @@ import app.pwhs.blockads.data.entities.WireGuardInterface
 import app.pwhs.blockads.data.entities.WireGuardPeer
 import app.pwhs.blockads.data.entities.WireGuardProfile
 import app.pwhs.blockads.service.ServiceController
+import app.pwhs.blockads.service.vpn.VpnNotificationManager
 import app.pwhs.blockads.utils.WireGuardValidators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,6 +94,8 @@ class WireGuardEditViewModel(
                 return@launch
             }
             _state.value = profile.toFormState()
+            // Surface problems an imported config arrived with, before the user tries to save.
+            _errors.value = WireGuardEditErrors(validate(_state.value))
             _isLoading.value = false
         }
     }
@@ -134,6 +137,7 @@ class WireGuardEditViewModel(
             val active = appPrefs.getActiveWgProfileSnapshot()
             appPrefs.addOrUpdateWgProfile(updated)
             _events.emit(EditEvent.Saved(updated.name))
+            if (active?.id == updated.id) VpnNotificationManager.cancelWireGuardConfigIssue(getApplication())
 
             // Restart VPN only if this profile is the active one and WG is on.
             val isWgOn =
@@ -172,10 +176,16 @@ class WireGuardEditViewModel(
                 ?.let { errs["peer.${peer.rowId}.presharedKey"] = it }
             WireGuardValidators.endpoint(peer.endpoint, optional = true)
                 ?.let { errs["peer.${peer.rowId}.endpoint"] = it }
-            peer.allowedIPs.splitTrim().firstNotNullOfOrNull { WireGuardValidators.cidr(it) }
+            peer.allowedIPs.splitTrim().firstNotNullOfOrNull { WireGuardValidators.allowedIp(it) }
                 ?.let { errs["peer.${peer.rowId}.allowedIPs"] = it }
             WireGuardValidators.keepalive(peer.persistentKeepalive)
                 ?.let { errs["peer.${peer.rowId}.persistentKeepalive"] = it }
+        }
+        // A peer may legitimately claim nothing, but if none do the tunnel carries no traffic.
+        if (s.peers.all { it.allowedIPs.splitTrim().isEmpty() }) {
+            for (peer in s.peers) {
+                errs["peer.${peer.rowId}.allowedIPs"] = "At least one peer needs Allowed IPs, or nothing is tunneled"
+            }
         }
         return errs
     }

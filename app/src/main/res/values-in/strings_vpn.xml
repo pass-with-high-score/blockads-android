@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Ganti nama</string>
     <string name="wireguard_more_options">Opsi lainnya</string>
     <string name="wireguard_no_peer">(tidak ada peer)</string>
+    <string name="wireguard_issue_no_allowed_ips">Tidak ada peer yang memiliki Allowed IPs, jadi tidak ada yang akan melewati tunnel</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Allowed IPs tidak valid: %1$s</string>
+    <string name="wireguard_issue_fix_first">Perbaiki \'%1$s\' terlebih dahulu: %2$s</string>
+    <string name="wireguard_config_invalid_title">Profil WireGuard perlu diperbaiki</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds berhenti alih-alih berjalan tanpa tunnel.</string>
     <string name="wireguard_rename_dialog_title">Ganti nama profil</string>
     <string name="root_proxy_start_failed_title">BlockAds gagal dimulai</string>
     <string name="root_proxy_start_failed_text">Tidak bisa mendapatkan akses root untuk memulai perlindungan. Ketuk Aktifkan untuk mencoba lagi.</string>

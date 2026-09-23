@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Přejmenovat</string>
     <string name="wireguard_more_options">Další možnosti</string>
     <string name="wireguard_no_peer">(žádný peer)</string>
+    <string name="wireguard_issue_no_allowed_ips">Žádný peer nemá Allowed IPs, takže by se nic netunelovalo</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Neplatné Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">Nejprve opravte \'%1$s\': %2$s</string>
+    <string name="wireguard_config_invalid_title">Profil WireGuard je potřeba opravit</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds se zastavil, místo aby běžel bez tunelu.</string>
     <string name="wireguard_rename_dialog_title">Přejmenovat profil</string>
     <string name="root_proxy_start_failed_title">BlockAds se nepodařilo spustit</string>
     <string name="root_proxy_start_failed_text">Nepodařilo se získat root oprávnění ke spuštění ochrany. Klepnutím na Povolit to zkuste znovu.</string>

@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Zmień nazwę</string>
     <string name="wireguard_more_options">Więcej opcji</string>
     <string name="wireguard_no_peer">(brak peera)</string>
+    <string name="wireguard_issue_no_allowed_ips">Żaden peer nie ma Allowed IPs, więc nic nie zostałoby przetunelowane</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Nieprawidłowe Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">Najpierw popraw \'%1$s\': %2$s</string>
+    <string name="wireguard_config_invalid_title">Profil WireGuard wymaga poprawy</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds zatrzymał się zamiast działać bez tunelu.</string>
     <string name="wireguard_rename_dialog_title">Zmień nazwę profilu</string>
     <string name="root_proxy_start_failed_title">Nie udało się uruchomić BlockAds</string>
     <string name="root_proxy_start_failed_text">Nie udało się uzyskać dostępu root, aby uruchomić ochronę. Stuknij Włącz, aby spróbować ponownie.</string>

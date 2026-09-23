@@ -4,10 +4,15 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardProfile
 import app.pwhs.blockads.service.ServiceController
+import app.pwhs.blockads.service.vpn.VpnNotificationManager
+import app.pwhs.blockads.utils.WgConfigIssue
 import app.pwhs.blockads.utils.WireGuardConfigParser
+import app.pwhs.blockads.utils.configIssue
+import app.pwhs.blockads.utils.describe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,7 +78,7 @@ class WireGuardImportViewModel(
             list to active
         }.onEach { (list, active) ->
             _profiles.value = list
-            _activeProfileId.value = active ?: list.firstOrNull()?.id
+            _activeProfileId.value = active ?: list.firstOrNull { it.configIssue == null }?.id
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
@@ -115,7 +120,7 @@ class WireGuardImportViewModel(
                     name = displayName,
                     config = parsed,
                 )
-                val makeActive = appPrefs.getActiveWgProfileSnapshot() == null
+                val makeActive = appPrefs.getActiveWgProfileSnapshot() == null && profile.configIssue == null
                 appPrefs.addOrUpdateWgProfile(profile, makeActive = makeActive)
                 _events.emit(WireGuardUiEvent.ProfileImported(displayName))
                 if (makeActive && _isWgActive.value) {
@@ -135,6 +140,10 @@ class WireGuardImportViewModel(
     fun setActiveProfile(id: String) {
         viewModelScope.launch {
             val profile = _profiles.value.firstOrNull { it.id == id } ?: return@launch
+            profile.configIssue?.let { issue ->
+                _error.value = fixFirstMessage(profile, issue)
+                return@launch
+            }
             appPrefs.setActiveWgProfile(id)
             _events.emit(WireGuardUiEvent.ProfileActivated(profile.name))
             if (_isWgActive.value) {
@@ -158,13 +167,13 @@ class WireGuardImportViewModel(
             val wasActive = _activeProfileId.value == id
             appPrefs.removeWgProfile(id)
             _events.emit(WireGuardUiEvent.ProfileDeleted(target.name))
+            if (wasActive) VpnNotificationManager.cancelWireGuardConfigIssue(getApplication())
 
             // If the active profile was deleted and WG was on, either:
-            //  - restart with the new active (if any other profile exists), or
-            //  - turn WG off (no profiles left).
+            //  - restart with the next usable profile, or
+            //  - turn WG off (none left) rather than restart into a refusal.
             if (wasActive && _isWgActive.value) {
-                val remaining = appPrefs.getWgProfilesSnapshot()
-                if (remaining.isEmpty()) {
+                if (appPrefs.getActiveWgProfileSnapshot() == null) {
                     appPrefs.setRoutingMode(AppPreferences.ROUTING_MODE_DIRECT)
                     _isWgActive.value = false
                     _events.emit(WireGuardUiEvent.WireGuardToggled(false))
@@ -181,8 +190,13 @@ class WireGuardImportViewModel(
         viewModelScope.launch {
             val newActive = !_isWgActive.value
             if (newActive) {
-                if (appPrefs.getActiveWgProfileSnapshot() == null) {
+                val active = appPrefs.getActiveWgProfileSnapshot()
+                if (active == null) {
                     _error.value = "Import a config first"
+                    return@launch
+                }
+                active.configIssue?.let { issue ->
+                    _error.value = fixFirstMessage(active, issue)
                     return@launch
                 }
                 // HTTPS filtering and WireGuard routing are mutually
@@ -223,6 +237,11 @@ class WireGuardImportViewModel(
 
     fun clearError() {
         _error.value = null
+    }
+
+    private fun fixFirstMessage(profile: WireGuardProfile, issue: WgConfigIssue): String {
+        val res = getApplication<Application>().resources
+        return res.getString(R.string.wireguard_issue_fix_first, profile.name, issue.describe(res))
     }
 
     private fun deriveNameFromUri(uri: Uri): String? {

@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Перейменувати</string>
     <string name="wireguard_more_options">Інші параметри</string>
     <string name="wireguard_no_peer">(немає вузла)</string>
+    <string name="wireguard_issue_no_allowed_ips">Жоден пір не має Allowed IPs, тому нічого не пройде через тунель</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Недійсні Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">Спочатку виправте «%1$s»: %2$s</string>
+    <string name="wireguard_config_invalid_title">Профіль WireGuard потрібно виправити</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds зупинено, щоб не працювати без тунелю.</string>
     <string name="wireguard_rename_dialog_title">Перейменувати профіль</string>
     <string name="root_proxy_start_failed_title">Не вдалося запустити BlockAds</string>
     <string name="root_proxy_start_failed_text">Не вдалося отримати root-доступ для запуску захисту. Натисніть «Увімкнути», щоб повторити спробу.</string>

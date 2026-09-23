@@ -7,6 +7,8 @@ import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardConfig
 import app.pwhs.blockads.utils.SubnetDecomposer
+import app.pwhs.blockads.utils.WgConfigIssue
+import app.pwhs.blockads.utils.wgRoutingFromPeers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -20,6 +22,7 @@ sealed interface TunnelResult {
     ) : TunnelResult
 
     data object PermissionRevoked : TunnelResult
+    data class InvalidWireGuardConfig(val issue: WgConfigIssue) : TunnelResult
     data object Failure : TunnelResult
 }
 
@@ -45,9 +48,7 @@ class VpnTunnelBuilder(
                     json?.let {
                         try {
                             val parsed = WireGuardConfig.fromJson(it)
-                            val resolved = resolveWireGuardEndpoints(parsed)
-                            resolvedWgConfigJson = resolved.toJson()
-                            resolved
+                            resolveWireGuardEndpoints(parsed)
                         } catch (e: Exception) {
                             Timber.e(e, "Failed to parse WireGuard config, falling back to direct")
                             null
@@ -73,11 +74,27 @@ class VpnTunnelBuilder(
                     }
                 }
 
+                // Fail closed: connecting with routes missing would send traffic the user expects tunneled out directly.
+                val routing = wgRoutingFromPeers(wgConfig.peers)
+                routing.issue?.let {
+                    Timber.e("WireGuard: refusing to connect, $it")
+                    return TunnelResult.InvalidWireGuardConfig(it)
+                }
+                // wireguard-go must get the same normalized entries the TUN routes; one bad entry fails the whole device.
+                resolvedWgConfigJson = wgConfig.copy(peers = routing.peers).toJson()
                 val excludeLan = runBlocking { appPrefs.excludeLan.first() }
-                addIpv4Routes(b, excludeLan)
-                b.addRoute("::", 0)
+                for (route in routing.tunRoutes) {
+                    // The decomposed routes stand in for 0.0.0.0/0 and also work below API 33.
+                    if (excludeLan && !route.isIpv6 && route.prefixLength == 0) {
+                        addIpv4Routes(b, excludeLan = true)
+                    } else {
+                        b.addRoute(route.address, route.prefixLength)
+                    }
+                }
+                Timber.d("WireGuard routes=${routing.tunRoutes.size} fullTunnel=${routing.isFullTunnel}")
 
-                if (excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // Full tunnel only: excludeRoute overrides a matching addRoute, so in split mode it would untunnel a listed LAN range.
+                if (routing.isFullTunnel && excludeLan && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     try {
                         b.excludeRoute(IpPrefix(InetAddress.getByName("10.0.0.0"), 8))
                         b.excludeRoute(IpPrefix(InetAddress.getByName("172.16.0.0"), 12))

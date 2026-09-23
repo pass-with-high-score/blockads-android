@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import app.pwhs.blockads.data.entities.WireGuardConfig
 import app.pwhs.blockads.data.entities.WireGuardProfile
 import app.pwhs.blockads.data.entities.WireGuardProfileList
+import app.pwhs.blockads.utils.configIssue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -91,7 +92,7 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
         val profiles = getWgProfilesSnapshot()
         if (profiles.isEmpty()) return null
         val activeId = wgActiveProfileId.first()
-        return profiles.firstOrNull { it.id == activeId } ?: profiles.first()
+        return profiles.firstOrNull { it.id == activeId } ?: profiles.firstOrNull { it.configIssue == null }
     }
 
     suspend fun addOrUpdateWgProfile(profile: WireGuardProfile, makeActive: Boolean = false) {
@@ -110,7 +111,7 @@ class WireGuardPreferences(private val dataStore: DataStore<Preferences>) {
             val current = readProfilesFromPrefs(prefs).filterNot { it.id == id }
             prefs[KEY_WG_PROFILES_JSON] = WireGuardProfileList(current).toJson()
             if (prefs[KEY_WG_ACTIVE_PROFILE_ID] == id) {
-                val newActive = current.firstOrNull()?.id
+                val newActive = current.firstOrNull { it.configIssue == null }?.id
                 if (newActive != null) {
                     prefs[KEY_WG_ACTIVE_PROFILE_ID] = newActive
                 } else {

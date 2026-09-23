@@ -269,10 +269,11 @@ class AdBlockVpnService : VpnService() {
                             resolvedWgConfigJson = tunnelRes.resolvedWgConfigJson
                             lastVpnEstablishedAt = android.os.SystemClock.elapsedRealtime()
                             vpnEstablished = true
+                            VpnNotificationManager.cancelWireGuardConfigIssue(this@AdBlockVpnService)
                         }
-                        is TunnelResult.PermissionRevoked -> {
+                        is TunnelResult.PermissionRevoked, is TunnelResult.InvalidWireGuardConfig -> {
                             stopVpn(showStoppedNotification = false)
-                            vpnNotificationManager.showRevokedNotification()
+                            vpnNotificationManager.showStartFailure(tunnelRes)
                             return@launch
                         }
                         is TunnelResult.Failure -> {

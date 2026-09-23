@@ -11,6 +11,7 @@ import app.pwhs.blockads.MainActivity
 import app.pwhs.blockads.R
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.utils.describe
 import java.util.Locale
 
 class VpnNotificationManager(private val context: Context) {
@@ -18,8 +19,13 @@ class VpnNotificationManager(private val context: Context) {
     companion object {
         const val NOTIFICATION_ID = 1
         const val REVOKED_NOTIFICATION_ID = 2
+        const val WG_CONFIG_ISSUE_NOTIFICATION_ID = 3
         const val CHANNEL_ID = "blockads_vpn_channel"
         const val ALERT_CHANNEL_ID = "blockads_vpn_alert_channel"
+
+        fun cancelWireGuardConfigIssue(context: Context) {
+            context.getSystemService(NotificationManager::class.java)?.cancel(WG_CONFIG_ISSUE_NOTIFICATION_ID)
+        }
     }
 
     private val notificationManager =
@@ -274,7 +280,21 @@ class VpnNotificationManager(private val context: Context) {
         notificationManager?.notify(NOTIFICATION_ID, notification)
     }
 
-    fun showRevokedNotification() {
+    fun showStartFailure(result: TunnelResult) = when (result) {
+        is TunnelResult.InvalidWireGuardConfig -> showAlert(
+            context.getString(R.string.wireguard_config_invalid_title),
+            context.getString(R.string.wireguard_config_invalid_text, result.issue.describe(context.resources)),
+            WG_CONFIG_ISSUE_NOTIFICATION_ID,
+        )
+        else -> showRevokedNotification()
+    }
+
+    fun showRevokedNotification() = showAlert(
+        context.getString(R.string.vpn_revoked_title),
+        context.getString(R.string.vpn_revoked_text),
+    )
+
+    private fun showAlert(title: String, text: String, id: Int = REVOKED_NOTIFICATION_ID) {
         createChannels()
 
         val intent = Intent(context, MainActivity::class.java).apply {
@@ -293,14 +313,15 @@ class VpnNotificationManager(private val context: Context) {
         }
 
         val notification = builder
-            .setContentTitle(context.getString(R.string.vpn_revoked_title))
-            .setContentText(context.getString(R.string.vpn_revoked_text))
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(Notification.BigTextStyle().bigText(text))
             .setSmallIcon(R.drawable.ic_error)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()
 
-        notificationManager?.notify(REVOKED_NOTIFICATION_ID, notification)
+        notificationManager?.notify(id, notification)
     }
 
     fun updateNotification(notification: Notification) {

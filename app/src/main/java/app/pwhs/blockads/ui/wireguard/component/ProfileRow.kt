@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material3.Card
@@ -33,12 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.WireGuardProfile
+import app.pwhs.blockads.utils.configIssue
+import app.pwhs.blockads.utils.describe
 
 @Composable
 fun ProfileRow(
@@ -53,6 +57,8 @@ fun ProfileRow(
     val firstPeer = profile.config.peers.firstOrNull()
     val endpoint = firstPeer?.endpoint ?: stringResource(R.string.wireguard_no_peer)
     val address = profile.config.interfaceConfig.address.firstOrNull() ?: "—"
+    val issue = remember(profile.config) { profile.configIssue }
+    val issueText = issue?.describe(LocalResources.current)
 
     Card(
         modifier = modifier
@@ -60,7 +66,9 @@ fun ProfileRow(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isActive) {
+            containerColor = if (issue != null) {
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f)
+            } else if (isActive) {
                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             } else {
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
@@ -74,9 +82,15 @@ fun ProfileRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = if (isActive) Icons.Filled.CheckCircle else Icons.Outlined.VpnLock,
+                imageVector = when {
+                    issue != null -> Icons.Filled.ErrorOutline
+                    isActive -> Icons.Filled.CheckCircle
+                    else -> Icons.Outlined.VpnLock
+                },
                 contentDescription = null,
-                tint = if (isActive) {
+                tint = if (issue != null) {
+                    MaterialTheme.colorScheme.error
+                } else if (isActive) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -109,6 +123,13 @@ fun ProfileRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (issueText != null) {
+                    Text(
+                        text = issueText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
             ProfileMenu(onEdit = onEdit, onRename = onRename, onDelete = onDelete)
         }

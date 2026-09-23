@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">名前変更</string>
     <string name="wireguard_more_options">その他のオプション</string>
     <string name="wireguard_no_peer">(ピアなし)</string>
+    <string name="wireguard_issue_no_allowed_ips">Allowed IPs を持つピアがないため、何もトンネルされません</string>
+    <string name="wireguard_issue_malformed_allowed_ips">無効な Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">先に「%1$s」を修正してください: %2$s</string>
+    <string name="wireguard_config_invalid_title">WireGuard プロファイルの修正が必要です</string>
+    <string name="wireguard_config_invalid_text">%1$s。トンネルなしで動作する代わりに BlockAds を停止しました。</string>
     <string name="wireguard_rename_dialog_title">プロファイル名を変更</string>
     <string name="root_proxy_start_failed_title">BlockAds を開始できませんでした</string>
     <string name="root_proxy_start_failed_text">保護を開始するための root 権限を取得できませんでした。「有効にする」をタップして再試行してください。</string>

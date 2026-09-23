@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">เปลี่ยนชื่อ</string>
     <string name="wireguard_more_options">ตัวเลือกเพิ่มเติม</string>
     <string name="wireguard_no_peer">(ไม่มี peer)</string>
+    <string name="wireguard_issue_no_allowed_ips">ไม่มี peer ใดมี Allowed IPs จึงไม่มีทราฟฟิกใดผ่านอุโมงค์</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Allowed IPs ไม่ถูกต้อง: %1$s</string>
+    <string name="wireguard_issue_fix_first">แก้ไข \'%1$s\' ก่อน: %2$s</string>
+    <string name="wireguard_config_invalid_title">โปรไฟล์ WireGuard ต้องได้รับการแก้ไข</string>
+    <string name="wireguard_config_invalid_text">%1$s BlockAds หยุดทำงานแทนการทำงานโดยไม่มีอุโมงค์</string>
     <string name="wireguard_rename_dialog_title">เปลี่ยนชื่อโปรไฟล์</string>
     <string name="root_proxy_start_failed_title">BlockAds เริ่มทำงานไม่สำเร็จ</string>
     <string name="root_proxy_start_failed_text">ไม่สามารถรับสิทธิ์รูทเพื่อเริ่มการป้องกันได้ แตะ เปิดใช้งาน เพื่อลองอีกครั้ง</string>

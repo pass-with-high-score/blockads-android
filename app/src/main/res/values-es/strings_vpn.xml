@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Renombrar</string>
     <string name="wireguard_more_options">Más opciones</string>
     <string name="wireguard_no_peer">(sin par)</string>
+    <string name="wireguard_issue_no_allowed_ips">Ningún peer tiene Allowed IPs, así que no se tunelizaría nada</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Allowed IPs no válidas: %1$s</string>
+    <string name="wireguard_issue_fix_first">Corrige \'%1$s\' primero: %2$s</string>
+    <string name="wireguard_config_invalid_title">El perfil de WireGuard necesita corrección</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds se detuvo en lugar de funcionar sin el túnel.</string>
     <string name="wireguard_rename_dialog_title">Renombrar perfil</string>
     <string name="root_proxy_start_failed_title">BlockAds no se pudo iniciar</string>
     <string name="root_proxy_start_failed_text">No se pudo obtener acceso root para iniciar la protección. Toca Activar para reintentar.</string>

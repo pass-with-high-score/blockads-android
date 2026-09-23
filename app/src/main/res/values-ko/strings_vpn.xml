@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">이름 변경</string>
     <string name="wireguard_more_options">더보기</string>
     <string name="wireguard_no_peer">(피어 없음)</string>
+    <string name="wireguard_issue_no_allowed_ips">Allowed IPs가 있는 피어가 없어 아무것도 터널링되지 않습니다</string>
+    <string name="wireguard_issue_malformed_allowed_ips">잘못된 Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">먼저 \'%1$s\'을(를) 수정하세요: %2$s</string>
+    <string name="wireguard_config_invalid_title">WireGuard 프로필을 수정해야 합니다</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds가 터널 없이 실행되는 대신 중지되었습니다.</string>
     <string name="wireguard_rename_dialog_title">프로필 이름 변경</string>
     <string name="root_proxy_start_failed_title">BlockAds를 시작하지 못했습니다</string>
     <string name="root_proxy_start_failed_text">보호를 시작하기 위한 루트 권한을 얻지 못했습니다. 다시 시도하려면 사용을 누르세요.</string>

@@ -63,6 +63,11 @@
     <string name="wireguard_action_rename">Rename</string>
     <string name="wireguard_more_options">More options</string>
     <string name="wireguard_no_peer">(no peer)</string>
+    <string name="wireguard_issue_no_allowed_ips">No peer has Allowed IPs, so nothing would be tunneled</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Invalid Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">Fix \'%1$s\' first: %2$s</string>
+    <string name="wireguard_config_invalid_title">WireGuard profile needs fixing</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds stopped rather than run without the tunnel.</string>
     <string name="wireguard_split_dns_placeholder" translatable="false">internal,local,lan,corp</string>
     <string name="wireguard_rename_dialog_title">Rename profile</string>
     <string name="vpn_network_switch_waiting">Waiting for network to stabilize… %1$ds</string>

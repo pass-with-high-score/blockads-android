@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">שנה שם</string>
     <string name="wireguard_more_options">אפשרויות נוספות</string>
     <string name="wireguard_no_peer">(אין עמית)</string>
+    <string name="wireguard_issue_no_allowed_ips">לאף עמית אין Allowed IPs, כך ששום דבר לא יעבור במנהרה</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Allowed IPs לא תקינים: %1$s</string>
+    <string name="wireguard_issue_fix_first">יש לתקן קודם את \'%1$s\': %2$s</string>
+    <string name="wireguard_config_invalid_title">יש לתקן את פרופיל ה-WireGuard</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds נעצר במקום לפעול ללא המנהרה.</string>
     <string name="wireguard_rename_dialog_title">שנה שם פרופיל</string>
     <string name="root_proxy_start_failed_title">ההפעלה של BlockAds נכשלה</string>
     <string name="root_proxy_start_failed_text">לא ניתן לקבל גישת root כדי להפעיל את ההגנה. הקש על הפעלה כדי לנסות שוב.</string>

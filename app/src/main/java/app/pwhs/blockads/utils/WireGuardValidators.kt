@@ -29,6 +29,14 @@ object WireGuardValidators {
         return if (isValidIp(ip, isIPv6)) null else "Invalid IP"
     }
 
+    /** One AllowedIPs entry. Defers to [parseCidrToRoute] so the editor accepts exactly what the tunnel will route. */
+    fun allowedIp(value: String): String? {
+        if (parseCidrToRoute(value) != null) return null
+        val v = value.trim()
+        if ('%' in v) return "Zone ids are not supported"
+        return (if ('/' in v) cidr(v) else ip(v)) ?: "Not supported by WireGuard"
+    }
+
     /** Bare IP address (no CIDR), used for DNS entries. */
     fun ip(value: String): String? {
         val v = value.trim()
@@ -78,7 +86,7 @@ object WireGuardValidators {
         return if (n in 0..65_535) null else "Out of range (0-65535)"
     }
 
-    private fun isValidIp(ip: String, isIPv6: Boolean): Boolean = try {
+    internal fun isValidIp(ip: String, isIPv6: Boolean): Boolean = try {
         if (isIPv6) java.net.Inet6Address.getByName(ip) != null
         else {
             // InetAddress.getByName resolves hostnames too; require dotted-quad shape first.

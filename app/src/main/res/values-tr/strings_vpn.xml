@@ -68,6 +68,11 @@
     <string name="wireguard_action_rename">Yeniden adlandır</string>
     <string name="wireguard_more_options">Diğer seçenekler</string>
     <string name="wireguard_no_peer">(eş yok)</string>
+    <string name="wireguard_issue_no_allowed_ips">Hiçbir eşin Allowed IPs değeri yok, bu yüzden hiçbir şey tünellenmez</string>
+    <string name="wireguard_issue_malformed_allowed_ips">Geçersiz Allowed IPs: %1$s</string>
+    <string name="wireguard_issue_fix_first">Önce \'%1$s\' profilini düzeltin: %2$s</string>
+    <string name="wireguard_config_invalid_title">WireGuard profilinin düzeltilmesi gerekiyor</string>
+    <string name="wireguard_config_invalid_text">%1$s. BlockAds tünel olmadan çalışmak yerine durduruldu.</string>
     <string name="wireguard_rename_dialog_title">Profili yeniden adlandır</string>
     <string name="root_proxy_start_failed_title">BlockAds başlatılamadı</string>
     <string name="root_proxy_start_failed_text">Korumayı başlatmak için root erişimi alınamadı. Yeniden denemek için Etkinleştir\'e dokunun.</string>
