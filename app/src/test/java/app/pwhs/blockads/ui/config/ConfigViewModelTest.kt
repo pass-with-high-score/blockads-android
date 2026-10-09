@@ -117,12 +117,40 @@ class ConfigViewModelTest {
     @Test
     fun `ShowAddDialog and DismissAddDialog update uiState`() = runTest {
         val vm = createViewModel()
-        assertFalse(vm.uiState.value.showAddDialog)
+        assertFalse(vm.uiState.value.showImportDialog)
 
         vm.onIntent(ConfigUiIntent.ShowAddDialog)
-        assertTrue(vm.uiState.value.showAddDialog)
+        assertTrue(vm.uiState.value.showImportDialog)
 
         vm.onIntent(ConfigUiIntent.DismissAddDialog)
-        assertFalse(vm.uiState.value.showAddDialog)
+        assertFalse(vm.uiState.value.showImportDialog)
+    }
+
+    @Test
+    fun `EditActiveConfig and CloseEditor update editor uiState`() = runTest {
+        val vm = createViewModel()
+        keepHot(vm.uiState)
+
+        assertFalse(vm.uiState.value.isEditorOpen)
+        vm.onIntent(ConfigUiIntent.EditActiveConfig)
+        assertTrue(vm.uiState.value.isEditorOpen)
+        assertEquals(defaultConfig.id, vm.uiState.value.editingConfig?.id)
+
+        vm.onIntent(ConfigUiIntent.CloseEditor)
+        assertFalse(vm.uiState.value.isEditorOpen)
+        assertEquals(null, vm.uiState.value.editingConfig)
+    }
+
+    @Test
+    fun `LoadSample updates active config with sample content`() = runTest {
+        coEvery { configDao.getById(defaultConfig.id) } returns defaultConfig
+        val vm = createViewModel()
+        keepHot(vm.uiState)
+
+        vm.onIntent(ConfigUiIntent.LoadSample)
+
+        coVerify(atLeast = 1) {
+            configDao.update(match { it.id == defaultConfig.id && it.content == ConfigProfile.SAMPLE_CONFIG })
+        }
     }
 }

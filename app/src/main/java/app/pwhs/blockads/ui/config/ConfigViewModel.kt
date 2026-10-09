@@ -59,11 +59,29 @@ class ConfigViewModel(
             is ConfigUiIntent.AddLocalConfig -> addLocalConfig(intent.name, intent.content)
             is ConfigUiIntent.UpdateConfig -> updateConfig(intent.configId, intent.name, intent.content)
             is ConfigUiIntent.DeleteConfig -> deleteConfig(intent.config)
-            is ConfigUiIntent.ShowAddDialog -> _uiState.update { it.copy(showAddDialog = true) }
-            is ConfigUiIntent.DismissAddDialog -> _uiState.update { it.copy(showAddDialog = false) }
-            is ConfigUiIntent.EditConfig -> _uiState.update { it.copy(editingConfig = intent.config) }
-            is ConfigUiIntent.DismissEditDialog -> _uiState.update { it.copy(editingConfig = null) }
+            is ConfigUiIntent.ShowAddDialog -> _uiState.update { it.copy(showImportDialog = true) }
+            is ConfigUiIntent.DismissAddDialog -> _uiState.update { it.copy(showImportDialog = false) }
+            is ConfigUiIntent.EditConfig -> _uiState.update { it.copy(editingConfig = intent.config, isEditorOpen = true) }
+            is ConfigUiIntent.EditActiveConfig -> {
+                _uiState.value.activeConfig?.let { active ->
+                    _uiState.update { it.copy(editingConfig = active, isEditorOpen = true) }
+                }
+            }
+            is ConfigUiIntent.CloseEditor -> _uiState.update { it.copy(editingConfig = null, isEditorOpen = false) }
             is ConfigUiIntent.RefreshRemote -> refreshRemoteConfig(intent.configId)
+            is ConfigUiIntent.LoadSample -> loadSampleConfig()
+            is ConfigUiIntent.ResetActiveConfig -> resetActiveConfig()
+            is ConfigUiIntent.ShowImportDialog -> _uiState.update { it.copy(showImportDialog = true) }
+            is ConfigUiIntent.DismissImportDialog -> _uiState.update { it.copy(showImportDialog = false) }
+            is ConfigUiIntent.ShowProfilesSheet -> _uiState.update { it.copy(showProfilesSheet = true) }
+            is ConfigUiIntent.DismissProfilesSheet -> _uiState.update { it.copy(showProfilesSheet = false) }
+            is ConfigUiIntent.ShowMiscSettingsDialog -> _uiState.update { it.copy(showMiscSettingsDialog = true) }
+            is ConfigUiIntent.DismissMiscSettingsDialog -> _uiState.update { it.copy(showMiscSettingsDialog = false) }
+            is ConfigUiIntent.ShowSnippetsSheet -> _uiState.update { it.copy(showSnippetsSheet = true) }
+            is ConfigUiIntent.DismissSnippetsSheet -> _uiState.update { it.copy(showSnippetsSheet = false) }
+            is ConfigUiIntent.ShowResetConfirmDialog -> _uiState.update { it.copy(showResetConfirmDialog = true) }
+            is ConfigUiIntent.DismissResetConfirmDialog -> _uiState.update { it.copy(showResetConfirmDialog = false) }
+            is ConfigUiIntent.ToggleAutoUpdate -> toggleAutoUpdate(intent.configId, intent.enabled)
         }
     }
 
@@ -71,11 +89,45 @@ class ConfigViewModel(
         if (configDao.getCount() == 0) {
             val defaultConfig = ConfigProfile(
                 name = ConfigProfile.DEFAULT_NAME,
-                content = "# Quantumult X default configuration\n[general]\n\n[dns]\nserver = 1.1.1.1\nserver = 8.8.8.8\n\n[filter_local]\nfinal, direct\n",
+                content = ConfigProfile.SAMPLE_CONFIG,
                 isActive = true,
                 isBuiltIn = true
             )
             configDao.insert(defaultConfig)
+        } else {
+            val default = configDao.getAll().firstOrNull { it.isBuiltIn && it.content.contains("Quantumult") }
+            if (default != null) {
+                configDao.update(
+                    default.copy(
+                        content = default.content.replace("Quantumult X default configuration", "Configuration Profile")
+                            .replace("Quantumult", "BlockAds")
+                    )
+                )
+            }
+        }
+    }
+
+    private fun loadSampleConfig() {
+        val active = _uiState.value.activeConfig ?: return
+        updateConfig(active.id, active.name, ConfigProfile.SAMPLE_CONFIG)
+        viewModelScope.launch {
+            _effects.emit(ConfigUiEffect.ShowToast(R.string.profile_sample_loaded))
+        }
+    }
+
+    private fun resetActiveConfig() {
+        val active = _uiState.value.activeConfig ?: return
+        updateConfig(active.id, active.name, ConfigProfile.SAMPLE_CONFIG)
+        _uiState.update { it.copy(showResetConfirmDialog = false) }
+        viewModelScope.launch {
+            _effects.emit(ConfigUiEffect.ShowToast(R.string.config_updated))
+        }
+    }
+
+    private fun toggleAutoUpdate(configId: Long, enabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val existing = configDao.getById(configId) ?: return@launch
+            configDao.update(existing.copy(autoUpdate = enabled))
         }
     }
 
@@ -92,7 +144,7 @@ class ConfigViewModel(
         if (trimmedName.isEmpty() || trimmedUrl.isEmpty()) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isUpdating = true, showAddDialog = false) }
+            _uiState.update { it.copy(isUpdating = true, showImportDialog = false) }
             try {
                 val content = withContext(Dispatchers.IO) {
                     client.get(trimmedUrl).bodyAsText()
@@ -128,7 +180,7 @@ class ConfigViewModel(
                 isActive = false
             )
             configDao.insert(newConfig)
-            _uiState.update { it.copy(showAddDialog = false) }
+            _uiState.update { it.copy(showImportDialog = false) }
             _effects.emit(ConfigUiEffect.ShowToast(R.string.config_added))
         }
     }

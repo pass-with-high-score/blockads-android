@@ -140,7 +140,6 @@
     <string name="settings_daily_summary_desc">Hiển thị tóm tắt chặn cuối ngày</string>
     <string name="settings_milestone_notifications">Thông báo cột mốc</string>
     <string name="settings_milestone_notifications_desc">Thông báo khi đạt cột mốc chặn</string>
-    <string name="profile_title">Hồ sơ bảo vệ</string>
     <string name="profile_section_profiles">Hồ sơ</string>
     <string name="profile_section_schedules">Lịch trình</string>
     <string name="profile_name_default">Mặc định</string>
@@ -222,6 +221,22 @@
     <string name="config_edit_dialog_title">Chỉnh sửa cấu hình</string>
     <string name="config_empty_desc">Chưa có cấu hình tùy chỉnh nào. Hãy thêm subscription từ URL hoặc quy tắc snippet.</string>
     <string name="config_save">Lưu</string>
+    <string name="profile_title">Hồ sơ Cấu hình</string>
+    <string name="profile_subtitle">Cấu hình chính chứa toàn bộ proxy, bộ lọc và các thiết lập khác.</string>
+    <string name="profile_action_snippets">Snippets</string>
+    <string name="profile_action_edit">Sửa cấu hình</string>
+    <string name="profile_action_import">Nhập</string>
+    <string name="profile_action_export">Xuất</string>
+    <string name="profile_action_download">Tải về</string>
+    <string name="profile_action_sample">Cấu hình mẫu</string>
+    <string name="profile_action_reset">Đặt lại</string>
+    <string name="profile_panel_toolbar">Đổi Cấu hình</string>
+    <string name="profile_misc_settings">Cài đặt khác</string>
+    <string name="profile_to_section">Chuyển đến phần</string>
+    <string name="profile_reset_confirm_title">Đặt lại Cấu hình</string>
+    <string name="profile_reset_confirm_msg">Bạn có chắc chắn muốn đặt lại cấu hình đang chọn về mặc định không?</string>
+    <string name="profile_copied_to_clipboard">Đã sao chép vào bộ nhớ tạm</string>
+    <string name="profile_sample_loaded">Đã tải cấu hình mẫu</string>
 
     <!-- DNS Leak Protection / DoH Bypass -->
     <string name="dns_category_advanced_security">Bảo mật DNS nâng cao</string>
