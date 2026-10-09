@@ -93,6 +93,8 @@
     <string name="config_content_label">Raw Config Content</string>
     <string name="config_edit_dialog_title">Edit Configuration</string>
     <string name="config_empty_desc">No custom configurations yet. Add a remote subscription or custom snippet rules.</string>
+    <string name="config_add_remote_title">Add Remote Subscription</string>
+    <string name="config_refresh_remote">Update</string>
     <string name="config_save">Save</string>
     <string name="profile_title">Profile</string>
     <string name="profile_subtitle">The main profile contains all the proxies, filters and other settings.</string>
@@ -110,6 +112,11 @@
     <string name="profile_reset_confirm_msg">Are you sure you want to reset configuration to defaults?</string>
     <string name="profile_copied_to_clipboard">Copied to clipboard</string>
     <string name="profile_sample_loaded">Sample configuration loaded</string>
+    <string name="profile_subscriptions_rulesets">Subscriptions &amp; Rulesets</string>
+    <string name="profile_subscriptions_desc">Remote subscription rulesets and sync status</string>
+    <string name="profile_no_subscriptions">No remote subscriptions</string>
+    <string name="profile_no_subscriptions_desc">Profiles with remote URLs or filter rulesets will appear here</string>
+    <string name="profile_tap_to_switch">Active Profile • Tap to switch</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
     <string name="settings_import">Import</string>

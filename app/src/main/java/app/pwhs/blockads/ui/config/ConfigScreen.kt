@@ -29,6 +29,7 @@ import app.pwhs.blockads.ui.config.dialogs.ConfigImportDialog
 import app.pwhs.blockads.ui.config.dialogs.ConfigMiscSettingsDialog
 import app.pwhs.blockads.ui.config.dialogs.ConfigProfilesSheet
 import app.pwhs.blockads.ui.config.dialogs.ConfigResetConfirmDialog
+import app.pwhs.blockads.ui.config.dialogs.ConfigSnippetsSheet
 import app.pwhs.blockads.ui.config.editor.ConfigEditorScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -84,13 +85,14 @@ fun ConfigScreen(
                     ProfileHeader(
                         activeConfig = uiState.activeConfig,
                         onNavigateBack = onNavigateBack,
-                        onOpenProfiles = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) }
+                        onAddProfile = { viewModel.onIntent(ConfigUiIntent.ShowImportDialog) },
+                        onSwitchProfile = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     ProfileGridActions(
-                        onSnippetsClick = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) },
+                        onSnippetsClick = { viewModel.onIntent(ConfigUiIntent.ShowSnippetsSheet) },
                         onEditClick = { viewModel.onIntent(ConfigUiIntent.EditActiveConfig) },
                         onImportClick = { viewModel.onIntent(ConfigUiIntent.ShowImportDialog) },
                         onExportClick = {
@@ -115,7 +117,7 @@ fun ConfigScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     ProfileBottomActions(
-                        onSwitchProfileClick = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) },
+                        onSubscriptionsClick = { viewModel.onIntent(ConfigUiIntent.ShowSnippetsSheet) },
                         onMiscSettingsClick = { viewModel.onIntent(ConfigUiIntent.ShowMiscSettingsDialog) }
                     )
 
@@ -166,6 +168,15 @@ fun ConfigScreen(
                         }
                     },
                     onDismiss = { viewModel.onIntent(ConfigUiIntent.DismissMiscSettingsDialog) }
+                )
+            }
+
+            if (uiState.showSnippetsSheet) {
+                ConfigSnippetsSheet(
+                    configs = uiState.configs,
+                    onRefreshConfig = { viewModel.onIntent(ConfigUiIntent.RefreshRemote(it)) },
+                    onAddClick = { viewModel.onIntent(ConfigUiIntent.ShowImportDialog) },
+                    onDismiss = { viewModel.onIntent(ConfigUiIntent.DismissSnippetsSheet) }
                 )
             }
         }

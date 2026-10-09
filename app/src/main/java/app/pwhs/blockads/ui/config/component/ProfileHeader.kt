@@ -17,8 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +46,8 @@ import app.pwhs.blockads.ui.theme.NeonGreen
 fun ProfileHeader(
     activeConfig: ConfigProfile?,
     onNavigateBack: () -> Unit,
-    onOpenProfiles: () -> Unit,
+    onAddProfile: () -> Unit,
+    onSwitchProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -67,10 +68,11 @@ fun ProfileHeader(
                 }
             },
             actions = {
-                IconButton(onClick = onOpenProfiles) {
+                IconButton(onClick = onAddProfile) {
                     Icon(
-                        imageVector = Icons.Default.Tune,
-                        contentDescription = stringResource(R.string.profile_panel_toolbar)
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.config_add_dialog_title),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             },
@@ -88,7 +90,7 @@ fun ProfileHeader(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(onClick = onOpenProfiles),
+                        .clickable(onClick = onSwitchProfile),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
@@ -119,7 +121,7 @@ fun ProfileHeader(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Active Profile • Tap to switch",
+                                text = stringResource(R.string.profile_tap_to_switch),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

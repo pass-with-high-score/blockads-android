@@ -33,7 +33,7 @@ import app.pwhs.blockads.ui.theme.AccentPurple
 
 @Composable
 fun ProfileBottomActions(
-    onSwitchProfileClick: () -> Unit,
+    onSubscriptionsClick: () -> Unit,
     onMiscSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -45,7 +45,7 @@ fun ProfileBottomActions(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onSwitchProfileClick),
+                .clickable(onClick = onSubscriptionsClick),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
@@ -68,12 +68,12 @@ fun ProfileBottomActions(
                 Spacer(modifier = Modifier.width(14.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.profile_panel_toolbar),
+                        text = stringResource(R.string.profile_subscriptions_rulesets),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Choose or manage configuration profiles",
+                        text = stringResource(R.string.profile_subscriptions_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
