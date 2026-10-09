@@ -87,7 +87,7 @@ fun ConfigScreen(
                         onOpenProfiles = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) }
                     )
 
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     ProfileGridActions(
                         onSnippetsClick = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) },
@@ -112,14 +112,14 @@ fun ConfigScreen(
                         onResetClick = { viewModel.onIntent(ConfigUiIntent.ShowResetConfirmDialog) }
                     )
 
-                    Spacer(modifier = Modifier.height(36.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     ProfileBottomActions(
                         onSwitchProfileClick = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) },
                         onMiscSettingsClick = { viewModel.onIntent(ConfigUiIntent.ShowMiscSettingsDialog) }
                     )
 
-                    Spacer(modifier = Modifier.height(36.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 

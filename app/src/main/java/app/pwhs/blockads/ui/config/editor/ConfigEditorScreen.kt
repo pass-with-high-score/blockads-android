@@ -109,7 +109,7 @@ fun ConfigEditorScreen(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.config_save),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
