@@ -104,11 +104,13 @@ fun ConfigProfilesSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                            .clip(RoundedCornerShape(12.dp))
                             .clickable {
                                 onSelectActive(config.id)
                                 onDismiss()
                             }
-                            .padding(horizontal = 24.dp, vertical = 14.dp),
+                            .padding(horizontal = 12.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(

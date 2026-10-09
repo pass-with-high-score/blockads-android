@@ -31,6 +31,7 @@ import app.pwhs.blockads.ui.config.dialogs.ConfigProfilesSheet
 import app.pwhs.blockads.ui.config.dialogs.ConfigResetConfirmDialog
 import app.pwhs.blockads.ui.config.dialogs.ConfigSnippetsSheet
 import app.pwhs.blockads.ui.config.editor.ConfigEditorScreen
+import app.pwhs.blockads.utils.ConfigExporter
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -98,8 +99,7 @@ fun ConfigScreen(
                         onExportClick = {
                             val active = uiState.activeConfig
                             if (active != null) {
-                                clipboardManager.setText(AnnotatedString(active.content))
-                                Toast.makeText(context, R.string.profile_copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                                ConfigExporter.shareConfig(context, active)
                             }
                         },
                         onDownloadClick = {

@@ -117,6 +117,10 @@
     <string name="profile_no_subscriptions">No remote subscriptions</string>
     <string name="profile_no_subscriptions_desc">Profiles with remote URLs or filter rulesets will appear here</string>
     <string name="profile_tap_to_switch">Active Profile • Tap to switch</string>
+    <string name="profile_import_file">Import File</string>
+    <string name="profile_choose_file">Choose File</string>
+    <string name="profile_choose_file_desc">Select a .conf, .snippet, or .txt file</string>
+    <string name="profile_change_file">Change</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
     <string name="settings_import">Import</string>

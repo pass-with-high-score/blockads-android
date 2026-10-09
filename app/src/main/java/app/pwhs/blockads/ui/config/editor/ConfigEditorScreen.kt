@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,20 @@ fun ConfigEditorScreen(
     var showSectionSheet by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
+
+    val sectionColors = remember {
+        STANDARD_SECTIONS.associate { it.id to it.color }
+    }
+    val defaultPrimary = MaterialTheme.colorScheme.primary
+    val commentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+    val visualTransformation = remember(sectionColors, defaultPrimary, commentColor) {
+        ConfigSyntaxVisualTransformation(
+            sectionColors = sectionColors,
+            defaultSectionColor = defaultPrimary,
+            commentColor = commentColor
+        )
+    }
 
     val lineCount = remember(content) {
         val count = content.count { it == '\n' } + 1
@@ -137,13 +152,13 @@ fun ConfigEditorScreen(
                     text = lineNumbersText,
                     style = TextStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        fontSize = 14.sp,
+                        lineHeight = 24.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                         textAlign = TextAlign.End
                     ),
                     modifier = Modifier
-                        .width(42.dp)
+                        .width(46.dp)
                         .padding(end = 10.dp)
                 )
 
@@ -151,10 +166,11 @@ fun ConfigEditorScreen(
                 BasicTextField(
                     value = content,
                     onValueChange = { content = it },
+                    visualTransformation = visualTransformation,
                     textStyle = TextStyle(
                         fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
+                        fontSize = 15.sp,
+                        lineHeight = 24.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -175,8 +191,9 @@ fun ConfigEditorScreen(
                 val lineIndex = lines.indexOfFirst { it.trim().equals(targetHeader, ignoreCase = true) }
                 if (lineIndex >= 0) {
                     coroutineScope.launch {
-                        val approximateScrollY = (lineIndex * 54)
-                        scrollState.animateScrollTo(approximateScrollY)
+                        val lineHeightPx = with(density) { 24.sp.toPx() }
+                        val targetScrollY = (lineIndex * lineHeightPx).toInt()
+                        scrollState.animateScrollTo(targetScrollY)
                     }
                 }
             }

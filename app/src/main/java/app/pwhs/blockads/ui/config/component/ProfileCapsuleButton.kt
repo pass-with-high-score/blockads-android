@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.config.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,9 +31,8 @@ fun ProfileCapsuleButton(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .height(64.dp)
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier.height(64.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)

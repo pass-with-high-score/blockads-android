@@ -2,7 +2,6 @@ package app.pwhs.blockads.ui.config.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,9 +87,8 @@ fun ProfileHeader(
         ) {
             activeConfig?.let { active ->
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onSwitchProfile),
+                    onClick = onSwitchProfile,
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)

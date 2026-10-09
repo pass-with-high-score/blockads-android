@@ -1,7 +1,6 @@
 package app.pwhs.blockads.ui.config.component
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,9 +42,8 @@ fun ProfileBottomActions(
             .padding(horizontal = 16.dp)
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onSubscriptionsClick),
+            onClick = onSubscriptionsClick,
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
@@ -90,9 +88,8 @@ fun ProfileBottomActions(
         Spacer(modifier = Modifier.height(12.dp))
 
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onMiscSettingsClick),
+            onClick = onMiscSettingsClick,
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
