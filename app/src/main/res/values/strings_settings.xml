@@ -305,5 +305,21 @@
     <string name="dns_custom_presets" translatable="false">Quick Presets</string>
     <string name="dns_custom_preset_cf_odoh" translatable="false">Cloudflare ODoH</string>
     <string name="dns_custom_active_badge" translatable="false">Using Custom DNS</string>
+
+    <!-- Profile Rule Creation -->
+    <string name="filter_rule_title">Filter Rule</string>
+    <string name="filter_rule_subtitle">The detail of the filter.</string>
+    <string name="policy_rule_title">Policy Rule</string>
+    <string name="policy_rule_subtitle">The detail of the policy.</string>
+    <string name="rewrite_rule_title">Rewrite Rule</string>
+    <string name="rewrite_rule_subtitle">The detail of the rewrite.</string>
+    <string name="rule_field_type">Type</string>
+    <string name="rule_field_param">Param</string>
+    <string name="rule_field_param_hint">The param for this type of filter.</string>
+    <string name="rule_field_policy">Policy</string>
+    <string name="rule_field_policy_hint">Choose the policy.</string>
+    <string name="rule_field_save_to">Save To</string>
+    <string name="rule_field_current_profile">Current Configuration Profile</string>
+    <string name="config_rule_added">Rule added to profile: %s</string>
 </resources>
 

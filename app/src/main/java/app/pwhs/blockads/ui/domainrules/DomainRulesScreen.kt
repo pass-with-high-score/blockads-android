@@ -41,7 +41,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
-import app.pwhs.blockads.ui.domainrules.dialog.AddDomainDialog
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
@@ -60,6 +67,9 @@ fun DomainRulesScreen(
 ) {
     val whitelistDomains by viewModel.whitelistDomains.collectAsStateWithLifecycle()
     val blocklistDomains by viewModel.blocklistDomains.collectAsStateWithLifecycle()
+    val activeConfig by viewModel.activeConfig.collectAsStateWithLifecycle()
+    val allConfigs by viewModel.allConfigs.collectAsStateWithLifecycle()
+    val profileFilterRules by viewModel.profileFilterRules.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -130,6 +140,42 @@ fun DomainRulesScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            activeConfig?.let { cfg ->
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Profile: ${cfg.name}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${profileFilterRules.size} rules in profile",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Tab row
             PrimaryTabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -226,15 +272,18 @@ fun DomainRulesScreen(
     }
 
     if (showAddDialog) {
-        AddDomainDialog(
-            isAllow = pagerState.currentPage == 0,
+        AddFilterRuleDialog(
+            activeConfig = activeConfig,
+            allConfigs = allConfigs,
             onDismiss = { showAddDialog = false },
-            onAdd = { domain ->
-                if (pagerState.currentPage == 0) {
-                    viewModel.addWhitelistDomain(domain)
-                } else {
-                    viewModel.addBlocklistDomain(domain)
-                }
+            onSave = { category, type, param, policy, configId ->
+                viewModel.addProfileRule(
+                    category = category,
+                    type = type,
+                    param = param,
+                    policy = policy,
+                    targetConfigId = configId
+                )
                 showAddDialog = false
             }
         )
