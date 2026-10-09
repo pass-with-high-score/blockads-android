@@ -309,10 +309,6 @@
     <!-- Profile Rule Creation -->
     <string name="filter_rule_title">Filter Rule</string>
     <string name="filter_rule_subtitle">The detail of the filter.</string>
-    <string name="policy_rule_title">Policy Rule</string>
-    <string name="policy_rule_subtitle">The detail of the policy.</string>
-    <string name="rewrite_rule_title">Rewrite Rule</string>
-    <string name="rewrite_rule_subtitle">The detail of the rewrite.</string>
     <string name="rule_field_type">Type</string>
     <string name="rule_field_param">Param</string>
     <string name="rule_field_param_hint">The param for this type of filter.</string>

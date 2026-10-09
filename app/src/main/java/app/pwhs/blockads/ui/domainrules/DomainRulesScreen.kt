@@ -276,9 +276,8 @@ fun DomainRulesScreen(
             activeConfig = activeConfig,
             allConfigs = allConfigs,
             onDismiss = { showAddDialog = false },
-            onSave = { category, type, param, policy, configId ->
+            onSave = { type, param, policy, configId ->
                 viewModel.addProfileRule(
-                    category = category,
                     type = type,
                     param = param,
                     policy = policy,

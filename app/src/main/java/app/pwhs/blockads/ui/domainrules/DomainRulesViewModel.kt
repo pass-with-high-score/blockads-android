@@ -29,11 +29,6 @@ import app.pwhs.blockads.utils.ConfigRuleHelper
 import app.pwhs.blockads.utils.ParsedFilterRule
 import kotlinx.coroutines.Dispatchers
 
-enum class RuleCategory {
-    POLICY,
-    FILTER,
-    REWRITE
-}
 
 class DomainRulesViewModel(
     private val whitelistDomainDao: WhitelistDomainDao,
@@ -242,7 +237,6 @@ class DomainRulesViewModel(
     // ── Profile Rules ────────────────────────────────────────
 
     fun addProfileRule(
-        category: RuleCategory,
         type: String,
         param: String,
         policy: String,
@@ -253,32 +247,18 @@ class DomainRulesViewModel(
                 ?: configDao.getActive()
                 ?: return@launch
 
-            val (sectionName, ruleLine) = when (category) {
-                RuleCategory.FILTER -> {
-                    val line = if (type.equals("FINAL", ignoreCase = true)) {
-                        "final, ${policy.lowercase()}"
-                    } else {
-                        "${type.lowercase()}, ${param.trim()}, ${policy.lowercase()}"
-                    }
-                    "filter_local" to line
-                }
-                RuleCategory.POLICY -> {
-                    val line = "${type.lowercase()} = ${param.trim()}, ${policy.lowercase()}"
-                    "policy" to line
-                }
-                RuleCategory.REWRITE -> {
-                    val line = "${param.trim()} ${type.lowercase()} ${policy.lowercase()}"
-                    "rewrite_local" to line
-                }
+            val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
+                "final, ${policy.lowercase()}"
+            } else {
+                "${type.lowercase()}, ${param.trim()}, ${policy.lowercase()}"
             }
 
-            val updatedContent = ConfigRuleHelper.appendRuleToSection(targetConfig.content, sectionName, ruleLine)
+            val updatedContent = ConfigRuleHelper.appendRuleToSection(targetConfig.content, "filter_local", ruleLine)
             configDao.update(targetConfig.copy(content = updatedContent))
 
             // Sync domain rules to Room DB if applicable
-            if (category == RuleCategory.FILTER) {
-                val cleanDomain = sanitizeDomain(param)
-                if (cleanDomain.isNotBlank() && type.startsWith("HOST", ignoreCase = true)) {
+            val cleanDomain = sanitizeDomain(param)
+            if (cleanDomain.isNotBlank() && type.startsWith("HOST", ignoreCase = true)) {
                     if (policy.equals("REJECT", ignoreCase = true)) {
                         val exists = customDnsRuleDao.exists(cleanDomain)
                         if (exists == 0) {
@@ -301,15 +281,13 @@ class DomainRulesViewModel(
                                 )
                             )
                         }
-                        filterRepo.loadWhitelist()
                     }
                 }
-            }
 
-            _events.toast(R.string.config_rule_added, listOf(ruleLine))
-            requestVpnRestart()
+                _events.toast(R.string.config_rule_added, listOf(ruleLine))
+                requestVpnRestart()
+            }
         }
-    }
 
     fun removeProfileRule(rawLine: String) {
         viewModelScope.launch(Dispatchers.IO) {
