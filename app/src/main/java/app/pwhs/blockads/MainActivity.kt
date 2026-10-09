@@ -107,6 +107,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 )
+                androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !isDark
+                    isAppearanceLightNavigationBars = !isDark
+                }
                 onDispose {}
             }
 

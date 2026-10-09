@@ -28,7 +28,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import android.app.Activity
+import android.graphics.Color as AndroidColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.ConfigProfile
 
@@ -99,6 +106,32 @@ fun AddFilterRuleDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        val view = LocalView.current
+        val isLight = MaterialTheme.colorScheme.background.luminance() > 0.5f
+
+        DisposableEffect(view, isLight) {
+            var parent = view.parent
+            var dialogWindow: android.view.Window? = null
+            while (parent != null) {
+                if (parent is DialogWindowProvider) {
+                    dialogWindow = parent.window
+                    break
+                }
+                parent = parent.parent
+            }
+            if (dialogWindow == null) {
+                dialogWindow = (view.context as? Activity)?.window
+            }
+            dialogWindow?.let { win ->
+                win.statusBarColor = AndroidColor.TRANSPARENT
+                win.navigationBarColor = AndroidColor.TRANSPARENT
+                val insetsController = WindowCompat.getInsetsController(win, win.decorView)
+                insetsController.isAppearanceLightStatusBars = isLight
+                insetsController.isAppearanceLightNavigationBars = isLight
+            }
+            onDispose {}
+        }
+
         Surface(
             modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
