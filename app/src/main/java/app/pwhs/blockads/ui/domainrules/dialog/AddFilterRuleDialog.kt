@@ -69,17 +69,25 @@ private val FILTER_TYPES = listOf(
 private val FILTER_POLICIES = listOf("REJECT", "DIRECT", "PROXY")
 
 @Composable
-fun AddFilterRuleDialog(
+fun FilterRuleDialog(
     activeConfig: ConfigProfile?,
     allConfigs: List<ConfigProfile>,
     onDismiss: () -> Unit,
     onSave: (type: String, param: String, policy: String, configId: Long?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.filter_rule_title),
+    subtitle: String = stringResource(R.string.filter_rule_subtitle),
+    initialType: String = "HOST-SUFFIX",
+    initialParam: String = "",
+    initialPolicy: String = "REJECT",
+    initialConfigId: Long? = null
 ) {
-    var type by remember { mutableStateOf("HOST-SUFFIX") }
-    var param by remember { mutableStateOf("") }
-    var policy by remember { mutableStateOf("REJECT") }
-    var selectedConfigId by remember { mutableStateOf(activeConfig?.id) }
+    var type by remember(initialType) { mutableStateOf(initialType) }
+    var param by remember(initialParam) { mutableStateOf(initialParam) }
+    var policy by remember(initialPolicy) { mutableStateOf(initialPolicy) }
+    var selectedConfigId by remember(initialConfigId, activeConfig) {
+        mutableStateOf(initialConfigId ?: activeConfig?.id)
+    }
 
     var showTypeDropdown by remember { mutableStateOf(false) }
     var showPolicyDropdown by remember { mutableStateOf(false) }
@@ -172,14 +180,14 @@ fun AddFilterRuleDialog(
 
                 // Title Header
                 Text(
-                    text = stringResource(R.string.filter_rule_title),
+                    text = title,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.filter_rule_subtitle),
+                    text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -390,4 +398,43 @@ private fun FormFieldLabel(
             )
         }
     }
+}
+
+@Composable
+fun AddFilterRuleDialog(
+    activeConfig: ConfigProfile?,
+    allConfigs: List<ConfigProfile>,
+    onDismiss: () -> Unit,
+    onSave: (type: String, param: String, policy: String, configId: Long?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilterRuleDialog(
+        activeConfig = activeConfig,
+        allConfigs = allConfigs,
+        onDismiss = onDismiss,
+        onSave = onSave,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun EditFilterRuleDialog(
+    initialDomain: String,
+    initialPolicy: String,
+    activeConfig: ConfigProfile?,
+    allConfigs: List<ConfigProfile>,
+    onDismiss: () -> Unit,
+    onSave: (type: String, param: String, policy: String, configId: Long?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilterRuleDialog(
+        initialParam = initialDomain,
+        initialPolicy = initialPolicy,
+        initialConfigId = activeConfig?.id,
+        activeConfig = activeConfig,
+        allConfigs = allConfigs,
+        onDismiss = onDismiss,
+        onSave = onSave,
+        modifier = modifier
+    )
 }

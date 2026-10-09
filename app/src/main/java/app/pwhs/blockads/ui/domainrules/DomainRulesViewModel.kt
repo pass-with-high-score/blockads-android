@@ -289,6 +289,63 @@ class DomainRulesViewModel(
             }
         }
 
+    fun updateProfileRule(
+        oldDomain: String,
+        type: String,
+        param: String,
+        policy: String,
+        targetConfigId: Long? = null
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val targetConfig = (if (targetConfigId != null) configDao.getById(targetConfigId) else null)
+                ?: configDao.getActive()
+
+            val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
+                "final, ${policy.lowercase()}"
+            } else {
+                "${type.lowercase()}, ${param.trim()}, ${policy.lowercase()}"
+            }
+
+            if (targetConfig != null) {
+                val updatedContent = ConfigRuleHelper.replaceRuleInContent(targetConfig.content, oldDomain, ruleLine)
+                configDao.update(targetConfig.copy(content = updatedContent))
+            }
+
+            val cleanDomain = sanitizeDomain(param)
+            val oldClean = sanitizeDomain(oldDomain)
+
+            if (policy.equals("REJECT", ignoreCase = true)) {
+                whitelistDomainDao.deleteByDomain(oldClean)
+                if (cleanDomain.isNotBlank()) {
+                    val existing = customDnsRuleDao.getAll().firstOrNull { it.domain.equals(oldClean, ignoreCase = true) }
+                    if (existing != null) {
+                        customDnsRuleDao.update(existing.copy(domain = cleanDomain, rule = "||$cleanDomain^"))
+                    } else if (customDnsRuleDao.exists("||$cleanDomain^") == 0) {
+                        customDnsRuleDao.insert(
+                            CustomDnsRule(domain = cleanDomain, rule = "||$cleanDomain^", ruleType = RuleType.BLOCK, isEnabled = true)
+                        )
+                    }
+                }
+            } else if (policy.equals("DIRECT", ignoreCase = true)) {
+                customDnsRuleDao.deleteBlockRuleByDomain(oldClean)
+                if (cleanDomain.isNotBlank()) {
+                    val existing = whitelistDomainDao.getAllDomains().any { it.equals(oldClean, ignoreCase = true) }
+                    if (existing) {
+                        whitelistDomainDao.deleteByDomain(oldClean)
+                    }
+                    if (whitelistDomainDao.exists(cleanDomain) == 0) {
+                        whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain, isEnabled = true))
+                    }
+                }
+            }
+
+            filterRepo.loadCustomRules()
+            filterRepo.loadWhitelist()
+            _events.toast(R.string.config_rule_added, listOf(ruleLine))
+            requestVpnRestart()
+        }
+    }
+
     fun removeProfileRule(rawLine: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val active = configDao.getActive() ?: return@launch

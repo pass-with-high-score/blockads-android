@@ -38,6 +38,20 @@ object ConfigRuleHelper {
         return lines.joinToString("\n")
     }
 
+    fun replaceRuleInContent(content: String, oldDomain: String, newRuleLine: String): String {
+        val lines = content.lines().toMutableList()
+        val index = lines.indexOfFirst { line ->
+            val trimmed = line.trim()
+            !trimmed.startsWith("#") && !trimmed.startsWith(";") && trimmed.contains(oldDomain, ignoreCase = true)
+        }
+        return if (index != -1) {
+            lines[index] = newRuleLine
+            lines.joinToString("\n")
+        } else {
+            appendRuleToSection(content, "filter_local", newRuleLine)
+        }
+    }
+
     fun parseFilterRules(content: String): List<ParsedFilterRule> {
         val result = mutableListOf<ParsedFilterRule>()
         val lines = content.lines()

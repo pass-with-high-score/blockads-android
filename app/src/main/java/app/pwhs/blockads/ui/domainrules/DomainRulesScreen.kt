@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
+import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
@@ -56,7 +57,6 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material.icons.filled.FileUpload
 import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.data.entities.WhitelistDomain
-import app.pwhs.blockads.ui.domainrules.dialog.EditDomainDialog
 import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -289,22 +289,40 @@ fun DomainRulesScreen(
     }
 
     editingWhitelistDomain?.let { domain ->
-        EditDomainDialog(
+        EditFilterRuleDialog(
             initialDomain = domain.domain,
+            initialPolicy = "DIRECT",
+            activeConfig = activeConfig,
+            allConfigs = allConfigs,
             onDismiss = { editingWhitelistDomain = null },
-            onConfirm = { newDomain ->
-                viewModel.updateWhitelistDomain(domain, newDomain)
+            onSave = { type, param, policy, configId ->
+                viewModel.updateProfileRule(
+                    oldDomain = domain.domain,
+                    type = type,
+                    param = param,
+                    policy = policy,
+                    targetConfigId = configId
+                )
                 editingWhitelistDomain = null
             }
         )
     }
 
     editingBlocklistRule?.let { rule ->
-        EditDomainDialog(
+        EditFilterRuleDialog(
             initialDomain = rule.domain,
+            initialPolicy = "REJECT",
+            activeConfig = activeConfig,
+            allConfigs = allConfigs,
             onDismiss = { editingBlocklistRule = null },
-            onConfirm = { newDomain ->
-                viewModel.updateBlocklistDomain(rule, newDomain)
+            onSave = { type, param, policy, configId ->
+                viewModel.updateProfileRule(
+                    oldDomain = rule.domain,
+                    type = type,
+                    param = param,
+                    policy = policy,
+                    targetConfigId = configId
+                )
                 editingBlocklistRule = null
             }
         )
