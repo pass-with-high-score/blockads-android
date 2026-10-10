@@ -12,7 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -43,11 +45,11 @@ import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
 import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
+import app.pwhs.blockads.ui.domainrules.dialog.RuleTypesDocSheet
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.material.icons.filled.FileUpload
 import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
@@ -67,6 +69,7 @@ fun DomainRulesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showRuleDocSheet by remember { mutableStateOf(false) }
     var editingWhitelistDomain by remember { mutableStateOf<WhitelistDomain?>(null) }
     var editingBlocklistRule by remember { mutableStateOf<CustomDnsRule?>(null) }
 
@@ -106,6 +109,14 @@ fun DomainRulesScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { showRuleDocSheet = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.rule_docs_action_tooltip)
+                        )
+                    }
                     IconButton(
                         onClick = { showImportDialog = true }
                     ) {
@@ -304,6 +315,12 @@ fun DomainRulesScreen(
                 viewModel.importDomains(domains, isAllow)
                 showImportDialog = false
             }
+        )
+    }
+
+    if (showRuleDocSheet) {
+        RuleTypesDocSheet(
+            onDismiss = { showRuleDocSheet = false }
         )
     }
 }

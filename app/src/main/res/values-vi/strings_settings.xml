@@ -265,5 +265,39 @@
     <string name="dns_custom_presets">Mẫu cấu hình nhanh</string>
     <string name="dns_custom_preset_cf_odoh">Cloudflare ODoH</string>
     <string name="dns_custom_active_badge">Đang dùng DNS tùy chỉnh</string>
+
+    <!-- Profile Rule Creation -->
+    <string name="filter_rule_title">Quy tắc lọc</string>
+    <string name="filter_rule_subtitle">Chi tiết cấu hình quy tắc lọc.</string>
+    <string name="rule_field_type">Loại quy tắc</string>
+    <string name="rule_field_param">Tham số</string>
+    <string name="rule_field_param_hint">Nhập tên miền, dải IP hoặc từ khóa…</string>
+    <string name="rule_field_policy">Chính sách</string>
+    <string name="rule_field_policy_hint">Chọn chính sách xử lý.</string>
+    <string name="rule_field_save_to">Lưu vào cấu hình</string>
+    <string name="rule_field_current_profile">Cấu hình đang kích hoạt</string>
+    <string name="config_rule_added">Đã thêm quy tắc vào: %s</string>
+    <string name="rule_param_hint_host_suffix">vd: example.com (khớp cả *.example.com)</string>
+    <string name="rule_param_hint_host">vd: ads.example.com (chỉ khớp chính xác tên miền này)</string>
+    <string name="rule_param_hint_host_keyword">vd: analytics, adservice, tracker</string>
+    <string name="rule_param_hint_ip_cidr">vd: 192.168.1.0/24 hoặc 10.0.0.1/32</string>
+    <string name="rule_param_hint_ip_cidr6">vd: 2001:db8::/32</string>
+    <string name="rule_param_hint_geoip">vd: VN, US, JP (mã quốc gia 2 chữ cái)</string>
+    <string name="rule_param_hint_user_agent">vd: *Spotify*, *MicroMessenger*</string>
+    <string name="rule_param_hint_final">Không cần tham số (khớp toàn bộ lưu lượng còn lại)</string>
+
+    <!-- Rule Types Documentation -->
+    <string name="rule_docs_title">Hướng dẫn các loại quy tắc</string>
+    <string name="rule_docs_subtitle">Giải thích cách hoạt động, cú pháp và ví dụ của từng loại quy tắc.</string>
+    <string name="rule_docs_action_tooltip">Hướng dẫn quy tắc</string>
+    <string name="rule_docs_category_all">Tất cả</string>
+    <string name="rule_docs_category_domain">Tên miền</string>
+    <string name="rule_docs_category_ip">IP &amp; Vị trí</string>
+    <string name="rule_docs_category_other">Khác</string>
+    <string name="rule_docs_category_policy">Chính sách</string>
+    <string name="rule_docs_example_label">Ví dụ:</string>
+    <string name="rule_docs_matches_label">Khớp với:</string>
+    <string name="rule_docs_not_matches_label">Không khớp:</string>
+    <string name="rule_docs_usage_label">Phù hợp khi:</string>
 </resources>
 

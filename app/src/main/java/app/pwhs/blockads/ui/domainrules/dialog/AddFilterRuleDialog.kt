@@ -14,15 +14,19 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +72,7 @@ private val FILTER_TYPES = listOf(
 )
 private val FILTER_POLICIES = listOf("REJECT", "DIRECT", "PROXY")
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterRuleDialog(
     activeConfig: ConfigProfile?,
@@ -92,6 +97,7 @@ fun FilterRuleDialog(
     var showTypeDropdown by remember { mutableStateOf(false) }
     var showPolicyDropdown by remember { mutableStateOf(false) }
     var showConfigDropdown by remember { mutableStateOf(false) }
+    var showDocSheet by remember { mutableStateOf(false) }
 
     val currentConfigName = remember(selectedConfigId, activeConfig, allConfigs) {
         allConfigs.find { it.id == selectedConfigId }?.name
@@ -195,7 +201,34 @@ fun FilterRuleDialog(
                 Spacer(modifier = Modifier.height(36.dp))
 
                 // Field 1: Type *
-                FormFieldLabel(label = stringResource(R.string.rule_field_type), isRequired = true)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FormFieldLabel(label = stringResource(R.string.rule_field_type), isRequired = true)
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .clickable { showDocSheet = true }
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.rule_docs_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.rule_docs_action_tooltip),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
                 Box(modifier = Modifier.fillMaxWidth()) {
                     UnderlineInputField(
                         value = type,
@@ -217,6 +250,28 @@ fun FilterRuleDialog(
                                 }
                             )
                         }
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.rule_docs_title),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            },
+                            onClick = {
+                                showTypeDropdown = false
+                                showDocSheet = true
+                            }
+                        )
                     }
                 }
 
@@ -224,11 +279,24 @@ fun FilterRuleDialog(
 
                 // Field 2: Param *
                 val isParamRequired = !type.equals("FINAL", ignoreCase = true)
+                val paramPlaceholder = when (type.uppercase()) {
+                    "HOST-SUFFIX" -> stringResource(R.string.rule_param_hint_host_suffix)
+                    "HOST" -> stringResource(R.string.rule_param_hint_host)
+                    "HOST-KEYWORD" -> stringResource(R.string.rule_param_hint_host_keyword)
+                    "IP-CIDR" -> stringResource(R.string.rule_param_hint_ip_cidr)
+                    "IP-CIDR6" -> stringResource(R.string.rule_param_hint_ip_cidr6)
+                    "GEOIP" -> stringResource(R.string.rule_param_hint_geoip)
+                    "USER-AGENT" -> stringResource(R.string.rule_param_hint_user_agent)
+                    "FINAL" -> stringResource(R.string.rule_param_hint_final)
+                    else -> stringResource(R.string.rule_field_param_hint)
+                }
+
                 FormFieldLabel(label = stringResource(R.string.rule_field_param), isRequired = isParamRequired)
                 UnderlineInputField(
-                    value = param,
+                    value = if (type.equals("FINAL", ignoreCase = true)) "" else param,
                     onValueChange = { param = it },
-                    placeholder = stringResource(R.string.rule_field_param_hint)
+                    placeholder = paramPlaceholder,
+                    enabled = isParamRequired
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -313,102 +381,14 @@ fun FilterRuleDialog(
                 Spacer(modifier = Modifier.height(48.dp))
             }
         }
-    }
-}
 
-@Composable
-private fun CircularActionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit,
-    enabled: Boolean = true
-) {
-    Box(
-        modifier = Modifier
-            .size(42.dp)
-            .clip(CircleShape)
-            .background(
-                if (enabled) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-            )
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = if (enabled) MaterialTheme.colorScheme.onSurface
-            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}
-
-@Composable
-private fun UnderlineInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    onClick: (() -> Unit)? = null
-) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        textStyle = TextStyle(
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Normal
-        ),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        decorationBox = { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            ) {
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                    )
-                }
-                innerTextField()
-            }
-        }
-    )
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
-}
-
-@Composable
-private fun FormFieldLabel(
-    label: String,
-    isRequired: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        if (isRequired) {
-            Text(
-                text = " *",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.Red
-            )
+        if (showDocSheet) {
+            RuleTypesDocSheet(onDismiss = { showDocSheet = false })
         }
     }
 }
+
+
 
 @Composable
 fun AddFilterRuleDialog(
@@ -421,28 +401,6 @@ fun AddFilterRuleDialog(
 ) {
     FilterRuleDialog(
         initialPolicy = initialPolicy,
-        activeConfig = activeConfig,
-        allConfigs = allConfigs,
-        onDismiss = onDismiss,
-        onSave = onSave,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun EditFilterRuleDialog(
-    initialDomain: String,
-    initialPolicy: String,
-    activeConfig: ConfigProfile?,
-    allConfigs: List<ConfigProfile>,
-    onDismiss: () -> Unit,
-    onSave: (type: String, param: String, policy: String, configId: Long?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    FilterRuleDialog(
-        initialParam = initialDomain,
-        initialPolicy = initialPolicy,
-        initialConfigId = activeConfig?.id,
         activeConfig = activeConfig,
         allConfigs = allConfigs,
         onDismiss = onDismiss,

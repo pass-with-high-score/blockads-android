@@ -317,5 +317,27 @@
     <string name="rule_field_save_to">Save To</string>
     <string name="rule_field_current_profile">Current Configuration Profile</string>
     <string name="config_rule_added">Rule added to profile: %s</string>
+    <string name="rule_param_hint_host_suffix">e.g. example.com (matches *.example.com)</string>
+    <string name="rule_param_hint_host">e.g. ads.example.com (exact host only)</string>
+    <string name="rule_param_hint_host_keyword">e.g. analytics, adservice, tracker</string>
+    <string name="rule_param_hint_ip_cidr">e.g. 192.168.1.0/24 or 10.0.0.1/32</string>
+    <string name="rule_param_hint_ip_cidr6">e.g. 2001:db8::/32</string>
+    <string name="rule_param_hint_geoip">e.g. VN, US, JP (2-letter country code)</string>
+    <string name="rule_param_hint_user_agent">e.g. *Spotify*, *MicroMessenger*</string>
+    <string name="rule_param_hint_final">No parameter needed (matches all remaining)</string>
+
+    <!-- Rule Types Documentation -->
+    <string name="rule_docs_title">Rule Types &amp; Syntax Guide</string>
+    <string name="rule_docs_subtitle">Understand how each rule type and policy evaluates traffic.</string>
+    <string name="rule_docs_action_tooltip">Rule Guide</string>
+    <string name="rule_docs_category_all">All</string>
+    <string name="rule_docs_category_domain">Domain</string>
+    <string name="rule_docs_category_ip">IP &amp; Geo</string>
+    <string name="rule_docs_category_other">Other</string>
+    <string name="rule_docs_category_policy">Policy</string>
+    <string name="rule_docs_example_label">Example:</string>
+    <string name="rule_docs_matches_label">Matches:</string>
+    <string name="rule_docs_not_matches_label">Doesn\'t match:</string>
+    <string name="rule_docs_usage_label">Best for:</string>
 </resources>
 
