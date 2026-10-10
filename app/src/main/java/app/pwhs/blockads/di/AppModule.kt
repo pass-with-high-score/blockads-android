@@ -146,6 +146,18 @@ val appModule = module {
             firewallRuleDao = get()
         )
     }
+    single {
+        app.pwhs.blockads.utils.SettingsBackupManager(
+            context = androidApplication(),
+            appPrefs = get(),
+            filterListDao = get(),
+            whitelistDomainDao = get(),
+            customDnsRuleDao = get(),
+            firewallRuleDao = get(),
+            configDao = get(),
+            filterRepo = get()
+        )
+    }
     viewModel {
         SettingsViewModel(
             appPrefs = get(),
@@ -155,6 +167,7 @@ val appModule = module {
             filterListDao = get(),
             customDnsRuleDao = get(),
             firewallRuleDao = get(),
+            backupManager = get(),
             application = androidApplication()
         )
     }

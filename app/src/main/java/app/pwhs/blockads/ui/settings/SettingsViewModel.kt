@@ -51,6 +51,7 @@ class SettingsViewModel(
     private val filterListDao: FilterListDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val firewallRuleDao: FirewallRuleDao,
+    private val backupManager: app.pwhs.blockads.utils.SettingsBackupManager? = null,
     application: Application,
 ) : AndroidViewModel(application) {
 
@@ -289,54 +290,8 @@ class SettingsViewModel(
     fun exportSettings(uri: Uri) {
         viewModelScope.launch {
             try {
-                val backup = SettingsBackup(
-                    upstreamDns = appPrefs.upstreamDns.first(),
-                    fallbackDns = appPrefs.fallbackDns.first(),
-                    autoReconnect = appPrefs.autoReconnect.first(),
-                    themeMode = appPrefs.themeMode.first(),
-                    appLanguage = appPrefs.appLanguage.first(),
-                    safeSearchEnabled = appPrefs.safeSearchEnabled.first(),
-                    youtubeRestrictedMode = appPrefs.youtubeRestrictedMode.first(),
-                    dailySummaryEnabled = appPrefs.dailySummaryEnabled.first(),
-                    milestoneNotificationsEnabled = appPrefs.milestoneNotificationsEnabled.first(),
-                    activeProfileType = "",
-                    firewallEnabled = appPrefs.firewallEnabled.first(),
-                    filterLists = filterListDao.getAllSync().map { f ->
-                        FilterListBackup(name = f.name, url = f.url, isEnabled = f.isEnabled)
-                    },
-                    whitelistDomains = whitelistDomainDao.getAllDomains()
-                        .map { it.trim().lowercase() }
-                        .filter { it.isNotBlank() }
-                        .distinct(),
-                    blocklistDomains = customDnsRuleDao.getBlockDomains()
-                        .map { it.trim().lowercase() }
-                        .filter { it.isNotBlank() }
-                        .distinct(),
-                    whitelistedApps = appPrefs.getWhitelistedAppsSnapshot().toList(),
-                    customRules = customDnsRuleDao.getAll().map { it.rule }.distinct(),
-                    firewallRules = firewallRuleDao.getEnabledRules().map { r ->
-                        FirewallRuleBackup(
-                            packageName = r.packageName,
-                            blockWifi = r.blockWifi,
-                            blockMobileData = r.blockMobileData,
-                            scheduleEnabled = r.scheduleEnabled,
-                            scheduleStartHour = r.scheduleStartHour,
-                            scheduleStartMinute = r.scheduleStartMinute,
-                            scheduleEndHour = r.scheduleEndHour,
-                            scheduleEndMinute = r.scheduleEndMinute,
-                            isEnabled = r.isEnabled
-                        )
-                    }
-                )
-
-                val jsonFormat = kotlinx.serialization.json.Json { prettyPrint = true }
-                getApplication<Application>().applicationContext.contentResolver.openOutputStream(
-                    uri
-                )?.use { out ->
-                    out.write(
-                        jsonFormat.encodeToString(SettingsBackup.serializer(), backup).toByteArray()
-                    )
-                }
+                val mgr = backupManager ?: createFallbackBackupManager()
+                mgr.exportBackup(uri)
                 _events.toast(R.string.filter_settings_export)
             } catch (e: Exception) {
                 _events.toast(R.string.filter_export_failed, listOf("${e.message}"))
@@ -348,124 +303,32 @@ class SettingsViewModel(
     fun importSettings(uri: Uri) {
         viewModelScope.launch {
             try {
-                val jsonStr =
-                    getApplication<Application>().applicationContext.contentResolver.openInputStream(
-                        uri
-                    )?.use { input ->
-                        input.bufferedReader().readText()
-                    } ?: throw Exception("Cannot read file")
-
-                val jsonFormat = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                val backup = jsonFormat.decodeFromString(SettingsBackup.serializer(), jsonStr)
-
-                // Preferences
-                appPrefs.setUpstreamDns(backup.upstreamDns)
-                appPrefs.setFallbackDns(backup.fallbackDns)
-                appPrefs.setAutoReconnect(backup.autoReconnect)
-                appPrefs.setThemeMode(backup.themeMode)
-                appPrefs.setAppLanguage(backup.appLanguage)
-                appPrefs.setSafeSearchEnabled(backup.safeSearchEnabled)
-                appPrefs.setYoutubeRestrictedMode(backup.youtubeRestrictedMode)
-                appPrefs.setDailySummaryEnabled(backup.dailySummaryEnabled)
-                if (backup.dailySummaryEnabled) {
-                    DailySummaryScheduler.scheduleDailySummary(getApplication())
-                } else {
-                    DailySummaryScheduler.cancelDailySummary(getApplication())
-                }
-                appPrefs.setMilestoneNotificationsEnabled(backup.milestoneNotificationsEnabled)
-                appPrefs.setFirewallEnabled(backup.firewallEnabled)
-
-                // Filter lists — add new AND update isEnabled for existing
-                backup.filterLists.forEach { f ->
-                    val existing = filterListDao.getByUrl(f.url)
-                    if (existing != null) {
-                        // Update isEnabled state if it differs
-                        if (existing.isEnabled != f.isEnabled) {
-                            filterListDao.setEnabled(existing.id, f.isEnabled)
-                        }
-                    } else {
-                        filterListDao.insert(
-                            FilterList(
-                                name = f.name,
-                                url = f.url,
-                                isEnabled = f.isEnabled
-                            )
-                        )
-                    }
-                }
-
-                // Whitelist domains — only add new
-                backup.whitelistDomains.forEach { domain ->
-                    val clean = domain.trim().lowercase()
-                    if (clean.isNotBlank() && whitelistDomainDao.exists(clean) == 0) {
-                        whitelistDomainDao.insert(WhitelistDomain(domain = clean))
-                    }
-                }
-
-                // Blocklist domains — support dedicated blocklistDomains list
-                val existingRules = customDnsRuleDao.getAll().map { it.rule }.toSet()
-                backup.blocklistDomains.forEach { domain ->
-                    val clean = domain.trim().lowercase()
-                    if (clean.isNotBlank()) {
-                        val ruleText = "||$clean^"
-                        if (ruleText !in existingRules && customDnsRuleDao.exists(ruleText) == 0) {
-                            customDnsRuleDao.insert(
-                                CustomDnsRule(
-                                    rule = ruleText,
-                                    ruleType = RuleType.BLOCK,
-                                    domain = clean,
-                                    isEnabled = true
-                                )
-                            )
-                        }
-                    }
-                }
-
-                // Whitelisted apps — merge
-                val current = appPrefs.getWhitelistedAppsSnapshot()
-                appPrefs.setWhitelistedApps(current + backup.whitelistedApps.toSet())
-
-                // Custom rules — parse and add (avoid duplicates)
-                val updatedRules = customDnsRuleDao.getAll().map { it.rule }.toSet()
-                backup.customRules.forEach { ruleText ->
-                    val trimmed = ruleText.trim()
-                    if (trimmed.isNotBlank() && trimmed !in updatedRules) {
-                        val rule = CustomRuleParser.parseRule(trimmed)
-                        if (rule != null) {
-                            customDnsRuleDao.insert(rule)
-                        }
-                    }
-                }
-
-                // Firewall rules — only add new
-                backup.firewallRules.forEach { r ->
-                    if (firewallRuleDao.getByPackageName(r.packageName) == null) {
-                        firewallRuleDao.insert(
-                            FirewallRule(
-                                packageName = r.packageName,
-                                blockWifi = r.blockWifi,
-                                blockMobileData = r.blockMobileData,
-                                scheduleEnabled = r.scheduleEnabled,
-                                scheduleStartHour = r.scheduleStartHour,
-                                scheduleStartMinute = r.scheduleStartMinute,
-                                scheduleEndHour = r.scheduleEndHour,
-                                scheduleEndMinute = r.scheduleEndMinute,
-                                isEnabled = r.isEnabled
-                            )
-                        )
-                    }
-                }
-
-                // Refresh in-memory whitelist and custom rules cache
-                filterRepo.loadWhitelist()
-                filterRepo.loadCustomRules()
-
+                val mgr = backupManager ?: createFallbackBackupManager()
+                mgr.importBackup(uri)
                 _events.toast(R.string.filter_settings_imported)
                 requestVpnRestart()
             } catch (e: Exception) {
                 _events.toast(R.string.filter_import_failed, listOf("${e.message}"))
             }
         }
+    }
+
+    private fun createFallbackBackupManager(): app.pwhs.blockads.utils.SettingsBackupManager {
+        val configDao = try {
+            org.koin.java.KoinJavaComponent.get<app.pwhs.blockads.data.dao.ConfigDao>(app.pwhs.blockads.data.dao.ConfigDao::class.java)
+        } catch (_: Exception) {
+            app.pwhs.blockads.data.AppDatabase.getInstance(getApplication()).configDao()
+        }
+        return app.pwhs.blockads.utils.SettingsBackupManager(
+            context = getApplication(),
+            appPrefs = appPrefs,
+            filterListDao = filterListDao,
+            whitelistDomainDao = whitelistDomainDao,
+            customDnsRuleDao = customDnsRuleDao,
+            firewallRuleDao = firewallRuleDao,
+            configDao = configDao,
+            filterRepo = filterRepo
+        )
     }
 
     private fun requestVpnRestart() {

@@ -88,11 +88,25 @@ fun ConfigImportDialog(
             val fileName = queryFileName(context, it)
             val fileContent = readFileContent(context, it)
             if (fileContent != null) {
-                content = fileContent
-                selectedFileName = fileName
-                if (name.isBlank() && fileName != null) {
-                    name = fileName.substringBeforeLast('.')
+                var resolvedContent = fileContent
+                var resolvedName = name
+                if (fileContent.trim().startsWith("{") && fileContent.contains("configProfiles")) {
+                    try {
+                        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                        val backup = json.decodeFromString<app.pwhs.blockads.data.entities.SettingsBackup>(fileContent)
+                        val primary = backup.configProfiles.firstOrNull { it.isActive } ?: backup.configProfiles.firstOrNull()
+                        if (primary != null) {
+                            resolvedContent = primary.content
+                            if (resolvedName.isBlank()) {
+                                resolvedName = primary.name
+                            }
+                        }
+                    } catch (_: Exception) {
+                    }
                 }
+                content = resolvedContent
+                name = if (resolvedName.isNotBlank()) resolvedName else fileName?.substringBeforeLast('.') ?: ""
+                selectedFileName = fileName
             }
         }
     }
