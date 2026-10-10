@@ -41,6 +41,7 @@ sealed interface ConfigUiIntent {
     data object ShowResetConfirmDialog : ConfigUiIntent
     data object DismissResetConfirmDialog : ConfigUiIntent
     data class ToggleAutoUpdate(val configId: Long, val enabled: Boolean) : ConfigUiIntent
+    data object MigrateFromAppSettings : ConfigUiIntent
 }
 
 sealed interface ConfigUiEffect {

@@ -114,6 +114,9 @@
     <string name="profile_sample_loaded">Sample configuration loaded</string>
     <string name="profile_subscriptions_rulesets">Subscriptions &amp; Rulesets</string>
     <string name="profile_subscriptions_desc">Remote subscription rulesets and sync status</string>
+    <string name="profile_action_migrate">Migrate App Settings</string>
+    <string name="profile_migrate_desc">Generate config profile from current DNS and adblock filters</string>
+    <string name="profile_migrated_success">Successfully generated profile from app settings</string>
     <string name="profile_no_subscriptions">No remote subscriptions</string>
     <string name="profile_no_subscriptions_desc">Profiles with remote URLs or filter rulesets will appear here</string>
     <string name="profile_tap_to_switch">Active Profile • Tap to switch</string>

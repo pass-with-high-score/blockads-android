@@ -22,10 +22,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+import app.pwhs.blockads.data.dao.CustomDnsRuleDao
+import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.dao.WhitelistDomainDao
+import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.utils.ProfileMigrationHelper
+import kotlinx.coroutines.flow.first
+
 class ConfigViewModel(
     private val configDao: ConfigDao,
     private val client: HttpClient,
     application: Application,
+    private val appPreferences: AppPreferences? = null,
+    private val customDnsRuleDao: CustomDnsRuleDao? = null,
+    private val whitelistDomainDao: WhitelistDomainDao? = null,
+    private val filterListDao: FilterListDao? = null,
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(ConfigUiState(isLoading = true))
@@ -82,6 +93,7 @@ class ConfigViewModel(
             is ConfigUiIntent.ShowResetConfirmDialog -> _uiState.update { it.copy(showResetConfirmDialog = true) }
             is ConfigUiIntent.DismissResetConfirmDialog -> _uiState.update { it.copy(showResetConfirmDialog = false) }
             is ConfigUiIntent.ToggleAutoUpdate -> toggleAutoUpdate(intent.configId, intent.enabled)
+            is ConfigUiIntent.MigrateFromAppSettings -> migrateFromAppSettings()
         }
     }
 
@@ -227,6 +239,41 @@ class ConfigViewModel(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to refresh remote config")
                 _effects.emit(ConfigUiEffect.ShowToast(R.string.config_fetch_failed))
+            } finally {
+                _uiState.update { it.copy(isUpdating = false) }
+            }
+        }
+    }
+
+    private fun migrateFromAppSettings() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isUpdating = true) }
+            try {
+                withContext(Dispatchers.IO) {
+                    val dnsId = appPreferences?.dnsProviderId?.first()
+                    val customRules = customDnsRuleDao?.getAll() ?: emptyList()
+                    val whitelist = whitelistDomainDao?.getAll()?.first() ?: emptyList()
+                    val filterLists = filterListDao?.getEnabled() ?: emptyList()
+
+                    val content = ProfileMigrationHelper.generateProfileFromCurrentSettings(
+                        selectedDnsProviderId = dnsId,
+                        customRules = customRules,
+                        whitelistDomains = whitelist,
+                        enabledFilterLists = filterLists
+                    )
+
+                    val profile = ConfigProfile(
+                        name = "Migrated Profile",
+                        content = content,
+                        isActive = false,
+                        isBuiltIn = false
+                    )
+                    val id = configDao.insert(profile)
+                    configDao.setActive(id)
+                }
+                _effects.emit(ConfigUiEffect.ShowToast(R.string.profile_migrated_success))
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to migrate profile from app settings")
             } finally {
                 _uiState.update { it.copy(isUpdating = false) }
             }

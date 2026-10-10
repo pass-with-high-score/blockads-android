@@ -213,7 +213,11 @@ val appModule = module {
         ConfigViewModel(
             configDao = get(),
             client = get(),
-            application = androidApplication()
+            application = androidApplication(),
+            appPreferences = get(),
+            customDnsRuleDao = get(),
+            whitelistDomainDao = get(),
+            filterListDao = get()
         )
     }
     viewModel {

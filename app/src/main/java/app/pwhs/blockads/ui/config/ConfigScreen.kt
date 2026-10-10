@@ -118,7 +118,8 @@ fun ConfigScreen(
 
                     ProfileBottomActions(
                         onSubscriptionsClick = { viewModel.onIntent(ConfigUiIntent.ShowSnippetsSheet) },
-                        onMiscSettingsClick = { viewModel.onIntent(ConfigUiIntent.ShowMiscSettingsDialog) }
+                        onMiscSettingsClick = { viewModel.onIntent(ConfigUiIntent.ShowMiscSettingsDialog) },
+                        onMigrateClick = { viewModel.onIntent(ConfigUiIntent.MigrateFromAppSettings) }
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
