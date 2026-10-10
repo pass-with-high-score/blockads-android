@@ -240,6 +240,9 @@
     <string name="profile_action_migrate">Đồng bộ từ cài đặt app</string>
     <string name="profile_migrate_desc">Tạo profile cấu hình từ DNS và bộ lọc chặn hiện tại</string>
     <string name="profile_migrated_success">Đã tạo profile mới từ cài đặt hiện tại của app</string>
+    <string name="profile_choose_icon">Chọn biểu tượng</string>
+    <string name="profile_change_icon">Đổi biểu tượng</string>
+    <string name="profile_icon_updated">Đã cập nhật biểu tượng hồ sơ</string>
 
     <!-- DNS Leak Protection / DoH Bypass -->
     <string name="dns_category_advanced_security">Bảo mật DNS nâng cao</string>

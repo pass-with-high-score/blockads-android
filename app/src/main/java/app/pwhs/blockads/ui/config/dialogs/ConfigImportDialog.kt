@@ -64,12 +64,14 @@ import app.pwhs.blockads.ui.settings.component.SettingIconBadge
 import app.pwhs.blockads.ui.theme.AccentBluePreset
 import app.pwhs.blockads.ui.theme.NeonGreen
 
+import app.pwhs.blockads.ui.config.ProfileIconHelper
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigImportDialog(
     onDismiss: () -> Unit,
-    onImportRemote: (String, String) -> Unit,
-    onImportLocal: (String, String) -> Unit,
+    onImportRemote: (String, String, String?) -> Unit,
+    onImportLocal: (String, String, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -79,6 +81,8 @@ fun ConfigImportDialog(
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
+    var selectedIconId by remember { mutableStateOf("shield") }
+    var showIconPicker by remember { mutableStateOf(false) }
     var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -99,6 +103,9 @@ fun ConfigImportDialog(
                             resolvedContent = primary.content
                             if (resolvedName.isBlank()) {
                                 resolvedName = primary.name
+                            }
+                            if (!primary.icon.isNullOrBlank()) {
+                                selectedIconId = primary.icon
                             }
                         }
                     } catch (_: Exception) {
@@ -209,197 +216,56 @@ fun ConfigImportDialog(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            if (selectedTab == 0) {
-                // Profile Name Input
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.config_name_label)) },
-                    placeholder = { Text("e.g., AdBlock Rules") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Label,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                    )
+            // Icon Selector Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+                    .clickable { showIconPicker = true }
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingIconBadge(
+                    icon = ProfileIconHelper.getIcon(selectedIconId),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text(stringResource(R.string.config_url_label)) },
-                    placeholder = { Text("https://example.com/filter.conf") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Link,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    supportingText = {
-                        Text(
-                            text = "Supports HTTP/HTTPS URLs with .conf, .snippet, or hosts rules",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.profile_choose_icon),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
                     )
-                )
-            } else {
-                // File Picker Section
-                if (content.isBlank()) {
-                    Card(
-                        onClick = { filePickerLauncher.launch(arrayOf("*/*")) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-                        ),
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 28.dp, horizontal = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            SettingIconBadge(
-                                icon = Icons.Default.UploadFile,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.profile_choose_file),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.profile_choose_file_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = { filePickerLauncher.launch(arrayOf("*/*")) },
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.UploadFile,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(stringResource(R.string.profile_choose_file))
-                            }
-                        }
-                    }
-                } else {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                        ),
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            SettingIconBadge(
-                                icon = Icons.Default.Description,
-                                tint = NeonGreen
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = selectedFileName ?: "Configuration File",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "${content.lines().size} lines • ${content.length} characters",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            TextButton(
-                                onClick = { filePickerLauncher.launch(arrayOf("*/*")) }
-                            ) {
-                                Text(stringResource(R.string.profile_change_file))
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text(stringResource(R.string.config_name_label)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Label,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    OutlinedTextField(
-                        value = content,
-                        onValueChange = { content = it },
-                        label = { Text(stringResource(R.string.config_content_label)) },
-                        textStyle = TextStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        minLines = 4,
-                        maxLines = 8,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
-                        )
+                    Text(
+                        text = ProfileIconHelper.PRESET_ICONS.firstOrNull { it.id == selectedIconId }?.label ?: "Shield",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                TextButton(onClick = { showIconPicker = true }) {
+                    Text(stringResource(R.string.profile_change_file))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (selectedTab == 0) {
+                ConfigImportRemoteSection(
+                    name = name,
+                    onNameChange = { name = it },
+                    url = url,
+                    onUrlChange = { url = it }
+                )
+            } else {
+                ConfigImportLocalSection(
+                    name = name,
+                    onNameChange = { name = it },
+                    content = content,
+                    onContentChange = { content = it },
+                    selectedFileName = selectedFileName,
+                    onPickFile = { filePickerLauncher.launch(arrayOf("*/*")) }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -425,8 +291,8 @@ fun ConfigImportDialog(
 
                 Button(
                     onClick = {
-                        if (selectedTab == 0) onImportRemote(name, url)
-                        else onImportLocal(name, content)
+                        if (selectedTab == 0) onImportRemote(name, url, selectedIconId)
+                        else onImportLocal(name, content, selectedIconId)
                     },
                     enabled = isInputValid,
                     shape = RoundedCornerShape(12.dp),
@@ -449,26 +315,13 @@ fun ConfigImportDialog(
             }
         }
     }
-}
 
-private fun queryFileName(context: Context, uri: Uri): String? {
-    if (uri.scheme == "content") {
-        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (nameIndex != -1 && cursor.moveToFirst()) {
-                return cursor.getString(nameIndex)
-            }
-        }
-    }
-    return uri.lastPathSegment?.substringAfterLast('/')
-}
-
-private fun readFileContent(context: Context, uri: Uri): String? {
-    return try {
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            inputStream.bufferedReader(Charsets.UTF_8).readText()
-        }
-    } catch (_: Exception) {
-        null
+    if (showIconPicker) {
+        ProfileIconPickerSheet(
+            initialIconId = selectedIconId,
+            profileName = name,
+            onIconSelected = { selectedIconId = it },
+            onDismiss = { showIconPicker = false }
+        )
     }
 }

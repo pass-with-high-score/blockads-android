@@ -69,8 +69,8 @@ class ConfigViewModel(
     fun onIntent(intent: ConfigUiIntent) {
         when (intent) {
             is ConfigUiIntent.SelectActive -> selectActive(intent.configId)
-            is ConfigUiIntent.AddRemoteConfig -> addRemoteConfig(intent.name, intent.url)
-            is ConfigUiIntent.AddLocalConfig -> addLocalConfig(intent.name, intent.content)
+            is ConfigUiIntent.AddRemoteConfig -> addRemoteConfig(intent.name, intent.url, intent.icon)
+            is ConfigUiIntent.AddLocalConfig -> addLocalConfig(intent.name, intent.content, intent.icon)
             is ConfigUiIntent.UpdateConfig -> updateConfig(intent.configId, intent.name, intent.content)
             is ConfigUiIntent.DeleteConfig -> deleteConfig(intent.config)
             is ConfigUiIntent.ShowAddDialog -> _uiState.update { it.copy(showImportDialog = true) }
@@ -97,6 +97,9 @@ class ConfigViewModel(
             is ConfigUiIntent.DismissResetConfirmDialog -> _uiState.update { it.copy(showResetConfirmDialog = false) }
             is ConfigUiIntent.ToggleAutoUpdate -> toggleAutoUpdate(intent.configId, intent.enabled)
             is ConfigUiIntent.MigrateFromAppSettings -> migrateFromAppSettings()
+            is ConfigUiIntent.ShowIconPicker -> _uiState.update { it.copy(iconPickerConfig = intent.config) }
+            is ConfigUiIntent.DismissIconPicker -> _uiState.update { it.copy(iconPickerConfig = null) }
+            is ConfigUiIntent.UpdateProfileIcon -> updateProfileIcon(intent.configId, intent.icon)
         }
     }
 
@@ -154,7 +157,7 @@ class ConfigViewModel(
         }
     }
 
-    private fun addRemoteConfig(name: String, url: String) {
+    private fun addRemoteConfig(name: String, url: String, icon: String? = null) {
         val trimmedName = name.trim()
         val trimmedUrl = url.trim()
         if (trimmedName.isEmpty() || trimmedUrl.isEmpty()) return
@@ -171,7 +174,8 @@ class ConfigViewModel(
                     content = content,
                     remoteUrl = trimmedUrl,
                     lastUpdated = System.currentTimeMillis(),
-                    isActive = false
+                    isActive = false,
+                    icon = icon
                 )
                 withContext(Dispatchers.IO) {
                     configDao.insert(newConfig)
@@ -186,7 +190,7 @@ class ConfigViewModel(
         }
     }
 
-    private fun addLocalConfig(name: String, content: String) {
+    private fun addLocalConfig(name: String, content: String, icon: String? = null) {
         val trimmedName = name.trim()
         if (trimmedName.isEmpty()) return
 
@@ -195,11 +199,20 @@ class ConfigViewModel(
             val newConfig = ConfigProfile(
                 name = trimmedName,
                 content = cleaned,
-                isActive = false
+                isActive = false,
+                icon = icon
             )
             configDao.insert(newConfig)
             _uiState.update { it.copy(showImportDialog = false) }
             _effects.emit(ConfigUiEffect.ShowToast(R.string.config_added))
+        }
+    }
+
+    private fun updateProfileIcon(configId: Long, icon: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            configDao.updateIcon(configId, icon)
+            _uiState.update { it.copy(iconPickerConfig = null) }
+            _effects.emit(ConfigUiEffect.ShowToast(R.string.profile_icon_updated))
         }
     }
 

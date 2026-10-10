@@ -35,7 +35,8 @@ data class ConfigProfileBackup(
     val remoteUrl: String? = null,
     val autoUpdate: Boolean = false,
     val isActive: Boolean = false,
-    val isBuiltIn: Boolean = false
+    val isBuiltIn: Boolean = false,
+    val icon: String? = null
 )
 
 @Serializable

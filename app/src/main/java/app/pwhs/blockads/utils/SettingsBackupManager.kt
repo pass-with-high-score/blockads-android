@@ -47,7 +47,8 @@ class SettingsBackupManager(
                 remoteUrl = c.remoteUrl,
                 autoUpdate = c.autoUpdate,
                 isActive = c.isActive,
-                isBuiltIn = c.isBuiltIn
+                isBuiltIn = c.isBuiltIn,
+                icon = c.icon
             )
         }
 
@@ -208,7 +209,8 @@ class SettingsBackupManager(
                         existing.copy(
                             content = cleanedContent,
                             remoteUrl = p.remoteUrl,
-                            autoUpdate = p.autoUpdate
+                            autoUpdate = p.autoUpdate,
+                            icon = p.icon ?: existing.icon
                         )
                     )
                     if (p.isActive) {
@@ -222,7 +224,8 @@ class SettingsBackupManager(
                             remoteUrl = p.remoteUrl,
                             autoUpdate = p.autoUpdate,
                             isActive = p.isActive,
-                            isBuiltIn = p.isBuiltIn
+                            isBuiltIn = p.isBuiltIn,
+                            icon = p.icon
                         )
                     )
                     if (p.isActive) {

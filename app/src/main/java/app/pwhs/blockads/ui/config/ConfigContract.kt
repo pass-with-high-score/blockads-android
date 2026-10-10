@@ -14,12 +14,13 @@ data class ConfigUiState(
     val showSnippetsSheet: Boolean = false,
     val showResetConfirmDialog: Boolean = false,
     val editingConfig: ConfigProfile? = null,
+    val iconPickerConfig: ConfigProfile? = null,
 )
 
 sealed interface ConfigUiIntent {
     data class SelectActive(val configId: Long) : ConfigUiIntent
-    data class AddRemoteConfig(val name: String, val url: String) : ConfigUiIntent
-    data class AddLocalConfig(val name: String, val content: String) : ConfigUiIntent
+    data class AddRemoteConfig(val name: String, val url: String, val icon: String? = null) : ConfigUiIntent
+    data class AddLocalConfig(val name: String, val content: String, val icon: String? = null) : ConfigUiIntent
     data class UpdateConfig(val configId: Long, val name: String, val content: String) : ConfigUiIntent
     data class DeleteConfig(val config: ConfigProfile) : ConfigUiIntent
     data object ShowAddDialog : ConfigUiIntent
@@ -42,6 +43,9 @@ sealed interface ConfigUiIntent {
     data object DismissResetConfirmDialog : ConfigUiIntent
     data class ToggleAutoUpdate(val configId: Long, val enabled: Boolean) : ConfigUiIntent
     data object MigrateFromAppSettings : ConfigUiIntent
+    data class ShowIconPicker(val config: ConfigProfile) : ConfigUiIntent
+    data object DismissIconPicker : ConfigUiIntent
+    data class UpdateProfileIcon(val configId: Long, val icon: String) : ConfigUiIntent
 }
 
 sealed interface ConfigUiEffect {

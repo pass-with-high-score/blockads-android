@@ -17,6 +17,7 @@ data class ConfigProfile(
     val lastUpdated: Long = 0L,
     val isActive: Boolean = false,
     val isBuiltIn: Boolean = false,
+    val icon: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 ) {
     companion object {

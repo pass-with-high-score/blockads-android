@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.ConfigProfile
 
+import app.pwhs.blockads.ui.config.ProfileIconHelper
+import androidx.compose.material.icons.filled.Palette
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigProfilesSheet(
@@ -48,6 +51,7 @@ fun ConfigProfilesSheet(
     activeConfig: ConfigProfile?,
     onSelectActive: (Long) -> Unit,
     onDeleteConfig: (ConfigProfile) -> Unit,
+    onChangeIcon: (ConfigProfile) -> Unit,
     onAddClick: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -115,29 +119,21 @@ fun ConfigProfilesSheet(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (isActive) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.surfaceContainerHighest
-                                ),
+                                    if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                )
+                                .clickable { onChangeIcon(config) },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (isActive) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Layers,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = ProfileIconHelper.getIcon(config.icon),
+                                contentDescription = null,
+                                tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
 
                         Spacer(modifier = Modifier.width(14.dp))
@@ -159,6 +155,15 @@ fun ConfigProfilesSheet(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        IconButton(onClick = { onChangeIcon(config) }) {
+                            Icon(
+                                imageVector = Icons.Default.Palette,
+                                contentDescription = stringResource(R.string.profile_choose_icon),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 

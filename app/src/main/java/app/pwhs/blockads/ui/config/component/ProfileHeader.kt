@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.config.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,8 @@ import app.pwhs.blockads.data.entities.ConfigProfile
 import app.pwhs.blockads.ui.settings.component.SettingIconBadge
 import app.pwhs.blockads.ui.theme.NeonGreen
 
+import app.pwhs.blockads.ui.config.ProfileIconHelper
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileHeader(
@@ -47,6 +50,7 @@ fun ProfileHeader(
     onNavigateBack: () -> Unit,
     onAddProfile: () -> Unit,
     onSwitchProfile: () -> Unit,
+    onChangeIcon: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -104,10 +108,21 @@ fun ProfileHeader(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SettingIconBadge(
-                            icon = Icons.Default.Shield,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        Box(
+                            modifier = Modifier
+                                .then(
+                                    if (onChangeIcon != null) {
+                                        Modifier
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .clickable { onChangeIcon() }
+                                    } else Modifier
+                                )
+                        ) {
+                            SettingIconBadge(
+                                icon = ProfileIconHelper.getIcon(active.icon),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
 
                         Spacer(modifier = Modifier.width(14.dp))
 

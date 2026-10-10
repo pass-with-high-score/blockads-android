@@ -30,6 +30,7 @@ import app.pwhs.blockads.ui.config.dialogs.ConfigMiscSettingsDialog
 import app.pwhs.blockads.ui.config.dialogs.ConfigProfilesSheet
 import app.pwhs.blockads.ui.config.dialogs.ConfigResetConfirmDialog
 import app.pwhs.blockads.ui.config.dialogs.ConfigSnippetsSheet
+import app.pwhs.blockads.ui.config.dialogs.ProfileIconPickerSheet
 import app.pwhs.blockads.ui.config.editor.ConfigEditorScreen
 import app.pwhs.blockads.utils.ConfigExporter
 import org.koin.androidx.compose.koinViewModel
@@ -87,7 +88,10 @@ fun ConfigScreen(
                         activeConfig = uiState.activeConfig,
                         onNavigateBack = onNavigateBack,
                         onAddProfile = { viewModel.onIntent(ConfigUiIntent.ShowImportDialog) },
-                        onSwitchProfile = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) }
+                        onSwitchProfile = { viewModel.onIntent(ConfigUiIntent.ShowProfilesSheet) },
+                        onChangeIcon = {
+                            uiState.activeConfig?.let { viewModel.onIntent(ConfigUiIntent.ShowIconPicker(it)) }
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -136,19 +140,31 @@ fun ConfigScreen(
                     activeConfig = uiState.activeConfig,
                     onSelectActive = { viewModel.onIntent(ConfigUiIntent.SelectActive(it)) },
                     onDeleteConfig = { viewModel.onIntent(ConfigUiIntent.DeleteConfig(it)) },
+                    onChangeIcon = { viewModel.onIntent(ConfigUiIntent.ShowIconPicker(it)) },
                     onAddClick = { viewModel.onIntent(ConfigUiIntent.ShowImportDialog) },
                     onDismiss = { viewModel.onIntent(ConfigUiIntent.DismissProfilesSheet) }
+                )
+            }
+
+            uiState.iconPickerConfig?.let { targetConfig ->
+                ProfileIconPickerSheet(
+                    initialIconId = targetConfig.icon,
+                    profileName = targetConfig.name,
+                    onIconSelected = { iconId ->
+                        viewModel.onIntent(ConfigUiIntent.UpdateProfileIcon(targetConfig.id, iconId))
+                    },
+                    onDismiss = { viewModel.onIntent(ConfigUiIntent.DismissIconPicker) }
                 )
             }
 
             if (uiState.showImportDialog) {
                 ConfigImportDialog(
                     onDismiss = { viewModel.onIntent(ConfigUiIntent.DismissImportDialog) },
-                    onImportRemote = { name, url ->
-                        viewModel.onIntent(ConfigUiIntent.AddRemoteConfig(name, url))
+                    onImportRemote = { name, url, icon ->
+                        viewModel.onIntent(ConfigUiIntent.AddRemoteConfig(name, url, icon))
                     },
-                    onImportLocal = { name, content ->
-                        viewModel.onIntent(ConfigUiIntent.AddLocalConfig(name, content))
+                    onImportLocal = { name, content, icon ->
+                        viewModel.onIntent(ConfigUiIntent.AddLocalConfig(name, content, icon))
                     }
                 )
             }

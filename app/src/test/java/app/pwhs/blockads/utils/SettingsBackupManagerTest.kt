@@ -88,7 +88,8 @@ class SettingsBackupManagerTest {
             id = 1,
             name = "Test Profile",
             content = "[filter_local]\nhost, ad.com, reject",
-            isActive = true
+            isActive = true,
+            icon = "gaming"
         )
         coEvery { configDao.getAll() } returns listOf(testProfile)
 
@@ -104,6 +105,7 @@ class SettingsBackupManagerTest {
         val backup = Json { ignoreUnknownKeys = true }.decodeFromString<SettingsBackup>(jsonContent)
         assertEquals(1, backup.configProfiles.size)
         assertEquals("Test Profile", backup.configProfiles[0].name)
+        assertEquals("gaming", backup.configProfiles[0].icon)
         assertTrue(backup.configProfiles[0].isActive)
     }
 
@@ -116,7 +118,8 @@ class SettingsBackupManagerTest {
                 ConfigProfileBackup(
                     name = "Imported Profile",
                     content = "[filter_local]\nhost, imported.ad, reject\n[rewrite_local]\nignored",
-                    isActive = true
+                    isActive = true,
+                    icon = "rocket"
                 )
             )
         )
@@ -133,6 +136,7 @@ class SettingsBackupManagerTest {
         coVerify {
             configDao.insert(match {
                 it.name == "Imported Profile" &&
+                        it.icon == "rocket" &&
                         it.content.contains("host, imported.ad, reject") &&
                         !it.content.contains("[rewrite_local]")
             })

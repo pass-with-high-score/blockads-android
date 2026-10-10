@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.pwhs.blockads.data.dao.ConfigDao
 import app.pwhs.blockads.data.entities.ConfigProfile
 import app.pwhs.blockads.ui.MainDispatcherRule
+import app.pwhs.blockads.ui.awaitUntil
 import app.pwhs.blockads.ui.keepHot
 import io.ktor.client.HttpClient
 import io.mockk.coEvery
@@ -130,6 +131,7 @@ class ConfigViewModelTest {
     fun `EditActiveConfig and CloseEditor update editor uiState`() = runTest {
         val vm = createViewModel()
         keepHot(vm.uiState)
+        awaitUntil { vm.uiState.value.activeConfig != null }
 
         assertFalse(vm.uiState.value.isEditorOpen)
         vm.onIntent(ConfigUiIntent.EditActiveConfig)
@@ -146,11 +148,40 @@ class ConfigViewModelTest {
         coEvery { configDao.getById(defaultConfig.id) } returns defaultConfig
         val vm = createViewModel()
         keepHot(vm.uiState)
+        awaitUntil { vm.uiState.value.activeConfig != null }
 
         vm.onIntent(ConfigUiIntent.LoadSample)
+        testScheduler.advanceUntilIdle()
 
-        coVerify(atLeast = 1) {
+        coVerify(timeout = 2000, atLeast = 1) {
             configDao.update(match { it.id == defaultConfig.id && it.content == ConfigProfile.SAMPLE_CONFIG })
         }
+    }
+
+    @Test
+    fun `ShowIconPicker and DismissIconPicker update iconPickerConfig`() = runTest {
+        val vm = createViewModel()
+        keepHot(vm.uiState)
+
+        assertEquals(null, vm.uiState.value.iconPickerConfig)
+        vm.onIntent(ConfigUiIntent.ShowIconPicker(defaultConfig))
+        assertEquals(defaultConfig.id, vm.uiState.value.iconPickerConfig?.id)
+
+        vm.onIntent(ConfigUiIntent.DismissIconPicker)
+        assertEquals(null, vm.uiState.value.iconPickerConfig)
+    }
+
+    @Test
+    fun `UpdateProfileIcon updates dao and clears iconPickerConfig`() = runTest {
+        val vm = createViewModel()
+        keepHot(vm.uiState)
+
+        vm.onIntent(ConfigUiIntent.ShowIconPicker(defaultConfig))
+        vm.onIntent(ConfigUiIntent.UpdateProfileIcon(defaultConfig.id, "rocket"))
+
+        coVerify {
+            configDao.updateIcon(defaultConfig.id, "rocket")
+        }
+        assertEquals(null, vm.uiState.value.iconPickerConfig)
     }
 }

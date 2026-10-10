@@ -46,4 +46,7 @@ interface ConfigDao {
 
     @Query("UPDATE configs SET content = :content, lastUpdated = :lastUpdated WHERE id = :id")
     suspend fun updateContent(id: Long, content: String, lastUpdated: Long)
+
+    @Query("UPDATE configs SET icon = :icon WHERE id = :id")
+    suspend fun updateIcon(id: Long, icon: String?)
 }

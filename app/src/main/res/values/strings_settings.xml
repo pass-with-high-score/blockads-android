@@ -124,6 +124,9 @@
     <string name="profile_choose_file">Choose File</string>
     <string name="profile_choose_file_desc">Select a .conf, .snippet, or .txt file</string>
     <string name="profile_change_file">Change</string>
+    <string name="profile_choose_icon">Choose Profile Icon</string>
+    <string name="profile_change_icon">Change Icon</string>
+    <string name="profile_icon_updated">Profile icon updated</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
     <string name="settings_import">Import</string>
