@@ -287,6 +287,51 @@ object ConfigRuleHelper {
         }
         return servers
     }
+
+    fun updateDnsSection(content: String, servers: List<String>): String {
+        val lines = content.lines().toMutableList()
+        var dnsStartIndex = -1
+        var dnsEndIndex = -1
+
+        for (i in lines.indices) {
+            val trimmed = lines[i].trim()
+            if (trimmed.equals("[dns]", ignoreCase = true)) {
+                dnsStartIndex = i
+            } else if (dnsStartIndex != -1 && trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                dnsEndIndex = i
+                break
+            }
+        }
+
+        val newDnsLines = mutableListOf<String>()
+        newDnsLines.add("[dns]")
+        for (s in servers) {
+            val trimmed = s.trim()
+            if (trimmed.isNotEmpty()) {
+                newDnsLines.add("server = $trimmed")
+            }
+        }
+
+        if (dnsStartIndex != -1) {
+            val end = if (dnsEndIndex != -1) dnsEndIndex else lines.size
+            lines.subList(dnsStartIndex, end).clear()
+            lines.addAll(dnsStartIndex, newDnsLines)
+            return lines.joinToString("\n")
+        } else {
+            var insertPos = 0
+            for (i in lines.indices) {
+                if (lines[i].trim().equals("[general]", ignoreCase = true)) {
+                    insertPos = i + 1
+                    while (insertPos < lines.size && !lines[insertPos].trim().startsWith("[")) {
+                        insertPos++
+                    }
+                    break
+                }
+            }
+            lines.addAll(insertPos, listOf("") + newDnsLines + listOf(""))
+            return lines.joinToString("\n")
+        }
+    }
 }
 
 data class ParsedRemoteFilter(

@@ -21,9 +21,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+import app.pwhs.blockads.data.dao.ConfigDao
+import app.pwhs.blockads.utils.ConfigRuleHelper
+import timber.log.Timber
+
 class DnsProviderViewModel(
     private val appPrefs: AppPreferences,
-    application: Application
+    application: Application,
+    private val configDao: ConfigDao? = null
 ) : AndroidViewModel(application) {
 
     private val _effects = MutableSharedFlow<DnsProviderUiEffect>(extraBufferCapacity = 1)
@@ -150,6 +155,8 @@ class DnsProviderViewModel(
                     }
                 appPrefs.setFallbackDns(fallbackIp)
             }
+            val servers = listOfNotNull(provider.ipAddress.takeIf { it.isNotBlank() }, DnsProviders.getSecondaryIp(provider)?.takeIf { it.isNotBlank() })
+            syncToActiveProfile(servers)
             restartService()
         }
     }
@@ -212,8 +219,24 @@ class DnsProviderViewModel(
                     appPrefs.setUpstreamDns(parsedHost)
                 }
             }
+            val customServers = listOfNotNull(parsedHost.takeIf { it.isNotBlank() }, currentFallback.takeIf { it.isNotBlank() })
+            syncToActiveProfile(customServers)
             _showCustomSheet.value = false
             restartService()
+        }
+    }
+
+    private suspend fun syncToActiveProfile(servers: List<String>) {
+        if (configDao == null || servers.isEmpty()) return
+        try {
+            val active = configDao.getActive() ?: return
+            val updated = ConfigRuleHelper.updateDnsSection(active.content, servers)
+            if (updated != active.content) {
+                configDao.update(active.copy(content = updated))
+                Timber.d("Active profile [dns] synced from DNS screen: $servers")
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to sync DNS server to active profile")
         }
     }
 

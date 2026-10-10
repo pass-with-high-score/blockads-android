@@ -164,4 +164,17 @@ object TunnelRuleLoader {
         if (csv.isBlank()) return emptyList()
         return csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
     }
+
+    /**
+     * Applies profile [dns] upstream servers if declared in active ruleset.
+     */
+    fun applyProfileDnsIfPresent(engine: tunnel.Engine, onApply: (primary: String, fallback: String) -> Unit) {
+        val servers = getProfileDNSServers(engine)
+        if (servers.isNotEmpty()) {
+            val primary = servers[0]
+            val fallback = servers.getOrNull(1) ?: "8.8.8.8"
+            onApply(primary, fallback)
+            Timber.d("Profile [dns] applied: primary=$primary, fallback=$fallback")
+        }
+    }
 }

@@ -78,4 +78,23 @@ class ConfigRuleHelperTest {
         assertEquals("FINAL", rules[2].type)
         assertEquals("DIRECT", rules[2].policy)
     }
+
+    @Test
+    fun testUpdateDnsSection() {
+        val original = """
+            [general]
+            dns_exclusion_list = *.local
+            
+            [dns]
+            server = 1.1.1.1
+            
+            [filter_local]
+            final, direct
+        """.trimIndent()
+
+        val updated = ConfigRuleHelper.updateDnsSection(original, listOf("8.8.8.8", "8.8.4.4"))
+        val servers = ConfigRuleHelper.parseDnsServers(updated)
+        assertEquals(listOf("8.8.8.8", "8.8.4.4"), servers)
+        assertTrue(updated.contains("[filter_local]"))
+    }
 }

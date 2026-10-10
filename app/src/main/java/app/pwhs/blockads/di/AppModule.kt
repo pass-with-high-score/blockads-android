@@ -193,7 +193,8 @@ val appModule = module {
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),
-            application = androidApplication()
+            application = androidApplication(),
+            configDao = get()
         )
     }
     viewModel {

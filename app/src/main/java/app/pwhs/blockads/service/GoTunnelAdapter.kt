@@ -475,6 +475,7 @@ class GoTunnelAdapter(
     fun setRulesetConfig(content: String): Long = runCatching {
         val count = engine.setRulesetConfig(content)
         TunnelRuleLoader.loadCachedRemoteRulesets(context, engine)
+        TunnelRuleLoader.applyProfileDnsIfPresent(engine) { p, f -> configureDns("PLAIN", p, f, "") }
         count
     }.onFailure { Timber.e(it, "Failed to set ruleset config") }.getOrDefault(0L)
 

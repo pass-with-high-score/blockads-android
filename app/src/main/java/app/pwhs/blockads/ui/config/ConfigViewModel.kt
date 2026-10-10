@@ -26,6 +26,9 @@ import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.entities.DnsProviders
+import app.pwhs.blockads.utils.ConfigRuleHelper
 import app.pwhs.blockads.utils.ProfileMigrationHelper
 import kotlinx.coroutines.flow.first
 
@@ -146,6 +149,7 @@ class ConfigViewModel(
     private fun selectActive(configId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             configDao.setActive(configId)
+            configDao.getById(configId)?.let { syncProfileDnsToAppPrefs(it.content) }
             _effects.emit(ConfigUiEffect.ShowToast(R.string.config_activated))
         }
     }
@@ -201,6 +205,9 @@ class ConfigViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val existing = configDao.getById(configId) ?: return@launch
             configDao.update(existing.copy(name = name.trim(), content = content))
+            if (existing.isActive) {
+                syncProfileDnsToAppPrefs(content)
+            }
             _uiState.update { it.copy(editingConfig = null) }
             _effects.emit(ConfigUiEffect.ShowToast(R.string.config_updated))
         }
@@ -278,5 +285,38 @@ class ConfigViewModel(
                 _uiState.update { it.copy(isUpdating = false) }
             }
         }
+    }
+
+    private suspend fun syncProfileDnsToAppPrefs(content: String) {
+        if (appPreferences == null) return
+        val servers = ConfigRuleHelper.parseDnsServers(content)
+        if (servers.isEmpty()) return
+        val primary = servers[0]
+        val secondary = servers.getOrNull(1)
+
+        val matched = DnsProviders.getByIp(primary)
+        if (matched != null) {
+            appPreferences.setDnsProviderId(matched.id)
+            appPreferences.setUpstreamDns(matched.ipAddress)
+            if (matched.odohRelayUrl != null && matched.dohUrl != null) {
+                appPreferences.setDnsProtocol(DnsProtocol.ODOH)
+                appPreferences.setDohUrl(matched.dohUrl)
+                appPreferences.setOdohRelayUrl(matched.odohRelayUrl)
+            } else if (matched.dohUrl != null) {
+                val protocol = if (matched.dohUrl.startsWith("quic://", ignoreCase = true)) DnsProtocol.DOQ else DnsProtocol.DOH
+                appPreferences.setDnsProtocol(protocol)
+                appPreferences.setDohUrl(matched.dohUrl)
+            } else {
+                appPreferences.setDnsProtocol(DnsProtocol.PLAIN)
+            }
+        } else {
+            appPreferences.setDnsProviderId(AppPreferences.CUSTOM_DNS_PROVIDER_ID)
+            appPreferences.setUpstreamDns(primary)
+            appPreferences.setDnsProtocol(DnsProtocol.PLAIN)
+        }
+        if (secondary != null) {
+            appPreferences.setFallbackDns(secondary)
+        }
+        Timber.d("AppPreferences DNS synced from active profile [dns]: primary=$primary, secondary=$secondary")
     }
 }
