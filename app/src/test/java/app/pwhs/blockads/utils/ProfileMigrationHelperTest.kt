@@ -65,6 +65,8 @@ class ProfileMigrationHelperTest {
         org.junit.Assert.assertFalse(profileContent.contains("[task_local]"))
         org.junit.Assert.assertFalse(profileContent.contains("[http_backend]"))
         org.junit.Assert.assertFalse(profileContent.contains("[mitm]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[server_local]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[server_remote]"))
     }
 
     @Test

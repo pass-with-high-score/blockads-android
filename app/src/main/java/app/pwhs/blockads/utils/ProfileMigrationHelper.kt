@@ -43,13 +43,7 @@ object ProfileMigrationHelper {
         sb.appendLine("static = REJECT, reject")
         sb.appendLine()
 
-        // 4. [server_local] & [server_remote]
-        sb.appendLine("[server_local]")
-        sb.appendLine()
-        sb.appendLine("[server_remote]")
-        sb.appendLine()
-
-        // 5. [filter_local]
+        // 4. [filter_local]
         sb.appendLine("[filter_local]")
         for (w in whitelistDomains) {
             if (!w.isEnabled) continue

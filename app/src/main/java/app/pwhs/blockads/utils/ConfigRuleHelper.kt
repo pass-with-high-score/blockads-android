@@ -338,7 +338,9 @@ object ConfigRuleHelper {
         "rewrite_remote",
         "task_local",
         "http_backend",
-        "mitm"
+        "mitm",
+        "server_local",
+        "server_remote"
     )
 
     fun stripUnsupportedSections(content: String): String {

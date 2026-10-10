@@ -37,10 +37,6 @@ server = 223.5.5.5
 static = DIRECT, direct
 static = REJECT, reject
 
-[server_local]
-
-[server_remote]
-
 [filter_local]
 # Local ad blocking rules
 host-suffix, doubleclick.net, reject

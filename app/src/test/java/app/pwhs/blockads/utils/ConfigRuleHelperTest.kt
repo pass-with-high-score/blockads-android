@@ -121,6 +121,12 @@ class ConfigRuleHelperTest {
             
             [mitm]
             hostname = *.google.com
+
+            [server_local]
+            shadowsocks = 1.1.1.1:8388, method=aes-128-gcm, password=pwd
+
+            [server_remote]
+            https://example.com/servers.txt
         """.trimIndent()
 
         val cleaned = ConfigRuleHelper.stripUnsupportedSections(configWithUnsupported)
@@ -132,6 +138,9 @@ class ConfigRuleHelperTest {
         org.junit.Assert.assertFalse(cleaned.contains("[task_local]"))
         org.junit.Assert.assertFalse(cleaned.contains("[http_backend]"))
         org.junit.Assert.assertFalse(cleaned.contains("[mitm]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[server_local]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[server_remote]"))
+        org.junit.Assert.assertFalse(cleaned.contains("shadowsocks"))
         org.junit.Assert.assertFalse(cleaned.contains("script.js"))
     }
 }

@@ -459,6 +459,12 @@ server = 127.0.0.1:8080
 [mitm]
 hostname = *.google.com
 
+[server_local]
+shadowsocks = 1.1.1.1:8388, method=aes-128-gcm, password=pwd, tag=Node1
+
+[server_remote]
+https://example.com/sub.txt, tag=Sub1
+
 [policy]
 static = DIRECT, direct
 `

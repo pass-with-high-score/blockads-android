@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Public
@@ -50,8 +49,6 @@ val STANDARD_SECTIONS = listOf(
     SectionItem("general", Icons.Default.Bookmark, Color(0xFF4A90E2)),
     SectionItem("dns", Icons.Default.Public, Color(0xFF9B51E0)),
     SectionItem("policy", Icons.Default.Tune, Color(0xFF00BFA5)),
-    SectionItem("server_local", Icons.Default.Dns, Color(0xFF29B6F6)),
-    SectionItem("server_remote", Icons.Default.Link, Color(0xFF03A9F4)),
     SectionItem("filter_local", Icons.Default.FilterAlt, Color(0xFF7C4DFF)),
     SectionItem("filter_remote", Icons.Default.Link, Color(0xFF651FFF)),
 )
