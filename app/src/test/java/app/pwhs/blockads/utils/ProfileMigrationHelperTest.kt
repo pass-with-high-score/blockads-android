@@ -59,4 +59,17 @@ class ProfileMigrationHelperTest {
         assertTrue(profileContent.contains("[filter_remote]"))
         assertTrue(profileContent.contains("https://filters.adtidy.org/android/filters/15_optimized.txt, tag=AdGuard_DNS, update-interval=24"))
     }
+
+    @Test
+    fun testDefaultFilterListsWhenEmpty() {
+        val profileContent = ProfileMigrationHelper.generateProfileFromCurrentSettings(
+            selectedDnsProviderId = "cloudflare",
+            customRules = emptyList(),
+            whitelistDomains = emptyList(),
+            enabledFilterLists = emptyList()
+        )
+
+        assertTrue(profileContent.contains("https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts, tag=StevenBlack, update-interval=24"))
+        assertTrue(profileContent.contains("https://easylist.to/easylist/easyprivacy.txt, tag=EasyPrivacy, update-interval=24"))
+    }
 }

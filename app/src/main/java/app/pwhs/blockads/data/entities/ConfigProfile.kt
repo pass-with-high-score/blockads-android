@@ -53,13 +53,10 @@ ip-cidr, 192.168.0.0/16, direct
 final, direct
 
 [filter_remote]
-# AdGuard Mobile & DNS Filters
-https://filters.adtidy.org/android/filters/11_optimized.txt, tag=AdGuardMobile, update-interval=24
-https://filters.adtidy.org/android/filters/15_optimized.txt, tag=AdGuardDNS, update-interval=24
-# OISD Small DNS Filter
-https://small.oisd.nl, tag=OISD_Small, update-interval=24
-# ABPVN Filter for Vietnamese websites
-https://raw.githubusercontent.com/abpvn/abpvn/master/filter/abpvn_rule.txt, tag=ABPVN, update-interval=24
+# StevenBlack Unified (App default hosts filter)
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts, tag=StevenBlack, update-interval=24
+# EasyPrivacy (App default privacy & tracking filter)
+https://easylist.to/easylist/easyprivacy.txt, tag=EasyPrivacy, update-interval=24
 
 [rewrite_local]
 
