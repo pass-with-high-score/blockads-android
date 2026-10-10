@@ -60,6 +60,7 @@ type DomainChecker interface
 	method DomainChecker.IsBlocked(domain string) bool
 type Engine struct
 	method Engine.ClearQuanXConfig()
+	method Engine.ClearRulesetConfig()
 	method Engine.GetMitmCACert(certDir string) string
 	method Engine.GetRouter() *Router
 	method Engine.GetStats() string
@@ -72,7 +73,9 @@ type Engine struct
 	method Engine.LogConnection(flow internal/mitm.FlowID, protocol int)
 	method Engine.LookupIP(host string) (net.IP, error)
 	method Engine.MatchQuanX(domain string, ip string) string
+	method Engine.MatchRuleset(domain string, ip string) string
 	method Engine.QuanXRuleCount() int
+	method Engine.RulesetRuleCount() int
 	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
 	method Engine.SetAdPathPatterns(patternsCsv string)
 	method Engine.SetAppResolver(resolver AppResolver)
@@ -94,6 +97,7 @@ type Engine struct
 	method Engine.SetODoHRelay(relayURL string)
 	method Engine.SetOutboundAdapter(adapter OutboundAdapter)
 	method Engine.SetQuanXConfig(content string) (int, error)
+	method Engine.SetRulesetConfig(content string) (int, error)
 	method Engine.SetSafeSearch(enabled bool)
 	method Engine.SetScriptletRules(content string)
 	method Engine.SetScriptletRulesFromFile(filePath string) error
@@ -151,6 +155,7 @@ type OutboundAdapter interface
 var ParseProtocol func(s string) internal/dns.DNSProtocol
 func ParseQuanXSummary(content string) string
 var ParseResponseType func(s string) internal/packet.ResponseType
+func ParseRulesetSummary(content string) string
 var ParseTUNPacket func(packet []byte, length int) *internal/packet.DNSQueryInfo
 var ParseWgConfigJSON func(jsonStr string) (*internal/wireguard.WgConfig, error)
 const ProtocolDoH internal/dns.DNSProtocol = 1
@@ -195,6 +200,19 @@ type Router struct
 	method Router.SetTunFile(f *os.File)
 	method Router.Stop()
 	method Router.WriteToTun(data []byte)
+type RulesetConfig = internal/config.Config
+	field RulesetConfig.General map[string]string
+	field RulesetConfig.DNSServers []string
+	field RulesetConfig.Rules []internal/config.Rule
+	field RulesetConfig.RemoteFilters []internal/config.RemoteFilter
+	field RulesetConfig.FinalPolicy string
+	method RulesetConfig.String() string
+type RulesetMatcher = internal/config.Matcher
+	method RulesetMatcher.FinalPolicy() string
+	method RulesetMatcher.Match(domain string, ipStr string) (string, string)
+	method RulesetMatcher.MatchNetIP(domain string, ip net.IP) (string, string)
+	method RulesetMatcher.MatchWithUA(domain string, ipStr string, userAgent string) (string, string)
+	method RulesetMatcher.RulesCount() int
 type SafeSearch = internal/safesearch.SafeSearch
 	method SafeSearch.CacheIP(domain string, ip net.IP)
 	method SafeSearch.Check(domain string, queryType uint16) internal/safesearch.SafeSearchResult

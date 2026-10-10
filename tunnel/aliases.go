@@ -23,8 +23,10 @@ type SafeSearchAction = safesearch.SafeSearchAction
 type ScriptletRule = scriptlet.Rule
 type scriptletStore = scriptlet.Store
 
-type QuanXMatcher = config.Matcher
-type QuanXConfig = config.Config
+type RulesetMatcher = config.Matcher
+type RulesetConfig = config.Config
+type QuanXMatcher = RulesetMatcher
+type QuanXConfig = RulesetConfig
 
 type CertManager = mitm.CertManager
 type MitmFilter = mitm.MitmFilter

@@ -143,8 +143,8 @@ type Engine struct {
 	stackMitmFilter *MitmFilter
 	certDir         string // persistent dir (for CA + goroutine-dump diagnostics)
 
-	// Quantumult X ruleset matcher
-	quanxMatcher atomic.Pointer[QuanXMatcher]
+	// Ruleset matcher
+	rulesetMatcher atomic.Pointer[RulesetMatcher]
 
 	// UID resolver — supplied by Kotlin. When nil, flow-level UID lookup
 	// falls back to UIDUnknown. Stored on the engine so both the stack

@@ -212,8 +212,8 @@ class AdBlockVpnService : VpnService() {
         serviceScope.launch {
             configDao.getActiveFlow().collect { activeConfig ->
                 if (::goTunnelAdapter.isInitialized) {
-                    val count = goTunnelAdapter.setQuanXConfig(activeConfig?.content ?: "")
-                    Timber.d("Active QuanX config updated in Go engine: %s (%d rules)", activeConfig?.name, count)
+                    val count = goTunnelAdapter.setRulesetConfig(activeConfig?.content ?: "")
+                    Timber.d("Active ruleset config updated in Go engine: %s (%d rules)", activeConfig?.name, count)
                 }
             }
         }

@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// ParseQuanX parses a Quantumult X configuration or snippet string.
-func ParseQuanX(content string) (*Config, error) {
+// ParseRuleset parses a profile ruleset configuration or snippet string.
+func ParseRuleset(content string) (*Config, error) {
 	cfg := &Config{
 		General:       make(map[string]string),
 		DNSServers:    make([]string, 0),
@@ -70,6 +70,11 @@ func ParseQuanX(content string) (*Config, error) {
 	}
 
 	return cfg, scanner.Err()
+}
+
+// ParseQuanX is a backward-compatible alias for ParseRuleset.
+func ParseQuanX(content string) (*Config, error) {
+	return ParseRuleset(content)
 }
 
 func parseGeneralLine(cfg *Config, line string) {
@@ -223,6 +228,6 @@ func stripComment(line string) string {
 
 // String returns formatted summary of Config
 func (c *Config) String() string {
-	return fmt.Sprintf("QuanX Config (DNS: %d, Rules: %d, Remotes: %d, Final: %s)",
+	return fmt.Sprintf("Ruleset Config (DNS: %d, Rules: %d, Remotes: %d, Final: %s)",
 		len(c.DNSServers), len(c.Rules), len(c.RemoteFilters), c.FinalPolicy)
 }

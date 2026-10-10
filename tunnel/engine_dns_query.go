@@ -111,11 +111,11 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 		}
 	}
 
-	// ── Quantumult X Ruleset Matching ──
-	if qMatcher := e.quanxMatcher.Load(); qMatcher != nil {
-		policy, matchedRule := qMatcher.MatchNetIP(domain, queryInfo.SourceIP)
+	// ── Ruleset Filter Matching ──
+	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
+		policy, matchedRule := rMatcher.MatchNetIP(domain, queryInfo.SourceIP)
 		if strings.HasPrefix(policy, "REJECT") {
-			e.handleBlockedDomain(queryInfo, "quanx:"+matchedRule, appName, startTime)
+			e.handleBlockedDomain(queryInfo, "ruleset:"+matchedRule, appName, startTime)
 			return
 		} else if policy == "DIRECT" && matchedRule != "FINAL" {
 			// Explicit DIRECT rule overrides general blocklists

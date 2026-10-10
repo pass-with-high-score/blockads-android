@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-const sampleQuanXConfig = `
-; Sample Quantumult X Configuration
+const sampleRulesetConfig = `
+; Sample Ruleset Configuration
 [general]
 geo_location_checker=http://www.google.com/generate_204
 dns_exclusion_list=*.local, localhost
@@ -36,10 +36,10 @@ FINAL, DIRECT
 https://raw.githubusercontent.com/filters/adblock.list, tag=AdBlock, update-interval=24, opt-parser=true
 `
 
-func TestParseQuanX(t *testing.T) {
-	cfg, err := ParseQuanX(sampleQuanXConfig)
+func TestParseRuleset(t *testing.T) {
+	cfg, err := ParseRuleset(sampleRulesetConfig)
 	if err != nil {
-		t.Fatalf("ParseQuanX failed: %v", err)
+		t.Fatalf("ParseRuleset failed: %v", err)
 	}
 
 	if len(cfg.DNSServers) != 3 {
@@ -68,9 +68,9 @@ func TestParseQuanX(t *testing.T) {
 }
 
 func TestMatcher(t *testing.T) {
-	cfg, err := ParseQuanX(sampleQuanXConfig)
+	cfg, err := ParseRuleset(sampleRulesetConfig)
 	if err != nil {
-		t.Fatalf("ParseQuanX failed: %v", err)
+		t.Fatalf("ParseRuleset failed: %v", err)
 	}
 
 	matcher := NewMatcher(cfg)
@@ -105,9 +105,9 @@ HOST, special.google.com, REJECT
 HOST-SUFFIX, google.com, DIRECT
 FINAL, REJECT
 `
-	cfg, err := ParseQuanX(snippet)
+	cfg, err := ParseRuleset(snippet)
 	if err != nil {
-		t.Fatalf("ParseQuanX failed: %v", err)
+		t.Fatalf("ParseRuleset failed: %v", err)
 	}
 
 	matcher := NewMatcher(cfg)
@@ -138,7 +138,7 @@ HOST, ad.server.com, REJECT
 HOST-KEYWORD, banner, REJECT
 FINAL, DIRECT
 `
-	cfg, err := ParseQuanX(snippet)
+	cfg, err := ParseRuleset(snippet)
 	if err != nil {
 		t.Fatalf("Parse failed: %v", err)
 	}
@@ -155,7 +155,7 @@ FINAL, DIRECT
 }
 
 func TestUserAgentMatching(t *testing.T) {
-	cfg, err := ParseQuanX(sampleQuanXConfig)
+	cfg, err := ParseRuleset(sampleRulesetConfig)
 	if err != nil {
 		t.Fatalf("Parse failed: %v", err)
 	}
@@ -175,7 +175,7 @@ HOST-SUFFIX, .EXAMPLE.COM, REJECT
 HOST, ADS.TRACK.ME., REJECT
 IP-CIDR, 1.2.3.4, REJECT
 `
-	cfg, err := ParseQuanX(snippet)
+	cfg, err := ParseRuleset(snippet)
 	if err != nil {
 		t.Fatalf("Parse failed: %v", err)
 	}
@@ -200,4 +200,3 @@ IP-CIDR, 1.2.3.4, REJECT
 		t.Errorf("Expected REJECT for single IP 1.2.3.4, got %s", policy)
 	}
 }
-

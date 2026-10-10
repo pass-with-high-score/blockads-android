@@ -26,7 +26,7 @@ const (
 	PolicyRejectDrop = "REJECT-DROP"
 )
 
-// Rule represents a parsed QuanX routing or blocking rule.
+// Rule represents a parsed routing or blocking ruleset rule.
 type Rule struct {
 	Type      RuleType
 	Value     string

@@ -482,12 +482,12 @@ class GoTunnelAdapter(
         return engine.stats
     }
 
-    fun setQuanXConfig(content: String): Long = runCatching {
-        engine.setQuanXConfig(content)
-    }.onFailure { Timber.e(it, "Failed to set QuanX config") }.getOrDefault(0L)
+    fun setRulesetConfig(content: String): Long = runCatching {
+        engine.setRulesetConfig(content)
+    }.onFailure { Timber.e(it, "Failed to set ruleset config") }.getOrDefault(0L)
 
-    fun clearQuanXConfig() {
-        engine.clearQuanXConfig()
+    fun clearRulesetConfig() {
+        engine.clearRulesetConfig()
     }
 
     companion object {
