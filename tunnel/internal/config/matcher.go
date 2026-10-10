@@ -9,6 +9,12 @@ import (
 type Matcher struct {
 	rules       []Rule
 	finalPolicy string
+	geoIPLookup func(net.IP) string
+}
+
+// SetGeoIPLookup sets the GeoIP country resolution function.
+func (m *Matcher) SetGeoIPLookup(fn func(net.IP) string) {
+	m.geoIPLookup = fn
 }
 
 // NewMatcher creates a new Rule Matcher from a parsed Config.
@@ -36,6 +42,9 @@ func (m *Matcher) MatchNetIP(domain string, ip net.IP) (string, string) {
 	normDomain := NormalizeDomain(domain)
 	for i := range m.rules {
 		r := &m.rules[i]
+		if r.Type == RuleFinal {
+			continue // FINAL is a fallback, specific rules always take precedence
+		}
 		if m.matches(r, normDomain, ip) {
 			return r.Policy, r.Value
 		}
@@ -54,6 +63,9 @@ func (m *Matcher) MatchWithUA(domain string, ipStr string, userAgent string) (st
 
 	for i := range m.rules {
 		r := &m.rules[i]
+		if r.Type == RuleFinal {
+			continue // FINAL is a fallback, specific rules always take precedence
+		}
 		if r.Type == RuleUserAgent {
 			if normUA != "" && matchWildcard(r.Value, normUA) {
 				return r.Policy, r.Value
@@ -82,6 +94,13 @@ func (m *Matcher) matches(r *Rule, domain string, ip net.IP) bool {
 	case RuleIPCidr, RuleIPCidr6:
 		if ip != nil && r.IPNet != nil {
 			return r.IPNet.Contains(ip)
+		}
+		return false
+
+	case RuleGeoIP:
+		if ip != nil && m.geoIPLookup != nil {
+			cc := m.geoIPLookup(ip)
+			return cc != "" && strings.EqualFold(cc, r.Value)
 		}
 		return false
 

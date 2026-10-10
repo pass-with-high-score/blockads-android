@@ -2,6 +2,7 @@ package app.pwhs.blockads.service
 
 import android.content.Context
 import app.pwhs.blockads.ui.browser.rules.BrowserRuleStorage
+import app.pwhs.blockads.utils.BlocklistInfo
 import timber.log.Timber
 
 /**
@@ -86,4 +87,36 @@ object TunnelRuleLoader {
             lines.map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }.toSet()
         }
     }.getOrDefault(setOf("com.android.chrome", "org.mozilla.firefox", "com.brave.browser"))
+
+    fun loadGeoIPDatabase(context: Context, engine: tunnel.Engine) {
+        try {
+            val loaded = BlocklistInfo.fromAsset(context, "preset/geoip_ipv4.bin")?.use { info ->
+                engine.setGeoIPDatabaseFromFd(info.fd, info.startOffset, info.length)
+                true
+            } ?: false
+            if (!loaded) {
+                val data = context.assets.open("preset/geoip_ipv4.bin").use { it.readBytes() }
+                engine.setGeoIPDatabaseBytes(data)
+            }
+            Timber.d("GeoIP database loaded into Go engine")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load GeoIP database asset into Go engine")
+        }
+    }
+
+    fun loadExtraPassthrough(context: Context, engine: tunnel.Engine) {
+        try {
+            val loaded = BlocklistInfo.fromAsset(context, "https_passthrough.txt")?.use { info ->
+                engine.setExtraPassthroughSuffixesFromFd(info.fd, info.startOffset, info.length)
+                true
+            } ?: false
+            if (!loaded) {
+                val passthrough = context.assets.open("https_passthrough.txt")
+                    .bufferedReader().use { it.readText() }
+                engine.setExtraPassthroughSuffixes(passthrough)
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load https_passthrough.txt asset")
+        }
+    }
 }

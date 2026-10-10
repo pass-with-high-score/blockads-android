@@ -114,10 +114,11 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 	// ── Ruleset Filter Matching ──
 	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
 		policy, matchedRule := rMatcher.MatchNetIP(domain, queryInfo.SourceIP)
-		if strings.HasPrefix(policy, "REJECT") {
+		policyUpper := strings.ToUpper(policy)
+		if strings.HasPrefix(policyUpper, "REJECT") {
 			e.handleBlockedDomain(queryInfo, "ruleset:"+matchedRule, appName, startTime)
 			return
-		} else if policy == "DIRECT" && matchedRule != "FINAL" {
+		} else if policyUpper == "DIRECT" && matchedRule != "FINAL" {
 			// Explicit DIRECT rule overrides general blocklists
 			e.handleForward(queryInfo, appName, startTime)
 			return
@@ -302,6 +303,14 @@ func (e *Engine) handleForward(queryInfo *DNSQueryInfo, appName string, startTim
 		logf("BLOCKED: %s (by: upstream_dns, app: %s)", queryInfo.Domain, appName)
 		e.notifyLog(queryInfo.Domain, true, queryInfo.QueryType, elapsed, appName, "", "upstream_dns")
 		return
+	}
+
+	// Detect Ruleset IP blocking (IP-CIDR / GEOIP) on resolved IPs
+	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
+		if blocked, matchedRule := checkDNSResponseRuleset(resp, rMatcher); blocked {
+			e.handleBlockedDomain(queryInfo, "ruleset:"+matchedRule, appName, startTime)
+			return
+		}
 	}
 
 	response := BuildForwardedResponse(queryInfo, resp)

@@ -4,6 +4,7 @@ import (
 	"github.com/nqmgaming/blockads-tunnel/internal/bloom"
 	internaldns "github.com/nqmgaming/blockads-tunnel/internal/dns"
 	"github.com/nqmgaming/blockads-tunnel/internal/config"
+	"github.com/nqmgaming/blockads-tunnel/internal/geoip"
 	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
 	"github.com/nqmgaming/blockads-tunnel/internal/packet"
 	"github.com/nqmgaming/blockads-tunnel/internal/safesearch"
@@ -27,6 +28,8 @@ type RulesetMatcher = config.Matcher
 type RulesetConfig = config.Config
 type QuanXMatcher = RulesetMatcher
 type QuanXConfig = RulesetConfig
+
+type GeoIPDatabase = geoip.Database
 
 type CertManager = mitm.CertManager
 type MitmFilter = mitm.MitmFilter

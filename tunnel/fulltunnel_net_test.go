@@ -148,6 +148,31 @@ func TestStartFullTCPGates(t *testing.T) {
 	}
 }
 
+func TestStartFullRulesetIPGate(t *testing.T) {
+	leakCheck(t)
+	e, _ := newNetEngine(t)
+	_, err := e.SetRulesetConfig("[filter_local]\nip-cidr, 1.1.1.1, reject\nfinal, direct\n")
+	if err != nil {
+		t.Fatalf("SetRulesetConfig failed: %v", err)
+	}
+	if !e.IsDomainBlocked("1.1.1.1") {
+		t.Errorf("Expected 1.1.1.1 to be blocked by IsDomainBlocked")
+	}
+	p := &countingProtector{}
+	h := runEngineProtected(t, e, true, p)
+	dst := netip.MustParseAddrPort("1.1.1.1:443")
+	start := time.Now()
+	if got, err := h.echoTCP(t, dst, "x"); err == nil {
+		t.Errorf("%s: flow echoed %q; expected rejection", dst, got)
+	}
+	if d := time.Since(start); d > 2*time.Second {
+		t.Errorf("%s: took %v to close; the flow was dialed", dst, d)
+	}
+	if n := p.calls.Load(); n != 0 {
+		t.Errorf("rejected flow dialed %d sockets", n)
+	}
+}
+
 // udpFlowsSeen returns how many UDP flows the full-tunnel stack dispatched.
 func udpFlowsSeen(e *Engine) int64 {
 	e.mu.Lock()

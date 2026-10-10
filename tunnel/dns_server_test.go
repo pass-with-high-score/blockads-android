@@ -91,6 +91,17 @@ func TestServeDNSPipeline(t *testing.T) {
 				e.SetDomainChecker(&fakeChecker{custom: map[string]int{"ads.example.com": 0}})
 			},
 			wantIPs: "192.0.2.1", wantLog: true, wantApp: "RootProxy"},
+		{name: "ruleset keyword block", domain: "pwhs.app", qtype: dns.TypeA,
+			setup: func(e *Engine) {
+				_, _ = e.SetRulesetConfig("[filter_local]\nHOST-KEYWORD, pwhs, REJECT\nfinal, direct\n")
+			},
+			wantIPs: "0.0.0.0", wantLog: true, wantBlocked: true, wantBy: "ruleset:pwhs", wantApp: "RootProxy"},
+		{name: "ruleset direct overrides trie", domain: "ads.example.com", qtype: dns.TypeA,
+			setup: func(e *Engine) {
+				e.SetTries(adTrie, secTrie, adBloom, secBloom)
+				_, _ = e.SetRulesetConfig("[filter_local]\nHOST, ads.example.com, DIRECT\nfinal, direct\n")
+			},
+			wantIPs: "192.0.2.1", wantLog: true, wantApp: "RootProxy"},
 		{name: "ad trie", domain: "x.ads.example.com", qtype: dns.TypeA,
 			setup:   func(e *Engine) { e.SetTries(adTrie, secTrie, adBloom, secBloom) },
 			wantIPs: "0.0.0.0", wantLog: true, wantBlocked: true, wantBy: "ads", wantApp: "RootProxy"},
@@ -357,5 +368,26 @@ func TestStandaloneBlockReplyPacks(t *testing.T) {
 		if w.writes != 1 || len(w.msg.Answer) != 1 {
 			t.Errorf("%s: writes=%d reply=%v", name, w.writes, w.msg)
 		}
+	}
+}
+
+func TestEngineIsDomainBlockedRuleset(t *testing.T) {
+	e, _ := newServeEngine(t, deadUpstream)
+	_, err := e.SetRulesetConfig("[filter_local]\nip-cidr, 1.1.1.1, reject\nhost, test.blocked.com, reject\nfinal, direct\n")
+	if err != nil {
+		t.Fatalf("SetRulesetConfig failed: %v", err)
+	}
+
+	if !e.IsDomainBlocked("1.1.1.1") {
+		t.Errorf("Expected 1.1.1.1 to be blocked by IsDomainBlocked")
+	}
+	if !e.IsDomainBlocked("test.blocked.com") {
+		t.Errorf("Expected test.blocked.com to be blocked by IsDomainBlocked")
+	}
+	if e.IsDomainBlocked("8.8.8.8") {
+		t.Errorf("Expected 8.8.8.8 not to be blocked")
+	}
+	if e.IsDomainBlocked("allowed.com") {
+		t.Errorf("Expected allowed.com not to be blocked")
 	}
 }

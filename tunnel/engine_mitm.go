@@ -381,6 +381,19 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		}
 	}
 
+	// ── Ruleset Filter Matching (Domain & IP-CIDR) ──
+	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
+		ip := net.ParseIP(host)
+		policy, matchedRule := rMatcher.MatchNetIP(host, ip)
+		policyUpper := strings.ToUpper(policy)
+		if strings.HasPrefix(policyUpper, "REJECT") {
+			logf("Ruleset BLOCKED connection to %s (matched: %s)", host, matchedRule)
+			return true
+		} else if policyUpper == "DIRECT" && matchedRule != "FINAL" {
+			return false
+		}
+	}
+
 	// ── Security trie (Bloom pre-filter → Mmap Trie) ──
 	e.mu.Lock()
 	secBlooms := e.secBlooms

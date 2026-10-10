@@ -213,3 +213,35 @@ func TestLookupIPExported(t *testing.T) {
 		t.Errorf("LookupIP = %v, %v", ip, err)
 	}
 }
+
+func TestEngineGeoIPBlocked(t *testing.T) {
+	e := NewEngine()
+	data, err := os.ReadFile("../app/src/main/assets/preset/geoip_ipv4.bin")
+	if err != nil {
+		t.Skip("geoip_ipv4.bin not found:", err)
+	}
+	if err := e.SetGeoIPDatabaseBytes(data); err != nil {
+		t.Fatal(err)
+	}
+	cfg := `
+[filter_local]
+ip-cidr, 10.0.0.0/8, direct
+ip-cidr, 172.16.0.0/12, direct
+ip-cidr, 192.168.0.0/16, direct
+geoip, vn, reject
+final, direct
+`
+	if _, err := e.SetRulesetConfig(cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	if !e.IsDomainBlocked("111.65.250.2") {
+		t.Errorf("Expected 111.65.250.2 to be blocked by GEOIP VN")
+	}
+	if !e.IsDomainBlocked("111.65.242.20") {
+		t.Errorf("Expected 111.65.242.20 to be blocked by GEOIP VN")
+	}
+	if e.IsDomainBlocked("1.1.1.1") {
+		t.Errorf("Expected 1.1.1.1 NOT to be blocked (US)")
+	}
+}

@@ -132,6 +132,32 @@ func (e *Engine) serveDNS(w dns.ResponseWriter, r *dns.Msg, appOverride string) 
 		}
 	}
 
+	// 1.5. Ruleset Filter Matching
+	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
+		var clientIP net.IP
+		if addr := w.RemoteAddr(); addr != nil {
+			switch a := addr.(type) {
+			case *net.UDPAddr:
+				clientIP = a.IP
+			case *net.TCPAddr:
+				clientIP = a.IP
+			default:
+				if host, _, err := net.SplitHostPort(addr.String()); err == nil {
+					clientIP = net.ParseIP(host)
+				}
+			}
+		}
+		policy, matchedRule := rMatcher.MatchNetIP(domain, clientIP)
+		policyUpper := strings.ToUpper(policy)
+		if strings.HasPrefix(policyUpper, "REJECT") {
+			e.standaloneBlock(w, r, "ruleset:"+matchedRule, appName, startTime)
+			return
+		} else if policyUpper == "DIRECT" && matchedRule != "FINAL" {
+			e.standaloneForward(w, r, appName, startTime)
+			return
+		}
+	}
+
 	// 2. SafeSearch / YouTube Check
 	ssResult := e.safeSearch.Check(domain, queryType)
 	if ssResult.Action == ActionRedirect {

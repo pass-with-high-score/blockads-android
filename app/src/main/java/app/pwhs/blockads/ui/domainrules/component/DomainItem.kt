@@ -112,12 +112,14 @@ fun DomainItem(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = formatTimestamp(addedTimestamp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary.copy(alpha = if (isEnabled) 1f else 0.5f)
-                )
+                if (addedTimestamp > 0L) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = formatTimestamp(addedTimestamp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary.copy(alpha = if (isEnabled) 1f else 0.5f)
+                    )
+                }
             }
             IconButton(
                 onClick = onEdit,

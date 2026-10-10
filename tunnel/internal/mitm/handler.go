@@ -100,6 +100,11 @@ func NewMitmTcpHandler(
 			return
 		}
 
+		// Gate -1.6 — Ruleset IP rules (e.g. IP-CIDR, REJECT)
+		if blocker != nil && blocker.IsDomainBlocked(flow.serverIP.String()) {
+			return
+		}
+
 		// Gate 0 — never MITM private / loopback destinations. These
 		// are local services (LAN printers, router admin pages) that
 		// often have self-signed certs or none at all.

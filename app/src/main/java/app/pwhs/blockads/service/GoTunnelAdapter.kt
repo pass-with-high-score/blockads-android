@@ -38,6 +38,10 @@ class GoTunnelAdapter(
 ) {
     private val engine = tunnel.Tunnel.newEngine()
 
+    init {
+        TunnelRuleLoader.loadGeoIPDatabase(context, engine)
+    }
+
     @Volatile
     private var isRunning = false
 
@@ -304,19 +308,7 @@ class GoTunnelAdapter(
                 engine.setMitmAllowedUIDs(uids)
                 engine.setFilterHttp3(filterHttp3)
 
-                try {
-                    val loaded = BlocklistInfo.fromAsset(context, "https_passthrough.txt")?.use { info ->
-                        engine.setExtraPassthroughSuffixesFromFd(info.fd, info.startOffset, info.length)
-                        true
-                    } ?: false
-                    if (!loaded) {
-                        val passthrough = context.assets.open("https_passthrough.txt")
-                            .bufferedReader().use { it.readText() }
-                        engine.setExtraPassthroughSuffixes(passthrough)
-                    }
-                } catch (e: Exception) {
-                    Timber.w(e, "Failed to load https_passthrough.txt asset")
-                }
+                TunnelRuleLoader.loadExtraPassthrough(context, engine)
 
                 Timber.d("HTTPS filtering via userspace TCP/IP stack (browsers=${browsers.size}, uids=$uids)")
             } catch (e: Exception) {
@@ -478,9 +470,7 @@ class GoTunnelAdapter(
     /**
      * Get engine statistics as JSON.
      */
-    fun getStats(): String {
-        return engine.stats
-    }
+    fun getStats(): String = engine.stats
 
     fun setRulesetConfig(content: String): Long = runCatching {
         engine.setRulesetConfig(content)

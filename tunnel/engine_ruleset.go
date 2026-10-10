@@ -2,7 +2,10 @@ package tunnel
 
 import (
 	"encoding/json"
+	"net"
+	"strings"
 
+	"github.com/miekg/dns"
 	"github.com/nqmgaming/blockads-tunnel/internal/config"
 )
 
@@ -20,8 +23,52 @@ func (e *Engine) SetRulesetConfig(content string) (int, error) {
 	}
 
 	matcher := config.NewMatcher(cfg)
+	if db := e.geoIPDB.Load(); db != nil {
+		matcher.SetGeoIPLookup(db.Lookup)
+	}
 	e.rulesetMatcher.Store(matcher)
 	return matcher.RulesCount(), nil
+}
+
+// checkMsgAnswerRuleset evaluates resolved A/AAAA records in a DNS response against the ruleset matcher.
+// Returns matchedRule if any resolved IP triggers a REJECT policy, or empty string otherwise.
+func checkMsgAnswerRuleset(msg *dns.Msg, matcher *config.Matcher) string {
+	if msg == nil || matcher == nil {
+		return ""
+	}
+	for _, rr := range msg.Answer {
+		var ip net.IP
+		switch a := rr.(type) {
+		case *dns.A:
+			ip = a.A
+		case *dns.AAAA:
+			ip = a.AAAA
+		}
+		if ip != nil {
+			policy, matchedRule := matcher.MatchNetIP("", ip)
+			if strings.HasPrefix(strings.ToUpper(policy), "REJECT") {
+				logf("Ruleset DNS BLOCKED resolved IP %s (matched: %s)", ip.String(), matchedRule)
+				return matchedRule
+			}
+		}
+	}
+	return ""
+}
+
+// checkDNSResponseRuleset unpacks a raw DNS response and evaluates answer IPs against the ruleset matcher.
+func checkDNSResponseRuleset(resp []byte, matcher *config.Matcher) (bool, string) {
+	if matcher == nil || len(resp) == 0 {
+		return false, ""
+	}
+	var msg dns.Msg
+	if err := msg.Unpack(resp); err != nil {
+		return false, ""
+	}
+	matched := checkMsgAnswerRuleset(&msg, matcher)
+	if matched != "" {
+		return true, matched
+	}
+	return false, ""
 }
 
 // ClearRulesetConfig clears the active ruleset configuration.

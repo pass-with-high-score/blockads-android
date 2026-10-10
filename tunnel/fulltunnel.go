@@ -229,6 +229,11 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 			handleDNSOverUDP(conn, engine)
 			return
 		}
+		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
+		if engine.IsDomainBlocked(flow.serverIP.String()) {
+			_ = conn.Close()
+			return
+		}
 		engine.logConnection(flow, ProtocolUDP)
 		// Browser QUIC (UDP 443): drop to force TCP TLS for MITM — ONLY
 		// when HTTP/3 filtering is enabled from the UI. Default off →
@@ -274,6 +279,10 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 		}
 		// Gate -1.5: Hardcoded DoH Direct-IP (port 443) - close to force fallback if DoH/DoT blocking is enabled
 		if engine.IsDoHBlockingEnabled() && flow.serverPort == 443 && isKnownPublicDoHIP(flow.serverIP) {
+			return
+		}
+		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
+		if engine.IsDomainBlocked(flow.serverIP.String()) {
 			return
 		}
 		engine.logConnection(flow, ProtocolTCP)

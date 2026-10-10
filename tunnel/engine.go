@@ -146,6 +146,9 @@ type Engine struct {
 	// Ruleset matcher
 	rulesetMatcher atomic.Pointer[RulesetMatcher]
 
+	// GeoIP database
+	geoIPDB atomic.Pointer[GeoIPDatabase]
+
 	// UID resolver — supplied by Kotlin. When nil, flow-level UID lookup
 	// falls back to UIDUnknown. Stored on the engine so both the stack
 	// (once created) and any future consumer can pull from one place.

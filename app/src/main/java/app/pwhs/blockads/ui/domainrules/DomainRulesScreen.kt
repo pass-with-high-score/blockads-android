@@ -45,14 +45,13 @@ import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
 import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
+import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
 import app.pwhs.blockads.ui.domainrules.dialog.RuleTypesDocSheet
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
+import app.pwhs.blockads.utils.ParsedFilterRule
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import app.pwhs.blockads.data.entities.CustomDnsRule
-import app.pwhs.blockads.data.entities.WhitelistDomain
-import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,8 +59,6 @@ fun DomainRulesScreen(
     modifier: Modifier = Modifier,
     viewModel: DomainRulesViewModel = koinViewModel()
 ) {
-    val whitelistDomains by viewModel.whitelistDomains.collectAsStateWithLifecycle()
-    val blocklistDomains by viewModel.blocklistDomains.collectAsStateWithLifecycle()
     val activeConfig by viewModel.activeConfig.collectAsStateWithLifecycle()
     val allConfigs by viewModel.allConfigs.collectAsStateWithLifecycle()
     val profileFilterRules by viewModel.profileFilterRules.collectAsStateWithLifecycle()
@@ -70,20 +67,27 @@ fun DomainRulesScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showRuleDocSheet by remember { mutableStateOf(false) }
-    var editingWhitelistDomain by remember { mutableStateOf<WhitelistDomain?>(null) }
-    var editingBlocklistRule by remember { mutableStateOf<CustomDnsRule?>(null) }
+    var editingRule by remember { mutableStateOf<ParsedFilterRule?>(null) }
 
     val pagerState = rememberPagerState(initialPage = 0) { 2 }
     val scope = rememberCoroutineScope()
 
-    val filteredWhitelist = remember(whitelistDomains, searchQuery) {
-        if (searchQuery.isBlank()) whitelistDomains
-        else whitelistDomains.filter { it.domain.contains(searchQuery, ignoreCase = true) }
+    val displayableRules = remember(profileFilterRules) {
+        profileFilterRules.filter { it.type != "FINAL" }
     }
 
-    val filteredBlocklist = remember(blocklistDomains, searchQuery) {
-        if (searchQuery.isBlank()) blocklistDomains
-        else blocklistDomains.filter { it.domain.contains(searchQuery, ignoreCase = true) }
+    val whitelistRules = remember(displayableRules, searchQuery) {
+        displayableRules.filter {
+            it.policy.equals("DIRECT", ignoreCase = true) &&
+                (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
+        }
+    }
+
+    val blocklistRules = remember(displayableRules, searchQuery) {
+        displayableRules.filter {
+            it.policy.startsWith("REJECT", ignoreCase = true) &&
+                (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
+        }
     }
 
     UiEventEffect(viewModel.events)
@@ -101,7 +105,7 @@ fun DomainRulesScreen(
                         )
                         activeConfig?.let { cfg ->
                             Text(
-                                text = "${cfg.name} • ${profileFilterRules.size} profile rules",
+                                text = "${cfg.name} • ${displayableRules.size} profile rules",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -233,18 +237,16 @@ fun DomainRulesScreen(
             ) { page ->
                 when (page) {
                     0 -> WhitelistTab(
-                        domains = filteredWhitelist,
-                        profileFilterRules = profileFilterRules,
-                        onToggle = { viewModel.toggleWhitelistDomain(it) },
-                        onRemove = { viewModel.removeWhitelistDomain(it) },
-                        onEdit = { editingWhitelistDomain = it }
+                        rules = whitelistRules,
+                        onToggle = { viewModel.toggleProfileRule(it) },
+                        onRemove = { viewModel.removeProfileRule(it) },
+                        onEdit = { editingRule = it }
                     )
                     1 -> BlocklistTab(
-                        domains = filteredBlocklist,
-                        profileFilterRules = profileFilterRules,
-                        onToggle = { viewModel.toggleBlocklistDomain(it) },
-                        onRemove = { viewModel.removeBlocklistDomain(it) },
-                        onEdit = { editingBlocklistRule = it }
+                        rules = blocklistRules,
+                        onToggle = { viewModel.toggleProfileRule(it) },
+                        onRemove = { viewModel.removeProfileRule(it) },
+                        onEdit = { editingRule = it }
                     )
                 }
             }
@@ -269,50 +271,24 @@ fun DomainRulesScreen(
         )
     }
 
-    editingWhitelistDomain?.let { domain ->
-        val matchedRule = remember(domain.domain, profileFilterRules) {
-            profileFilterRules.find { it.param.trim().equals(domain.domain.trim(), ignoreCase = true) }
-        }
+    editingRule?.let { rule ->
         EditFilterRuleDialog(
-            initialDomain = domain.domain,
-            initialType = matchedRule?.type ?: "HOST-SUFFIX",
-            initialPolicy = matchedRule?.policy ?: "DIRECT",
+            initialDomain = rule.param,
+            initialType = rule.type,
+            initialPolicy = rule.policy,
             activeConfig = activeConfig,
             allConfigs = allConfigs,
-            onDismiss = { editingWhitelistDomain = null },
+            onDismiss = { editingRule = null },
             onSave = { type, param, policy, configId ->
                 viewModel.updateProfileRule(
-                    oldDomain = domain.domain,
+                    oldRawLine = rule.rawLine,
+                    oldDomain = rule.param,
                     type = type,
                     param = param,
                     policy = policy,
                     targetConfigId = configId
                 )
-                editingWhitelistDomain = null
-            }
-        )
-    }
-
-    editingBlocklistRule?.let { rule ->
-        val matchedRule = remember(rule.domain, profileFilterRules) {
-            profileFilterRules.find { it.param.trim().equals(rule.domain.trim(), ignoreCase = true) }
-        }
-        EditFilterRuleDialog(
-            initialDomain = rule.domain,
-            initialType = matchedRule?.type ?: "HOST-SUFFIX",
-            initialPolicy = matchedRule?.policy ?: "REJECT",
-            activeConfig = activeConfig,
-            allConfigs = allConfigs,
-            onDismiss = { editingBlocklistRule = null },
-            onSave = { type, param, policy, configId ->
-                viewModel.updateProfileRule(
-                    oldDomain = rule.domain,
-                    type = type,
-                    param = param,
-                    policy = policy,
-                    targetConfigId = configId
-                )
-                editingBlocklistRule = null
+                editingRule = null
             }
         )
     }

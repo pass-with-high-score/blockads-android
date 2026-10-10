@@ -15,27 +15,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.ui.theme.TextSecondary
-
-import androidx.compose.runtime.remember
 import app.pwhs.blockads.utils.ParsedFilterRule
 
 @Composable
 fun WhitelistTab(
-    domains: List<WhitelistDomain>,
-    profileFilterRules: List<ParsedFilterRule> = emptyList(),
-    onToggle: (WhitelistDomain) -> Unit = {},
-    onRemove: (WhitelistDomain) -> Unit,
-    onEdit: (WhitelistDomain) -> Unit = {}
+    rules: List<ParsedFilterRule>,
+    onToggle: (ParsedFilterRule) -> Unit = {},
+    onRemove: (ParsedFilterRule) -> Unit,
+    onEdit: (ParsedFilterRule) -> Unit = {}
 ) {
-    if (domains.isEmpty()) {
+    if (rules.isEmpty()) {
         EmptyState(stringResource(R.string.whitelist_domains_empty))
     } else {
-        // Domain count
         Column {
             Text(
-                text = "${domains.size} ${stringResource(R.string.settings_whitelist_domains).lowercase()}",
+                text = "${rules.size} ${stringResource(R.string.settings_whitelist_domains).lowercase()}",
                 style = MaterialTheme.typography.labelMedium,
                 color = TextSecondary,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -48,25 +43,22 @@ fun WhitelistTab(
                 )
             ) {
                 items(
-                    items = domains,
-                    key = { it.id }
-                ) { domain ->
-                    val matchedRule = remember(domain.domain, profileFilterRules) {
-                        profileFilterRules.find { it.param.trim().equals(domain.domain.trim(), ignoreCase = true) }
-                    }
+                    items = rules,
+                    key = { it.id.ifEmpty { it.rawLine } }
+                ) { rule ->
                     SwipeToDismissItem(
-                        onDismiss = { onRemove(domain) }
+                        onDismiss = { onRemove(rule) }
                     ) {
                         DomainItem(
-                            domain = domain.domain,
-                            addedTimestamp = domain.addedTimestamp,
+                            domain = rule.param.ifEmpty { rule.type },
+                            addedTimestamp = 0L,
                             iconTint = MaterialTheme.colorScheme.secondary,
                             icon = Icons.Default.CheckCircle,
-                            isEnabled = domain.isEnabled,
-                            ruleType = matchedRule?.type,
-                            onToggle = { onToggle(domain) },
-                            onDelete = { onRemove(domain) },
-                            onEdit = { onEdit(domain) }
+                            isEnabled = rule.isEnabled,
+                            ruleType = rule.type,
+                            onToggle = { onToggle(rule) },
+                            onDelete = { onRemove(rule) },
+                            onEdit = { onEdit(rule) }
                         )
                     }
                 }

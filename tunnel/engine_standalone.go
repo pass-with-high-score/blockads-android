@@ -71,6 +71,10 @@ func (e *Engine) standaloneForward(w dns.ResponseWriter, r *dns.Msg, appName str
 		e.blockedQueries.Add(1)
 		elapsed := time.Since(startTime).Milliseconds()
 		e.notifyLog(strings.TrimSuffix(r.Question[0].Name, "."), true, r.Question[0].Qtype, elapsed, appName, "", "upstream_dns")
+	} else if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil && checkMsgAnswerRuleset(&respMsg, rMatcher) != "" {
+		matchedRule := checkMsgAnswerRuleset(&respMsg, rMatcher)
+		e.standaloneBlock(w, r, "ruleset:"+matchedRule, appName, startTime)
+		return
 	} else {
 		e.totalQueries.Add(1)
 		elapsed := time.Since(startTime).Milliseconds()

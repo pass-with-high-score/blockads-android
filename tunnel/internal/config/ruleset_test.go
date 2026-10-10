@@ -1,6 +1,7 @@
 package config
 
 import (
+	"net"
 	"testing"
 )
 
@@ -199,4 +200,156 @@ IP-CIDR, 1.2.3.4, REJECT
 	if policy != PolicyReject {
 		t.Errorf("Expected REJECT for single IP 1.2.3.4, got %s", policy)
 	}
+
+	cfgSingle, err := ParseRuleset("[filter_local]\nip-cidr, 1.1.1.1, reject\nfinal, direct\n")
+	if err != nil {
+		t.Fatalf("ParseRuleset failed: %v", err)
+	}
+	matcherSingle := NewMatcher(cfgSingle)
+	if p, _ := matcherSingle.MatchNetIP("", net.ParseIP("1.1.1.1")); p != PolicyReject {
+		t.Errorf("Expected REJECT for 1.1.1.1, got %s", p)
+	}
+	if p, _ := matcherSingle.MatchNetIP("1.1.1.1", net.ParseIP("1.1.1.1")); p != PolicyReject {
+		t.Errorf("Expected REJECT for 1.1.1.1 with domain, got %s", p)
+	}
 }
+
+func TestFinalFallbackWithSubsequentRule(t *testing.T) {
+	snippet := `
+[filter_local]
+FINAL, DIRECT
+HOST-KEYWORD, pwhs, REJECT
+`
+	cfg, err := ParseRuleset(snippet)
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	matcher := NewMatcher(cfg)
+
+	// pwhs.app must match HOST-KEYWORD, pwhs, REJECT even though FINAL, DIRECT came first
+	policy, matched := matcher.Match("pwhs.app", "")
+	if policy != PolicyReject {
+		t.Errorf("Expected REJECT for pwhs.app, got (%s, %s)", policy, matched)
+	}
+	if matched != "pwhs" {
+		t.Errorf("Expected matched rule 'pwhs', got %s", matched)
+	}
+
+	// unmatched domain should fall through to FINAL with PolicyDirect
+	policy, matched = matcher.Match("google.com", "")
+	if policy != PolicyDirect {
+		t.Errorf("Expected DIRECT for google.com, got (%s, %s)", policy, matched)
+	}
+	if matched != "FINAL" {
+		t.Errorf("Expected matched rule 'FINAL', got %s", matched)
+	}
+}
+
+func TestRulesetCaseInsensitivePolicy(t *testing.T) {
+	content := "[filter_local]\nhost-keyword, pwhs, reject\nfinal, direct\n"
+	cfg, err := ParseRuleset(content)
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+	matcher := NewMatcher(cfg)
+	policy, matched := matcher.MatchNetIP("pwhs.app", nil)
+	if policy != PolicyReject || matched != "pwhs" {
+		t.Fatalf("Expected REJECT, pwhs, got %s, %s", policy, matched)
+	}
+}
+
+func TestGeoIPMatching(t *testing.T) {
+	snippet := `
+[filter_local]
+GEOIP, VN, REJECT
+FINAL, DIRECT
+`
+	cfg, err := ParseRuleset(snippet)
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	matcher := NewMatcher(cfg)
+	matcher.SetGeoIPLookup(func(ip net.IP) string {
+		if ip.String() == "14.225.254.1" {
+			return "VN"
+		}
+		if ip.String() == "1.1.1.1" {
+			return "US"
+		}
+		return ""
+	})
+
+	policy, matched := matcher.MatchNetIP("vn-server", net.ParseIP("14.225.254.1"))
+	if policy != PolicyReject || matched != "VN" {
+		t.Fatalf("Expected REJECT, VN for 14.225.254.1, got %s, %s", policy, matched)
+	}
+
+	policy, matched = matcher.MatchNetIP("us-server", net.ParseIP("1.1.1.1"))
+	if policy != PolicyDirect || matched != "FINAL" {
+		t.Fatalf("Expected DIRECT, FINAL for 1.1.1.1, got %s, %s", policy, matched)
+	}
+}
+
+func TestUserConfigCase(t *testing.T) {
+	snippet := `
+[filter_local]
+ip-cidr, 10.0.0.0/8, direct
+ip-cidr, 172.16.0.0/12, direct
+ip-cidr, 192.168.0.0/16, direct
+ip-cidr6, 2606.4700.4700:1111/128, reject
+geoip, vn, reject
+geoip, sg, reject
+geoip, us, reject
+final, direct
+`
+	cfg, err := ParseRuleset(snippet)
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	matcher := NewMatcher(cfg)
+	matcher.SetGeoIPLookup(func(ip net.IP) string {
+		if ip.String() == "111.65.242.20" || ip.String() == "111.65.250.2" {
+			return "VN"
+		}
+		return ""
+	})
+
+	ip := net.ParseIP("111.65.242.20")
+	policy, matched := matcher.MatchNetIP("111.65.242.20", ip)
+	t.Logf("MatchNetIP(111.65.242.20): policy=%s, matched=%s", policy, matched)
+	if policy != PolicyReject {
+		t.Fatalf("Expected REJECT, got %s, %s", policy, matched)
+	}
+}
+
+func BenchmarkMatchNetIP_GeoIP(b *testing.B) {
+	snippet := `
+ip-cidr, 10.0.0.0/8, direct
+ip-cidr, 172.16.0.0/12, direct
+ip-cidr, 192.168.0.0/16, direct
+geoip, vn, reject
+geoip, sg, reject
+geoip, us, reject
+final, direct
+`
+	cfg, err := ParseRuleset(snippet)
+	if err != nil {
+		b.Fatalf("Parse failed: %v", err)
+	}
+
+	matcher := NewMatcher(cfg)
+	matcher.SetGeoIPLookup(func(ip net.IP) string {
+		return "VN"
+	})
+
+	ip := net.ParseIP("111.65.242.20")
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		_, _ = matcher.MatchNetIP("111.65.242.20", ip)
+	}
+}
+

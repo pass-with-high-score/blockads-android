@@ -61,6 +61,7 @@ type DomainChecker interface
 type Engine struct
 	method Engine.ClearQuanXConfig()
 	method Engine.ClearRulesetConfig()
+	method Engine.GetGeoIPCountry(ipStr string) string
 	method Engine.GetMitmCACert(certDir string) string
 	method Engine.GetRouter() *Router
 	method Engine.GetStats() string
@@ -92,6 +93,8 @@ type Engine struct
 	method Engine.SetExtraPassthroughSuffixesFromFd(fd int, offset int64, length int64) error
 	method Engine.SetFilterHttp3(enabled bool)
 	method Engine.SetFirewallChecker(checker FirewallChecker)
+	method Engine.SetGeoIPDatabaseBytes(data []byte) error
+	method Engine.SetGeoIPDatabaseFromFd(fd int, offset int64, length int64) error
 	method Engine.SetLogCallback(cb LogCallback)
 	method Engine.SetMitmAllowedUIDs(uidsCsv string)
 	method Engine.SetODoHRelay(relayURL string)
@@ -115,6 +118,9 @@ type Engine struct
 	method Engine.StopStackMitm()
 type FirewallChecker interface
 	method FirewallChecker.ShouldBlock(appName string) bool
+type GeoIPDatabase = internal/geoip.Database
+	method GeoIPDatabase.Lookup(ip net.IP) string
+	method GeoIPDatabase.RecordCount() int
 var LoadBloomFilter func(path string) (*internal/bloom.BloomFilter, error)
 var LoadMmapTrie func(path string) (*internal/trie.MmapTrie, error)
 const LocalAssetHost untyped string = "local.pwhs.app"
@@ -178,6 +184,7 @@ type QuanXMatcher = internal/config.Matcher
 	method QuanXMatcher.MatchNetIP(domain string, ip net.IP) (string, string)
 	method QuanXMatcher.MatchWithUA(domain string, ipStr string, userAgent string) (string, string)
 	method QuanXMatcher.RulesCount() int
+	method QuanXMatcher.SetGeoIPLookup(fn func(net.IP) string)
 func ResolveHostForProtection(hostname string) string
 type Resolver = internal/dns.Resolver
 	method Resolver.Configure(protocol internal/dns.DNSProtocol, primary string, fallback string, dohURL string)
@@ -213,6 +220,7 @@ type RulesetMatcher = internal/config.Matcher
 	method RulesetMatcher.MatchNetIP(domain string, ip net.IP) (string, string)
 	method RulesetMatcher.MatchWithUA(domain string, ipStr string, userAgent string) (string, string)
 	method RulesetMatcher.RulesCount() int
+	method RulesetMatcher.SetGeoIPLookup(fn func(net.IP) string)
 type SafeSearch = internal/safesearch.SafeSearch
 	method SafeSearch.CacheIP(domain string, ip net.IP)
 	method SafeSearch.Check(domain string, queryType uint16) internal/safesearch.SafeSearchResult

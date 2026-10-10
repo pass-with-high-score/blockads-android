@@ -110,7 +110,7 @@ func parseRuleLine(line string, order int) (Rule, bool) {
 	val := strings.TrimSpace(parts[1])
 	policy := PolicyDirect
 	if len(parts) >= 3 {
-		policy = strings.TrimSpace(parts[2])
+		policy = strings.ToUpper(strings.TrimSpace(parts[2]))
 	}
 
 	var rType RuleType
@@ -136,7 +136,8 @@ func parseRuleLine(line string, order int) (Rule, bool) {
 	case "FINAL":
 		return Rule{
 			Type:   RuleFinal,
-			Policy: val, // For FINAL, the value field is the policy (FINAL, DIRECT)
+			Policy: strings.ToUpper(val), // For FINAL, the value field is the policy (FINAL, DIRECT)
+			Value:  "FINAL",
 			Order:  order,
 		}, true
 	default:
