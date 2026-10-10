@@ -236,8 +236,13 @@ fun FilterRuleDialog(
                 // Field 3: Policy *
                 FormFieldLabel(label = stringResource(R.string.rule_field_policy), isRequired = true)
                 Box(modifier = Modifier.fillMaxWidth()) {
+                    val displayPolicy = when (policy.uppercase()) {
+                        "DIRECT" -> "DIRECT (Whitelist)"
+                        "REJECT" -> "REJECT (Blocklist)"
+                        else -> policy
+                    }
                     UnderlineInputField(
-                        value = policy,
+                        value = displayPolicy,
                         onValueChange = { policy = it },
                         placeholder = stringResource(R.string.rule_field_policy_hint),
                         onClick = { showPolicyDropdown = true }
@@ -248,8 +253,13 @@ fun FilterRuleDialog(
                         onDismissRequest = { showPolicyDropdown = false }
                     ) {
                         FILTER_POLICIES.forEach { pol ->
+                            val label = when (pol) {
+                                "DIRECT" -> "DIRECT (Whitelist)"
+                                "REJECT" -> "REJECT (Blocklist)"
+                                else -> pol
+                            }
                             DropdownMenuItem(
-                                text = { Text(pol) },
+                                text = { Text(label) },
                                 onClick = {
                                     policy = pol
                                     showPolicyDropdown = false
@@ -402,6 +412,7 @@ private fun FormFieldLabel(
 
 @Composable
 fun AddFilterRuleDialog(
+    initialPolicy: String = "REJECT",
     activeConfig: ConfigProfile?,
     allConfigs: List<ConfigProfile>,
     onDismiss: () -> Unit,
@@ -409,6 +420,7 @@ fun AddFilterRuleDialog(
     modifier: Modifier = Modifier
 ) {
     FilterRuleDialog(
+        initialPolicy = initialPolicy,
         activeConfig = activeConfig,
         allConfigs = allConfigs,
         onDismiss = onDismiss,

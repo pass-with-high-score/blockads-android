@@ -273,6 +273,7 @@ fun DomainRulesScreen(
 
     if (showAddDialog) {
         AddFilterRuleDialog(
+            initialPolicy = if (pagerState.currentPage == 0) "DIRECT" else "REJECT",
             activeConfig = activeConfig,
             allConfigs = allConfigs,
             onDismiss = { showAddDialog = false },
