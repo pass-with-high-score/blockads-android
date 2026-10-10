@@ -29,6 +29,7 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
+import app.pwhs.blockads.data.dao.ConfigDao
 import app.pwhs.blockads.data.repository.FilterListRepository
 
 class DomainRulesViewModelTest {
@@ -39,7 +40,8 @@ class DomainRulesViewModelTest {
     private val whitelistDao = FakeWhitelistDomainDao()
     private val ruleDao = FakeCustomDnsRuleDao()
     private val filterRepo: FilterListRepository = mockk(relaxed = true)
-    private val vm by lazy { DomainRulesViewModel(whitelistDao, ruleDao, filterRepo, mockk<Application>(relaxed = true)) }
+    private val configDao: ConfigDao = mockk(relaxed = true)
+    private val vm by lazy { DomainRulesViewModel(whitelistDao, ruleDao, filterRepo, configDao, mockk<Application>(relaxed = true)) }
 
     @Before
     fun setUp() {

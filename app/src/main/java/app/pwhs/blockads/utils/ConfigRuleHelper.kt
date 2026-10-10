@@ -40,12 +40,44 @@ object ConfigRuleHelper {
 
     fun replaceRuleInContent(content: String, oldDomain: String, newRuleLine: String): String {
         val lines = content.lines().toMutableList()
-        val index = lines.indexOfFirst { line ->
-            val trimmed = line.trim()
-            !trimmed.startsWith("#") && !trimmed.startsWith(";") && trimmed.contains(oldDomain, ignoreCase = true)
+        var inFilterSection = false
+        var targetIndex = -1
+        val targetParam = oldDomain.trim().lowercase()
+
+        for (i in lines.indices) {
+            val trimmed = lines[i].trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inFilterSection = trimmed.equals("[filter_local]", ignoreCase = true)
+                continue
+            }
+            if (inFilterSection && trimmed.isNotEmpty() && !trimmed.startsWith("#") && !trimmed.startsWith(";") && !trimmed.startsWith("//")) {
+                val parts = trimmed.split(",").map { it.trim() }
+                if (parts.size >= 2 && parts[1].equals(targetParam, ignoreCase = true)) {
+                    targetIndex = i
+                    break
+                }
+            }
         }
-        return if (index != -1) {
-            lines[index] = newRuleLine
+
+        if (targetIndex == -1) {
+            inFilterSection = false
+            for (i in lines.indices) {
+                val trimmed = lines[i].trim()
+                if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                    inFilterSection = trimmed.equals("[filter_local]", ignoreCase = true)
+                    continue
+                }
+                if (inFilterSection && trimmed.isNotEmpty() && !trimmed.startsWith("#") && !trimmed.startsWith(";") && !trimmed.startsWith("//")) {
+                    if (trimmed.contains(targetParam, ignoreCase = true)) {
+                        targetIndex = i
+                        break
+                    }
+                }
+            }
+        }
+
+        return if (targetIndex != -1) {
+            lines[targetIndex] = newRuleLine
             lines.joinToString("\n")
         } else {
             appendRuleToSection(content, "filter_local", newRuleLine)

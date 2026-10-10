@@ -234,12 +234,14 @@ fun DomainRulesScreen(
                 when (page) {
                     0 -> WhitelistTab(
                         domains = filteredWhitelist,
+                        profileFilterRules = profileFilterRules,
                         onToggle = { viewModel.toggleWhitelistDomain(it) },
                         onRemove = { viewModel.removeWhitelistDomain(it) },
                         onEdit = { editingWhitelistDomain = it }
                     )
                     1 -> BlocklistTab(
                         domains = filteredBlocklist,
+                        profileFilterRules = profileFilterRules,
                         onToggle = { viewModel.toggleBlocklistDomain(it) },
                         onRemove = { viewModel.removeBlocklistDomain(it) },
                         onEdit = { editingBlocklistRule = it }
@@ -268,9 +270,13 @@ fun DomainRulesScreen(
     }
 
     editingWhitelistDomain?.let { domain ->
+        val matchedRule = remember(domain.domain, profileFilterRules) {
+            profileFilterRules.find { it.param.trim().equals(domain.domain.trim(), ignoreCase = true) }
+        }
         EditFilterRuleDialog(
             initialDomain = domain.domain,
-            initialPolicy = "DIRECT",
+            initialType = matchedRule?.type ?: "HOST-SUFFIX",
+            initialPolicy = matchedRule?.policy ?: "DIRECT",
             activeConfig = activeConfig,
             allConfigs = allConfigs,
             onDismiss = { editingWhitelistDomain = null },
@@ -288,9 +294,13 @@ fun DomainRulesScreen(
     }
 
     editingBlocklistRule?.let { rule ->
+        val matchedRule = remember(rule.domain, profileFilterRules) {
+            profileFilterRules.find { it.param.trim().equals(rule.domain.trim(), ignoreCase = true) }
+        }
         EditFilterRuleDialog(
             initialDomain = rule.domain,
-            initialPolicy = "REJECT",
+            initialType = matchedRule?.type ?: "HOST-SUFFIX",
+            initialPolicy = matchedRule?.policy ?: "REJECT",
             activeConfig = activeConfig,
             allConfigs = allConfigs,
             onDismiss = { editingBlocklistRule = null },

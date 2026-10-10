@@ -39,6 +39,7 @@ class FakeCustomDnsRuleDao(initial: List<CustomDnsRule> = emptyList()) : CustomD
     }
     override suspend fun getRuleCount() = rules.value.count { it.ruleType != RuleType.COMMENT }
     override suspend fun exists(ruleText: String) = rules.value.count { it.rule == ruleText }
+    override suspend fun existsBlockDomain(domain: String) = rules.value.count { it.domain == domain && it.ruleType == RuleType.BLOCK }
 }
 
 class FakeWhitelistDomainDao(initial: List<WhitelistDomain> = emptyList()) : WhitelistDomainDao {

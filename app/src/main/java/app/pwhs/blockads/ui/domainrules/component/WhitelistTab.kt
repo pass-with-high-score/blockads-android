@@ -18,9 +18,13 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.ui.theme.TextSecondary
 
+import androidx.compose.runtime.remember
+import app.pwhs.blockads.utils.ParsedFilterRule
+
 @Composable
 fun WhitelistTab(
     domains: List<WhitelistDomain>,
+    profileFilterRules: List<ParsedFilterRule> = emptyList(),
     onToggle: (WhitelistDomain) -> Unit = {},
     onRemove: (WhitelistDomain) -> Unit,
     onEdit: (WhitelistDomain) -> Unit = {}
@@ -47,6 +51,9 @@ fun WhitelistTab(
                     items = domains,
                     key = { it.id }
                 ) { domain ->
+                    val matchedRule = remember(domain.domain, profileFilterRules) {
+                        profileFilterRules.find { it.param.trim().equals(domain.domain.trim(), ignoreCase = true) }
+                    }
                     SwipeToDismissItem(
                         onDismiss = { onRemove(domain) }
                     ) {
@@ -56,6 +63,7 @@ fun WhitelistTab(
                             iconTint = MaterialTheme.colorScheme.secondary,
                             icon = Icons.Default.CheckCircle,
                             isEnabled = domain.isEnabled,
+                            ruleType = matchedRule?.type,
                             onToggle = { onToggle(domain) },
                             onDelete = { onRemove(domain) },
                             onEdit = { onEdit(domain) }

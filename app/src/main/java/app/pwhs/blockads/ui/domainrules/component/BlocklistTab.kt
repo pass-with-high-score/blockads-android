@@ -19,9 +19,13 @@ import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 
+import androidx.compose.runtime.remember
+import app.pwhs.blockads.utils.ParsedFilterRule
+
 @Composable
 fun BlocklistTab(
     domains: List<CustomDnsRule>,
+    profileFilterRules: List<ParsedFilterRule> = emptyList(),
     onToggle: (CustomDnsRule) -> Unit = {},
     onRemove: (CustomDnsRule) -> Unit,
     onEdit: (CustomDnsRule) -> Unit = {}
@@ -47,6 +51,9 @@ fun BlocklistTab(
                     items = domains,
                     key = { it.id }
                 ) { rule ->
+                    val matchedRule = remember(rule.domain, profileFilterRules) {
+                        profileFilterRules.find { it.param.trim().equals(rule.domain.trim(), ignoreCase = true) }
+                    }
                     SwipeToDismissItem(
                         onDismiss = { onRemove(rule) }
                     ) {
@@ -56,6 +63,7 @@ fun BlocklistTab(
                             iconTint = DangerRed.copy(alpha = 0.7f),
                             icon = Icons.Default.Block,
                             isEnabled = rule.isEnabled,
+                            ruleType = matchedRule?.type,
                             onToggle = { onToggle(rule) },
                             onDelete = { onRemove(rule) },
                             onEdit = { onEdit(rule) }

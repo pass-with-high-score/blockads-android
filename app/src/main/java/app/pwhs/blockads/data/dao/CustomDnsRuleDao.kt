@@ -50,4 +50,7 @@ interface CustomDnsRuleDao {
 
     @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE rule = :ruleText")
     suspend fun exists(ruleText: String): Int
+
+    @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE domain = :domain AND ruleType = 'BLOCK'")
+    suspend fun existsBlockDomain(domain: String): Int
 }

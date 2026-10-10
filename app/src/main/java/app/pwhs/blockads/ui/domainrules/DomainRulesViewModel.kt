@@ -247,47 +247,48 @@ class DomainRulesViewModel(
                 ?: configDao.getActive()
                 ?: return@launch
 
+            val cleanDomain = sanitizeDomain(param)
+            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) cleanDomain else param.trim()
             val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
                 "final, ${policy.lowercase()}"
             } else {
-                "${type.lowercase()}, ${param.trim()}, ${policy.lowercase()}"
+                "${type.lowercase()}, $paramClean, ${policy.lowercase()}"
             }
 
             val updatedContent = ConfigRuleHelper.appendRuleToSection(targetConfig.content, "filter_local", ruleLine)
             configDao.update(targetConfig.copy(content = updatedContent))
 
             // Sync domain rules to Room DB if applicable
-            val cleanDomain = sanitizeDomain(param)
             if (cleanDomain.isNotBlank() && type.startsWith("HOST", ignoreCase = true)) {
-                    if (policy.equals("REJECT", ignoreCase = true)) {
-                        val exists = customDnsRuleDao.exists(cleanDomain)
-                        if (exists == 0) {
-                            customDnsRuleDao.insert(
-                                CustomDnsRule(
-                                    rule = "||$cleanDomain^",
-                                    ruleType = RuleType.BLOCK,
-                                    domain = cleanDomain,
-                                    isEnabled = true
-                                )
+                if (policy.equals("REJECT", ignoreCase = true)) {
+                    val exists = customDnsRuleDao.existsBlockDomain(cleanDomain)
+                    if (exists == 0) {
+                        customDnsRuleDao.insert(
+                            CustomDnsRule(
+                                rule = "||$cleanDomain^",
+                                ruleType = RuleType.BLOCK,
+                                domain = cleanDomain,
+                                isEnabled = true
                             )
-                        }
-                    } else if (policy.equals("DIRECT", ignoreCase = true)) {
-                        val exists = whitelistDomainDao.exists(cleanDomain)
-                        if (exists == 0) {
-                            whitelistDomainDao.insert(
-                                WhitelistDomain(
-                                    domain = cleanDomain,
-                                    isEnabled = true
-                                )
+                        )
+                    }
+                } else if (policy.equals("DIRECT", ignoreCase = true)) {
+                    val exists = whitelistDomainDao.exists(cleanDomain)
+                    if (exists == 0) {
+                        whitelistDomainDao.insert(
+                            WhitelistDomain(
+                                domain = cleanDomain,
+                                isEnabled = true
                             )
-                        }
+                        )
                     }
                 }
-
-                _events.toast(R.string.config_rule_added, listOf(ruleLine))
-                requestVpnRestart()
             }
+
+            _events.toast(R.string.config_rule_added, listOf(ruleLine))
+            requestVpnRestart()
         }
+    }
 
     fun updateProfileRule(
         oldDomain: String,
@@ -300,10 +301,14 @@ class DomainRulesViewModel(
             val targetConfig = (if (targetConfigId != null) configDao.getById(targetConfigId) else null)
                 ?: configDao.getActive()
 
+            val cleanDomain = sanitizeDomain(param)
+            val oldClean = sanitizeDomain(oldDomain)
+            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) cleanDomain else param.trim()
+
             val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
                 "final, ${policy.lowercase()}"
             } else {
-                "${type.lowercase()}, ${param.trim()}, ${policy.lowercase()}"
+                "${type.lowercase()}, $paramClean, ${policy.lowercase()}"
             }
 
             if (targetConfig != null) {
@@ -311,30 +316,29 @@ class DomainRulesViewModel(
                 configDao.update(targetConfig.copy(content = updatedContent))
             }
 
-            val cleanDomain = sanitizeDomain(param)
-            val oldClean = sanitizeDomain(oldDomain)
-
-            if (policy.equals("REJECT", ignoreCase = true)) {
-                whitelistDomainDao.deleteByDomain(oldClean)
-                if (cleanDomain.isNotBlank()) {
-                    val existing = customDnsRuleDao.getAll().firstOrNull { it.domain.equals(oldClean, ignoreCase = true) }
-                    if (existing != null) {
-                        customDnsRuleDao.update(existing.copy(domain = cleanDomain, rule = "||$cleanDomain^"))
-                    } else if (customDnsRuleDao.exists("||$cleanDomain^") == 0) {
-                        customDnsRuleDao.insert(
-                            CustomDnsRule(domain = cleanDomain, rule = "||$cleanDomain^", ruleType = RuleType.BLOCK, isEnabled = true)
-                        )
+            if (type.startsWith("HOST", ignoreCase = true)) {
+                if (policy.equals("REJECT", ignoreCase = true)) {
+                    whitelistDomainDao.deleteByDomain(oldClean)
+                    if (cleanDomain.isNotBlank()) {
+                        val existing = customDnsRuleDao.getAll().firstOrNull { it.domain.equals(oldClean, ignoreCase = true) }
+                        if (existing != null) {
+                            customDnsRuleDao.update(existing.copy(domain = cleanDomain, rule = "||$cleanDomain^"))
+                        } else if (customDnsRuleDao.existsBlockDomain(cleanDomain) == 0) {
+                            customDnsRuleDao.insert(
+                                CustomDnsRule(domain = cleanDomain, rule = "||$cleanDomain^", ruleType = RuleType.BLOCK, isEnabled = true)
+                            )
+                        }
                     }
-                }
-            } else if (policy.equals("DIRECT", ignoreCase = true)) {
-                customDnsRuleDao.deleteBlockRuleByDomain(oldClean)
-                if (cleanDomain.isNotBlank()) {
-                    val existing = whitelistDomainDao.getAllDomains().any { it.equals(oldClean, ignoreCase = true) }
-                    if (existing) {
-                        whitelistDomainDao.deleteByDomain(oldClean)
-                    }
-                    if (whitelistDomainDao.exists(cleanDomain) == 0) {
-                        whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain, isEnabled = true))
+                } else if (policy.equals("DIRECT", ignoreCase = true)) {
+                    customDnsRuleDao.deleteBlockRuleByDomain(oldClean)
+                    if (cleanDomain.isNotBlank()) {
+                        val existing = whitelistDomainDao.getAllDomains().any { it.equals(oldClean, ignoreCase = true) }
+                        if (existing) {
+                            whitelistDomainDao.deleteByDomain(oldClean)
+                        }
+                        if (whitelistDomainDao.exists(cleanDomain) == 0) {
+                            whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain, isEnabled = true))
+                        }
                     }
                 }
             }

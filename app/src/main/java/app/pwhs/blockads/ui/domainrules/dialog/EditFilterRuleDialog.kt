@@ -7,6 +7,7 @@ import app.pwhs.blockads.data.entities.ConfigProfile
 @Composable
 fun EditFilterRuleDialog(
     initialDomain: String,
+    initialType: String = "HOST-SUFFIX",
     initialPolicy: String,
     activeConfig: ConfigProfile?,
     allConfigs: List<ConfigProfile>,
@@ -15,6 +16,7 @@ fun EditFilterRuleDialog(
     modifier: Modifier = Modifier
 ) {
     FilterRuleDialog(
+        initialType = initialType,
         initialParam = initialDomain,
         initialPolicy = initialPolicy,
         initialConfigId = activeConfig?.id,
