@@ -58,13 +58,17 @@ func ParseRuleset(content string) (*Config, error) {
 			if filter, ok := parseRemoteFilterLine(line); ok {
 				cfg.RemoteFilters = append(cfg.RemoteFilters, filter)
 			}
+		case "rewrite_local", "rewrite_remote", "task_local", "http_backend", "mitm", "policy", "server_local", "server_remote":
+			// Unsupported or non-filtering sections; ignore lines within them
 		default:
-			// If not inside a specific recognized section or inside a .snippet file without headers
-			if rule, ok := parseRuleLine(line, order); ok {
-				cfg.Rules = append(cfg.Rules, rule)
-				order++
-				if rule.Type == RuleFinal {
-					cfg.FinalPolicy = rule.Policy
+			// If inside a raw .snippet or .list file without section headers
+			if currentSection == "" {
+				if rule, ok := parseRuleLine(line, order); ok {
+					cfg.Rules = append(cfg.Rules, rule)
+					order++
+					if rule.Type == RuleFinal {
+						cfg.FinalPolicy = rule.Policy
+					}
 				}
 			}
 		}

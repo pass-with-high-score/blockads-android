@@ -162,9 +162,10 @@ class ConfigViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isUpdating = true, showImportDialog = false) }
             try {
-                val content = withContext(Dispatchers.IO) {
+                val rawContent = withContext(Dispatchers.IO) {
                     client.get(trimmedUrl).bodyAsText()
                 }
+                val content = ConfigRuleHelper.stripUnsupportedSections(rawContent)
                 val newConfig = ConfigProfile(
                     name = trimmedName,
                     content = content,
@@ -190,9 +191,10 @@ class ConfigViewModel(
         if (trimmedName.isEmpty()) return
 
         viewModelScope.launch(Dispatchers.IO) {
+            val cleaned = ConfigRuleHelper.stripUnsupportedSections(content)
             val newConfig = ConfigProfile(
                 name = trimmedName,
-                content = content,
+                content = cleaned,
                 isActive = false
             )
             configDao.insert(newConfig)

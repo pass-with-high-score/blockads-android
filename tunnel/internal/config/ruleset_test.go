@@ -439,3 +439,39 @@ IP-CIDR, 1.2.3.4/32, REJECT
 	}
 }
 
+func TestIgnoredUnsupportedSections(t *testing.T) {
+	configStr := `
+[filter_local]
+HOST, ad.com, REJECT
+
+[rewrite_local]
+^https?:\/\/example\.com url reject-200
+
+[rewrite_remote]
+https://example.com/rewrite.js, tag=Test
+
+[task_local]
+0 9 * * * task.js, tag=Cron
+
+[http_backend]
+server = 127.0.0.1:8080
+
+[mitm]
+hostname = *.google.com
+
+[policy]
+static = DIRECT, direct
+`
+	cfg, err := ParseRuleset(configStr)
+	if err != nil {
+		t.Fatalf("ParseRuleset failed: %v", err)
+	}
+
+	if len(cfg.Rules) != 1 {
+		t.Errorf("Expected exactly 1 rule from filter_local, got %d: %+v", len(cfg.Rules), cfg.Rules)
+	}
+	if cfg.Rules[0].Value != "ad.com" {
+		t.Errorf("Expected ad.com rule, got %s", cfg.Rules[0].Value)
+	}
+}
+

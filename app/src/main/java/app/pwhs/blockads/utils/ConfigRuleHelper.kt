@@ -332,6 +332,40 @@ object ConfigRuleHelper {
             return lines.joinToString("\n")
         }
     }
+
+    val UNSUPPORTED_SECTIONS = setOf(
+        "rewrite_local",
+        "rewrite_remote",
+        "task_local",
+        "http_backend",
+        "mitm"
+    )
+
+    fun stripUnsupportedSections(content: String): String {
+        val lines = content.lines()
+        val result = mutableListOf<String>()
+        var skipping = false
+
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                val sectionName = trimmed.substring(1, trimmed.length - 1).trim().lowercase()
+                skipping = UNSUPPORTED_SECTIONS.contains(sectionName)
+                if (!skipping) {
+                    result.add(line)
+                }
+                continue
+            }
+            if (!skipping) {
+                result.add(line)
+            }
+        }
+
+        while (result.isNotEmpty() && result.last().isBlank()) {
+            result.removeAt(result.size - 1)
+        }
+        return if (result.isEmpty()) "" else result.joinToString("\n") + "\n"
+    }
 }
 
 data class ParsedRemoteFilter(

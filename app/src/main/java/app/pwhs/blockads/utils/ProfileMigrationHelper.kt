@@ -99,17 +99,6 @@ object ProfileMigrationHelper {
             sb.appendLine("https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts, tag=StevenBlack, update-interval=24")
             sb.appendLine("https://easylist.to/easylist/easyprivacy.txt, tag=EasyPrivacy, update-interval=24")
         }
-        sb.appendLine()
-
-        sb.appendLine("[rewrite_local]")
-        sb.appendLine()
-        sb.appendLine("[rewrite_remote]")
-        sb.appendLine()
-        sb.appendLine("[task_local]")
-        sb.appendLine()
-        sb.appendLine("[http_backend]")
-        sb.appendLine()
-        sb.appendLine("[mitm]")
 
         return sb.toString()
     }

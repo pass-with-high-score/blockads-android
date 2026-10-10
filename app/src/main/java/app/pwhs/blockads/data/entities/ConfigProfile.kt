@@ -57,16 +57,6 @@ final, direct
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts, tag=StevenBlack, update-interval=24
 # EasyPrivacy (App default privacy & tracking filter)
 https://easylist.to/easylist/easyprivacy.txt, tag=EasyPrivacy, update-interval=24
-
-[rewrite_local]
-
-[rewrite_remote]
-
-[task_local]
-
-[http_backend]
-
-[mitm]
 """
     }
 }

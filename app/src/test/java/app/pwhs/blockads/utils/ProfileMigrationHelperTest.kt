@@ -58,6 +58,13 @@ class ProfileMigrationHelperTest {
         // Filter remote
         assertTrue(profileContent.contains("[filter_remote]"))
         assertTrue(profileContent.contains("https://filters.adtidy.org/android/filters/15_optimized.txt, tag=AdGuard_DNS, update-interval=24"))
+
+        // Unsupported sections must NOT be generated
+        org.junit.Assert.assertFalse(profileContent.contains("[rewrite_local]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[rewrite_remote]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[task_local]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[http_backend]"))
+        org.junit.Assert.assertFalse(profileContent.contains("[mitm]"))
     }
 
     @Test

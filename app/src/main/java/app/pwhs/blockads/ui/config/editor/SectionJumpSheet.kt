@@ -16,16 +16,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -58,11 +54,6 @@ val STANDARD_SECTIONS = listOf(
     SectionItem("server_remote", Icons.Default.Link, Color(0xFF03A9F4)),
     SectionItem("filter_local", Icons.Default.FilterAlt, Color(0xFF7C4DFF)),
     SectionItem("filter_remote", Icons.Default.Link, Color(0xFF651FFF)),
-    SectionItem("rewrite_local", Icons.Default.Edit, Color(0xFFFF4081)),
-    SectionItem("rewrite_remote", Icons.Default.Link, Color(0xFFF50057)),
-    SectionItem("task_local", Icons.Default.Schedule, Color(0xFFFF6D00)),
-    SectionItem("http_backend", Icons.Default.AccountTree, Color(0xFFFF3D00)),
-    SectionItem("mitm", Icons.Default.VpnKey, Color(0xFF00C853)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

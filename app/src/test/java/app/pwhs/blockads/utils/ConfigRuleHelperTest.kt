@@ -97,4 +97,41 @@ class ConfigRuleHelperTest {
         assertEquals(listOf("8.8.8.8", "8.8.4.4"), servers)
         assertTrue(updated.contains("[filter_local]"))
     }
+
+    @Test
+    fun testStripUnsupportedSections() {
+        val configWithUnsupported = """
+            [general]
+            dns_exclusion_list = *.local
+            
+            [filter_local]
+            host, ad.com, reject
+            
+            [rewrite_local]
+            ^https://example.com url reject
+            
+            [rewrite_remote]
+            https://example.com/rewrite.js
+            
+            [task_local]
+            0 9 * * * script.js
+            
+            [http_backend]
+            server = 127.0.0.1
+            
+            [mitm]
+            hostname = *.google.com
+        """.trimIndent()
+
+        val cleaned = ConfigRuleHelper.stripUnsupportedSections(configWithUnsupported)
+        assertTrue(cleaned.contains("[general]"))
+        assertTrue(cleaned.contains("[filter_local]"))
+        assertTrue(cleaned.contains("host, ad.com, reject"))
+        org.junit.Assert.assertFalse(cleaned.contains("[rewrite_local]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[rewrite_remote]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[task_local]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[http_backend]"))
+        org.junit.Assert.assertFalse(cleaned.contains("[mitm]"))
+        org.junit.Assert.assertFalse(cleaned.contains("script.js"))
+    }
 }
