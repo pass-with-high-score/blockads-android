@@ -205,4 +205,93 @@ object ConfigRuleHelper {
         }
         return result
     }
+
+    fun parseRemoteFilters(content: String): List<ParsedRemoteFilter> {
+        val lines = content.lines()
+        val result = mutableListOf<ParsedRemoteFilter>()
+        var inRemoteSection = false
+
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inRemoteSection = trimmed.equals("[filter_remote]", ignoreCase = true)
+                continue
+            }
+            if (!inRemoteSection || trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith(";") || trimmed.startsWith("//")) {
+                continue
+            }
+
+            val parts = trimmed.split(",")
+            if (parts.isNotEmpty()) {
+                val url = parts[0].trim()
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    var tag = ""
+                    var interval = 24
+                    for (i in 1 until parts.size) {
+                        val kv = parts[i].split("=", limit = 2)
+                        if (kv.size == 2) {
+                            val k = kv[0].trim().lowercase()
+                            val v = kv[1].trim()
+                            if (k == "tag") tag = v
+                            else if (k == "update-interval") interval = v.toIntOrNull() ?: 24
+                        }
+                    }
+                    if (tag.isBlank()) {
+                        tag = url.substringAfterLast("/").substringBefore("?")
+                    }
+                    result.add(ParsedRemoteFilter(url = url, tag = tag, interval = interval, rawLine = trimmed))
+                }
+            }
+        }
+        return result
+    }
+
+    fun parseGeneralDnsExclusions(content: String): List<String> {
+        val lines = content.lines()
+        var inGeneral = false
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inGeneral = trimmed.equals("[general]", ignoreCase = true)
+                continue
+            }
+            if (inGeneral && !trimmed.startsWith("#") && !trimmed.startsWith(";") && !trimmed.startsWith("//")) {
+                val kv = trimmed.split("=", limit = 2)
+                if (kv.size == 2 && kv[0].trim().lowercase() == "dns_exclusion_list") {
+                    return kv[1].split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+                }
+            }
+        }
+        return emptyList()
+    }
+
+    fun parseDnsServers(content: String): List<String> {
+        val lines = content.lines()
+        var inDns = false
+        val servers = mutableListOf<String>()
+        for (line in lines) {
+            val trimmed = line.trim()
+            if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                inDns = trimmed.equals("[dns]", ignoreCase = true)
+                continue
+            }
+            if (inDns && !trimmed.startsWith("#") && !trimmed.startsWith(";") && !trimmed.startsWith("//")) {
+                val kv = trimmed.split("=", limit = 2)
+                if (kv.size == 2 && kv[0].trim().lowercase() == "server") {
+                    val s = kv[1].trim()
+                    if (s.isNotEmpty()) servers.add(s)
+                } else if (!trimmed.contains("=") && trimmed.isNotEmpty()) {
+                    servers.add(trimmed)
+                }
+            }
+        }
+        return servers
+    }
 }
+
+data class ParsedRemoteFilter(
+    val url: String,
+    val tag: String,
+    val interval: Int = 24,
+    val rawLine: String
+)

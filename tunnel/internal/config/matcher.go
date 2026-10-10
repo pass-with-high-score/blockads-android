@@ -7,9 +7,11 @@ import (
 
 // Matcher evaluates traffic against parsed rules in declaration order.
 type Matcher struct {
-	rules       []Rule
-	finalPolicy string
-	geoIPLookup func(net.IP) string
+	rules            []Rule
+	finalPolicy      string
+	geoIPLookup      func(net.IP) string
+	dnsExclusionList []string
+	dnsServers       []string
 }
 
 // SetGeoIPLookup sets the GeoIP country resolution function.
@@ -23,8 +25,51 @@ func NewMatcher(cfg *Config) *Matcher {
 		return &Matcher{rules: nil, finalPolicy: PolicyDirect}
 	}
 	return &Matcher{
-		rules:       cfg.Rules,
-		finalPolicy: cfg.FinalPolicy,
+		rules:            cfg.Rules,
+		finalPolicy:      cfg.FinalPolicy,
+		dnsExclusionList: cfg.DNSExclusionList,
+		dnsServers:       cfg.DNSServers,
+	}
+}
+
+// DNSExclusionList returns the configured DNS exclusion patterns.
+func (m *Matcher) DNSExclusionList() []string {
+	if m == nil {
+		return nil
+	}
+	return m.dnsExclusionList
+}
+
+// DNSServers returns the configured DNS upstream servers.
+func (m *Matcher) DNSServers() []string {
+	if m == nil {
+		return nil
+	}
+	return m.dnsServers
+}
+
+// Rules returns the current list of rules.
+func (m *Matcher) Rules() []Rule {
+	if m == nil {
+		return nil
+	}
+	return m.rules
+}
+
+// NewMatcherFromRules constructs a Matcher directly from rules and options.
+func NewMatcherFromRules(rules []Rule, finalPolicy string, dnsExclusionList, dnsServers []string) *Matcher {
+	return &Matcher{
+		rules:            rules,
+		finalPolicy:      finalPolicy,
+		dnsExclusionList: dnsExclusionList,
+		dnsServers:       dnsServers,
+	}
+}
+
+// AppendRules appends additional rules (such as from remote filter lists) to the matcher.
+func (m *Matcher) AppendRules(rules []Rule) {
+	if m != nil && len(rules) > 0 {
+		m.rules = append(m.rules, rules...)
 	}
 }
 
@@ -40,6 +85,16 @@ func (m *Matcher) Match(domain string, ipStr string) (string, string) {
 // MatchNetIP evaluates domain and client net.IP directly without string allocation.
 func (m *Matcher) MatchNetIP(domain string, ip net.IP) (string, string) {
 	normDomain := NormalizeDomain(domain)
+
+	// Check dns_exclusion_list first for domains
+	if normDomain != "" {
+		for _, excl := range m.dnsExclusionList {
+			if matchDomainExclusion(excl, normDomain) {
+				return PolicyDirect, "dns_exclusion_list:" + excl
+			}
+		}
+	}
+
 	for i := range m.rules {
 		r := &m.rules[i]
 		if r.Type == RuleFinal {
@@ -139,5 +194,25 @@ func matchWildcard(pattern, text string) bool {
 		return strings.HasPrefix(t, strings.TrimSuffix(p, "*"))
 	}
 	return p == t || strings.Contains(t, p)
+}
+
+func matchDomainExclusion(pattern, domain string) bool {
+	p := NormalizeDomain(pattern)
+	d := NormalizeDomain(domain)
+	if p == d {
+		return true
+	}
+	if strings.HasPrefix(p, "*.") {
+		suffix := p[2:]
+		return d == suffix || strings.HasSuffix(d, "."+suffix)
+	}
+	if strings.HasPrefix(p, ".") {
+		suffix := p[1:]
+		return d == suffix || strings.HasSuffix(d, "."+suffix)
+	}
+	if strings.Contains(p, "*") {
+		return matchWildcard(p, d)
+	}
+	return false
 }
 

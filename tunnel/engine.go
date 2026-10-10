@@ -144,7 +144,8 @@ type Engine struct {
 	certDir         string // persistent dir (for CA + goroutine-dump diagnostics)
 
 	// Ruleset matcher
-	rulesetMatcher atomic.Pointer[RulesetMatcher]
+	rulesetMatcher   atomic.Pointer[RulesetMatcher]
+	activeRulesetCfg atomic.Pointer[RulesetConfig]
 
 	// GeoIP database
 	geoIPDB atomic.Pointer[GeoIPDatabase]

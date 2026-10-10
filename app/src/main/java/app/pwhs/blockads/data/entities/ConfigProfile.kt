@@ -26,7 +26,7 @@ data class ConfigProfile(
 # Lines starting with ";" or "#" or "//" are comments.
 
 [general]
-dns_exclusion_list = *.apple.com, *.icloud.com
+dns_exclusion_list = *.local, localhost, *.lan
 
 [dns]
 server = 1.1.1.1

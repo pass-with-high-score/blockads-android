@@ -11,11 +11,12 @@ import (
 // ParseRuleset parses a profile ruleset configuration or snippet string.
 func ParseRuleset(content string) (*Config, error) {
 	cfg := &Config{
-		General:       make(map[string]string),
-		DNSServers:    make([]string, 0),
-		Rules:         make([]Rule, 0),
-		RemoteFilters: make([]RemoteFilter, 0),
-		FinalPolicy:   PolicyDirect,
+		General:          make(map[string]string),
+		DNSServers:       make([]string, 0),
+		Rules:            make([]Rule, 0),
+		RemoteFilters:    make([]RemoteFilter, 0),
+		FinalPolicy:      PolicyDirect,
+		DNSExclusionList: make([]string, 0),
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(content))
@@ -80,10 +81,41 @@ func ParseQuanX(content string) (*Config, error) {
 func parseGeneralLine(cfg *Config, line string) {
 	parts := strings.SplitN(line, "=", 2)
 	if len(parts) == 2 {
-		key := strings.TrimSpace(parts[0])
+		key := strings.ToLower(strings.TrimSpace(parts[0]))
 		val := strings.TrimSpace(parts[1])
 		cfg.General[key] = val
+		if key == "dns_exclusion_list" {
+			items := strings.Split(val, ",")
+			for _, item := range items {
+				item = strings.TrimSpace(strings.ToLower(item))
+				if item != "" {
+					cfg.DNSExclusionList = append(cfg.DNSExclusionList, item)
+				}
+			}
+		}
 	}
+}
+
+// ParseRuleSnippet parses a plain text ruleset file (such as a downloaded .list or .snippet).
+func ParseRuleSnippet(content string) []Rule {
+	rules := make([]Rule, 0)
+	scanner := bufio.NewScanner(strings.NewReader(content))
+	order := 0
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
+			continue
+		}
+		line = stripComment(line)
+		if line == "" || strings.HasPrefix(line, "[") {
+			continue
+		}
+		if rule, ok := parseRuleLine(line, order); ok {
+			rules = append(rules, rule)
+			order++
+		}
+	}
+	return rules
 }
 
 func parseDNSLine(cfg *Config, line string) {

@@ -119,4 +119,49 @@ object TunnelRuleLoader {
             Timber.w(e, "Failed to load https_passthrough.txt asset")
         }
     }
+
+    /**
+     * Loads any cached remote ruleset files declared in [filter_remote] of the active profile.
+     */
+    fun loadCachedRemoteRulesets(context: Context, engine: tunnel.Engine) {
+        try {
+            val jsonStr = engine.rulesetRemoteFiltersJSON
+            if (jsonStr.isBlank() || jsonStr == "[]") return
+
+            val remoteDir = java.io.File(context.filesDir, "remote_rulesets")
+            if (!remoteDir.exists()) return
+
+            val array = org.json.JSONArray(jsonStr)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val tag = obj.optString("tag").ifBlank { "remote_$i" }
+                val targetFile = java.io.File(remoteDir, "$tag.list")
+                if (targetFile.exists() && targetFile.length() > 0) {
+                    val content = targetFile.readText()
+                    val added = engine.appendRemoteFilterRules(tag, content)
+                    Timber.d("Loaded cached remote ruleset [$tag]: $added rules")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load cached remote rulesets")
+        }
+    }
+
+    /**
+     * Returns upstream DNS servers declared in [dns] section of active profile.
+     */
+    fun getProfileDNSServers(engine: tunnel.Engine): List<String> {
+        val csv = engine.rulesetDNSServersCSV
+        if (csv.isBlank()) return emptyList()
+        return csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Returns DNS exclusion list declared in [general] (dns_exclusion_list) of active profile.
+     */
+    fun getProfileDNSExclusions(engine: tunnel.Engine): List<String> {
+        val csv = engine.rulesetDNSExclusionListCSV
+        if (csv.isBlank()) return emptyList()
+        return csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    }
 }

@@ -473,7 +473,9 @@ class GoTunnelAdapter(
     fun getStats(): String = engine.stats
 
     fun setRulesetConfig(content: String): Long = runCatching {
-        engine.setRulesetConfig(content)
+        val count = engine.setRulesetConfig(content)
+        TunnelRuleLoader.loadCachedRemoteRulesets(context, engine)
+        count
     }.onFailure { Timber.e(it, "Failed to set ruleset config") }.getOrDefault(0L)
 
     fun clearRulesetConfig() {

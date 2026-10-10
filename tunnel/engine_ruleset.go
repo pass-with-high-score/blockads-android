@@ -14,6 +14,7 @@ import (
 func (e *Engine) SetRulesetConfig(content string) (int, error) {
 	if content == "" {
 		e.rulesetMatcher.Store(nil)
+		e.activeRulesetCfg.Store(nil)
 		return 0, nil
 	}
 
@@ -22,11 +23,24 @@ func (e *Engine) SetRulesetConfig(content string) (int, error) {
 		return 0, err
 	}
 
+	e.activeRulesetCfg.Store(cfg)
+
 	matcher := config.NewMatcher(cfg)
 	if db := e.geoIPDB.Load(); db != nil {
 		matcher.SetGeoIPLookup(db.Lookup)
 	}
 	e.rulesetMatcher.Store(matcher)
+
+	if len(cfg.DNSExclusionList) > 0 {
+		logf("Ruleset: loaded %d dns_exclusion_list entries: %s", len(cfg.DNSExclusionList), strings.Join(cfg.DNSExclusionList, ", "))
+	}
+	if len(cfg.DNSServers) > 0 {
+		logf("Ruleset: loaded %d upstream DNS servers: %s", len(cfg.DNSServers), strings.Join(cfg.DNSServers, ", "))
+	}
+	if len(cfg.RemoteFilters) > 0 {
+		logf("Ruleset: loaded %d remote filter subscriptions", len(cfg.RemoteFilters))
+	}
+
 	return matcher.RulesCount(), nil
 }
 
@@ -74,6 +88,82 @@ func checkDNSResponseRuleset(resp []byte, matcher *config.Matcher) (bool, string
 // ClearRulesetConfig clears the active ruleset configuration.
 func (e *Engine) ClearRulesetConfig() {
 	e.rulesetMatcher.Store(nil)
+	e.activeRulesetCfg.Store(nil)
+}
+
+// GetRulesetDNSServersCSV returns comma-separated upstream DNS servers from active profile ruleset.
+func (e *Engine) GetRulesetDNSServersCSV() string {
+	matcher := e.rulesetMatcher.Load()
+	if matcher == nil || len(matcher.DNSServers()) == 0 {
+		return ""
+	}
+	return strings.Join(matcher.DNSServers(), ",")
+}
+
+// GetRulesetDNSExclusionListCSV returns comma-separated DNS exclusion patterns from active profile ruleset.
+func (e *Engine) GetRulesetDNSExclusionListCSV() string {
+	matcher := e.rulesetMatcher.Load()
+	if matcher == nil || len(matcher.DNSExclusionList()) == 0 {
+		return ""
+	}
+	return strings.Join(matcher.DNSExclusionList(), ",")
+}
+
+type RemoteFilterSubscription struct {
+	URL      string `json:"url"`
+	Tag      string `json:"tag"`
+	Interval int    `json:"interval"`
+}
+
+// GetRulesetRemoteFiltersJSON returns JSON array of remote filter subscriptions from active profile.
+func (e *Engine) GetRulesetRemoteFiltersJSON() string {
+	cfg := e.activeRulesetCfg.Load()
+	if cfg == nil || len(cfg.RemoteFilters) == 0 {
+		return "[]"
+	}
+	items := make([]RemoteFilterSubscription, len(cfg.RemoteFilters))
+	for i, rf := range cfg.RemoteFilters {
+		items[i] = RemoteFilterSubscription{
+			URL:      rf.URL,
+			Tag:      rf.Tag,
+			Interval: rf.Interval,
+		}
+	}
+	b, _ := json.Marshal(items)
+	return string(b)
+}
+
+// AppendRemoteFilterRules parses plain text rule lines and appends them to the active matcher.
+// Safe for concurrent use: builds and atomically stores a new matcher.
+func (e *Engine) AppendRemoteFilterRules(tag, content string) (int, error) {
+	if content == "" {
+		return 0, nil
+	}
+	parsed := config.ParseRuleSnippet(content)
+	if len(parsed) == 0 {
+		return 0, nil
+	}
+
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	matcher := e.rulesetMatcher.Load()
+	if matcher == nil {
+		return 0, nil
+	}
+
+	currentRules := matcher.Rules()
+	combined := make([]config.Rule, len(currentRules)+len(parsed))
+	copy(combined, currentRules)
+	copy(combined[len(currentRules):], parsed)
+
+	newMatcher := config.NewMatcherFromRules(combined, matcher.FinalPolicy(), matcher.DNSExclusionList(), matcher.DNSServers())
+	if db := e.geoIPDB.Load(); db != nil {
+		newMatcher.SetGeoIPLookup(db.Lookup)
+	}
+	e.rulesetMatcher.Store(newMatcher)
+	logf("Ruleset: appended %d rules from remote filter [%s] (total rules: %d)", len(parsed), tag, newMatcher.RulesCount())
+	return len(parsed), nil
 }
 
 // RulesetRuleCount returns the number of active ruleset rules.

@@ -353,3 +353,89 @@ final, direct
 	}
 }
 
+func TestDNSExclusionList(t *testing.T) {
+	snippet := `
+[general]
+dns_exclusion_list = *.local, localhost, *.lan, custom.bank.vn
+
+[filter_local]
+host-suffix, local, reject
+host-suffix, bank.vn, reject
+final, reject
+`
+	cfg, err := ParseRuleset(snippet)
+	if err != nil {
+		t.Fatalf("ParseRuleset failed: %v", err)
+	}
+
+	if len(cfg.DNSExclusionList) != 4 {
+		t.Fatalf("Expected 4 exclusions, got %d: %v", len(cfg.DNSExclusionList), cfg.DNSExclusionList)
+	}
+
+	matcher := NewMatcher(cfg)
+
+	// *.local should bypass reject
+	policy, matched := matcher.Match("router.local", "")
+	if policy != PolicyDirect || matched != "dns_exclusion_list:*.local" {
+		t.Errorf("router.local: got %s (%s), want DIRECT", policy, matched)
+	}
+
+	// localhost should bypass reject
+	policy, matched = matcher.Match("localhost", "")
+	if policy != PolicyDirect || matched != "dns_exclusion_list:localhost" {
+		t.Errorf("localhost: got %s (%s), want DIRECT", policy, matched)
+	}
+
+	// *.lan should bypass reject
+	policy, matched = matcher.Match("nas.lan", "")
+	if policy != PolicyDirect || matched != "dns_exclusion_list:*.lan" {
+		t.Errorf("nas.lan: got %s (%s), want DIRECT", policy, matched)
+	}
+
+	// custom.bank.vn should bypass reject
+	policy, matched = matcher.Match("custom.bank.vn", "")
+	if policy != PolicyDirect || matched != "dns_exclusion_list:custom.bank.vn" {
+		t.Errorf("custom.bank.vn: got %s (%s), want DIRECT", policy, matched)
+	}
+
+	// other.bank.vn should still be REJECT
+	policy, matched = matcher.Match("other.bank.vn", "")
+	if policy != PolicyReject {
+		t.Errorf("other.bank.vn: got %s (%s), want REJECT", policy, matched)
+	}
+}
+
+func TestParseRuleSnippetAndAppend(t *testing.T) {
+	snippet := `
+# Remote adblock rules
+HOST, ad.remote.com, REJECT
+HOST-SUFFIX, tracking.remote.org, REJECT
+IP-CIDR, 1.2.3.4/32, REJECT
+`
+	rules := ParseRuleSnippet(snippet)
+	if len(rules) != 3 {
+		t.Fatalf("Expected 3 parsed rules, got %d", len(rules))
+	}
+
+	baseCfg := &Config{FinalPolicy: PolicyDirect}
+	matcher := NewMatcher(baseCfg)
+	if matcher.RulesCount() != 0 {
+		t.Fatalf("Expected 0 initial rules, got %d", matcher.RulesCount())
+	}
+
+	matcher.AppendRules(rules)
+	if matcher.RulesCount() != 3 {
+		t.Fatalf("Expected 3 rules after append, got %d", matcher.RulesCount())
+	}
+
+	policy, _ := matcher.Match("ad.remote.com", "")
+	if policy != PolicyReject {
+		t.Errorf("ad.remote.com: got %s, want REJECT", policy)
+	}
+
+	policy, _ = matcher.Match("test.tracking.remote.org", "")
+	if policy != PolicyReject {
+		t.Errorf("test.tracking.remote.org: got %s, want REJECT", policy)
+	}
+}
+

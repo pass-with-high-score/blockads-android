@@ -59,11 +59,15 @@ type DomainChecker interface
 	method DomainChecker.HasCustomRule(domain string) int
 	method DomainChecker.IsBlocked(domain string) bool
 type Engine struct
+	method Engine.AppendRemoteFilterRules(tag string, content string) (int, error)
 	method Engine.ClearQuanXConfig()
 	method Engine.ClearRulesetConfig()
 	method Engine.GetGeoIPCountry(ipStr string) string
 	method Engine.GetMitmCACert(certDir string) string
 	method Engine.GetRouter() *Router
+	method Engine.GetRulesetDNSExclusionListCSV() string
+	method Engine.GetRulesetDNSServersCSV() string
+	method Engine.GetRulesetRemoteFiltersJSON() string
 	method Engine.GetStats() string
 	method Engine.IsConnLogEnabled() bool
 	method Engine.IsDoHBlockingEnabled() bool
@@ -177,14 +181,23 @@ type QuanXConfig = internal/config.Config
 	field QuanXConfig.Rules []internal/config.Rule
 	field QuanXConfig.RemoteFilters []internal/config.RemoteFilter
 	field QuanXConfig.FinalPolicy string
+	field QuanXConfig.DNSExclusionList []string
 	method QuanXConfig.String() string
 type QuanXMatcher = internal/config.Matcher
+	method QuanXMatcher.AppendRules(rules []internal/config.Rule)
+	method QuanXMatcher.DNSExclusionList() []string
+	method QuanXMatcher.DNSServers() []string
 	method QuanXMatcher.FinalPolicy() string
 	method QuanXMatcher.Match(domain string, ipStr string) (string, string)
 	method QuanXMatcher.MatchNetIP(domain string, ip net.IP) (string, string)
 	method QuanXMatcher.MatchWithUA(domain string, ipStr string, userAgent string) (string, string)
+	method QuanXMatcher.Rules() []internal/config.Rule
 	method QuanXMatcher.RulesCount() int
 	method QuanXMatcher.SetGeoIPLookup(fn func(net.IP) string)
+type RemoteFilterSubscription struct
+	field RemoteFilterSubscription.URL string
+	field RemoteFilterSubscription.Tag string
+	field RemoteFilterSubscription.Interval int
 func ResolveHostForProtection(hostname string) string
 type Resolver = internal/dns.Resolver
 	method Resolver.Configure(protocol internal/dns.DNSProtocol, primary string, fallback string, dohURL string)
@@ -213,12 +226,17 @@ type RulesetConfig = internal/config.Config
 	field RulesetConfig.Rules []internal/config.Rule
 	field RulesetConfig.RemoteFilters []internal/config.RemoteFilter
 	field RulesetConfig.FinalPolicy string
+	field RulesetConfig.DNSExclusionList []string
 	method RulesetConfig.String() string
 type RulesetMatcher = internal/config.Matcher
+	method RulesetMatcher.AppendRules(rules []internal/config.Rule)
+	method RulesetMatcher.DNSExclusionList() []string
+	method RulesetMatcher.DNSServers() []string
 	method RulesetMatcher.FinalPolicy() string
 	method RulesetMatcher.Match(domain string, ipStr string) (string, string)
 	method RulesetMatcher.MatchNetIP(domain string, ip net.IP) (string, string)
 	method RulesetMatcher.MatchWithUA(domain string, ipStr string, userAgent string) (string, string)
+	method RulesetMatcher.Rules() []internal/config.Rule
 	method RulesetMatcher.RulesCount() int
 	method RulesetMatcher.SetGeoIPLookup(fn func(net.IP) string)
 type SafeSearch = internal/safesearch.SafeSearch

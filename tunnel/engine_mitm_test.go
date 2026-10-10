@@ -245,3 +245,74 @@ final, direct
 		t.Errorf("Expected 1.1.1.1 NOT to be blocked (US)")
 	}
 }
+
+func TestEngineRulesetGeneralDNSAndRemoteFilters(t *testing.T) {
+	e := NewEngine()
+	cfg := `
+[general]
+dns_exclusion_list = *.local, localhost, *.lan
+
+[dns]
+server = 1.1.1.1
+server = 8.8.8.8
+
+[filter_local]
+host-suffix, local, reject
+final, direct
+
+[filter_remote]
+https://example.com/ads.list, tag=AdBlockList, update-interval=12
+`
+	count, err := e.SetRulesetConfig(cfg)
+	if err != nil {
+		t.Fatalf("SetRulesetConfig failed: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("Expected 2 rules, got %d", count)
+	}
+
+	// 1. Test dns_exclusion_list
+	excl := e.GetRulesetDNSExclusionListCSV()
+	if excl != "*.local,localhost,*.lan" {
+		t.Errorf("Unexpected exclusion list: %s", excl)
+	}
+	// router.local should match dns_exclusion_list (DIRECT), overriding host-suffix, local, reject
+	if e.IsDomainBlocked("router.local") {
+		t.Errorf("router.local should NOT be blocked due to dns_exclusion_list")
+	}
+
+	// 2. Test DNS servers
+	dnsServers := e.GetRulesetDNSServersCSV()
+	if dnsServers != "1.1.1.1,8.8.8.8" {
+		t.Errorf("Unexpected DNS servers: %s", dnsServers)
+	}
+
+	// 3. Test remote filters
+	rfJSON := e.GetRulesetRemoteFiltersJSON()
+	if !strings.Contains(rfJSON, "https://example.com/ads.list") || !strings.Contains(rfJSON, "AdBlockList") {
+		t.Errorf("Unexpected remote filters JSON: %s", rfJSON)
+	}
+
+	// 4. Test AppendRemoteFilterRules
+	remoteContent := `
+HOST, evil-tracker.com, REJECT
+HOST-SUFFIX, ads-network.net, REJECT
+`
+	added, err := e.AppendRemoteFilterRules("AdBlockList", remoteContent)
+	if err != nil {
+		t.Fatalf("AppendRemoteFilterRules failed: %v", err)
+	}
+	if added != 2 {
+		t.Errorf("Expected 2 added rules, got %d", added)
+	}
+	if e.RulesetRuleCount() != 4 {
+		t.Errorf("Expected total 4 rules, got %d", e.RulesetRuleCount())
+	}
+
+	if !e.IsDomainBlocked("evil-tracker.com") {
+		t.Errorf("Expected evil-tracker.com to be blocked")
+	}
+	if !e.IsDomainBlocked("sub.ads-network.net") {
+		t.Errorf("Expected sub.ads-network.net to be blocked")
+	}
+}

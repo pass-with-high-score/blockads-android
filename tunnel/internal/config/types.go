@@ -47,11 +47,12 @@ type RemoteFilter struct {
 
 // Config represents a parsed Quantumult X configuration.
 type Config struct {
-	General       map[string]string
-	DNSServers    []string
-	Rules         []Rule
-	RemoteFilters []RemoteFilter
-	FinalPolicy   string
+	General          map[string]string
+	DNSServers       []string
+	Rules            []Rule
+	RemoteFilters    []RemoteFilter
+	FinalPolicy      string
+	DNSExclusionList []string
 }
 
 // NormalizeDomain lowercases domain and strips leading/trailing dots and spaces.
