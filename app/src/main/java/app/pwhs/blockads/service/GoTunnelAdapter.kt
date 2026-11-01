@@ -66,6 +66,7 @@ class GoTunnelAdapter(
         private set
 
     /** The in-flight standalone startup, retained so a timeout can cancel it. */
+    @Volatile
     private var standaloneJob: Job? = null
 
     /** Invalidates a startup attempt that timed out while a gomobile call was blocking. */
@@ -513,6 +514,9 @@ class GoTunnelAdapter(
     fun isEngineRunning(): Boolean = engine.isRunning
 
     fun stop() {
+        // Invalidate an in-flight startup so it cannot publish isRunning /
+        // isMitmRunning after this stop.
+        standaloneGeneration.incrementAndGet()
         standaloneJob?.cancel()
         isRunning = false
         isMitmRunning = false
