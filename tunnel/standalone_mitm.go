@@ -2,9 +2,11 @@ package tunnel
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
+	"time"
 	"unsafe"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
@@ -64,6 +66,18 @@ func (e *Engine) StartStandaloneMitm(port int, certDir string) string {
 	return pem
 }
 
+// StopStandaloneMitm closes the root-mode standalone MITM listener without
+// stopping the DNS engine. Safe to call when no listener is running.
+func (e *Engine) StopStandaloneMitm() {
+	e.mu.Lock()
+	old := e.standaloneMitm
+	e.standaloneMitm = nil
+	e.mu.Unlock()
+	if old != nil {
+		old.close()
+	}
+}
+
 func (s *standaloneMitmServer) serve(
 	certMgr *mitm.CertManager,
 	filter *mitm.MitmFilter,
@@ -73,7 +87,12 @@ func (s *standaloneMitmServer) serve(
 	for {
 		conn, err := s.ln.Accept()
 		if err != nil {
-			return
+			if errors.Is(err, net.ErrClosed) {
+				return
+			}
+			logf("Standalone MITM: accept failed: %v", err)
+			time.Sleep(100 * time.Millisecond)
+			continue
 		}
 		tcpConn, ok := conn.(*net.TCPConn)
 		if !ok {
