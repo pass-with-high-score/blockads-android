@@ -45,8 +45,6 @@ const (
 	peekTimeout = 10 * time.Second
 )
 
-// newMitmTcpHandler returns a TCP flow handler that MITMs HTTPS/HTTP
-// flows for eligible apps and passes every other flow through directly
 // NewMitmTcpHandler returns a TCP flow handler that MITMs HTTPS/HTTP
 // flows for eligible apps and passes every other flow through directly
 // with socket protection. The handler owns the flow for its lifetime.
@@ -89,9 +87,6 @@ func HandleTcpFlow(
 		blocker.LogConnection(flow, ProtocolTCP)
 	}
 
-	// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
-	// system's Private DNS resolver probes DoT against our fake DNS
-	// server (10.0.0.1 / fd00::1), which isn't a real host — the dial
 	// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
 	// system's Private DNS resolver probes DoT against our fake DNS
 	// server (100.64.100.1 / fd00::1), which isn't a real host — the dial
