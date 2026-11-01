@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="support_bottom_sheet_title">Besoin d\'aide ou signaler un problème ?</string>
-    <string name="support_bottom_sheet_desc">Si vous rencontrez des problèmes ou si quelque chose ne fonctionne pas comme prévu, faites-le savoir à notre équipe.</string>
-    <string name="support_error_filter_title">Échec de l\'ajout du filtre</string>
-    <string name="support_error_filter_desc">Impossible de télécharger ou compiler cette liste de filtres. Le lien est peut-être inaccessible ou contient une syntaxe non prise en charge.</string>
-    <string name="support_error_subscription_title">Échec de la mise à jour de l\'abonnement</string>
+    <string name="support_bottom_sheet_title">Besoin d'aide ou de signaler un bug ?</string>
+    <string name="support_bottom_sheet_desc">Si vous rencontrez des problèmes ou si quelque chose ne fonctionne pas comme prévu, faites-le savoir à notre équipe pour que nous puissions vous aider.</string>
+    <string name="support_error_filter_title">Échec de l'ajout du filtre</string>
+    <string name="support_error_filter_desc">Impossible de télécharger ou de compiler cette liste de filtres. Le lien est peut-être inaccessible, hors ligne ou contient une syntaxe non prise en charge. Vous pouvez demander de l'aide ou nous le signaler.</string>
+    <string name="support_error_subscription_title">Échec de la mise à jour de l'abonnement</string>
     <string name="support_channel_telegram_title">Communauté Telegram</string>
-    <string name="support_channel_telegram_desc">Rejoignez le chat pour obtenir une aide en direct des développeurs et de la communauté</string>
+    <string name="support_channel_telegram_desc">Rejoignez le chat pour obtenir de l'aide en direct du développeur et de la communauté</string>
     <string name="support_channel_github_title">Signaler sur GitHub</string>
-    <string name="support_channel_github_desc">Ouvrez un ticket avec les détails de l\'erreur et les diagnostics</string>
-    <string name="support_channel_email_title">Assistance par e-mail</string>
-    <string name="support_channel_email_desc">Envoyez les détails du problème directement à support@pwhs.app</string>
+    <string name="support_channel_github_desc">Ouvrez une issue avec les détails de l'erreur et les diagnostics</string>
+    <string name="support_channel_email_title">Support par e-mail</string>
+    <string name="support_channel_email_desc">Envoyez les détails du bug directement à support@pwhs.app</string>
     <string name="support_copy_details">Copier les diagnostics</string>
-    <string name="support_copied">Détails du diagnostic copiés dans le presse-papiers</string>
-    <string name="support_need_help">Besoin d\'aide ?</string>
+    <string name="support_copied">Détails de diagnostic copiés dans le presse-papiers</string>
+    <string name="support_need_help">Besoin d'aide ?</string>
     <string name="support_close">Fermer</string>
 </resources>
