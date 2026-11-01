@@ -188,6 +188,9 @@ type Engine struct {
 	standaloneUdp6 *dns.Server
 	standaloneTcp6 *dns.Server
 
+	// Root-mode standalone MITM listener (iptables REDIRECT target).
+	standaloneMitm *standaloneMitmServer
+
 	// Stats
 	totalQueries   atomic.Int64
 	blockedQueries atomic.Int64

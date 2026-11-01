@@ -12,10 +12,13 @@ import app.pwhs.blockads.utils.AppNameResolver
 import app.pwhs.blockads.utils.BlocklistInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import tunnel.AppResolver
 import tunnel.DomainChecker
@@ -24,6 +27,7 @@ import tunnel.SocketProtector
 import tunnel.UIDResolver
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Bridge between Android VpnService and the Go DNS tunnel engine.
@@ -50,6 +54,23 @@ class GoTunnelAdapter(
 
     @Volatile
     private var isRunning = false
+
+    /**
+     * True when the root-mode standalone MITM listener is accepting
+     * connections. RootProxyService installs the TCP 80/443 REDIRECT
+     * rules only while this is true, so a failed listener never
+     * black-holes the browser's traffic.
+     */
+    @Volatile
+    var isMitmRunning: Boolean = false
+        private set
+
+    /** The in-flight standalone startup, retained so a timeout can cancel it. */
+    @Volatile
+    private var standaloneJob: Job? = null
+
+    /** Invalidates a startup attempt that timed out while a gomobile call was blocking. */
+    private val standaloneGeneration = AtomicLong(0)
 
     /**
      * Configure the DNS settings for the Go engine.
@@ -365,13 +386,36 @@ class GoTunnelAdapter(
 
     /**
      * Start the Go engine in Standalone DNS server mode (for Root/Proxy Mode).
+     *
+     * When [mitmEnabled] is true, also start the transparent MITM listener
+     * on [mitmPort]. iptables REDIRECTs the selected browser UIDs' TCP
+     * 80/443 traffic there, so cosmetic CSS and scriptlets are injected in
+     * root mode without a VpnService.
      */
-    suspend fun startStandalone(port: Int): Boolean {
+    suspend fun startStandalone(
+        port: Int,
+        mitmEnabled: Boolean = false,
+        mitmPort: Int = 15354,
+        certDir: String = "",
+    ): Boolean {
+        // A timed-out startup can still be inside a blocking gomobile call.
+        // Wait for it before starting another engine so the two attempts
+        // cannot race on the listener or on isMitmRunning.
+        standaloneJob?.let { previous ->
+            previous.cancel()
+            if (withTimeoutOrNull(2000) { previous.join() } == null) {
+                Timber.w("Previous standalone startup is still stopping; deferring")
+                return false
+            }
+        }
+        standaloneJob = null
+
         // Ensure any previous engine is fully stopped to release the port
         if (isRunning) {
             stop()
             delay(300) // Give OS time to release the socket
         }
+        isMitmRunning = false
 
         setupAppResolver()
         setupDomainChecker()
@@ -384,33 +428,82 @@ class GoTunnelAdapter(
 
         Timber.d("Starting Go tunnel engine in STANDALONE mode on port $port")
         val deferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        val generation = standaloneGeneration.incrementAndGet()
 
-        scope.launch(Dispatchers.IO) {
+        val job = scope.launch(Dispatchers.IO) {
             try {
-                launch {
-                    delay(500)
-                    if (!deferred.isCompleted) {
-                        isRunning = true
-                        deferred.complete(true)
+                engine.startStandalone(port.toLong())
+
+                // A timeout may have cancelled this attempt while the
+                // blocking gomobile call was in flight. Do not publish
+                // state or start the MITM listener for a stale attempt.
+                if (!isActive || generation != standaloneGeneration.get()) {
+                    runCatching { engine.stop() }
+                    return@launch
+                }
+
+                if (mitmEnabled && certDir.isNotEmpty()) {
+                    val caPem = engine.startStandaloneMitm(mitmPort.toLong(), certDir)
+
+                    if (!isActive || generation != standaloneGeneration.get()) {
+                        // Close only the listener this attempt created; the
+                        // next start/stop owns the DNS engine.
+                        runCatching { engine.stopStandaloneMitm() }
+                        return@launch
+                    }
+
+                    if (caPem.isEmpty()) {
+                        isMitmRunning = false
+                        Timber.e("Root-mode MITM listener failed on port $mitmPort — HTTPS filtering disabled")
+                    } else {
+                        // Root mode gates interception with iptables owner
+                        // matches, not the VPN-mode UID allowlist. Clear any
+                        // allowlist left over from a previous full-tunnel run.
+                        engine.setMitmAllowedUIDs("")
+                        isMitmRunning = true
+                        Timber.d("Root-mode MITM listener started on 127.0.0.1:$mitmPort")
                     }
                 }
-                engine.startStandalone(port.toLong())
+
+                if (!isActive || generation != standaloneGeneration.get()) {
+                    runCatching { engine.stopStandaloneMitm() }
+                    return@launch
+                }
+
+                if (!deferred.isCompleted) {
+                    deferred.complete(true)
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Go standalone engine crashed or failed to start")
                 isRunning = false
+                isMitmRunning = false
                 if (!deferred.isCompleted) {
                     deferred.complete(false)
                 }
             }
         }
+        standaloneJob = job
 
         return try {
-            withTimeout(2000) {
+            val started = withTimeout(2000) {
                 deferred.await()
+            }
+            if (started && !job.isCancelled && generation == standaloneGeneration.get()) {
+                isRunning = true
+                true
+            } else {
+                false
             }
         } catch (e: TimeoutCancellationException) {
             Timber.e("Timeout waiting for Go engine to start")
+            standaloneGeneration.incrementAndGet()
+            job.cancel()
+            withTimeoutOrNull(2000) { job.join() }
+            // Stop anything the cancelled attempt created; the next retry
+            // waits for this job before starting a new engine.
+            runCatching { engine.stop() }
             isRunning = false
+            isMitmRunning = false
             false
         }
     }
@@ -421,7 +514,12 @@ class GoTunnelAdapter(
     fun isEngineRunning(): Boolean = engine.isRunning
 
     fun stop() {
+        // Invalidate an in-flight startup so it cannot publish isRunning /
+        // isMitmRunning after this stop.
+        standaloneGeneration.incrementAndGet()
+        standaloneJob?.cancel()
         isRunning = false
+        isMitmRunning = false
         engine.stop()
         Timber.d("Go tunnel engine stopped")
     }

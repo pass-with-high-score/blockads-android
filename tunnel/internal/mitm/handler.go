@@ -45,8 +45,6 @@ const (
 	peekTimeout = 10 * time.Second
 )
 
-// newMitmTcpHandler returns a TCP flow handler that MITMs HTTPS/HTTP
-// flows for eligible apps and passes every other flow through directly
 // NewMitmTcpHandler returns a TCP flow handler that MITMs HTTPS/HTTP
 // flows for eligible apps and passes every other flow through directly
 // with socket protection. The handler owns the flow for its lifetime.
@@ -59,131 +57,142 @@ func NewMitmTcpHandler(
 ) TcpFlowHandler {
 	return func(conn adapter.TCPConn) {
 		defer conn.Close()
+		HandleTcpFlow(conn, tcpFlowID(conn), certMgr, filter, blocker, uidr, protectFn)
+	}
+}
 
-		flow := tcpFlowID(conn)
-		uid := resolveFlowUID(uidr, ProtocolTCP, flow)
+// HandleTcpFlow runs the MITM decision pipeline for one accepted TCP
+// connection. Exported for the root-mode standalone listener, which has
+// no userspace TCP/IP stack and therefore builds its own FlowID from
+// SO_ORIGINAL_DST. The caller owns conn and must close it.
+func HandleTcpFlow(
+	conn net.Conn,
+	flow flowID,
+	certMgr *CertManager,
+	filter *MitmFilter,
+	blocker AdBlockChecker,
+	uidr UIDResolver,
+	protectFn func(fd int) bool,
+) {
+	uid := resolveFlowUID(uidr, ProtocolTCP, flow)
 
-		if flow.serverIP.IsUnspecified() {
-			return
-		}
+	if flow.serverIP.IsUnspecified() {
+		return
+	}
 
-		// Connection log (full-tunnel): surface every flow with its owning
-		// app + destination, so apps that barely use DNS (Telegram/WhatsApp
-		// → hard-coded IPs) are visible in the log screen.
-		if blocker != nil {
-			blocker.LogConnection(flow, ProtocolTCP)
-		}
+	// Connection log (full-tunnel): surface every flow with its owning
+	// app + destination, so apps that barely use DNS (Telegram/WhatsApp
+	// → hard-coded IPs) are visible in the log screen.
+	if blocker != nil {
+		blocker.LogConnection(flow, ProtocolTCP)
+	}
 
-		// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
-		// system's Private DNS resolver probes DoT against our fake DNS
-		// server (10.0.0.1 / fd00::1), which isn't a real host — the dial
-		// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
-		// system's Private DNS resolver probes DoT against our fake DNS
-		// server (100.64.100.1 / fd00::1), which isn't a real host — the dial
-		// would hang for flowDialTimeout (10s) and stall all DNS. Close
-		// immediately so Android falls back to plaintext DNS on port 53,
-		// which the engine intercepts and filters. Mirrors the fake-DNS /
-		// force-port-53 approach already used in WireGuard mode.
-		if flow.serverPort == 853 {
-			return
-		}
+	// Gate -1 — DNS-over-TLS (port 853). Under full-tunnel routing the
+	// system's Private DNS resolver probes DoT against our fake DNS
+	// server (100.64.100.1 / fd00::1), which isn't a real host — the dial
+	// would hang for flowDialTimeout (10s) and stall all DNS. Close
+	// immediately so Android falls back to plaintext DNS on port 53,
+	// which the engine intercepts and filters. Mirrors the fake-DNS /
+	// force-port-53 approach already used in WireGuard mode.
+	if flow.serverPort == 853 {
+		return
+	}
 
-		// Never attempt to dial our virtual TUN DNS IPs on non-DNS ports
-		s := flow.serverIP.String()
-		if s == "100.64.100.1" || s == "fd00::1" || s == "192.0.2.2" || s == "2001:db8:1111::2" {
-			return
-		}
+	// Never attempt to dial our virtual TUN DNS IPs on non-DNS ports
+	s := flow.serverIP.String()
+	if s == "100.64.100.1" || s == "fd00::1" || s == "192.0.2.2" || s == "2001:db8:1111::2" {
+		return
+	}
 
-		// Gate -1.5 — Hardcoded DoH Direct-IP (port 443). If DoH/DoT blocking is enabled
-		// and an app tries to connect directly to known public DoH server IPs,
-		// close immediately so it falls back to system DNS on port 53.
-		if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 443 && IsKnownPublicDoHIP(flow.serverIP) {
-			return
-		}
+	// Gate -1.5 — Hardcoded DoH Direct-IP (port 443). If DoH/DoT blocking is enabled
+	// and an app tries to connect directly to known public DoH server IPs,
+	// close immediately so it falls back to system DNS on port 53.
+	if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 443 && IsKnownPublicDoHIP(flow.serverIP) {
+		return
+	}
 
-		// Gate -1.6 — Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if blocker != nil && blocker.IsDomainBlocked(flow.serverIP.String()) {
-			return
-		}
+	// Gate -1.6 — Ruleset IP rules (e.g. IP-CIDR, REJECT)
+	if blocker != nil && blocker.IsDomainBlocked(flow.serverIP.String()) {
+		return
+	}
 
-		// Gate 0 — never MITM private / loopback destinations. These
-		// are local services (LAN printers, router admin pages) that
-		// often have self-signed certs or none at all.
-		if isLoopbackOrInternal(flow.serverIP.String()) {
-			relayDirectFromFlow(conn, flow, blocker, protectFn)
-			return
-		}
+	// Gate 0 — never MITM private / loopback destinations. These
+	// are local services (LAN printers, router admin pages) that
+	// often have self-signed certs or none at all.
+	if isLoopbackOrInternal(flow.serverIP.String()) {
+		relayDirectFromFlow(conn, flow, blocker, protectFn)
+		return
+	}
 
-		// Gate 1 — only attempt MITM on HTTP/HTTPS well-known ports.
-		if flow.serverPort != 443 && flow.serverPort != 80 {
-			relayDirectFromFlow(conn, flow, blocker, protectFn)
-			return
-		}
+	// Gate 1 — only attempt MITM on HTTP/HTTPS well-known ports.
+	if flow.serverPort != 443 && flow.serverPort != 80 {
+		relayDirectFromFlow(conn, flow, blocker, protectFn)
+		return
+	}
 
-		// Gate 2 — peek first bytes to classify and extract SNI / Host.
-		peeked, peekedReader, err := peekFlow(conn, peekSize, peekTimeout)
-		if err != nil || len(peeked) == 0 {
-			return
-		}
+	// Gate 2 — peek first bytes to classify and extract SNI / Host.
+	peeked, peekedReader, err := peekFlow(conn, peekSize, peekTimeout)
+	if err != nil || len(peeked) == 0 {
+		return
+	}
 
-		sni := ""
-		var classification flowClass
-		if len(peeked) >= 3 && peeked[0] == 0x16 && peeked[1] == 0x03 {
-			classification = classTLS
-			sni = parseClientHelloSNI(peeked)
-		} else if looksLikeHTTPRequest(peeked) {
-			classification = classHTTP
-			sni = parseHTTPHost(peeked)
-		} else {
-			relayDirectPeeked(conn, peekedReader, flow, "", blocker, protectFn)
-			return
-		}
+	sni := ""
+	var classification flowClass
+	if len(peeked) >= 3 && peeked[0] == 0x16 && peeked[1] == 0x03 {
+		classification = classTLS
+		sni = parseClientHelloSNI(peeked)
+	} else if looksLikeHTTPRequest(peeked) {
+		classification = classHTTP
+		sni = parseHTTPHost(peeked)
+	} else {
+		relayDirectPeeked(conn, peekedReader, flow, "", blocker, protectFn)
+		return
+	}
 
-		hostname := sni
-		if hostname == "" {
-			hostname = flow.serverIP.String()
-		}
-		hostname = strings.ToLower(strings.TrimSpace(hostname))
+	hostname := sni
+	if hostname == "" {
+		hostname = flow.serverIP.String()
+	}
+	hostname = strings.ToLower(strings.TrimSpace(hostname))
 
-		// Gate 3 — local asset server (local.pwhs.app).
-		// Always intercepted and served locally from memory regardless of UID allowlist.
-		if IsLocalAssetHost(hostname) {
-			if classification == classTLS {
-				serveLocalAssetTLS(conn, peekedReader, certMgr, hostname)
-			} else {
-				serveLocalAssetPlaintext(conn, peekedReader)
-			}
-			return
-		}
-
-		// Gate 4 — ad-block blocker (by SNI / Host).
-		// Must run BEFORE browser UID allowlist check so ad/tracker domains
-		// are blocked for ALL apps (both browsers and non-browsers like SayDuo).
-		if blocker != nil && blocker.IsDomainBlocked(hostname) {
-			return
-		}
-
-		// Gate 5 — browser allowlist (UID). When Kotlin has configured
-		// an allowlist, non-allowed UIDs get passthrough (no MITM decryption / cosmetic injection).
-		// If UID is unknown (API < 29, resolver failure), err on the safe side:
-		// passthrough rather than MITM an unknown app.
-		if filter.HasAllowedUIDs() && (uid == UIDUnknown || !filter.IsUIDAllowed(uid)) {
-			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
-			return
-		}
-
-		// Gate 6 — sensitive / cert-pinned domain.
-		if !filter.IsInterceptionAllowed(hostname) {
-			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
-			return
-		}
-
-		// Gate 7 — MITM.
+	// Gate 3 — local asset server (local.pwhs.app).
+	// Always intercepted and served locally from memory regardless of UID allowlist.
+	if IsLocalAssetHost(hostname) {
 		if classification == classTLS {
-			mitmTLSFlow(conn, peekedReader, certMgr, filter, blocker, hostname, flow, protectFn)
+			serveLocalAssetTLS(conn, peekedReader, certMgr, hostname)
 		} else {
-			mitmHTTPFlow(conn, peekedReader, filter, blocker, hostname, flow, protectFn)
+			serveLocalAssetPlaintext(conn, peekedReader)
 		}
+		return
+	}
+
+	// Gate 4 — ad-block blocker (by SNI / Host).
+	// Must run BEFORE browser UID allowlist check so ad/tracker domains
+	// are blocked for ALL apps (both browsers and non-browsers like SayDuo).
+	if blocker != nil && blocker.IsDomainBlocked(hostname) {
+		return
+	}
+
+	// Gate 5 — browser allowlist (UID). When Kotlin has configured
+	// an allowlist, non-allowed UIDs get passthrough (no MITM decryption / cosmetic injection).
+	// If UID is unknown (API < 29, resolver failure), err on the safe side:
+	// passthrough rather than MITM an unknown app.
+	if filter.HasAllowedUIDs() && (uid == UIDUnknown || !filter.IsUIDAllowed(uid)) {
+		relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
+		return
+	}
+
+	// Gate 6 — sensitive / cert-pinned domain.
+	if !filter.IsInterceptionAllowed(hostname) {
+		relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
+		return
+	}
+
+	// Gate 7 — MITM.
+	if classification == classTLS {
+		mitmTLSFlow(conn, peekedReader, certMgr, filter, blocker, hostname, flow, protectFn)
+	} else {
+		mitmHTTPFlow(conn, peekedReader, filter, blocker, hostname, flow, protectFn)
 	}
 }
 
