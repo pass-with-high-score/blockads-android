@@ -52,6 +52,16 @@ class GoTunnelAdapter(
     private var isRunning = false
 
     /**
+     * True when the root-mode standalone MITM listener is accepting
+     * connections. RootProxyService installs the TCP 80/443 REDIRECT
+     * rules only while this is true, so a failed listener never
+     * black-holes the browser's traffic.
+     */
+    @Volatile
+    var isMitmRunning: Boolean = false
+        private set
+
+    /**
      * Configure the DNS settings for the Go engine.
      */
     fun configureDns(
@@ -365,13 +375,24 @@ class GoTunnelAdapter(
 
     /**
      * Start the Go engine in Standalone DNS server mode (for Root/Proxy Mode).
+     *
+     * When [mitmEnabled] is true, also start the transparent MITM listener
+     * on [mitmPort]. iptables REDIRECTs the selected browser UIDs' TCP
+     * 80/443 traffic there, so cosmetic CSS and scriptlets are injected in
+     * root mode without a VpnService.
      */
-    suspend fun startStandalone(port: Int): Boolean {
+    suspend fun startStandalone(
+        port: Int,
+        mitmEnabled: Boolean = false,
+        mitmPort: Int = 15354,
+        certDir: String = "",
+    ): Boolean {
         // Ensure any previous engine is fully stopped to release the port
         if (isRunning) {
             stop()
             delay(300) // Give OS time to release the socket
         }
+        isMitmRunning = false
 
         setupAppResolver()
         setupDomainChecker()
@@ -387,17 +408,31 @@ class GoTunnelAdapter(
 
         scope.launch(Dispatchers.IO) {
             try {
-                launch {
-                    delay(500)
-                    if (!deferred.isCompleted) {
-                        isRunning = true
-                        deferred.complete(true)
+                engine.startStandalone(port.toLong())
+
+                if (mitmEnabled && certDir.isNotEmpty()) {
+                    val caPem = engine.startStandaloneMitm(mitmPort.toLong(), certDir)
+                    if (caPem.isEmpty()) {
+                        isMitmRunning = false
+                        Timber.e("Root-mode MITM listener failed on port $mitmPort — HTTPS filtering disabled")
+                    } else {
+                        // Root mode gates interception with iptables owner
+                        // matches, not the VPN-mode UID allowlist. Clear any
+                        // allowlist left over from a previous full-tunnel run.
+                        engine.setMitmAllowedUIDs("")
+                        isMitmRunning = true
+                        Timber.d("Root-mode MITM listener started on 127.0.0.1:$mitmPort")
                     }
                 }
-                engine.startStandalone(port.toLong())
+
+                isRunning = true
+                if (!deferred.isCompleted) {
+                    deferred.complete(true)
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Go standalone engine crashed or failed to start")
                 isRunning = false
+                isMitmRunning = false
                 if (!deferred.isCompleted) {
                     deferred.complete(false)
                 }
@@ -422,6 +457,7 @@ class GoTunnelAdapter(
 
     fun stop() {
         isRunning = false
+        isMitmRunning = false
         engine.stop()
         Timber.d("Go tunnel engine stopped")
     }

@@ -124,6 +124,14 @@ class RootProxyService : Service() {
     @Volatile
     private var whitelistedUids: List<Int> = emptyList()
 
+    // Browser UIDs routed to the root-mode MITM listener (empty = HTTPS
+    // filtering off). Kept for watchdog re-apply.
+    @Volatile
+    private var mitmUids: List<Int> = emptyList()
+
+    @Volatile
+    private var blockQuic: Boolean = true
+
     @Volatile
     private var isRecordDnsLogsEnabled = true
 
@@ -238,13 +246,51 @@ class RootProxyService : Service() {
                     }
                 }.distinct()
 
+                // Root-mode HTTPS filtering: resolve the selected browsers
+                // to UIDs. Empty list keeps the DNS-only behavior.
+                val httpsFilteringEnabled = appPrefs.getHttpsFilteringEnabledSnapshot()
+                blockQuic = appPrefs.getFilterHttp3Snapshot()
+                mitmUids = if (httpsFilteringEnabled) {
+                    val selectedBrowsers = appPrefs.getSelectedBrowsersSnapshot()
+                        .ifEmpty { TunnelRuleLoader.loadPresetBrowsers(this@RootProxyService) }
+                    selectedBrowsers.mapNotNull { pkg ->
+                        runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull()
+                    }.distinct()
+                } else {
+                    emptyList()
+                }
+                if (mitmUids.isNotEmpty()) {
+                    Timber.d("Root-mode HTTPS filtering enabled for ${mitmUids.size} browser UID(s)")
+                }
+
                 // 3. Retry loop for Standalone mode and IPTables setup
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
                 val proxyStarted = RootProxyStartup.establish(
                     retryManager = { retryManager },
                     ensureRootShell = IptablesManager::ensureRootShell,
-                    startEngine = { goTunnelAdapter.startStandalone(port = 15353) },
-                    setupRules = { IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids) },
+                    startEngine = {
+                        goTunnelAdapter.startStandalone(
+                            port = 15353,
+                            mitmEnabled = mitmUids.isNotEmpty(),
+                            mitmPort = IptablesManager.LOCAL_MITM_PORT,
+                            certDir = filesDir.absolutePath,
+                        )
+                    },
+                    setupRules = {
+                        // Only redirect TCP 80/443 while the MITM listener
+                        // is actually accepting connections; otherwise the
+                        // browser would be sent to a dead port.
+                        val activeMitmUids = if (goTunnelAdapter.isMitmRunning) mitmUids else emptyList()
+                        if (mitmUids.isNotEmpty() && activeMitmUids.isEmpty()) {
+                            Timber.w("HTTPS filtering requested but MITM is not running — continuing DNS-only")
+                        }
+                        IptablesManager.setupRules(
+                            this@RootProxyService,
+                            whitelistUids = whitelistedUids,
+                            mitmUids = activeMitmUids,
+                            blockQuic = blockQuic,
+                        )
+                    },
                     stopEngine = { goTunnelAdapter.stop() },
                 )
 
@@ -384,7 +430,12 @@ class RootProxyService : Service() {
                 // For now, check if iptables rules are still active
                 if (!IptablesManager.isActive()) {
                     Timber.w("iptables rules disappeared — re-applying")
-                    IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids)
+                    IptablesManager.setupRules(
+                        this@RootProxyService,
+                        whitelistUids = whitelistedUids,
+                        mitmUids = if (goTunnelAdapter.isMitmRunning) mitmUids else emptyList(),
+                        blockQuic = blockQuic,
+                    )
                 }
             }
         }

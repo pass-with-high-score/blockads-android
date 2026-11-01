@@ -133,6 +133,27 @@ class RootProxyServiceShellTest {
     }
 
     @Test
+    fun `https filtering in root mode redirects the browser to the mitm listener`() {
+        shadowOf(app.packageManager).installPackage(PackageInfo().apply {
+            packageName = "com.android.chrome"
+            applicationInfo = ApplicationInfo().apply { packageName = "com.android.chrome"; uid = 10555 }
+        })
+        coEvery { prefs.getHttpsFilteringEnabledSnapshot() } returns true
+        every { prefs.getSelectedBrowsersSnapshot() } returns setOf("com.android.chrome")
+        coEvery { prefs.getFilterHttp3Snapshot() } returns true
+        every { engine.startStandaloneMitm(any(), any()) } returns "-----BEGIN CERTIFICATE-----"
+
+        startRunning()
+
+        verify { engine.startStandaloneMitm(15354L, app.filesDir.absolutePath) }
+        assertTrue(
+            shell.commands.containsAll(
+                IptablesManager.buildIpv4Commands(uid, true, emptyList(), listOf(10555), true)
+            )
+        )
+    }
+
+    @Test
     fun `stop tears the rules down and stops the engine`() {
         startRunning()
         command(RootProxyService.ACTION_STOP)

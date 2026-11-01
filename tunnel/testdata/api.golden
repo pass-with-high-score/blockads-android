@@ -129,6 +129,7 @@ type Engine struct
 	method Engine.StartFull(fd int, protector SocketProtector)
 	method Engine.StartStackMitm(certDir string) string
 	method Engine.StartStandalone(port int) error
+	method Engine.StartStandaloneMitm(port int, certDir string) string
 	method Engine.Stop()
 	method Engine.StopStackMitm()
 	method Engine.TestProxyDelay(protocol string, configJSON string, timeoutMs int) (int64, error)

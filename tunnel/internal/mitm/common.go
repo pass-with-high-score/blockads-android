@@ -71,6 +71,17 @@ type FlowID struct {
 
 type flowID = FlowID
 
+// NewFlowID builds a flow tuple for callers that don't have a userspace
+// stack endpoint (e.g. the root-mode standalone MITM listener).
+func NewFlowID(clientIP net.IP, clientPort uint16, serverIP net.IP, serverPort uint16) FlowID {
+	return FlowID{
+		clientIP:   clientIP,
+		clientPort: clientPort,
+		serverIP:   serverIP,
+		serverPort: serverPort,
+	}
+}
+
 func (f FlowID) ClientIP() net.IP   { return f.clientIP }
 func (f FlowID) ClientPort() uint16 { return f.clientPort }
 func (f FlowID) ServerIP() net.IP   { return f.serverIP }

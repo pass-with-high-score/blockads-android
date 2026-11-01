@@ -215,6 +215,9 @@ func (e *Engine) Stop() {
 	oldTcp6 := e.standaloneTcp6
 	e.standaloneTcp6 = nil
 
+	oldMitm := e.standaloneMitm
+	e.standaloneMitm = nil
+
 	e.mu.Unlock()
 
 	if oldUdp != nil {
@@ -228,6 +231,9 @@ func (e *Engine) Stop() {
 	}
 	if oldTcp6 != nil {
 		oldTcp6.Shutdown()
+	}
+	if oldMitm != nil {
+		oldMitm.close()
 	}
 	if oldResolver != nil {
 		oldResolver.Shutdown()

@@ -15,7 +15,8 @@ import timber.log.Timber
  *
  * Architecture:
  * - nat table:    REDIRECT port 53 → 15353 (DNS interception)
- * - filter table: DROP port 853 (block DoT to force plain DNS)
+ *                 REDIRECT browser TCP 80/443 → 15354 (root-mode HTTPS MITM)
+ * - filter table: REJECT port 853 (block DoT) and browser QUIC (UDP 443)
  * - settings:     Disable Android Private DNS (forces port 53 fallback)
  */
 object IptablesManager {
@@ -23,6 +24,7 @@ object IptablesManager {
     private const val CHAIN = "BLOCKADS_DNS"
     private const val CHAIN_FILTER = "BLOCKADS_DOT"
     private const val LOCAL_DNS_PORT = 15353
+    internal const val LOCAL_MITM_PORT = 15354
 
     @Volatile
     internal var shell: RootShell = LibsuRootShell
@@ -72,12 +74,18 @@ object IptablesManager {
      * @param whitelistUids UIDs of whitelisted apps whose DNS must bypass the
      *        redirect entirely — the Root-mode equivalent of VPN mode's
      *        addDisallowedApplication (#150)
+     * @param mitmUids Browser UIDs whose TCP 80/443 traffic must go to the
+     *        root-mode MITM listener (empty = HTTPS filtering off)
+     * @param blockQuic Reject browser QUIC (UDP 443) so HTTP/3 can't bypass
+     *        the MITM path
      * @return true if at least IPv4 rules succeeded
      */
     fun setupRules(
         context: Context,
         blockDoT: Boolean = true,
-        whitelistUids: Collection<Int> = emptyList()
+        whitelistUids: Collection<Int> = emptyList(),
+        mitmUids: Collection<Int> = emptyList(),
+        blockQuic: Boolean = true,
     ): Boolean {
         val uid = context.applicationInfo.uid
         Timber.d("Setting up iptables rules for UID=$uid, blockDoT=$blockDoT, whitelistUids=$whitelistUids")
@@ -99,7 +107,7 @@ object IptablesManager {
         // NOTE: We run each iptables command individually so that a single
         // failure (e.g. chain already exists) doesn't abort the entire setup.
         // ══════════════════════════════════════════════════════════════
-        val ipv4Commands = buildIpv4Commands(uid, blockDoT, whitelistUids)
+        val ipv4Commands = buildIpv4Commands(uid, blockDoT, whitelistUids, mitmUids, blockQuic)
 
         var ipv4Success = true
         for (cmd in ipv4Commands) {
@@ -120,7 +128,7 @@ object IptablesManager {
         // ══════════════════════════════════════════════════════════════
         // IPv6 — try independently, many Android kernels lack ip6tables nat
         // ══════════════════════════════════════════════════════════════
-        val ipv6Commands = buildIpv6Commands(uid, blockDoT, whitelistUids)
+        val ipv6Commands = buildIpv6Commands(uid, blockDoT, whitelistUids, mitmUids, blockQuic)
 
         for (cmd in ipv6Commands) {
             val result = shell.exec(cmd)
@@ -151,7 +159,13 @@ object IptablesManager {
         return true
     }
 
-    internal fun buildIpv4Commands(uid: Int, blockDoT: Boolean, whitelistUids: Collection<Int>): List<String> = buildList {
+    internal fun buildIpv4Commands(
+        uid: Int,
+        blockDoT: Boolean,
+        whitelistUids: Collection<Int>,
+        mitmUids: Collection<Int> = emptyList(),
+        blockQuic: Boolean = true,
+    ): List<String> = buildList {
         // Create chain (may fail if leftover — that's OK)
         add("iptables -t nat -N $CHAIN 2>/dev/null || true")
         // Skip our own app's traffic (prevents infinite loop)
@@ -164,22 +178,43 @@ object IptablesManager {
         add("iptables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
         // Redirect TCP DNS → local engine
         add("iptables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
+        // Root-mode HTTPS filtering: only the selected browser UIDs' TCP
+        // 80/443 goes to the MITM listener; every other app stays direct.
+        for (mUid in mitmUids) {
+            add("iptables -t nat -A $CHAIN -m owner --uid-owner $mUid -p tcp --dport 80 -j REDIRECT --to-ports $LOCAL_MITM_PORT")
+            add("iptables -t nat -A $CHAIN -m owner --uid-owner $mUid -p tcp --dport 443 -j REDIRECT --to-ports $LOCAL_MITM_PORT")
+        }
         // Hook into OUTPUT chain
         add("iptables -t nat -A OUTPUT -j $CHAIN")
 
-        if (blockDoT) {
-            // filter table — DROP port 853 (DoT)
+        if (blockDoT || mitmUids.isNotEmpty()) {
+            // filter table — DoT block + QUIC suppression
             add("iptables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
             add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
             for (wUid in whitelistUids) {
                 add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $wUid -j RETURN")
             }
-            add("iptables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
+            if (blockDoT) {
+                add("iptables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
+            }
+            if (blockQuic) {
+                // HTTP/3 bypasses the TCP MITM, so force browser QUIC back
+                // to TCP where cosmetic injection can run.
+                for (mUid in mitmUids) {
+                    add("iptables -t filter -A $CHAIN_FILTER -m owner --uid-owner $mUid -p udp --dport 443 -j REJECT")
+                }
+            }
             add("iptables -t filter -A OUTPUT -j $CHAIN_FILTER")
         }
     }
 
-    internal fun buildIpv6Commands(uid: Int, blockDoT: Boolean, whitelistUids: Collection<Int>): List<String> = buildList {
+    internal fun buildIpv6Commands(
+        uid: Int,
+        blockDoT: Boolean,
+        whitelistUids: Collection<Int>,
+        mitmUids: Collection<Int> = emptyList(),
+        blockQuic: Boolean = true,
+    ): List<String> = buildList {
         add("ip6tables -t nat -N $CHAIN 2>/dev/null || true")
         add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
         for (wUid in whitelistUids) {
@@ -189,13 +224,27 @@ object IptablesManager {
         add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
         add("ip6tables -t nat -A OUTPUT -j $CHAIN")
 
-        if (blockDoT) {
+        if (blockDoT || mitmUids.isNotEmpty()) {
             add("ip6tables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
             add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $uid -j RETURN")
             for (wUid in whitelistUids) {
                 add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $wUid -j RETURN")
             }
-            add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
+            if (blockDoT) {
+                add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
+            }
+            // Kernels without IP6_NF_NAT can't REDIRECT IPv6 to the MITM
+            // port. Rejecting v6 HTTP/HTTPS makes Happy Eyeballs fall back
+            // to the IPv4 path, which the nat chain does intercept.
+            for (mUid in mitmUids) {
+                add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $mUid -p tcp --dport 80 -j REJECT")
+                add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $mUid -p tcp --dport 443 -j REJECT")
+            }
+            if (blockQuic) {
+                for (mUid in mitmUids) {
+                    add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $mUid -p udp --dport 443 -j REJECT")
+                }
+            }
             add("ip6tables -t filter -A OUTPUT -j $CHAIN_FILTER")
         }
     }

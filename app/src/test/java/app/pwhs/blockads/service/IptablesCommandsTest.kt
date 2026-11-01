@@ -55,4 +55,69 @@ class IptablesCommandsTest {
             forced.any { it.endsWith(" opportunistic") }
         )
     }
+
+    @Test
+    fun `root mitm redirects selected browser tcp 80 and 443 to the mitm port`() {
+        val cmds = IptablesManager.buildIpv4Commands(
+            uid = 10123,
+            blockDoT = false,
+            whitelistUids = emptyList(),
+            mitmUids = listOf(10200),
+            blockQuic = true,
+        )
+        assertTrue(
+            cmds.contains(
+                "iptables -t nat -A BLOCKADS_DNS -m owner --uid-owner 10200 -p tcp --dport 80 -j REDIRECT --to-ports 15354"
+            )
+        )
+        assertTrue(
+            cmds.contains(
+                "iptables -t nat -A BLOCKADS_DNS -m owner --uid-owner 10200 -p tcp --dport 443 -j REDIRECT --to-ports 15354"
+            )
+        )
+        assertTrue(
+            cmds.contains(
+                "iptables -t filter -A BLOCKADS_DOT -m owner --uid-owner 10200 -p udp --dport 443 -j REJECT"
+            )
+        )
+    }
+
+    @Test
+    fun `root mitm leaves QUIC alone when http3 filtering is off`() {
+        val cmds = IptablesManager.buildIpv4Commands(
+            uid = 10123,
+            blockDoT = false,
+            whitelistUids = emptyList(),
+            mitmUids = listOf(10200),
+            blockQuic = false,
+        )
+        assertTrue(cmds.none { "udp --dport 443" in it })
+        assertTrue(cmds.contains("iptables -t filter -A OUTPUT -j BLOCKADS_DOT"))
+    }
+
+    @Test
+    fun `ipv6 rejects browser http and https to force the ipv4 mitm path`() {
+        val cmds = IptablesManager.buildIpv6Commands(
+            uid = 10123,
+            blockDoT = false,
+            whitelistUids = emptyList(),
+            mitmUids = listOf(10200),
+            blockQuic = true,
+        )
+        assertTrue(
+            cmds.contains(
+                "ip6tables -t filter -A BLOCKADS_DOT -m owner --uid-owner 10200 -p tcp --dport 80 -j REJECT"
+            )
+        )
+        assertTrue(
+            cmds.contains(
+                "ip6tables -t filter -A BLOCKADS_DOT -m owner --uid-owner 10200 -p tcp --dport 443 -j REJECT"
+            )
+        )
+        assertTrue(
+            cmds.contains(
+                "ip6tables -t filter -A BLOCKADS_DOT -m owner --uid-owner 10200 -p udp --dport 443 -j REJECT"
+            )
+        )
+    }
 }

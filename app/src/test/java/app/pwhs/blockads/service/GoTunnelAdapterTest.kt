@@ -181,6 +181,24 @@ class GoTunnelAdapterTest {
     }
 
     @Test
+    fun `standalone mitm start marks the listener running and clears the vpn allowlist`() = runBlocking {
+        every { f.engine.startStandaloneMitm(15354L, "/certs") } returns "-----BEGIN CERTIFICATE-----"
+
+        assertTrue(f.adapter.startStandalone(5353, mitmEnabled = true, mitmPort = 15354, certDir = "/certs"))
+        assertTrue(f.adapter.isMitmRunning)
+        verify { f.engine.setMitmAllowedUIDs("") }
+    }
+
+    @Test
+    fun `standalone mitm failure leaves redirects off`() = runBlocking {
+        every { f.engine.startStandaloneMitm(15354L, "/certs") } returns ""
+
+        assertTrue(f.adapter.startStandalone(5353, mitmEnabled = true, mitmPort = 15354, certDir = "/certs"))
+        assertFalse(f.adapter.isMitmRunning)
+        verify(exactly = 0) { f.engine.setMitmAllowedUIDs(any()) }
+    }
+
+    @Test
     fun `app resolver prefers package names and falls back to labels`() {
         f.adapter.start(f.tunFd)
         val resolver = f.appResolver.captured
