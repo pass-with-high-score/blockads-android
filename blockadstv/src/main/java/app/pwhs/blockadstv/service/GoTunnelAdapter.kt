@@ -117,9 +117,19 @@ class GoTunnelAdapter(
     fun start(
         vpnInterface: ParcelFileDescriptor,
         socketProtector: ((Int) -> Boolean)? = null,
+        proxyProtocol: String = "",
+        proxyConfigJson: String = "",
     ) {
         if (isRunning) return
         isRunning = true
+
+        if (proxyProtocol.isNotEmpty() && proxyConfigJson.isNotEmpty()) {
+            try {
+                engine.setProxyNodeConfig(proxyProtocol, proxyConfigJson)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to configure proxy node in Go engine")
+            }
+        }
 
         setupAppResolver()
         setupDomainChecker()
@@ -128,13 +138,62 @@ class GoTunnelAdapter(
         updateTries()
 
         val fd = vpnInterface.fd
-        Timber.d("Starting Go tunnel engine with fd=$fd")
+        Timber.d("Starting Go tunnel engine with fd=$fd, hasProxy=${proxyConfigJson.isNotEmpty()}")
 
         val protector = SocketProtector { fd ->
             socketProtector?.invoke(fd.toInt()) ?: false
         }
 
-        engine.start(fd.toLong(), protector, "")
+        if (proxyConfigJson.isNotEmpty()) {
+            engine.startFull(fd.toLong(), protector)
+        } else {
+            engine.start(fd.toLong(), protector, "")
+        }
+    }
+
+    suspend fun startStandalone(port: Int): Boolean {
+        if (isRunning) {
+            stop()
+            kotlinx.coroutines.delay(300)
+        }
+
+        setupAppResolver()
+        setupDomainChecker()
+        setupFirewallChecker()
+        setupLogCallback()
+        updateTries()
+
+        Timber.d("Starting TV Go tunnel engine in STANDALONE mode on port $port")
+        val deferred = kotlinx.coroutines.CompletableDeferred<Boolean>()
+
+        scope.launch(Dispatchers.IO) {
+            try {
+                launch {
+                    kotlinx.coroutines.delay(500)
+                    if (!deferred.isCompleted) {
+                        isRunning = true
+                        deferred.complete(true)
+                    }
+                }
+                engine.startStandalone(port.toLong())
+            } catch (e: Exception) {
+                Timber.e(e, "TV Go standalone engine crashed or failed to start")
+                isRunning = false
+                if (!deferred.isCompleted) {
+                    deferred.complete(false)
+                }
+            }
+        }
+
+        return try {
+            kotlinx.coroutines.withTimeout(2000) {
+                deferred.await()
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Timeout or error starting TV Go standalone engine")
+            isRunning = false
+            false
+        }
     }
 
     fun stop() {

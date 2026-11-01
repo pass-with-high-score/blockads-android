@@ -53,6 +53,7 @@ enum class TvScreen(
     Apps(R.string.nav_apps, R.drawable.ic_settings_whitelist_apps),
     Logs(R.string.nav_logs, R.drawable.ic_history),
     Dns(R.string.nav_dns, R.drawable.ic_dns),
+    Proxy(R.string.nav_proxy, R.drawable.ic_nav_proxy),
     Settings(R.string.nav_settings, R.drawable.ic_setting),
 }
 

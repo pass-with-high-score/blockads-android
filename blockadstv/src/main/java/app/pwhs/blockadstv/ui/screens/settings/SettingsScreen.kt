@@ -66,12 +66,30 @@ fun SettingsScreen(
     val appLanguage by tvPrefs.appLanguage.collectAsStateWithLifecycle(
         initialValue = TvPreferences.LANGUAGE_SYSTEM
     )
+    val routingMode by tvPrefs.routingMode.collectAsStateWithLifecycle(
+        initialValue = TvPreferences.ROUTING_MODE_DIRECT
+    )
 
     var isUpdatingFilters by remember { mutableStateOf(false) }
     var updateResult by remember { mutableStateOf<String?>(null) }
     var showResponseTypeDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showModeDialog by remember { mutableStateOf(false) }
+
+    if (showModeDialog) {
+        ModeSelectionDialog(
+            currentMode = routingMode,
+            onDismiss = { showModeDialog = false },
+            onSelect = { selectedMode ->
+                scope.launch {
+                    tvPrefs.setRoutingMode(selectedMode)
+                    app.pwhs.blockadstv.service.ServiceController.requestRestart(context)
+                }
+                showModeDialog = false
+            },
+        )
+    }
 
     if (showResponseTypeDialog) {
         ResponseTypeDialog(
@@ -155,6 +173,22 @@ fun SettingsScreen(
                     onClick = {
                         scope.launch { tvPrefs.setStartOnBoot(!startOnBoot) }
                     },
+                )
+            }
+
+            // Protection Mode
+            item {
+                SettingListItem(
+                    iconRes = R.drawable.ic_nav_proxy,
+                    title = stringResource(R.string.settings_mode_title),
+                    subtitle = when (routingMode) {
+                        TvPreferences.ROUTING_MODE_ROOT -> stringResource(R.string.proxy_mode_root)
+                        TvPreferences.ROUTING_MODE_PROXY_VPN -> stringResource(R.string.proxy_mode_proxy_vpn)
+                        else -> stringResource(R.string.proxy_mode_direct)
+                    },
+                    isToggle = false,
+                    isEnabled = false,
+                    onClick = { showModeDialog = true },
                 )
             }
 

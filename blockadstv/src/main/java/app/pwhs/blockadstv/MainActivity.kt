@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import app.pwhs.blockadstv.data.datastore.TvPreferences
+import app.pwhs.blockadstv.service.RootProxyService
+import app.pwhs.blockadstv.service.ServiceController
 import app.pwhs.blockadstv.service.TvVpnService
 import app.pwhs.blockadstv.ui.navigation.TvNavigationDrawer
 import app.pwhs.blockadstv.ui.navigation.TvScreen
@@ -26,6 +28,7 @@ import app.pwhs.blockadstv.ui.screens.dns.DnsSetupScreen
 import app.pwhs.blockadstv.ui.screens.filters.FiltersScreen
 import app.pwhs.blockadstv.ui.screens.home.HomeScreen
 import app.pwhs.blockadstv.ui.screens.logs.LogsScreen
+import app.pwhs.blockadstv.ui.screens.proxy.ProxyScreen
 import app.pwhs.blockadstv.ui.screens.rules.DomainRulesScreen
 import app.pwhs.blockadstv.ui.screens.settings.SettingsScreen
 import app.pwhs.blockadstv.ui.theme.BlockadsTheme
@@ -65,10 +68,21 @@ class MainActivity : AppCompatActivity() {
                     shape = RectangleShape,
                 ) {
                     BlockAdsTvApp(
-                        onRequestVpnPermission = { requestVpnPermission() },
-                        onStopVpn = { TvVpnService.stop(this@MainActivity) },
+                        onRequestVpnPermission = { requestProtectionToggle() },
+                        onStopVpn = { ServiceController.requestStop(this@MainActivity) },
                     )
                 }
+            }
+        }
+    }
+
+    private fun requestProtectionToggle() {
+        lifecycleScope.launch {
+            val mode = tvPrefs.getRoutingModeSnapshot()
+            if (mode == TvPreferences.ROUTING_MODE_ROOT) {
+                RootProxyService.start(this@MainActivity)
+            } else {
+                requestVpnPermission()
             }
         }
     }
@@ -104,6 +118,7 @@ fun BlockAdsTvApp(
             TvScreen.Apps -> WhitelistAppScreen()
             TvScreen.Logs -> LogsScreen()
             TvScreen.Dns -> DnsSetupScreen()
+            TvScreen.Proxy -> ProxyScreen()
             TvScreen.Settings -> SettingsScreen()
         }
     }

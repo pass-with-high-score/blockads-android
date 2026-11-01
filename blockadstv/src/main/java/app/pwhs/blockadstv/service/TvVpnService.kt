@@ -68,6 +68,17 @@ class TvVpnService : VpnService() {
             }
             context.startService(intent)
         }
+
+        fun requestRestart(context: Context) {
+            val s = _state.value
+            if (s == VpnState.RUNNING) {
+                stop(context)
+                val intent = Intent(context, TvVpnService::class.java).apply {
+                    action = ACTION_START
+                }
+                androidx.core.content.ContextCompat.startForegroundService(context, intent)
+            }
+        }
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -151,12 +162,18 @@ class TvVpnService : VpnService() {
                 val odohRelayUrl = tvPrefs.odohRelayUrl.first()
                 val dnsResponseType = tvPrefs.dnsResponseType.first()
                 val whitelistedApps = tvPrefs.getWhitelistedAppsSnapshot()
+                val routingMode = tvPrefs.getRoutingModeSnapshot()
+                val isProxyVpn = routingMode == TvPreferences.ROUTING_MODE_PROXY_VPN
+                val activeProxy = if (isProxyVpn) tvPrefs.getActiveProxyProfileSnapshot() else null
+                val proxyProtocol = activeProxy?.protocol?.value ?: ""
+                val proxyConfigJson = activeProxy?.toEngineJson() ?: ""
+
                 Timber.d("DNS: protocol=$dnsProtocol, primary=$upstreamDns, fallback=$fallbackDns")
-                Timber.d("Response type: $dnsResponseType, whitelisted apps: ${whitelistedApps.size}")
+                Timber.d("Response type: $dnsResponseType, routingMode: $routingMode, proxy: ${activeProxy?.displayName}")
 
                 // Phase 3: Establish VPN
-                Timber.d("Phase 3: Establishing VPN tunnel...")
-                val established = establishVpn(whitelistedApps)
+                Timber.d("Phase 3: Establishing VPN tunnel (isProxyVpn=$isProxyVpn)...")
+                val established = establishVpn(whitelistedApps, isProxyVpn)
                 if (!established) {
                     Timber.e("Failed to establish VPN")
                     stopVpn()
@@ -169,9 +186,10 @@ class TvVpnService : VpnService() {
 
                 withContext(Dispatchers.Main) {
                     val nm = getSystemService(NotificationManager::class.java)
+                    val title = if (isProxyVpn) "BlockAds TV Proxy Active" else "BlockAds TV Active"
                     nm.notify(
                         NOTIFICATION_ID,
-                        buildNotification("BlockAds TV Active", "$domainCount filter rules loaded")
+                        buildNotification(title, "$domainCount filter rules loaded")
                     )
                 }
 
@@ -232,6 +250,8 @@ class TvVpnService : VpnService() {
                         socketProtector = { fd ->
                             try { protect(fd) } catch (e: Exception) { false }
                         },
+                        proxyProtocol = proxyProtocol,
+                        proxyConfigJson = proxyConfigJson,
                     )
                 }
 
@@ -242,7 +262,7 @@ class TvVpnService : VpnService() {
         }
     }
 
-    private fun establishVpn(whitelistedApps: Set<String>): Boolean {
+    private fun establishVpn(whitelistedApps: Set<String>, isProxyVpn: Boolean): Boolean {
         if (VpnService.prepare(this) != null) {
             Timber.e("VPN not prepared or permission revoked")
             return false
@@ -250,15 +270,21 @@ class TvVpnService : VpnService() {
 
         return try {
             val builder = Builder()
-                .setSession("BlockAds TV")
+                .setSession(if (isProxyVpn) "BlockAds TV Proxy" else "BlockAds TV")
                 .addAddress("100.64.100.2", 32)
-                .addRoute("100.64.100.1", 32)
-                .addDnsServer("100.64.100.1")
                 .addAddress("fd00::2", 128)
-                .addRoute("fd00::1", 128)
+                .addDnsServer("100.64.100.1")
                 .addDnsServer("fd00::1")
                 .setBlocking(false)
                 .setMtu(1350)
+
+            if (isProxyVpn) {
+                builder.addRoute("0.0.0.0", 0)
+                builder.addRoute("::", 0)
+            } else {
+                builder.addRoute("100.64.100.1", 32)
+                builder.addRoute("fd00::1", 128)
+            }
 
             // Exclude our own app
             try {

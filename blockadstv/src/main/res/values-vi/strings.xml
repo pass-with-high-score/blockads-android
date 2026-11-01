@@ -7,6 +7,7 @@
     <string name="nav_apps">Ứng dụng</string>
     <string name="nav_logs">Nhật ký</string>
     <string name="nav_dns">DNS</string>
+    <string name="nav_proxy">Proxy</string>
     <string name="nav_settings">Cài đặt</string>
 
     <!-- Home -->
@@ -81,4 +82,33 @@
     <string name="settings_update_filters">Cập nhật danh sách bộ lọc</string>
     <string name="settings_update_filters_desc">Đồng bộ và tải bộ lọc mới nhất</string>
     <string name="settings_about">Giới thiệu</string>
+
+    <!-- VPN & Proxy -->
+    <string name="proxy_title">VPN &amp; Proxy</string>
+    <string name="proxy_desc">Cấu hình định tuyến proxy và chế độ root proxy</string>
+    <string name="proxy_mode_title">Chế độ bảo vệ</string>
+    <string name="proxy_mode_direct">VPN Tiêu chuẩn (Chỉ DNS)</string>
+    <string name="proxy_mode_direct_desc">Chặn quảng cáo qua VPN cục bộ, không định tuyến toàn bộ dữ liệu mạng</string>
+    <string name="proxy_mode_proxy_vpn">Proxy VPN</string>
+    <string name="proxy_mode_proxy_vpn_desc">Định tuyến dữ liệu TV qua máy chủ proxy được chọn và chặn quảng cáo</string>
+    <string name="proxy_mode_root">Root Proxy (iptables)</string>
+    <string name="proxy_mode_root_desc">Chuyển hướng cổng DNS 53 bằng iptables, không chiếm khe kết nối VPN của TV</string>
+    <string name="proxy_nodes_title">Danh sách máy chủ Proxy</string>
+    <string name="proxy_no_nodes">Chưa có máy chủ proxy nào. Thêm liên kết hoặc gói đăng ký để định tuyến qua proxy.</string>
+    <string name="proxy_add_node">Thêm liên kết</string>
+    <string name="proxy_add_subscription">Thêm gói đăng ký</string>
+    <string name="proxy_ping_all">Kiểm tra ping</string>
+    <string name="proxy_delete_node">Xóa</string>
+    <string name="proxy_select_node">Chọn</string>
+    <string name="proxy_active_badge">ĐANG DÙNG</string>
+    <string name="proxy_root_not_available">Quyền Root không khả dụng hoặc bị từ chối trên thiết bị này.</string>
+    <string name="proxy_dialog_add_title">Thêm máy chủ Proxy</string>
+    <string name="proxy_dialog_import_title">Nhập gói đăng ký</string>
+    <string name="proxy_dialog_link_hint">Dán URL cấu hình (vless://, vmess://, ss://, trojan://...)</string>
+    <string name="proxy_dialog_sub_hint">Dán URL gói đăng ký</string>
+    <string name="proxy_save">Lưu</string>
+    <string name="proxy_cancel">Hủy</string>
+    <string name="proxy_err_invalid_link">Liên kết proxy không hợp lệ hoặc giao thức không được hỗ trợ</string>
+    <string name="proxy_subscription_success">Đã nhập %1$d máy chủ proxy</string>
+    <string name="settings_mode_title">Chế độ bảo vệ</string>
 </resources>

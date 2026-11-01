@@ -68,6 +68,7 @@ fun HomeScreen(
     val uptimeMs by viewModel.protectionUptimeMs.collectAsStateWithLifecycle()
     val filterRuleCount by viewModel.filterRuleCount.collectAsStateWithLifecycle()
     val topBlocked by viewModel.topBlockedDomains.collectAsStateWithLifecycle()
+    val routingMode by viewModel.routingMode.collectAsStateWithLifecycle()
 
     val vpnEnabled = vpnState == VpnState.RUNNING
     val vpnConnecting = vpnState == VpnState.STARTING || vpnState == VpnState.STOPPING
@@ -108,6 +109,23 @@ fun HomeScreen(
                     else -> DangerRed
                 },
             )
+            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    text = when (routingMode) {
+                        app.pwhs.blockadstv.data.datastore.TvPreferences.ROUTING_MODE_ROOT -> "Root Proxy"
+                        app.pwhs.blockadstv.data.datastore.TvPreferences.ROUTING_MODE_PROXY_VPN -> "Proxy VPN"
+                        else -> "DNS VPN"
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AccentBlue,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))

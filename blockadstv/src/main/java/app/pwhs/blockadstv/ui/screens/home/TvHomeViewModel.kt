@@ -6,11 +6,14 @@ import app.pwhs.blockadstv.data.dao.DnsLogDao
 import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.entities.TopBlockedDomain
 import app.pwhs.blockadstv.data.repository.FilterListRepository
+import app.pwhs.blockadstv.service.RootProxyService
+import app.pwhs.blockadstv.service.ServiceController
 import app.pwhs.blockadstv.service.TvVpnService
 import app.pwhs.blockadstv.service.VpnState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -22,13 +25,26 @@ class TvHomeViewModel(
     private val filterRepo: FilterListRepository,
 ) : ViewModel() {
 
-    val vpnState: StateFlow<VpnState> = TvVpnService.state
+    val vpnState: StateFlow<VpnState> = combine(
+        TvVpnService.state,
+        RootProxyService.state,
+    ) { vpn, root ->
+        when {
+            vpn == VpnState.RUNNING || root == VpnState.RUNNING -> VpnState.RUNNING
+            vpn == VpnState.STARTING || root == VpnState.STARTING -> VpnState.STARTING
+            vpn == VpnState.STOPPING || root == VpnState.STOPPING -> VpnState.STOPPING
+            else -> VpnState.STOPPED
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnState.STOPPED)
 
-    val vpnEnabled: StateFlow<Boolean> = TvVpnService.state
+    val routingMode: StateFlow<String> = tvPrefs.routingMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TvPreferences.ROUTING_MODE_DIRECT)
+
+    val vpnEnabled: StateFlow<Boolean> = vpnState
         .map { it == VpnState.RUNNING }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val vpnConnecting: StateFlow<Boolean> = TvVpnService.state
+    val vpnConnecting: StateFlow<Boolean> = vpnState
         .map { it == VpnState.STARTING }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -58,8 +74,8 @@ class TvHomeViewModel(
 
     val protectionUptimeMs: StateFlow<Long> = flow {
         while (true) {
-            val ts = TvVpnService.startTimestamp
-            if (ts > 0 && TvVpnService.isRunning) {
+            val ts = ServiceController.activeStartTimestamp
+            if (ts > 0 && ServiceController.isRunning) {
                 emit(System.currentTimeMillis() - ts)
             } else {
                 emit(0L)

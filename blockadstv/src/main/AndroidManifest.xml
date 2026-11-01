@@ -50,6 +50,11 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".service.RootProxyService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="false">

@@ -6,6 +6,7 @@
     <string name="nav_apps">Apps</string>
     <string name="nav_logs">Logs</string>
     <string name="nav_dns">DNS</string>
+    <string name="nav_proxy">Proxy</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Home -->
@@ -80,4 +81,33 @@
     <string name="settings_update_filters">Update filter lists</string>
     <string name="settings_update_filters_desc">Tap to sync and download latest filters</string>
     <string name="settings_about">About</string>
+
+    <!-- VPN & Proxy -->
+    <string name="proxy_title">VPN &amp; Proxy</string>
+    <string name="proxy_desc">Configure proxy routing and root proxy mode</string>
+    <string name="proxy_mode_title">Protection Mode</string>
+    <string name="proxy_mode_direct">Standard VPN (DNS Only)</string>
+    <string name="proxy_mode_direct_desc">Blocks ads and trackers via local VPN without routing general traffic</string>
+    <string name="proxy_mode_proxy_vpn">Proxy VPN</string>
+    <string name="proxy_mode_proxy_vpn_desc">Routes TV traffic through selected proxy node with ad blocking</string>
+    <string name="proxy_mode_root">Root Proxy (iptables)</string>
+    <string name="proxy_mode_root_desc">Redirects DNS port 53 via iptables without taking the VPN slot</string>
+    <string name="proxy_nodes_title">Proxy Nodes</string>
+    <string name="proxy_no_nodes">No proxy nodes configured. Add a node or subscription to route traffic through proxy.</string>
+    <string name="proxy_add_node">Add Link</string>
+    <string name="proxy_add_subscription">Add Subscription</string>
+    <string name="proxy_ping_all">Ping All</string>
+    <string name="proxy_delete_node">Delete</string>
+    <string name="proxy_select_node">Select</string>
+    <string name="proxy_active_badge">ACTIVE</string>
+    <string name="proxy_root_not_available">Root access is not available or was denied on this device.</string>
+    <string name="proxy_dialog_add_title">Add Proxy Node</string>
+    <string name="proxy_dialog_import_title">Import Subscription</string>
+    <string name="proxy_dialog_link_hint">Paste node URL (vless://, vmess://, ss://, trojan://, etc.)</string>
+    <string name="proxy_dialog_sub_hint">Paste subscription URL</string>
+    <string name="proxy_save">Save</string>
+    <string name="proxy_cancel">Cancel</string>
+    <string name="proxy_err_invalid_link">Invalid proxy link or unsupported protocol</string>
+    <string name="proxy_subscription_success">Imported %1$d nodes</string>
+    <string name="settings_mode_title">Protection Mode</string>
 </resources>

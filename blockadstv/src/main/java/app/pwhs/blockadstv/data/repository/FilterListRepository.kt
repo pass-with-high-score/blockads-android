@@ -60,11 +60,22 @@ class FilterListRepository(
     fun hasCustomRule(domain: String): Long = -1L
     fun getBlockReason(domain: String): String = ""
 
-    suspend fun seedDefaultsIfNeeded() {
+    suspend fun seedDefaultsIfNeeded() = withContext(Dispatchers.IO) {
+        if (app.pwhs.blockadstv.BuildConfig.IS_STORE) {
+            val builtIns = filterListDao.getAllSync().filter { it.isBuiltIn }
+            if (builtIns.isNotEmpty()) {
+                builtIns.forEach { filterListDao.delete(it) }
+                Timber.d("Store flavor: deleted ${builtIns.size} built-in filters")
+            }
+            return@withContext
+        }
         fetchAndSyncRemoteFilterLists()
     }
 
     suspend fun fetchAndSyncRemoteFilterLists() = withContext(Dispatchers.IO) {
+        if (app.pwhs.blockadstv.BuildConfig.IS_STORE) {
+            return@withContext
+        }
         try {
             val channel = client.get(FILTER_LIST_JSON_URL).bodyAsChannel()
             val buffer = ByteArray(256 * 1024)

@@ -17,7 +17,7 @@ platform :android do
   desc "Build release APK"
   lane :build_release do
     gradle(
-      task: ":app:assembleFdroidRelease :blockadstv:assembleRelease"
+      task: ":app:assembleFdroidRelease :blockadstv:assembleFdroidRelease"
     )
   end
 

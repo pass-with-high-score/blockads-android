@@ -5,6 +5,22 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+// Copy fdroid release APKs to build/outputs/apk/release/ with legacy un-flavored
+// filenames (blockadstv-*-release*.apk) so F-Droid AutoUpdateMode and GitHub Release
+// deploy.yml continue to work without requiring changes in fdroiddata.
+val copyFdroidReleaseApks = tasks.register<Copy>("copyFdroidReleaseApks") {
+    from(layout.buildDirectory.dir("outputs/apk/fdroid/release")) {
+        include("*.apk")
+        rename { it.replace("blockadstv-fdroid-", "blockadstv-") }
+    }
+    into(layout.buildDirectory.dir("outputs/apk/release"))
+}
+
+tasks.matching { it.name == "assembleFdroidRelease" || it.name == "packageFdroidRelease" }.configureEach {
+    finalizedBy(copyFdroidReleaseApks)
 }
 
 android {
@@ -19,6 +35,18 @@ android {
         targetSdk = 36
         versionCode = 57
         versionName = "7.1.0"
+    }
+
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("fdroid") {
+            dimension = "distribution"
+            buildConfigField("Boolean", "IS_STORE", "false")
+        }
+        create("store") {
+            dimension = "distribution"
+            buildConfigField("Boolean", "IS_STORE", "true")
+        }
     }
 
     // Load signing config from key.properties (CI/CD)
@@ -142,6 +170,13 @@ dependencies {
 
     // Logging
     implementation(libs.timber)
+
+    // Kotlin Serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    // libsu — root shell access for iptables mode
+    implementation(libs.core)
+    implementation(libs.service)
 
     // Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -9,6 +9,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.pwhs.blockadstv.data.entities.DnsProtocol
+import app.pwhs.blockadstv.data.entities.ProxyProfile
+import app.pwhs.blockadstv.data.entities.ProxyProfileList
+import app.pwhs.blockadstv.data.entities.ProxySubscription
+import app.pwhs.blockadstv.data.entities.ProxySubscriptionList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -32,6 +36,14 @@ class TvPreferences(private val context: Context) {
         private val KEY_START_ON_BOOT = booleanPreferencesKey("start_on_boot")
         private val KEY_WHITELISTED_APPS = stringSetPreferencesKey("whitelisted_apps")
         private val KEY_FILTERS_DOWNLOADED = booleanPreferencesKey("filters_downloaded")
+        private val KEY_ROUTING_MODE = stringPreferencesKey("routing_mode")
+        private val KEY_PROXY_PROFILES_JSON = stringPreferencesKey("proxy_profiles_json")
+        private val KEY_ACTIVE_PROXY_PROFILE_ID = stringPreferencesKey("active_proxy_profile_id")
+        private val KEY_SUBSCRIPTIONS_JSON = stringPreferencesKey("proxy_subscriptions_json")
+
+        const val ROUTING_MODE_DIRECT = "direct"
+        const val ROUTING_MODE_PROXY_VPN = "proxy_vpn"
+        const val ROUTING_MODE_ROOT = "root"
 
         const val DEFAULT_UPSTREAM_DNS = "9.9.9.9"
         const val DEFAULT_FALLBACK_DNS = "94.140.14.14"
@@ -219,6 +231,127 @@ class TvPreferences(private val context: Context) {
     suspend fun setDnsResponseType(type: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_DNS_RESPONSE_TYPE] = type
+        }
+    }
+
+    val routingMode: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_ROUTING_MODE] ?: ROUTING_MODE_DIRECT
+    }
+
+    val proxyProfiles: Flow<List<ProxyProfile>> = context.dataStore.data.map { prefs ->
+        prefs[KEY_PROXY_PROFILES_JSON]?.let { json ->
+            ProxyProfileList.fromJson(json).profiles
+        } ?: emptyList()
+    }
+
+    val activeProxyProfileId: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_ACTIVE_PROXY_PROFILE_ID]
+    }
+
+    val activeProxyProfile: Flow<ProxyProfile?> = context.dataStore.data.map { prefs ->
+        val list = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+        val activeId = prefs[KEY_ACTIVE_PROXY_PROFILE_ID]
+        list.firstOrNull { it.id == activeId } ?: list.firstOrNull()
+    }
+
+    val proxySubscriptions: Flow<List<ProxySubscription>> = context.dataStore.data.map { prefs ->
+        prefs[KEY_SUBSCRIPTIONS_JSON]?.let { json ->
+            ProxySubscriptionList.fromJson(json).subscriptions
+        } ?: emptyList()
+    }
+
+    suspend fun setRoutingMode(mode: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ROUTING_MODE] = mode
+        }
+    }
+
+    suspend fun getRoutingModeSnapshot(): String = routingMode.first()
+
+    suspend fun getProxyProfilesSnapshot(): List<ProxyProfile> = proxyProfiles.first()
+
+    suspend fun getActiveProxyProfileSnapshot(): ProxyProfile? = activeProxyProfile.first()
+
+    suspend fun getProxySubscriptionsSnapshot(): List<ProxySubscription> = proxySubscriptions.first()
+
+    suspend fun setActiveProxyProfileId(id: String?) {
+        context.dataStore.edit { prefs ->
+            if (id != null) {
+                prefs[KEY_ACTIVE_PROXY_PROFILE_ID] = id
+            } else {
+                prefs.remove(KEY_ACTIVE_PROXY_PROFILE_ID)
+            }
+        }
+    }
+
+    suspend fun addProxyProfile(profile: ProxyProfile) {
+        context.dataStore.edit { prefs ->
+            val list = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+            val updated = list + profile
+            prefs[KEY_PROXY_PROFILES_JSON] = ProxyProfileList(updated).toJson()
+            if (prefs[KEY_ACTIVE_PROXY_PROFILE_ID] == null) {
+                prefs[KEY_ACTIVE_PROXY_PROFILE_ID] = profile.id
+            }
+        }
+    }
+
+    suspend fun updateProxyProfile(profile: ProxyProfile) {
+        context.dataStore.edit { prefs ->
+            val list = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+            val updated = list.map { if (it.id == profile.id) profile else it }
+            prefs[KEY_PROXY_PROFILES_JSON] = ProxyProfileList(updated).toJson()
+        }
+    }
+
+    suspend fun deleteProxyProfile(id: String) {
+        context.dataStore.edit { prefs ->
+            val list = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+            val updated = list.filter { it.id != id }
+            prefs[KEY_PROXY_PROFILES_JSON] = ProxyProfileList(updated).toJson()
+            if (prefs[KEY_ACTIVE_PROXY_PROFILE_ID] == id) {
+                val nextActive = updated.firstOrNull()?.id
+                if (nextActive != null) {
+                    prefs[KEY_ACTIVE_PROXY_PROFILE_ID] = nextActive
+                } else {
+                    prefs.remove(KEY_ACTIVE_PROXY_PROFILE_ID)
+                }
+            }
+        }
+    }
+
+    suspend fun syncSubscriptionProfiles(subscription: ProxySubscription, newProfiles: List<ProxyProfile>) {
+        context.dataStore.edit { prefs ->
+            val subs = prefs[KEY_SUBSCRIPTIONS_JSON]?.let { ProxySubscriptionList.fromJson(it).subscriptions } ?: emptyList()
+            val subUpdated = (subs.filter { it.id != subscription.id } + subscription)
+            prefs[KEY_SUBSCRIPTIONS_JSON] = ProxySubscriptionList(subUpdated).toJson()
+
+            val existing = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+            val otherProfiles = existing.filter { it.subscriptionId != subscription.id }
+            val attachedProfiles = newProfiles.map {
+                it.copy(subscriptionId = subscription.id, subscriptionUrl = subscription.url)
+            }
+            val merged = otherProfiles + attachedProfiles
+            prefs[KEY_PROXY_PROFILES_JSON] = ProxyProfileList(merged).toJson()
+
+            if (prefs[KEY_ACTIVE_PROXY_PROFILE_ID] == null && attachedProfiles.isNotEmpty()) {
+                prefs[KEY_ACTIVE_PROXY_PROFILE_ID] = attachedProfiles.first().id
+            }
+        }
+    }
+
+    suspend fun removeSubscription(id: String, deleteNodes: Boolean = true) {
+        context.dataStore.edit { prefs ->
+            val subs = prefs[KEY_SUBSCRIPTIONS_JSON]?.let { ProxySubscriptionList.fromJson(it).subscriptions } ?: emptyList()
+            prefs[KEY_SUBSCRIPTIONS_JSON] = ProxySubscriptionList(subs.filter { it.id != id }).toJson()
+
+            if (deleteNodes) {
+                val existing = prefs[KEY_PROXY_PROFILES_JSON]?.let { ProxyProfileList.fromJson(it).profiles } ?: emptyList()
+                val kept = existing.filter { it.subscriptionId != id }
+                prefs[KEY_PROXY_PROFILES_JSON] = ProxyProfileList(kept).toJson()
+                if (existing.any { it.id == prefs[KEY_ACTIVE_PROXY_PROFILE_ID] && it.subscriptionId == id }) {
+                    prefs.remove(KEY_ACTIVE_PROXY_PROFILE_ID)
+                }
+            }
         }
     }
 }
