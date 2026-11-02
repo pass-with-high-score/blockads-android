@@ -59,7 +59,7 @@
     <string name="settings_accent_color">Couleur d'accentuation</string>
     <string name="settings_accent_color_desc">Personnaliser la couleur principale de l'application</string>
     <string name="accent_dynamic">Dynamique (Material You)</string>
-    <string name="accent_dynamic_desc">Utilise les couleurs de votre fond d'écran</string>
+    <string name="accent_dynamic_desc" formatted="false">Utilise les couleurs de votre fond d'écran</string>
     <string name="settings_add_custom_filter">Ajouter une liste de filtres personnalisée</string>
     <string name="settings_updating">Mise à jour…</string>
     <string name="settings_update_all">Mettre à jour tous les filtres</string>
