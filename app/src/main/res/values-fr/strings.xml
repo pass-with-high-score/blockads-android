@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_tagline">Navigation sans publicité</string>
-    <string name="nav_home">Accueil</string>
-    <string name="nav_logs">Journaux</string>
-    <string name="nav_filter">Filtre</string>
-    <string name="nav_settings">Paramètres</string>
-    <string name="test_block_ads">Tester le blocage des publicités</string>
-    <string name="home_connecting_desc">Établissement de la connexion VPN…</string>
-    <string name="home_protected_desc">Votre appareil est protégé contre les publicités</string>
-    <string name="home_unprotected_desc">Appuyez sur le bouton pour activer le blocage des publicités</string>
-    <string name="home_block_rate">Taux de blocage</string>
-    <string name="home_filter_rules">Règles de filtrage</string>
-    <string name="home_recent_blocked">Récemment bloqués</string>
-    <string name="home_data_saved">Données économisées</string>
-    <string name="home_protection_uptime">Temps de fonctionnement</string>
-    <string name="home_chart_24h">24 heures</string>
-    <string name="home_chart_7d">7 jours</string>
-    <string name="home_top_blocked">Principaux domaines bloqués</string>
-    <string name="home_chart_no_data">Aucune donnée disponible</string>
-    <string name="cancel">Annuler</string>
-    <string name="nav_statistics">Statistiques</string>
-    <string name="open_settings">Ouvrir les paramètres</string>
-    <string name="accessibility_stat_card">%1$s : %2$s</string>
-    <string name="accessibility_navigate_back">Retour</string>
-    <string name="home_disconnecting_desc">Arrêt de la connexion VPN…</string>
-    <string name="home_connecting_desc_root">Établissement du Root Proxy…</string>
-    <string name="home_disconnecting_desc_root">Arrêt du Root Proxy…</string>
-    <string name="home_paused_trusted_short">En pause sur un réseau de confiance</string>
-    <string name="nav_browser">Navigateur</string>
-    <string name="home_downloaded">Téléchargé</string>
-    <string name="home_uploaded">Téléversé</string>
+    <string name="app_name" translatable="false">BlockAds</string>
+    <string name="app_tagline">Ad-Free Browsing</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_logs">Logs</string>
+    <string name="nav_filter">Filter</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="nav_settings">Settings</string>
+    <string name="test_block_ads">Test Ad Blocking</string>
+    <string name="home_connecting_desc">Establishing VPN connection…</string>
+    <string name="home_connecting_desc_root">Establishing Root Proxy…</string>
+    <string name="home_protected_desc">Your device is protected from ads</string>
+    <string name="home_unprotected_desc">Tap the button to enable ad blocking</string>
+    <string name="home_block_rate">Block Rate</string>
+    <string name="home_filter_rules">Filter Rules</string>
+    <string name="home_recent_blocked">Recently Blocked</string>
+    <string name="home_data_saved">Data Saved</string>
+    <string name="home_protection_uptime">Uptime</string>
+    <string name="home_downloaded">Downloaded</string>
+    <string name="home_uploaded">Uploaded</string>
+    <string name="home_chart_24h">24 Hours</string>
+    <string name="home_chart_7d">7 Days</string>
+    <string name="home_top_blocked">Top Blocked Domains</string>
+    <string name="home_chart_no_data">No data available</string>
+    <string name="home_paused_trusted_short">Paused on a trusted network</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok" translatable="false">OK</string>
+    <string name="nav_statistics">Stats</string>
+    <string name="nav_browser">Browser</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_navigate_back">Navigate back</string>
+    <string name="reddit_link" translatable="false">https://www.reddit.com/r/BlockAds/</string>
+    <string name="telegram_link" translatable="false">https://t.me/blockads_android</string>
+    <string name="test_block_link" translatable="false">https://adblock.turtlecute.org/</string>
+    <string name="home_disconnecting_desc">Stopping VPN connection…</string>
+    <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
 </resources>
