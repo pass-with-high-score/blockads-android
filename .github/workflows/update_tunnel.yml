@@ -81,7 +81,7 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23.5'
+          go-version: '1.26.1'
 
       - name: Test tunnel
         if: steps.version.outputs.publish == 'true'

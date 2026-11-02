@@ -1,9 +1,8 @@
 module github.com/nqmgaming/blockads-tunnel
 
-go 1.27
+go 1.26.1
 
 require (
-	github.com/amnezia-vpn/amneziawg-go v1.0.4
 	github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260828
 	github.com/apernet/hysteria/core/v2 v2.13.0
 	github.com/apernet/hysteria/extras/v2 v2.13.0
@@ -21,6 +20,7 @@ require (
 	github.com/xjasonlyu/tun2socks/v2 v2.6.0
 	golang.org/x/crypto v0.57.0
 	golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b
+	golang.org/x/net v0.58.0
 	golang.org/x/sys v0.48.0
 	gvisor.dev/gvisor v0.0.0-20250606233247-e3c4c4cad86f
 )
@@ -38,12 +38,9 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/stretchr/testify v1.12.1 // indirect
-	github.com/tevino/abool v1.2.0 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
