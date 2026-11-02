@@ -57,7 +57,7 @@
     <string name="settings_lang_fr" translatable="false">Français</string>
     <string name="settings_lang_kk" translatable="false">Қазақша</string>
     <string name="settings_accent_color">Accent Color</string>
-    <string name="settings_accent_color_desc">Customize the app\'s primary color</string>
+    <string name="settings_accent_color_desc">Customize the app primary color</string>
     <string name="accent_dynamic">Dynamic (Material You)</string>
     <string name="accent_dynamic_desc">Uses your wallpaper colors</string>
     <string name="settings_add_custom_filter">Add Custom Filter List</string>
@@ -68,13 +68,13 @@
     <string name="trusted_networks_toggle">Pause on trusted networks</string>
     <string name="trusted_networks_desc">BlockAds turns off on these Wi-Fi networks and back on when you leave.</string>
     <string name="trusted_networks_use_system_dns_toggle">Use system DNS on trusted networks</string>
-    <string name="trusted_networks_use_system_dns_desc">Keep ad blocking active but use the Wi-Fi network\'s local DNS server to resolve internal domains.</string>
+    <string name="trusted_networks_use_system_dns_desc">Keep ad blocking active but use the Wi-Fi network local DNS server to resolve internal domains.</string>
     <string name="trusted_networks_add_current">Add current Wi-Fi network</string>
     <string name="trusted_networks_no_wifi">Not connected to Wi-Fi (or location permission needed)</string>
     <string name="trusted_networks_list_header">Trusted Wi-Fi networks</string>
-    <string name="trusted_networks_empty">No trusted networks yet. Add the one you\'re on to pause BlockAds there.</string>
+    <string name="trusted_networks_empty">No trusted networks yet. Add the one you are on to pause BlockAds there.</string>
     <string name="trusted_networks_paused_title">Paused on trusted network</string>
-    <string name="trusted_networks_paused_text" formatted="false">BlockAds is paused on \&quot;%1$s\&quot; — it resumes automatically when you leave this network.</string>
+    <string name="trusted_networks_paused_text" formatted="false">BlockAds is paused on &quot;%1$s&quot; — it resumes automatically when you leave this network.</string>
     <string name="trusted_networks_paused_text_generic">BlockAds is paused on a trusted Wi-Fi network — it resumes automatically when you leave.</string>
     <string name="settings_whitelist_domains">Whitelisted Domains</string>
     <string name="settings_export">Export</string>
@@ -179,7 +179,7 @@
     <string name="milestone_channel_name">Milestones</string>
     <string name="milestone_channel_description">Achievements when you reach ad blocking milestones</string>
     <string name="milestone_title">🎉 Milestone Reached!</string>
-    <string name="milestone_text" formatted="false">You\'ve blocked %1$s ads! Keep it up!</string>
+    <string name="milestone_text" formatted="false">You have blocked %1$s ads! Keep it up!</string>
     <string name="milestone_sheet_title">Protection Milestone Reached!</string>
     <string name="milestone_sheet_subtitle" formatted="false">You have successfully blocked %1$s ads and trackers with BlockAds.</string>
     <string name="milestone_sheet_data_saved">Estimated Data Saved</string>
@@ -222,7 +222,7 @@
     <string name="dns_category_advanced_security">Advanced DNS Security</string>
     <string name="dns_block_doh_bypass_title">Block DNS-over-HTTPS (DoH) Bypass</string>
     <string name="dns_block_doh_bypass_desc">Prevent apps and browsers from bypassing local filtering using encrypted DoH/DoT</string>
-    <string name="dns_block_doh_bypass_notice">Note: If your browser (e.g. Chrome) shows a connection error (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), set \"Use secure DNS\" in your browser settings to \"Automatic\".</string>
+    <string name="dns_block_doh_bypass_notice">Note: If your browser (e.g. Chrome) shows a connection error (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), set &quot;Use secure DNS&quot; in your browser settings to &quot;Automatic&quot;.</string>
     <string name="dns_block_webrtc_leak_title">Block WebRTC IP Leak</string>
     <string name="dns_block_webrtc_leak_desc">Prevent websites and browsers from discovering your real IP and local network addresses via WebRTC STUN</string>
     <string name="dns_block_webrtc_leak_notice">Note: Blocking WebRTC STUN prevents IP leaks on leak-test and tracking sites, but may affect browser-based real-time video/voice calls (e.g. web Discord, Google Meet).</string>
@@ -273,7 +273,7 @@
     <string name="rule_docs_category_policy">Policy</string>
     <string name="rule_docs_example_label">Example:</string>
     <string name="rule_docs_matches_label">Matches:</string>
-    <string name="rule_docs_not_matches_label">Doesn\'t match:</string>
+    <string name="rule_docs_not_matches_label">Doesn match:</string>
     <string name="rule_docs_usage_label">Best for:</string>
 
     <!-- GeoIP Management -->
@@ -325,7 +325,7 @@
     <string name="routing_mode_no_proxy_profile">No server selected</string>
     <string name="routing_mode_configure_proxy">Configure</string>
     <string name="shadowsocks_delete_confirm_title">Delete Profile</string>
-    <string name="shadowsocks_delete_confirm_desc" formatted="false">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="shadowsocks_delete_confirm_desc" formatted="false">Are you sure you want to delete &quot;%1$s&quot;?</string>
     <string name="proxy_node_empty_title">No proxy nodes added</string>
     <string name="proxy_node_empty_desc">Add a proxy node link (VLESS, Trojan, Shadowsocks) to route traffic through an encrypted proxy.</string>
     <string name="proxy_node_add_node">Add Proxy Node</string>
@@ -409,7 +409,7 @@
     <string name="proxy_raw_json_toggle">Edit Raw Engine JSON</string>
     <string name="proxy_copy_link">Copy Share Link</string>
     <string name="proxy_link_copied">Link copied to clipboard</string>
-    <string name="proxy_save_success" formatted="false">Saved \'%1$s\'</string>
+    <string name="proxy_save_success" formatted="false">Saved &quot;%1$s&quot;</string>
     <string name="proxy_err_server_required">Server address is required</string>
     <string name="proxy_err_port_invalid">Invalid port (must be 1–65535)</string>
     <string name="proxy_err_uuid_required">UUID is required</string>
