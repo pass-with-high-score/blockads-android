@@ -15,7 +15,7 @@
     <string name="device_step_samsung_security_privacy">Sélectionner Sécurité et confidentialité</string>
     <string name="device_step_samsung_more_security">Faire défiler vers le bas et sélectionner Autres paramètres de sécurité</string>
     <string name="device_step_samsung_install_from_storage">Sélectionner Installer depuis le stockage de l'appareil</string>
-    <string name="device_step_samsung_ca_cert_confirm">Sélectionner Certificat CA et confirmer via \'Installer quand même\'</string>
+    <string name="device_step_samsung_ca_cert_confirm">Sélectionner Certificat CA et confirmer \'Installer quand même\'</string>
     <string name="device_step_select_downloaded_cert">Sélectionner le fichier BlockAds-RootCA.crt téléchargé</string>
     <string name="device_step_samsung_biometrics">Sélectionner Biométrie et sécurité</string>
     <string name="device_step_samsung_other_security">Sélectionner Autres paramètres de sécurité</string>
