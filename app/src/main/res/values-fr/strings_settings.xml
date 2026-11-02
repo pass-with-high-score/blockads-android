@@ -409,7 +409,7 @@
     <string name="proxy_raw_json_toggle">Modifier le JSON brut du moteur</string>
     <string name="proxy_copy_link">Copier le lien de partage</string>
     <string name="proxy_link_copied">Lien copié dans le presse-papiers</string>
-    <string name="proxy_save_success">'%1$s' enregistré</string>
+    <string name="proxy_save_success">"%1$s" enregistré</string>
     <string name="proxy_err_server_required">L\'adresse du serveur est requise</string>
     <string name="proxy_err_port_invalid">Port invalide (doit être entre 1 et 65535)</string>
     <string name="proxy_err_uuid_required">L\'UUID est requis</string>
