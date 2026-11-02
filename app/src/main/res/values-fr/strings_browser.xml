@@ -1,75 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="browser_omnibox_hint">Rechercher ou saisir une URL</string>
-    <string name="browser_action_navigate_back">Retour</string>
-    <string name="browser_action_home">Accueil</string>
-    <string name="browser_action_pip">Vidéo flottante (PiP)</string>
+    <!-- Browser Navigation & Bottom Bar -->
+    <string name="browser_omnibox_hint">Search or type URL</string>
+    <string name="browser_action_navigate_back">Navigate back</string>
+    <string name="browser_action_home">Home</string>
+    <string name="browser_action_pip">Floating video</string>
     <string name="browser_action_menu">Menu</string>
-    <string name="browser_action_close">Fermer</string>
-    <string name="browser_home_protecting">Protégé</string>
-    <string name="browser_home_hero_tagline">Navigation sans pub • Lecture vidéo en arrière-plan</string>
-    <string name="browser_home_search_hint">Rechercher ou saisir une adresse web…</string>
-    <string name="browser_home_banner_title">Blocage des pubs &amp; Vidéo en arrière-plan</string>
-    <string name="browser_home_banner_subtitle">Filtre les pubs vidéo, popups &amp; supporte la lecture en PiP</string>
-    <string name="browser_search_input_hint">Saisir des mots-clés ou une adresse web…</string>
-    <string name="browser_search_visit_site">Accéder au site</string>
-    <string name="browser_search_with_engine">Rechercher avec %1$s</string>
-    <string name="browser_search_popular_shortcuts">Raccourcis populaires</string>
-    <string name="browser_bento_privacy_header">Protection de la vie privée &amp; Filtrage</string>
-    <string name="browser_blocked_badge">BLOQUÉ</string>
-    <string name="browser_check_rule_updates">Vérifier les règles</string>
-    <string name="browser_ads_and_trackers">Publicités &amp; Traqueurs</string>
-    <string name="browser_rule_stats_format">Règle v%1$d • %2$s</string>
-    <string name="browser_rule_stats_domains">%1$d domaines</string>
-    <string name="browser_rule_stats_local_db">Base locale</string>
-    <string name="browser_adblock_title">Blocage des pubs</string>
-    <string name="browser_status_active">Activé</string>
-    <string name="browser_status_paused">En pause</string>
-    <string name="browser_popup_title">Bloqueur de popups</string>
-    <string name="browser_desktop_title">Version ordinateur</string>
-    <string name="browser_desktop_active">User-Agent ordinateur actif</string>
-    <string name="browser_desktop_inactive">Vue mobile</string>
-    <string name="browser_pip_mode_pip">Image dans l\'image (PiP)</string>
-    <string name="browser_pip_mode_audio">Audio en arrière-plan</string>
-    <string name="browser_pip_desc_pip">Ouvrir automatiquement la vidéo flottante en quittant l\'application</string>
-    <string name="browser_pip_desc_audio">Lire l\'audio uniquement via les notifications en quittant</string>
-    <string name="browser_pip_card_title">Vidéo Image dans l\'image (PiP)</string>
-    <string name="browser_pip_card_subtitle">Regardez vos vidéos en multitâche dans une mini-fenêtre</string>
-    <string name="browser_pip_card_btn">ACTIVER</string>
-    <string name="browser_action_clear_cache">Vider le cache</string>
-    <string name="browser_action_share">Partager</string>
-    <string name="browser_action_open_external">Ouvrir dans l\'application</string>
-    <string name="browser_pick_element_title">Bloquer un élément</string>
-    <string name="browser_pick_element_desc">Touchez pour masquer une publicité ou un élément indésirable</string>
-    <string name="browser_manage_rules_title">Gérer les règles d\'éléments</string>
-    <string name="browser_manage_rules_desc">Consultez et supprimez vos éléments bloqués</string>
-    <string name="browser_exit_title">Fermer le navigateur</string>
-    <string name="browser_download_desc">Téléchargement du fichier %1$s…</string>
-    <string name="browser_download_started">Téléchargement commencé : %1$s</string>
-    <string name="browser_open_external_error">Impossible d\'ouvrir l\'application externe</string>
-    <string name="browser_element_blocked_on">Élément bloqué sur %1$s</string>
-    <string name="browser_rules_updated_format">Règles mises à jour vers v%1$d (%2$d domaines)</string>
-    <string name="browser_rules_already_latest">Les règles du navigateur sont déjà à jour (v%1$d)</string>
-    <string name="browser_rules_update_error">Échec du téléchargement des mises à jour : %1$s</string>
-    <string name="browser_rules_update_error_network">Erreur de connexion</string>
-    <string name="browser_data_cleared">Cookies et cache effacés</string>
-    <string name="browser_data_clear_error">Erreur lors de la suppression des données : %1$s</string>
-    <string name="element_rules_title">Règles d\'éléments</string>
-    <string name="element_rules_search_hint">Rechercher un domaine ou un sélecteur…</string>
-    <string name="element_rules_clear">Effacer</string>
-    <string name="element_rules_search">Rechercher</string>
-    <string name="element_rules_delete_all_title">Supprimer toutes les règles ?</string>
-    <string name="element_rules_delete_all_desc">Tous les éléments masqués sur %1$s seront à nouveau visibles.</string>
-    <string name="element_rules_delete">Supprimer</string>
-    <string name="element_rules_cancel">Annuler</string>
-    <string name="element_rules_hiding_count">%1$d élément(s) masqué(s)</string>
-    <string name="element_rules_domains_count">Appliqué sur %1$d site(s) web</string>
-    <string name="element_rules_delete_domain_content_desc">Tout supprimer pour ce domaine</string>
-    <string name="element_rules_delete_rule_content_desc">Supprimer la règle</string>
-    <string name="element_rules_empty_searching">Aucune règle trouvée</string>
-    <string name="element_rules_empty_normal">Aucune règle de blocage pour le moment</string>
-    <string name="element_rules_empty_searching_desc">Essayez de rechercher avec un autre mot-clé</string>
-    <string name="element_rules_empty_normal_desc">En naviguant, ouvrez le menu et choisissez \"Bloquer un élément\" pour sélectionner et masquer tout contenu indésirable.</string>
-    <string name="element_rules_toast_deleted">Règle supprimée</string>
-    <string name="element_rules_toast_deleted_all">Toutes les règles pour %1$s ont été supprimées</string>
+    <string name="browser_action_close">Close</string>
+
+    <!-- Browser Home / Shortcuts -->
+    <string name="browser_home_protecting">Protected</string>
+    <string name="browser_home_hero_tagline">Ad-free browsing • Background video playback</string>
+    <string name="browser_home_search_hint">Search or type web address…</string>
+    <string name="browser_home_banner_title">Ad Blocking &amp; Background Video</string>
+    <string name="browser_home_banner_subtitle">Auto-filters video ads, popups &amp; supports PiP playback</string>
+
+    <!-- Search Suggestion Sheet -->
+    <string name="browser_search_input_hint">Enter keywords or web address…</string>
+    <string name="browser_search_visit_site">Go to website</string>
+    <string name="browser_search_with_engine" formatted="false">Search with %1$s</string>
+    <string name="browser_search_popular_shortcuts">Popular Shortcuts</string>
+
+    <!-- Bento Menu Sheet -->
+    <string name="browser_bento_privacy_header">Privacy Protection &amp; Content Filtering</string>
+    <string name="browser_blocked_badge">BLOCKED</string>
+    <string name="browser_check_rule_updates">Check rule updates</string>
+    <string name="browser_ads_and_trackers">Ads &amp; Trackers</string>
+    <string name="browser_rule_stats_format" formatted="false">Rule v%1$d • %2$s</string>
+    <string name="browser_rule_stats_domains" formatted="false">%1$d domains</string>
+    <string name="browser_rule_stats_local_db">Local DB</string>
+
+    <string name="browser_adblock_title">Ad Blocking</string>
+    <string name="browser_status_active">Active</string>
+    <string name="browser_status_paused">Paused</string>
+
+    <string name="browser_popup_title">Popup Blocking</string>
+
+    <string name="browser_desktop_title">Desktop Site</string>
+    <string name="browser_desktop_active">Using desktop User-Agent</string>
+    <string name="browser_desktop_inactive">Mobile view</string>
+
+    <string name="browser_pip_mode_pip">Floating Video (PiP)</string>
+    <string name="browser_pip_mode_audio">Background Audio</string>
+    <string name="browser_pip_desc_pip">Automatically open floating video when leaving the app</string>
+    <string name="browser_pip_desc_audio">Play audio only via notification when leaving</string>
+
+    <string name="browser_pip_card_title">Floating Video (PiP)</string>
+    <string name="browser_pip_card_subtitle">Watch mini video while multitasking in other apps</string>
+    <string name="browser_pip_card_btn">ON</string>
+
+    <string name="browser_action_clear_cache">Clear cache</string>
+    <string name="browser_action_share">Share</string>
+    <string name="browser_action_open_external">Open external</string>
+
+    <string name="browser_pick_element_title">Block Element</string>
+    <string name="browser_pick_element_desc">Tap to hide ads or unwanted page elements</string>
+    <string name="browser_manage_rules_title">Manage Element Rules</string>
+    <string name="browser_manage_rules_desc">View and delete custom elements you have blocked</string>
+    <string name="browser_exit_title">Exit Browser</string>
+
+    <!-- Browser WebView & ViewModel Toasts -->
+    <string name="browser_download_desc" formatted="false">Downloading file %1$s…</string>
+    <string name="browser_download_started" formatted="false">Starting download: %1$s</string>
+    <string name="browser_open_external_error">Unable to open external app</string>
+    <string name="browser_element_blocked_on" formatted="false">Blocked element on %1$s</string>
+    <string name="browser_rules_updated_format" formatted="false">Filter rules updated to v%1$d (%2$d domains)</string>
+    <string name="browser_rules_already_latest" formatted="false">Browser filter rules are already up to date (v%1$d)</string>
+    <string name="browser_rules_update_error" formatted="false">Unable to download updates: %1$s</string>
+    <string name="browser_rules_update_error_network">Connection error</string>
+    <string name="browser_data_cleared">Cookies and cache cleared</string>
+    <string name="browser_data_clear_error" formatted="false">Error clearing data: %1$s</string>
+
+    <!-- Element Rules Screen -->
+    <string name="element_rules_title">Element Rules</string>
+    <string name="element_rules_search_hint">Search domain or selector…</string>
+    <string name="element_rules_clear">Clear</string>
+    <string name="element_rules_search">Search</string>
+    <string name="element_rules_delete_all_title">Delete all rules?</string>
+    <string name="element_rules_delete_all_desc" formatted="false">All hidden elements on %1$s will be visible again.</string>
+    <string name="element_rules_delete">Delete</string>
+    <string name="element_rules_cancel">Cancel</string>
+    <string name="element_rules_hiding_count" formatted="false">Hiding %1$d element(s)</string>
+    <string name="element_rules_domains_count" formatted="false">Applied across %1$d website(s)</string>
+    <string name="element_rules_delete_domain_content_desc">Delete all for this domain</string>
+    <string name="element_rules_delete_rule_content_desc">Delete rule</string>
+    <string name="element_rules_empty_searching">No rules found</string>
+    <string name="element_rules_empty_normal">No element blocking rules yet</string>
+    <string name="element_rules_empty_searching_desc">Try searching with a different keyword</string>
+    <string name="element_rules_empty_normal_desc">While browsing, open the menu and choose \"Block Element\" to select and hide any ad or unwanted element.</string>
+    <string name="element_rules_toast_deleted">Rule deleted</string>
+    <string name="element_rules_toast_deleted_all" formatted="false">Deleted all rules for %1$s</string>
 </resources>
