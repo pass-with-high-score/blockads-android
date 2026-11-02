@@ -149,7 +149,7 @@
     <string name="dns_security_title">Sécurité DNS (DNSSEC)</string>
     <string name="dns_security_authenticated">Protégé (DNSSEC validé)</string>
     <string name="dns_security_not_authenticated">Non validé</string>
-    <string name="dns_security_desc">Valide les signatures cryptographiques pour se protéger contre l'usurpation DNS et l'empoisonnement de cache.</string>
+    <string name="dns_security_desc">Valide les signatures cryptographiques pour se protéger contre l\'usurpation DNS et l\'empoisonnement de cache.</string>
     <string name="dns_leak_tab_overview">Aperçu</string>
     <string name="dns_leak_tab_dnssec">DNSSEC</string>
     <string name="dns_leak_tab_resolvers">Résolveurs</string>
@@ -175,7 +175,7 @@
     <string name="daily_summary_channel_name">Résumé quotidien</string>
     <string name="daily_summary_channel_description">Résumé de fin de journée du blocage des publicités</string>
     <string name="daily_summary_title">Résumé de protection quotidien</string>
-    <string name="daily_summary_text">Aujourd'hui, nous avons bloqué %1$d publicités pour vous !</string>
+    <string name="daily_summary_text">Aujourd\'hui, nous avons bloqué %1$d publicités pour vous !</string>
     <string name="milestone_channel_name">Jalons</string>
     <string name="milestone_channel_description">Récompenses lorsque vous atteignez des jalons de blocage de publicités</string>
     <string name="milestone_title">🎉 Jalon atteint !</string>
@@ -204,7 +204,7 @@
     <string name="settings_privacy_diagnostics_title">Confidentialité &amp; Diagnostics</string>
     <string name="settings_privacy_diagnostics_desc">Gérer les rapports de plantage et les journaux locaux</string>
     <string name="settings_crash_reporting_title">Rapports de plantage anonymes</string>
-    <string name="settings_crash_reporting_subtitle">Envoyer automatiquement les journaux d'erreurs pour nous aider à résoudre les problèmes. Aucune donnée personnelle n'est incluse.</string>
+    <string name="settings_crash_reporting_subtitle">Envoyer automatiquement les journaux d\'erreurs pour nous aider à résoudre les problèmes. Aucune donnée personnelle n\'est incluse.</string>
     <string name="settings_export_logs_title">Exporter les journaux locaux</string>
     <string name="settings_export_logs_subtitle">Partager les journaux de débogage hors ligne directement par e-mail, Telegram, etc.</string>
     <string name="settings_export_logs_chooser_title">Partager les journaux</string>
@@ -212,20 +212,20 @@
     <string name="split_dns_title">Zones DNS divisées</string>
     <string name="split_dns_description">Zones de domaines séparées par des virgules à résoudre via le DNS WireGuard au lieu du DNS amont (ex. internal,local,lan)</string>
     <string name="exclude_lan_title">Exclure le trafic LAN</string>
-    <string name="exclude_lan_description">Autoriser l'accès aux appareils du réseau local (imprimantes, NAS, serveurs locaux) lorsque WireGuard est actif. S'applique uniquement aux configurations à tunnel complet (AllowedIPs = 0.0.0.0/0).</string>
+    <string name="exclude_lan_description">Autoriser l\'accès aux appareils du réseau local (imprimantes, NAS, serveurs locaux) lorsque WireGuard est actif. S\'applique uniquement aux configurations à tunnel complet (AllowedIPs = 0.0.0.0/0).</string>
     <string name="allow_app_bypass_title">Autoriser les applications à contourner le VPN</string>
-    <string name="allow_app_bypass_description">Permettre aux applications qui épinglent une connexion à un réseau (Android Auto sans fil, casting, configuration d'appareil) de l'atteindre directement. Tout le reste passe toujours par le tunnel.</string>
+    <string name="allow_app_bypass_description">Permettre aux applications qui épinglent une connexion à un réseau (Android Auto sans fil, casting, configuration d\'appareil) de l\'atteindre directement. Tout le reste passe toujours par le tunnel.</string>
     <string name="settings_hide_from_recents_title">Masquer des applications récentes</string>
-    <string name="settings_hide_from_recents_subtitle">Masquer BlockAds de l'écran des applications récentes</string>
+    <string name="settings_hide_from_recents_subtitle">Masquer BlockAds de l\'écran des applications récentes</string>
 
     <!-- DNS Leak Protection / DoH Bypass -->
     <string name="dns_category_advanced_security">Sécurité DNS avancée</string>
     <string name="dns_block_doh_bypass_title">Bloquer le contournement DNS-over-HTTPS (DoH)</string>
-    <string name="dns_block_doh_bypass_desc">Empêcher les applications et navigateurs de contourner le filtrage local à l'aide de DoH/DoT chiffré</string>
+    <string name="dns_block_doh_bypass_desc">Empêcher les applications et navigateurs de contourner le filtrage local à l\'aide de DoH/DoT chiffré</string>
     <string name="dns_block_doh_bypass_notice">Remarque : Si votre navigateur (ex. Chrome) affiche une erreur de connexion (DNS_PROBE_FINISHED_BAD_SECURE_CONFIG), définissez \"Utiliser le DNS sécurisé\" sur \"Automatique\" dans les paramètres de votre navigateur.</string>
     <string name="dns_block_webrtc_leak_title">Bloquer les fuites IP WebRTC</string>
     <string name="dns_block_webrtc_leak_desc">Empêcher les sites web et navigateurs de découvrir votre véritable IP et vos adresses réseau locales via WebRTC STUN</string>
-    <string name="dns_block_webrtc_leak_notice">Remarque : Le blocage de WebRTC STUN évite les fuites d'IP sur les sites de test de fuite et de suivi, mais peut affecter les appels vidéo/vocaux en temps réel basés sur le navigateur (ex. Discord web, Google Meet).</string>
+    <string name="dns_block_webrtc_leak_notice">Remarque : Le blocage de WebRTC STUN évite les fuites d\'IP sur les sites de test de fuite et de suivi, mais peut affecter les appels vidéo/vocaux en temps réel basés sur le navigateur (ex. Discord web, Google Meet).</string>
 
     <!-- DNS Screen Refactor & ODoH Preparation -->
     <string name="dns_tab_builtin">Intégré</string>
@@ -242,7 +242,7 @@
     <string name="dns_custom_relay_hint">Proxy HTTP anonyme transmettant les requêtes chiffrées au résolveur</string>
     <string name="dns_custom_server_ip">Adresse du serveur</string>
     <string name="dns_custom_presets">Préréglages rapides</string>
-    <string name="dns_custom_active_badge">Utilisation d'un DNS personnalisé</string>
+    <string name="dns_custom_active_badge">Utilisation d\'un DNS personnalisé</string>
 
     <!-- Profile Rule Creation -->
     <string name="filter_rule_title">Règle de filtrage</string>
@@ -278,7 +278,7 @@
 
     <!-- GeoIP Management -->
     <string name="settings_geoip_title">Base de données GeoIP</string>
-    <string name="settings_geoip_subtitle">Recherche de localisation IP pour l'analyse des destinations &amp; les règles de routage</string>
+    <string name="settings_geoip_subtitle">Recherche de localisation IP pour l\'analyse des destinations &amp; les règles de routage</string>
     <string name="geoip_status_empty">Non téléchargé</string>
     <string name="geoip_status_downloading">Mise à jour...</string>
     <string name="geoip_records_count">%s plages IP</string>
@@ -294,7 +294,7 @@
     <string name="geoip_auto_update_desc">Vérifier et mettre à jour automatiquement la base de données chaque semaine en arrière-plan</string>
     <string name="geoip_custom_url_title">URL de source personnalisée</string>
     <string name="geoip_custom_url_desc">Laisser vide pour utiliser le miroir de publication officiel</string>
-    <string name="geoip_custom_url_dialog_title">Modifier l'URL de la source</string>
+    <string name="geoip_custom_url_dialog_title">Modifier l\'URL de la source</string>
     <string name="geoip_custom_url_hint">https://example.com/geoip_ipv4.bin.gz</string>
     <string name="geoip_source_credit">Source : sapics/ip-location-db (CC0 1.0 Universal)</string>
     <string name="geoip_import_success">%s plages IP importées avec succès</string>
@@ -303,7 +303,7 @@
     <string name="routing_mode_sheet_title">Mode de routage</string>
     <string name="routing_mode_sheet_desc">Choisissez comment le trafic est acheminé et filtré sur votre appareil.</string>
     <string name="routing_mode_local_vpn_title">VPN local</string>
-    <string name="routing_mode_local_vpn_desc" formatted="false">Filtrer les publicités directement sur l'appareil. Aucun root requis, 100 % privé.</string>
+    <string name="routing_mode_local_vpn_desc" formatted="false">Filtrer les publicités directement sur l\'appareil. Aucun root requis, 100 % privé.</string>
     <string name="routing_mode_root_proxy_title">Proxy Root</string>
     <string name="routing_mode_root_proxy_desc">Rediriger le DNS via iptables sans créer de connexion VPN.</string>
     <string name="routing_mode_recommended">Recommandé</string>
@@ -311,7 +311,7 @@
     <string name="routing_mode_root_unavailable">Nécessite les privilèges Root</string>
     <string name="routing_mode_no_ss_profile">Aucune clé Outline configurée</string>
     <string name="outline_dialog_title">Clé VPN Outline</string>
-    <string name="outline_dialog_desc">Collez une clé d'accès Outline (ss://...) pour vous connecter via un proxy chiffré.</string>
+    <string name="outline_dialog_desc">Collez une clé d\'accès Outline (ss://...) pour vous connecter via un proxy chiffré.</string>
     <string name="outline_dialog_hint" translatable="false">ss://...</string>
     <string name="outline_dialog_save">Enregistrer &amp; Se connecter</string>
     <string name="outline_dialog_paste">Coller depuis le presse-papiers</string>
@@ -330,9 +330,9 @@
     <string name="proxy_node_empty_desc">Ajoutez un lien de nœud proxy (VLESS, Trojan, Shadowsocks) pour acheminer le trafic via un proxy chiffré.</string>
     <string name="proxy_node_add_node">Ajouter un nœud proxy</string>
     <string name="proxy_node_dialog_title">Ajouter un nœud proxy / abonnement</string>
-    <string name="proxy_node_dialog_desc">Collez un lien proxy (VLESS, TUIC, MASQUE, Trojan, VMess, Shadowsocks, WireGuard, AmneziaWG) ou une URL d'abonnement</string>
+    <string name="proxy_node_dialog_desc">Collez un lien proxy (VLESS, TUIC, MASQUE, Trojan, VMess, Shadowsocks, WireGuard, AmneziaWG) ou une URL d\'abonnement</string>
     <string name="proxy_node_dialog_hint">vless://, tuic://, masque://, trojan://, ss://, wireguard://, vpn:// ou https://…</string>
-    <string name="proxy_node_dialog_invalid">Lien ou URL d'abonnement invalide. Pris en charge : vless, tuic, masque, trojan, vmess, ss, wireguard, amnezia ou abonnement http(s)://.</string>
+    <string name="proxy_node_dialog_invalid">Lien ou URL d\'abonnement invalide. Pris en charge : vless, tuic, masque, trojan, vmess, ss, wireguard, amnezia ou abonnement http(s)://.</string>
     <string name="proxy_ping_test_all">Vérifier le ping</string>
     <string name="proxy_ping_single">Vérifier le ping</string>
     <string name="proxy_ping_timeout">Délai dépassé</string>
@@ -355,7 +355,7 @@
     <string name="vpn_settings_section_general">Général</string>
     <string name="vpn_settings_section_routing">Routage &amp; Réseau</string>
     <string name="vpn_settings_section_security">Sécurité &amp; Fuites</string>
-    <string name="preferred_ip_type_title">Type d'IP préféré</string>
+    <string name="preferred_ip_type_title">Type d\'IP préféré</string>
     <string name="preferred_ip_type_desc">Sélectionner la préférence de version IP pour la connexion</string>
     <string name="preferred_ip_type_auto">Auto</string>
     <string name="preferred_ip_type_ipv4">IPv4</string>
@@ -366,7 +366,7 @@
     <string name="proxy_hero_network_cellular">Cellulaire</string>
     <string name="proxy_hero_network_ethernet">Ethernet</string>
     <string name="proxy_hero_network_disconnected">Hors ligne</string>
-    <string name="proxy_refresh_ip">Actualiser l'IP</string>
+    <string name="proxy_refresh_ip">Actualiser l\'IP</string>
     <string name="proxy_refreshing_ip">Actualisation…</string>
 
     <!-- Proxy Custom & Edit Config -->
@@ -374,7 +374,7 @@
     <string name="proxy_add_custom_title">Ajouter une configuration personnalisée</string>
     <string name="proxy_add_choice_title">Ajouter un proxy</string>
     <string name="proxy_add_choice_import">Importer depuis un lien / presse-papiers</string>
-    <string name="proxy_add_choice_import_desc">Coller vless://, vmess://, ss://, trojan:// ou une URL d'abonnement</string>
+    <string name="proxy_add_choice_import_desc">Coller vless://, vmess://, ss://, trojan:// ou une URL d\'abonnement</string>
     <string name="proxy_add_choice_custom">Configuration personnalisée manuelle</string>
     <string name="proxy_add_choice_custom_desc">Configurer VLESS, VMess, Shadowsocks, Trojan, Hysteria 2, TUIC</string>
     <string name="proxy_field_remark">Remarques / Nom du profil</string>
@@ -397,7 +397,7 @@
     <string name="proxy_field_spider_x">SpiderX (spx)</string>
     <string name="proxy_field_fingerprint">Empreinte (uTLS)</string>
     <string name="proxy_field_obfs">Obfuscation (obfs)</string>
-    <string name="proxy_field_obfs_password">Mot de passe d'obfuscation</string>
+    <string name="proxy_field_obfs_password">Mot de passe d\'obfuscation</string>
     <string name="proxy_field_congestion_control">Contrôle de congestion</string>
     <string name="proxy_field_udp_relay_mode">Mode de relais UDP</string>
     <string name="proxy_field_generate_uuid">Générer un UUID</string>
@@ -410,25 +410,24 @@
     <string name="proxy_copy_link">Copier le lien de partage</string>
     <string name="proxy_link_copied">Lien copié dans le presse-papiers</string>
     <string name="proxy_save_success">'%1$s' enregistré</string>
-    <string name="proxy_err_server_required">L'adresse du serveur est requise</string>
+    <string name="proxy_err_server_required">L\'adresse du serveur est requise</string>
     <string name="proxy_err_port_invalid">Port invalide (doit être entre 1 et 65535)</string>
-    <string name="proxy_err_uuid_required">L'UUID est requis</string>
+    <string name="proxy_err_uuid_required">L\'UUID est requis</string>
     <string name="proxy_err_password_required">Le mot de passe est requis</string>
     <string name="proxy_err_json_invalid">Format JSON invalide</string>
 
     <!-- Bottom Navigation Customization -->
     <string name="settings_bottom_nav_secondary_tab">Onglet de navigation secondaire</string>
-    <string name="settings_bottom_nav_secondary_tab_desc">Choisir d'afficher Filtre ou VPN dans la barre de navigation</string>
+    <string name="settings_bottom_nav_secondary_tab_desc">Choisir d\'afficher Filtre ou VPN dans la barre de navigation</string>
     <string name="settings_bottom_nav_tab_auto">Auto (Par défaut)</string>
     <string name="settings_bottom_nav_tab_filter">Configuration des filtres</string>
     <string name="settings_bottom_nav_tab_vpn">VPN &amp; Proxy</string>
 
     <!-- Rating & Review -->
     <string name="rate_app_title">Vous aimez BlockAds ?</string>
-    <string name="rate_app_desc" tools:ignore="PluralsCandidate">BlockAds a bloqué plus de %1$d publicités pour vous. Si vous trouvez l'application utile, prenez un moment pour nous attribuer 5 étoiles sur Google Play !</string>
+    <string name="rate_app_desc" tools:ignore="PluralsCandidate">BlockAds a bloqué plus de %1$d publicités pour vous. Si vous trouvez l\'application utile, prenez un moment pour nous attribuer 5 étoiles sur Google Play !</string>
     <string name="rate_app_action_rate">Noter 5 étoiles</string>
     <string name="rate_app_action_feedback">Envoyer un commentaire</string>
     <string name="rate_app_action_later">Plus tard</string>
     <string name="about_rate_app">Noter sur Google Play</string>
 </resources>
-
