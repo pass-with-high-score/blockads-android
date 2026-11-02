@@ -335,7 +335,7 @@ class HttpsFilteringViewModel(
         }
 
         // Load saved selected browsers from prefs
-        val savedSelected = appPrefs.getSelectedBrowsersSnapshot()
+        val savedSelected = appPrefs.getSelectedBrowsersOrNullSnapshot()
         val curatedBrowsers = try {
             getApplication<Application>().assets.open("preset/browsers.txt")
                 .bufferedReader()
@@ -355,7 +355,7 @@ class HttpsFilteringViewModel(
             .mapNotNull { pkgName ->
                 try {
                     val appInfo = pm.getApplicationInfo(pkgName, 0)
-                    val isSelected = if (savedSelected.isEmpty()) {
+                    val isSelected = if (savedSelected == null) {
                         pkgName in curatedBrowsers
                     } else {
                         pkgName in savedSelected

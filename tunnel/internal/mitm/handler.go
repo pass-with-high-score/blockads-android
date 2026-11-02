@@ -189,19 +189,17 @@ func NewMitmTcpHandler(
 
 // NewMitmUdpHandler wraps the protected UDP relay with QUIC suppression
 // for browser UIDs.
-func NewMitmUdpHandler(filter *MitmFilter, uidr UIDResolver, baseRelay UdpFlowHandler) UdpFlowHandler {
+func NewMitmUdpHandler(filter *MitmFilter, uidr UIDResolver, quicDrop func() bool, baseRelay UdpFlowHandler) UdpFlowHandler {
 	return func(conn adapter.UDPConn) {
 		flow := udpFlowID(conn)
 		if flow.serverPort == 443 {
-			if filter != nil && filter.HasAllowedUIDs() {
+			shouldDrop := quicDrop == nil || quicDrop()
+			if shouldDrop && filter != nil && filter.HasAllowedUIDs() {
 				uid := resolveFlowUID(uidr, ProtocolUDP, flow)
-				if uid == UIDUnknown || filter.IsUIDAllowed(uid) {
+				if uid != UIDUnknown && filter.IsUIDAllowed(uid) {
 					_ = conn.Close()
 					return
 				}
-			} else {
-				_ = conn.Close()
-				return
 			}
 		}
 		if baseRelay != nil {

@@ -137,6 +137,16 @@ type adBlockChecker = AdBlockChecker
 // HTML document, not a subresource. Used to decide when to strip
 // Accept-Encoding so responses arrive uncompressed for injection.
 func requestAcceptsHTML(req *http.Request) bool {
+	if req.Method == http.MethodHead || req.Method == http.MethodOptions {
+		return false
+	}
+	if req.Header.Get("Upgrade") != "" {
+		return false
+	}
+	dest := strings.ToLower(req.Header.Get("Sec-Fetch-Dest"))
+	if dest != "" && dest != "document" && dest != "iframe" && dest != "frame" {
+		return false
+	}
 	accept := strings.ToLower(req.Header.Get("Accept"))
 	if strings.Contains(accept, "text/html") {
 		return true
@@ -144,8 +154,11 @@ func requestAcceptsHTML(req *http.Request) bool {
 	if req.Header.Get("Upgrade-Insecure-Requests") == "1" {
 		return true
 	}
+	if strings.Contains(accept, "application/json") || strings.Contains(accept, "text/event-stream") {
+		return false
+	}
 	path := strings.ToLower(req.URL.Path)
-	return path == "" || path == "/" || strings.HasSuffix(path, ".html") || strings.HasSuffix(path, ".htm") || !strings.Contains(path, ".")
+	return path == "" || path == "/" || strings.HasSuffix(path, ".html") || strings.HasSuffix(path, ".htm") || (!strings.Contains(path, ".") && !strings.HasPrefix(path, "/api/"))
 }
 
 // wrapResponseForInjection prepares an HTML response for in-stream
@@ -159,6 +172,10 @@ func requestAcceptsHTML(req *http.Request) bool {
 // and injection is skipped — the page still renders correctly, just
 // without cosmetic filtering.
 func wrapResponseForInjection(resp *http.Response) {
+	if resp.StatusCode < 200 || resp.StatusCode == 204 || resp.StatusCode == 205 || resp.StatusCode == 304 ||
+		(resp.Request != nil && resp.Request.Method == http.MethodHead) || resp.Header.Get("Content-Length") == "0" {
+		return
+	}
 	encoding := strings.ToLower(strings.TrimSpace(resp.Header.Get("Content-Encoding")))
 
 	var bodyReader io.Reader

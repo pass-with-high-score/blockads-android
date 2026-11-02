@@ -257,13 +257,15 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { prefs -> prefs[KEY_SELECTED_BROWSERS] = packages }
     }
 
-    fun getSelectedBrowsersSnapshot(): Set<String> {
+    fun getSelectedBrowsersSnapshot(): Set<String> = getSelectedBrowsersOrNullSnapshot() ?: emptySet()
+
+    fun getSelectedBrowsersOrNullSnapshot(): Set<String>? {
         return try {
             runBlocking {
-                dataStore.data.first()[KEY_SELECTED_BROWSERS] ?: emptySet()
+                dataStore.data.first()[KEY_SELECTED_BROWSERS]
             }
         } catch (_: Exception) {
-            emptySet()
+            null
         }
     }
 

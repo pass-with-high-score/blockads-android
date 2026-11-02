@@ -338,3 +338,37 @@ func flateBytes(t *testing.T, b []byte) []byte {
 	w.Close()
 	return buf.Bytes()
 }
+
+func TestWrapResponseSkipsNonInjectable(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		status     int
+		method     string
+		headers    http.Header
+		shouldSkip bool
+	}{
+		{"304 Not Modified", 304, "GET", http.Header{"Content-Type": {"text/html"}}, true},
+		{"204 No Content", 204, "GET", http.Header{"Content-Type": {"text/html"}}, true},
+		{"205 Reset Content", 205, "GET", http.Header{"Content-Type": {"text/html"}}, true},
+		{"101 Switching Protocols", 101, "GET", http.Header{"Content-Type": {"text/html"}}, true},
+		{"HEAD request", 200, "HEAD", http.Header{"Content-Type": {"text/html"}}, true},
+		{"Content-Length 0", 200, "GET", http.Header{"Content-Type": {"text/html"}, "Content-Length": {"0"}}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req, _ := http.NewRequest(tc.method, "https://example.com/", nil)
+			resp := &http.Response{
+				StatusCode: tc.status,
+				Header:     tc.headers.Clone(),
+				Request:    req,
+				Body:       io.NopCloser(strings.NewReader("")),
+			}
+			wrapResponseForInjection(resp)
+			if len(resp.TransferEncoding) > 0 {
+				t.Fatalf("%s: TransferEncoding was modified to %v", tc.name, resp.TransferEncoding)
+			}
+			if resp.ContentLength == -1 {
+				t.Fatalf("%s: ContentLength was set to -1", tc.name)
+			}
+		})
+	}
+}

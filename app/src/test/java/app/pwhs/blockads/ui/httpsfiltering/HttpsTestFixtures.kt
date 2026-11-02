@@ -27,12 +27,12 @@ class HttpsTestFixtures(
     httpsEnabled: Boolean = false,
     filterHttp3: Boolean = true,
     routingMode: String = AppPreferences.ROUTING_MODE_DIRECT,
-    selectedBrowsers: Set<String> = emptySet(),
+    selectedBrowsers: Set<String>? = null,
 ) {
     val app: Application = ApplicationProvider.getApplicationContext()
     val engine: Engine = mockk(relaxed = true)
     val prefs: AppPreferences = mockk(relaxed = true)
-    var savedBrowsers: Set<String> = selectedBrowsers
+    var savedBrowsers: Set<String>? = selectedBrowsers
 
     init {
         mockkStatic(Tunnel::class)
@@ -44,7 +44,8 @@ class HttpsTestFixtures(
         coEvery { prefs.getRoutingModeSnapshot() } returns routingMode
         every { prefs.routingMode } returns flowOf(routingMode)
         every { prefs.httpsFilteringEnabled } returns flowOf(httpsEnabled)
-        every { prefs.getSelectedBrowsersSnapshot() } answers { savedBrowsers }
+        every { prefs.getSelectedBrowsersSnapshot() } answers { savedBrowsers ?: emptySet() }
+        every { prefs.getSelectedBrowsersOrNullSnapshot() } answers { savedBrowsers }
         coEvery { prefs.setSelectedBrowsers(any()) } answers { savedBrowsers = firstArg() }
         startKoin { modules(module { single { prefs } }) }
     }

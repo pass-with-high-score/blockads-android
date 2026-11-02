@@ -121,19 +121,21 @@ func TestMitmUdpHandler(t *testing.T) {
 		name      string
 		filter    *MitmFilter
 		uidr      UIDResolver
+		quicDrop  func() bool
 		port      uint16
 		wantRelay bool
 	}{
-		{"quic, no filter", nil, nil, 443, false},
-		{"quic, no browsers configured", filterWith(), nil, 443, false},
-		{"quic, browser uid", filterWith(10100), fixedUID(10100), 443, false},
-		{"quic, unknown uid", filterWith(10100), nil, 443, false},
-		{"quic, other app", filterWith(10100), fixedUID(10200), 443, true},
-		{"dns", filterWith(10100), fixedUID(10100), 53, true},
+		{"quic, no filter", nil, nil, nil, 443, true},
+		{"quic, no browsers configured", filterWith(), nil, nil, 443, true},
+		{"quic, browser uid", filterWith(10100), fixedUID(10100), nil, 443, false},
+		{"quic, unknown uid", filterWith(10100), nil, nil, 443, true},
+		{"quic, other app", filterWith(10100), fixedUID(10200), nil, 443, true},
+		{"quic, quicDrop disabled", filterWith(10100), fixedUID(10100), func() bool { return false }, 443, true},
+		{"dns", filterWith(10100), fixedUID(10100), nil, 53, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			relayed := false
-			h := NewMitmUdpHandler(tc.filter, tc.uidr, func(adapter.UDPConn) { relayed = true })
+			h := NewMitmUdpHandler(tc.filter, tc.uidr, tc.quicDrop, func(adapter.UDPConn) { relayed = true })
 			conn := &fakeUDPConn{id: endpointID(clientIP, net.ParseIP("93.184.216.34"), 5000, tc.port)}
 			h(conn)
 			if relayed != tc.wantRelay || conn.closed.Load() == tc.wantRelay {
@@ -142,7 +144,7 @@ func TestMitmUdpHandler(t *testing.T) {
 		})
 	}
 	// A nil base relay must not panic.
-	NewMitmUdpHandler(nil, nil, nil)(&fakeUDPConn{id: endpointID(clientIP, clientIP, 1, 53)})
+	NewMitmUdpHandler(nil, nil, nil, nil)(&fakeUDPConn{id: endpointID(clientIP, clientIP, 1, 53)})
 }
 
 func TestFlowIDAccessorsAndUID(t *testing.T) {

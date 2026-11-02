@@ -116,7 +116,6 @@ class GoTunnelAdapterTest {
         verify { f.engine.setMitmAllowedUIDs("10100") }
     }
 
-    @Ignore("an explicit empty browser selection is indistinguishable from 'no choice', so presets get MITM'd")
     @Test
     fun `an explicit empty browser selection MITMs nothing`() {
         f.installApp("com.android.chrome", 10_100)

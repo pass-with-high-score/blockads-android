@@ -29,6 +29,9 @@ type MitmFilter struct {
 	// Key = UID (int32), stored as int for map efficiency.
 	allowedUIDs map[int]bool
 
+	// uidFilterConfigured indicates whether an allowed UID set has been explicitly configured.
+	uidFilterConfigured bool
+
 	// permanentBlacklist contains domains where TLS handshake failed
 	// (cert pinning detected). These are auto-added and never MITM'd again.
 	permanentBlacklist map[string]bool
@@ -136,6 +139,14 @@ func (f *MitmFilter) SetAllowedUIDs(uids []int) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
+	if uids == nil {
+		f.uidFilterConfigured = false
+		f.allowedUIDs = nil
+		logf("MITM Filter: cleared allowed UIDs")
+		return
+	}
+
+	f.uidFilterConfigured = true
 	f.allowedUIDs = make(map[int]bool, len(uids))
 	for _, uid := range uids {
 		f.allowedUIDs[uid] = true
@@ -147,16 +158,19 @@ func (f *MitmFilter) SetAllowedUIDs(uids []int) {
 func (f *MitmFilter) IsUIDAllowed(uid int) bool {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
+	if !f.uidFilterConfigured {
+		return false
+	}
 	return f.allowedUIDs[uid]
 }
 
-// HasAllowedUIDs returns true if any browser UIDs have been configured.
+// HasAllowedUIDs returns true if browser UIDs have been configured (even if empty).
 // When true and we can't determine the source UID (Android 10+ SELinux),
 // we default to pass-through rather than MITM-ing unknown traffic.
 func (f *MitmFilter) HasAllowedUIDs() bool {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
-	return len(f.allowedUIDs) > 0
+	return f.uidFilterConfigured
 }
 
 // SetAdPathPatterns replaces the list of URL path patterns to block.

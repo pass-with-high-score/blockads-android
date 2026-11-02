@@ -220,6 +220,7 @@ class AppPreferences internal constructor(
     suspend fun getFilterHttp3Snapshot(): Boolean = vpnSecurity.getFilterHttp3Snapshot()
     suspend fun setSelectedBrowsers(packages: Set<String>) = vpnSecurity.setSelectedBrowsers(packages)
     fun getSelectedBrowsersSnapshot(): Set<String> = vpnSecurity.getSelectedBrowsersSnapshot()
+    fun getSelectedBrowsersOrNullSnapshot(): Set<String>? = vpnSecurity.getSelectedBrowsersOrNullSnapshot()
     suspend fun setCrashReportingEnabled(enabled: Boolean) = vpnSecurity.setCrashReportingEnabled(enabled)
     suspend fun setHideFromRecents(enabled: Boolean) = vpnSecurity.setHideFromRecents(enabled)
     suspend fun setTrustedSsids(ssids: Set<String>) = vpnSecurity.setTrustedSsids(ssids)

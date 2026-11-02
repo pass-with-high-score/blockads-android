@@ -12,6 +12,7 @@ import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.FirewallManager
 import app.pwhs.blockads.service.GoTunnelAdapter
 import app.pwhs.blockads.service.TrustedNetworkManager
+import app.pwhs.blockads.service.TunnelRuleLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -210,7 +211,7 @@ class VpnEngineCoordinator(
             ""
         }
 
-        val selectedBrowsers = appPrefs.getSelectedBrowsersSnapshot()
+        val selectedBrowsers = appPrefs.getSelectedBrowsersOrNullSnapshot()
         val filterHttp3 = httpsFilteringEnabled && appPrefs.getFilterHttp3Snapshot()
         val blockDohBypass = appPrefs.getBlockDohBypassSnapshot()
         val blockWebRtc = appPrefs.getBlockWebRtcLeakSnapshot()

@@ -37,6 +37,26 @@ const LocalAssetHost = "local.pwhs.app"
 // Returns true if the request was handled (caller should NOT forward upstream).
 // Returns false if the path is unknown (caller can 404).
 func ServeLocalAsset(req *http.Request) *http.Response {
+	if req.Method == http.MethodOptions {
+		return &http.Response{
+			StatusCode: http.StatusNoContent,
+			Status:     "204 No Content",
+			Proto:      "HTTP/1.1",
+			ProtoMajor: 1,
+			ProtoMinor: 1,
+			Header: http.Header{
+				"Access-Control-Allow-Origin":          []string{"*"},
+				"Access-Control-Allow-Methods":         []string{"GET, HEAD, OPTIONS"},
+				"Access-Control-Allow-Headers":         []string{"*"},
+				"Access-Control-Allow-Private-Network": []string{"true"},
+				"Access-Control-Max-Age":               []string{"86400"},
+				"X-BlockAds":                           []string{"local-asset-server"},
+			},
+			ContentLength: 0,
+			Request:       req,
+		}
+	}
+
 	path := req.URL.Path
 
 	switch {
@@ -216,11 +236,14 @@ func buildTextResponse(req *http.Request, status int, contentType, body string) 
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 		Header: http.Header{
-			"Content-Type":                []string{contentType},
-			"Content-Length":              []string{fmt.Sprintf("%d", len(body))},
-			"Cache-Control":              []string{"public, max-age=300"}, // 5min cache
-			"Access-Control-Allow-Origin": []string{"*"},
-			"X-BlockAds":                 []string{"local-asset-server"},
+			"Content-Type":                        []string{contentType},
+			"Content-Length":                      []string{fmt.Sprintf("%d", len(body))},
+			"Cache-Control":                       []string{"public, max-age=300"}, // 5min cache
+			"Access-Control-Allow-Origin":         []string{"*"},
+			"Access-Control-Allow-Methods":        []string{"GET, HEAD, OPTIONS"},
+			"Access-Control-Allow-Headers":        []string{"*"},
+			"Access-Control-Allow-Private-Network": []string{"true"},
+			"X-BlockAds":                          []string{"local-asset-server"},
 		},
 		Body:          readCloserFromString(body),
 		ContentLength: int64(len(body)),
