@@ -69,7 +69,7 @@
     <string name="wireguard_no_peer">(aucun pair)</string>
     <string name="wireguard_issue_no_allowed_ips">Aucun pair ne possède d'IPs autorisées (Allowed IPs), aucun trafic ne sera donc acheminé</string>
     <string name="wireguard_issue_malformed_allowed_ips">IPs autorisées invalides : %1$s</string>
-    <string name="wireguard_issue_fix_first">Corriger '%1$s' d'abord : %2$s</string>
+    <string name="wireguard_issue_fix_first" formatted="false">Corriger '%1$s' d'abord : %2$s</string>
     <string name="wireguard_config_invalid_title">Le profil WireGuard doit être corrigé</string>
     <string name="wireguard_config_invalid_text">%1$s. BlockAds s'est arrêté au lieu de s'exécuter sans le tunnel.</string>
     <string name="wireguard_split_dns_placeholder" translatable="false">internal,local,lan,corp</string>
