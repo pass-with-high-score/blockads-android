@@ -218,7 +218,7 @@
     <string name="settings_hide_from_recents_title">Masquer des applications récentes</string>
     <string name="settings_hide_from_recents_subtitle">Masquer BlockAds de l'écran des applications récentes</string>
 
-        <!-- DNS Leak Protection / DoH Bypass -->
+    <!-- DNS Leak Protection / DoH Bypass -->
     <string name="dns_category_advanced_security">Sécurité DNS avancée</string>
     <string name="dns_block_doh_bypass_title">Bloquer le contournement DNS-over-HTTPS (DoH)</string>
     <string name="dns_block_doh_bypass_desc">Empêcher les applications et navigateurs de contourner le filtrage local à l'aide du DoH/DoT chiffré</string>
@@ -317,7 +317,7 @@
     <string name="outline_dialog_paste">Coller depuis le presse-papiers</string>
     <string name="outline_dialog_invalid_key">Clé Outline / Shadowsocks invalide</string>
 
-        <!-- Proxy & VPN -->
+    <!-- Proxy & VPN -->
     <string name="proxy_vpn_title">Proxy et VPN</string>
     <string name="proxy_vpn_subtitle">Gérer les serveurs proxy et VPN</string>
     <string name="routing_mode_proxy_vpn_title">Proxy et VPN</string>
