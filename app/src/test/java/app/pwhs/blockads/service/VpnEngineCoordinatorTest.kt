@@ -63,6 +63,13 @@ class VpnEngineCoordinatorTest {
         coEvery { getTrustedSsidsSnapshot() } returns emptySet()
         coEvery { getActiveProxyTypeSnapshot() } returns AppPreferences.PROXY_TYPE_WIREGUARD
         coEvery { getSsProfileSnapshot() } returns null
+        every { tailscale } returns mockk {
+            coEvery { isEnabledSnapshot() } returns false
+            coEvery { getStateJsonSnapshot() } returns ""
+            coEvery { getControlUrlSnapshot() } returns ""
+            coEvery { getAuthKeySnapshot() } returns ""
+            coEvery { getExitNodeIdSnapshot() } returns 0L
+        }
     }
     private val domainCount = MutableStateFlow(100)
     private val filterRepo: FilterListRepository = mockk(relaxed = true) {

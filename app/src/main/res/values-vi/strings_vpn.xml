@@ -109,4 +109,31 @@
     <string name="home_tip_feature_wireguard_title">Tích hợp WireGuard</string>
     <string name="home_tip_feature_wireguard_desc">Dùng server VPN riêng của bạn cùng BlockAds</string>
     <string name="home_tip_feature_wireguard_action">Thử ngay</string>
+
+    <!-- Tailscale -->
+    <string name="tailscale_title">Tailscale</string>
+    <string name="tailscale_subtitle">Kết nối mạng Tailnet song song cùng BlockAds</string>
+    <string name="tailscale_desc">Tham gia mạng riêng Tailscale hoặc Headscale trong khi vẫn giữ 100% tính năng chặn quảng cáo và lọc HTTPS trên máy.</string>
+    <string name="tailscale_sign_in_browser">Đăng nhập với Tailscale</string>
+    <string name="tailscale_waiting_auth">Đang chờ xác thực trong trình duyệt...</string>
+    <string name="tailscale_open_auth_url">Mở trang đăng nhập</string>
+    <string name="tailscale_auth_key_label">Khóa xác thực (Auth Key - tùy chọn)</string>
+    <string name="tailscale_auth_key_hint">tskey-auth-...</string>
+    <string name="tailscale_control_url_label">Địa chỉ máy chủ Control (Control Server URL)</string>
+    <string name="tailscale_custom_settings">Tùy chỉnh máy chủ / Auth Key</string>
+    <string name="tailscale_apply">Kết nối với Auth Key</string>
+    <string name="tailscale_connected">Đã kết nối</string>
+    <string name="tailscale_connecting">Đang kết nối...</string>
+    <string name="tailscale_paused">Đã tạm dừng</string>
+    <string name="tailscale_enable">Bật Tailscale</string>
+    <string name="tailscale_disconnected">Chưa kết nối</string>
+    <string name="tailscale_device_ip">IP Tailscale</string>
+    <string name="tailscale_magic_dns">Tên miền MagicDNS</string>
+    <string name="tailscale_exit_node">Exit Node (Cổng ra Internet)</string>
+    <string name="tailscale_exit_node_none">Không dùng (Chỉ định tuyến mạng nội bộ)</string>
+    <string name="tailscale_peers">Thiết bị trong mạng (Tailnet)</string>
+    <string name="tailscale_no_peers">Chưa tìm thấy thiết bị nào khác trong mạng</string>
+    <string name="tailscale_disconnect">Ngắt kết nối Tailscale</string>
+    <string name="tailscale_online">Trực tuyến</string>
+    <string name="tailscale_offline">Ngoại tuyến</string>
 </resources>

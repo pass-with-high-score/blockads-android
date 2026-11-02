@@ -84,3 +84,6 @@ data object GeoIpKey : NavKey
 
 @Serializable
 data object VpnSettingsKey : NavKey
+
+@Serializable
+data object TailscaleKey : NavKey

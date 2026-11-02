@@ -1,5 +1,6 @@
 [versions]
 agp = "9.2.1"
+browser = "1.8.0"
 core = "6.0.0"
 kotlin = "2.3.10"
 ksp = "2.3.13"
@@ -42,6 +43,7 @@ tunnel = "2026.10.27.2b2a570e"
 [libraries]
 tunnel = { module = "app.pwhs:tunnel", version.ref = "tunnel" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 core = { module = "com.github.topjohnwu.libsu:core", version.ref = "core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

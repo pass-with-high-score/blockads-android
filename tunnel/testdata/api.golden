@@ -62,6 +62,7 @@ type Engine struct
 	method Engine.AppendRemoteFilterRules(tag string, content string) (int, error)
 	method Engine.ClearQuanXConfig()
 	method Engine.ClearRulesetConfig()
+	method Engine.ConfigureTailscale(stateJSON string, controlURL string, authKey string) string
 	method Engine.DialProxy(targetIP net.IP, targetPort int) (net.Conn, bool, error)
 	method Engine.GetActiveProxyProtocol() string
 	method Engine.GetActiveProxyServerAddress() string
@@ -73,12 +74,15 @@ type Engine struct
 	method Engine.GetRulesetRemoteFiltersJSON() string
 	method Engine.GetShadowsocksConfig() string
 	method Engine.GetStats() string
+	method Engine.GetTailscaleState() string
+	method Engine.GetTailscaleStatus() string
 	method Engine.IsBlockWebRTC() bool
 	method Engine.IsConnLogEnabled() bool
 	method Engine.IsDoHBlockingEnabled() bool
 	method Engine.IsDomainBlocked(host string) bool
 	method Engine.IsMitmActive() bool
 	method Engine.IsRunning() bool
+	method Engine.IsTailscaleActive() bool
 	method Engine.IsUsingTcpStack() bool
 	method Engine.LogConnection(flow internal/mitm.FlowID, protocol int)
 	method Engine.LookupIP(host string) (net.IP, error)
@@ -121,6 +125,7 @@ type Engine struct
 	method Engine.SetScriptletsRuntime(js string)
 	method Engine.SetShadowsocksConfig(configJSON string) error
 	method Engine.SetSplitDNSZones(zones string)
+	method Engine.SetTailscaleExitNode(nodeID int64)
 	method Engine.SetTries(adTriePathsCsv string, secTriePathsCsv string, adBloomPathsCsv string, secBloomPathsCsv string)
 	method Engine.SetUIDResolver(r UIDResolver)
 	method Engine.SetUseTcpStack(enabled bool)
@@ -129,8 +134,11 @@ type Engine struct
 	method Engine.StartFull(fd int, protector SocketProtector)
 	method Engine.StartStackMitm(certDir string) string
 	method Engine.StartStandalone(port int) error
+	method Engine.StartTailscaleAuth(hostname string) string
+	method Engine.StartTailscaleSession(hostname string) error
 	method Engine.Stop()
 	method Engine.StopStackMitm()
+	method Engine.StopTailscale()
 	method Engine.TestProxyDelay(protocol string, configJSON string, timeoutMs int) (int64, error)
 	method Engine.TestWireGuardDelay(configJSON string, timeoutMs int) (int64, error)
 type FirewallChecker interface

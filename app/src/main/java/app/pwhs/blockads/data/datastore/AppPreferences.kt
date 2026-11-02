@@ -9,6 +9,7 @@ import app.pwhs.blockads.data.datastore.prefs.AppearancePreferences
 import app.pwhs.blockads.data.datastore.prefs.DnsPreferences
 import app.pwhs.blockads.data.datastore.prefs.FilterPreferences
 import app.pwhs.blockads.data.datastore.prefs.ShadowsocksPreferences
+import app.pwhs.blockads.data.datastore.prefs.TailscalePreferences
 import app.pwhs.blockads.data.datastore.prefs.VpnSecurityPreferences
 import app.pwhs.blockads.data.datastore.prefs.WireGuardPreferences
 import app.pwhs.blockads.data.entities.DnsProtocol
@@ -34,6 +35,7 @@ class AppPreferences internal constructor(
     val wireguard = WireGuardPreferences(dataStore)
     val vpnSecurity = VpnSecurityPreferences(dataStore)
     val shadowsocks = ShadowsocksPreferences(dataStore)
+    val tailscale = TailscalePreferences(dataStore)
 
     companion object {
         const val ROUTING_MODE_DIRECT = WireGuardPreferences.ROUTING_MODE_DIRECT

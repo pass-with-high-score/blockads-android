@@ -90,6 +90,9 @@ class AdBlockVpnService : VpnService() {
         fun stop(context: Context) {
             context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_STOP })
         }
+
+        var activeTunnelAdapter: GoTunnelAdapter? = null
+            internal set
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -153,6 +156,7 @@ class AdBlockVpnService : VpnService() {
             firewallManagerProvider = { session.firewallManager },
             recordLogProvider = { isRecordDnsLogsEnabled },
         )
+        activeTunnelAdapter = goTunnelAdapter
 
         connectionSupervisor = VpnConnectionSupervisor(
             context = this,
@@ -299,6 +303,7 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onDestroy() {
+        activeTunnelAdapter = null
         socketProtector = null
         tunnelSocketProtector = null
         session.onDestroy()

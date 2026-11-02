@@ -63,6 +63,24 @@ func (e *Engine) serveDNS(w dns.ResponseWriter, r *dns.Msg, appOverride string) 
 		return
 	}
 
+	// Tailscale MagicDNS: resolve local Tailnet machine names directly with 0ms latency.
+	if ip := e.resolveTailscaleMagicDNS(domain); ip != nil {
+		m := new(dns.Msg)
+		m.SetReply(r)
+		m.Rcode = dns.RcodeSuccess
+		if queryType == dns.TypeA && ip.To4() != nil {
+			rr, _ := dns.NewRR(fmt.Sprintf("%s 300 IN A %s", r.Question[0].Name, ip.String()))
+			m.Answer = append(m.Answer, rr)
+		} else if queryType == dns.TypeAAAA && ip.To4() == nil {
+			rr, _ := dns.NewRR(fmt.Sprintf("%s 300 IN AAAA %s", r.Question[0].Name, ip.String()))
+			m.Answer = append(m.Answer, rr)
+		}
+		_ = w.WriteMsg(m)
+		e.totalQueries.Add(1)
+		e.notifyLog(domain, false, queryType, time.Since(startTime).Milliseconds(), appOverride, ip.String(), "tailscale_magicdns")
+		return
+	}
+
 	appName := "RootProxy"
 	// Try to resolve the real app name from the source port of the incoming connection.
 	// iptables REDIRECT preserves the original source port, so we can look up the UID

@@ -215,6 +215,20 @@ class VpnEngineCoordinator(
         val blockDohBypass = appPrefs.getBlockDohBypassSnapshot()
         val blockWebRtc = appPrefs.getBlockWebRtcLeakSnapshot()
 
+        if (appPrefs.tailscale.isEnabledSnapshot()) {
+            val tsState = appPrefs.tailscale.getStateJsonSnapshot()
+            val tsControlUrl = appPrefs.tailscale.getControlUrlSnapshot()
+            val tsAuthKey = appPrefs.tailscale.getAuthKeySnapshot()
+            val updatedState = goTunnelAdapter.configureTailscale(tsState, tsControlUrl, tsAuthKey)
+            if (updatedState.isNotEmpty() && updatedState != "{}") {
+                appPrefs.tailscale.setStateJson(updatedState)
+            }
+            val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+            if (exitNodeId != 0L) {
+                goTunnelAdapter.setTailscaleExitNode(exitNodeId)
+            }
+        }
+
         goTunnelAdapter.start(
             vpnInterface = vpnInterface,
             wgConfigJson = wgConfigJson,

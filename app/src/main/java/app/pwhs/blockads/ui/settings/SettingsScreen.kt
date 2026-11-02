@@ -55,6 +55,7 @@ fun SettingsScreen(
     onNavigateToAppManagement: () -> Unit = { },
     onNavigateToTrustedNetworks: () -> Unit = { },
     onNavigateToWireGuardImport: () -> Unit = { },
+    onNavigateToTailscale: () -> Unit = { },
     onNavigateToHttpsFiltering: () -> Unit = { },
     onNavigateToDNSProvider: () -> Unit = { },
     onNavigateToGeoIp: () -> Unit = { },
@@ -139,6 +140,7 @@ fun SettingsScreen(
                 onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
                 onNavigateToHttpsFiltering = onNavigateToHttpsFiltering,
                 onNavigateToWireGuardImport = onNavigateToWireGuardImport,
+                onNavigateToTailscale = onNavigateToTailscale,
                 showVpnSetting = !hasVpnInBottomBar
             )
 

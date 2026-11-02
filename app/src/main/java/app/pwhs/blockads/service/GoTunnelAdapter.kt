@@ -431,47 +431,7 @@ class GoTunnelAdapter(
     }
 
     fun updateCosmeticRules() {
-        runCatching {
-            val css = TunnelRuleLoader.loadCosmeticCss(context, filterRepo.getCosmeticCssPath())
-            engine.setCosmeticCSS(css)
-            Timber.d("Cosmetic CSS updated for engine: %d bytes", css.length)
-        }.onFailure {
-            Timber.e(it, "Failed to load cosmetic CSS for engine")
-            engine.setCosmeticCSS("")
-        }
-
-        runCatching {
-            val js = TunnelRuleLoader.loadScriptletsJs(context)
-            engine.setScriptletsRuntime(js)
-            Timber.d("Scriptlets runtime updated for engine: %d bytes", js.length)
-        }.onFailure { Timber.e(it, "Failed to load scriptlets JS for engine") }
-
-        runCatching {
-            val manifest = TunnelRuleLoader.loadRuleManifest(context)
-            engine.setRuleManifestJSON(manifest)
-            Timber.d("Rule manifest updated for engine: %d bytes", manifest.length)
-        }.onFailure { Timber.e(it, "Failed to load rule manifest for engine") }
-
-        runCatching {
-            TunnelRuleLoader.loadModules(context, engine, filterRepo.getFilterModulesPath())
-        }.onFailure { Timber.e(it, "Failed to load modular rules for engine") }
-
-        runCatching {
-            val sp = filterRepo.getScriptletsPath()
-            if (sp != null && java.io.File(sp).exists()) engine.setScriptletRulesFromFile(sp) else engine.setScriptletRules("")
-        }.onFailure {
-            Timber.e(it, "Failed to load scriptlet rules for engine")
-            engine.setScriptletRules("")
-        }
-
-        runCatching {
-            val patterns = TunnelRuleLoader.loadAdPathPatterns(context)
-            engine.setAdPathPatterns(patterns)
-            if (patterns.isNotEmpty()) Timber.d("Ad path patterns loaded: ${patterns.lines().size} patterns")
-        }.onFailure {
-            Timber.e(it, "Failed to load ad path patterns for engine")
-            engine.setAdPathPatterns("")
-        }
+        TunnelRuleLoader.updateCosmeticRules(context, engine, filterRepo)
     }
 
     fun getStats(): String = engine.stats
@@ -484,6 +444,33 @@ class GoTunnelAdapter(
     }.onFailure { Timber.e(it, "Failed to set ruleset config") }.getOrDefault(0L)
 
     fun clearRulesetConfig() = engine.clearRulesetConfig()
+
+    fun configureTailscale(state: String, url: String, key: String): String =
+        runCatching { engine.configureTailscale(state, url, key) }.getOrDefault("{}")
+
+    fun startTailscaleAuth(host: String): String =
+        runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
+
+    fun startTailscaleSession(host: String) {
+        runCatching { engine.startTailscaleSession(host) }
+    }
+
+    fun stopTailscale() {
+        runCatching { engine.stopTailscale() }
+    }
+
+    fun getTailscaleStatus(): String =
+        runCatching { engine.tailscaleStatus }.getOrDefault("""{"state":"DISCONNECTED"}""")
+
+    fun getTailscaleState(): String =
+        runCatching { engine.tailscaleState }.getOrDefault("{}")
+
+    fun setTailscaleExitNode(id: Long) {
+        runCatching { engine.setTailscaleExitNode(id) }
+    }
+
+    fun isTailscaleActive(): Boolean =
+        runCatching { engine.isTailscaleActive }.getOrDefault(false)
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {

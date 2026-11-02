@@ -313,4 +313,52 @@ object TunnelRuleLoader {
             Timber.d("Profile [dns] applied: primary=$primary, fallback=$fallback")
         }
     }
+
+    fun updateCosmeticRules(
+        context: Context,
+        engine: tunnel.Engine,
+        filterRepo: app.pwhs.blockads.data.repository.FilterListRepository
+    ) {
+        runCatching {
+            val css = loadCosmeticCss(context, filterRepo.getCosmeticCssPath())
+            engine.setCosmeticCSS(css)
+            Timber.d("Cosmetic CSS updated for engine: %d bytes", css.length)
+        }.onFailure {
+            Timber.e(it, "Failed to load cosmetic CSS for engine")
+            engine.setCosmeticCSS("")
+        }
+
+        runCatching {
+            val js = loadScriptletsJs(context)
+            engine.setScriptletsRuntime(js)
+            Timber.d("Scriptlets runtime updated for engine: %d bytes", js.length)
+        }.onFailure { Timber.e(it, "Failed to load scriptlets JS for engine") }
+
+        runCatching {
+            val manifest = loadRuleManifest(context)
+            engine.setRuleManifestJSON(manifest)
+            Timber.d("Rule manifest updated for engine: %d bytes", manifest.length)
+        }.onFailure { Timber.e(it, "Failed to load rule manifest for engine") }
+
+        runCatching {
+            loadModules(context, engine, filterRepo.getFilterModulesPath())
+        }.onFailure { Timber.e(it, "Failed to load modular rules for engine") }
+
+        runCatching {
+            val sp = filterRepo.getScriptletsPath()
+            if (sp != null && java.io.File(sp).exists()) engine.setScriptletRulesFromFile(sp) else engine.setScriptletRules("")
+        }.onFailure {
+            Timber.e(it, "Failed to load scriptlet rules for engine")
+            engine.setScriptletRules("")
+        }
+
+        runCatching {
+            val patterns = loadAdPathPatterns(context)
+            engine.setAdPathPatterns(patterns)
+            if (patterns.isNotEmpty()) Timber.d("Ad path patterns loaded: ${patterns.lines().size} patterns")
+        }.onFailure {
+            Timber.e(it, "Failed to load ad path patterns for engine")
+            engine.setAdPathPatterns("")
+        }
+    }
 }

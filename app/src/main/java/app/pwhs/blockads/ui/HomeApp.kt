@@ -72,6 +72,8 @@ import app.pwhs.blockads.ui.data.ProxyVpnKey
 import app.pwhs.blockads.ui.data.ProxyEditKey
 import app.pwhs.blockads.ui.data.VpnSettingsKey
 import app.pwhs.blockads.ui.data.WireGuardImportKey
+import app.pwhs.blockads.ui.data.TailscaleKey
+import app.pwhs.blockads.ui.tailscale.TailscaleScreen
 import app.pwhs.blockads.ui.proxyvpn.edit.ProxyEditScreen
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.domainrules.DomainRulesScreen
@@ -304,6 +306,10 @@ fun HomeApp(
                         onNavigateToGeoIp = {
                             showBottomBar = false
                             settingsStack.add(GeoIpKey)
+                        },
+                        onNavigateToTailscale = {
+                            showBottomBar = false
+                            settingsStack.add(TailscaleKey)
                         }
                     )
                 }
@@ -444,6 +450,13 @@ fun HomeApp(
                 }
                 entry<CertInstallationWizardKey> {
                     CertInstallationWizardScreen(
+                        onNavigateBack = {
+                            safePop(currentBackStack)
+                        }
+                    )
+                }
+                entry<TailscaleKey> {
+                    TailscaleScreen(
                         onNavigateBack = {
                             safePop(currentBackStack)
                         }

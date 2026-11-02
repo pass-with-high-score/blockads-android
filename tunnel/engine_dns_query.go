@@ -46,6 +46,14 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 		return
 	}
 
+	// Tailscale MagicDNS: resolve local Tailnet machine names directly with 0ms latency.
+	if ip := e.resolveTailscaleMagicDNS(domain); ip != nil {
+		response := BuildRedirectResponse(queryInfo, ip)
+		e.writeToTUN(response)
+		e.totalQueries.Add(1)
+		return
+	}
+
 	// Fetch App Name for logging (and firewall)
 	appName := ""
 	if e.appResolver != nil {

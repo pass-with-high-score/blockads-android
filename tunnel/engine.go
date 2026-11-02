@@ -19,6 +19,7 @@ import (
 
 	"github.com/miekg/dns"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy"
+	"github.com/nqmgaming/blockads-tunnel/internal/tailscale"
 )
 
 // LogCallback is the interface for receiving DNS query events in Kotlin.
@@ -160,6 +161,9 @@ type Engine struct {
 
 	// Outbound proxy client (Shadowsocks, Trojan, VLESS)
 	proxyClient atomic.Pointer[proxy.Client]
+
+	// Tailscale manager (lightweight integration)
+	tsManager atomic.Pointer[tailscale.Manager]
 
 	// preferredIPType controls whether IPv4 or IPv6 DNS records are preferred:
 	// "auto" (default): dual stack, allow both A and AAAA queries.

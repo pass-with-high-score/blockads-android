@@ -151,6 +151,10 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 		client.SetProtectFn(protectFn)
 		logf("StartFull: Shadowsocks outbound active via %s", client.ServerAddress())
 	}
+	if mgr := e.tsManager.Load(); mgr != nil {
+		mgr.SetProtectFn(protectFn)
+		_ = mgr.StartSession("blockads-android")
+	}
 	e.mu.Unlock()
 
 	fail := func(format string, args ...interface{}) {

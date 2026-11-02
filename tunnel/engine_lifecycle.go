@@ -163,6 +163,10 @@ func (e *Engine) Stop() {
 	fullDone := e.fullTunnelDone
 	e.fullTunnelDone = nil
 
+	if ts := e.tsManager.Swap(nil); ts != nil {
+		ts.Stop()
+	}
+
 	if e.tunFile != nil {
 		e.tunFile.Close()
 		e.tunFile = nil
@@ -241,6 +245,7 @@ func (e *Engine) Stop() {
 	if stack != nil {
 		stack.Stop()
 	}
+	e.StopTailscale()
 }
 
 // IsRunning returns whether the engine is currently running.

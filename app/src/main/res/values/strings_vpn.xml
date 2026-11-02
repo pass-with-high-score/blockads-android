@@ -110,4 +110,31 @@
     <string name="home_tip_feature_wireguard_title">WireGuard VPN</string>
     <string name="home_tip_feature_wireguard_desc">Use your personal VPN server alongside BlockAds</string>
     <string name="home_tip_feature_wireguard_action">Try now</string>
+
+    <!-- Tailscale -->
+    <string name="tailscale_title">Tailscale</string>
+    <string name="tailscale_subtitle">Connect to your Tailnet alongside BlockAds</string>
+    <string name="tailscale_desc">Join your private Tailscale or Headscale network while maintaining all on-device ad blocking and HTTPS filtering.</string>
+    <string name="tailscale_sign_in_browser">Sign in with Tailscale</string>
+    <string name="tailscale_waiting_auth">Waiting for browser sign-in...</string>
+    <string name="tailscale_open_auth_url">Open sign-in page</string>
+    <string name="tailscale_auth_key_label">Auth Key (optional)</string>
+    <string name="tailscale_auth_key_hint">tskey-auth-...</string>
+    <string name="tailscale_control_url_label">Control Server URL</string>
+    <string name="tailscale_custom_settings">Custom Server / Auth Key</string>
+    <string name="tailscale_apply">Connect with Auth Key</string>
+    <string name="tailscale_connected">Connected</string>
+    <string name="tailscale_connecting">Connecting...</string>
+    <string name="tailscale_paused">Paused</string>
+    <string name="tailscale_enable">Enable Tailscale</string>
+    <string name="tailscale_disconnected">Disconnected</string>
+    <string name="tailscale_device_ip">Tailscale IP</string>
+    <string name="tailscale_magic_dns">MagicDNS</string>
+    <string name="tailscale_exit_node">Exit Node</string>
+    <string name="tailscale_exit_node_none">None (Local Tailnet only)</string>
+    <string name="tailscale_peers">Tailnet Devices</string>
+    <string name="tailscale_no_peers">No other devices found in this tailnet</string>
+    <string name="tailscale_disconnect">Disconnect Tailscale</string>
+    <string name="tailscale_online">Online</string>
+    <string name="tailscale_offline">Offline</string>
 </resources>
