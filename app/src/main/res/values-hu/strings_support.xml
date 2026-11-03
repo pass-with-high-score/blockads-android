@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_bottom_sheet_title">Segítségre van szüksége, vagy hibát jelentene?</string>
+    <string name="support_bottom_sheet_desc">Ha problémába ütközik, vagy valami nem az elvárt módon működik, jelezze csapatunknak, hogy segíthessünk.</string>
+    <string name="support_error_filter_title">Nem sikerült hozzáadni a szűrőt</string>
+    <string name="support_error_filter_desc">Nem sikerült letölteni vagy feldolgozni ezt a szűrőlistát. Lehet, hogy a link nem érhető el, nem működik, vagy nem támogatott szintaxist tartalmaz. Kérhet segítséget, vagy jelentheti nekünk.</string>
+    <string name="support_error_subscription_title">Az előfizetés frissítése sikertelen</string>
+    <string name="support_channel_telegram_title">Telegram-közösség</string>
+    <string name="support_channel_telegram_desc">Csatlakozzon a csevegéshez valós idejű segítségért a fejlesztőtől és a közösségtől</string>
+    <string name="support_channel_github_title">Jelentés a GitHubon</string>
+    <string name="support_channel_github_desc">Nyisson hibajegyet a hiba részleteivel és a diagnosztikai adatokkal</string>
+    <string name="support_channel_email_title">E-mailes támogatás</string>
+    <string name="support_channel_email_desc">Küldje el a hiba részleteit közvetlenül a support@pwhs.app címre</string>
+    <string name="support_copy_details">Diagnosztika másolása</string>
+    <string name="support_copied">Diagnosztikai adatok a vágólapra másolva</string>
+    <string name="support_need_help">Segítségre van szüksége?</string>
+    <string name="support_close">Bezárás</string>
+</resources>

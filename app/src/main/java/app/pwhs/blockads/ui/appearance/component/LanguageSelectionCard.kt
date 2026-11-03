@@ -62,6 +62,7 @@ fun LanguageSelectionCard(
             LanguageItem(R.string.settings_lang_ru, AppPreferences.LANGUAGE_RU, emoji = "🇷🇺"),
             LanguageItem(R.string.settings_lang_th, AppPreferences.LANGUAGE_TH, emoji = "🇹🇭"),
             LanguageItem(R.string.settings_lang_tr, AppPreferences.LANGUAGE_TR, emoji = "🇹🇷"),
+            LanguageItem(R.string.settings_lang_hu, AppPreferences.LANGUAGE_HU, emoji = "🇭🇺"),
             LanguageItem(R.string.settings_lang_uk, AppPreferences.LANGUAGE_UK, emoji = "🇺🇦"),
             LanguageItem(R.string.settings_lang_vi, AppPreferences.LANGUAGE_VI, emoji = "🇻🇳"),
             LanguageItem(R.string.settings_lang_zh, AppPreferences.LANGUAGE_ZH, emoji = "🇨🇳"),
