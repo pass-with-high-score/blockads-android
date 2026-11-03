@@ -216,7 +216,8 @@ class VpnEngineCoordinator(
         val blockDohBypass = appPrefs.getBlockDohBypassSnapshot()
         val blockWebRtc = appPrefs.getBlockWebRtcLeakSnapshot()
 
-        if (appPrefs.tailscale.isEnabledSnapshot()) {
+        // Tailscale temporarily disabled for hotfix
+        if (false && appPrefs.tailscale.isEnabledSnapshot()) {
             val tsState = appPrefs.tailscale.getStateJsonSnapshot()
             val tsControlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val tsAuthKey = appPrefs.tailscale.getAuthKeySnapshot()

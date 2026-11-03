@@ -59,17 +59,6 @@ fun AdvancedSection(
 
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
 
-                // Tailscale
-                SettingItem(
-                    iconPainter = painterResource(R.drawable.ic_tailscale),
-                    iconTint = Color(0xFF4F46E5),
-                    title = stringResource(R.string.tailscale_title),
-                    desc = stringResource(R.string.tailscale_subtitle),
-                    onClick = onNavigateToTailscale
-                )
-
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
-
                 // 3. Root Proxy
                 SettingsToggleItem(
                     iconPainter = painterResource(R.drawable.ic_settings_root_proxy),
