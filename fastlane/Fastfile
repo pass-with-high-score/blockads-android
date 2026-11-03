@@ -68,6 +68,18 @@ platform :android do
     )
   end
 
+  desc "Upload store listing text (title, descriptions) for all locales in fastlane/metadata/android"
+  lane :metadata do
+    upload_to_play_store(
+      json_key: "fastlane/play-store-key.json",
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
   desc "Increment version code"
   lane :bump_version do |options|
     version_name = options[:version] || "1.0"
