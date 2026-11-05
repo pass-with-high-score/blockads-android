@@ -7,7 +7,7 @@
     <string name="vpn_notification_reconnecting">BlockAds se reconnecte</string>
     <string name="vpn_notification_reconnecting_text">Changement de réseau, reconnexion du VPN…</string>
     <string name="vpn_notification_retrying">BlockAds réessaie</string>
-    <string name="vpn_notification_retry_text">Tentative de réessaye %1$d sur %2$d</string>
+    <string name="vpn_notification_retry_text">Tentative %1$d sur %2$d</string>
     <string name="vpn_alert_channel_name">Alertes VPN</string>
     <string name="vpn_alert_channel_description">Alertes importantes concernant les changements d\'état du VPN</string>
     <string name="vpn_revoked_title">Blocage des publicités arrêté</string>
