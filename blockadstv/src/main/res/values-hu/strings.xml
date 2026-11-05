@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">BlockAds TV</string>
+    <string name="nav_home">Kezdőlap</string>
+    <string name="nav_filters">Szűrők</string>
+    <string name="nav_rules">Szabályok</string>
+    <string name="nav_apps">Alkalmazások</string>
+    <string name="nav_logs">Naplók</string>
+    <string name="nav_dns">DNS</string>
+    <string name="nav_proxy">Proxy</string>
+    <string name="nav_settings">Beállítások</string>
+
+    <!-- Home -->
+    <string name="home_protected">Védett</string>
+    <string name="home_unprotected">Nem védett</string>
+    <string name="home_protected_desc">A védelem aktív. A reklámok és nyomkövetők blokkolva vannak.</string>
+    <string name="home_unprotected_desc">A védelem ki van kapcsolva. Kapcsolja be a reklámok és nyomkövetők blokkolásához.</string>
+    <string name="home_total_queries">Összes lekérdezés</string>
+    <string name="home_blocked">Blokkolva</string>
+    <string name="home_threats">Fenyegetések</string>
+    <string name="home_block_rate">Blokkolási arány</string>
+    <string name="home_uptime">Üzemidő</string>
+    <string name="home_filter_rules">Szűrőszabályok</string>
+    <string name="home_top_blocked_domains">Leggyakrabban blokkolt domainek a TV-n</string>
+    <string name="home_no_blocked_domains">Még nincs blokkolt domain</string>
+
+    <!-- DNS -->
+    <string name="dns_setup_title">DNS beállítása</string>
+    <string name="dns_protocol_standard">Szabványos DNS (UDP)</string>
+    <string name="dns_protocol_standard_desc">Gyors, szabványos feloldó</string>
+    <string name="dns_protocol_doh">DNS-over-HTTPS (DoH)</string>
+    <string name="dns_protocol_doh_desc">Titkosított, manipuláció ellen védett</string>
+    <string name="dns_resolvers_header">DNS-feloldók és egyéni konfiguráció</string>
+    <string name="dns_custom_server_title">Egyéni DNS-szerver</string>
+    <string name="dns_custom_server_desc">Egyéni DoH, DoH3, DoQ, DoT, ODoH vagy egyszerű IP beállítása</string>
+    <string name="dns_custom_server_hint">Támogatja a DNS Stampet (sdns://), hostneveket és gyorssablonokat</string>
+    <string name="dns_custom_configure">Beállítás</string>
+    <string name="dns_custom_dialog_title">Egyéni DNS-konfiguráció</string>
+    <string name="dns_custom_dialog_desc">Egyéni upstream feloldó és protokoll beállítása</string>
+    <string name="dns_custom_quick_templates">Gyorssablonok</string>
+    <string name="dns_cancel">Mégse</string>
+    <string name="dns_save_apply">Mentés és alkalmazás</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Beállítások</string>
+    <string name="settings_desc">Reklámblokkolási beállítások testreszabása</string>
+    <string name="settings_start_on_boot">Indítás bekapcsoláskor</string>
+    <string name="settings_start_on_boot_desc">A védelem automatikus indítása az eszköz bekapcsolásakor</string>
+    <string name="settings_theme_title">Téma</string>
+    <string name="settings_theme_desc">Megjelenési téma kiválasztása a TV-hez</string>
+    <string name="settings_theme_dark">Sötét (alapértelmezett)</string>
+    <string name="settings_theme_oled">OLED / tiszta fekete</string>
+    <string name="settings_theme_light">Világos</string>
+    <string name="settings_theme_system">Rendszer szerint</string>
+    <string name="settings_language_title">Nyelv</string>
+    <string name="settings_language_desc">Megjelenítési nyelv módosítása</string>
+    <string name="settings_language_system">Rendszer szerint</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_vi">Tiếng Việt</string>
+    <string name="settings_lang_system">Rendszer</string>
+    <string name="settings_response_type_title">Blokkolási válasz típusa</string>
+    <string name="settings_update_filters">Szűrőlisták frissítése</string>
+    <string name="settings_update_filters_desc">Koppintson a legújabb szűrők szinkronizálásához és letöltéséhez</string>
+    <string name="settings_about">Névjegy</string>
+
+    <!-- VPN & Proxy -->
+    <string name="proxy_title">VPN és proxy</string>
+    <string name="proxy_desc">Proxy-útválasztás és root proxy mód beállítása</string>
+    <string name="proxy_mode_title">Védelmi mód</string>
+    <string name="proxy_mode_direct">Szabványos VPN (csak DNS)</string>
+    <string name="proxy_mode_direct_desc">Helyi VPN-nel blokkolja a reklámokat és nyomkövetőket az általános forgalom átirányítása nélkül</string>
+    <string name="proxy_mode_proxy_vpn">Proxy VPN</string>
+    <string name="proxy_mode_proxy_vpn_desc">A TV forgalmát a kiválasztott proxycsomóponton keresztül irányítja, reklámblokkolással</string>
+    <string name="proxy_mode_root">Root proxy (iptables)</string>
+    <string name="proxy_mode_root_desc">Az 53-as DNS-portot iptables-szel irányítja át, a VPN-hely lefoglalása nélkül</string>
+    <string name="proxy_nodes_title">Proxycsomópontok</string>
+    <string name="proxy_no_nodes">Nincs beállított proxycsomópont. Adjon hozzá csomópontot vagy előfizetést, hogy a forgalom proxyn keresztül haladjon.</string>
+    <string name="proxy_add_node">Link hozzáadása</string>
+    <string name="proxy_add_subscription">Előfizetés hozzáadása</string>
+    <string name="proxy_ping_all">Összes pingelése</string>
+    <string name="proxy_delete_node">Törlés</string>
+    <string name="proxy_select_node">Kiválasztás</string>
+    <string name="proxy_active_badge">AKTÍV</string>
+    <string name="proxy_root_not_available">A root hozzáférés nem érhető el, vagy megtagadták ezen az eszközön.</string>
+    <string name="proxy_dialog_add_title">Proxycsomópont hozzáadása</string>
+    <string name="proxy_dialog_import_title">Előfizetés importálása</string>
+    <string name="proxy_dialog_link_hint">Illessze be a csomópont URL-jét (vless://, vmess://, ss://, trojan:// stb.)</string>
+    <string name="proxy_dialog_sub_hint">Illessze be az előfizetési URL-t</string>
+    <string name="proxy_save">Mentés</string>
+    <string name="proxy_cancel">Mégse</string>
+    <string name="proxy_err_invalid_link">Érvénytelen proxylink vagy nem támogatott protokoll</string>
+    <string name="proxy_subscription_success">%1$d csomópont importálva</string>
+    <string name="settings_mode_title">Védelmi mód</string>
+</resources>
