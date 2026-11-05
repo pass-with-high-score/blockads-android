@@ -208,8 +208,7 @@ val appModule = module {
     viewModel {
         DnsProviderViewModel(
             appPrefs = get(),
-            application = androidApplication(),
-            configDao = get()
+            application = androidApplication()
         )
     }
     viewModel {
@@ -248,7 +247,6 @@ val appModule = module {
             whitelistDomainDao = get(),
             customDnsRuleDao = get(),
             filterRepo = get(),
-            configDao = get(),
             application = androidApplication()
         )
     }

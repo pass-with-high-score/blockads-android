@@ -10,7 +10,6 @@ import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.data.entities.RuleType
 import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.repository.FilterListRepository
-import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
@@ -23,30 +22,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-import app.pwhs.blockads.data.dao.ConfigDao
-import app.pwhs.blockads.data.entities.ConfigProfile
-import app.pwhs.blockads.utils.ConfigRuleHelper
-import app.pwhs.blockads.utils.ParsedFilterRule
-import kotlinx.coroutines.Dispatchers
-
-
 class DomainRulesViewModel(
     private val whitelistDomainDao: WhitelistDomainDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val filterRepo: FilterListRepository,
-    private val configDao: ConfigDao,
     application: Application
 ) : AndroidViewModel(application) {
-
-    val activeConfig: StateFlow<ConfigProfile?> = configDao.getActiveFlow()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    val allConfigs: StateFlow<List<ConfigProfile>> = configDao.getAllFlow()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    val profileFilterRules: StateFlow<List<ParsedFilterRule>> = configDao.getActiveFlow()
-        .map { it?.content?.let(ConfigRuleHelper::parseFilterRules) ?: emptyList() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -54,33 +35,6 @@ class DomainRulesViewModel(
     val blocklistDomains: StateFlow<List<CustomDnsRule>> = customDnsRuleDao.getAllFlow()
         .map { rules -> rules.filter { it.ruleType == RuleType.BLOCK } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val active = configDao.getActive()
-            if (active != null) {
-                var content = active.content
-                val dbBlockRules = customDnsRuleDao.getAll().filter { it.ruleType == RuleType.BLOCK }
-                for (r in dbBlockRules) {
-                    val clean = r.domain.trim()
-                    if (clean.isNotBlank() && !content.contains(clean, ignoreCase = true)) {
-                        content = ConfigRuleHelper.appendRuleToSection(content, "filter_local", "host, $clean, reject")
-                    }
-                }
-                val dbWhiteDomains = whitelistDomainDao.getAllDomains()
-                for (w in dbWhiteDomains) {
-                    val clean = w.trim()
-                    if (clean.isNotBlank() && !content.contains(clean, ignoreCase = true)) {
-                        content = ConfigRuleHelper.appendRuleToSection(content, "filter_local", "host, $clean, direct")
-                    }
-                }
-                val normalized = ConfigRuleHelper.normalizeFilterLocalSection(content)
-                if (normalized != active.content) {
-                    configDao.update(active.copy(content = normalized))
-                }
-            }
-        }
-    }
 
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
@@ -258,222 +212,6 @@ class DomainRulesViewModel(
                     requestVpnRestart()
                 }
             }
-        }
-    }
-
-    // ── Profile Rules ────────────────────────────────────────
-
-    fun addProfileRule(
-        type: String,
-        param: String,
-        policy: String,
-        targetConfigId: Long? = null
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val targetConfig = (if (targetConfigId != null) configDao.getById(targetConfigId) else null)
-                ?: configDao.getActive()
-                ?: return@launch
-
-            val cleanDomain = sanitizeDomain(param)
-            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) cleanDomain else param.trim()
-            val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
-                "final, ${policy.lowercase()}"
-            } else {
-                "${type.lowercase()}, $paramClean, ${policy.lowercase()}"
-            }
-
-            val updatedContent = ConfigRuleHelper.appendRuleToSection(targetConfig.content, "filter_local", ruleLine)
-            val normalizedContent = ConfigRuleHelper.normalizeFilterLocalSection(updatedContent)
-            configDao.update(targetConfig.copy(content = normalizedContent))
-
-            // Sync domain rules to Room DB if applicable
-            if (cleanDomain.isNotBlank() && type.startsWith("HOST", ignoreCase = true)) {
-                if (policy.equals("REJECT", ignoreCase = true)) {
-                    val exists = customDnsRuleDao.existsBlockDomain(cleanDomain)
-                    if (exists == 0) {
-                        customDnsRuleDao.insert(
-                            CustomDnsRule(
-                                rule = "||$cleanDomain^",
-                                ruleType = RuleType.BLOCK,
-                                domain = cleanDomain,
-                                isEnabled = true
-                            )
-                        )
-                    }
-                } else if (policy.equals("DIRECT", ignoreCase = true)) {
-                    val exists = whitelistDomainDao.exists(cleanDomain)
-                    if (exists == 0) {
-                        whitelistDomainDao.insert(
-                            WhitelistDomain(
-                                domain = cleanDomain,
-                                isEnabled = true
-                            )
-                        )
-                    }
-                }
-            }
-
-            _events.toast(R.string.config_rule_added, listOf(ruleLine))
-            requestVpnRestart()
-        }
-    }
-
-    fun updateProfileRule(
-        oldDomain: String,
-        type: String,
-        param: String,
-        policy: String,
-        targetConfigId: Long? = null
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val targetConfig = (if (targetConfigId != null) configDao.getById(targetConfigId) else null)
-                ?: configDao.getActive()
-
-            val cleanDomain = sanitizeDomain(param)
-            val oldClean = sanitizeDomain(oldDomain)
-            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) cleanDomain else param.trim()
-
-            val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
-                "final, ${policy.lowercase()}"
-            } else {
-                "${type.lowercase()}, $paramClean, ${policy.lowercase()}"
-            }
-
-            if (targetConfig != null) {
-                val updatedContent = ConfigRuleHelper.replaceRuleInContent(targetConfig.content, oldDomain, ruleLine)
-                val normalizedContent = ConfigRuleHelper.normalizeFilterLocalSection(updatedContent)
-                configDao.update(targetConfig.copy(content = normalizedContent))
-            }
-
-            if (type.startsWith("HOST", ignoreCase = true)) {
-                if (policy.equals("REJECT", ignoreCase = true)) {
-                    whitelistDomainDao.deleteByDomain(oldClean)
-                    if (cleanDomain.isNotBlank()) {
-                        val existing = customDnsRuleDao.getAll().firstOrNull { it.domain.equals(oldClean, ignoreCase = true) }
-                        if (existing != null) {
-                            customDnsRuleDao.update(existing.copy(domain = cleanDomain, rule = "||$cleanDomain^"))
-                        } else if (customDnsRuleDao.existsBlockDomain(cleanDomain) == 0) {
-                            customDnsRuleDao.insert(
-                                CustomDnsRule(domain = cleanDomain, rule = "||$cleanDomain^", ruleType = RuleType.BLOCK, isEnabled = true)
-                            )
-                        }
-                    }
-                } else if (policy.equals("DIRECT", ignoreCase = true)) {
-                    customDnsRuleDao.deleteBlockRuleByDomain(oldClean)
-                    if (cleanDomain.isNotBlank()) {
-                        val existing = whitelistDomainDao.getAllDomains().any { it.equals(oldClean, ignoreCase = true) }
-                        if (existing) {
-                            whitelistDomainDao.deleteByDomain(oldClean)
-                        }
-                        if (whitelistDomainDao.exists(cleanDomain) == 0) {
-                            whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain, isEnabled = true))
-                        }
-                    }
-                }
-            }
-
-            filterRepo.loadCustomRules()
-            filterRepo.loadWhitelist()
-            _events.toast(R.string.config_rule_added, listOf(ruleLine))
-            requestVpnRestart()
-        }
-    }
-
-    fun toggleProfileRule(rule: ParsedFilterRule) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val active = configDao.getActive() ?: return@launch
-            val updated = ConfigRuleHelper.toggleRuleInContent(active.content, rule)
-            configDao.update(active.copy(content = updated))
-            requestVpnRestart()
-        }
-    }
-
-    fun removeProfileRule(rule: ParsedFilterRule) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val active = configDao.getActive() ?: return@launch
-            val updated = ConfigRuleHelper.removeRuleFromContent(active.content, rule.rawLine)
-            configDao.update(active.copy(content = updated))
-            if (rule.type.startsWith("HOST", ignoreCase = true)) {
-                val clean = sanitizeDomain(rule.param)
-                customDnsRuleDao.deleteBlockRuleByDomain(clean)
-                whitelistDomainDao.deleteByDomain(clean)
-            }
-            requestVpnRestart()
-        }
-    }
-
-    fun removeProfileRule(rawLine: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val active = configDao.getActive() ?: return@launch
-            val updated = ConfigRuleHelper.removeRuleFromContent(active.content, rawLine)
-            configDao.update(active.copy(content = updated))
-            requestVpnRestart()
-        }
-    }
-
-    fun updateProfileRule(
-        oldRawLine: String,
-        oldDomain: String,
-        type: String,
-        param: String,
-        policy: String,
-        targetConfigId: Long? = null
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val targetConfig = (if (targetConfigId != null) configDao.getById(targetConfigId) else null)
-                ?: configDao.getActive()
-
-            val cleanDomain = sanitizeDomain(param)
-            val oldClean = sanitizeDomain(oldDomain)
-            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) cleanDomain else param.trim()
-
-            val ruleLine = if (type.equals("FINAL", ignoreCase = true)) {
-                "final, ${policy.lowercase()}"
-            } else {
-                "${type.lowercase()}, $paramClean, ${policy.lowercase()}"
-            }
-
-            if (targetConfig != null) {
-                val updatedContent = ConfigRuleHelper.replaceRuleInContent(
-                    targetConfig.content,
-                    oldRawLine.ifBlank { oldDomain },
-                    ruleLine
-                )
-                val normalizedContent = ConfigRuleHelper.normalizeFilterLocalSection(updatedContent)
-                configDao.update(targetConfig.copy(content = normalizedContent))
-            }
-
-            if (type.startsWith("HOST", ignoreCase = true)) {
-                if (policy.equals("REJECT", ignoreCase = true)) {
-                    whitelistDomainDao.deleteByDomain(oldClean)
-                    if (cleanDomain.isNotBlank()) {
-                        val existing = customDnsRuleDao.getAll().firstOrNull { it.domain.equals(oldClean, ignoreCase = true) }
-                        if (existing != null) {
-                            customDnsRuleDao.update(existing.copy(domain = cleanDomain, rule = "||$cleanDomain^"))
-                        } else if (customDnsRuleDao.existsBlockDomain(cleanDomain) == 0) {
-                            customDnsRuleDao.insert(
-                                CustomDnsRule(domain = cleanDomain, rule = "||$cleanDomain^", ruleType = RuleType.BLOCK, isEnabled = true)
-                            )
-                        }
-                    }
-                } else if (policy.equals("DIRECT", ignoreCase = true)) {
-                    customDnsRuleDao.deleteBlockRuleByDomain(oldClean)
-                    if (cleanDomain.isNotBlank()) {
-                        val existing = whitelistDomainDao.getAllDomains().any { it.equals(oldClean, ignoreCase = true) }
-                        if (existing) {
-                            whitelistDomainDao.deleteByDomain(oldClean)
-                        }
-                        if (whitelistDomainDao.exists(cleanDomain) == 0) {
-                            whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain, isEnabled = true))
-                        }
-                    }
-                }
-            }
-
-            filterRepo.loadCustomRules()
-            filterRepo.loadWhitelist()
-            _events.toast(R.string.config_rule_added, listOf(ruleLine))
-            requestVpnRestart()
         }
     }
 
