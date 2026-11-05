@@ -37,3 +37,4 @@
     <string name="home_disconnecting_desc">Arrêt de la connexion VPN…</string>
     <string name="home_disconnecting_desc_root">Arrêt du proxy root…</string>
 </resources>
+
