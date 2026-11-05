@@ -132,6 +132,7 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
+            it.maxHeapSize = "2048m"
             // Robolectric's SDK 36 runtime pokes FileDescriptor internals.
             it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
             // Robolectric's SDK 36 runtime needs Java 21; the build itself stays on the CI JDK.

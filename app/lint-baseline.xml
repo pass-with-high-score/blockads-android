@@ -4,72 +4,6 @@
     <issue
         id="NewApi"
         message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64#getDecoder`"
-        errorLine1="            java.util.Base64.getDecoder().decode(clean)"
-        errorLine2="                             ~~~~~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="322"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64.Decoder#decode`"
-        errorLine1="            java.util.Base64.getDecoder().decode(clean)"
-        errorLine2="                                          ~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="322"
-            column="43"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64#getUrlDecoder`"
-        errorLine1="                java.util.Base64.getUrlDecoder().decode(clean)"
-        errorLine2="                                 ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="325"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64.Decoder#decode`"
-        errorLine1="                java.util.Base64.getUrlDecoder().decode(clean)"
-        errorLine2="                                                 ~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="325"
-            column="50"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64#getMimeDecoder`"
-        errorLine1="                    java.util.Base64.getMimeDecoder().decode(clean)"
-        errorLine2="                                     ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="328"
-            column="38"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64.Decoder#decode`"
-        errorLine1="                    java.util.Base64.getMimeDecoder().decode(clean)"
-        errorLine2="                                                      ~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/utils/ProxyLinkParser.kt"
-            line="328"
-            column="55"/>
-    </issue>
-
-    <issue
-        id="NewApi"
-        message="Call requires API level 26, or core library desugaring (current min is 24): `java.util.Base64#getDecoder`"
         errorLine1="                java.util.Base64.getDecoder().decode(text)"
         errorLine2="                                 ~~~~~~~~~~">
         <location
@@ -184,7 +118,7 @@
         errorLine2="        ~~~~~~~~~~~~~~">
         <location
             file="build.gradle.kts"
-            line="49"
+            line="66"
             column="9"/>
     </issue>
 
@@ -377,12 +311,23 @@
 
     <issue
         id="GradleDependency"
+        message="A newer version of androidx.browser:browser than 1.8.0 is available: 1.10.0"
+        errorLine1="browser = &quot;1.8.0&quot;"
+        errorLine2="          ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
+            line="3"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
         message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.10.0 is available: 2.11.0"
         errorLine1="lifecycleRuntimeKtx = &quot;2.10.0&quot;"
         errorLine2="                      ~~~~~~~~">
         <location
             file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
-            line="10"
+            line="11"
             column="23"/>
     </issue>
 
@@ -393,7 +338,7 @@
         errorLine2="                      ~~~~~~~~">
         <location
             file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
-            line="10"
+            line="11"
             column="23"/>
     </issue>
 
@@ -404,8 +349,30 @@
         errorLine2="                          ~~~~~~~~">
         <location
             file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
-            line="30"
+            line="31"
             column="27"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation3:navigation3-runtime than 1.2.0 is available: 1.2.1"
+        errorLine1="nav3Core = &quot;1.2.0&quot;"
+        errorLine2="           ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
+            line="32"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation3:navigation3-ui than 1.2.0 is available: 1.2.1"
+        errorLine1="nav3Core = &quot;1.2.0&quot;"
+        errorLine2="           ~~~~~~~">
+        <location
+            file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
+            line="32"
+            column="12"/>
     </issue>
 
     <issue
@@ -415,7 +382,7 @@
         errorLine2="         ~~~~~~~~">
         <location
             file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
-            line="4"
+            line="5"
             column="10"/>
     </issue>
 
@@ -426,7 +393,7 @@
         errorLine2="         ~~~~~~~~">
         <location
             file="$HOME/AndroidStudioProjects/blockads-android/gradle/libs.versions.toml"
-            line="4"
+            line="5"
             column="10"/>
     </issue>
 
@@ -444,11 +411,11 @@
     <issue
         id="ModifierParameter"
         message="Modifier parameter should be the first optional parameter"
-        errorLine1="    modifier: Modifier = Modifier"
+        errorLine1="    modifier: Modifier = Modifier,"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/java/app/pwhs/blockads/ui/domainrules/dialog/AddFilterRuleDialog.kt"
-            line="341"
+            file="src/main/java/app/pwhs/blockads/ui/settings/component/AdvancedSection.kt"
+            line="25"
             column="5"/>
     </issue>
 
@@ -546,17 +513,6 @@
         errorLine1="    modifier: Modifier = Modifier"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/java/app/pwhs/blockads/ui/domainrules/dialog/EditFilterRuleDialog.kt"
-            line="13"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="ModifierParameter"
-        message="Modifier parameter should be the first optional parameter"
-        errorLine1="    modifier: Modifier = Modifier"
-        errorLine2="    ~~~~~~~~">
-        <location
             file="src/main/java/app/pwhs/blockads/ui/browser/elementrules/ElementRulesScreen.kt"
             line="74"
             column="5"/>
@@ -570,28 +526,6 @@
         <location
             file="src/main/java/app/pwhs/blockads/ui/filter/component/FilterListCard.kt"
             line="72"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="ModifierParameter"
-        message="Modifier parameter should be the first optional parameter"
-        errorLine1="    modifier: Modifier = Modifier"
-        errorLine2="    ~~~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/ui/domainrules/dialog/FilterRuleFormComponents.kt"
-            line="34"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="ModifierParameter"
-        message="Modifier parameter should be the first optional parameter"
-        errorLine1="    modifier: Modifier = Modifier"
-        errorLine2="    ~~~~~~~~">
-        <location
-            file="src/main/java/app/pwhs/blockads/ui/domainrules/dialog/FilterRuleFormComponents.kt"
-            line="64"
             column="5"/>
     </issue>
 
@@ -681,6 +615,281 @@
             file="src/main/java/app/pwhs/blockads/ui/proxyvpn/component/WireGuardTabContent.kt"
             line="70"
             column="5"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_title&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_title&quot;>Tailscale&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_subtitle&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_subtitle&quot;>Connect to your Tailnet alongside BlockAds&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_desc&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_desc&quot;>Join your private Tailscale or Headscale network while maintaining all on-device ad blocking and HTTPS filtering.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_sign_in_browser&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_sign_in_browser&quot;>Sign in with Tailscale&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="118"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_waiting_auth&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_waiting_auth&quot;>Waiting for browser sign-in...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="119"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_open_auth_url&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_open_auth_url&quot;>Open sign-in page&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="120"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_auth_key_label&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_auth_key_label&quot;>Auth Key (optional)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="121"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_auth_key_hint&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_auth_key_hint&quot;>tskey-auth-...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="122"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_control_url_label&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_control_url_label&quot;>Control Server URL&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="123"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_custom_settings&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_custom_settings&quot;>Custom Server / Auth Key&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="124"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_apply&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_apply&quot;>Connect with Auth Key&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="125"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_connected&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_connected&quot;>Connected&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="126"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_connecting&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_connecting&quot;>Connecting...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="127"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_paused&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_paused&quot;>Paused&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="128"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_enable&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_enable&quot;>Enable Tailscale&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="129"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_disconnected&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_disconnected&quot;>Disconnected&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="130"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_device_ip&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_device_ip&quot;>Tailscale IP&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="131"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_magic_dns&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_magic_dns&quot;>MagicDNS&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="132"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_exit_node&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_exit_node&quot;>Exit Node&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="133"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_exit_node_none&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_exit_node_none&quot;>None (Local Tailnet only)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="134"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_peers&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_peers&quot;>Tailnet Devices&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="135"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_no_peers&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_no_peers&quot;>No other devices found in this tailnet&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="136"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_disconnect&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_disconnect&quot;>Disconnect Tailscale&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="137"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_online&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_online&quot;>Online&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="138"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;tailscale_offline&quot; is not translated in &quot;kk&quot; (Kazakh), &quot;de&quot; (German), &quot;ru&quot; (Russian), &quot;ko&quot; (Korean), &quot;pt&quot; (Portuguese), &quot;in&quot; (Indonesian), &quot;it&quot; (Italian), &quot;fr&quot; (French), &quot;es&quot; (Spanish), &quot;iw&quot; (Hebrew), &quot;zh&quot; (Chinese), &quot;cs&quot; (Czech), &quot;ar&quot; (Arabic), &quot;th&quot; (Thai), &quot;uk&quot; (Ukrainian), &quot;ja&quot; (Japanese), &quot;pl&quot; (Polish), &quot;tr&quot; (Turkish)"
+        errorLine1="    &lt;string name=&quot;tailscale_offline&quot;>Offline&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="139"
+            column="13"/>
     </issue>
 
     <issue
@@ -949,6 +1158,17 @@
 
     <issue
         id="StaticFieldLeak"
+        message="Do not place Android context classes in static fields (static reference to `GoTunnelAdapter` which has field `context` pointing to `Context`); this is a memory leak"
+        errorLine1="        var activeTunnelAdapter: GoTunnelAdapter? = null"
+        errorLine2="        ^">
+        <location
+            file="src/main/java/app/pwhs/blockads/service/AdBlockVpnService.kt"
+            line="94"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
         message="This field leaks a context object"
         errorLine1="    private val context: Context,"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -1099,6 +1319,380 @@
             file="src/main/res/drawable/ic_power.xml"
             line="2"
             column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.filter_rule_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;filter_rule_title&quot;>Filter Rule&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="248"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.filter_rule_subtitle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;filter_rule_subtitle&quot;>The detail of the filter.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="249"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_field_type` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_field_type&quot;>Type&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="250"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_field_param` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_field_param&quot;>Param&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="251"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_field_param_hint` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_field_param_hint&quot;>The param for this type of filter.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="252"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_field_policy` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_field_policy&quot;>Policy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="253"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_field_policy_hint` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_field_policy_hint&quot;>Choose the policy.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="254"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.config_rule_added` appears to be unused"
+        errorLine1="    &lt;string name=&quot;config_rule_added&quot;>Rule added to profile: %s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="255"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_host_suffix` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_host_suffix&quot;>e.g. example.com (matches *.example.com)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="256"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_host` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_host&quot;>e.g. ads.example.com (exact host only)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="257"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_host_keyword` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_host_keyword&quot;>e.g. analytics, adservice, tracker&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="258"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_ip_cidr` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_ip_cidr&quot;>e.g. 192.168.1.0/24 or 10.0.0.1/32&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="259"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_ip_cidr6` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_ip_cidr6&quot;>e.g. 2001:db8::/32&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="260"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_geoip` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_geoip&quot;>e.g. VN, US, JP (2-letter country code)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="261"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_user_agent` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_user_agent&quot;>e.g. *Spotify*, *MicroMessenger*&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="262"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_param_hint_final` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_param_hint_final&quot;>No parameter needed (matches all remaining)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="263"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_title&quot;>Rule Types &amp;amp; Syntax Guide&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="266"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_subtitle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_subtitle&quot;>Understand how each rule type and policy evaluates traffic.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="267"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_action_tooltip` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_action_tooltip&quot;>Rule Guide&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="268"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_category_all` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_category_all&quot;>All&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="269"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_category_domain` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_category_domain&quot;>Domain&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="270"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_category_ip` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_category_ip&quot;>IP &amp;amp; Geo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="271"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_category_other` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_category_other&quot;>Other&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="272"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_category_policy` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_category_policy&quot;>Policy&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="273"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_example_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_example_label&quot;>Example:&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="274"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_matches_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_matches_label&quot;>Matches:&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="275"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_not_matches_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_not_matches_label&quot;>Doesn\&apos;t match:&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="276"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.rule_docs_usage_label` appears to be unused"
+        errorLine1="    &lt;string name=&quot;rule_docs_usage_label&quot;>Best for:&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_settings.xml"
+            line="277"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_subtitle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_subtitle&quot;>Connect to your Tailnet alongside BlockAds&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_exit_node` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_exit_node&quot;>Exit Node&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="133"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_exit_node_none` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_exit_node_none&quot;>None (Local Tailnet only)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="134"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_no_peers` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_no_peers&quot;>No other devices found in this tailnet&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="136"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_online` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_online&quot;>Online&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="138"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tailscale_offline` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tailscale_offline&quot;>Offline&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="139"
+            column="13"/>
     </issue>
 
     <issue
@@ -1685,6 +2279,72 @@
     </issue>
 
     <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_waiting_auth&quot;>Đang chờ xác thực trong trình duyệt...&lt;/string>"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-vi/strings_vpn.xml"
+            line="118"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_waiting_auth&quot;>Waiting for browser sign-in...&lt;/string>"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="119"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_auth_key_hint&quot;>tskey-auth-...&lt;/string>"
+        errorLine2="                                           ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-vi/strings_vpn.xml"
+            line="121"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_auth_key_hint&quot;>tskey-auth-...&lt;/string>"
+        errorLine2="                                           ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="122"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_connecting&quot;>Đang kết nối...&lt;/string>"
+        errorLine2="                                        ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-vi/strings_vpn.xml"
+            line="126"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;tailscale_connecting&quot;>Connecting...&lt;/string>"
+        errorLine2="                                        ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings_vpn.xml"
+            line="127"
+            column="41"/>
+    </issue>
+
+    <issue
         id="IconXmlAndPng"
         message="The following images appear both as density independent `.xml` files and as bitmap files: src/main/res/drawable/ic_launcher_foreground.xml, src/main/res/mipmap-hdpi/ic_launcher_foreground.webp">
         <location
@@ -1930,6 +2590,50 @@
             file="src/main/java/app/pwhs/blockads/ui/httpsfiltering/HttpsFilteringViewModel.kt"
             line="326"
             column="56"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="                        customTabs.launchUrl(context, Uri.parse(effect.url))"
+        errorLine2="                                                      ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/app/pwhs/blockads/ui/tailscale/TailscaleScreen.kt"
+            line="89"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(effect.url)).apply {"
+        errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/app/pwhs/blockads/ui/tailscale/TailscaleScreen.kt"
+            line="91"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="                                    customTabs.launchUrl(context, Uri.parse(uiState.authUrl))"
+        errorLine2="                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/app/pwhs/blockads/ui/tailscale/TailscaleScreen.kt"
+            line="179"
+            column="67"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uiState.authUrl))"
+        errorLine2="                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/app/pwhs/blockads/ui/tailscale/TailscaleScreen.kt"
+            line="181"
+            column="77"/>
     </issue>
 
     <issue

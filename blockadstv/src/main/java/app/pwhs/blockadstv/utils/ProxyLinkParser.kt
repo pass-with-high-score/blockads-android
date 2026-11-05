@@ -318,16 +318,28 @@ object ProxyLinkParser {
 
     private fun decodeBase64Safe(input: String): String {
         val clean = input.trim()
-        val bytes = try {
-            java.util.Base64.getDecoder().decode(clean)
-        } catch (_: Exception) {
+        val bytes = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             try {
-                java.util.Base64.getUrlDecoder().decode(clean)
+                java.util.Base64.getDecoder().decode(clean)
             } catch (_: Exception) {
                 try {
-                    java.util.Base64.getMimeDecoder().decode(clean)
+                    java.util.Base64.getUrlDecoder().decode(clean)
                 } catch (_: Exception) {
-                    android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                    try {
+                        java.util.Base64.getMimeDecoder().decode(clean)
+                    } catch (_: Exception) {
+                        android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+                    }
+                }
+            }
+        } else {
+            try {
+                android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
+            } catch (_: Exception) {
+                try {
+                    android.util.Base64.decode(clean, android.util.Base64.URL_SAFE)
+                } catch (_: Exception) {
+                    android.util.Base64.decode(clean, android.util.Base64.NO_WRAP)
                 }
             }
         }
