@@ -136,7 +136,7 @@ func TestHandleDNSQueryPipeline(t *testing.T) {
 			},
 			wantRcode: dns.RcodeServerFailure, wantLog: true},
 		{name: "local asset host", domain: LocalAssetHost, qtype: dns.TypeA,
-			wantIPs: "198.51.100.1"},
+			wantIPs: "64.29.17.100"},
 		{name: "safesearch cached redirect", domain: "www.google.com", qtype: dns.TypeA,
 			setup: func(t *testing.T, h *tunHarness, _ *upstream) {
 				h.e.SetSafeSearch(true)

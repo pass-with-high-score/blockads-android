@@ -204,9 +204,26 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *Mit
 			return
 		}
 
+		if resp.StatusCode == http.StatusSwitchingProtocols {
+			if err := resp.Write(clientConn); err != nil {
+				return
+			}
+			errc := make(chan error, 2)
+			go func() {
+				_, err := io.Copy(serverConn, cr)
+				errc <- err
+			}()
+			go func() {
+				_, err := io.Copy(clientConn, sr)
+				errc <- err
+			}()
+			<-errc
+			return
+		}
+
 		pipeline.ExecuteResponse(reqHost, req, resp)
 
-		if ShouldInjectHTML(resp.Header.Get("Content-Type")) {
+		if ShouldInjectHTML(resp.Header.Get("Content-Type")) && canInjectResponse(req, resp) {
 			wrapResponseForInjection(resp)
 		}
 		if err := resp.Write(clientConn); err != nil {
@@ -219,6 +236,19 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *Mit
 			return
 		}
 	}
+}
+
+func canInjectResponse(req *http.Request, resp *http.Response) bool {
+	if req != nil && (req.Method == http.MethodHead || req.Method == http.MethodOptions) {
+		return false
+	}
+	if resp.StatusCode < 200 || resp.StatusCode == 204 || resp.StatusCode == 205 || resp.StatusCode == 304 {
+		return false
+	}
+	if resp.Header.Get("Content-Length") == "0" {
+		return false
+	}
+	return true
 }
 
 // ── Utilities ────────────────────────────────────────────────────────────────

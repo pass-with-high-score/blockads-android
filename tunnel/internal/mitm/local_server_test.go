@@ -148,3 +148,20 @@ func TestIsLocalAssetHost(t *testing.T) {
 		}
 	}
 }
+
+func TestServeLocalAssetCORSAndOptions(t *testing.T) {
+	req := httptest.NewRequest("OPTIONS", "https://local.pwhs.app/cosmetic.css", nil)
+	resp := ServeLocalAsset(req)
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("OPTIONS status = %d, want 204", resp.StatusCode)
+	}
+	if resp.Header.Get("Access-Control-Allow-Private-Network") != "true" {
+		t.Fatalf("missing Access-Control-Allow-Private-Network header")
+	}
+
+	getReq := httptest.NewRequest("GET", "https://local.pwhs.app/cosmetic.css", nil)
+	getResp := ServeLocalAsset(getReq)
+	if getResp.Header.Get("Access-Control-Allow-Private-Network") != "true" {
+		t.Fatalf("GET missing Access-Control-Allow-Private-Network header")
+	}
+}

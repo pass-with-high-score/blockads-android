@@ -13,8 +13,8 @@ import (
 const defaultTunMTU = 1500
 
 var (
-	localAssetSynthIP   = net.IPv4(198, 51, 100, 1)
-	localAssetSynthIPv6 = net.ParseIP("2001:db8::1")
+	localAssetSynthIP   = net.IPv4(64, 29, 17, 100)
+	localAssetSynthIPv6 = net.ParseIP("2606:4700::100")
 )
 
 func fileExists(path string) bool {
@@ -127,7 +127,7 @@ func (e *Engine) startTcpStackParallel() error {
 		// Phase D path — MITM handler applies the full filtering flow.
 		stack.SetTcpHandler(newMitmTcpHandler(certMgr, filter, e, uidr, protectFn))
 		// Drop browser QUIC so HTTP/3 can't bypass the TCP-TLS MITM.
-		stack.SetUdpHandler(newMitmUdpHandler(filter, uidr, newProtectedUdpHandler(uidr, protectFn)))
+		stack.SetUdpHandler(newMitmUdpHandler(filter, uidr, e.quicDrop.Load, newProtectedUdpHandler(uidr, protectFn)))
 		logf("TcpIpStack: MITM handler registered (TCP + QUIC-suppressing UDP)")
 	} else {
 		// Phase C default — direct-dial passthrough, no MITM.
@@ -237,7 +237,7 @@ func (e *Engine) SetMitmAllowedUIDs(uidsCsv string) {
 		return
 	}
 
-	var uids []int
+	uids := make([]int, 0)
 	for _, s := range strings.Split(uidsCsv, ",") {
 		s = strings.TrimSpace(s)
 		if s == "" {

@@ -113,7 +113,7 @@
     <!-- Tailscale -->
     <string name="tailscale_title">Tailscale</string>
     <string name="tailscale_subtitle">Kết nối mạng Tailnet song song cùng BlockAds</string>
-    <string name="tailscale_desc">Tham gia mạng riêng Tailscale hoặc Headscale trong khi vẫn giữ 100% tính năng chặn quảng cáo và lọc HTTPS trên máy.</string>
+    <string name="tailscale_desc">Tham gia mạng riêng Tailscale hoặc Headscale trong khi vẫn giữ 100%% tính năng chặn quảng cáo và lọc HTTPS trên máy.</string>
     <string name="tailscale_sign_in_browser">Đăng nhập với Tailscale</string>
     <string name="tailscale_waiting_auth">Đang chờ xác thực trong trình duyệt...</string>
     <string name="tailscale_open_auth_url">Mở trang đăng nhập</string>

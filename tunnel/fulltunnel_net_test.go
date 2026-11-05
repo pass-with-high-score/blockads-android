@@ -207,7 +207,7 @@ func quicFlowDropped(t *testing.T, h *netHarness, dst netip.Addr) bool {
 }
 
 // Browser QUIC (UDP 443) is dropped only when HTTP/3 filtering is on, and,
-// with MITM UIDs configured, only for allowed or unknown UIDs.
+// with MITM UIDs configured, only for allowed UIDs.
 func TestStartFullQUIC(t *testing.T) {
 	ip := testnet.HostIPv4(t)
 	tests := []struct {
@@ -219,9 +219,9 @@ func TestStartFullQUIC(t *testing.T) {
 		wantDials bool
 	}{
 		{"flag off relays", false, "", 0, false, true},
-		{"flag on drops", true, "", 0, true, false},
+		{"flag on without allowed uids relays", true, "", 0, false, true},
 		{"flag on allowed uid drops", true, "10100", 10100, true, false},
-		{"flag on unknown uid drops", true, "10100", UIDUnknown, true, false},
+		{"flag on unknown uid relays", true, "10100", UIDUnknown, false, true},
 		{"flag on other uid relays", true, "10100", 10200, false, true},
 	}
 	for _, tt := range tests {

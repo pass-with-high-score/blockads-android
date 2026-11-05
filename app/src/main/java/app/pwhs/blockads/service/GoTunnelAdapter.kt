@@ -274,7 +274,7 @@ class GoTunnelAdapter(
         vpnInterface: android.os.ParcelFileDescriptor, 
         wgConfigJson: String = "",
         httpsFilteringEnabled: Boolean = false,
-        selectedBrowsers: Set<String> = emptySet(),
+        selectedBrowsers: Set<String>? = null,
         certDir: String = "",
         filterHttp3: Boolean = false,
         blockDohBypass: Boolean = false,
@@ -307,7 +307,7 @@ class GoTunnelAdapter(
         if (mitmMode) {
             try {
                 val pm = context.packageManager
-                val browsers = selectedBrowsers.ifEmpty { TunnelRuleLoader.loadPresetBrowsers(context) }
+                val browsers = selectedBrowsers ?: TunnelRuleLoader.loadPresetBrowsers(context)
                 val uids = browsers.mapNotNull { pkg ->
                     runCatching { pm.getPackageUid(pkg, 0) }.getOrNull()
                 }.joinToString(",")

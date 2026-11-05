@@ -112,7 +112,6 @@ class HttpsFilteringViewModelTest {
         assertTrue(vm.browsers.value.all { it.isSelected })
     }
 
-    @Ignore("deselecting every browser saves an empty set, which reloads as 'no choice' and brings the presets back")
     @Test
     fun `deselecting every browser survives a reload`() {
         val f = HttpsTestFixtures()

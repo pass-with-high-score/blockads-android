@@ -53,6 +53,7 @@ class VpnEngineCoordinatorTest {
         every { preferredIPType } returns flowOf("auto")
         every { appLanguage } returns flowOf(AppPreferences.LANGUAGE_EN)
         every { getSelectedBrowsersSnapshot() } returns setOf("com.android.chrome")
+        every { getSelectedBrowsersOrNullSnapshot() } returns setOf("com.android.chrome")
         coEvery { getWhitelistedAppsSnapshot() } returns setOf("com.bank")
         coEvery { getRoutingModeSnapshot() } answers { this@VpnEngineCoordinatorTest.routingMode }
         coEvery { getWgConfigJsonSnapshot() } answers { savedWgJson }

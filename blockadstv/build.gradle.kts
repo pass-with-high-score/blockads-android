@@ -33,8 +33,8 @@ android {
         applicationId = "app.pwhs.blockadstv"
         minSdk = 24
         targetSdk = 36
-        versionCode = 57
-        versionName = "7.1.0"
+        versionCode = 58
+        versionName = "7.1.1"
     }
 
     flavorDimensions += "distribution"

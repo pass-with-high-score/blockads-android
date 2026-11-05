@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -41,15 +40,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.entities.CustomDnsRule
+import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
-import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
-import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
+import app.pwhs.blockads.ui.domainrules.dialog.AddDomainDialog
+import app.pwhs.blockads.ui.domainrules.dialog.EditDomainDialog
 import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
-import app.pwhs.blockads.ui.domainrules.dialog.RuleTypesDocSheet
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
-import app.pwhs.blockads.utils.ParsedFilterRule
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -59,34 +58,29 @@ fun DomainRulesScreen(
     modifier: Modifier = Modifier,
     viewModel: DomainRulesViewModel = koinViewModel()
 ) {
-    val profileFilterRules by viewModel.profileFilterRules.collectAsStateWithLifecycle()
+    val whitelistDomains by viewModel.whitelistDomains.collectAsStateWithLifecycle()
+    val blocklistDomains by viewModel.blocklistDomains.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
-    var showRuleDocSheet by remember { mutableStateOf(false) }
-    var editingRule by remember { mutableStateOf<ParsedFilterRule?>(null) }
+    var editingWhitelistDomain by remember { mutableStateOf<WhitelistDomain?>(null) }
+    var editingBlocklistRule by remember { mutableStateOf<CustomDnsRule?>(null) }
 
     val pagerState = rememberPagerState(initialPage = 0) { 2 }
     val scope = rememberCoroutineScope()
 
-    val displayableRules = remember(profileFilterRules) {
-        profileFilterRules.filter { it.type != "FINAL" }
+    val whitelistRules = remember(whitelistDomains, searchQuery) {
+        if (searchQuery.isBlank()) whitelistDomains
+        else whitelistDomains.filter { it.domain.contains(searchQuery, ignoreCase = true) }
     }
 
-    val whitelistRules = remember(displayableRules, searchQuery) {
-        displayableRules.filter {
-            it.policy.equals("DIRECT", ignoreCase = true) &&
-                (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
-        }
+    val blocklistRules = remember(blocklistDomains, searchQuery) {
+        if (searchQuery.isBlank()) blocklistDomains
+        else blocklistDomains.filter { it.domain.contains(searchQuery, ignoreCase = true) }
     }
 
-    val blocklistRules = remember(displayableRules, searchQuery) {
-        displayableRules.filter {
-            it.policy.startsWith("REJECT", ignoreCase = true) &&
-                (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
-        }
-    }
+    val totalCount = whitelistDomains.size + blocklistDomains.size
 
     UiEventEffect(viewModel.events)
 
@@ -102,21 +96,13 @@ fun DomainRulesScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${displayableRules.size} rules",
+                            text = "$totalCount rules",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = { showRuleDocSheet = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(R.string.rule_docs_action_tooltip)
-                        )
-                    }
                     IconButton(
                         onClick = { showImportDialog = true }
                     ) {
@@ -233,16 +219,16 @@ fun DomainRulesScreen(
             ) { page ->
                 when (page) {
                     0 -> WhitelistTab(
-                        rules = whitelistRules,
-                        onToggle = { viewModel.toggleProfileRule(it) },
-                        onRemove = { viewModel.removeProfileRule(it) },
-                        onEdit = { editingRule = it }
+                        domains = whitelistRules,
+                        onToggle = { viewModel.toggleWhitelistDomain(it) },
+                        onRemove = { viewModel.removeWhitelistDomain(it) },
+                        onEdit = { editingWhitelistDomain = it }
                     )
                     1 -> BlocklistTab(
-                        rules = blocklistRules,
-                        onToggle = { viewModel.toggleProfileRule(it) },
-                        onRemove = { viewModel.removeProfileRule(it) },
-                        onEdit = { editingRule = it }
+                        domains = blocklistRules,
+                        onToggle = { viewModel.toggleBlocklistDomain(it) },
+                        onRemove = { viewModel.removeBlocklistDomain(it) },
+                        onEdit = { editingBlocklistRule = it }
                     )
                 }
             }
@@ -250,35 +236,39 @@ fun DomainRulesScreen(
     }
 
     if (showAddDialog) {
-        AddFilterRuleDialog(
-            initialPolicy = if (pagerState.currentPage == 0) "DIRECT" else "REJECT",
+        val isAllow = pagerState.currentPage == 0
+        AddDomainDialog(
+            isAllow = isAllow,
             onDismiss = { showAddDialog = false },
-            onSave = { type, param, policy ->
-                viewModel.addProfileRule(
-                    type = type,
-                    param = param,
-                    policy = policy
-                )
+            onAdd = { domain ->
+                if (isAllow) {
+                    viewModel.addWhitelistDomain(domain)
+                } else {
+                    viewModel.addBlocklistDomain(domain)
+                }
                 showAddDialog = false
             }
         )
     }
 
-    editingRule?.let { rule ->
-        EditFilterRuleDialog(
-            initialDomain = rule.param,
-            initialType = rule.type,
-            initialPolicy = rule.policy,
-            onDismiss = { editingRule = null },
-            onSave = { type, param, policy ->
-                viewModel.updateProfileRule(
-                    oldRawLine = rule.rawLine,
-                    oldDomain = rule.param,
-                    type = type,
-                    param = param,
-                    policy = policy
-                )
-                editingRule = null
+    editingWhitelistDomain?.let { domain ->
+        EditDomainDialog(
+            initialDomain = domain.domain,
+            onDismiss = { editingWhitelistDomain = null },
+            onConfirm = { newDomain ->
+                viewModel.updateWhitelistDomain(domain, newDomain)
+                editingWhitelistDomain = null
+            }
+        )
+    }
+
+    editingBlocklistRule?.let { rule ->
+        EditDomainDialog(
+            initialDomain = rule.domain,
+            onDismiss = { editingBlocklistRule = null },
+            onConfirm = { newDomain ->
+                viewModel.updateBlocklistDomain(rule, newDomain)
+                editingBlocklistRule = null
             }
         )
     }
@@ -291,12 +281,6 @@ fun DomainRulesScreen(
                 viewModel.importDomains(domains, isAllow)
                 showImportDialog = false
             }
-        )
-    }
-
-    if (showRuleDocSheet) {
-        RuleTypesDocSheet(
-            onDismiss = { showRuleDocSheet = false }
         )
     }
 }

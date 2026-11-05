@@ -316,17 +316,18 @@ object ProxyLinkParser {
         }
     }
 
+    @android.annotation.SuppressLint("NewApi")
     private fun decodeBase64Safe(input: String): String {
         val clean = input.trim()
         val bytes = try {
             java.util.Base64.getDecoder().decode(clean)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             try {
                 java.util.Base64.getUrlDecoder().decode(clean)
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
                 try {
                     java.util.Base64.getMimeDecoder().decode(clean)
-                } catch (_: Exception) {
+                } catch (_: Throwable) {
                     android.util.Base64.decode(clean, android.util.Base64.DEFAULT)
                 }
             }
