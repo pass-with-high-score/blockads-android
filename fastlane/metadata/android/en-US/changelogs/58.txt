@@ -1,0 +1,5 @@
+• Android TV: Added root proxy and VPN proxy support
+• Fixed HTTPS filtering issues (white screen & WebSocket stability)
+• Fixed Domain Rules management and CA certificate wizard in light mode
+• Enhanced Go tunnel engine performance and connection stability
+• General bug fixes and stability improvements
