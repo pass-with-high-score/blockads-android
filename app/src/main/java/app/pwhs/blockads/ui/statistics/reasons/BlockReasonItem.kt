@@ -75,13 +75,17 @@ fun BlockReasonItem(
         else -> Icons.Default.FilterList to AccentBlue
     }
 
-    val displayName = when (stat.category) {
-        "CUSTOM" -> stringResource(R.string.stats_block_reason_custom)
-        "FIREWALL" -> stringResource(R.string.stats_block_reason_firewall)
-        "SECURITY" -> stringResource(R.string.stats_block_reason_security)
-        "DNS" -> stringResource(R.string.stats_block_reason_upstream)
-        "AD" -> stringResource(R.string.stats_block_reason_filter_list)
-        else -> stat.displayName
+    val displayName = if (stat.filterId != null) {
+        stat.displayName.ifBlank { stringResource(R.string.stats_block_reason_filter_list) }
+    } else {
+        when (stat.category) {
+            "CUSTOM" -> stringResource(R.string.stats_block_reason_custom)
+            "FIREWALL" -> stringResource(R.string.stats_block_reason_firewall)
+            "SECURITY" -> stringResource(R.string.stats_block_reason_security)
+            "DNS" -> stringResource(R.string.stats_block_reason_upstream)
+            "AD" -> stringResource(R.string.stats_block_reason_filter_list)
+            else -> stat.displayName
+        }
     }
 
     val itemModifier = if (onClick != null) {
