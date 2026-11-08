@@ -13,12 +13,19 @@ import app.pwhs.blockads.service.FirewallManager
 import app.pwhs.blockads.service.GoTunnelAdapter
 import app.pwhs.blockads.service.TrustedNetworkManager
 import app.pwhs.blockads.service.TunnelRuleLoader
+import app.pwhs.blockads.service.tailscale.TailscalePeerNotifier
+import app.pwhs.blockads.service.tailscale.TailscaleTaildropManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -43,6 +50,33 @@ class VpnEngineCoordinator(
     private val filterRepo: FilterListRepository,
     private val firewallRuleDao: FirewallRuleDao
 ) {
+    private val tailscalePeerNotifier by lazy { TailscalePeerNotifier(context) }
+    private val taildropManager by lazy {
+        TailscaleTaildropManager(
+            context = context,
+            tailscalePreferences = appPrefs.tailscale,
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        )
+    }
+    private var tailscaleMonitorJob: Job? = null
+
+    fun startTailscaleBackgroundMonitor(goTunnelAdapter: GoTunnelAdapter) {
+        tailscaleMonitorJob?.cancel()
+        tailscaleMonitorJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isActive) {
+                delay(10_000)
+                if (appPrefs.tailscale.isEnabledSnapshot()) {
+                    val status = goTunnelAdapter.getTailscaleStatus()
+                    tailscalePeerNotifier.checkAndNotifyJson(status)
+                }
+            }
+        }
+    }
+
+    fun stopTailscaleMonitor() {
+        tailscaleMonitorJob?.cancel()
+        tailscaleMonitorJob = null
+    }
 
     suspend fun prepareStartupConfig(): StartupConfig {
         filterRepo.loadWhitelist()
@@ -216,8 +250,11 @@ class VpnEngineCoordinator(
         val blockDohBypass = appPrefs.getBlockDohBypassSnapshot()
         val blockWebRtc = appPrefs.getBlockWebRtcLeakSnapshot()
 
-        // Tailscale temporarily disabled for hotfix
-        if (false && appPrefs.tailscale.isEnabledSnapshot()) {
+        if (appPrefs.tailscale.isEnabledSnapshot()) {
+            val tdCache = java.io.File(context.cacheDir, "taildrop").apply { mkdirs() }
+            goTunnelAdapter.setTailscaleTaildropDir(tdCache.absolutePath)
+            goTunnelAdapter.setTailscaleTaildropReceiver(taildropManager)
+
             val tsState = appPrefs.tailscale.getStateJsonSnapshot()
             val tsControlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val tsAuthKey = appPrefs.tailscale.getAuthKeySnapshot()
@@ -245,6 +282,11 @@ class VpnEngineCoordinator(
             blockWebRtc = blockWebRtc,
             socketProtector = socketProtector
         )
+
+        if (appPrefs.tailscale.isEnabledSnapshot()) {
+            goTunnelAdapter.startTailscaleSession("blockads-android")
+            startTailscaleBackgroundMonitor(goTunnelAdapter)
+        }
     }
 
     suspend fun handleLinkPropertiesChanged(

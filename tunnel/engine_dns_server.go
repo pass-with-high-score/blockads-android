@@ -332,6 +332,9 @@ func (e *Engine) domainHasAAAA(domain string) bool {
 // no A record (NXDOMAIN / empty answer) is NOT retried — that's treated as
 // intentional filtering by the user's configured DNS.
 func (e *Engine) lookupIP(domain string) (net.IP, error) {
+	if ip := e.resolveTailscaleMagicDNS(domain); ip != nil {
+		return ip, nil
+	}
 	e.mu.Lock()
 	resolver := e.resolver
 	e.mu.Unlock()

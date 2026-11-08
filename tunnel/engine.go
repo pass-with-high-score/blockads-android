@@ -163,7 +163,9 @@ type Engine struct {
 	proxyClient atomic.Pointer[proxy.Client]
 
 	// Tailscale manager (lightweight integration)
-	tsManager atomic.Pointer[tailscale.Manager]
+	tsManager        atomic.Pointer[tailscale.Manager]
+	taildropReceiver TaildropReceiver
+	taildropDir      string
 
 	// preferredIPType controls whether IPv4 or IPv6 DNS records are preferred:
 	// "auto" (default): dual stack, allow both A and AAAA queries.

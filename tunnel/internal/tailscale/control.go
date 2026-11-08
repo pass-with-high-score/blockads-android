@@ -6,7 +6,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -31,10 +30,28 @@ type ControlClient struct {
 	serverKey  [32]byte
 	insecure   bool
 
-	mu      sync.Mutex
-	session *NoiseIKSession
-	rawConn net.Conn
-	running bool
+	mu            sync.Mutex
+	session       *NoiseIKSession
+	rawConn       net.Conn
+	running       bool
+	endpoints     []string
+	preferredDERP int
+	peerAPIPort   uint16
+}
+
+// SetNetMeta updates the local UDP endpoints and preferred DERP region sent in MapRequest.
+func (c *ControlClient) SetNetMeta(endpoints []string, preferredDERP int) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.endpoints = append([]string(nil), endpoints...)
+	c.preferredDERP = preferredDERP
+}
+
+// SetPeerAPIPort sets the port on which the node's PeerAPI / Taildrop server listens.
+func (c *ControlClient) SetPeerAPIPort(port uint16) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.peerAPIPort = port
 }
 
 // NewControlClient creates a new ControlClient.
@@ -191,25 +208,29 @@ func (c *ControlClient) dialNoiseTLS(ctx context.Context) (*NoiseConn, error) {
 		return nil, fmt.Errorf("dial control server %s: %w", targetAddr, err)
 	}
 
-	tlsConn := tls.Client(rawConn, &tls.Config{
-		ServerName:         u.Hostname(),
-		InsecureSkipVerify: c.insecure,
-		NextProtos:         []string{"http/1.1"},
-	})
-	if err := tlsConn.HandshakeContext(ctx); err != nil {
-		rawConn.Close()
-		return nil, fmt.Errorf("tls handshake: %w", err)
+	var streamConn net.Conn = rawConn
+	if u.Scheme != "http" {
+		tlsConn := tls.Client(rawConn, &tls.Config{
+			ServerName:         u.Hostname(),
+			InsecureSkipVerify: c.insecure,
+			NextProtos:         []string{"http/1.1"},
+		})
+		if err := tlsConn.HandshakeContext(ctx); err != nil {
+			rawConn.Close()
+			return nil, fmt.Errorf("tls handshake: %w", err)
+		}
+		streamConn = tlsConn
 	}
 
 	noiseSess, err := NewNoiseIKClient(1, c.state.MachineKey(), c.serverKey)
 	if err != nil {
-		tlsConn.Close()
+		streamConn.Close()
 		return nil, err
 	}
 
 	msg1, err := noiseSess.CreateHandshakeMessage(1)
 	if err != nil {
-		tlsConn.Close()
+		streamConn.Close()
 		return nil, err
 	}
 
@@ -221,21 +242,21 @@ func (c *ControlClient) dialNoiseTLS(ctx context.Context) (*NoiseConn, error) {
 		"X-Tailscale-Handshake: %s\r\n"+
 		"Content-Length: 0\r\n\r\n", u.Hostname(), b64Msg1)
 
-	if _, err := io.WriteString(tlsConn, reqStr); err != nil {
-		tlsConn.Close()
+	if _, err := io.WriteString(streamConn, reqStr); err != nil {
+		streamConn.Close()
 		return nil, err
 	}
 
-	br := bufio.NewReader(tlsConn)
+	br := bufio.NewReader(streamConn)
 	resp, err := http.ReadResponse(br, nil)
 	if err != nil {
-		tlsConn.Close()
+		streamConn.Close()
 		return nil, fmt.Errorf("read handshake response: %w", err)
 	}
 
 	if resp.StatusCode != http.StatusSwitchingProtocols {
 		body, _ := io.ReadAll(resp.Body)
-		tlsConn.Close()
+		streamConn.Close()
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -249,25 +270,25 @@ func (c *ControlClient) dialNoiseTLS(ctx context.Context) (*NoiseConn, error) {
 		var err error
 		msg2, err = base64.StdEncoding.DecodeString(handshakeRespHeader)
 		if err != nil {
-			tlsConn.Close()
+			streamConn.Close()
 			return nil, fmt.Errorf("decode msg2 header: %w", err)
 		}
 	} else {
 		// Response msg2 is sent directly over the upgraded socket stream (51 bytes)
 		rawBuf := make([]byte, 51)
 		if _, err := io.ReadFull(br, rawBuf); err != nil {
-			tlsConn.Close()
+			streamConn.Close()
 			return nil, fmt.Errorf("read msg2 from stream: %w", err)
 		}
 		msg2 = rawBuf
 	}
 
 	if err := noiseSess.ProcessHandshakeResponse(msg2); err != nil {
-		tlsConn.Close()
+		streamConn.Close()
 		return nil, fmt.Errorf("process msg2: %w", err)
 	}
 
-	return NewNoiseConn(noiseSess, &bufferedConn{r: br, Conn: tlsConn}), nil
+	return NewNoiseConn(noiseSess, &bufferedConn{r: br, Conn: streamConn}), nil
 }
 
 // Register registers the machine with the control plane.
@@ -341,108 +362,6 @@ func (c *ControlClient) Register(ctx context.Context, hostname string, followup 
 	}
 
 	return regResp.AuthURL, false, nil
-}
-
-// StartMapSession starts long-running subscription to /machine/map and feeds updates into updateChan.
-func (c *ControlClient) StartMapSession(ctx context.Context, hostname string, updateChan chan<- *MapResponse) error {
-	noiseConn, err := c.dialNoiseTLS(ctx)
-	if err != nil {
-		return err
-	}
-
-	c.mu.Lock()
-	c.rawConn = noiseConn
-	c.running = true
-	c.mu.Unlock()
-
-	defer func() {
-		c.mu.Lock()
-		c.running = false
-		if c.rawConn != nil {
-			c.rawConn.Close()
-			c.rawConn = nil
-		}
-		c.mu.Unlock()
-	}()
-
-	mapReq := MapRequest{
-		Version:   105,
-		NodeKey:   c.state.NodeKey().PublicHex("nodekey:"),
-		DiscoKey:  c.state.DiscoKey().PublicHex("discokey:"),
-		Stream:    true,
-		OmitPeers: false,
-		Hostinfo: &Hostinfo{
-			OS:       "android",
-			Hostname: hostname,
-		},
-	}
-
-	reqBytes, err := json.Marshal(mapReq)
-	if err != nil {
-		return err
-	}
-
-	client := &http.Client{
-		Transport: &http2.Transport{
-			AllowHTTP: true,
-			DialTLSContext: func(ctx context.Context, network, addr string, cfg *tls.Config) (net.Conn, error) {
-				return noiseConn, nil
-			},
-		},
-	}
-
-	mapURL := strings.TrimRight(c.controlURL, "/") + "/machine/map"
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", mapURL, bytes.NewReader(reqBytes))
-	if err != nil {
-		return err
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(httpReq)
-	if err != nil {
-		return fmt.Errorf("map stream request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("map stream HTTP %d: %s", resp.StatusCode, string(b))
-	}
-
-	br := bufio.NewReader(resp.Body)
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
-
-		var lenBuf [4]byte
-		if _, err := io.ReadFull(br, lenBuf[:]); err != nil {
-			return err
-		}
-		frameLen := binary.LittleEndian.Uint32(lenBuf[:])
-		if frameLen == 0 || frameLen > 16*1024*1024 {
-			continue
-		}
-
-		frameBytes := make([]byte, frameLen)
-		if _, err := io.ReadFull(br, frameBytes); err != nil {
-			return err
-		}
-
-		var mapResp MapResponse
-		if err := json.Unmarshal(frameBytes, &mapResp); err != nil {
-			logf("[Tailscale] map unmarshal error: %v", err)
-			continue
-		}
-
-		select {
-		case updateChan <- &mapResp:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
 }
 
 // Close closes the active control session.

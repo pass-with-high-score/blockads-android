@@ -448,6 +448,14 @@ class GoTunnelAdapter(
     fun configureTailscale(state: String, url: String, key: String): String =
         runCatching { engine.configureTailscale(state, url, key) }.getOrDefault("{}")
 
+    fun setTailscaleTaildropReceiver(receiver: tunnel.TaildropReceiver) {
+        runCatching { engine.setTailscaleTaildropReceiver(receiver) }
+    }
+
+    fun setTailscaleTaildropDir(dir: String) {
+        runCatching { engine.setTailscaleTaildropDir(dir) }
+    }
+
     fun startTailscaleAuth(host: String): String =
         runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
 
@@ -468,6 +476,9 @@ class GoTunnelAdapter(
     fun setTailscaleExitNode(id: Long) {
         runCatching { engine.setTailscaleExitNode(id) }
     }
+
+    fun pingTailscalePeer(target: String): String =
+        runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
 
     fun isTailscaleActive(): Boolean =
         runCatching { engine.isTailscaleActive }.getOrDefault(false)

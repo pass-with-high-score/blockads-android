@@ -200,9 +200,12 @@ func (e *Engine) isProxyServer(targetIP net.IP, targetPort int) bool {
 	return false
 }
 
-// DialProxy attempts to dial target via active proxy (Shadowsocks, Trojan, VLESS) if active.
-// Returns (conn, true, err) if proxy handled it, or (nil, false, nil) if no proxy is active.
+// DialProxy attempts to dial target via Tailscale (for Tailnet / Exit Node traffic) or the active outbound proxy.
+// Returns (conn, true, err) if handled, or (nil, false, nil) if neither is applicable.
 func (e *Engine) DialProxy(targetIP net.IP, targetPort int) (net.Conn, bool, error) {
+	if conn, used, err := e.dialTailscale(targetIP, targetPort); used {
+		return conn, true, err
+	}
 	if e.isProxyServer(targetIP, targetPort) {
 		logf("[Engine] DialProxy: skipped dial to proxy server itself (%s:%d)", targetIP, targetPort)
 		return nil, false, nil

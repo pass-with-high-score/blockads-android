@@ -303,6 +303,9 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onDestroy() {
+        if (::engineCoordinator.isInitialized) {
+            engineCoordinator.stopTailscaleMonitor()
+        }
         activeTunnelAdapter = null
         socketProtector = null
         tunnelSocketProtector = null

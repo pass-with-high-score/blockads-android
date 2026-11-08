@@ -1,8 +1,11 @@
 package tunnel
 
 import (
+	"context"
+	"fmt"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/tailscale"
 )
@@ -31,7 +34,19 @@ func (e *Engine) ConfigureTailscale(stateJSON, controlURL, authKey string) strin
 		st.AuthKey = authKey
 	}
 
-	mgr := tailscale.NewManager(st, e.protectFn)
+	e.mu.Lock()
+	protectFn := e.protectFn
+	rcv := e.taildropReceiver
+	tdDir := e.taildropDir
+	e.mu.Unlock()
+
+	mgr := tailscale.NewManager(st, protectFn)
+	if rcv != nil {
+		mgr.SetTaildropReceiver(rcv)
+	}
+	if tdDir != "" {
+		mgr.SetTaildropTempDir(tdDir)
+	}
 	if old := e.tsManager.Swap(mgr); old != nil {
 		old.Stop()
 	}
@@ -126,4 +141,69 @@ func (e *Engine) matchTailscalePeer(ip net.IP) bool {
 		return false
 	}
 	return mgr.MatchPeer(ip) != nil
+}
+
+// PingTailscalePeer tests reachability and latency to a Tailscale peer by ID or IP.
+// Returns JSON string: {"latency_ms": 15, "direct": true, "relay": "sin"} or {"error": "..."}
+func (e *Engine) PingTailscalePeer(target string) string {
+	mgr := e.tsManager.Load()
+	if mgr == nil {
+		return `{"error":"Tailscale not running"}`
+	}
+	rttMs, isDirect, relay, err := mgr.PingPeer(target)
+	if err != nil {
+		return fmt.Sprintf(`{"error":%q}`, err.Error())
+	}
+	return fmt.Sprintf(`{"latency_ms":%d,"direct":%t,"relay":%q}`, rttMs, isDirect, relay)
+}
+
+// TaildropReceiver is a callback invoked when a file is received via Taildrop.
+type TaildropReceiver interface {
+	OnFileReceived(fileName string, tempPath string, size int64) bool
+}
+
+// SetTailscaleTaildropReceiver registers a callback to handle incoming Taildrop files.
+func (e *Engine) SetTailscaleTaildropReceiver(receiver TaildropReceiver) {
+	e.mu.Lock()
+	e.taildropReceiver = receiver
+	mgr := e.tsManager.Load()
+	e.mu.Unlock()
+
+	if mgr != nil {
+		mgr.SetTaildropReceiver(receiver)
+	}
+}
+
+// SetTailscaleTaildropDir configures the directory where incoming Taildrop files are temporarily stored.
+func (e *Engine) SetTailscaleTaildropDir(dir string) {
+	e.mu.Lock()
+	e.taildropDir = dir
+	mgr := e.tsManager.Load()
+	e.mu.Unlock()
+
+	if mgr != nil {
+		mgr.SetTaildropTempDir(dir)
+	}
+}
+
+// dialTailscale routes a TCP connection through the Tailscale DataPlane when the destination
+// matches a Tailscale peer, an active Exit Node, or falls within the Tailscale CGNAT range.
+func (e *Engine) dialTailscale(targetIP net.IP, targetPort int) (net.Conn, bool, error) {
+	mgr := e.tsManager.Load()
+	if mgr == nil {
+		return nil, false, nil
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	return mgr.DialTCP(ctx, targetIP, targetPort)
+}
+
+// dialTailscaleUDP routes a UDP connection through the Tailscale DataPlane when the destination
+// matches a Tailscale peer, an active Exit Node, or falls within the Tailscale CGNAT range.
+func (e *Engine) dialTailscaleUDP(targetIP net.IP, targetPort int) (net.Conn, bool, error) {
+	mgr := e.tsManager.Load()
+	if mgr == nil {
+		return nil, false, nil
+	}
+	return mgr.DialUDP(targetIP, targetPort)
 }

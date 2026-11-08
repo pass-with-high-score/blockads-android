@@ -237,12 +237,13 @@ func isLoopbackOrInternal(hostname string) bool {
 	return ip.IsLoopback() || ip.IsUnspecified() || ip.IsLinkLocalUnicast() || isPrivateIP(ip)
 }
 
-// isPrivateIP checks if an IP is in RFC 1918 private ranges.
+// isPrivateIP checks if an IP is in RFC 1918 private ranges or Tailscale CGNAT (100.64.0.0/10).
 func isPrivateIP(ip net.IP) bool {
 	privateRanges := []string{
 		"10.0.0.0/8",
 		"172.16.0.0/12",
 		"192.168.0.0/16",
+		"100.64.0.0/10",
 	}
 	for _, cidrStr := range privateRanges {
 		_, cidr, _ := net.ParseCIDR(cidrStr)

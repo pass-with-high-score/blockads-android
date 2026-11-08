@@ -97,7 +97,7 @@ func TestRealTailscaleNoiseHandshake(t *testing.T) {
 		t.Fatal(err)
 	}
 	client := NewControlClient(st, nil)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	conn, err := client.dialNoiseTLS(ctx)

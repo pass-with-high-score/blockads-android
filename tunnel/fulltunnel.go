@@ -79,40 +79,9 @@ func (b *bufferedTun) halt() { close(b.stop) }
 
 var _ io.ReadWriter = (*bufferedTun)(nil)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// fulltunnel.go — dedicated FULL-NETWORK HTTPS-filtering data path.
-//
-// This is a separate, isolated engine mode from the DNS-only / WireGuard
-// modes. Where the legacy path bridges the TUN into the userspace stack
-// through DnsInterceptor + a bounded packetPipe (which deadlocks under
-// real browser load — the inbound queue fills, backpressure stalls every
-// flow), this path hands the TUN fd DIRECTLY to the gVisor stack, exactly
-// as tun2socks is designed to run:
-//
-//	 apps ─► TUN ─► gVisor stack (owns the fd; native flow control)
-//	                 ├─ TCP any        → MITM handler (browser) / passthrough
-//	                 ├─ UDP :53        → engine.ServeDNS (adblock + resolve)
-//	                 ├─ UDP :443 (br)  → drop (force TCP so HTTP/3 can't dodge MITM)
-//	                 └─ UDP other      → protected passthrough
-//
-// One dispatcher owns the TUN, reads AND writes it, so there is no
-// second reader, no pipe, no separate outbound-writer goroutine, and no
-// double-hop bottleneck. The legacy Start()/DnsInterceptor/packetPipe
-// path is left completely untouched and still serves the current modes;
-// StartFull is only entered when the app selects full-network filtering.
-// ─────────────────────────────────────────────────────────────────────────────
-
 // StartFull runs the engine in full-network capture mode. The gVisor
 // stack reads the TUN fd directly and terminates every flow in userspace.
-// StartStackMitm MUST have been called first to initialise the MITM CA +
-// filter. Blocks until Stop() is called.
-//
-// gomobile usage (Kotlin), when full-network HTTPS filtering is on:
-//
-//	engine.setUseTcpStack(true)          // (informational; not used by StartFull)
-//	engine.startStackMitm(certDir)       // CA + filter
-//	engine.setMitmAllowedUIDs(uids)
-//	engine.startFull(fd, protector)      // instead of engine.start(...)
+// Blocks until Stop() is called.
 func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	e.mu.Lock()
 	if e.running {
@@ -263,9 +232,20 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 		}
 		engine.logConnection(flow, ProtocolUDP)
 
-		// When Proxy (Shadowsocks, Trojan, VLESS) is active, drop QUIC (UDP 443) so browsers fall back to TCP through the proxy.
-		if (engine.proxyClient.Load() != nil || engine.ssClient.Load() != nil) && flow.serverPort == 443 {
+		// When Proxy (Shadowsocks, Trojan, VLESS) or Tailscale peer routing is active, drop QUIC (UDP 443)
+		// so browsers fall back to TCP through the tunnel.
+		if (engine.proxyClient.Load() != nil || engine.ssClient.Load() != nil || engine.matchTailscalePeer(flow.serverIP)) && flow.serverPort == 443 {
 			_ = conn.Close()
+			return
+		}
+
+		if udpRemote, used, err := engine.dialTailscaleUDP(flow.serverIP, flow.serverPort); used {
+			defer conn.Close()
+			if err != nil {
+				return
+			}
+			defer udpRemote.Close()
+			bidiCopyFlow(conn, udpRemote)
 			return
 		}
 
