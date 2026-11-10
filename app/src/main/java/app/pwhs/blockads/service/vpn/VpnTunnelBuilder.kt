@@ -7,6 +7,7 @@ import android.os.ParcelFileDescriptor
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardConfig
+import app.pwhs.blockads.utils.NetworkInfoHelper
 import app.pwhs.blockads.utils.SubnetDecomposer
 import app.pwhs.blockads.utils.WgConfigIssue
 import app.pwhs.blockads.utils.wgRoutingFromPeers
@@ -29,7 +30,8 @@ sealed interface TunnelResult {
 
 class VpnTunnelBuilder(
     private val vpnService: VpnService,
-    private val appPrefs: AppPreferences
+    private val appPrefs: AppPreferences,
+    private val hasIpv6Provider: () -> Boolean = { NetworkInfoHelper.hasRoutableIpv6(vpnService) }
 ) {
 
     fun establish(whitelistedApps: Set<String>): TunnelResult {
@@ -161,14 +163,14 @@ class VpnTunnelBuilder(
                 b
             } else {
                 val excludeLan = runBlocking { appPrefs.excludeLan.first() }
-                val preferredIp = if (isProxyOutbound) {
-                    runBlocking { appPrefs.preferredIPType.first() }
-                } else {
-                    AppPreferences.PREFERRED_IP_AUTO
+                val preferredIp = runBlocking { appPrefs.preferredIPType.first() }
+                val allowIpv6 = when (preferredIp) {
+                    AppPreferences.PREFERRED_IP_IPV4 -> false
+                    AppPreferences.PREFERRED_IP_IPV6 -> true
+                    else -> hasIpv6Provider()
                 }
-                val allowIpv6 = preferredIp != AppPreferences.PREFERRED_IP_IPV4
-                val allowIpv4 = true
-                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan, preferredIp=$preferredIp)")
+                val allowIpv4 = preferredIp != AppPreferences.PREFERRED_IP_IPV6
+                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan, preferredIp=$preferredIp, allowIpv6=$allowIpv6)")
                 val appName = vpnService.getString(R.string.app_name)
                 val b = vpnService.Builder()
                     .setSession(if (isSs) "$appName Outline" else appName)

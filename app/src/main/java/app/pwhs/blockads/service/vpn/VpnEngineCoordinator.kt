@@ -154,15 +154,7 @@ class VpnEngineCoordinator(
         val splitDnsZones = appPrefs.splitDnsZones.first()
         goTunnelAdapter.setSplitDNSZones(splitDnsZones)
 
-        val routingMode = appPrefs.getRoutingModeSnapshot()
-        val isProxyVpn = routingMode == AppPreferences.ROUTING_MODE_PROXY_VPN ||
-            routingMode == AppPreferences.ROUTING_MODE_WIREGUARD ||
-            routingMode == AppPreferences.ROUTING_MODE_SHADOWSOCKS
-        val preferredIPType = if (isProxyVpn) {
-            appPrefs.preferredIPType.first()
-        } else {
-            AppPreferences.PREFERRED_IP_AUTO
-        }
+        val preferredIPType = appPrefs.preferredIPType.first()
         goTunnelAdapter.setPreferredIPType(preferredIPType)
 
         val appLang = appPrefs.appLanguage.first()

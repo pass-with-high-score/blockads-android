@@ -230,16 +230,8 @@ class AdBlockVpnService : VpnService() {
             }
         }
         serviceScope.launch {
-            kotlinx.coroutines.flow.combine(
-                appPrefs.preferredIPType,
-                appPrefs.routingMode
-            ) { ipType, mode ->
-                val isProxyVpn = mode == AppPreferences.ROUTING_MODE_PROXY_VPN ||
-                    mode == AppPreferences.ROUTING_MODE_WIREGUARD ||
-                    mode == AppPreferences.ROUTING_MODE_SHADOWSOCKS
-                if (isProxyVpn) ipType else AppPreferences.PREFERRED_IP_AUTO
-            }.collect { effectiveIpType ->
-                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setPreferredIPType(effectiveIpType)
+            appPrefs.preferredIPType.collect { ipType ->
+                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setPreferredIPType(ipType)
             }
         }
         serviceScope.launch {
