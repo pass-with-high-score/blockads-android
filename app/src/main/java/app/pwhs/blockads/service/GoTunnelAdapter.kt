@@ -420,8 +420,18 @@ class GoTunnelAdapter(
      */
     fun isEngineRunning(): Boolean = engine.isRunning
 
+    fun startTransparentMitm(port: Int = 15354): Boolean = runCatching {
+        engine.startTransparentMitm(port.toLong())
+        true
+    }.onFailure { Timber.e(it, "Failed to start transparent MITM proxy") }.getOrDefault(false)
+
+    fun stopTransparentMitm() {
+        runCatching { engine.stopTransparentMitm() }
+    }
+
     fun stop() {
         isRunning = false
+        stopTransparentMitm()
         engine.stop()
         Timber.d("Go tunnel engine stopped")
     }

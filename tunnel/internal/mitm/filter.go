@@ -173,6 +173,16 @@ func (f *MitmFilter) HasAllowedUIDs() bool {
 	return f.uidFilterConfigured
 }
 
+// FirstAllowedUID returns one of the allowed UIDs, or -1 if none configured.
+func (f *MitmFilter) FirstAllowedUID() int {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	for uid := range f.allowedUIDs {
+		return uid
+	}
+	return -1
+}
+
 // SetAdPathPatterns replaces the list of URL path patterns to block.
 // Patterns are matched as substrings against the request path (case-insensitive).
 // Pass nil or an empty slice to clear. Called from Kotlin with patterns
