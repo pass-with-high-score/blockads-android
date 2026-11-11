@@ -38,7 +38,7 @@ tvMaterial = "1.1.0"
 # Prebuilt Go tunnel. Published as a GitHub Release asset by
 # .github/workflows/update_tunnel.yml; the checksum is pinned in gradle/tunnel.aar.sha256.
 # Format: <release date>.<short git tree hash of tunnel/>
-tunnel = "2026.11.02.a661770f"
+tunnel = "2026.11.08.63123206"
 
 [libraries]
 tunnel = { module = "app.pwhs:tunnel", version.ref = "tunnel" }
