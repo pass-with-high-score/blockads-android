@@ -37,7 +37,7 @@ class GoTunnelAdapter(
     private val firewallManagerProvider: () -> FirewallManager?,
     private val recordLogProvider: () -> Boolean,
 ) {
-    private val engine = tunnel.Tunnel.newEngine()
+    val engine = tunnel.Tunnel.newEngine()
 
     init {
         TunnelRuleLoader.loadGeoIPDatabase(context, engine)
