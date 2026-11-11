@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.text.format.Formatter
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.prefs.TailscalePreferences
 import kotlinx.coroutines.CoroutineScope
@@ -60,7 +61,7 @@ class TailscaleTaildropManager(
             // 1. If user selected a custom SAF directory
             if (dirUriString.isNotEmpty()) {
                 runCatching {
-                    val treeUri = Uri.parse(dirUriString)
+                    val treeUri = dirUriString.toUri()
                     val parentDocUri = DocumentsContract.buildDocumentUriUsingTree(
                         treeUri,
                         DocumentsContract.getTreeDocumentId(treeUri)

@@ -59,8 +59,8 @@ fun TailscaleStatusCard(
     onToggleEnabled: (Boolean) -> Unit,
     onDisconnect: () -> Unit,
     onStartVpn: () -> Unit,
-    onSelectSelfPeer: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSelectSelfPeer: (() -> Unit)? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),

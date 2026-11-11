@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -224,7 +224,7 @@ fun TailscalePeerDetailSheet(
                     )
 
                     val expiryText = if (peer.keyExpiry > 0) {
-                        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", LocalLocale.current.platformLocale)
                         sdf.format(Date(peer.keyExpiry * 1000))
                     } else {
                         stringResource(R.string.tailscale_key_never_expires)

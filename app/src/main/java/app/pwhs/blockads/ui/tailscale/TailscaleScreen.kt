@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +63,7 @@ fun TailscaleScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -102,7 +104,7 @@ fun TailscaleScreen(
                     } catch (e: Exception) {
                         Timber.e(e, "Failed to bring MainActivity to foreground")
                     }
-                    snackbarHostState.showSnackbar(context.getString(R.string.tailscale_auth_success))
+                    snackbarHostState.showSnackbar(resources.getString(R.string.tailscale_auth_success))
                 }
                 is TailscaleUiEffect.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(effect.message)
@@ -110,7 +112,7 @@ fun TailscaleScreen(
                 is TailscaleUiEffect.CopyToClipboard -> {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText(effect.label, effect.text))
-                    snackbarHostState.showSnackbar(context.getString(R.string.tailscale_copied, effect.label))
+                    snackbarHostState.showSnackbar(resources.getString(R.string.tailscale_copied, effect.label))
                 }
             }
         }
