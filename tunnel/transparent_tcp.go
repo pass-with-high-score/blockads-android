@@ -3,85 +3,19 @@ package tunnel
 import (
 	"fmt"
 	"net"
-	"syscall"
 	"time"
-	"unsafe"
 
+	"github.com/sagernet/sing/common/control"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
-type sockaddrIn struct {
-	sinFamily uint16
-	sinPort   uint16
-	sinAddr   [4]byte
-	sinZero   [8]byte
-}
-
-type sockaddrIn6 struct {
-	sin6Family   uint16
-	sin6Port     uint16
-	sin6Flowinfo uint32
-	sin6Addr     [16]byte
-	sin6ScopeID  uint32
-}
-
 func getOriginalDst(tcpConn *net.TCPConn) (net.IP, int, error) {
-	raw, err := tcpConn.SyscallConn()
+	addrPort, err := control.GetOriginalDestination(tcpConn)
 	if err != nil {
 		return nil, 0, err
 	}
-	var origIP net.IP
-	var origPort int
-	var opErr error
-
-	err = raw.Control(func(fd uintptr) {
-		// Try IPv4 SO_ORIGINAL_DST
-		var addr4 sockaddrIn
-		size4 := uint32(unsafe.Sizeof(addr4))
-		_, _, errno := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
-			fd,
-			uintptr(syscall.IPPROTO_IP),
-			uintptr(80), // SO_ORIGINAL_DST
-			uintptr(unsafe.Pointer(&addr4)),
-			uintptr(unsafe.Pointer(&size4)),
-			0,
-		)
-		if errno == 0 {
-			origIP = net.IPv4(addr4.sinAddr[0], addr4.sinAddr[1], addr4.sinAddr[2], addr4.sinAddr[3])
-			origPort = int(addr4.sinPort>>8) | int(addr4.sinPort&0xff)<<8
-			return
-		}
-
-		// Try IPv6 IP6T_SO_ORIGINAL_DST
-		var addr6 sockaddrIn6
-		size6 := uint32(unsafe.Sizeof(addr6))
-		_, _, errno6 := syscall.Syscall6(
-			syscall.SYS_GETSOCKOPT,
-			fd,
-			uintptr(syscall.IPPROTO_IPV6),
-			uintptr(80), // IP6T_SO_ORIGINAL_DST
-			uintptr(unsafe.Pointer(&addr6)),
-			uintptr(unsafe.Pointer(&size6)),
-			0,
-		)
-		if errno6 == 0 {
-			origIP = net.IP(addr6.sin6Addr[:])
-			origPort = int(addr6.sin6Port>>8) | int(addr6.sin6Port&0xff)<<8
-			return
-		}
-
-		opErr = errno
-	})
-
-	if err != nil {
-		return nil, 0, err
-	}
-	if opErr != nil {
-		return nil, 0, opErr
-	}
-	return origIP, origPort, nil
+	return net.IP(addrPort.Addr().AsSlice()), int(addrPort.Port()), nil
 }
 
 type transparentTCPConn struct {
