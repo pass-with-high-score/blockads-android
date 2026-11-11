@@ -66,6 +66,7 @@ class RootProxyServiceShellTest {
         every { youtubeRestrictedMode } returns flowOf(false)
         every { dnsResponseType } returns flowOf("NXDOMAIN")
         every { firewallEnabled } returns flowOf(false)
+        every { httpsFilteringEnabled } returns flowOf(false)
         coEvery { getWhitelistedAppsSnapshot() } answers { whitelist }
     }
     private val filterRepo: FilterListRepository = mockk(relaxed = true) {
