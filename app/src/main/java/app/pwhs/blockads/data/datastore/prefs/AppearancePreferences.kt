@@ -48,6 +48,7 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
         const val LANGUAGE_IT = "it"
         const val LANGUAGE_AR = "ar"
         const val LANGUAGE_TR = "tr"
+        const val LANGUAGE_HU = "hu"
         const val LANGUAGE_PL = "pl"
         const val LANGUAGE_IN = "in"
         const val LANGUAGE_PT_BR = "pt-BR"

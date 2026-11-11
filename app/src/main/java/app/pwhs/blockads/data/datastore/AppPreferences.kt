@@ -89,6 +89,7 @@ class AppPreferences internal constructor(
         const val LANGUAGE_IT = AppearancePreferences.LANGUAGE_IT
         const val LANGUAGE_AR = AppearancePreferences.LANGUAGE_AR
         const val LANGUAGE_TR = AppearancePreferences.LANGUAGE_TR
+        const val LANGUAGE_HU = AppearancePreferences.LANGUAGE_HU
         const val LANGUAGE_PL = AppearancePreferences.LANGUAGE_PL
         const val LANGUAGE_IN = AppearancePreferences.LANGUAGE_IN
         const val LANGUAGE_PT_BR = AppearancePreferences.LANGUAGE_PT_BR
