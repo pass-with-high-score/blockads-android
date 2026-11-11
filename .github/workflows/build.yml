@@ -47,11 +47,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew -Ptunnel.source=local :app:assembleDebug
+        run: ./gradlew -Ptunnel.source=local :app:assembleFdroidDebug
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: BlockAds-Root-Transparent-Debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/fdroid/debug/*.apk
           retention-days: 14
