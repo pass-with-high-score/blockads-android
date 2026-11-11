@@ -71,4 +71,5 @@ sealed interface TailscaleUiEffect {
     data class OpenBrowser(val url: String) : TailscaleUiEffect
     data class ShowSnackbar(val message: String) : TailscaleUiEffect
     data class CopyToClipboard(val text: String, val label: String) : TailscaleUiEffect
+    data object AuthSuccess : TailscaleUiEffect
 }

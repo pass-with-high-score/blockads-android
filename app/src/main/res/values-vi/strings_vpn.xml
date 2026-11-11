@@ -117,6 +117,7 @@
     <string name="tailscale_sign_in_browser">Đăng nhập với Tailscale</string>
     <string name="tailscale_waiting_auth">Đang chờ xác thực trong trình duyệt...</string>
     <string name="tailscale_open_auth_url">Mở trang đăng nhập</string>
+    <string name="tailscale_auth_success">Đăng nhập Tailscale thành công!</string>
     <string name="tailscale_auth_key_label">Khóa xác thực (Auth Key - tùy chọn)</string>
     <string name="tailscale_auth_key_hint">tskey-auth-...</string>
     <string name="tailscale_control_url_label">Địa chỉ máy chủ Control (Control Server URL)</string>

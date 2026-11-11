@@ -118,6 +118,7 @@
     <string name="tailscale_sign_in_browser">Sign in with Tailscale</string>
     <string name="tailscale_waiting_auth">Waiting for browser sign-in...</string>
     <string name="tailscale_open_auth_url">Open sign-in page</string>
+    <string name="tailscale_auth_success">Tailscale authorized successfully!</string>
     <string name="tailscale_auth_key_label">Auth Key (optional)</string>
     <string name="tailscale_auth_key_hint">tskey-auth-...</string>
     <string name="tailscale_control_url_label">Control Server URL</string>
