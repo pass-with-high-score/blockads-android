@@ -26,7 +26,7 @@ import app.pwhs.blockadstv.data.entities.WhitelistDomain
         FirewallRule::class,
         ConfigProfile::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class TvDatabase : RoomDatabase() {

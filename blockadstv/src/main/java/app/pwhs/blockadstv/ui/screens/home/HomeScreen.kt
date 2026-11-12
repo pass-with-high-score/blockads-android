@@ -217,6 +217,9 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(14.dp))
             TopBlockedSection(topBlocked = topBlocked)
         }
+
+        Spacer(modifier = Modifier.height(14.dp))
+        TvStatsSection()
     }
 }
 

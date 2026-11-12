@@ -184,6 +184,7 @@ class GoTunnelAdapter(
                         packageNameOrAppName
                     }
 
+                    val countryCode = app.pwhs.blockadstv.data.geoip.GeoIpLookup.getCountryCode(resolvedIP, domain)
                     val entry = DnsLogEntry(
                         domain = domain,
                         isBlocked = blocked,
@@ -193,6 +194,7 @@ class GoTunnelAdapter(
                         packageName = packageNameOrAppName,
                         resolvedIp = resolvedIP,
                         blockedBy = blockedBy,
+                        countryCode = countryCode,
                         timestamp = System.currentTimeMillis(),
                     )
                     dnsLogDao.insert(entry)
