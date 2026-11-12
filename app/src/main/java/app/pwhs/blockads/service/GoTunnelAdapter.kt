@@ -437,7 +437,7 @@ class GoTunnelAdapter(
     }
 
     fun lookupIP(domain: String): ByteArray? = runCatching {
-        engine.lookupIP(domain)
+        engine.resolveIP(domain)
     }.getOrNull()
 
     fun updateTries() {

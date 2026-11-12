@@ -90,6 +90,7 @@ type Engine struct
 	method Engine.MatchRuleset(domain string, ip string) string
 	method Engine.PingTailscalePeer(target string) string
 	method Engine.QuanXRuleCount() int
+	method Engine.ResolveIP(host string) ([]byte, error)
 	method Engine.RulesetRuleCount() int
 	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
 	method Engine.SetAdPathPatterns(patternsCsv string)
