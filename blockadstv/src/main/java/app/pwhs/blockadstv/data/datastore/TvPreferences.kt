@@ -253,6 +253,19 @@ class TvPreferences(private val context: Context) {
         }
     }
 
+    suspend fun setWhitelistedApps(apps: Set<String>) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_WHITELISTED_APPS] = apps
+        }
+    }
+
+    suspend fun addWhitelistedApp(packageName: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[KEY_WHITELISTED_APPS] ?: emptySet()
+            prefs[KEY_WHITELISTED_APPS] = current + packageName
+        }
+    }
+
     suspend fun setUpstreamDns(dns: String) {
         context.dataStore.edit { prefs ->
             prefs[KEY_UPSTREAM_DNS] = dns

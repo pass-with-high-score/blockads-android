@@ -3,6 +3,7 @@ package app.pwhs.blockadstv
 import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
+import app.pwhs.blockadstv.di.tvCompanionModule
 import app.pwhs.blockadstv.di.tvProtectionModule
 import app.pwhs.blockadstv.di.tvRulesModule
 import app.pwhs.blockadstv.di.tvStatsBackupModule
@@ -35,7 +36,14 @@ class BlockAdsTvApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsTvApplication)
-            modules(tvAppModule, tvProtectionModule, tvWireGuardModule, tvRulesModule, tvStatsBackupModule)
+            modules(
+                tvAppModule,
+                tvProtectionModule,
+                tvWireGuardModule,
+                tvRulesModule,
+                tvStatsBackupModule,
+                tvCompanionModule,
+            )
         }
 
         val trustedNetworkManager: TrustedNetworkManager by inject()

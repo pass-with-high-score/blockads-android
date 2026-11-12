@@ -42,6 +42,7 @@ import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.service.TrustedNetworkManager
 import app.pwhs.blockadstv.ui.components.TvSwitch
+import app.pwhs.blockadstv.ui.screens.companion.WebCompanionDialog
 import app.pwhs.blockadstv.ui.theme.NeonGreen
 import app.pwhs.blockadstv.ui.theme.TextSecondary
 import app.pwhs.blockadstv.utils.TvLocaleHelper
@@ -86,6 +87,11 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showModeDialog by remember { mutableStateOf(false) }
     var showTrustedNetworksDialog by remember { mutableStateOf(false) }
+    var showWebCompanionDialog by remember { mutableStateOf(false) }
+
+    if (showWebCompanionDialog) {
+        WebCompanionDialog(onDismiss = { showWebCompanionDialog = false })
+    }
 
     if (showTrustedNetworksDialog) {
         val currentNet = remember(showTrustedNetworksDialog) {
@@ -320,6 +326,18 @@ fun SettingsScreen(
                     isToggle = false,
                     isEnabled = false,
                     onClick = { showLanguageDialog = true },
+                )
+            }
+
+            // Web Companion (QR)
+            item {
+                SettingListItem(
+                    iconRes = R.drawable.ic_nav_proxy,
+                    title = stringResource(R.string.settings_web_companion),
+                    subtitle = stringResource(R.string.settings_web_companion_desc),
+                    isToggle = false,
+                    isEnabled = false,
+                    onClick = { showWebCompanionDialog = true },
                 )
             }
 
