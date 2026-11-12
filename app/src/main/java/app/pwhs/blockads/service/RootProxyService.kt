@@ -65,6 +65,10 @@ class RootProxyService : Service() {
         var startTimestamp: Long = 0L
             private set
 
+        @Volatile
+        var activeTunnelAdapter: GoTunnelAdapter? = null
+            internal set
+
         fun start(context: Context) {
             val intent = Intent(context, RootProxyService::class.java).apply {
                 action = ACTION_START
@@ -151,6 +155,7 @@ class RootProxyService : Service() {
             firewallManagerProvider = { firewallManager },
             recordLogProvider = { isRecordDnsLogsEnabled },
         )
+        activeTunnelAdapter = goTunnelAdapter
         Timber.d("RootProxyService created")
     }
 
@@ -323,6 +328,7 @@ class RootProxyService : Service() {
 
         // Stop Go engine
         goTunnelAdapter.stop()
+        activeTunnelAdapter = null
 
         _state.value = VpnState.STOPPED
         serviceScope.launch {
@@ -423,6 +429,7 @@ class RootProxyService : Service() {
         stopNotificationUpdates()
         if (::appNameResolver.isInitialized) appNameResolver.stopSnapshotter()
         IptablesManager.teardownRules()
+        activeTunnelAdapter = null
         serviceScope.cancel()
         super.onDestroy()
     }

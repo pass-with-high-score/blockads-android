@@ -436,6 +436,10 @@ class GoTunnelAdapter(
         Timber.d("Go tunnel engine stopped")
     }
 
+    fun lookupIP(domain: String): ByteArray? = runCatching {
+        engine.lookupIP(domain)
+    }.getOrNull()
+
     fun updateTries() {
         engine.setTries(filterRepo.getAdTriePath(), filterRepo.getSecurityTriePath(), filterRepo.getAdBloomPath(), filterRepo.getSecurityBloomPath())
     }

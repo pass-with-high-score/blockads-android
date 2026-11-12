@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import kotlin.system.measureTimeMillis
+import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.service.RootProxyService
 
 class DnsLeakTestViewModel(
     private val dnsLeakRepository: DnsLeakRepository,
@@ -51,8 +53,13 @@ class DnsLeakTestViewModel(
 
             val latencyDeferred = async(ioDispatcher) {
                 latencyProvider?.invoke() ?: runCatching {
+                    val adapter = AdBlockVpnService.activeTunnelAdapter ?: RootProxyService.activeTunnelAdapter
                     measureTimeMillis {
-                        InetAddress.getByName("one.one.one.one")
+                        if (adapter != null) {
+                            adapter.lookupIP("one.one.one.one")
+                        } else {
+                            InetAddress.getByName("one.one.one.one")
+                        }
                     }
                 }.getOrNull()
             }
@@ -127,15 +134,25 @@ class DnsLeakTestViewModel(
             Triple("alg18", "ML-DSA-44", "Post-Quantum")
         )
 
+        val adapter = AdBlockVpnService.activeTunnelAdapter ?: RootProxyService.activeTunnelAdapter
+
         val results = algs.map { (algKey, name, desc) ->
             val validResolves = runCatching {
-                InetAddress.getByName("$cid.test-$algKey.dnscheck.tools")
-                true
+                if (adapter != null) {
+                    adapter.lookupIP("$cid.test-$algKey.dnscheck.tools") != null
+                } else {
+                    InetAddress.getByName("$cid.test-$algKey.dnscheck.tools")
+                    true
+                }
             }.getOrDefault(false)
 
             val badsigBlocked = runCatching {
-                InetAddress.getByName("$cid-badsig.test-$algKey.dnscheck.tools")
-                false
+                if (adapter != null) {
+                    adapter.lookupIP("$cid-badsig.test-$algKey.dnscheck.tools") == null
+                } else {
+                    InetAddress.getByName("$cid-badsig.test-$algKey.dnscheck.tools")
+                    false
+                }
             }.getOrElse { true }
 
             DnssecAlgorithmResult(
@@ -147,8 +164,12 @@ class DnsLeakTestViewModel(
         }
 
         val standardFailedBlocked = runCatching {
-            InetAddress.getByName("dnssec-failed.org")
-            false
+            if (adapter != null) {
+                adapter.lookupIP("dnssec-failed.org") == null
+            } else {
+                InetAddress.getByName("dnssec-failed.org")
+                false
+            }
         }.getOrElse { true }
 
         val overallValidating = standardFailedBlocked || results.any { it.isValidating && it.isSupported }
