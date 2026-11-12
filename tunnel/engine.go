@@ -193,8 +193,9 @@ type Engine struct {
 	standaloneTcp          *dns.Server
 	standaloneUdp6         *dns.Server
 	standaloneTcp6         *dns.Server
-	standaloneMitmListener net.Listener
-	standaloneMitmDone     chan struct{}
+	standaloneMitmListener  net.Listener
+	standaloneMitmListener6 net.Listener
+	standaloneMitmDone      chan struct{}
 
 	// Stats
 	totalQueries   atomic.Int64

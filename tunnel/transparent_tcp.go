@@ -84,22 +84,29 @@ func (e *Engine) StartTransparentMitm(port int) error {
 		return fmt.Errorf("MITM engine not initialized; call StartStackMitm first")
 	}
 
-	addr := fmt.Sprintf("127.0.0.1:%d", port)
-	l, err := net.Listen("tcp", addr)
+	addr4 := fmt.Sprintf("127.0.0.1:%d", port)
+	l4, err := net.Listen("tcp4", addr4)
 	if err != nil {
-		return fmt.Errorf("failed to listen on %s: %w", addr, err)
+		return fmt.Errorf("failed to listen on %s: %w", addr4, err)
+	}
+
+	addr6 := fmt.Sprintf("[::1]:%d", port)
+	l6, err6 := net.Listen("tcp6", addr6)
+	if err6 != nil {
+		logf("Transparent MITM IPv6 listen skipped: %v", err6)
 	}
 
 	done := make(chan struct{})
 
 	e.mu.Lock()
-	e.standaloneMitmListener = l
+	e.standaloneMitmListener = l4
+	e.standaloneMitmListener6 = l6
 	e.standaloneMitmDone = done
 	e.mu.Unlock()
 
 	tcpHandler := newMitmTcpHandler(certMgr, filter, blocker, uidr, protectFn)
 
-	go func() {
+	serve := func(l net.Listener) {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
@@ -140,23 +147,34 @@ func (e *Engine) StartTransparentMitm(port int) error {
 				tcpHandler(wrapped)
 			}(tcpConn)
 		}
-	}()
+	}
 
-	logf("Transparent MITM proxy listening on %s", addr)
+	go serve(l4)
+	if l6 != nil {
+		go serve(l6)
+		logf("Transparent MITM proxy listening on %s and %s", addr4, addr6)
+	} else {
+		logf("Transparent MITM proxy listening on %s", addr4)
+	}
 	return nil
 }
 
 // StopTransparentMitm stops the transparent TCP MITM proxy.
 func (e *Engine) StopTransparentMitm() {
 	e.mu.Lock()
-	l := e.standaloneMitmListener
+	l4 := e.standaloneMitmListener
 	e.standaloneMitmListener = nil
+	l6 := e.standaloneMitmListener6
+	e.standaloneMitmListener6 = nil
 	done := e.standaloneMitmDone
 	e.standaloneMitmDone = nil
 	e.mu.Unlock()
 
-	if l != nil {
-		_ = l.Close()
+	if l4 != nil {
+		_ = l4.Close()
+	}
+	if l6 != nil {
+		_ = l6.Close()
 	}
 	if done != nil {
 		close(done)

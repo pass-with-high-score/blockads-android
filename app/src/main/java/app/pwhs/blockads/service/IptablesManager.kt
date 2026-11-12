@@ -23,6 +23,7 @@ object IptablesManager {
     private const val CHAIN = "BLOCKADS_DNS"
     private const val CHAIN_FILTER = "BLOCKADS_DOT"
     private const val CHAIN_HTTP = "BLOCKADS_HTTP"
+    private const val CHAIN_HTTP_V6 = "BLOCKADS_HTTP6"
     private const val LOCAL_DNS_PORT = 15353
     private const val LOCAL_HTTP_PORT = 15354
 
@@ -124,7 +125,7 @@ object IptablesManager {
         // ══════════════════════════════════════════════════════════════
         // IPv6 — try independently, many Android kernels lack ip6tables nat
         // ══════════════════════════════════════════════════════════════
-        val ipv6Commands = buildIpv6Commands(uid, blockDoT, whitelistUids)
+        val ipv6Commands = buildIpv6Commands(uid, blockDoT, whitelistUids, httpsFiltering, browserUids)
 
         for (cmd in ipv6Commands) {
             val result = shell.exec(cmd)
@@ -204,15 +205,21 @@ object IptablesManager {
         }
     }
 
-    internal fun buildIpv6Commands(uid: Int, blockDoT: Boolean, whitelistUids: Collection<Int>): List<String> = buildList {
+    internal fun buildIpv6Commands(
+        uid: Int,
+        blockDoT: Boolean,
+        whitelistUids: Collection<Int>,
+        httpsFiltering: Boolean = false,
+        browserUids: Collection<Int> = emptyList()
+    ): List<String> = buildList {
         add("ip6tables -t nat -N $CHAIN 2>/dev/null || true")
-        add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN")
+        add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $uid -j RETURN 2>/dev/null || true")
         for (wUid in whitelistUids) {
-            add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $wUid -j RETURN")
+            add("ip6tables -t nat -A $CHAIN -m owner --uid-owner $wUid -j RETURN 2>/dev/null || true")
         }
-        add("ip6tables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
-        add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT")
-        add("ip6tables -t nat -A OUTPUT -j $CHAIN")
+        add("ip6tables -t nat -A $CHAIN -p udp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT 2>/dev/null || true")
+        add("ip6tables -t nat -A $CHAIN -p tcp --dport 53 -j REDIRECT --to-ports $LOCAL_DNS_PORT 2>/dev/null || true")
+        add("ip6tables -t nat -A OUTPUT -j $CHAIN 2>/dev/null || true")
 
         if (blockDoT) {
             add("ip6tables -t filter -N $CHAIN_FILTER 2>/dev/null || true")
@@ -220,8 +227,23 @@ object IptablesManager {
             for (wUid in whitelistUids) {
                 add("ip6tables -t filter -A $CHAIN_FILTER -m owner --uid-owner $wUid -j RETURN")
             }
-            add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT")
+            add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 853 -j REJECT --reject-with tcp-reset")
+            add("ip6tables -t filter -A $CHAIN_FILTER -p udp --dport 53 -j REJECT --reject-with icmp6-port-unreachable")
+            add("ip6tables -t filter -A $CHAIN_FILTER -p tcp --dport 53 -j REJECT --reject-with tcp-reset")
             add("ip6tables -t filter -A OUTPUT -j $CHAIN_FILTER")
+        }
+
+        if (httpsFiltering && browserUids.isNotEmpty()) {
+            add("ip6tables -t filter -N $CHAIN_HTTP_V6 2>/dev/null || true")
+            add("ip6tables -t filter -A $CHAIN_HTTP_V6 -m owner --uid-owner $uid -j RETURN")
+            for (wUid in whitelistUids) {
+                add("ip6tables -t filter -A $CHAIN_HTTP_V6 -m owner --uid-owner $wUid -j RETURN")
+            }
+            for (bUid in browserUids) {
+                add("ip6tables -t filter -A $CHAIN_HTTP_V6 -m owner --uid-owner $bUid -p tcp -m multiport --dports 80,443 -j REJECT --reject-with tcp-reset")
+                add("ip6tables -t filter -A $CHAIN_HTTP_V6 -m owner --uid-owner $bUid -p udp --dport 443 -j REJECT --reject-with icmp6-port-unreachable")
+            }
+            add("ip6tables -t filter -A OUTPUT -j $CHAIN_HTTP_V6")
         }
     }
 
@@ -243,6 +265,10 @@ object IptablesManager {
         "ip6tables -t nat -D OUTPUT -j $CHAIN 2>/dev/null",
         "ip6tables -t nat -F $CHAIN 2>/dev/null",
         "ip6tables -t nat -X $CHAIN 2>/dev/null",
+        // IPv6 filter chain (HTTP/HTTPS & QUIC browser reject)
+        "ip6tables -t filter -D OUTPUT -j $CHAIN_HTTP_V6 2>/dev/null",
+        "ip6tables -t filter -F $CHAIN_HTTP_V6 2>/dev/null",
+        "ip6tables -t filter -X $CHAIN_HTTP_V6 2>/dev/null",
         // IPv6 filter chain (DoT blocking)
         "ip6tables -t filter -D OUTPUT -j $CHAIN_FILTER 2>/dev/null",
         "ip6tables -t filter -F $CHAIN_FILTER 2>/dev/null",
