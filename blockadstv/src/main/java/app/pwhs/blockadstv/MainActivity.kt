@@ -31,6 +31,7 @@ import app.pwhs.blockadstv.ui.screens.logs.LogsScreen
 import app.pwhs.blockadstv.ui.screens.proxy.ProxyScreen
 import app.pwhs.blockadstv.ui.screens.rules.DomainRulesScreen
 import app.pwhs.blockadstv.ui.screens.settings.SettingsScreen
+import app.pwhs.blockadstv.ui.screens.wireguard.WireGuardScreen
 import app.pwhs.blockadstv.ui.theme.BlockadsTheme
 import app.pwhs.blockadstv.utils.TvLocaleHelper
 import kotlinx.coroutines.flow.first
@@ -119,6 +120,7 @@ fun BlockAdsTvApp(
             TvScreen.Logs -> LogsScreen()
             TvScreen.Dns -> DnsSetupScreen()
             TvScreen.Proxy -> ProxyScreen()
+            TvScreen.WireGuard -> WireGuardScreen()
             TvScreen.Settings -> SettingsScreen()
         }
     }

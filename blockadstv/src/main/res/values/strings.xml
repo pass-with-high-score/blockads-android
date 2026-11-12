@@ -7,6 +7,7 @@
     <string name="nav_logs">Logs</string>
     <string name="nav_dns">DNS</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="nav_wireguard">WireGuard</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Home -->
@@ -120,4 +121,21 @@
     <string name="filter_compile_success_title">Filter compiled</string>
     <string name="filter_compile_failed_title">Filter compilation failed</string>
     <string name="filter_compile_channel_name">Filter Compilation</string>
+
+    <!-- WireGuard & GeoIP -->
+    <string name="wg_title">WireGuard VPN</string>
+    <string name="wg_desc">Route TV traffic through WireGuard or AmneziaWG with on-device ad blocking</string>
+    <string name="wg_mode_title">Enable WireGuard Mode</string>
+    <string name="wg_mode_desc">Route all traffic through the active WireGuard profile</string>
+    <string name="wg_profiles_title">WireGuard Profiles</string>
+    <string name="wg_import_btn">Import Config</string>
+    <string name="wg_no_profiles">No WireGuard profiles imported yet. Import a .conf or wireguard:// URI to get started.</string>
+    <string name="wg_dialog_import_title">Import WireGuard Config</string>
+    <string name="wg_dialog_import_hint">Paste a wireguard://, vpn://, awg:// URI or raw .conf text</string>
+    <string name="wg_profile_name_optional">Profile name (optional)</string>
+    <string name="wg_dialog_rename_title">Rename Profile</string>
+    <string name="wg_profile_name">Profile name</string>
+    <string name="wg_geoip_title">GeoIP Database</string>
+    <string name="wg_geoip_not_downloaded">Not downloaded (ccTLD fallback active)</string>
+    <string name="wg_geoip_update">Update</string>
 </resources>

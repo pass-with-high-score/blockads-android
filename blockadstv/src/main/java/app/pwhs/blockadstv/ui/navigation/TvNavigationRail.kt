@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ enum class TvScreen(
     Logs(R.string.nav_logs, R.drawable.ic_history),
     Dns(R.string.nav_dns, R.drawable.ic_dns),
     Proxy(R.string.nav_proxy, R.drawable.ic_nav_proxy),
+    WireGuard(R.string.nav_wireguard, R.drawable.ic_shield_on),
     Settings(R.string.nav_settings, R.drawable.ic_setting),
 }
 
@@ -72,6 +75,7 @@ fun TvNavigationDrawer(
                 .fillMaxHeight()
                 .width(96.dp)
                 .background(MaterialTheme.colorScheme.surface)
+                .verticalScroll(rememberScrollState())
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
