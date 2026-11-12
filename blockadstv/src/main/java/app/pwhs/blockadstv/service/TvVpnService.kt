@@ -15,10 +15,13 @@ import app.pwhs.blockadstv.data.dao.DnsLogDao
 import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.utils.AppNameResolver
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +29,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.java.KoinJavaComponent.getKoin
 import timber.log.Timber
 
 enum class VpnState {
@@ -42,6 +47,8 @@ class TvVpnService : VpnService() {
     companion object {
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "blockadstv_vpn_channel"
+        private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
+        private const val CONNECTION_PROBE_INTERVAL_MS = 60_000L
         const val ACTION_START = "app.pwhs.blockadstv.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockadstv.STOP_VPN"
 
@@ -70,8 +77,7 @@ class TvVpnService : VpnService() {
         }
 
         fun requestRestart(context: Context) {
-            val s = _state.value
-            if (s == VpnState.RUNNING) {
+            if (_state.value == VpnState.RUNNING) {
                 stop(context)
                 val intent = Intent(context, TvVpnService::class.java).apply {
                     action = ACTION_START
@@ -87,18 +93,29 @@ class TvVpnService : VpnService() {
     private lateinit var tvPrefs: TvPreferences
     private lateinit var dnsLogDao: DnsLogDao
     private lateinit var firewallManager: TvFirewallManager
-    private lateinit var goTunnelAdapter: GoTunnelAdapter
     private lateinit var appNameResolver: AppNameResolver
+    private lateinit var goTunnelAdapter: GoTunnelAdapter
+    private lateinit var tunnelBuilder: TvVpnTunnelBuilder
+    private val retryManager = VpnRetryManager()
+
+    private var networkMonitor: NetworkMonitor? = null
+    private var networkSwitchJob: Job? = null
+    private var connectionProbeJob: Job? = null
+    private var startJob: Job? = null
+
+    @Volatile
+    private var isRecordDnsLogsEnabled = true
 
     override fun onCreate() {
         super.onCreate()
-        val koin = org.koin.java.KoinJavaComponent.getKoin()
+        val koin = getKoin()
         filterRepo = koin.get()
         tvPrefs = koin.get()
         dnsLogDao = koin.get()
         firewallManager = koin.get()
+        appNameResolver = koin.get()
 
-        appNameResolver = AppNameResolver(this)
+        tunnelBuilder = TvVpnTunnelBuilder(this)
         goTunnelAdapter = GoTunnelAdapter(
             context = this,
             filterRepo = filterRepo,
@@ -106,18 +123,65 @@ class TvVpnService : VpnService() {
             scope = serviceScope,
             appNameResolver = appNameResolver,
             firewallManager = firewallManager,
+            recordLogProvider = { isRecordDnsLogsEnabled },
         )
+
+        networkMonitor = NetworkMonitor(
+            context = this,
+            onNetworkAvailable = { handleNetworkAvailable() },
+            onNetworkLost = { Timber.d("TV physical network lost") },
+            onNetworkActiveChanged = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    try {
+                        setUnderlyingNetworks(null)
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to reset underlying networks")
+                    }
+                }
+            },
+        )
+
+        observePreferenceUpdates()
+    }
+
+    private fun observePreferenceUpdates() {
+        serviceScope.launch {
+            tvPrefs.recordDnsLogs.collect { enabled ->
+                isRecordDnsLogsEnabled = enabled
+                goTunnelAdapter.setConnLogEnabled(enabled)
+            }
+        }
+        serviceScope.launch {
+            tvPrefs.blockDohBypass.collect { enabled ->
+                goTunnelAdapter.setBlockDohBypass(enabled)
+            }
+        }
+        serviceScope.launch {
+            tvPrefs.blockWebRtcLeak.collect { enabled ->
+                goTunnelAdapter.setBlockWebRtc(enabled)
+            }
+        }
+        serviceScope.launch {
+            tvPrefs.preferredIPType.collect { ipType ->
+                goTunnelAdapter.setPreferredIPType(ipType)
+            }
+        }
+        serviceScope.launch {
+            tvPrefs.filterHttp3.collect { enabled ->
+                goTunnelAdapter.setFilterHttp3(enabled)
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        return when (intent?.action) {
             ACTION_STOP -> {
                 stopVpn()
-                return START_NOT_STICKY
+                START_NOT_STICKY
             }
             else -> {
                 startVpn()
-                return START_STICKY
+                START_STICKY
             }
         }
     }
@@ -129,32 +193,21 @@ class TvVpnService : VpnService() {
 
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification("Connecting...", "Loading filters..."))
+        networkMonitor?.startMonitoring()
 
-        serviceScope.launch {
+        startJob = serviceScope.launch {
             try {
-                // Phase 1: Load filters
                 val isFirstDownload = !tvPrefs.filtersDownloaded.first()
                 if (isFirstDownload) {
-                    Timber.d("Phase 1: First VPN start — force downloading all filters...")
                     filterRepo.forceReloadAllFilters()
                     tvPrefs.setFiltersDownloaded(true)
                 } else {
-                    Timber.d("Phase 1: Seeding default filters...")
                     filterRepo.seedDefaultsIfNeeded()
                 }
 
-                Timber.d("Phase 1: Loading enabled filters...")
-                val result = filterRepo.loadAllEnabledFilters()
-                val domainCount = result.getOrDefault(0)
-                Timber.d("Filters loaded: $domainCount domains")
-                Timber.d("Ad trie paths: '${filterRepo.getAdTriePath()}'")
-                Timber.d("Security trie paths: '${filterRepo.getSecurityTriePath()}'")
-                Timber.d("Ad bloom paths: '${filterRepo.getAdBloomPath()}'")
-                Timber.d("Security bloom paths: '${filterRepo.getSecurityBloomPath()}'")
-
-                // Phase 2: Read preferences & firewall rules
-                Timber.d("Phase 2: Reading preferences...")
+                val domainCount = filterRepo.loadAllEnabledFilters().getOrDefault(0)
                 firewallManager.loadRules()
+
                 val upstreamDns = tvPrefs.upstreamDns.first()
                 val fallbackDns = tvPrefs.fallbackDns.first()
                 val dnsProtocol = tvPrefs.dnsProtocol.first()
@@ -163,23 +216,43 @@ class TvVpnService : VpnService() {
                 val dnsResponseType = tvPrefs.dnsResponseType.first()
                 val whitelistedApps = tvPrefs.getWhitelistedAppsSnapshot()
                 val routingMode = tvPrefs.getRoutingModeSnapshot()
+                val excludeLan = tvPrefs.excludeLan.first()
+                val preferredIpType = tvPrefs.preferredIPType.first()
+                val blockDohBypass = tvPrefs.blockDohBypass.first()
+                val blockWebRtc = tvPrefs.blockWebRtcLeak.first()
+                val filterHttp3 = tvPrefs.filterHttp3.first()
+
                 val isProxyVpn = routingMode == TvPreferences.ROUTING_MODE_PROXY_VPN
                 val activeProxy = if (isProxyVpn) tvPrefs.getActiveProxyProfileSnapshot() else null
                 val proxyProtocol = activeProxy?.protocol?.value ?: ""
                 val proxyConfigJson = activeProxy?.toEngineJson() ?: ""
 
-                Timber.d("DNS: protocol=$dnsProtocol, primary=$upstreamDns, fallback=$fallbackDns")
-                Timber.d("Response type: $dnsResponseType, routingMode: $routingMode, proxy: ${activeProxy?.displayName}")
+                retryManager.reset()
+                var establishedPfd: ParcelFileDescriptor? = null
+                while (isActive && establishedPfd == null && retryManager.shouldRetry()) {
+                    establishedPfd = tunnelBuilder.establish(
+                        whitelistedApps = whitelistedApps,
+                        isProxyVpn = isProxyVpn,
+                        excludeLan = excludeLan,
+                        preferredIpType = preferredIpType,
+                        proxyHost = activeProxy?.server,
+                    )
+                    if (establishedPfd == null && retryManager.shouldRetry()) {
+                        Timber.w(
+                            "TV VPN establish failed, retrying (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})"
+                        )
+                        retryManager.waitForRetry()
+                    }
+                }
 
-                // Phase 3: Establish VPN
-                Timber.d("Phase 3: Establishing VPN tunnel (isProxyVpn=$isProxyVpn)...")
-                val established = establishVpn(whitelistedApps, isProxyVpn)
-                if (!established) {
-                    Timber.e("Failed to establish VPN")
+                if (establishedPfd == null) {
+                    Timber.e("Failed to establish TV VPN after ${retryManager.getMaxRetries()} attempts")
                     stopVpn()
                     return@launch
                 }
 
+                vpnInterface = establishedPfd
+                retryManager.reset()
                 _state.value = VpnState.RUNNING
                 tvPrefs.setVpnEnabled(true)
                 startTimestamp = System.currentTimeMillis()
@@ -189,11 +262,10 @@ class TvVpnService : VpnService() {
                     val title = if (isProxyVpn) "BlockAds TV Proxy Active" else "BlockAds TV Active"
                     nm.notify(
                         NOTIFICATION_ID,
-                        buildNotification(title, "$domainCount filter rules loaded")
+                        buildNotification(title, "$domainCount filter rules loaded"),
                     )
                 }
 
-                // Configure Go tunnel engine
                 goTunnelAdapter.configureDns(
                     protocol = dnsProtocol.name,
                     primary = upstreamDns,
@@ -202,59 +274,24 @@ class TvVpnService : VpnService() {
                     odohRelayUrl = odohRelayUrl,
                 )
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
-                Timber.d("Go engine configured, starting tunnel...")
+                goTunnelAdapter.setPreferredIPType(preferredIpType)
 
-                // Dynamically update Go Engine tries whenever filters change
-                // (e.g. user toggles filters in UI while VPN is running)
-                launch {
-                    filterRepo.domainCountFlow.drop(1).collectLatest { count ->
-                        Timber.d("Filter count changed to $count, hot-reloading tries...")
-                        goTunnelAdapter.updateTries()
-                        Timber.d("Tries reloaded: ad='${filterRepo.getAdTriePath()}', sec='${filterRepo.getSecurityTriePath()}'")
-                    }
-                }
+                startDynamicEngineWatchers()
+                startConnectionProbing()
 
-                // Dynamically update DNS config whenever DNS settings change
-                launch {
-                    combine(
-                        tvPrefs.dnsProtocol,
-                        tvPrefs.upstreamDns,
-                        tvPrefs.fallbackDns,
-                        tvPrefs.dohUrl,
-                        tvPrefs.odohRelayUrl,
-                    ) { protocol, primary, fallback, doh, relay ->
-                        listOf(protocol.name, primary, fallback, doh, relay)
-                    }.drop(1).collectLatest { config ->
-                        Timber.d("DNS config changed, hot-updating Go tunnel DNS: $config")
-                        goTunnelAdapter.configureDns(
-                            protocol = config[0],
-                            primary = config[1],
-                            fallback = config[2],
-                            dohUrl = config[3],
-                            odohRelayUrl = config[4],
-                        )
-                    }
-                }
-
-                // Dynamically update DNS response type
-                launch {
-                    tvPrefs.dnsResponseType.drop(1).collectLatest { responseType ->
-                        Timber.d("DNS response type changed to $responseType")
-                        goTunnelAdapter.setBlockResponseType(responseType)
-                    }
-                }
-
-                vpnInterface?.let {
-                    goTunnelAdapter.start(
-                        vpnInterface = it,
-                        socketProtector = { fd ->
-                            try { protect(fd) } catch (e: Exception) { false }
-                        },
-                        proxyProtocol = proxyProtocol,
-                        proxyConfigJson = proxyConfigJson,
-                    )
-                }
-
+                goTunnelAdapter.start(
+                    vpnInterface = establishedPfd,
+                    socketProtector = { fd ->
+                        try { protect(fd) } catch (_: Exception) { false }
+                    },
+                    proxyProtocol = proxyProtocol,
+                    proxyConfigJson = proxyConfigJson,
+                    filterHttp3 = filterHttp3,
+                    blockDohBypass = blockDohBypass,
+                    blockWebRtc = blockWebRtc,
+                )
+            } catch (e: CancellationException) {
+                Timber.d("TV VPN startup cancelled")
             } catch (e: Exception) {
                 Timber.e(e, "VPN startup failed")
                 stopVpn()
@@ -262,82 +299,98 @@ class TvVpnService : VpnService() {
         }
     }
 
-    private fun establishVpn(whitelistedApps: Set<String>, isProxyVpn: Boolean): Boolean {
-        if (VpnService.prepare(this) != null) {
-            Timber.e("VPN not prepared or permission revoked")
-            return false
+    private fun startDynamicEngineWatchers() {
+        serviceScope.launch {
+            filterRepo.domainCountFlow.drop(1).collectLatest { count ->
+                Timber.d("Filter count changed to $count, hot-reloading tries...")
+                goTunnelAdapter.updateTries()
+            }
         }
-
-        return try {
-            val builder = Builder()
-                .setSession(if (isProxyVpn) "BlockAds TV Proxy" else "BlockAds TV")
-                .addAddress("100.64.100.2", 32)
-                .addAddress("fd00::2", 128)
-                .addDnsServer("100.64.100.1")
-                .addDnsServer("fd00::1")
-                .setBlocking(false)
-                .setMtu(1350)
-
-            if (isProxyVpn) {
-                builder.addRoute("0.0.0.0", 0)
-                builder.addRoute("::", 0)
-            } else {
-                builder.addRoute("100.64.100.1", 32)
-                builder.addRoute("fd00::1", 128)
+        serviceScope.launch {
+            combine(
+                tvPrefs.dnsProtocol,
+                tvPrefs.upstreamDns,
+                tvPrefs.fallbackDns,
+                tvPrefs.dohUrl,
+                tvPrefs.odohRelayUrl,
+            ) { protocol, primary, fallback, doh, relay ->
+                listOf(protocol.name, primary, fallback, doh, relay)
+            }.drop(1).collectLatest { config ->
+                goTunnelAdapter.configureDns(
+                    protocol = config[0],
+                    primary = config[1],
+                    fallback = config[2],
+                    dohUrl = config[3],
+                    odohRelayUrl = config[4],
+                )
             }
-
-            // Exclude our own app
-            try {
-                builder.addDisallowedApplication(packageName)
-            } catch (e: Exception) {
-                Timber.w(e, "Could not exclude self from VPN")
+        }
+        serviceScope.launch {
+            tvPrefs.dnsResponseType.drop(1).collectLatest { responseType ->
+                goTunnelAdapter.setBlockResponseType(responseType)
             }
+        }
+    }
 
-            for (appPackage in whitelistedApps) {
-                try {
-                    builder.addDisallowedApplication(appPackage)
-                    Timber.d("Excluded from VPN: $appPackage")
-                } catch (e: Exception) {
-                    Timber.w(e, "Could not exclude $appPackage")
+    private fun handleNetworkAvailable() {
+        networkSwitchJob?.cancel()
+        networkSwitchJob = serviceScope.launch {
+            val autoReconnect = tvPrefs.autoReconnect.first()
+            val vpnWasEnabled = tvPrefs.vpnEnabled.first()
+            if (autoReconnect && vpnWasEnabled && _state.value == VpnState.STOPPED) {
+                Timber.d("Auto-reconnecting TV VPN after network became available")
+                delay(NETWORK_STABILIZATION_DELAY_MS)
+                if (_state.value == VpnState.STOPPED) {
+                    startVpn()
                 }
             }
+        }
+    }
 
-            builder.allowBypass()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                builder.setUnderlyingNetworks(null)
-                // VPN networks are metered by default on Android 10+ —
-                // inherit meteredness from the underlying network instead,
-                // so "Wi-Fi/unmetered only" apps keep working (see #181).
-                builder.setMetered(false)
-            }
-
-            vpnInterface = builder.establish()
-            if (vpnInterface != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    try {
-                        val fd = vpnInterface!!.fileDescriptor
-                        val flags = android.system.Os.fcntlInt(fd, android.system.OsConstants.F_GETFL, 0)
-                        android.system.Os.fcntlInt(
-                            fd,
-                            android.system.OsConstants.F_SETFL,
-                            flags or android.system.OsConstants.O_NONBLOCK
-                        )
-                        Timber.d("TV TUN file descriptor set to O_NONBLOCK successfully")
-                    } catch (e: Exception) {
-                        Timber.w(e, "Failed to enforce O_NONBLOCK on TV TUN fd")
+    private fun startConnectionProbing() {
+        connectionProbeJob?.cancel()
+        val probe = ConnectionQualityProbe(
+            socketProtector = { socket ->
+                try { protect(socket) } catch (_: Exception) { false }
+            },
+            isEngineRunning = { goTunnelAdapter.isEngineRunning() },
+        )
+        connectionProbeJob = serviceScope.launch {
+            var consecutiveStalls = 0
+            while (isActive && _state.value == VpnState.RUNNING) {
+                delay(CONNECTION_PROBE_INTERVAL_MS)
+                if (_state.value != VpnState.RUNNING) break
+                val result = probe.runDiagnosis()
+                Timber.d(
+                    "ConnectionQualityProbe: ${result.status} " +
+                        "(physical=${result.physicalOk}, engine=${result.engineOk}, latency=${result.latencyMs}ms)"
+                )
+                when (result.status) {
+                    ConnectionStatus.VPN_TUNNEL_STALLED -> {
+                        consecutiveStalls++
+                        if (consecutiveStalls >= 2) {
+                            Timber.w("TV VPN tunnel stalled with healthy internet — restarting")
+                            consecutiveStalls = 0
+                            requestRestart(this@TvVpnService)
+                        }
+                    }
+                    ConnectionStatus.HEALTHY, ConnectionStatus.NO_PHYSICAL_INTERNET -> {
+                        consecutiveStalls = 0
                     }
                 }
             }
-            Timber.d("VPN interface established: ${vpnInterface != null}")
-            vpnInterface != null
-        } catch (e: Exception) {
-            Timber.e(e, "Error establishing VPN")
-            false
         }
     }
 
     private fun stopVpn() {
+        startJob?.cancel()
+        startJob = null
+        networkSwitchJob?.cancel()
+        networkSwitchJob = null
+        connectionProbeJob?.cancel()
+        connectionProbeJob = null
+        networkMonitor?.stopMonitoring()
+
         _state.value = VpnState.STOPPING
         startTimestamp = 0L
 
@@ -366,6 +419,9 @@ class TvVpnService : VpnService() {
     override fun onDestroy() {
         _state.value = VpnState.STOPPED
         startTimestamp = 0L
+        networkMonitor?.stopMonitoring()
+        connectionProbeJob?.cancel()
+        networkSwitchJob?.cancel()
         serviceScope.cancel()
         try { vpnInterface?.close() } catch (_: Exception) {}
         vpnInterface = null

@@ -3,6 +3,7 @@ package app.pwhs.blockadstv
 import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
+import app.pwhs.blockadstv.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,6 +43,7 @@ class BlockAdsTvApplication : Application() {
             } catch (e: Exception) {
                 Timber.e(e, "Auto-seed failed")
             }
+            FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsTvApplication)
         }
     }
 }

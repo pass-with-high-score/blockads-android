@@ -1,0 +1,68 @@
+# BlockAds DoH (DNS-over-HTTPS) Blacklist
+# Purpose: Block third-party applications (Chrome, Firefox, in-app ad SDKs)
+# from bootstrapping DoH to bypass local VPN DNS ad filtering.
+# Blocking these returns NXDOMAIN, forcing apps to fall back to plain DNS on port 53.
+
+# Cloudflare DNS
+cloudflare-dns.com
+mozilla.cloudflare-dns.com
+one.one.one.one
+security.cloudflare-dns.com
+family.cloudflare-dns.com
+
+# Google Public DNS
+dns.google
+dns.google.com
+dns64.dns.google
+
+# Quad9
+dns.quad9.net
+dns9.quad9.net
+dns10.quad9.net
+dns11.quad9.net
+
+# AdGuard DNS
+dns.adguard-dns.com
+unfiltered.adguard-dns.com
+family.adguard-dns.com
+
+# NextDNS
+dns.nextdns.io
+
+# OpenDNS / Cisco Umbrella
+doh.opendns.com
+doh.familyshield.opendns.com
+
+# CleanBrowsing
+doh.cleanbrowsing.org
+
+# Mullvad
+doh.mullvad.net
+adblock.doh.mullvad.net
+
+# Control D
+dns.controld.com
+freedns.controld.com
+
+# AliDNS / DNSPod
+dns.alidns.com
+doh.pub
+dot.pub
+
+# DNS.SB
+dns.sb
+doh.dns.sb
+
+# Comodo Secure DNS
+doh.shield.comodo.com
+
+# Alternate DNS
+doh.alternate-dns.com
+
+# Cira Canadian Shield
+private.canadianshield.cira.ca
+protected.canadianshield.cira.ca
+family.canadianshield.cira.ca
+
+# LibreDNS
+doh.libredns.gr

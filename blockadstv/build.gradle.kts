@@ -164,6 +164,9 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
+    // WorkManager for background filter updates and VPN resume
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Ktor HTTP client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

@@ -110,4 +110,14 @@
     <string name="proxy_err_invalid_link">Invalid proxy link or unsupported protocol</string>
     <string name="proxy_subscription_success">Imported %1$d nodes</string>
     <string name="settings_mode_title">Protection Mode</string>
+    <string name="filter_update_success">Filter lists updated</string>
+    <string name="filter_update_success_message">Successfully updated %d domains</string>
+    <string name="filter_update_failed">Filter update failed</string>
+    <string name="filter_update_failed_message">Failed to update filter lists</string>
+    <string name="filter_update_notification_channel">Filter Updates</string>
+    <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
+    <string name="filter_compile_progress_title">Compiling filter…</string>
+    <string name="filter_compile_success_title">Filter compiled</string>
+    <string name="filter_compile_failed_title">Filter compilation failed</string>
+    <string name="filter_compile_channel_name">Filter Compilation</string>
 </resources>

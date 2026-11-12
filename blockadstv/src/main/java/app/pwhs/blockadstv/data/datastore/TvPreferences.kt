@@ -40,6 +40,17 @@ class TvPreferences(private val context: Context) {
         private val KEY_PROXY_PROFILES_JSON = stringPreferencesKey("proxy_profiles_json")
         private val KEY_ACTIVE_PROXY_PROFILE_ID = stringPreferencesKey("active_proxy_profile_id")
         private val KEY_SUBSCRIPTIONS_JSON = stringPreferencesKey("proxy_subscriptions_json")
+        private val KEY_EXCLUDE_LAN = booleanPreferencesKey("exclude_lan")
+        private val KEY_PREFERRED_IP_TYPE = stringPreferencesKey("preferred_ip_type")
+        private val KEY_AUTO_RECONNECT = booleanPreferencesKey("auto_reconnect")
+        private val KEY_RECORD_DNS_LOGS = booleanPreferencesKey("record_dns_logs")
+        private val KEY_BLOCK_DOH_BYPASS = booleanPreferencesKey("block_doh_bypass")
+        private val KEY_BLOCK_WEBRTC_LEAK = booleanPreferencesKey("block_webrtc_leak")
+        private val KEY_FILTER_HTTP3 = booleanPreferencesKey("filter_http3")
+
+        const val PREFERRED_IP_AUTO = "auto"
+        const val PREFERRED_IP_IPV4 = "ipv4"
+        const val PREFERRED_IP_IPV6 = "ipv6"
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_PROXY_VPN = "proxy_vpn"
@@ -135,6 +146,62 @@ class TvPreferences(private val context: Context) {
 
     val whitelistedApps: Flow<Set<String>> = context.dataStore.data.map { prefs ->
         prefs[KEY_WHITELISTED_APPS] ?: emptySet()
+    }
+
+    val excludeLan: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_EXCLUDE_LAN] ?: true
+    }
+
+    val preferredIPType: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[KEY_PREFERRED_IP_TYPE] ?: PREFERRED_IP_AUTO
+    }
+
+    val autoReconnect: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_AUTO_RECONNECT] ?: true
+    }
+
+    val recordDnsLogs: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_RECORD_DNS_LOGS] ?: true
+    }
+
+    val blockDohBypass: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_BLOCK_DOH_BYPASS] ?: false
+    }
+
+    val blockWebRtcLeak: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_BLOCK_WEBRTC_LEAK] ?: false
+    }
+
+    val filterHttp3: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[KEY_FILTER_HTTP3] ?: true
+    }
+
+    suspend fun setExcludeLan(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_EXCLUDE_LAN] = enabled }
+    }
+
+    suspend fun setPreferredIPType(type: String) {
+        context.dataStore.edit { prefs -> prefs[KEY_PREFERRED_IP_TYPE] = type }
+    }
+
+    suspend fun setAutoReconnect(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_AUTO_RECONNECT] = enabled }
+    }
+
+    suspend fun setRecordDnsLogs(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_RECORD_DNS_LOGS] = enabled }
+    }
+
+    suspend fun setBlockDohBypass(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_BLOCK_DOH_BYPASS] = enabled }
+    }
+
+    suspend fun setBlockWebRtcLeak(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_BLOCK_WEBRTC_LEAK] = enabled }
+    }
+
+    suspend fun setFilterHttp3(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[KEY_FILTER_HTTP3] = enabled }
     }
 
     suspend fun setVpnEnabled(enabled: Boolean) {
