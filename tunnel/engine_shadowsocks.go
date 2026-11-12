@@ -200,11 +200,24 @@ func (e *Engine) isProxyServer(targetIP net.IP, targetPort int) bool {
 	return false
 }
 
+func isPrivateOrLoopback(ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	return ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsUnspecified()
+}
+
 // DialProxy attempts to dial target via Tailscale (for Tailnet / Exit Node traffic) or the active outbound proxy.
 // Returns (conn, true, err) if handled, or (nil, false, nil) if neither is applicable.
 func (e *Engine) DialProxy(targetIP net.IP, targetPort int) (net.Conn, bool, error) {
+	if targetIP != nil && targetIP.IsLoopback() {
+		return nil, false, nil
+	}
 	if conn, used, err := e.dialTailscale(targetIP, targetPort); used {
 		return conn, true, err
+	}
+	if isPrivateOrLoopback(targetIP) {
+		return nil, false, nil
 	}
 	if e.isProxyServer(targetIP, targetPort) {
 		logf("[Engine] DialProxy: skipped dial to proxy server itself (%s:%d)", targetIP, targetPort)

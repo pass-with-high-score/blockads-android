@@ -237,6 +237,7 @@ type Resolver = internal/dns.Resolver
 	method Resolver.Resolve(rawQuery []byte) ([]byte, error)
 	method Resolver.ResolveARecord(domain string, dnsServer string) (net.IP, error)
 	method Resolver.SetODoHRelay(relayURL string)
+	method Resolver.SetProxyDialer(fn internal/dns.ProxyDialFunc)
 	method Resolver.SetSplitDNS(dnsServer string, zones []string)
 	method Resolver.Shutdown()
 	method Resolver.SplitDNS() string

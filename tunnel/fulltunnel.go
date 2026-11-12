@@ -104,6 +104,7 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	e.resolver = NewResolver(protectFn)
 	e.resolver.Configure(ParseProtocol(e.protocol), e.primaryDNS, e.fallbackDNS, e.dohURL)
 	e.resolver.SetODoHRelay(e.odohRelayURL)
+	e.resolver.SetProxyDialer(e.DialProxy)
 
 	certMgr := e.stackCertMgr
 	filter := e.stackMitmFilter

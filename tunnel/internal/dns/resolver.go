@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -45,6 +46,10 @@ func ParseProtocol(s string) DNSProtocol {
 	}
 }
 
+// ProxyDialFunc dials a TCP connection to targetIP:targetPort through an active outbound proxy.
+// Returns (conn, true, err) when handled by the proxy, or (nil, false, nil) to fall back to direct dialing.
+type ProxyDialFunc func(targetIP net.IP, targetPort int) (net.Conn, bool, error)
+
 // Resolver handles DNS query forwarding across multiple protocols.
 type Resolver struct {
 	mu sync.RWMutex
@@ -56,6 +61,7 @@ type Resolver struct {
 	odohCache       odohConfigCache
 	protocol        DNSProtocol
 	protectSocketFn func(fd int) bool
+	proxyDialer     ProxyDialFunc
 
 	// Split-DNS: route queries for specific zones to a different DNS server
 	splitDNS   string
@@ -180,6 +186,30 @@ func (r *Resolver) SetODoHRelay(relayURL string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.odohRelayURL = relayURL
+}
+
+// SetProxyDialer sets an optional callback used to route upstream DNS TCP
+// connections through an active outbound proxy.
+func (r *Resolver) SetProxyDialer(fn ProxyDialFunc) {
+	r.mu.Lock()
+	r.proxyDialer = fn
+	r.mu.Unlock()
+	if r.httpClient != nil {
+		r.httpClient.CloseIdleConnections()
+	}
+}
+
+func (r *Resolver) dialProxy(targetIP net.IP, targetPort int) (net.Conn, bool, error) {
+	if r == nil || targetIP == nil || targetPort <= 0 {
+		return nil, false, nil
+	}
+	r.mu.RLock()
+	fn := r.proxyDialer
+	r.mu.RUnlock()
+	if fn == nil {
+		return nil, false, nil
+	}
+	return fn(targetIP, targetPort)
 }
 
 // SetSplitDNS configures split-DNS zones and their upstream DNS server.
@@ -316,13 +346,25 @@ func (r *Resolver) query(rawQuery []byte, protocol DNSProtocol, server, dohURL s
 	}
 }
 
-// queryPlain sends a plain UDP DNS query with socket protection.
+// queryPlain sends a plain DNS query, upgrading to DNS-over-TCP via proxyDialer
+// when an outbound proxy is active, or falling back to protected UDP.
 func (r *Resolver) queryPlain(rawQuery []byte, server string) ([]byte, error) {
 	host := server
 	port := "53"
 	if h, p, err := net.SplitHostPort(server); err == nil {
 		host = h
 		port = p
+	}
+
+	if portNum, err := strconv.Atoi(port); err == nil && portNum > 0 {
+		if ip := net.ParseIP(host); ip != nil {
+			if proxyConn, used, dialErr := r.dialProxy(ip, portNum); used {
+				if dialErr != nil {
+					return nil, fmt.Errorf("plain proxy dial: %w", dialErr)
+				}
+				return exchangeDNSOverConn(rawQuery, proxyConn)
+			}
+		}
 	}
 
 	udpAddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort(host, port))
@@ -358,6 +400,26 @@ func (r *Resolver) queryPlain(rawQuery []byte, server string) ([]byte, error) {
 	}
 
 	return buf[:n], nil
+}
+
+func exchangeDNSOverConn(rawQuery []byte, conn net.Conn) ([]byte, error) {
+	co := &miekgdns.Conn{Conn: conn}
+	defer co.Close()
+
+	var req miekgdns.Msg
+	if err := req.Unpack(rawQuery); err != nil {
+		return nil, fmt.Errorf("plain tcp unpack: %w", err)
+	}
+
+	client := &miekgdns.Client{
+		Net:     "tcp",
+		Timeout: queryTimeoutUDP,
+	}
+	resp, _, err := client.ExchangeWithConn(&req, co)
+	if err != nil {
+		return nil, fmt.Errorf("plain tcp exchange: %w", err)
+	}
+	return resp.Pack()
 }
 
 // Shutdown cleans up resolver resources.
