@@ -4,7 +4,10 @@ import app.pwhs.blockadstv.data.TvDatabase
 import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.remote.FilterDownloadManager
 import app.pwhs.blockadstv.data.repository.FilterListRepository
+import app.pwhs.blockadstv.service.TvFirewallManager
 import app.pwhs.blockadstv.ui.screens.home.TvHomeViewModel
+import app.pwhs.blockadstv.utils.AppNameResolver
+import app.pwhs.blockadstv.utils.SubscriptionManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.engine.cio.endpoint
@@ -33,8 +36,9 @@ val tvAppModule = module {
     single { get<TvDatabase>().customDnsRuleDao() }
     single { get<TvDatabase>().firewallRuleDao() }
 
-    // Firewall
-    single { app.pwhs.blockadstv.service.TvFirewallManager(get()) }
+    // Firewall & System Helpers
+    single { TvFirewallManager(get()) }
+    single { AppNameResolver(androidContext()) }
 
     // Preferences
     single { TvPreferences(androidContext()) }
@@ -42,7 +46,7 @@ val tvAppModule = module {
     // Repositories
     single { FilterDownloadManager(androidContext(), get()) }
     single { FilterListRepository(androidContext(), get(), get(), get()) }
-    single { app.pwhs.blockadstv.utils.SubscriptionManager(get(), get()) }
+    single { SubscriptionManager(get(), get()) }
 
     // ViewModels
     viewModel { TvHomeViewModel(get(), get(), get()) }
