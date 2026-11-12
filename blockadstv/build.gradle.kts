@@ -30,10 +30,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.pwhs.blockadstv"
+        applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 59
+        versionCode = 2000
         versionName = "7.1.2"
     }
 
