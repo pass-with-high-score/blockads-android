@@ -158,4 +158,16 @@
     <string name="wg_geoip_title">GeoIP Database</string>
     <string name="wg_geoip_not_downloaded">Not downloaded (ccTLD fallback active)</string>
     <string name="wg_geoip_update">Update</string>
+
+    <!-- Web Companion (QR) -->
+    <string name="settings_web_companion">Web Companion (QR)</string>
+    <string name="settings_web_companion_desc">Scan QR to push WireGuard configs, proxy nodes, and settings from phone</string>
+    <string name="web_companion_title">Web Companion</string>
+    <string name="web_companion_subtitle">Scan the QR code or open the URL in your phone browser</string>
+    <string name="web_companion_qr_desc">QR code to access companion web page</string>
+    <string name="web_companion_starting">Starting companion server...</string>
+    <string name="web_companion_url_label">COMPANION URL</string>
+    <string name="web_companion_supports_desc">Push WireGuard .conf, proxy links, subscriptions, or restore settings backup</string>
+    <string name="web_companion_restart">Restart</string>
+    <string name="web_companion_close">Close</string>
 </resources>

@@ -35,6 +35,7 @@ sentry-android = "8.62.0"
 appcompat = "1.8.0"
 tvFoundation = "1.0.0"
 tvMaterial = "1.1.0"
+zxing = "3.5.4"
 # Prebuilt Go tunnel. Published as a GitHub Release asset by
 # .github/workflows/update_tunnel.yml; the checksum is pinned in gradle/tunnel.aar.sha256.
 # Format: <release date>.<short git tree hash of tunnel/>
@@ -99,6 +100,7 @@ sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry-an
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-tv-foundation = { group = "androidx.tv", name = "tv-foundation", version.ref = "tvFoundation" }
 androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -177,6 +177,9 @@ dependencies {
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // QR Code generation
+    implementation(libs.zxing.core)
+
     // libsu — root shell access for iptables mode
     implementation(libs.core)
     implementation(libs.service)
