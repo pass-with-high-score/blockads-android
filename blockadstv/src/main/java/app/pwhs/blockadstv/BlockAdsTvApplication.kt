@@ -4,8 +4,10 @@ import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
 import app.pwhs.blockadstv.di.tvProtectionModule
+import app.pwhs.blockadstv.di.tvWireGuardModule
 import app.pwhs.blockadstv.service.TrustedNetworkManager
 import app.pwhs.blockadstv.worker.FilterUpdateScheduler
+import app.pwhs.blockadstv.worker.GeoIpUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +32,7 @@ class BlockAdsTvApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsTvApplication)
-            modules(tvAppModule, tvProtectionModule)
+            modules(tvAppModule, tvProtectionModule, tvWireGuardModule)
         }
 
         val trustedNetworkManager: TrustedNetworkManager by inject()
@@ -49,6 +51,7 @@ class BlockAdsTvApplication : Application() {
                 Timber.e(e, "Auto-seed failed")
             }
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsTvApplication)
+            GeoIpUpdateWorker.schedule(this@BlockAdsTvApplication)
         }
     }
 }

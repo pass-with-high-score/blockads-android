@@ -206,6 +206,7 @@ class GoTunnelAdapter(
     fun start(
         vpnInterface: ParcelFileDescriptor,
         socketProtector: ((Int) -> Boolean)? = null,
+        wgConfigJson: String = "",
         proxyProtocol: String = "",
         proxyConfigJson: String = "",
         filterHttp3: Boolean = false,
@@ -237,15 +238,19 @@ class GoTunnelAdapter(
         setBlockDohBypass(blockDohBypass)
         setBlockWebRtc(blockWebRtc)
         updateTries()
+        loadGeoIPDatabase()
 
         val fd = vpnInterface.fd
-        Timber.d("Starting Go tunnel engine with fd=$fd, hasProxy=${proxyConfigJson.isNotEmpty()}")
+        Timber.d("Starting Go tunnel engine with fd=$fd, wg=${wgConfigJson.isNotEmpty()}, hasProxy=${proxyConfigJson.isNotEmpty()}")
 
         val protector = SocketProtector { protectedFd ->
             socketProtector?.invoke(protectedFd.toInt()) ?: false
         }
 
-        if (proxyConfigJson.isNotEmpty()) {
+        if (wgConfigJson.isNotEmpty()) {
+            Timber.d("Starting Go tunnel engine in WIREGUARD mode (fd=$fd)")
+            engine.start(fd.toLong(), protector, wgConfigJson)
+        } else if (proxyConfigJson.isNotEmpty()) {
             engine.startFull(fd.toLong(), protector)
         } else {
             engine.start(fd.toLong(), protector, "")
@@ -313,6 +318,32 @@ class GoTunnelAdapter(
             filterRepo.getAdBloomPath(),
             filterRepo.getSecurityBloomPath(),
         )
+    }
+
+    fun loadGeoIPDatabase() {
+        try {
+            val localFile = java.io.File(context.filesDir, "geoip_ipv4.bin")
+            if (localFile.exists() && localFile.length() > 0) {
+                val data = localFile.readBytes()
+                engine.setGeoIPDatabaseBytes(data)
+                Timber.d("GeoIP database loaded into Go engine from local storage (${data.size} bytes)")
+                return
+            }
+
+            val loaded = BlocklistInfo.fromAsset(context, "preset/geoip_ipv4.bin")?.use { info ->
+                engine.setGeoIPDatabaseFromFd(info.fd, info.startOffset, info.length)
+                true
+            } ?: false
+            if (!loaded) {
+                val data = context.assets.open("preset/geoip_ipv4.bin").use { it.readBytes() }
+                engine.setGeoIPDatabaseBytes(data)
+            }
+            Timber.d("GeoIP database loaded into Go engine from asset")
+        } catch (_: java.io.FileNotFoundException) {
+            Timber.d("GeoIP database not yet downloaded, engine running without GeoIP ruleset")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to load GeoIP database into Go engine")
+        }
     }
 
     companion object {

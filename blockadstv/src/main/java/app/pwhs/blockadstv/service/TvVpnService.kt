@@ -13,6 +13,9 @@ import app.pwhs.blockadstv.MainActivity
 import app.pwhs.blockadstv.R
 import app.pwhs.blockadstv.data.dao.DnsLogDao
 import app.pwhs.blockadstv.data.datastore.TvPreferences
+import app.pwhs.blockadstv.data.datastore.WireGuardPreferences
+import app.pwhs.blockadstv.data.geoip.GeoIpLookup
+import app.pwhs.blockadstv.data.geoip.GeoIpManager
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.utils.AppNameResolver
 import kotlinx.coroutines.CancellationException
@@ -62,6 +65,12 @@ class TvVpnService : VpnService() {
         var startTimestamp = 0L
             private set
 
+        @Volatile
+        var socketProtector: ((java.net.Socket) -> Unit)? = null
+
+        @Volatile
+        var tunnelSocketProtector: tunnel.SocketProtector? = null
+
         fun start(context: Context) {
             val intent = Intent(context, TvVpnService::class.java).apply {
                 action = ACTION_START
@@ -91,6 +100,8 @@ class TvVpnService : VpnService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var filterRepo: FilterListRepository
     private lateinit var tvPrefs: TvPreferences
+    private lateinit var wireGuardPrefs: WireGuardPreferences
+    private lateinit var geoIpManager: GeoIpManager
     private lateinit var dnsLogDao: DnsLogDao
     private lateinit var firewallManager: TvFirewallManager
     private lateinit var appNameResolver: AppNameResolver
@@ -112,10 +123,18 @@ class TvVpnService : VpnService() {
         val koin = getKoin()
         filterRepo = koin.get()
         tvPrefs = koin.get()
+        wireGuardPrefs = koin.get()
+        geoIpManager = koin.get()
         dnsLogDao = koin.get()
         firewallManager = koin.get()
         appNameResolver = koin.get()
         protectionHelper = koin.get()
+
+        GeoIpLookup.init(this)
+        socketProtector = { sock -> protect(sock) }
+        tunnelSocketProtector = tunnel.SocketProtector { fd ->
+            try { protect(fd.toInt()) } catch (_: Exception) { false }
+        }
 
         tunnelBuilder = TvVpnTunnelBuilder(this)
         goTunnelAdapter = GoTunnelAdapter(
@@ -144,6 +163,7 @@ class TvVpnService : VpnService() {
         )
 
         observePreferenceUpdates()
+        TvWireGuardTunnelHelper.observeGeoIpUpdates(serviceScope, geoIpManager, goTunnelAdapter)
     }
 
     private fun observePreferenceUpdates() {
@@ -199,8 +219,11 @@ class TvVpnService : VpnService() {
         if (s == VpnState.RUNNING || s == VpnState.STARTING) return
         _state.value = VpnState.STARTING
 
-        createNotificationChannel()
-        startForeground(NOTIFICATION_ID, buildNotification("Connecting...", "Loading filters..."))
+        TvVpnNotificationHelper.createNotificationChannel(this)
+        startForeground(
+            TvVpnNotificationHelper.NOTIFICATION_ID,
+            TvVpnNotificationHelper.buildNotification(this, "Connecting...", "Loading filters..."),
+        )
         networkMonitor?.startMonitoring()
 
         startJob = serviceScope.launch {
@@ -226,6 +249,8 @@ class TvVpnService : VpnService() {
                 val blockWebRtc = tvPrefs.blockWebRtcLeak.first()
                 val filterHttp3 = tvPrefs.filterHttp3.first()
 
+                val isWg = routingMode == WireGuardPreferences.ROUTING_MODE_WIREGUARD
+                val preparedWg = if (isWg) TvWireGuardTunnelHelper.prepare(wireGuardPrefs) else null
                 val isProxyVpn = routingMode == TvPreferences.ROUTING_MODE_PROXY_VPN
                 val activeProxy = if (isProxyVpn) tvPrefs.getActiveProxyProfileSnapshot() else null
                 val proxyProtocol = activeProxy?.protocol?.value ?: ""
@@ -234,13 +259,17 @@ class TvVpnService : VpnService() {
                 retryManager.reset()
                 var establishedPfd: ParcelFileDescriptor? = null
                 while (isActive && establishedPfd == null && retryManager.shouldRetry()) {
-                    establishedPfd = tunnelBuilder.establish(
-                        whitelistedApps = whitelistedApps,
-                        isProxyVpn = isProxyVpn,
-                        excludeLan = excludeLan,
-                        preferredIpType = preferredIpType,
-                        proxyHost = activeProxy?.server,
-                    )
+                    establishedPfd = if (preparedWg != null) {
+                        TvWireGuardTunnelHelper.establishTun(this@TvVpnService, preparedWg, whitelistedApps, excludeLan)
+                    } else {
+                        tunnelBuilder.establish(
+                            whitelistedApps = whitelistedApps,
+                            isProxyVpn = isProxyVpn,
+                            excludeLan = excludeLan,
+                            preferredIpType = preferredIpType,
+                            proxyHost = activeProxy?.server,
+                        )
+                    }
                     if (establishedPfd == null && retryManager.shouldRetry()) {
                         Timber.w(
                             "TV VPN establish failed, retrying (${retryManager.getRetryCount()}/${retryManager.getMaxRetries()})"
@@ -263,10 +292,14 @@ class TvVpnService : VpnService() {
 
                 withContext(Dispatchers.Main) {
                     val nm = getSystemService(NotificationManager::class.java)
-                    val title = if (isProxyVpn) "BlockAds TV Proxy Active" else "BlockAds TV Active"
+                    val title = when {
+                        preparedWg != null -> "BlockAds TV WireGuard Active"
+                        isProxyVpn -> "BlockAds TV Proxy Active"
+                        else -> "BlockAds TV Active"
+                    }
                     nm.notify(
-                        NOTIFICATION_ID,
-                        buildNotification(title, "$domainCount filter rules loaded"),
+                        TvVpnNotificationHelper.NOTIFICATION_ID,
+                        TvVpnNotificationHelper.buildNotification(this@TvVpnService, title, "$domainCount filter rules loaded"),
                     )
                 }
 
@@ -289,6 +322,7 @@ class TvVpnService : VpnService() {
                     socketProtector = { fd ->
                         try { protect(fd) } catch (_: Exception) { false }
                     },
+                    wgConfigJson = preparedWg?.configJson ?: "",
                     proxyProtocol = proxyProtocol,
                     proxyConfigJson = proxyConfigJson,
                     filterHttp3 = filterHttp3,
@@ -429,55 +463,5 @@ class TvVpnService : VpnService() {
         try { vpnInterface?.close() } catch (_: Exception) {}
         vpnInterface = null
         super.onDestroy()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "BlockAds TV VPN",
-                NotificationManager.IMPORTANCE_LOW,
-            ).apply {
-                description = "VPN service notification"
-                setShowBadge(false)
-            }
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-        }
-    }
-
-    private fun buildNotification(title: String, text: String): Notification {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-
-        val stopIntent = Intent(this, TvVpnService::class.java).apply {
-            action = ACTION_STOP
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this, 1, stopIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-
-        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, CHANNEL_ID)
-        } else {
-            @Suppress("DEPRECATION")
-            Notification.Builder(this)
-        }
-
-        return builder
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setOngoing(true)
-            .setContentIntent(pendingIntent)
-            .addAction(
-                Notification.Action.Builder(null, "Stop", stopPendingIntent).build()
-            )
-            .build()
     }
 }
