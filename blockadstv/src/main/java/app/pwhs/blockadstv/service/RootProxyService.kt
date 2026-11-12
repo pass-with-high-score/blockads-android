@@ -91,6 +91,7 @@ class RootProxyService : Service() {
     private lateinit var firewallManager: TvFirewallManager
     private lateinit var appNameResolver: AppNameResolver
     private lateinit var goTunnelAdapter: GoTunnelAdapter
+    private lateinit var protectionHelper: TvProtectionTunnelHelper
 
     @Volatile
     private var whitelistedUids: List<Int> = emptyList()
@@ -102,6 +103,7 @@ class RootProxyService : Service() {
         filterRepo = koin.get()
         dnsLogDao = koin.get()
         firewallManager = koin.get()
+        protectionHelper = koin.get()
 
         appNameResolver = AppNameResolver(this)
         goTunnelAdapter = GoTunnelAdapter(
@@ -113,6 +115,12 @@ class RootProxyService : Service() {
             firewallManager = firewallManager,
         )
         Timber.d("RootProxyService created on TV")
+        protectionHelper.observeProtectionUpdates(
+            scope = serviceScope,
+            tvPrefs = tvPrefs,
+            goTunnelAdapter = goTunnelAdapter,
+            isRunning = { _state.value == VpnState.RUNNING },
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -158,15 +166,18 @@ class RootProxyService : Service() {
                 val domainCount = result.getOrDefault(0)
 
                 // 2. Configure DNS engine
-                val protocol = tvPrefs.dnsProtocol.first().name
-                val primary = tvPrefs.upstreamDns.first()
-                val fallback = tvPrefs.fallbackDns.first()
-                val dohUrl = tvPrefs.dohUrl.first()
-                val odohRelayUrl = tvPrefs.odohRelayUrl.first()
+                val dnsConfig = protectionHelper.resolveEffectiveDnsConfig(tvPrefs)
                 val responseType = tvPrefs.dnsResponseType.first()
 
-                goTunnelAdapter.configureDns(protocol, primary, fallback, dohUrl, odohRelayUrl)
+                goTunnelAdapter.configureDns(
+                    dnsConfig.protocol,
+                    dnsConfig.primary,
+                    dnsConfig.fallback,
+                    dnsConfig.dohUrl,
+                    dnsConfig.odohRelayUrl,
+                )
                 goTunnelAdapter.setBlockResponseType(responseType)
+                protectionHelper.applyInitialProtection(goTunnelAdapter)
 
                 // 3. Resolve whitelisted apps to UIDs
                 whitelistedUids = tvPrefs.getWhitelistedAppsSnapshot().mapNotNull { pkg ->

@@ -57,6 +57,11 @@ class GoTunnelAdapter(
         engine.setBlockResponseType(responseType)
     }
 
+    fun configureSafeSearch(safeSearchEnabled: Boolean, youtubeRestricted: Boolean) {
+        engine.setSafeSearch(safeSearchEnabled)
+        engine.setYouTubeRestricted(youtubeRestricted)
+    }
+
     fun setPreferredIPType(type: String) = engine.setPreferredIPType(type)
 
     fun setUseTcpStack(enabled: Boolean) = engine.setUseTcpStack(enabled)

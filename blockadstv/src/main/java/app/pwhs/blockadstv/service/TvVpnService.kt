@@ -96,6 +96,7 @@ class TvVpnService : VpnService() {
     private lateinit var appNameResolver: AppNameResolver
     private lateinit var goTunnelAdapter: GoTunnelAdapter
     private lateinit var tunnelBuilder: TvVpnTunnelBuilder
+    private lateinit var protectionHelper: TvProtectionTunnelHelper
     private val retryManager = VpnRetryManager()
 
     private var networkMonitor: NetworkMonitor? = null
@@ -114,6 +115,7 @@ class TvVpnService : VpnService() {
         dnsLogDao = koin.get()
         firewallManager = koin.get()
         appNameResolver = koin.get()
+        protectionHelper = koin.get()
 
         tunnelBuilder = TvVpnTunnelBuilder(this)
         goTunnelAdapter = GoTunnelAdapter(
@@ -171,6 +173,12 @@ class TvVpnService : VpnService() {
                 goTunnelAdapter.setFilterHttp3(enabled)
             }
         }
+        protectionHelper.observeProtectionUpdates(
+            scope = serviceScope,
+            tvPrefs = tvPrefs,
+            goTunnelAdapter = goTunnelAdapter,
+            isRunning = { _state.value == VpnState.RUNNING },
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -208,11 +216,7 @@ class TvVpnService : VpnService() {
                 val domainCount = filterRepo.loadAllEnabledFilters().getOrDefault(0)
                 firewallManager.loadRules()
 
-                val upstreamDns = tvPrefs.upstreamDns.first()
-                val fallbackDns = tvPrefs.fallbackDns.first()
-                val dnsProtocol = tvPrefs.dnsProtocol.first()
-                val dohUrl = tvPrefs.dohUrl.first()
-                val odohRelayUrl = tvPrefs.odohRelayUrl.first()
+                val dnsConfig = protectionHelper.resolveEffectiveDnsConfig(tvPrefs)
                 val dnsResponseType = tvPrefs.dnsResponseType.first()
                 val whitelistedApps = tvPrefs.getWhitelistedAppsSnapshot()
                 val routingMode = tvPrefs.getRoutingModeSnapshot()
@@ -267,14 +271,15 @@ class TvVpnService : VpnService() {
                 }
 
                 goTunnelAdapter.configureDns(
-                    protocol = dnsProtocol.name,
-                    primary = upstreamDns,
-                    fallback = fallbackDns,
-                    dohUrl = dohUrl,
-                    odohRelayUrl = odohRelayUrl,
+                    protocol = dnsConfig.protocol,
+                    primary = dnsConfig.primary,
+                    fallback = dnsConfig.fallback,
+                    dohUrl = dnsConfig.dohUrl,
+                    odohRelayUrl = dnsConfig.odohRelayUrl,
                 )
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
                 goTunnelAdapter.setPreferredIPType(preferredIpType)
+                protectionHelper.applyInitialProtection(goTunnelAdapter)
 
                 startDynamicEngineWatchers()
                 startConnectionProbing()
@@ -315,14 +320,8 @@ class TvVpnService : VpnService() {
                 tvPrefs.odohRelayUrl,
             ) { protocol, primary, fallback, doh, relay ->
                 listOf(protocol.name, primary, fallback, doh, relay)
-            }.drop(1).collectLatest { config ->
-                goTunnelAdapter.configureDns(
-                    protocol = config[0],
-                    primary = config[1],
-                    fallback = config[2],
-                    dohUrl = config[3],
-                    odohRelayUrl = config[4],
-                )
+            }.drop(1).collectLatest {
+                protectionHelper.reloadEffectiveDns(tvPrefs, goTunnelAdapter)
             }
         }
         serviceScope.launch {
@@ -335,6 +334,10 @@ class TvVpnService : VpnService() {
     private fun handleNetworkAvailable() {
         networkSwitchJob?.cancel()
         networkSwitchJob = serviceScope.launch {
+            if (_state.value == VpnState.RUNNING) {
+                protectionHelper.reloadEffectiveDns(tvPrefs, goTunnelAdapter)
+                return@launch
+            }
             val autoReconnect = tvPrefs.autoReconnect.first()
             val vpnWasEnabled = tvPrefs.vpnEnabled.first()
             if (autoReconnect && vpnWasEnabled && _state.value == VpnState.STOPPED) {

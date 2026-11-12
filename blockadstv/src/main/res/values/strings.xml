@@ -120,4 +120,24 @@
     <string name="filter_compile_success_title">Filter compiled</string>
     <string name="filter_compile_failed_title">Filter compilation failed</string>
     <string name="filter_compile_channel_name">Filter Compilation</string>
+    <string name="settings_safe_search">SafeSearch</string>
+    <string name="settings_safe_search_desc">Enforce SafeSearch on Google, Bing, DuckDuckGo, and Yandex</string>
+    <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
+    <string name="settings_youtube_restricted_desc">Filter potentially mature content on YouTube</string>
+    <string name="trusted_networks_title">Trusted Networks</string>
+    <string name="trusted_networks_desc">Auto-pause or use System DNS on trusted Wi-Fi or Ethernet networks</string>
+    <string name="trusted_networks_pause_title">Pause protection on trusted networks</string>
+    <string name="trusted_networks_pause_desc">Automatically stop BlockAds TV when connected to a trusted network</string>
+    <string name="trusted_networks_system_dns_title">Use System DNS on trusted networks</string>
+    <string name="trusted_networks_system_dns_desc">Bypass custom DNS and use the network DHCP DNS on trusted networks</string>
+    <string name="trusted_networks_current">Current network: %1$s</string>
+    <string name="trusted_networks_current_unknown">Current network: Unavailable</string>
+    <string name="trusted_networks_add_current">Add Current</string>
+    <string name="trusted_networks_add_hint">Enter Wi-Fi SSID or Ethernet</string>
+    <string name="trusted_networks_add_btn">Add</string>
+    <string name="trusted_networks_remove">Remove</string>
+    <string name="trusted_networks_empty">No trusted networks added yet.</string>
+    <string name="trusted_networks_paused_title">Protection paused</string>
+    <string name="trusted_networks_paused_text">Paused on trusted network: %1$s</string>
+    <string name="trusted_networks_paused_text_generic">Paused on trusted network</string>
 </resources>

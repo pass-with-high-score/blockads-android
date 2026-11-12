@@ -3,6 +3,8 @@ package app.pwhs.blockadstv
 import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
+import app.pwhs.blockadstv.di.tvProtectionModule
+import app.pwhs.blockadstv.service.TrustedNetworkManager
 import app.pwhs.blockadstv.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,8 +30,11 @@ class BlockAdsTvApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsTvApplication)
-            modules(tvAppModule)
+            modules(tvAppModule, tvProtectionModule)
         }
+
+        val trustedNetworkManager: TrustedNetworkManager by inject()
+        trustedNetworkManager.start()
 
         // Auto-fetch filter lists from GitHub on app launch
         // so filters are available immediately without starting VPN first

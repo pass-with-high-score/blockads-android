@@ -31,15 +31,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import app.pwhs.blockadstv.R
+import app.pwhs.blockadstv.data.datastore.ProtectionPreferences
 import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.repository.FilterListRepository
+import app.pwhs.blockadstv.service.TrustedNetworkManager
 import app.pwhs.blockadstv.ui.components.TvSwitch
 import app.pwhs.blockadstv.ui.theme.NeonGreen
 import app.pwhs.blockadstv.ui.theme.TextSecondary
@@ -52,11 +53,19 @@ import org.koin.compose.koinInject
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     tvPrefs: TvPreferences = koinInject(),
+    protectionPrefs: ProtectionPreferences = koinInject(),
     filterRepo: FilterListRepository = koinInject(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val startOnBoot by tvPrefs.startOnBoot.collectAsStateWithLifecycle(initialValue = false)
+    val safeSearchEnabled by protectionPrefs.safeSearchEnabled.collectAsStateWithLifecycle(initialValue = false)
+    val youtubeRestricted by protectionPrefs.youtubeRestrictedMode.collectAsStateWithLifecycle(initialValue = false)
+    val trustedNetworks by protectionPrefs.trustedNetworks.collectAsStateWithLifecycle(initialValue = emptySet())
+    val pauseOnTrusted by protectionPrefs.pauseOnTrustedEnabled.collectAsStateWithLifecycle(initialValue = false)
+    val useSystemDnsOnTrusted by protectionPrefs.useSystemDnsOnTrustedEnabled.collectAsStateWithLifecycle(
+        initialValue = false
+    )
     val currentResponseType by tvPrefs.dnsResponseType.collectAsStateWithLifecycle(
         initialValue = TvPreferences.DNS_RESPONSE_CUSTOM_IP
     )
@@ -76,6 +85,38 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showModeDialog by remember { mutableStateOf(false) }
+    var showTrustedNetworksDialog by remember { mutableStateOf(false) }
+
+    if (showTrustedNetworksDialog) {
+        val currentNet = remember(showTrustedNetworksDialog) {
+            TrustedNetworkManager.currentNetworkName(context)
+        }
+        TrustedNetworksDialog(
+            trustedNetworks = trustedNetworks,
+            pauseOnTrusted = pauseOnTrusted,
+            useSystemDnsOnTrusted = useSystemDnsOnTrusted,
+            currentNetwork = currentNet,
+            onTogglePauseOnTrusted = { enabled ->
+                scope.launch {
+                    protectionPrefs.setPauseOnTrustedEnabled(enabled)
+                    if (enabled) protectionPrefs.setUseSystemDnsOnTrustedEnabled(false)
+                }
+            },
+            onToggleUseSystemDns = { enabled ->
+                scope.launch {
+                    protectionPrefs.setUseSystemDnsOnTrustedEnabled(enabled)
+                    if (enabled) protectionPrefs.setPauseOnTrustedEnabled(false)
+                }
+            },
+            onAddNetwork = { net ->
+                scope.launch { protectionPrefs.addTrustedNetwork(net) }
+            },
+            onRemoveNetwork = { net ->
+                scope.launch { protectionPrefs.removeTrustedNetwork(net) }
+            },
+            onDismiss = { showTrustedNetworksDialog = false },
+        )
+    }
 
     if (showModeDialog) {
         ModeSelectionDialog(
@@ -173,6 +214,51 @@ fun SettingsScreen(
                     onClick = {
                         scope.launch { tvPrefs.setStartOnBoot(!startOnBoot) }
                     },
+                )
+            }
+
+            // SafeSearch
+            item {
+                SettingListItem(
+                    iconRes = R.drawable.ic_shield_on,
+                    title = stringResource(R.string.settings_safe_search),
+                    subtitle = stringResource(R.string.settings_safe_search_desc),
+                    isToggle = true,
+                    isEnabled = safeSearchEnabled,
+                    onClick = {
+                        scope.launch { protectionPrefs.setSafeSearchEnabled(!safeSearchEnabled) }
+                    },
+                )
+            }
+
+            // YouTube Restricted Mode
+            item {
+                SettingListItem(
+                    iconRes = R.drawable.ic_shield,
+                    title = stringResource(R.string.settings_youtube_restricted),
+                    subtitle = stringResource(R.string.settings_youtube_restricted_desc),
+                    isToggle = true,
+                    isEnabled = youtubeRestricted,
+                    onClick = {
+                        scope.launch { protectionPrefs.setYoutubeRestrictedMode(!youtubeRestricted) }
+                    },
+                )
+            }
+
+            // Trusted Networks
+            item {
+                val modeLabel = when {
+                    pauseOnTrusted -> stringResource(R.string.trusted_networks_pause_title)
+                    useSystemDnsOnTrusted -> stringResource(R.string.trusted_networks_system_dns_title)
+                    else -> stringResource(R.string.trusted_networks_desc)
+                }
+                SettingListItem(
+                    iconRes = R.drawable.ic_dns_system,
+                    title = stringResource(R.string.trusted_networks_title),
+                    subtitle = "${trustedNetworks.size} · $modeLabel",
+                    isToggle = false,
+                    isEnabled = false,
+                    onClick = { showTrustedNetworksDialog = true },
                 )
             }
 
@@ -339,100 +425,6 @@ private fun SettingListItem(
             TvSwitch(
                 checked = isEnabled,
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun ResponseTypeDialog(
-    currentType: String,
-    onSelect: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Box(
-            modifier = Modifier
-                .width(520.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .border(2.dp, NeonGreen, RoundedCornerShape(16.dp))
-                .padding(24.dp),
-        ) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings_block_mode),
-                        contentDescription = null,
-                        tint = NeonGreen,
-                        modifier = Modifier.size(28.dp),
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "Block Response Type",
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Select how blocked domains respond to client queries:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                listOf(
-                    Triple("0.0.0.0 (Null IP)", "Standard block address, fastest response", "0.0.0.0"),
-                    Triple("NXDOMAIN", "Domain does not exist, standard DNS response", "NXDOMAIN"),
-                    Triple("REFUSED", "Query refused by resolver", "REFUSED"),
-                ).forEach { (label, desc, value) ->
-                    var isFocused by remember { mutableStateOf(false) }
-                    val isSelected = currentType == value
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isSelected) NeonGreen.copy(alpha = 0.15f)
-                                else if (isFocused) MaterialTheme.colorScheme.surfaceVariant
-                                else MaterialTheme.colorScheme.surface
-                            )
-                            .border(
-                                width = if (isFocused || isSelected) 2.dp else 1.dp,
-                                color = if (isFocused || isSelected) NeonGreen else MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .onFocusChanged { isFocused = it.isFocused }
-                            .clickable(onClick = { onSelect(value) })
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = if (isSelected) NeonGreen else MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = desc,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary,
-                            )
-                        }
-                        if (isSelected) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_check),
-                                contentDescription = "Selected",
-                                tint = NeonGreen,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 }
