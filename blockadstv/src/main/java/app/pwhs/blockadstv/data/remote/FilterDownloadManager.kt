@@ -27,10 +27,21 @@ class FilterDownloadManager(
         try {
             val bloomFile = File(filterDir, "${filter.id}.bloom")
             val trieFile = File(filterDir, "${filter.id}.trie")
+            val cssFile = File(filterDir, "${filter.id}.css")
+            val scriptletFile = File(filterDir, "${filter.id}.scriptlets")
+            val modulesFile = File(filterDir, "${filter.id}.modules.json")
 
             if (!forceUpdate && bloomFile.exists() && bloomFile.length() > 0 && trieFile.exists() && trieFile.length() > 0) {
                 Timber.d("Filter ${filter.id} already cached locally")
-                return@withContext Result.success(DownloadedFilterPaths(bloomFile.absolutePath, trieFile.absolutePath))
+                return@withContext Result.success(
+                    DownloadedFilterPaths(
+                        bloomPath = bloomFile.absolutePath,
+                        triePath = trieFile.absolutePath,
+                        cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                        scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                        modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                    )
+                )
             }
 
             val zipUrl = when {
@@ -60,6 +71,9 @@ class FilterDownloadManager(
                                 val target = when {
                                     entry.name.endsWith(".bloom") -> bloomFile
                                     entry.name.endsWith(".trie") -> trieFile
+                                    entry.name.endsWith(".css") -> cssFile
+                                    entry.name.endsWith(".scriptlets") -> scriptletFile
+                                    entry.name.endsWith(".modules.json") -> modulesFile
                                     else -> null
                                 }
                                 target?.let { out ->
@@ -70,7 +84,15 @@ class FilterDownloadManager(
                             }
                         }
                         if (bloomFile.exists() && trieFile.exists()) {
-                            return@withContext Result.success(DownloadedFilterPaths(bloomFile.absolutePath, trieFile.absolutePath))
+                            return@withContext Result.success(
+                                DownloadedFilterPaths(
+                                    bloomPath = bloomFile.absolutePath,
+                                    triePath = trieFile.absolutePath,
+                                    cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                                    scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                                    modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                                )
+                            )
                         }
                     }
                 } catch (e: Exception) {
@@ -82,9 +104,11 @@ class FilterDownloadManager(
 
             val bloomPath = if (filter.bloomUrl.isNotEmpty()) downloadFile(filter.bloomUrl, bloomFile, forceUpdate) else null
             val triePath = if (filter.trieUrl.isNotEmpty()) downloadFile(filter.trieUrl, trieFile, forceUpdate) else null
+            val cssPath = if (filter.cssUrl.isNotEmpty()) downloadFile(filter.cssUrl, cssFile, forceUpdate) else null
+            val scriptletPath = if (filter.scriptletsUrl.isNotEmpty()) downloadFile(filter.scriptletsUrl, scriptletFile, forceUpdate) else null
 
             if (bloomPath != null && triePath != null) {
-                Result.success(DownloadedFilterPaths(bloomPath, triePath))
+                Result.success(DownloadedFilterPaths(bloomPath, triePath, cssPath, scriptletPath))
             } else {
                 Result.failure(Exception("Failed to download core filter files for ${filter.id}"))
             }
@@ -147,5 +171,30 @@ class FilterDownloadManager(
             Timber.e(e, "Failed to download $url")
             null
         }
+    }
+
+    fun getInjectableCss(file: File): String {
+        if (!file.exists() || file.length() == 0L) return ""
+        val cssBuilder = StringBuilder()
+        try {
+            file.forEachLine { line ->
+                val trimmed = line.trim()
+                if (trimmed.isEmpty() || trimmed.startsWith("!") || (trimmed.startsWith("#") && !trimmed.startsWith("##"))) {
+                    return@forEachLine
+                }
+                if (trimmed.contains("#@#") || trimmed.contains("##+js") || trimmed.contains("##^")) {
+                    return@forEachLine
+                }
+                when {
+                    trimmed.contains("##") -> cssBuilder.append(trimmed).append("\n")
+                    trimmed.contains("{") -> cssBuilder.append(trimmed).append("\n")
+                    else -> cssBuilder.append("##").append(trimmed).append("\n")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error reading CSS file ${file.absolutePath}")
+            return ""
+        }
+        return cssBuilder.toString()
     }
 }

@@ -1,0 +1,186 @@
+{
+  "version": 1792513963,
+  "updatedAt": 1792513963944,
+  "modules": [
+    {
+      "id": "general",
+      "name": "General Web Ads, Popups & Anti-Adblock Cleaner",
+      "enabled": true,
+      "domains": [
+        "*"
+      ],
+      "mock_paths": [],
+      "block_paths": [
+        "/pagead",
+        "/pagead.js",
+        "/ads.js",
+        "/widget/ads.js",
+        "/doubleclick/",
+        "/popunder",
+        "/popads",
+        "/advertisement",
+        "/adserver",
+        "-adx.js",
+        "/vl-top-adx",
+        "/vl-main-adx",
+        "/vl-underplayer-adx",
+        "/vl-native-adx",
+        "/catfish",
+        "/static/js/ads-",
+        "/no-adblock-access/",
+        "/videoSliderAlt.js",
+        "/inpagepush.js",
+        "/aclib.js",
+        "/suv5.js",
+        "/js/cla/",
+        "/invoke.js",
+        "/bn.js",
+        "/sfp.js",
+        "/on.js",
+        "/apitiny",
+        "ezoic",
+        "AdsScript",
+        "/jquery.openxtag.js",
+        "/metrika/tag",
+        "/tag.min.js"
+      ],
+      "cosmetic_css": [],
+      "scriptlets": [],
+      "scripts": [
+        "service_worker_killer.js"
+      ]
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube AdBlock & Video Enhancements",
+      "enabled": true,
+      "domains": [
+        "youtube.com",
+        "m.youtube.com",
+        "www.youtube.com",
+        "youtubei.googleapis.com"
+      ],
+      "mock_paths": [
+        {
+          "pattern": "/youtubei/v1/player/ad_break",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8",
+          "body": "{}"
+        },
+        {
+          "pattern": "/get_midroll_info",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8",
+          "body": "{}"
+        },
+        {
+          "pattern": "/api/stats/ads",
+          "status": 204
+        }
+      ],
+      "block_paths": [
+        "/pagead",
+        "/pagead.js",
+        "/static/doubleclick/instream",
+        "/ad_status"
+      ],
+      "cosmetic_css": [
+        "ytd-promoted-sparkles-web-renderer { display: none !important; }",
+        "ytd-display-ad-renderer { display: none !important; }",
+        "ytd-action-companion-ad-renderer { display: none !important; }",
+        ".ad-showing { display: none !important; }",
+        ".ytp-ad-overlay-container { display: none !important; }",
+        ".ytp-ad-message-container { display: none !important; }",
+        "ytd-ad-slot-renderer { display: none !important; }",
+        "#masthead-ad { display: none !important; }"
+      ],
+      "scriptlets": [
+        "set-constant ytInitialPlayerResponse.adPlacements undefined",
+        "set-constant playerResponse.adPlacements undefined",
+        "prevent-fetch /ad_break"
+      ],
+      "scripts": [
+        "youtube_sanitizer.js",
+        "background_play.js"
+      ]
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook & Messenger Ad & Tracking Cleaner",
+      "enabled": true,
+      "domains": [
+        "facebook.com",
+        "m.facebook.com",
+        "web.facebook.com",
+        "messenger.com"
+      ],
+      "mock_paths": [
+        {
+          "pattern": "/ajax/bz",
+          "status": 204
+        }
+      ],
+      "block_paths": [
+        "/tr/",
+        "/signals_log",
+        "/privacy/mutation"
+      ],
+      "cosmetic_css": [
+        "div[data-pagelet*='FeedUnit_'] span:has-text('Sponsored') { display: none !important; }",
+        "div[data-pagelet*='FeedUnit_'] span:has-text('Được tài trợ') { display: none !important; }",
+        "div[data-pagelet*='FeedUnit_'] span:has-text('広告') { display: none !important; }"
+      ],
+      "scriptlets": [],
+      "scripts": []
+    }
+  ],
+  "domainIndex": {
+    "youtube.com": "youtube",
+    "m.youtube.com": "youtube",
+    "www.youtube.com": "youtube",
+    "youtubei.googleapis.com": "youtube",
+    "facebook.com": "facebook",
+    "m.facebook.com": "facebook",
+    "web.facebook.com": "facebook",
+    "messenger.com": "facebook"
+  },
+  "globalBlockPaths": [
+    "/pagead",
+    "/pagead.js",
+    "/ads.js",
+    "/widget/ads.js",
+    "/doubleclick/",
+    "/popunder",
+    "/popads",
+    "/advertisement",
+    "/adserver",
+    "-adx.js",
+    "/vl-top-adx",
+    "/vl-main-adx",
+    "/vl-underplayer-adx",
+    "/vl-native-adx",
+    "/catfish",
+    "/static/js/ads-",
+    "/no-adblock-access/",
+    "/videoSliderAlt.js",
+    "/inpagepush.js",
+    "/aclib.js",
+    "/suv5.js",
+    "/js/cla/",
+    "/invoke.js",
+    "/bn.js",
+    "/sfp.js",
+    "/on.js",
+    "/apitiny",
+    "ezoic",
+    "AdsScript",
+    "/jquery.openxtag.js",
+    "/metrika/tag",
+    "/tag.min.js",
+    "/static/doubleclick/instream",
+    "/ad_status",
+    "/tr/",
+    "/signals_log",
+    "/privacy/mutation"
+  ]
+}

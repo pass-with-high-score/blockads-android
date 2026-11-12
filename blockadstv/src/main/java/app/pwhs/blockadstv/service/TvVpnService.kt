@@ -199,6 +199,7 @@ class TvVpnService : VpnService() {
             goTunnelAdapter = goTunnelAdapter,
             isRunning = { _state.value == VpnState.RUNNING },
         )
+        TvRulesTunnelHelper.observeRules(serviceScope, goTunnelAdapter, getKoin())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

@@ -11,10 +11,14 @@ data class RemoteFilterList(
     val bloomUrl: String,
     val trieUrl: String,
     val cssUrl: String? = null,
+    val scriptletsUrl: String? = null,
     val originalUrl: String? = null,
 )
 
 data class DownloadedFilterPaths(
     val bloomPath: String?,
     val triePath: String?,
+    val cssPath: String? = null,
+    val scriptletPath: String? = null,
+    val modulesPath: String? = null,
 )
