@@ -29,6 +29,7 @@ class FilterListRepository(
     companion object {
         private const val FILTER_LIST_JSON_URL =
             "https://complier.pwhs.app/api/filters/default"
+        private const val CACHE_DIR = "filter_cache"
     }
 
     @Volatile
@@ -53,7 +54,20 @@ class FilterListRepository(
     fun getAdBloomPath(): String = adBloomPaths
     fun getSecurityBloomPath(): String = securityBloomPaths
 
-    fun getCosmeticCssPath(): String? = null
+    fun getScriptletsPath(): String? {
+        val file = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
+        return if (file.exists() && file.length() > 0) file.absolutePath else null
+    }
+
+    fun getCosmeticCssPath(): String? {
+        val file = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
+        return if (file.exists() && file.length() > 0) file.absolutePath else null
+    }
+
+    fun getFilterModulesPath(): String? {
+        val file = File(context.filesDir, "$CACHE_DIR/filter_modules.json")
+        return if (file.exists() && file.length() > 0) file.absolutePath else null
+    }
 
     // Simplified blocking checks - Go engine handles most blocking via tries
     fun isBlocked(domain: String): Boolean = false
@@ -102,6 +116,8 @@ class FilterListRepository(
                             category = category,
                             bloomUrl = remote.bloomUrl,
                             trieUrl = remote.trieUrl,
+                            cssUrl = remote.cssUrl ?: "",
+                            scriptletsUrl = remote.scriptletsUrl ?: "",
                             domainCount = remote.ruleCount,
                             ruleCount = remote.ruleCount,
                             originalUrl = remote.originalUrl ?: existing.originalUrl,
@@ -120,6 +136,8 @@ class FilterListRepository(
                             ruleCount = remote.ruleCount,
                             bloomUrl = remote.bloomUrl,
                             trieUrl = remote.trieUrl,
+                            cssUrl = remote.cssUrl ?: "",
+                            scriptletsUrl = remote.scriptletsUrl ?: "",
                             originalUrl = remote.originalUrl ?: "",
                         )
                     )
@@ -179,6 +197,7 @@ class FilterListRepository(
                         bloomUrl = bloomUrl,
                         trieUrl = trieUrl,
                         cssUrl = extractString("cssUrl"),
+                        scriptletsUrl = extractString("scriptletsUrl"),
                         originalUrl = extractString("originalUrl"),
                     )
                 )
@@ -225,6 +244,9 @@ class FilterListRepository(
                     securityTriePaths = ""
                     adBloomPaths = ""
                     securityBloomPaths = ""
+                    File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").delete()
+                    File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt").delete()
+                    File(context.filesDir, "$CACHE_DIR/filter_modules.json").delete()
                     _domainCountFlow.value = 0
                     return@withContext Result.success(0)
                 }
@@ -270,6 +292,10 @@ class FilterListRepository(
                 adBloomPaths = adBloomSb.toString().trimEnd(',')
                 securityBloomPaths = secBloomSb.toString().trimEnd(',')
 
+                compileCosmeticRules(enabledLists)
+                compileScriptletRules(enabledLists)
+                compileModuleRules(enabledLists)
+
                 _domainCountFlow.value = totalCount
                 Result.success(totalCount)
             } catch (e: Exception) {
@@ -278,4 +304,121 @@ class FilterListRepository(
             }
         }
     }
+
+    private suspend fun compileScriptletRules(enabledLists: List<FilterList>) =
+        withContext(Dispatchers.IO) {
+            try {
+                val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+                val outFile = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
+                if (validLists.isEmpty()) {
+                    outFile.delete()
+                    return@withContext
+                }
+                val sb = StringBuilder()
+                var added = 0
+                for (filter in validLists) {
+                    val f = File(context.filesDir, "remote_filters/${filter.id}.scriptlets")
+                    if (f.exists() && f.length() > 0) {
+                        sb.append(f.readText())
+                        if (!sb.endsWith("\n")) sb.append("\n")
+                        added++
+                    }
+                }
+                if (added > 0) {
+                    outFile.parentFile?.mkdirs()
+                    outFile.writeText(sb.toString())
+                    Timber.d("Wrote scriptlets ($added lists, ${sb.length} bytes)")
+                } else {
+                    outFile.delete()
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to compile scriptlet rules")
+            }
+        }
+
+    private suspend fun compileCosmeticRules(enabledLists: List<FilterList>) =
+        withContext(Dispatchers.IO) {
+            try {
+                val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+                val finalCssFile = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
+                if (validLists.isEmpty()) {
+                    finalCssFile.delete()
+                    return@withContext
+                }
+                val cssBuilder = StringBuilder()
+                var rulesAdded = 0
+                for (filter in validLists) {
+                    val cssFile = File(context.filesDir, "remote_filters/${filter.id}.css")
+                    if (cssFile.exists() && cssFile.length() > 0) {
+                        val cssSnippet = downloadManager.getInjectableCss(cssFile)
+                        if (cssSnippet.isNotEmpty()) {
+                            cssBuilder.append(cssSnippet)
+                            rulesAdded++
+                        }
+                    }
+                }
+                if (rulesAdded > 0) {
+                    finalCssFile.parentFile?.mkdirs()
+                    finalCssFile.writeText(cssBuilder.toString())
+                    Timber.d("Wrote cosmetic CSS (${cssBuilder.length} bytes)")
+                } else {
+                    finalCssFile.delete()
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to compile cosmetic rules")
+            }
+        }
+
+    private suspend fun compileModuleRules(enabledLists: List<FilterList>) =
+        withContext(Dispatchers.IO) {
+            try {
+                val outFile = File(context.filesDir, "$CACHE_DIR/filter_modules.json")
+                val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+                if (validLists.isEmpty()) {
+                    outFile.delete()
+                    return@withContext
+                }
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
+                val mergedDomains = mutableMapOf<String, Pair<MutableSet<String>, MutableSet<String>>>()
+                val mergedGlobalPaths = mutableSetOf<String>()
+
+                for (filter in validLists) {
+                    val modFile = File(context.filesDir, "remote_filters/${filter.id}.modules.json")
+                    if (!modFile.exists() || modFile.length() == 0L) continue
+                    val pkg = runCatching {
+                        json.decodeFromString<app.pwhs.blockadstv.data.models.ModuleRulesPackage>(modFile.readText())
+                    }.getOrNull() ?: continue
+
+                    mergedGlobalPaths.addAll(pkg.globalBlockPaths)
+                    for ((domain, rules) in pkg.domains) {
+                        val pair = mergedDomains.getOrPut(domain.lowercase()) { mutableSetOf<String>() to mutableSetOf() }
+                        pair.first.addAll(rules.css)
+                        pair.second.addAll(rules.blockPaths)
+                    }
+                }
+
+                if (mergedDomains.isNotEmpty() || mergedGlobalPaths.isNotEmpty()) {
+                    val outPkg = app.pwhs.blockadstv.data.models.ModuleRulesPackage(
+                        name = "merged_filters",
+                        ruleCount = mergedDomains.size + mergedGlobalPaths.size,
+                        domains = mergedDomains.mapValues { (_, pair) ->
+                            app.pwhs.blockadstv.data.models.DomainModuleRules(
+                                css = pair.first.toList(),
+                                blockPaths = pair.second.toList(),
+                            )
+                        },
+                        globalBlockPaths = mergedGlobalPaths.toList(),
+                    )
+                    outFile.parentFile?.mkdirs()
+                    outFile.writeText(
+                        json.encodeToString(app.pwhs.blockadstv.data.models.ModuleRulesPackage.serializer(), outPkg)
+                    )
+                    Timber.d("Wrote filter modules (${mergedDomains.size} domains, ${mergedGlobalPaths.size} global paths)")
+                } else {
+                    outFile.delete()
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to compile filter module rules")
+            }
+        }
 }

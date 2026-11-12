@@ -3,7 +3,9 @@ package app.pwhs.blockadstv
 import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
+import app.pwhs.blockadstv.di.tvRulesModule
 import app.pwhs.blockadstv.worker.FilterUpdateScheduler
+import app.pwhs.blockadstv.worker.TvRuleUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +30,7 @@ class BlockAdsTvApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsTvApplication)
-            modules(tvAppModule)
+            modules(tvAppModule, tvRulesModule)
         }
 
         // Auto-fetch filter lists from GitHub on app launch
@@ -44,6 +46,7 @@ class BlockAdsTvApplication : Application() {
                 Timber.e(e, "Auto-seed failed")
             }
             FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsTvApplication)
+            TvRuleUpdateWorker.schedule(this@BlockAdsTvApplication)
         }
     }
 }

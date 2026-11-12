@@ -232,6 +232,7 @@ class GoTunnelAdapter(
         setBlockDohBypass(blockDohBypass)
         setBlockWebRtc(blockWebRtc)
         updateTries()
+        updateCosmeticRules()
 
         val fd = vpnInterface.fd
         Timber.d("Starting Go tunnel engine with fd=$fd, hasProxy=${proxyConfigJson.isNotEmpty()}")
@@ -309,6 +310,33 @@ class GoTunnelAdapter(
             filterRepo.getSecurityBloomPath(),
         )
     }
+
+    fun updateCosmeticRules(
+        ruleManifestEnabled: Boolean = true,
+        modulesEnabled: Boolean = true,
+    ) {
+        TvRulesTunnelHelper.updateCosmeticRules(
+            context = context,
+            engine = engine,
+            filterRepo = filterRepo,
+            ruleManifestEnabled = ruleManifestEnabled,
+            modulesEnabled = modulesEnabled,
+        )
+    }
+
+    fun setRulesetConfig(content: String): Long = runCatching {
+        val count = engine.setRulesetConfig(content)
+        TvRulesTunnelHelper.loadCachedRemoteRulesets(context, engine)
+        TvRulesTunnelHelper.applyProfileDnsIfPresent(engine) { p, f -> configureDns("PLAIN", p, f, "") }
+        count
+    }.onFailure { Timber.e(it, "Failed to set ruleset config") }.getOrDefault(0L)
+
+    fun clearRulesetConfig() {
+        runCatching { engine.clearRulesetConfig() }
+    }
+
+    fun getRulesetRemoteFiltersJson(): String =
+        runCatching { engine.rulesetRemoteFiltersJSON }.getOrDefault("[]")
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {

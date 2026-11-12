@@ -185,15 +185,23 @@ fun FiltersScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (filters.isEmpty()) {
-            Text(
-                text = "No filter lists available. Start the VPN to download filters.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = TextSecondary,
-            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                item(key = "rules_engine_section") { RulesEngineSection() }
+                item(key = "empty_filters_hint") {
+                    Text(
+                        text = "No filter lists available. Start the VPN to download filters.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = TextSecondary,
+                    )
+                }
+            }
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                item(key = "rules_engine_section") { RulesEngineSection() }
                 items(filters, key = { it.id }) { filter ->
                     FilterListItem(
                         filter = filter,

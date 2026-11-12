@@ -109,6 +109,7 @@ class FilterCompileWorker(
             }
 
             val hasCss = tempCss.exists() && tempCss.length() > 0
+            val hasScriptlets = tempScriptlets.exists() && tempScriptlets.length() > 0
 
             val filterId = if (existingId > 0) {
                 val existing = filterListDao.getById(existingId)
@@ -120,6 +121,7 @@ class FilterCompileWorker(
                         bloomUrl = "local://$existingId.bloom",
                         trieUrl = "local://$existingId.trie",
                         cssUrl = if (hasCss) "local://$existingId.css" else existing.cssUrl,
+                        scriptletsUrl = if (hasScriptlets) "local://$existingId.scriptlets" else existing.scriptletsUrl,
                         lastUpdated = System.currentTimeMillis()
                     )
                     filterListDao.update(updated)
@@ -138,6 +140,7 @@ class FilterCompileWorker(
                     bloomUrl = "",
                     trieUrl = "",
                     cssUrl = "",
+                    scriptletsUrl = "",
                     originalUrl = url,
                     lastUpdated = System.currentTimeMillis()
                 )
@@ -147,7 +150,8 @@ class FilterCompileWorker(
                         id = id,
                         bloomUrl = "local://$id.bloom",
                         trieUrl = "local://$id.trie",
-                        cssUrl = if (hasCss) "local://$id.css" else ""
+                        cssUrl = if (hasCss) "local://$id.css" else "",
+                        scriptletsUrl = if (hasScriptlets) "local://$id.scriptlets" else ""
                     )
                 )
                 id
@@ -157,6 +161,9 @@ class FilterCompileWorker(
             File(remoteFilterDir, "$filterId.bloom").let { tempBloom.copyTo(it, overwrite = true) }
             if (hasCss) {
                 tempCss.copyTo(File(remoteFilterDir, "$filterId.css"), overwrite = true)
+            }
+            if (hasScriptlets) {
+                tempScriptlets.copyTo(File(remoteFilterDir, "$filterId.scriptlets"), overwrite = true)
             }
             if (tempModules.exists() && tempModules.length() > 0) {
                 tempModules.copyTo(File(remoteFilterDir, "$filterId.modules.json"), overwrite = true)

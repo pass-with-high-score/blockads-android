@@ -171,6 +171,7 @@ class TvVpnService : VpnService() {
                 goTunnelAdapter.setFilterHttp3(enabled)
             }
         }
+        TvRulesTunnelHelper.observeRules(serviceScope, goTunnelAdapter, getKoin())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
