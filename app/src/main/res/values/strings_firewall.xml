@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Ask when app connects</string>
+    <string name="firewall_prompt_toggle_desc">Ask before allowing network access for apps without a rule</string>
+    <string name="firewall_prompt_channel_name">Firewall prompts</string>
+    <string name="firewall_prompt_channel_desc">Asks whether an app may access the internet</string>
+    <string name="firewall_prompt_notification_title">%1$s wants to access the internet</string>
+    <string name="firewall_prompt_notification_text">%1$s is blocked until you decide</string>
+    <string name="firewall_prompt_action_allow">Allow</string>
+    <string name="firewall_prompt_action_block">Block</string>
+    <string name="firewall_prompt_dialog_title">%1$s wants to access the internet</string>
+    <string name="firewall_prompt_dialog_message">Network access is paused for this app until you choose.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d more app(s) waiting</string>
+    <string name="firewall_prompt_always_allow">Always allow</string>
+    <string name="firewall_prompt_allow_once">Allow once</string>
+</resources>

@@ -133,6 +133,7 @@ class AppPreferences internal constructor(
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId
     val recordDnsLogs: Flow<Boolean> get() = vpnSecurity.recordDnsLogs
     val firewallEnabled: Flow<Boolean> get() = vpnSecurity.firewallEnabled
+    val firewallPromptEnabled: Flow<Boolean> get() = vpnSecurity.firewallPromptEnabled
     val crashReportingEnabled: Flow<Boolean> get() = vpnSecurity.crashReportingEnabled
     val hideFromRecents: Flow<Boolean> get() = vpnSecurity.hideFromRecents
     val trustedSsids: Flow<Set<String>> get() = vpnSecurity.trustedSsids
@@ -214,6 +215,7 @@ class AppPreferences internal constructor(
     suspend fun setActiveProfileId(id: Long) = vpnSecurity.setActiveProfileId(id)
     suspend fun setRecordDnsLogs(enabled: Boolean) = vpnSecurity.setRecordDnsLogs(enabled)
     suspend fun setFirewallEnabled(enabled: Boolean) = vpnSecurity.setFirewallEnabled(enabled)
+    suspend fun setFirewallPromptEnabled(enabled: Boolean) = vpnSecurity.setFirewallPromptEnabled(enabled)
     suspend fun setHttpsFilteringEnabled(enabled: Boolean) = vpnSecurity.setHttpsFilteringEnabled(enabled)
     suspend fun getHttpsFilteringEnabledSnapshot(): Boolean = vpnSecurity.getHttpsFilteringEnabledSnapshot()
     suspend fun setFilterHttp3(enabled: Boolean) = vpnSecurity.setFilterHttp3(enabled)

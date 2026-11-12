@@ -101,8 +101,7 @@ class VpnEngineCoordinator(
 
             val firewallEnabled = d9.await()
             val fwManager = if (firewallEnabled) {
-                FirewallManager(context, firewallRuleDao).also {
-                    it.loadRules()
+                FirewallManager.create(context, firewallRuleDao, appPrefs).also {
                     Timber.d("Firewall enabled, rules loaded")
                 }
             } else {

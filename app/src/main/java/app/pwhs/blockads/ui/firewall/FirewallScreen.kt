@@ -25,6 +25,7 @@ import app.pwhs.blockads.ui.component.AppListSkeleton
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallConfigSheet
 import app.pwhs.blockads.ui.firewall.component.FirewallControlBar
+import app.pwhs.blockads.ui.firewall.component.FirewallPromptToggle
 import app.pwhs.blockads.ui.firewall.component.FirewallSearchBar
 import app.pwhs.blockads.ui.firewall.component.FirewallTopBar
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -38,12 +39,12 @@ fun FirewallScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val allUserEnabled = uiState.userApps.isNotEmpty() &&
-        uiState.userApps.all { it.packageName in uiState.rulesMap }
+        uiState.userApps.all { uiState.isBlocked(it.packageName) }
     val allSystemEnabled = uiState.systemApps.isNotEmpty() &&
-        uiState.systemApps.all { it.packageName in uiState.rulesMap }
+        uiState.systemApps.all { uiState.isBlocked(it.packageName) }
 
     val currentApps = uiState.currentApps
-    val blockedCount = currentApps.count { it.packageName in uiState.rulesMap }
+    val blockedCount = currentApps.count { uiState.isBlocked(it.packageName) }
     val allowedCount = currentApps.size - blockedCount
 
     // Rule configuration bottom sheet
@@ -82,6 +83,11 @@ fun FirewallScreen(
             FirewallSearchBar(
                 query = uiState.searchQuery,
                 onQueryChange = { viewModel.processIntent(FirewallUiIntent.UpdateSearchQuery(it)) }
+            )
+
+            FirewallPromptToggle(
+                enabled = uiState.isPromptEnabled,
+                onToggle = { viewModel.processIntent(FirewallUiIntent.SetPromptEnabled(it)) }
             )
 
             // Compact Segmented Tabs + Filter Chips

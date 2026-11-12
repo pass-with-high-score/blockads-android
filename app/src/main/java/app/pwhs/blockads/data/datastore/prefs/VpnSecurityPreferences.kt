@@ -29,6 +29,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
         val KEY_RECORD_DNS_LOGS = booleanPreferencesKey("record_dns_logs")
         val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
+        val KEY_FIREWALL_PROMPT_ENABLED = booleanPreferencesKey("firewall_prompt_enabled")
         val KEY_HTTPS_FILTERING_ENABLED = booleanPreferencesKey("https_filtering_enabled")
         val KEY_FILTER_HTTP3 = booleanPreferencesKey("filter_http3")
         val KEY_SELECTED_BROWSERS = stringSetPreferencesKey("selected_browsers")
@@ -62,6 +63,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
             prefs.remove(KEY_MILESTONE_NOTIFICATIONS_ENABLED)
             prefs.remove(KEY_RECORD_DNS_LOGS)
             prefs.remove(KEY_FIREWALL_ENABLED)
+            prefs.remove(KEY_FIREWALL_PROMPT_ENABLED)
             prefs.remove(KEY_HTTPS_FILTERING_ENABLED)
             prefs.remove(KEY_FILTER_HTTP3)
             prefs.remove(KEY_SELECTED_BROWSERS)
@@ -143,6 +145,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     val firewallEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_FIREWALL_ENABLED] ?: false
+    }
+
+    val firewallPromptEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_FIREWALL_PROMPT_ENABLED] ?: false
     }
 
     val httpsFilteringEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
@@ -237,6 +243,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setFirewallEnabled(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[KEY_FIREWALL_ENABLED] = enabled }
+    }
+
+    suspend fun setFirewallPromptEnabled(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[KEY_FIREWALL_PROMPT_ENABLED] = enabled }
     }
 
     suspend fun setHttpsFilteringEnabled(enabled: Boolean) {

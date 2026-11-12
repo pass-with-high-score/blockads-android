@@ -125,6 +125,10 @@
             android:name=".widget.WidgetToggleReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".service.FirewallPromptReceiver"
+            android:exported="false" />
+
         <!-- Tasker / Automation integration -->
         <receiver
             android:name=".receiver.TaskerReceiver"

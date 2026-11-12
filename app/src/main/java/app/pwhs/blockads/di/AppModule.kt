@@ -86,6 +86,9 @@ val appModule = module {
     // Preferences
     single { AppPreferences(androidContext()) }
 
+    // Interactive firewall prompt
+    single { app.pwhs.blockads.service.FirewallPromptManager(androidContext(), get()) }
+
     // Repository
     single { FilterDownloadManager(androidContext(), get()) }
     single {
@@ -228,6 +231,13 @@ val appModule = module {
         FirewallViewModel(
             appPrefs = get(),
             firewallRuleDao = get(),
+            promptManager = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
+        app.pwhs.blockads.ui.firewall.prompt.FirewallPromptViewModel(
+            promptManager = get(),
             application = androidApplication()
         )
     }

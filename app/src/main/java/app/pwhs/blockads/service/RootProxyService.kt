@@ -217,9 +217,7 @@ class RootProxyService : Service() {
                 // Load firewall rules if enabled
                 val firewallEnabled = appPrefs.firewallEnabled.first()
                 if (firewallEnabled) {
-                    val fwManager = FirewallManager(this@RootProxyService, firewallRuleDao)
-                    fwManager.loadRules()
-                    firewallManager = fwManager
+                    firewallManager = FirewallManager.create(this@RootProxyService, firewallRuleDao, appPrefs)
                     Timber.d("Firewall enabled for Root Proxy, rules loaded")
                 } else {
                     firewallManager = null

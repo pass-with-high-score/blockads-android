@@ -90,17 +90,17 @@ class LogViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val blockedFirewallPackages: StateFlow<Set<String>> = (firewallRuleDao?.getAll() ?: MutableStateFlow(emptyList()))
-        .map { list -> list.map { it.packageName }.toSet() }
+        .map { list -> list.filter { it.isEnabled }.map { it.packageName }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
     fun toggleAppFirewall(packageName: String) {
         if (packageName.isBlank() || firewallRuleDao == null) return
         viewModelScope.launch {
             val existing = firewallRuleDao.getByPackageName(packageName)
-            if (existing != null) {
-                firewallRuleDao.deleteByPackageName(packageName)
-            } else {
-                firewallRuleDao.insert(FirewallRule(packageName = packageName))
+            when {
+                existing == null -> firewallRuleDao.insert(FirewallRule(packageName = packageName))
+                !existing.isEnabled -> firewallRuleDao.insert(existing.copy(isEnabled = true))
+                else -> firewallRuleDao.deleteByPackageName(packageName)
             }
             ServiceController.requestRestart(application.applicationContext)
         }

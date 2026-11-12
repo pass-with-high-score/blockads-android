@@ -9,6 +9,7 @@ import app.pwhs.blockads.ui.data.HomeAppKey
 import app.pwhs.blockads.ui.data.OnboardingKey
 import app.pwhs.blockads.ui.data.SplashKey
 import app.pwhs.blockads.ui.dialog.VPNConflictDialog
+import app.pwhs.blockads.ui.firewall.prompt.FirewallPromptHost
 import app.pwhs.blockads.ui.onboarding.OnboardingScreen
 import app.pwhs.blockads.ui.splash.SplashScreen
 
@@ -55,6 +56,7 @@ fun BlockAdsApp(
                 )
             }
             entry<HomeAppKey> {
+                FirewallPromptHost()
                 HomeApp(
                     onRequestVpnPermission = onRequestVpnPermission,
                     onShowVpnConflictDialog = onShowVpnConflictDialog

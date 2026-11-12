@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Hỏi khi ứng dụng kết nối</string>
+    <string name="firewall_prompt_toggle_desc">Hỏi trước khi cho phép truy cập mạng với ứng dụng chưa có quy tắc</string>
+    <string name="firewall_prompt_channel_name">Hỏi quyền tường lửa</string>
+    <string name="firewall_prompt_channel_desc">Hỏi xem ứng dụng có được phép truy cập mạng không</string>
+    <string name="firewall_prompt_notification_title">%1$s muốn truy cập mạng</string>
+    <string name="firewall_prompt_notification_text">%1$s đang bị chặn cho đến khi bạn quyết định</string>
+    <string name="firewall_prompt_action_allow">Cho phép</string>
+    <string name="firewall_prompt_action_block">Chặn</string>
+    <string name="firewall_prompt_dialog_title">%1$s muốn truy cập mạng</string>
+    <string name="firewall_prompt_dialog_message">Truy cập mạng của ứng dụng này đang tạm dừng cho đến khi bạn chọn.</string>
+    <string name="firewall_prompt_dialog_pending">Còn %1$d ứng dụng đang chờ</string>
+    <string name="firewall_prompt_always_allow">Luôn cho phép</string>
+    <string name="firewall_prompt_allow_once">Chỉ lần này</string>
+</resources>

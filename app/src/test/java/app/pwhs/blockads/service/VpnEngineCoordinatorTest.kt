@@ -47,6 +47,7 @@ class VpnEngineCoordinatorTest {
         every { safeSearchEnabled } returns flowOf(true)
         every { youtubeRestrictedMode } returns flowOf(false)
         every { firewallEnabled } answers { flowOf(this@VpnEngineCoordinatorTest.firewallEnabled) }
+        every { firewallPromptEnabled } returns flowOf(false)
         every { dnsProviderId } answers { flowOf(providerId) }
         every { odohRelayUrl } returns flowOf("")
         every { splitDnsZones } returns flowOf("lan")
@@ -77,7 +78,7 @@ class VpnEngineCoordinatorTest {
         every { domainCountFlow } returns this@VpnEngineCoordinatorTest.domainCount
         coEvery { loadAllEnabledFilters() } returns Result.success(100)
     }
-    private val firewallDao: FirewallRuleDao = mockk { coEvery { getEnabledRules() } returns emptyList() }
+    private val firewallDao: FirewallRuleDao = mockk { coEvery { getAllSnapshot() } returns emptyList() }
     private var systemDns = listOf("192.168.1.1")
     private val network: Network = mockk()
     private val cm: ConnectivityManager = mockk {
