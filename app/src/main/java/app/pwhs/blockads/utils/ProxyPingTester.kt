@@ -46,16 +46,18 @@ object ProxyPingTester {
                     timber.log.Timber.d("pingNode: success for ${repaired.displayName} latency=${delayMs}ms")
                     NodePingResult.Success(delayMs)
                 } else {
-                    timber.log.Timber.w("pingNode: negative delay returned for ${repaired.displayName}, falling back to TCP ping")
-                    fallbackPing(repaired, timeoutMs)
+                    timber.log.Timber.w("pingNode: negative delay returned for ${repaired.displayName}: $delayMs")
+                    NodePingResult.Error("Test failed")
                 }
             } catch (t: Throwable) {
                 timber.log.Timber.w(t, "pingNode: proxy delay failed for ${repaired.displayName}: ${t.message}")
                 val msg = t.message.orEmpty()
-                if (msg.contains("timeout", ignoreCase = true) || msg.contains("deadline", ignoreCase = true)) {
+                if (t is LinkageError || msg.contains("unsupported protocol", ignoreCase = true)) {
+                    fallbackPing(repaired, timeoutMs)
+                } else if (msg.contains("timeout", ignoreCase = true) || msg.contains("deadline", ignoreCase = true)) {
                     NodePingResult.Timeout
                 } else {
-                    fallbackPing(repaired, timeoutMs)
+                    NodePingResult.Error(msg.ifEmpty { "Failed" })
                 }
             }
         }
