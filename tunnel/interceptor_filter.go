@@ -97,3 +97,60 @@ func classifyNonDNSPacket(packet []byte, length int, isDoHBlocking bool) packetA
 
 	return packetActionForward
 }
+
+// classifyPacketFirewall checks whether a raw IPv4/IPv6 TCP or UDP packet belongs
+// to a firewalled app in packet-routed modes (e.g. WireGuard).
+func (e *Engine) classifyPacketFirewall(packet []byte, length int) packetAction {
+	if !e.firewallEnabled.Load() || e.firewallChecker == nil || length < ipv4HeaderSize {
+		return packetActionForward
+	}
+
+	version := packet[0] >> 4
+	var proto byte
+	var srcIP, dstIP net.IP
+	var srcPort, dstPort uint16
+
+	switch version {
+	case 4:
+		ihl := int(packet[0]&0x0F) * 4
+		if length < ihl+4 {
+			return packetActionForward
+		}
+		proto = packet[9]
+		if proto != ProtocolTCP && proto != ProtocolUDP {
+			return packetActionForward
+		}
+		srcIP = net.IP(packet[12:16])
+		dstIP = net.IP(packet[16:20])
+		srcPort = binary.BigEndian.Uint16(packet[ihl : ihl+2])
+		dstPort = binary.BigEndian.Uint16(packet[ihl+2 : ihl+4])
+	case 6:
+		if length < ipv6HeaderSize+4 {
+			return packetActionForward
+		}
+		proto = packet[6]
+		if proto != ProtocolTCP && proto != ProtocolUDP {
+			return packetActionForward
+		}
+		srcIP = net.IP(packet[8:24])
+		dstIP = net.IP(packet[24:40])
+		srcPort = binary.BigEndian.Uint16(packet[ipv6HeaderSize : ipv6HeaderSize+2])
+		dstPort = binary.BigEndian.Uint16(packet[ipv6HeaderSize+2 : ipv6HeaderSize+4])
+	default:
+		return packetActionForward
+	}
+
+	flow := flowID{
+		appIP:      srcIP,
+		appPort:    int(srcPort),
+		serverIP:   dstIP,
+		serverPort: int(dstPort),
+	}
+	if e.isFlowFirewalled(flow, int(proto)) {
+		if proto == ProtocolTCP {
+			return packetActionReset
+		}
+		return packetActionDrop
+	}
+	return packetActionForward
+}

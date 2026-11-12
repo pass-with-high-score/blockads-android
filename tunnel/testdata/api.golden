@@ -108,6 +108,7 @@ type Engine struct
 	method Engine.SetExtraPassthroughSuffixesFromFd(fd int, offset int64, length int64) error
 	method Engine.SetFilterHttp3(enabled bool)
 	method Engine.SetFirewallChecker(checker FirewallChecker)
+	method Engine.SetFirewallEnabled(enabled bool)
 	method Engine.SetGeoIPDatabaseBytes(data []byte) error
 	method Engine.SetGeoIPDatabaseFromFd(fd int, offset int64, length int64) error
 	method Engine.SetLogCallback(cb LogCallback)

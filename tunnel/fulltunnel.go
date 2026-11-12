@@ -172,6 +172,10 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 			handleDNSOverTCP(conn, e)
 			return
 		}
+		if e.isFlowFirewalled(flow, ProtocolTCP) {
+			_ = conn.Close()
+			return
+		}
 		tcpHandler(conn)
 	})
 	stack.SetUdpHandler(newFullTunnelUdpHandler(e, filter, uidr, protectFn))
@@ -218,6 +222,10 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 		// DNS → answer locally (adblock + resolve).
 		if flow.serverPort == 53 {
 			handleDNSOverUDP(conn, engine)
+			return
+		}
+		if engine.isFlowFirewalled(flow, ProtocolUDP) {
+			_ = conn.Close()
 			return
 		}
 		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)

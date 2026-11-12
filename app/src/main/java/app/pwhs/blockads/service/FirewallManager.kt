@@ -34,6 +34,9 @@ class FirewallManager(
         Timber.d("Loaded ${rulesCache.size} firewall rules")
     }
 
+    /** Returns true if at least one enabled firewall rule is loaded. */
+    fun hasActiveRules(): Boolean = rulesCache.isNotEmpty()
+
     /**
      * Check if a given app (by package name) should be blocked right now.
      * Considers: rule enabled, network type (Wi-Fi/Mobile), and schedule.
