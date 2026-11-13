@@ -110,7 +110,15 @@ class GoTunnelAdapter(
     private fun setupAppUidResolver() {
         engine.setAppUidResolver(tunnel.AppUidResolver { uid ->
             try {
-                context.packageManager.getPackagesForUid(uid.toInt())?.firstOrNull() ?: ""
+                val uidInt = uid.toInt()
+                // Fallback to appId (uid % 100_000) for Secure Folder / Private Space / Work Profile UIDs.
+                context.packageManager.getPackagesForUid(uidInt)?.firstOrNull()
+                    ?: (if (uidInt >= 100_000) {
+                        context.packageManager.getPackagesForUid(uidInt % 100_000)?.firstOrNull()
+                    } else {
+                        null
+                    })
+                    ?: ""
             } catch (e: Exception) {
                 ""
             }
@@ -148,6 +156,8 @@ class GoTunnelAdapter(
      * Receives the already resolved appName from Go, and checks [FirewallManager.shouldBlock].
      */
     private fun setupFirewallChecker() {
+        val initialFwManager = firewallManagerProvider()
+        engine.setFirewallEnabled(initialFwManager != null && initialFwManager.hasActiveRules())
         engine.setFirewallChecker(FirewallChecker { appName ->
             val fwManager = firewallManagerProvider() ?: return@FirewallChecker false
             try {

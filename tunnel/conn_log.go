@@ -76,6 +76,38 @@ var connLogSeen sync.Map // key string -> struct{}
 // cache dies with the engine, so staleness isn't a concern.
 var uidPackageCache sync.Map // int -> string
 
+// flowFirewallCache memoizes 5-tuple → blocked bool so packet-routed modes
+// (e.g. WireGuard) only resolve the owning app once per flow.
+var flowFirewallCache sync.Map // string -> bool
+
+// isFlowFirewalled enforces per-app firewall rules at L4 (TCP/UDP) using
+// int/string-only UID→package resolution so apps using hard-coded IPs
+// (e.g. Telegram) or DoH cannot bypass DNS-only firewalling.
+func (e *Engine) isFlowFirewalled(flow flowID, protocol int) bool {
+	if !e.firewallEnabled.Load() || e.firewallChecker == nil {
+		return false
+	}
+	cacheKey := fmt.Sprintf("%d|%s:%d|%s:%d", protocol, flow.appIP, flow.appPort, flow.serverIP, flow.serverPort)
+	if cached, ok := flowFirewallCache.Load(cacheKey); ok {
+		return cached.(bool)
+	}
+	pkg := e.appNameForFlow(flow, protocol)
+	if pkg == "" {
+		return false
+	}
+	blocked := e.firewallChecker.ShouldBlock(pkg)
+	flowFirewallCache.Store(cacheKey, blocked)
+	if blocked {
+		protoName := "TCP"
+		if protocol == ProtocolUDP {
+			protoName = "UDP"
+		}
+		logf("BLOCKED L4 (%s): %s:%d -> %s:%d (by: firewall, app: %s)",
+			protoName, flow.appIP, flow.appPort, flow.serverIP, flow.serverPort, pkg)
+	}
+	return blocked
+}
+
 // logConnection reports a connection to the DNS-log callback so it shows in
 // the app's log screen (marked blockedBy="connection"). Deduped per
 // app+destIP+destPort. protocol is ProtocolTCP/ProtocolUDP.
