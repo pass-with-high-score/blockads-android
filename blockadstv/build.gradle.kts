@@ -164,6 +164,9 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
+    // WorkManager for background filter updates and VPN resume
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Ktor HTTP client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
@@ -173,6 +176,9 @@ dependencies {
 
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // QR Code generation
+    implementation(libs.zxing.core)
 
     // libsu — root shell access for iptables mode
     implementation(libs.core)

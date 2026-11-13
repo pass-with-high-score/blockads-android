@@ -3,6 +3,15 @@ package app.pwhs.blockadstv
 import android.app.Application
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.di.tvAppModule
+import app.pwhs.blockadstv.di.tvCompanionModule
+import app.pwhs.blockadstv.di.tvProtectionModule
+import app.pwhs.blockadstv.di.tvRulesModule
+import app.pwhs.blockadstv.di.tvStatsBackupModule
+import app.pwhs.blockadstv.di.tvWireGuardModule
+import app.pwhs.blockadstv.service.TrustedNetworkManager
+import app.pwhs.blockadstv.worker.FilterUpdateScheduler
+import app.pwhs.blockadstv.worker.GeoIpUpdateWorker
+import app.pwhs.blockadstv.worker.TvRuleUpdateWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,8 +36,18 @@ class BlockAdsTvApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsTvApplication)
-            modules(tvAppModule)
+            modules(
+                tvAppModule,
+                tvProtectionModule,
+                tvWireGuardModule,
+                tvRulesModule,
+                tvStatsBackupModule,
+                tvCompanionModule,
+            )
         }
+
+        val trustedNetworkManager: TrustedNetworkManager by inject()
+        trustedNetworkManager.start()
 
         // Auto-fetch filter lists from GitHub on app launch
         // so filters are available immediately without starting VPN first
@@ -42,6 +61,9 @@ class BlockAdsTvApplication : Application() {
             } catch (e: Exception) {
                 Timber.e(e, "Auto-seed failed")
             }
+            FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsTvApplication)
+            GeoIpUpdateWorker.schedule(this@BlockAdsTvApplication)
+            TvRuleUpdateWorker.schedule(this@BlockAdsTvApplication)
         }
     }
 }

@@ -4,8 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import app.pwhs.blockadstv.data.entities.AppStat
+import app.pwhs.blockadstv.data.entities.BlockReasonRawStat
+import app.pwhs.blockadstv.data.entities.CountryStat
+import app.pwhs.blockadstv.data.entities.DailyStat
 import app.pwhs.blockadstv.data.entities.DnsLogEntry
 import app.pwhs.blockadstv.data.entities.HourlyStat
+import app.pwhs.blockadstv.data.entities.MonthlyStat
 import app.pwhs.blockadstv.data.entities.TopBlockedDomain
 import kotlinx.coroutines.flow.Flow
 
@@ -83,4 +88,105 @@ interface DnsLogDao {
         """
     )
     fun getSecurityBlockedCountSince(since: Long): Flow<Int>
+
+    @Query(
+        """
+        SELECT (timestamp / 86400000) * 86400000 AS day,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY day
+        ORDER BY day ASC
+        """
+    )
+    fun getDailyStats(
+        since: Long = System.currentTimeMillis() - 7 * 86_400_000L
+    ): Flow<List<DailyStat>>
+
+    @Query(
+        """
+        SELECT strftime('%Y-%m', timestamp / 1000, 'unixepoch', 'localtime') AS month,
+               COUNT(*) AS total,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blocked
+        FROM dns_logs
+        WHERE timestamp > :since
+        GROUP BY month
+        ORDER BY month ASC
+        """
+    )
+    fun getMonthlyStats(
+        since: Long = System.currentTimeMillis() - 365 * 86_400_000L
+    ): Flow<List<MonthlyStat>>
+
+    @Query(
+        """
+        SELECT appName, packageName,
+               COUNT(*) AS totalQueries,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
+        FROM dns_logs
+        WHERE appName != ''
+          AND (:since IS NULL OR timestamp > :since)
+        GROUP BY appName, packageName
+        """
+    )
+    fun getPerAppStats(since: Long? = null): Flow<List<AppStat>>
+
+    @Query(
+        """
+        SELECT appName, packageName,
+               COUNT(*) AS totalQueries,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedQueries
+        FROM dns_logs
+        WHERE appName != ''
+        GROUP BY appName, packageName
+        ORDER BY totalQueries DESC
+        LIMIT :limit
+        """
+    )
+    fun getTopApps(limit: Int = 15): Flow<List<AppStat>>
+
+    @Query(
+        """
+        SELECT countryCode, COUNT(*) AS count
+        FROM dns_logs
+        WHERE countryCode != '' AND timestamp > :since
+        GROUP BY countryCode
+        ORDER BY count DESC
+        """
+    )
+    fun getCountryStatsSince(since: Long): Flow<List<CountryStat>>
+
+    @Query(
+        """
+        SELECT countryCode, COUNT(*) AS count
+        FROM dns_logs
+        WHERE countryCode != ''
+        GROUP BY countryCode
+        ORDER BY count DESC
+        """
+    )
+    fun getAllCountryStats(): Flow<List<CountryStat>>
+
+    @Query(
+        """
+        SELECT blockedBy, COUNT(*) AS count
+        FROM dns_logs
+        WHERE isBlocked = 1 AND blockedBy != '' AND timestamp > :since
+        GROUP BY blockedBy
+        ORDER BY count DESC
+        """
+    )
+    fun getBlockReasonStatsSince(since: Long): Flow<List<BlockReasonRawStat>>
+
+    @Query(
+        """
+        SELECT blockedBy, COUNT(*) AS count
+        FROM dns_logs
+        WHERE isBlocked = 1 AND blockedBy != ''
+        GROUP BY blockedBy
+        ORDER BY count DESC
+        """
+    )
+    fun getAllBlockReasonStats(): Flow<List<BlockReasonRawStat>>
 }

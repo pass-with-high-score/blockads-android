@@ -7,6 +7,7 @@
     <string name="nav_logs">Logs</string>
     <string name="nav_dns">DNS</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="nav_wireguard">WireGuard</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Home -->
@@ -110,4 +111,63 @@
     <string name="proxy_err_invalid_link">Invalid proxy link or unsupported protocol</string>
     <string name="proxy_subscription_success">Imported %1$d nodes</string>
     <string name="settings_mode_title">Protection Mode</string>
+    <string name="filter_update_success">Filter lists updated</string>
+    <string name="filter_update_success_message">Successfully updated %d domains</string>
+    <string name="filter_update_failed">Filter update failed</string>
+    <string name="filter_update_failed_message">Failed to update filter lists</string>
+    <string name="filter_update_notification_channel">Filter Updates</string>
+    <string name="filter_update_notification_channel_desc">Notifications for filter list updates</string>
+    <string name="filter_compile_progress_title">Compiling filter…</string>
+    <string name="filter_compile_success_title">Filter compiled</string>
+    <string name="filter_compile_failed_title">Filter compilation failed</string>
+    <string name="filter_compile_channel_name">Filter Compilation</string>
+    <string name="settings_safe_search">SafeSearch</string>
+    <string name="settings_safe_search_desc">Enforce SafeSearch on Google, Bing, DuckDuckGo, and Yandex</string>
+    <string name="settings_youtube_restricted">YouTube Restricted Mode</string>
+    <string name="settings_youtube_restricted_desc">Filter potentially mature content on YouTube</string>
+    <string name="trusted_networks_title">Trusted Networks</string>
+    <string name="trusted_networks_desc">Auto-pause or use System DNS on trusted Wi-Fi or Ethernet networks</string>
+    <string name="trusted_networks_pause_title">Pause protection on trusted networks</string>
+    <string name="trusted_networks_pause_desc">Automatically stop BlockAds TV when connected to a trusted network</string>
+    <string name="trusted_networks_system_dns_title">Use System DNS on trusted networks</string>
+    <string name="trusted_networks_system_dns_desc">Bypass custom DNS and use the network DHCP DNS on trusted networks</string>
+    <string name="trusted_networks_current">Current network: %1$s</string>
+    <string name="trusted_networks_current_unknown">Current network: Unavailable</string>
+    <string name="trusted_networks_add_current">Add Current</string>
+    <string name="trusted_networks_add_hint">Enter Wi-Fi SSID or Ethernet</string>
+    <string name="trusted_networks_add_btn">Add</string>
+    <string name="trusted_networks_remove">Remove</string>
+    <string name="trusted_networks_empty">No trusted networks added yet.</string>
+    <string name="trusted_networks_paused_title">Protection paused</string>
+    <string name="trusted_networks_paused_text">Paused on trusted network: %1$s</string>
+    <string name="trusted_networks_paused_text_generic">Paused on trusted network</string>
+
+    <!-- WireGuard & GeoIP -->
+    <string name="wg_title">WireGuard VPN</string>
+    <string name="wg_desc">Route TV traffic through WireGuard or AmneziaWG with on-device ad blocking</string>
+    <string name="wg_mode_title">Enable WireGuard Mode</string>
+    <string name="wg_mode_desc">Route all traffic through the active WireGuard profile</string>
+    <string name="wg_profiles_title">WireGuard Profiles</string>
+    <string name="wg_import_btn">Import Config</string>
+    <string name="wg_no_profiles">No WireGuard profiles imported yet. Import a .conf or wireguard:// URI to get started.</string>
+    <string name="wg_dialog_import_title">Import WireGuard Config</string>
+    <string name="wg_dialog_import_hint">Paste a wireguard://, vpn://, awg:// URI or raw .conf text</string>
+    <string name="wg_profile_name_optional">Profile name (optional)</string>
+    <string name="wg_dialog_rename_title">Rename Profile</string>
+    <string name="wg_profile_name">Profile name</string>
+    <string name="wg_geoip_title">GeoIP Database</string>
+    <string name="wg_geoip_not_downloaded">Not downloaded (ccTLD fallback active)</string>
+    <string name="wg_geoip_update">Update</string>
+
+    <!-- Web Companion (QR) -->
+    <string name="settings_web_companion">Web Companion (QR)</string>
+    <string name="settings_web_companion_desc">Scan QR to push WireGuard configs, proxy nodes, and settings from phone</string>
+    <string name="web_companion_title">Web Companion</string>
+    <string name="web_companion_subtitle">Scan the QR code or open the URL in your phone browser</string>
+    <string name="web_companion_qr_desc">QR code to access companion web page</string>
+    <string name="web_companion_starting">Starting companion server...</string>
+    <string name="web_companion_url_label">COMPANION URL</string>
+    <string name="web_companion_supports_desc">Push WireGuard .conf, proxy links, subscriptions, or restore settings backup</string>
+    <string name="web_companion_restart">Restart</string>
+    <string name="web_companion_close">Close</string>
 </resources>
