@@ -211,43 +211,17 @@ class HttpsFilteringViewModel(
 
             try {
                 withContext(Dispatchers.IO) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // ── MediaStore (Android 10+) ─────────────────────────
-                        val fileName = "BlockAds-RootCA.crt"
-                        val resolver = getApplication<Application>().contentResolver
-
-                        // Delete old file if exists (overwrite)
-                        resolver.delete(
-                            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                            "${MediaStore.Downloads.DISPLAY_NAME} = ?",
-                            arrayOf(fileName)
-                        )
-
-                        val values = ContentValues().apply {
-                            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                            put(MediaStore.Downloads.MIME_TYPE, "application/x-x509-ca-cert")
-                            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                        }
-
-                        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-                            ?: throw Exception("Failed to create MediaStore entry")
-
-                        resolver.openOutputStream(uri)?.use { out ->
-                            out.write(pem.toByteArray())
-                        } ?: throw Exception("Failed to open output stream")
-
-                        _certExported.value = true
+                    val fileName = "BlockAds-RootCA.crt"
+                    val legacyFile = app.pwhs.blockads.utils.CaCertHelper.saveCertToDownloads(
+                        getApplication(),
+                        pem,
+                        fileName
+                    )
+                    _certExported.value = true
+                    if (legacyFile == null) {
                         _events.emit(HttpsFilteringEvent.CaCertSavedToDownloads(fileName))
                     } else {
-                        // ── Legacy (Android 9-) ─────────────────────────────
-                        @Suppress("DEPRECATION")
-                        val downloadsDir = Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_DOWNLOADS
-                        )
-                        val file = File(downloadsDir, "BlockAds-RootCA.crt")
-                        file.writeText(pem)
-                        _certExported.value = true
-                        _events.emit(HttpsFilteringEvent.CaCertExportedLegacy(file))
+                        _events.emit(HttpsFilteringEvent.CaCertExportedLegacy(legacyFile))
                     }
                 }
             } catch (e: Exception) {

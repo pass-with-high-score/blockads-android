@@ -1,6 +1,7 @@
 package app.pwhs.blockads.ui.httpsfiltering.wizard
 
 import android.content.Intent
+import android.net.Uri
 import app.pwhs.blockads.ui.httpsfiltering.CertStatus
 
 enum class WizardStep(val stepIndex: Int, val titleRes: Int) {
@@ -25,6 +26,7 @@ sealed interface CertInstallationWizardUiIntent {
     data object PrevStep : CertInstallationWizardUiIntent
     data class GoToStep(val step: WizardStep) : CertInstallationWizardUiIntent
     data object ExportCert : CertInstallationWizardUiIntent
+    data class ExportCertToUri(val uri: Uri) : CertInstallationWizardUiIntent
     data object OpenSecuritySettings : CertInstallationWizardUiIntent
     data object VerifyCert : CertInstallationWizardUiIntent
     data object FinishWizard : CertInstallationWizardUiIntent
