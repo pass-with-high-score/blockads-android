@@ -44,12 +44,14 @@ class DailySummaryWorker(
                 showDailySummaryNotification(blockedToday)
             }
 
-            // Prune stale logs older than 14 days to keep Room DB fast and lightweight
+            // Prune stale logs based on user retention setting (fallback to 14 days)
             try {
-                val cutoff = System.currentTimeMillis() - (14L * 24 * 60 * 60 * 1000)
+                val configuredDays = appPreferences.logRetentionDays.first()
+                val retentionDays = if (configuredDays > 0) configuredDays else 14
+                val cutoff = System.currentTimeMillis() - (retentionDays.toLong() * LogCleanupWorker.MILLIS_PER_DAY)
                 val pruned = dnsLogDao.deleteLogsOlderThan(cutoff)
                 if (pruned > 0) {
-                    Timber.d("Daily maintenance: pruned $pruned stale DNS logs older than 14 days")
+                    Timber.d("Daily maintenance: pruned $pruned stale DNS logs older than $retentionDays days")
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Failed to prune stale logs")

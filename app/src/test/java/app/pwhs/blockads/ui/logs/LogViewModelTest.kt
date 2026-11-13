@@ -72,6 +72,7 @@ class LogViewModelTest {
             sinceArgs += secondArg<Long>(); since(secondArg<Long>()).map { rows -> rows.filter { it.blockedBy == firstArg() } }
         }
         every { getDistinctAppNames() } returns flowOf(listOf("Chrome"))
+        every { getDistinctAppPackages() } returns flowOf(emptyList())
     }
     private val filterListDao: FilterListDao = mockk(relaxed = true) {
         every { getAll() } returns flowOf(listOf(FilterList(id = 7, name = "EasyList", url = "u")))
@@ -82,6 +83,7 @@ class LogViewModelTest {
     private val recordLogs = MutableStateFlow(true)
     private val appPrefs: AppPreferences = mockk(relaxed = true) {
         every { recordDnsLogs } returns recordLogs
+        every { logRetentionDays } returns flowOf(0)
     }
 
     private val vm by lazy { LogViewModel(dnsLogDao, filterListDao, whitelistDao, ruleDao, repo, appPrefs, app) { now } }

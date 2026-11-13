@@ -19,9 +19,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -63,15 +66,16 @@ fun AppFilterBottomSheet(
     logs: List<DnsLogEntry>,
     onSelectApp: (String) -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    allAppPackages: Map<String, String> = emptyMap(),
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
 
     // Precompute query count & sample package name per app
-    val appInfoMap = remember(logs) {
+    val appInfoMap = remember(logs, allAppPackages) {
         val countMap = mutableMapOf<String, Int>()
-        val pkgMap = mutableMapOf<String, String>()
+        val pkgMap = allAppPackages.toMutableMap()
         for (log in logs) {
             val name = log.appName
             if (name.isNotEmpty()) {
@@ -262,6 +266,12 @@ fun AppFilterBottomSheet(
                                     .clip(RoundedCornerShape(8.dp))
                             )
                         } else {
+                            val fallbackIcon = when {
+                                pkgName.isNotEmpty() -> Icons.Default.Android
+                                appName.startsWith("System", ignoreCase = true) ||
+                                    appName.equals("Android System", ignoreCase = true) -> Icons.Default.Dns
+                                else -> Icons.AutoMirrored.Rounded.HelpOutline
+                            }
                             Surface(
                                 modifier = Modifier.size(36.dp),
                                 shape = RoundedCornerShape(8.dp),
@@ -269,7 +279,7 @@ fun AppFilterBottomSheet(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.Apps,
+                                        imageVector = fallbackIcon,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(20.dp)

@@ -132,6 +132,7 @@ class AppPreferences internal constructor(
     val lastSeenMilestoneDialog: Flow<Long> get() = vpnSecurity.lastSeenMilestoneDialog
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId
     val recordDnsLogs: Flow<Boolean> get() = vpnSecurity.recordDnsLogs
+    val logRetentionDays: Flow<Int> get() = vpnSecurity.logRetentionDays
     val firewallEnabled: Flow<Boolean> get() = vpnSecurity.firewallEnabled
     val firewallPromptEnabled: Flow<Boolean> get() = vpnSecurity.firewallPromptEnabled
     val crashReportingEnabled: Flow<Boolean> get() = vpnSecurity.crashReportingEnabled
@@ -214,6 +215,7 @@ class AppPreferences internal constructor(
     suspend fun setLastSeenMilestoneDialog(milestone: Long) = vpnSecurity.setLastSeenMilestoneDialog(milestone)
     suspend fun setActiveProfileId(id: Long) = vpnSecurity.setActiveProfileId(id)
     suspend fun setRecordDnsLogs(enabled: Boolean) = vpnSecurity.setRecordDnsLogs(enabled)
+    suspend fun setLogRetentionDays(days: Int) = vpnSecurity.setLogRetentionDays(days)
     suspend fun setFirewallEnabled(enabled: Boolean) = vpnSecurity.setFirewallEnabled(enabled)
     suspend fun setFirewallPromptEnabled(enabled: Boolean) = vpnSecurity.setFirewallPromptEnabled(enabled)
     suspend fun setHttpsFilteringEnabled(enabled: Boolean) = vpnSecurity.setHttpsFilteringEnabled(enabled)

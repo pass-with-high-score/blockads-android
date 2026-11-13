@@ -114,6 +114,9 @@ class SettingsViewModel(
     val milestoneNotificationsEnabled: StateFlow<Boolean> = appPrefs.milestoneNotificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val logRetentionDays: StateFlow<Int> = appPrefs.logRetentionDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val upstreamDns: StateFlow<String> = kotlinx.coroutines.flow.combine(
         appPrefs.dnsProviderId,
         appPrefs.upstreamDns
@@ -296,6 +299,18 @@ class SettingsViewModel(
         viewModelScope.launch {
             dnsLogDao.clearAll()
             _events.toast(R.string.filter_log_cleared)
+        }
+    }
+
+    fun setLogRetentionDays(days: Int) {
+        viewModelScope.launch {
+            appPrefs.setLogRetentionDays(days)
+            val context = getApplication<Application>().applicationContext
+            app.pwhs.blockads.worker.LogCleanupWorker.syncSchedule(context, days)
+            if (days > 0) {
+                val cutoff = System.currentTimeMillis() - (days.toLong() * app.pwhs.blockads.worker.LogCleanupWorker.MILLIS_PER_DAY)
+                dnsLogDao.deleteLogsOlderThan(cutoff)
+            }
         }
     }
 

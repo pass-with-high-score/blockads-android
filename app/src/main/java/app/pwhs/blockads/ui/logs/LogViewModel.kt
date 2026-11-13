@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -72,6 +73,18 @@ class LogViewModel(
     val recordDnsLogs: StateFlow<Boolean> = appPrefs.recordDnsLogs
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val logRetentionDays: StateFlow<Int> = appPrefs.logRetentionDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    init {
+        viewModelScope.launch {
+            val days = appPrefs.logRetentionDays.firstOrNull() ?: 0
+            if (days > 0) {
+                pruneExpiredLogs(days)
+            }
+        }
+    }
+
     private val _selectionMode = MutableStateFlow(false)
     val selectionMode: StateFlow<Boolean> = _selectionMode.asStateFlow()
 
@@ -88,6 +101,10 @@ class LogViewModel(
 
     val appNames: StateFlow<List<String>> = dnsLogDao.getDistinctAppNames()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val appPackages: StateFlow<Map<String, String>> = dnsLogDao.getDistinctAppPackages()
+        .map { list -> list.associate { it.appName to it.packageName } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val blockedFirewallPackages: StateFlow<Set<String>> = (firewallRuleDao?.getAll() ?: MutableStateFlow(emptyList()))
         .map { list -> list.filter { it.isEnabled }.map { it.packageName }.toSet() }
@@ -292,6 +309,24 @@ class LogViewModel(
         viewModelScope.launch {
             appPrefs.setRecordDnsLogs(enabled)
         }
+    }
+
+    fun setLogRetentionDays(days: Int) {
+        viewModelScope.launch {
+            appPrefs.setLogRetentionDays(days)
+            app.pwhs.blockads.worker.LogCleanupWorker.syncSchedule(
+                application.applicationContext,
+                days
+            )
+            if (days > 0) {
+                pruneExpiredLogs(days)
+            }
+        }
+    }
+
+    private suspend fun pruneExpiredLogs(days: Int) {
+        val cutoff = clock() - (days.toLong() * app.pwhs.blockads.worker.LogCleanupWorker.MILLIS_PER_DAY)
+        dnsLogDao.deleteLogsOlderThan(cutoff)
     }
 }
 

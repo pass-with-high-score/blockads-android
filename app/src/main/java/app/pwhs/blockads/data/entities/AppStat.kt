@@ -6,3 +6,8 @@ data class AppStat(
     val totalQueries: Int,
     val blockedQueries: Int
 )
+
+data class AppNamePackage(
+    val appName: String,
+    val packageName: String
+)

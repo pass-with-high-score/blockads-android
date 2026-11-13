@@ -28,6 +28,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_LAST_SEEN_MILESTONE_DIALOG = longPreferencesKey("last_seen_milestone_dialog")
         val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
         val KEY_RECORD_DNS_LOGS = booleanPreferencesKey("record_dns_logs")
+        val KEY_LOG_RETENTION_DAYS = intPreferencesKey("log_retention_days")
         val KEY_FIREWALL_ENABLED = booleanPreferencesKey("firewall_enabled")
         val KEY_FIREWALL_PROMPT_ENABLED = booleanPreferencesKey("firewall_prompt_enabled")
         val KEY_HTTPS_FILTERING_ENABLED = booleanPreferencesKey("https_filtering_enabled")
@@ -143,6 +144,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         prefs[KEY_RECORD_DNS_LOGS] ?: true
     }
 
+    val logRetentionDays: Flow<Int> = dataStore.data.map { prefs ->
+        prefs[KEY_LOG_RETENTION_DAYS] ?: 0
+    }
+
     val firewallEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_FIREWALL_ENABLED] ?: false
     }
@@ -239,6 +244,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setRecordDnsLogs(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[KEY_RECORD_DNS_LOGS] = enabled }
+    }
+
+    suspend fun setLogRetentionDays(days: Int) {
+        dataStore.edit { prefs -> prefs[KEY_LOG_RETENTION_DAYS] = days }
     }
 
     suspend fun setFirewallEnabled(enabled: Boolean) {

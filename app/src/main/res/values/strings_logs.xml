@@ -70,4 +70,9 @@
     <string name="stats_country_top_domains_title">Top Domains in %s</string>
     <string name="stats_country_top_domains_empty">No domain queries recorded for this country</string>
     <string name="log_unknown_app">Unknown</string>
+    <string name="log_retention_title">Auto-delete old logs</string>
+    <string name="log_retention_off">Never (keep all)</string>
+    <string name="log_retention_1d">After 1 day</string>
+    <string name="log_retention_3d">After 3 days</string>
+    <string name="log_retention_7d">After 7 days</string>
 </resources>

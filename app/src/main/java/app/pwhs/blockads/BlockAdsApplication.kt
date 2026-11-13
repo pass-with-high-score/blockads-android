@@ -53,6 +53,10 @@ class BlockAdsApplication : Application() {
             app.pwhs.blockads.worker.ConfigUpdateScheduler.scheduleConfigUpdate(this@BlockAdsApplication, appPreferences)
             app.pwhs.blockads.ui.browser.rules.BrowserRuleUpdateWorker.schedule(this@BlockAdsApplication)
             app.pwhs.blockads.worker.GeoIpUpdateWorker.schedule(this@BlockAdsApplication)
+            app.pwhs.blockads.worker.LogCleanupWorker.syncSchedule(
+                this@BlockAdsApplication,
+                appPreferences.logRetentionDays.first()
+            )
 
             // Schedule daily summary only if enabled
             if (appPreferences.dailySummaryEnabled.first()) {

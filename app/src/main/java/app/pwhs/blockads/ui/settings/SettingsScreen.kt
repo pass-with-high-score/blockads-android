@@ -80,10 +80,12 @@ fun SettingsScreen(
     val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsStateWithLifecycle()
     val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsStateWithLifecycle()
     val upstreamDNS by viewModel.upstreamDns.collectAsStateWithLifecycle()
+    val logRetentionDays by viewModel.logRetentionDays.collectAsStateWithLifecycle()
 
     var showDnsResponseTypeDialog by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
+    var showRetentionDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -207,6 +209,8 @@ fun SettingsScreen(
                 onImport = { importLauncher.launch(arrayOf("application/json")) },
                 onClearLogs = { showClearConfirm = true },
                 onResetSettings = { showResetConfirm = true },
+                logRetentionDays = logRetentionDays,
+                onOpenLogRetentionDialog = { showRetentionDialog = true }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -256,6 +260,14 @@ fun SettingsScreen(
                     showClearConfirm = false
                 },
                 onDismiss = { showClearConfirm = false }
+            )
+        }
+
+        if (showRetentionDialog) {
+            app.pwhs.blockads.ui.logs.dialog.LogRetentionDialog(
+                selectedDays = logRetentionDays,
+                onSelectDays = { viewModel.setLogRetentionDays(it) },
+                onDismiss = { showRetentionDialog = false }
             )
         }
 

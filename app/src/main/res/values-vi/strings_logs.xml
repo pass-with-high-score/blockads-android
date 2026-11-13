@@ -70,4 +70,9 @@
     <string name="stats_country_top_domains_title">Tên miền hàng đầu tại %s</string>
     <string name="stats_country_top_domains_empty">Không có tên miền nào được ghi nhận cho quốc gia này</string>
     <string name="log_unknown_app">Không xác định</string>
+    <string name="log_retention_title">Tự động xóa nhật ký cũ</string>
+    <string name="log_retention_off">Không bao giờ (giữ tất cả)</string>
+    <string name="log_retention_1d">Sau 1 ngày</string>
+    <string name="log_retention_3d">Sau 3 ngày</string>
+    <string name="log_retention_7d">Sau 7 ngày</string>
 </resources>

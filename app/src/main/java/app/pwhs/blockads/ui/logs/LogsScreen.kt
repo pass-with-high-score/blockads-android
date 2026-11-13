@@ -75,15 +75,18 @@ fun LogsScreen(
     val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
     val appFilter by viewModel.appFilter.collectAsStateWithLifecycle()
     val appNames by viewModel.appNames.collectAsStateWithLifecycle()
+    val appPackages by viewModel.appPackages.collectAsStateWithLifecycle()
     val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
     val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
     val whitelistedDomains by viewModel.whitelistedDomains.collectAsStateWithLifecycle()
     val recordDnsLogs by viewModel.recordDnsLogs.collectAsStateWithLifecycle()
+    val logRetentionDays by viewModel.logRetentionDays.collectAsStateWithLifecycle()
 
     var isSearchVisible by remember { mutableStateOf(initialSearchQuery.isNotEmpty()) }
     var showAppFilterSheet by remember { mutableStateOf(false) }
     var selectedEntry by remember { mutableStateOf<DnsLogEntry?>(null) }
     var showClearConfirm by remember { mutableStateOf(false) }
+    var showRetentionDialog by remember { mutableStateOf(false) }
 
     val appSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
@@ -122,7 +125,9 @@ fun LogsScreen(
                 onToggleSearch = { isSearchVisible = !isSearchVisible },
                 onToggleRecordDnsLogs = { viewModel.setRecordDnsLogs(!recordDnsLogs) },
                 onExportLogs = { viewModel.exportLogs() },
-                onClearLogs = { showClearConfirm = true }
+                onClearLogs = { showClearConfirm = true },
+                logRetentionDays = logRetentionDays,
+                onOpenRetentionSettings = { showRetentionDialog = true }
             )
         }
     ) { innerPadding ->
@@ -293,6 +298,7 @@ fun LogsScreen(
             appNames = appNames,
             selectedApp = appFilter,
             logs = logs,
+            allAppPackages = appPackages,
             onSelectApp = { viewModel.setAppFilter(it) },
             onDismiss = { showAppFilterSheet = false }
         )
@@ -306,6 +312,14 @@ fun LogsScreen(
                 showClearConfirm = false
             },
             onDismiss = { showClearConfirm = false }
+        )
+    }
+
+    if (showRetentionDialog) {
+        app.pwhs.blockads.ui.logs.dialog.LogRetentionDialog(
+            selectedDays = logRetentionDays,
+            onSelectDays = { viewModel.setLogRetentionDays(it) },
+            onDismiss = { showRetentionDialog = false }
         )
     }
 }
