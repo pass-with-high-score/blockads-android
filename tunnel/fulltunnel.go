@@ -254,7 +254,7 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 				return
 			}
 			defer udpRemote.Close()
-			bidiCopyFlow(conn, udpRemote)
+			bidiCopyUDP(conn, udpRemote, udpFlowIdleTimeout)
 			return
 		}
 
