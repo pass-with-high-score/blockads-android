@@ -456,6 +456,16 @@ func (e *Engine) LookupIP(host string) (net.IP, error) {
 	return e.lookupIP(host)
 }
 
+// ResolveIP resolves a hostname to an IP byte slice using the engine's internal resolver.
+// Exported for Java/Kotlin via gomobile (which does not support net.IP).
+func (e *Engine) ResolveIP(host string) ([]byte, error) {
+	ip, err := e.lookupIP(host)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(ip), nil
+}
+
 // LogConnection logs a flow for connection monitoring.
 func (e *Engine) LogConnection(flow mitm.FlowID, protocol int) {
 	e.logConnection(flowID{

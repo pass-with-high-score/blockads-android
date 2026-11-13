@@ -190,10 +190,13 @@ type Engine struct {
 	fullTunnelDone chan struct{}
 
 	// Standalone Servers
-	standaloneUdp  *dns.Server
-	standaloneTcp  *dns.Server
-	standaloneUdp6 *dns.Server
-	standaloneTcp6 *dns.Server
+	standaloneUdp          *dns.Server
+	standaloneTcp          *dns.Server
+	standaloneUdp6         *dns.Server
+	standaloneTcp6         *dns.Server
+	standaloneMitmListener  net.Listener
+	standaloneMitmListener6 net.Listener
+	standaloneMitmDone      chan struct{}
 
 	// Stats
 	totalQueries   atomic.Int64

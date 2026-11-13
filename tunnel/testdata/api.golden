@@ -90,6 +90,7 @@ type Engine struct
 	method Engine.MatchRuleset(domain string, ip string) string
 	method Engine.PingTailscalePeer(target string) string
 	method Engine.QuanXRuleCount() int
+	method Engine.ResolveIP(host string) ([]byte, error)
 	method Engine.RulesetRuleCount() int
 	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
 	method Engine.SetAdPathPatterns(patternsCsv string)
@@ -140,9 +141,11 @@ type Engine struct
 	method Engine.StartStandalone(port int) error
 	method Engine.StartTailscaleAuth(hostname string) string
 	method Engine.StartTailscaleSession(hostname string) error
+	method Engine.StartTransparentMitm(port int) error
 	method Engine.Stop()
 	method Engine.StopStackMitm()
 	method Engine.StopTailscale()
+	method Engine.StopTransparentMitm()
 	method Engine.TestProxyDelay(protocol string, configJSON string, timeoutMs int) (int64, error)
 	method Engine.TestWireGuardDelay(configJSON string, timeoutMs int) (int64, error)
 type FirewallChecker interface
@@ -157,6 +160,7 @@ type LogCallback interface
 	method LogCallback.OnDNSQuery(domain string, blocked bool, queryType int, responseTimeMs int64, appName string, resolvedIP string, blockedBy string)
 type MitmFilter = internal/mitm.MitmFilter
 	method MitmFilter.BlacklistDomain(host string)
+	method MitmFilter.FirstAllowedUID() int
 	method MitmFilter.GetBlacklistCount() int
 	method MitmFilter.HasAllowedUIDs() bool
 	method MitmFilter.IsAdPathBlocked(urlPath string) bool

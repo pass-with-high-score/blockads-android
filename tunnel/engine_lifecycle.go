@@ -246,6 +246,7 @@ func (e *Engine) Stop() {
 	if stack != nil {
 		stack.Stop()
 	}
+	e.StopTransparentMitm()
 	e.StopTailscale()
 }
 
