@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.Build
+import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -17,6 +18,7 @@ import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.service.tailscale.ITailscaleService
 import app.pwhs.blockads.service.vpn.StartupConfig
 import app.pwhs.blockads.service.vpn.TunnelResult
 import app.pwhs.blockads.service.vpn.VpnConnectionSupervisor
@@ -129,6 +131,8 @@ class AdBlockVpnService : VpnService() {
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
         const val EXTRA_STARTED_FROM_BOOT = "extra_started_from_boot"
+
+        const val ACTION_TAILSCALE_BIND = "app.pwhs.blockads.ACTION_TAILSCALE_BIND"
 
         const val ACTION_VPN_STATE_CHANGED = "app.pwhs.blockads.ACTION_VPN_STATE_CHANGED"
         const val EXTRA_VPN_STATE = "extra_vpn_state"
@@ -268,6 +272,70 @@ class AdBlockVpnService : VpnService() {
     val connectingPhase: String get() = if (::session.isInitialized) session.connectingPhase else ""
 
     @Volatile private var isRecordDnsLogsEnabled = true
+
+    private val tailscaleBinder = object : ITailscaleService.Stub() {
+        override fun getTailscaleStatus(): String {
+            return if (::goTunnelAdapter.isInitialized) {
+                goTunnelAdapter.getTailscaleStatus().ifEmpty { """{"state":"DISCONNECTED"}""" }
+            } else {
+                """{"state":"DISCONNECTED"}"""
+            }
+        }
+
+        override fun configureTailscale(stateJson: String?, controlUrl: String?, authKey: String?): String {
+            return if (::goTunnelAdapter.isInitialized) {
+                goTunnelAdapter.configureTailscale(stateJson ?: "", controlUrl ?: "", authKey ?: "")
+            } else {
+                "{}"
+            }
+        }
+
+        override fun startTailscaleSession(hostname: String?) {
+            synchronized(this) {
+                if (::goTunnelAdapter.isInitialized) {
+                    if (::engineCoordinator.isInitialized) {
+                        engineCoordinator.setupTaildropIfNeeded(goTunnelAdapter)
+                    }
+                    goTunnelAdapter.startTailscaleSession(hostname ?: "blockads-android")
+                    if (::engineCoordinator.isInitialized) {
+                        engineCoordinator.startTailscaleBackgroundMonitor(goTunnelAdapter)
+                    }
+                }
+            }
+        }
+
+        override fun stopTailscale() {
+            synchronized(this) {
+                if (::engineCoordinator.isInitialized) {
+                    engineCoordinator.stopTailscaleMonitor()
+                }
+                if (::goTunnelAdapter.isInitialized) {
+                    goTunnelAdapter.stopTailscale()
+                }
+            }
+        }
+
+        override fun setTailscaleExitNode(nodeId: Long) {
+            if (::goTunnelAdapter.isInitialized) {
+                goTunnelAdapter.setTailscaleExitNode(nodeId)
+            }
+        }
+
+        override fun pingTailscalePeer(target: String?): String {
+            return if (::goTunnelAdapter.isInitialized) {
+                goTunnelAdapter.pingTailscalePeer(target ?: "")
+            } else {
+                """{"error":"Tunnel not active"}"""
+            }
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        if (intent?.action == ACTION_TAILSCALE_BIND) {
+            return tailscaleBinder
+        }
+        return super.onBind(intent)
+    }
 
     override fun onCreate() {
         super.onCreate()

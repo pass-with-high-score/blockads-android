@@ -1,12 +1,18 @@
 package app.pwhs.blockads.ui.tailscale
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.service.tailscale.ITailscaleService
 import app.pwhs.blockads.service.tailscale.TailscalePeerNotifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,6 +48,55 @@ class TailscaleViewModel(
     private var pollJob: Job? = null
     private var authEngine: tunnel.Engine? = null
     private val tailscalePeerNotifier by lazy { TailscalePeerNotifier(getApplication()) }
+    private var tailscaleService: ITailscaleService? = null
+    private var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            tailscaleService = ITailscaleService.Stub.asInterface(service)
+            if (_uiState.value.isEnabled && _uiState.value.isLoggedIn) {
+                viewModelScope.launch {
+                    syncActiveSession()
+                    pollStatusOnce()
+                }
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            tailscaleService = null
+            isBound = false
+        }
+
+        override fun onBindingDied(name: ComponentName?) {
+            unbindTailscaleService()
+        }
+    }
+
+    private fun bindTailscaleService() {
+        if (isBound) return
+        val context = getApplication<Application>().applicationContext
+        val intent = Intent(context, AdBlockVpnService::class.java).apply {
+            action = AdBlockVpnService.ACTION_TAILSCALE_BIND
+        }
+        try {
+            isBound = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to bind Tailscale service")
+        }
+    }
+
+    private fun unbindTailscaleService() {
+        if (!isBound) return
+        val context = getApplication<Application>().applicationContext
+        try {
+            context.unbindService(serviceConnection)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to unbind Tailscale service")
+        } finally {
+            isBound = false
+            tailscaleService = null
+        }
+    }
 
     init {
         loadPreferences()
@@ -79,6 +134,9 @@ class TailscaleViewModel(
                     }
                 )
             }
+            if (isVpnRunning) {
+                bindTailscaleService()
+            }
             if (enabled && hasKeys && isVpnRunning) {
                 syncActiveSession(stateJson)
                 startStatusPolling()
@@ -89,6 +147,14 @@ class TailscaleViewModel(
             viewModelScope.launch {
                 AdBlockVpnService.state.collect { vpnState ->
                     val running = vpnState == VpnState.RUNNING
+                    if (running) {
+                        bindTailscaleService()
+                    } else {
+                        unbindTailscaleService()
+                        if (authEngine == null) {
+                            pollJob?.cancel()
+                        }
+                    }
                     _uiState.update { state ->
                         val connState = when {
                             !state.isEnabled -> "DISCONNECTED"
@@ -168,8 +234,11 @@ class TailscaleViewModel(
                 }
             } else {
                 pollJob?.cancel()
-                val adapter = AdBlockVpnService.activeTunnelAdapter
-                adapter?.stopTailscale()
+                try {
+                    tailscaleService?.stopTailscale()
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to stop Tailscale session via service")
+                }
                 _uiState.update { it.copy(connectionState = "DISCONNECTED") }
             }
         }
@@ -270,11 +339,15 @@ class TailscaleViewModel(
         viewModelScope.launch {
             appPrefs.tailscale.setExitNodeId(nodeId)
             _uiState.update { it.copy(activeExitNodeId = nodeId) }
-            val adapter = AdBlockVpnService.activeTunnelAdapter
-            if (adapter != null) {
-                adapter.setTailscaleExitNode(nodeId)
-            } else {
-                ServiceController.requestRestart(getApplication())
+            val service = tailscaleService
+            if (service != null) {
+                withContext(Dispatchers.IO) {
+                    try {
+                        service.setTailscaleExitNode(nodeId)
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to set Tailscale exit node via service")
+                    }
+                }
             }
         }
     }
@@ -284,17 +357,25 @@ class TailscaleViewModel(
             pollJob?.cancel()
             authEngine?.stopTailscale()
             authEngine = null
-            AdBlockVpnService.activeTunnelAdapter?.stopTailscale()
+            try {
+                tailscaleService?.stopTailscale()
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to stop Tailscale on logout")
+            }
             appPrefs.tailscale.setEnabled(false)
             appPrefs.tailscale.setStateJson("")
             appPrefs.tailscale.setAuthKey("")
             appPrefs.tailscale.setExitNodeId(0L)
 
-            _uiState.update {
+            _uiState.update { state ->
                 TailscaleUiState(
                     isEnabled = false,
                     isLoggedIn = false,
-                    connectionState = "DISCONNECTED"
+                    isVpnRunning = AdBlockVpnService.isRunning,
+                    connectionState = "DISCONNECTED",
+                    controlUrl = state.controlUrl,
+                    taildropDirUri = state.taildropDirUri,
+                    taildropDirName = state.taildropDirName
                 )
             }
         }
@@ -339,8 +420,12 @@ class TailscaleViewModel(
                 )
             }
 
-            val adapter = AdBlockVpnService.activeTunnelAdapter
-            val rawJson = adapter?.pingTailscalePeer(target) ?: ""
+            val rawJson = try {
+                tailscaleService?.pingTailscalePeer(target) ?: ""
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to ping Tailscale peer")
+                ""
+            }
             var rtt: Long? = null
             var errorStr: String? = null
             if (rawJson.isNotEmpty()) {
@@ -351,7 +436,7 @@ class TailscaleViewModel(
                     errorStr = obj.optString("error")
                 }
             } else {
-                errorStr = if (AdBlockVpnService.isRunning) "Peer ping is handled within VPN process" else "Tunnel not active"
+                errorStr = if (AdBlockVpnService.isRunning) "Peer unreachable" else "Tunnel not active"
             }
 
             _uiState.update { state ->
@@ -381,12 +466,20 @@ class TailscaleViewModel(
     private suspend fun pollStatusOnce() = withContext(Dispatchers.IO) {
         try {
             // When actively authenticating via authEngine, poll authEngine first.
-            // Otherwise, query active VPN tunnel adapter.
+            // Otherwise, query active VPN tunnel adapter via bound AIDL service.
             val statusJson = if (authEngine != null) {
                 val s = authEngine?.tailscaleStatus ?: ""
-                if (s.isNotEmpty() && s != "{}") s else AdBlockVpnService.activeTunnelAdapter?.getTailscaleStatus() ?: ""
+                if (s.isNotEmpty() && s != "{}") s else try {
+                    tailscaleService?.tailscaleStatus ?: ""
+                } catch (e: Exception) {
+                    ""
+                }
             } else {
-                AdBlockVpnService.activeTunnelAdapter?.getTailscaleStatus() ?: ""
+                try {
+                    tailscaleService?.tailscaleStatus ?: ""
+                } catch (e: Exception) {
+                    ""
+                }
             }
 
             if (statusJson.isNotEmpty() && statusJson != "{}") {
@@ -398,11 +491,11 @@ class TailscaleViewModel(
                 if (hasKeys && !_uiState.value.isLoggedIn) {
                     _uiState.update { it.copy(isLoggedIn = true) }
                 }
-                // When running in multi-process (:vpn), activeTunnelAdapter is only accessible in :vpn.
-                // If VPN is not running, ensure connection state reflects DISCONNECTED.
+                // When running in multi-process (:vpn), Tailscale status is queried via AIDL.
+                // If VPN is not running, ensure connection state reflects VPN_DISCONNECTED when enabled, or DISCONNECTED.
                 // If VPN is running and keys exist, mark connection state as READY instead of hanging in CONNECTING.
                 if (!AdBlockVpnService.isRunning) {
-                    _uiState.update { it.copy(connectionState = "DISCONNECTED") }
+                    _uiState.update { it.copy(connectionState = if (it.isEnabled) "VPN_DISCONNECTED" else "DISCONNECTED") }
                 } else if (_uiState.value.connectionState == "CONNECTING" && hasKeys) {
                     _uiState.update { it.copy(connectionState = "READY") }
                 }
@@ -459,25 +552,36 @@ class TailscaleViewModel(
     }
 
     private suspend fun syncActiveSession(stateJson: String? = null) {
-        val adapter = AdBlockVpnService.activeTunnelAdapter
-        if (adapter != null) {
-            val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
-            val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
-            val authKey = appPrefs.tailscale.getAuthKeySnapshot()
-            adapter.configureTailscale(stateToUse, controlUrl, authKey)
-            val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
-            if (exitNodeId != 0L) {
-                adapter.setTailscaleExitNode(exitNodeId)
+        val service = tailscaleService
+        if (service != null) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
+                    val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
+                    val authKey = appPrefs.tailscale.getAuthKeySnapshot()
+                    val updatedState = service.configureTailscale(stateToUse, controlUrl, authKey)
+                    if (updatedState.isNotEmpty() && updatedState != "{}") {
+                        appPrefs.tailscale.setStateJson(updatedState)
+                    }
+                    val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+                    if (exitNodeId != 0L) {
+                        service.setTailscaleExitNode(exitNodeId)
+                    }
+                    service.startTailscaleSession("blockads-android")
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to sync active Tailscale session via service")
+                }
             }
-            adapter.startTailscaleSession("blockads-android")
-        } else {
+        } else if (!AdBlockVpnService.isRunning) {
             ServiceController.requestStart(getApplication<Application>().applicationContext)
         }
     }
 
     override fun onCleared() {
         super.onCleared()
+        pollJob?.cancel()
         authEngine?.stopTailscale()
         authEngine = null
+        unbindTailscaleService()
     }
 }

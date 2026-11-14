@@ -78,6 +78,12 @@ class VpnEngineCoordinator(
         tailscaleMonitorJob = null
     }
 
+    fun setupTaildropIfNeeded(goTunnelAdapter: GoTunnelAdapter) {
+        val tdCache = java.io.File(context.cacheDir, "taildrop").apply { mkdirs() }
+        goTunnelAdapter.setTailscaleTaildropDir(tdCache.absolutePath)
+        goTunnelAdapter.setTailscaleTaildropReceiver(taildropManager)
+    }
+
     suspend fun prepareStartupConfig(): StartupConfig {
         filterRepo.loadWhitelist()
         filterRepo.loadCustomRules()

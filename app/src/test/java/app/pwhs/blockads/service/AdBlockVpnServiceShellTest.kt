@@ -14,6 +14,7 @@ import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.DnsProtocol
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.service.tailscale.ITailscaleService
 import app.pwhs.blockads.service.vpn.VpnNotificationManager
 import app.pwhs.blockads.testutil.ServiceStateHack
 import app.pwhs.blockads.testutil.ShadowGoSeq
@@ -199,5 +200,35 @@ class AdBlockVpnServiceShellTest {
         controller.destroy()
         assertEquals(VpnState.STOPPED, AdBlockVpnService.state.value)
         verify { tun.close() }
+    }
+
+    @Test
+    fun `onBind with ACTION_TAILSCALE_BIND returns ITailscaleService binder`() {
+        val intent = Intent(app, AdBlockVpnService::class.java).apply {
+            action = AdBlockVpnService.ACTION_TAILSCALE_BIND
+        }
+        val binder = service.onBind(intent)
+        org.junit.Assert.assertNotNull(binder)
+        val ts = ITailscaleService.Stub.asInterface(binder)
+        org.junit.Assert.assertNotNull(ts)
+
+        val status = ts.tailscaleStatus
+        org.junit.Assert.assertTrue(status.contains("DISCONNECTED"))
+
+        val conf = ts.configureTailscale("{}", "", "")
+        org.junit.Assert.assertNotNull(conf)
+
+        val ping = ts.pingTailscalePeer("100.64.0.1")
+        org.junit.Assert.assertNotNull(ping)
+    }
+
+    @Test
+    fun `onBind with non-tailscale action does not return ITailscaleService`() {
+        val intent = Intent(app, AdBlockVpnService::class.java).apply {
+            action = "android.net.VpnService"
+        }
+        val binder = service.onBind(intent)
+        val ts = binder as? ITailscaleService
+        org.junit.Assert.assertNull(ts)
     }
 }

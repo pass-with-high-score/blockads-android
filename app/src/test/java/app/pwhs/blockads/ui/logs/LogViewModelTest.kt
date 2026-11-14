@@ -93,7 +93,10 @@ class LogViewModelTest {
         // FileProvider caches its roots statically; each Robolectric test gets a new data dir.
         val cache = FileProvider::class.java.getDeclaredField("sCache").apply { isAccessible = true }
         (cache.get(null) as MutableMap<*, *>).clear()
-        File(app.cacheDir, "logs").deleteRecursively()
+        File(app.cacheDir, "logs").apply {
+            deleteRecursively()
+            mkdirs()
+        }
     }
 
     private fun entry(

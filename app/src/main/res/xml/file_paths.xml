@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <cache-path name="logs" path="logs/" />
-    <cache-path name="configs" path="configs/" />
-    <cache-path name="taildrop" path="taildrop/" />
+    <cache-path name="logs" path="logs" />
+    <cache-path name="configs" path="configs" />
+    <cache-path name="taildrop" path="taildrop" />
+    <cache-path name="cache" path="." />
     <external-path name="external_files" path="." />
 </paths>
