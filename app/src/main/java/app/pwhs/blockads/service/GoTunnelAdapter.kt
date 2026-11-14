@@ -7,6 +7,7 @@ import android.system.OsConstants
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.data.geoip.GeoIpLookup
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.utils.AppNameResolver
 import app.pwhs.blockads.utils.BlocklistInfo
@@ -40,6 +41,7 @@ class GoTunnelAdapter(
     private val engine = tunnel.Tunnel.newEngine()
 
     init {
+        GeoIpLookup.init(context)
         TunnelRuleLoader.loadGeoIPDatabase(context, engine)
     }
 
@@ -253,7 +255,7 @@ class GoTunnelAdapter(
 
                     val resolvedDomain = IpDomainResolver.resolve(domain, resolvedIP)
                     IpDomainResolver.remember(domain, resolvedIP)
-                    val countryCode = app.pwhs.blockads.data.geoip.GeoIpLookup.getCountryCode(resolvedIP, resolvedDomain)
+                    val countryCode = GeoIpLookup.getCountryCode(resolvedIP, resolvedDomain)
                     val isConnection = blockedBy == "connection" || domain.startsWith("TCP ", ignoreCase = true) || domain.startsWith("UDP ", ignoreCase = true)
                     val effectiveQueryType = if (isConnection) {
                         if (domain.startsWith("UDP ", ignoreCase = true)) "UDP" else "TCP"
@@ -469,29 +471,19 @@ class GoTunnelAdapter(
     fun startTailscaleAuth(host: String): String =
         runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
 
-    fun startTailscaleSession(host: String) {
-        runCatching { engine.startTailscaleSession(host) }
-    }
+    fun startTailscaleSession(host: String) { runCatching { engine.startTailscaleSession(host) } }
 
-    fun stopTailscale() {
-        runCatching { engine.stopTailscale() }
-    }
+    fun stopTailscale() { runCatching { engine.stopTailscale() } }
 
-    fun getTailscaleStatus(): String =
-        runCatching { engine.tailscaleStatus }.getOrDefault("""{"state":"DISCONNECTED"}""")
+    fun getTailscaleStatus(): String = runCatching { engine.tailscaleStatus }.getOrDefault("""{"state":"DISCONNECTED"}""")
 
-    fun getTailscaleState(): String =
-        runCatching { engine.tailscaleState }.getOrDefault("{}")
+    fun getTailscaleState(): String = runCatching { engine.tailscaleState }.getOrDefault("{}")
 
-    fun setTailscaleExitNode(id: Long) {
-        runCatching { engine.setTailscaleExitNode(id) }
-    }
+    fun setTailscaleExitNode(id: Long) { runCatching { engine.setTailscaleExitNode(id) } }
 
-    fun pingTailscalePeer(target: String): String =
-        runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
+    fun pingTailscalePeer(target: String): String = runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
 
-    fun isTailscaleActive(): Boolean =
-        runCatching { engine.isTailscaleActive }.getOrDefault(false)
+    fun isTailscaleActive(): Boolean = runCatching { engine.isTailscaleActive }.getOrDefault(false)
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {

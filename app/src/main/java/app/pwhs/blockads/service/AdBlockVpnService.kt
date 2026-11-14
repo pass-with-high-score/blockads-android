@@ -1,11 +1,8 @@
 package app.pwhs.blockads.service
 
 import android.app.Notification
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.Build
@@ -18,7 +15,7 @@ import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
-import app.pwhs.blockads.service.tailscale.ITailscaleService
+import app.pwhs.blockads.service.tailscale.TailscaleBinder
 import app.pwhs.blockads.service.vpn.StartupConfig
 import app.pwhs.blockads.service.vpn.TunnelResult
 import app.pwhs.blockads.service.vpn.VpnConnectionSupervisor
@@ -43,85 +40,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-
-object VpnStateBridge {
-    const val PREF_NAME = "blockads_direct_boot_state"
-    const val KEY_VPN_STATE = "direct_boot_vpn_state"
-    const val KEY_START_TIMESTAMP = "direct_boot_start_timestamp"
-    const val KEY_LAST_STOPPED_TIMESTAMP = "direct_boot_last_stopped_timestamp"
-    const val KEY_PRIVATE_DNS_STRICT = "direct_boot_private_dns_strict"
-    const val KEY_VPN_ENABLED = "direct_boot_vpn_enabled"
-
-    private fun getPrefs(context: Context): SharedPreferences {
-        val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (context.isDeviceProtectedStorage) context else context.createDeviceProtectedStorageContext()
-        } else {
-            context
-        }
-        return deContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun persistState(
-        context: Context,
-        state: VpnState,
-        startTimestamp: Long,
-        lastStoppedTimestamp: Long,
-        privateDnsStrict: Boolean
-    ) {
-        try {
-            getPrefs(context).edit()
-                .putString(KEY_VPN_STATE, state.name)
-                .putLong(KEY_START_TIMESTAMP, startTimestamp)
-                .putLong(KEY_LAST_STOPPED_TIMESTAMP, lastStoppedTimestamp)
-                .putBoolean(KEY_PRIVATE_DNS_STRICT, privateDnsStrict)
-                .putBoolean(KEY_VPN_ENABLED, state == VpnState.RUNNING || state == VpnState.STARTING)
-                .commit()
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to persist VPN state to DirectBoot preferences")
-        }
-    }
-
-    fun hydrateState(
-        context: Context,
-        status: VpnStatusStore
-    ) {
-        try {
-            val prefs = getPrefs(context)
-            val stateName = prefs.getString(KEY_VPN_STATE, null)
-            if (stateName != null) {
-                try {
-                    status.state.value = VpnState.valueOf(stateName)
-                } catch (e: Exception) {
-                    Timber.w(e, "Unknown hydrated VPN state: $stateName")
-                }
-            } else if (prefs.getBoolean(KEY_VPN_ENABLED, false)) {
-                status.state.value = VpnState.RUNNING
-            }
-            status.startTimestamp = prefs.getLong(KEY_START_TIMESTAMP, 0L)
-            status.lastStoppedTimestamp = prefs.getLong(KEY_LAST_STOPPED_TIMESTAMP, 0L)
-            status.privateDnsStrict.value = prefs.getBoolean(KEY_PRIVATE_DNS_STRICT, false)
-
-            // Reconcile: If hydrated state is RUNNING or STARTING on cold boot, verify against OS active VPN transport.
-            // If the OS reports no active VPN transport, fall back to STOPPED and reset startTimestamp.
-            if ((status.state.value == VpnState.RUNNING || status.state.value == VpnState.STARTING) &&
-                !VpnUtils.isVpnTransportActive(context)
-            ) {
-                Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")
-                status.state.value = VpnState.STOPPED
-                status.startTimestamp = 0L
-                persistState(
-                    context = context,
-                    state = VpnState.STOPPED,
-                    startTimestamp = 0L,
-                    lastStoppedTimestamp = status.lastStoppedTimestamp,
-                    privateDnsStrict = status.privateDnsStrict.value
-                )
-            }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to hydrate VPN state from DirectBoot preferences")
-        }
-    }
-}
 
 class AdBlockVpnService : VpnService() {
 
@@ -157,43 +75,8 @@ class AdBlockVpnService : VpnService() {
 
         val privateDnsStrict: StateFlow<Boolean> = status.privateDnsStrict.asStateFlow()
 
-        @Volatile
-        private var isBridgeInitialized = false
-
         fun initMainProcessBridge(context: Context) {
-            VpnStateBridge.hydrateState(context, status)
-            if (isBridgeInitialized) return
-            synchronized(this) {
-                if (isBridgeInitialized) return
-                val receiver = object : BroadcastReceiver() {
-                    override fun onReceive(c: Context?, intent: Intent?) {
-                        if (intent?.action == ACTION_VPN_STATE_CHANGED) {
-                            val stateStr = intent.getStringExtra(EXTRA_VPN_STATE)
-                            val startTime = intent.getLongExtra(EXTRA_START_TIMESTAMP, 0L)
-                            val stopTime = intent.getLongExtra(EXTRA_LAST_STOPPED_TIMESTAMP, 0L)
-                            val privateDns = intent.getBooleanExtra(EXTRA_PRIVATE_DNS_STRICT, false)
-
-                            if (stateStr != null) {
-                                try {
-                                    status.state.value = VpnState.valueOf(stateStr)
-                                } catch (e: Exception) {
-                                    Timber.w(e, "Failed to parse VPN state: $stateStr")
-                                }
-                            }
-                            status.startTimestamp = startTime
-                            status.lastStoppedTimestamp = stopTime
-                            status.privateDnsStrict.value = privateDns
-                        }
-                    }
-                }
-                val filter = IntentFilter(ACTION_VPN_STATE_CHANGED)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
-                } else {
-                    context.registerReceiver(receiver, filter)
-                }
-                isBridgeInitialized = true
-            }
+            VpnStateBridge.initMainProcessBridge(context, status)
         }
 
         // Note: Running in dedicated process (:vpn) isolates static companion memory.
@@ -273,62 +156,10 @@ class AdBlockVpnService : VpnService() {
 
     @Volatile private var isRecordDnsLogsEnabled = true
 
-    private val tailscaleBinder = object : ITailscaleService.Stub() {
-        override fun getTailscaleStatus(): String {
-            return if (::goTunnelAdapter.isInitialized) {
-                goTunnelAdapter.getTailscaleStatus().ifEmpty { """{"state":"DISCONNECTED"}""" }
-            } else {
-                """{"state":"DISCONNECTED"}"""
-            }
-        }
-
-        override fun configureTailscale(stateJson: String?, controlUrl: String?, authKey: String?): String {
-            return if (::goTunnelAdapter.isInitialized) {
-                goTunnelAdapter.configureTailscale(stateJson ?: "", controlUrl ?: "", authKey ?: "")
-            } else {
-                "{}"
-            }
-        }
-
-        override fun startTailscaleSession(hostname: String?) {
-            synchronized(this) {
-                if (::goTunnelAdapter.isInitialized) {
-                    if (::engineCoordinator.isInitialized) {
-                        engineCoordinator.setupTaildropIfNeeded(goTunnelAdapter)
-                    }
-                    goTunnelAdapter.startTailscaleSession(hostname ?: "blockads-android")
-                    if (::engineCoordinator.isInitialized) {
-                        engineCoordinator.startTailscaleBackgroundMonitor(goTunnelAdapter)
-                    }
-                }
-            }
-        }
-
-        override fun stopTailscale() {
-            synchronized(this) {
-                if (::engineCoordinator.isInitialized) {
-                    engineCoordinator.stopTailscaleMonitor()
-                }
-                if (::goTunnelAdapter.isInitialized) {
-                    goTunnelAdapter.stopTailscale()
-                }
-            }
-        }
-
-        override fun setTailscaleExitNode(nodeId: Long) {
-            if (::goTunnelAdapter.isInitialized) {
-                goTunnelAdapter.setTailscaleExitNode(nodeId)
-            }
-        }
-
-        override fun pingTailscalePeer(target: String?): String {
-            return if (::goTunnelAdapter.isInitialized) {
-                goTunnelAdapter.pingTailscalePeer(target ?: "")
-            } else {
-                """{"error":"Tunnel not active"}"""
-            }
-        }
-    }
+    private val tailscaleBinder = TailscaleBinder(
+        getGoTunnelAdapter = { if (::goTunnelAdapter.isInitialized) goTunnelAdapter else null },
+        getEngineCoordinator = { if (::engineCoordinator.isInitialized) engineCoordinator else null },
+    )
 
     override fun onBind(intent: Intent?): IBinder? {
         if (intent?.action == ACTION_TAILSCALE_BIND) {
@@ -500,11 +331,15 @@ class AdBlockVpnService : VpnService() {
     private fun pauseVpn() {
         Timber.d("Pausing VPN for 1 hour")
         isPaused = true
-        WorkManager.getInstance(this).enqueueUniqueWork(
-            VpnResumeWorker.WORK_NAME,
-            androidx.work.ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<VpnResumeWorker>().setInitialDelay(1, TimeUnit.HOURS).build()
-        )
+        try {
+            WorkManager.getInstance(this).enqueueUniqueWork(
+                VpnResumeWorker.WORK_NAME,
+                androidx.work.ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<VpnResumeWorker>().setInitialDelay(1, TimeUnit.HOURS).build()
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to schedule VPN resume worker in :vpn process")
+        }
         session.stop(
             showStoppedNotification = false,
             onStopped = { vpnNotificationManager.showPausedNotification() }

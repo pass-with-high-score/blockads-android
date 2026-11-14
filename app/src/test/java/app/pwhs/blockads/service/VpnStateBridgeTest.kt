@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.LinkProperties
 import android.os.Build
+import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import app.pwhs.blockads.data.datastore.DirectBootPreferences
 import app.pwhs.blockads.service.vpn.VpnStatusStore
 import io.mockk.every
 import io.mockk.mockk
@@ -30,6 +32,7 @@ class VpnStateBridgeTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext<Application>()
+        shadowOf(context as Application).grantPermissions("${context.packageName}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
         AdBlockVpnService.status.privateDnsStrict.value = false
         AdBlockVpnService.status.state.value = VpnState.STOPPED
         AdBlockVpnService.status.startTimestamp = 0L
@@ -89,5 +92,76 @@ class VpnStateBridgeTest {
             it.action == AdBlockVpnService.ACTION_VPN_STATE_CHANGED
         }
         assertEquals(true, broadcast?.getBooleanExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, false))
+    }
+
+    @Test
+    fun testVpnStateBridgePrefNameIsIsolatedFromDirectBootPreferences() {
+        assertEquals("blockads_vpn_state_bridge", VpnStateBridge.PREF_NAME)
+
+        val directBootPrefs = DirectBootPreferences(context)
+        directBootPrefs.wasVpnEnabled = true
+
+        VpnStateBridge.persistState(
+            context = context,
+            state = VpnState.STOPPED,
+            startTimestamp = 0L,
+            lastStoppedTimestamp = 1000L,
+            privateDnsStrict = false
+        )
+
+        // Ensure DirectBootPreferences wasVpnEnabled is not overwritten by VpnStateBridge persistState
+        assertTrue("DirectBootPreferences wasVpnEnabled must remain untouched", directBootPrefs.wasVpnEnabled)
+    }
+
+    @Test
+    fun testInitMainProcessBridgeRegistersReceiverAndHydratesState() {
+        VpnStateBridge.resetBridgeForTesting()
+        val store = VpnStatusStore()
+
+        // Persist initial state
+        VpnStateBridge.persistState(
+            context = context,
+            state = VpnState.STOPPED,
+            startTimestamp = 0L,
+            lastStoppedTimestamp = 2000L,
+            privateDnsStrict = false
+        )
+
+        VpnStateBridge.initMainProcessBridge(context, store)
+        assertEquals(2000L, store.lastStoppedTimestamp)
+
+        // Send a state change broadcast to verify the registered receiver updates the store
+        val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
+            putExtra(AdBlockVpnService.EXTRA_VPN_STATE, VpnState.RUNNING.name)
+            putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, 9999L)
+            putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, 2000L)
+            putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, true)
+        }
+        context.sendBroadcast(intent)
+        shadowOf(Looper.getMainLooper()).idle()
+
+        assertEquals(VpnState.RUNNING, store.state.value)
+        assertEquals(9999L, store.startTimestamp)
+        assertTrue(store.privateDnsStrict.value)
+    }
+
+    @Test
+    fun testAdBlockVpnServiceDelegatesInitMainProcessBridge() {
+        VpnStateBridge.resetBridgeForTesting()
+        AdBlockVpnService.status.state.value = VpnState.STOPPED
+
+        AdBlockVpnService.initMainProcessBridge(context)
+
+        val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
+            putExtra(AdBlockVpnService.EXTRA_VPN_STATE, VpnState.RUNNING.name)
+            putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, 8888L)
+            putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, 0L)
+            putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, false)
+        }
+        context.sendBroadcast(intent)
+        shadowOf(Looper.getMainLooper()).idle()
+
+        assertEquals(VpnState.RUNNING, AdBlockVpnService.status.state.value)
+        assertEquals(8888L, AdBlockVpnService.status.startTimestamp)
     }
 }

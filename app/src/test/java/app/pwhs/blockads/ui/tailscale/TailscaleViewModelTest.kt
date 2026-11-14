@@ -172,4 +172,40 @@ class TailscaleViewModelTest {
         // Peer was not in peer list originally, but ping handles target safely without crashing
         assertFalse(vm.uiState.value.isLoading)
     }
+
+    @Test
+    fun `TailscaleServiceClient preserves isBound across onServiceDisconnected`() {
+        val client = TailscaleServiceClient(app)
+        client.bind()
+        assertTrue(client.isBound)
+
+        val shadowApp = shadowOf(app)
+        val conn = shadowApp.boundServiceConnections.first()
+        conn.onServiceConnected(null, null)
+        conn.onServiceDisconnected(null)
+
+        // Requirement R4: onServiceDisconnected must NOT clear isBound
+        assertTrue("isBound must remain true on service disconnection", client.isBound)
+        assertFalse(client.isConnected)
+
+        client.unbind()
+        assertFalse("isBound is cleared only on explicit unbind", client.isBound)
+    }
+
+    @Test
+    fun `logout cancels ongoing sync and keeps state disabled`() = runTest {
+        coEvery { tailscalePrefs.isEnabledSnapshot() } returns true
+        coEvery { tailscalePrefs.getStateJsonSnapshot() } returns """{"node_key":"k1","machine_key":"k2"}"""
+        AdBlockVpnService.status.state.value = VpnState.RUNNING
+
+        val vm = TailscaleViewModel(app)
+        advanceUntilIdle()
+
+        vm.processIntent(TailscaleUiIntent.Logout)
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.isEnabled)
+        assertFalse(vm.uiState.value.isLoggedIn)
+        assertEquals("DISCONNECTED", vm.uiState.value.connectionState)
+    }
 }
