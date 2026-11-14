@@ -1,13 +1,17 @@
 package app.pwhs.blockads.service.vpn
 
+import android.content.Context
+import android.content.Intent
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.FirewallManager
 import app.pwhs.blockads.service.VpnRetryManager
 import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.service.VpnStateBridge
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -42,11 +46,35 @@ class VpnSessionController(
     private val elapsedRealtime: () -> Long = SystemClock::elapsedRealtime,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val context: Context? = null,
 ) {
 
     companion object {
         private const val RESTART_CLEANUP_DELAY_MS = 1000L
         private const val GO_STOP_TIMEOUT_MS = 300L
+    }
+
+    private fun notifyStateChanged() {
+        val currentState = status.state.value
+        val startTime = status.startTimestamp
+        val stopTime = status.lastStoppedTimestamp
+        val strictDns = status.privateDnsStrict.value
+
+        context?.let { ctx ->
+            VpnStateBridge.persistState(ctx, currentState, startTime, stopTime, strictDns)
+            try {
+                val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
+                    setPackage(ctx.packageName)
+                    putExtra(AdBlockVpnService.EXTRA_VPN_STATE, currentState.name)
+                    putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, startTime)
+                    putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, stopTime)
+                    putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, strictDns)
+                }
+                ctx.sendBroadcast(intent)
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to broadcast VPN state change")
+            }
+        }
     }
 
     val retryManager = VpnRetryManager(maxRetries = 5, maxDelayMs = 60000L)
@@ -106,6 +134,7 @@ class VpnSessionController(
         val s = status.state.value
         if (s == VpnState.RUNNING || s == VpnState.STARTING) return
         status.state.value = VpnState.STARTING
+        notifyStateChanged()
 
         host.enterForeground()
         network.startNetworkMonitoring()
@@ -186,6 +215,7 @@ class VpnSessionController(
                     vpnStartTime = clock()
                 }
                 status.startTimestamp = vpnStartTime
+                notifyStateChanged()
 
                 val startupElapsed = clock() - startupTime
                 Timber.d("VPN startup completed in ${startupElapsed}ms")
@@ -234,6 +264,7 @@ class VpnSessionController(
         isPhysicalNetworkLost = false
         network.cancelNetworkSwitch()
         status.startTimestamp = 0L
+        notifyStateChanged()
 
         host.updateNotification()
         network.stopNetworkMonitoring()
@@ -272,6 +303,7 @@ class VpnSessionController(
                     status.state.value = VpnState.STOPPED
                     status.lastStoppedTimestamp = clock()
                     status.privateDnsStrict.value = false
+                    notifyStateChanged()
                     Timber.d("VPN fully stopped (OS transport cleared)")
                     host.onFullyStopped()
                 }
@@ -290,6 +322,7 @@ class VpnSessionController(
         isPhysicalNetworkLost = false
         network.cancelNetworkSwitch()
         status.startTimestamp = 0L
+        notifyStateChanged()
 
         network.stopNetworkMonitoring()
         network.stopPeriodicMonitoring()
@@ -332,6 +365,7 @@ class VpnSessionController(
         isReconnecting = false
         isPhysicalNetworkLost = false
         status.startTimestamp = 0L
+        notifyStateChanged()
 
         network.stopNetworkMonitoring()
         network.stopPeriodicMonitoring()
@@ -350,6 +384,7 @@ class VpnSessionController(
 
     suspend fun tearDownForRestart() {
         status.state.value = VpnState.RESTARTING
+        notifyStateChanged()
         isReconnecting = true
         isPhysicalNetworkLost = false
 

@@ -1,8 +1,11 @@
 package app.pwhs.blockads
 
 import android.app.Application
+import android.content.Context
+import android.os.Build
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.di.appModule
+import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +26,17 @@ import app.pwhs.blockads.utils.FileLoggingTree
 class BlockAdsApplication : Application() {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    private fun isMainProcess(): Boolean {
+        val currentProcess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            val pid = android.os.Process.myPid()
+            val am = getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+            am?.runningAppProcesses?.firstOrNull { it.pid == pid }?.processName
+        }
+        return currentProcess == null || currentProcess == packageName
+    }
+
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -38,41 +52,45 @@ class BlockAdsApplication : Application() {
         // Plant File logging tree for all builds to allow log export
         Timber.plant(FileLoggingTree(this))
 
-        // Schedule auto-update for filter lists after Koin is initialized
-        val appPreferences: AppPreferences by inject()
-        val geoIpManager: app.pwhs.blockads.data.geoip.GeoIpManager by inject()
-        applicationScope.launch {
-            // Restore Crash Reporting state dynamically
-            val isCrashReportingEnabled = appPreferences.crashReportingEnabled.first()
-            CrashReportingManager.toggleSentry(this@BlockAdsApplication, isCrashReportingEnabled)
+        if (isMainProcess()) {
+            AdBlockVpnService.initMainProcessBridge(this)
 
-            // Move v6.3.0 single-config users onto the multi-profile schema.
-            appPreferences.migrateLegacyWgConfigIfNeeded()
+            // Schedule auto-update for filter lists after Koin is initialized
+            val appPreferences: AppPreferences by inject()
+            val geoIpManager: app.pwhs.blockads.data.geoip.GeoIpManager by inject()
+            applicationScope.launch {
+                // Restore Crash Reporting state dynamically
+                val isCrashReportingEnabled = appPreferences.crashReportingEnabled.first()
+                CrashReportingManager.toggleSentry(this@BlockAdsApplication, isCrashReportingEnabled)
 
-            FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
-            app.pwhs.blockads.worker.ConfigUpdateScheduler.scheduleConfigUpdate(this@BlockAdsApplication, appPreferences)
-            app.pwhs.blockads.ui.browser.rules.BrowserRuleUpdateWorker.schedule(this@BlockAdsApplication)
-            app.pwhs.blockads.worker.GeoIpUpdateWorker.schedule(this@BlockAdsApplication)
-            app.pwhs.blockads.worker.LogCleanupWorker.syncSchedule(
-                this@BlockAdsApplication,
-                appPreferences.logRetentionDays.first()
-            )
+                // Move v6.3.0 single-config users onto the multi-profile schema.
+                appPreferences.migrateLegacyWgConfigIfNeeded()
 
-            // Schedule daily summary only if enabled
-            if (appPreferences.dailySummaryEnabled.first()) {
-                DailySummaryScheduler.scheduleDailySummary(this@BlockAdsApplication)
+                FilterUpdateScheduler.scheduleFilterUpdate(this@BlockAdsApplication, appPreferences)
+                app.pwhs.blockads.worker.ConfigUpdateScheduler.scheduleConfigUpdate(this@BlockAdsApplication, appPreferences)
+                app.pwhs.blockads.ui.browser.rules.BrowserRuleUpdateWorker.schedule(this@BlockAdsApplication)
+                app.pwhs.blockads.worker.GeoIpUpdateWorker.schedule(this@BlockAdsApplication)
+                app.pwhs.blockads.worker.LogCleanupWorker.syncSchedule(
+                    this@BlockAdsApplication,
+                    appPreferences.logRetentionDays.first()
+                )
+
+                // Schedule daily summary only if enabled
+                if (appPreferences.dailySummaryEnabled.first()) {
+                    DailySummaryScheduler.scheduleDailySummary(this@BlockAdsApplication)
+                }
+
+                // Warm up GeoIP database on IO thread
+                app.pwhs.blockads.data.geoip.GeoIpLookup.init(this@BlockAdsApplication)
+
+                // Fetch GeoIP database dynamically on fresh install if not present
+                if (!geoIpManager.isDatabaseAvailable()) {
+                    geoIpManager.checkAndUpdate(force = false)
+                }
             }
 
-            // Warm up GeoIP database on IO thread
-            app.pwhs.blockads.data.geoip.GeoIpLookup.init(this@BlockAdsApplication)
-
-            // Fetch GeoIP database dynamically on fresh install if not present
-            if (!geoIpManager.isDatabaseAvailable()) {
-                geoIpManager.checkAndUpdate(force = false)
-            }
+            // Trusted Wi-Fi networks (#197): auto-pause/resume on SSID change.
+            app.pwhs.blockads.service.TrustedNetworkManager(this, appPreferences).start()
         }
-
-        // Trusted Wi-Fi networks (#197): auto-pause/resume on SSID change.
-        app.pwhs.blockads.service.TrustedNetworkManager(this, appPreferences).start()
     }
 }

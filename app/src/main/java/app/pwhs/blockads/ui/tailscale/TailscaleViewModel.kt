@@ -351,7 +351,7 @@ class TailscaleViewModel(
                     errorStr = obj.optString("error")
                 }
             } else {
-                errorStr = "Tunnel not active"
+                errorStr = if (AdBlockVpnService.isRunning) "Peer ping is handled within VPN process" else "Tunnel not active"
             }
 
             _uiState.update { state ->
@@ -397,6 +397,14 @@ class TailscaleViewModel(
                 }
                 if (hasKeys && !_uiState.value.isLoggedIn) {
                     _uiState.update { it.copy(isLoggedIn = true) }
+                }
+                // When running in multi-process (:vpn), activeTunnelAdapter is only accessible in :vpn.
+                // If VPN is not running, ensure connection state reflects DISCONNECTED.
+                // If VPN is running and keys exist, mark connection state as READY instead of hanging in CONNECTING.
+                if (!AdBlockVpnService.isRunning) {
+                    _uiState.update { it.copy(connectionState = "DISCONNECTED") }
+                } else if (_uiState.value.connectionState == "CONNECTING" && hasKeys) {
+                    _uiState.update { it.copy(connectionState = "READY") }
                 }
             }
         } catch (e: Exception) {

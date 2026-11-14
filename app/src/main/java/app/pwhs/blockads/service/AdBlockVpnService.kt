@@ -1,8 +1,11 @@
 package app.pwhs.blockads.service
 
 import android.app.Notification
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.Build
@@ -39,6 +42,85 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
+object VpnStateBridge {
+    const val PREF_NAME = "blockads_direct_boot_state"
+    const val KEY_VPN_STATE = "direct_boot_vpn_state"
+    const val KEY_START_TIMESTAMP = "direct_boot_start_timestamp"
+    const val KEY_LAST_STOPPED_TIMESTAMP = "direct_boot_last_stopped_timestamp"
+    const val KEY_PRIVATE_DNS_STRICT = "direct_boot_private_dns_strict"
+    const val KEY_VPN_ENABLED = "direct_boot_vpn_enabled"
+
+    private fun getPrefs(context: Context): SharedPreferences {
+        val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (context.isDeviceProtectedStorage) context else context.createDeviceProtectedStorageContext()
+        } else {
+            context
+        }
+        return deContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
+
+    fun persistState(
+        context: Context,
+        state: VpnState,
+        startTimestamp: Long,
+        lastStoppedTimestamp: Long,
+        privateDnsStrict: Boolean
+    ) {
+        try {
+            getPrefs(context).edit()
+                .putString(KEY_VPN_STATE, state.name)
+                .putLong(KEY_START_TIMESTAMP, startTimestamp)
+                .putLong(KEY_LAST_STOPPED_TIMESTAMP, lastStoppedTimestamp)
+                .putBoolean(KEY_PRIVATE_DNS_STRICT, privateDnsStrict)
+                .putBoolean(KEY_VPN_ENABLED, state == VpnState.RUNNING || state == VpnState.STARTING)
+                .commit()
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to persist VPN state to DirectBoot preferences")
+        }
+    }
+
+    fun hydrateState(
+        context: Context,
+        status: VpnStatusStore
+    ) {
+        try {
+            val prefs = getPrefs(context)
+            val stateName = prefs.getString(KEY_VPN_STATE, null)
+            if (stateName != null) {
+                try {
+                    status.state.value = VpnState.valueOf(stateName)
+                } catch (e: Exception) {
+                    Timber.w(e, "Unknown hydrated VPN state: $stateName")
+                }
+            } else if (prefs.getBoolean(KEY_VPN_ENABLED, false)) {
+                status.state.value = VpnState.RUNNING
+            }
+            status.startTimestamp = prefs.getLong(KEY_START_TIMESTAMP, 0L)
+            status.lastStoppedTimestamp = prefs.getLong(KEY_LAST_STOPPED_TIMESTAMP, 0L)
+            status.privateDnsStrict.value = prefs.getBoolean(KEY_PRIVATE_DNS_STRICT, false)
+
+            // Reconcile: If hydrated state is RUNNING or STARTING on cold boot, verify against OS active VPN transport.
+            // If the OS reports no active VPN transport, fall back to STOPPED and reset startTimestamp.
+            if ((status.state.value == VpnState.RUNNING || status.state.value == VpnState.STARTING) &&
+                !VpnUtils.isVpnTransportActive(context)
+            ) {
+                Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")
+                status.state.value = VpnState.STOPPED
+                status.startTimestamp = 0L
+                persistState(
+                    context = context,
+                    state = VpnState.STOPPED,
+                    startTimestamp = 0L,
+                    lastStoppedTimestamp = status.lastStoppedTimestamp,
+                    privateDnsStrict = status.privateDnsStrict.value
+                )
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to hydrate VPN state from DirectBoot preferences")
+        }
+    }
+}
+
 class AdBlockVpnService : VpnService() {
 
     companion object {
@@ -47,6 +129,12 @@ class AdBlockVpnService : VpnService() {
         const val ACTION_PAUSE_1H = "app.pwhs.blockads.PAUSE_VPN_1H"
         const val ACTION_RESTART = "app.pwhs.blockads.RESTART_VPN"
         const val EXTRA_STARTED_FROM_BOOT = "extra_started_from_boot"
+
+        const val ACTION_VPN_STATE_CHANGED = "app.pwhs.blockads.ACTION_VPN_STATE_CHANGED"
+        const val EXTRA_VPN_STATE = "extra_vpn_state"
+        const val EXTRA_START_TIMESTAMP = "extra_start_timestamp"
+        const val EXTRA_LAST_STOPPED_TIMESTAMP = "extra_last_stopped_timestamp"
+        const val EXTRA_PRIVATE_DNS_STRICT = "extra_private_dns_strict"
 
         internal val status = VpnStatusStore()
         val state: StateFlow<VpnState> = status.state.asStateFlow()
@@ -66,14 +154,77 @@ class AdBlockVpnService : VpnService() {
         val privateDnsStrict: StateFlow<Boolean> = status.privateDnsStrict.asStateFlow()
 
         @Volatile
+        private var isBridgeInitialized = false
+
+        fun initMainProcessBridge(context: Context) {
+            VpnStateBridge.hydrateState(context, status)
+            if (isBridgeInitialized) return
+            synchronized(this) {
+                if (isBridgeInitialized) return
+                val receiver = object : BroadcastReceiver() {
+                    override fun onReceive(c: Context?, intent: Intent?) {
+                        if (intent?.action == ACTION_VPN_STATE_CHANGED) {
+                            val stateStr = intent.getStringExtra(EXTRA_VPN_STATE)
+                            val startTime = intent.getLongExtra(EXTRA_START_TIMESTAMP, 0L)
+                            val stopTime = intent.getLongExtra(EXTRA_LAST_STOPPED_TIMESTAMP, 0L)
+                            val privateDns = intent.getBooleanExtra(EXTRA_PRIVATE_DNS_STRICT, false)
+
+                            if (stateStr != null) {
+                                try {
+                                    status.state.value = VpnState.valueOf(stateStr)
+                                } catch (e: Exception) {
+                                    Timber.w(e, "Failed to parse VPN state: $stateStr")
+                                }
+                            }
+                            status.startTimestamp = startTime
+                            status.lastStoppedTimestamp = stopTime
+                            status.privateDnsStrict.value = privateDns
+                        }
+                    }
+                }
+                val filter = IntentFilter(ACTION_VPN_STATE_CHANGED)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+                } else {
+                    context.registerReceiver(receiver, filter)
+                }
+                isBridgeInitialized = true
+            }
+        }
+
+        // Note: Running in dedicated process (:vpn) isolates static companion memory.
+        // socketProtector and tunnelSocketProtector are initialized in :vpn and are safely null in the main UI process.
+        @Volatile
         var socketProtector: ((java.net.Socket) -> Boolean)? = null
 
         @Volatile
         var tunnelSocketProtector: tunnel.SocketProtector? = null
 
-        fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?) {
-            status.privateDnsStrict.value = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+        fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?, context: Context? = null) {
+            val strict = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                 linkProperties?.privateDnsServerName != null
+            if (status.privateDnsStrict.value != strict) {
+                status.privateDnsStrict.value = strict
+                if (context != null) {
+                    VpnStateBridge.persistState(context, status.state.value, status.startTimestamp, status.lastStoppedTimestamp, strict)
+                    try {
+                        val intent = Intent(ACTION_VPN_STATE_CHANGED).apply {
+                            setPackage(context.packageName)
+                            putExtra(EXTRA_VPN_STATE, status.state.value.name)
+                            putExtra(EXTRA_START_TIMESTAMP, status.startTimestamp)
+                            putExtra(EXTRA_LAST_STOPPED_TIMESTAMP, status.lastStoppedTimestamp)
+                            putExtra(EXTRA_PRIVATE_DNS_STRICT, strict)
+                        }
+                        context.sendBroadcast(intent)
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to broadcast private DNS state change")
+                    }
+                }
+            }
+        }
+
+        fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?) {
+            updatePrivateDnsState(linkProperties, null)
         }
 
         fun requestRestart(context: Context) {
@@ -91,6 +242,8 @@ class AdBlockVpnService : VpnService() {
             context.startService(Intent(context, AdBlockVpnService::class.java).apply { action = ACTION_STOP })
         }
 
+        // Note: Running in dedicated process (:vpn) isolates static companion memory.
+        // activeTunnelAdapter is initialized in :vpn and is safely null in the main UI process.
         var activeTunnelAdapter: GoTunnelAdapter? = null
             internal set
     }
@@ -175,7 +328,7 @@ class AdBlockVpnService : VpnService() {
             },
             onUpdateNotification = { updateNotification() },
             onLinkPropertiesChanged = { linkProperties ->
-                updatePrivateDnsState(linkProperties)
+                updatePrivateDnsState(linkProperties, this@AdBlockVpnService)
                 serviceScope.launch {
                     engineCoordinator.handleLinkPropertiesChanged(goTunnelAdapter, linkProperties)
                 }
@@ -210,6 +363,7 @@ class AdBlockVpnService : VpnService() {
             dnsLogDao = dnsLogDao,
             nextMilestoneThreshold = notificationHelper::nextMilestoneThreshold,
             establishTunnel = tunnelBuilder::establish,
+            context = this@AdBlockVpnService,
         )
         connectionSupervisor.initializeNetworkMonitor()
 
@@ -294,6 +448,14 @@ class AdBlockVpnService : VpnService() {
         super.onRevoke()
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Timber.d("AdBlockVpnService onTaskRemoved: maintaining active foreground VPN")
+        if (isRunning || isConnecting) {
+            updateNotification()
+        }
+    }
+
     override fun onDestroy() {
         if (::engineCoordinator.isInitialized) {
             engineCoordinator.stopTailscaleMonitor()
@@ -350,7 +512,7 @@ class AdBlockVpnService : VpnService() {
         override fun refreshPrivateDnsState() {
             runCatching {
                 val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) })
+                updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) }, this@AdBlockVpnService)
             }
         }
 

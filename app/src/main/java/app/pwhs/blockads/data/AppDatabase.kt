@@ -264,6 +264,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "blockads_database"
                 )
+                    .enableMultiInstanceInvalidation()
                     .addMigrations(*ALL_MIGRATIONS)
                     .fallbackToDestructiveMigration(false)
                     .build()

@@ -36,6 +36,7 @@ object WireGuardPingTester {
             return@withContext NodePingResult.Error("No endpoint")
         }
 
+        // In multi-process (:vpn), protector is null in the UI process; testWireGuardDelayProtected safely handles null.
         val protector = app.pwhs.blockads.service.AdBlockVpnService.tunnelSocketProtector
         try {
             val resolvedConfig = profile.config.resolveEndpoints()

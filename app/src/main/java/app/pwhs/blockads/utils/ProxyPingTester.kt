@@ -34,6 +34,7 @@ object ProxyPingTester {
             val repaired = profile.sanitizeOrRepair().resolveServer()
             timber.log.Timber.d("pingNode: testing ${repaired.displayName} [${repaired.protocol}] (${repaired.server}:${repaired.port}) sni=${repaired.sni}")
             timber.log.Timber.d("pingNode: json=${repaired.toEngineJson()}")
+            // In multi-process (:vpn), protector is null in the UI process; testProxyNodeDelayProtected safely handles null.
             val protector = app.pwhs.blockads.service.AdBlockVpnService.tunnelSocketProtector
             try {
                 val delayMs = tunnel.Tunnel.testProxyNodeDelayProtected(

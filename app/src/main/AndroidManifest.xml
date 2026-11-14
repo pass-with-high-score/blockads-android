@@ -72,6 +72,8 @@
 
         <service
             android:name=".service.AdBlockVpnService"
+            android:process=":vpn"
+            android:stopWithTask="false"
             android:exported="false"
             android:directBootAware="true"
             android:foregroundServiceType="specialUse"
