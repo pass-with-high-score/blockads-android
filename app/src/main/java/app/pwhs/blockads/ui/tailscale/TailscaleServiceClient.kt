@@ -96,13 +96,16 @@ class TailscaleServiceClient(
             }
         }
 
-    suspend fun stopTailscale(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            tailscaleService?.stopTailscale()
-            true
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to stop Tailscale session via service")
-            false
+    suspend fun stopTailscale(): Boolean {
+        val service = tailscaleService
+        return withContext(Dispatchers.IO) {
+            try {
+                service?.stopTailscale()
+                true
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to stop Tailscale session via service")
+                false
+            }
         }
     }
 
