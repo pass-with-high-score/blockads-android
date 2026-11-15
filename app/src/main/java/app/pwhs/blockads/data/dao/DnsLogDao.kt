@@ -316,4 +316,19 @@ interface DnsLogDao {
         countryCode: String,
         limit: Int = 10
     ): Flow<List<CountryTopDomain>>
+    @Query(
+        """
+        SELECT domain, COUNT(*) AS count,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedCount
+        FROM dns_logs
+        WHERE packageName = :packageName
+        GROUP BY domain
+        ORDER BY blockedCount DESC, count DESC
+        LIMIT :limit
+        """
+    )
+    fun getAppTopDomains(
+        packageName: String,
+        limit: Int = 20
+    ): Flow<List<CountryTopDomain>>
 }

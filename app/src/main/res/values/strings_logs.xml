@@ -6,6 +6,8 @@
     <string name="logs_filter_all">All</string>
     <string name="logs_filter_blocked">Blocked</string>
     <string name="log_action_whitelist">Add to Whitelist</string>
+    <string name="log_action_whitelist_app">Whitelist App (Bypass VPN)</string>
+    <string name="log_action_unwhitelist_app">Remove App from Whitelist</string>
     <string name="log_action_copy">Copy Domain</string>
     <string name="log_search_hint">Search domains…</string>
     <string name="domain_copied">Domain copied</string>

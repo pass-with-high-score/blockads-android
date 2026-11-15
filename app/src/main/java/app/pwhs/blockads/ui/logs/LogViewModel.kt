@@ -118,6 +118,17 @@ class LogViewModel(
         .map { list -> list.filter { it.isEnabled }.map { it.packageName }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
+    val whitelistedApps: StateFlow<Set<String>> = appPrefs.whitelistedApps
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    fun toggleWhitelistApp(packageName: String) {
+        if (packageName.isBlank()) return
+        viewModelScope.launch {
+            appPrefs.toggleWhitelistedApp(packageName)
+            ServiceController.requestRestart(application.applicationContext)
+        }
+    }
+
     fun toggleAppFirewall(packageName: String) {
         if (packageName.isBlank() || firewallRuleDao == null) return
         viewModelScope.launch {

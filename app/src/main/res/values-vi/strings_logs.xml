@@ -6,6 +6,8 @@
     <string name="logs_filter_all">Tất cả</string>
     <string name="logs_filter_blocked">Đã chặn</string>
     <string name="log_action_whitelist">Thêm vào danh sách cho phép</string>
+    <string name="log_action_whitelist_app">Whitelist ứng dụng (Bỏ qua VPN)</string>
+    <string name="log_action_unwhitelist_app">Bỏ whitelist ứng dụng</string>
     <string name="log_action_copy">Sao chép tên miền</string>
     <string name="log_search_hint">Tìm kiếm tên miền…</string>
     <string name="domain_copied">Đã sao chép tên miền</string>
