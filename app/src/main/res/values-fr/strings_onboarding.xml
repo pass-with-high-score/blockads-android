@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_title_1">Bloquez les publicités intelligemment</string>
-    <string name="onboarding_desc_1">Bloquez les publicités dans toutes vos applications et navigateurs d'un simple toucher. Utilise une technologie de filtrage DNS — aucun accès root requis.\n\n🔒 Promesse de confidentialité : nous ne collectons, ne stockons et ne transmettons jamais vos données de navigation. Tout le traitement s'effectue uniquement sur votre appareil.</string>
+    <string name="onboarding_desc_1">Bloquez les publicités dans toutes vos applications et navigateurs d\'un simple toucher. Utilise une technologie de filtrage DNS — aucun accès root requis.\n\n🔒 Promesse de confidentialité : nous ne collectons, ne stockons et ne transmettons jamais vos données de navigation. Tout le traitement s\'effectue uniquement sur votre appareil.</string>
     <string name="onboarding_skip">Passer</string>
     <string name="onboarding_next">Suivant</string>
     <string name="onboarding_get_started">Commencer</string>
@@ -15,8 +15,8 @@
     <string name="onboarding_notification_desc">Autorisez les notifications pour consulter les statistiques de blocage en temps réel et savoir quand votre protection est active. Nécessaire pour la notification VPN persistante sur Android 13+.</string>
     <string name="onboarding_notification_grant">Autoriser les notifications</string>
     <string name="onboarding_battery_title">Maintenir la protection active</string>
-    <string name="onboarding_battery_desc">Excluez BlockAds de l'optimisation de la batterie pour que le service VPN reste actif en arrière-plan et ne soit pas interrompu par le système.</string>
-    <string name="onboarding_battery_grant">Désactiver l'optimisation de la batterie</string>
+    <string name="onboarding_battery_desc">Excluez BlockAds de l\'optimisation de la batterie pour que le service VPN reste actif en arrière-plan et ne soit pas interrompu par le système.</string>
+    <string name="onboarding_battery_grant">Désactiver l\'optimisation de la batterie</string>
     <string name="onboarding_battery_unsupported">Non pris en charge</string>
     <string name="onboarding_permission_granted">✓ Autorisation accordée</string>
     <string name="onboarding_complete_title">Vous êtes désormais protégé !</string>

@@ -16,7 +16,7 @@
     <string name="home_filter_rules">Règles de filtrage</string>
     <string name="home_recent_blocked">Bloqués récents</string>
     <string name="home_data_saved">Données économisées</string>
-    <string name="home_protection_uptime">Temps d'activité</string>
+    <string name="home_protection_uptime">Temps d\'activité</string>
     <string name="home_downloaded">Téléchargé</string>
     <string name="home_uploaded">Envoyé</string>
     <string name="home_chart_24h">24 heures</string>
