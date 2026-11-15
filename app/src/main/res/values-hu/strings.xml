@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_tagline">Reklámmentes böngészés</string>
+    <string name="nav_home">Kezdőlap</string>
+    <string name="nav_logs">Naplók</string>
+    <string name="nav_filter">Szűrők</string>
+    <string name="nav_proxy">Proxy</string>
+    <string name="nav_settings">Beállítások</string>
+    <string name="test_block_ads">Reklámblokkolás tesztelése</string>
+    <string name="home_connecting_desc">VPN-kapcsolat létrehozása…</string>
+    <string name="home_connecting_desc_root">Root proxy indítása…</string>
+    <string name="home_protected_desc">Eszköze védve van a reklámoktól</string>
+    <string name="home_unprotected_desc">Koppintson a gombra a reklámblokkolás bekapcsolásához</string>
+    <string name="home_block_rate">Blokkolási arány</string>
+    <string name="home_filter_rules">Szűrőszabályok</string>
+    <string name="home_recent_blocked">Nemrég blokkolva</string>
+    <string name="home_data_saved">Megtakarított adat</string>
+    <string name="home_protection_uptime">Üzemidő</string>
+    <string name="home_downloaded">Letöltve</string>
+    <string name="home_uploaded">Feltöltve</string>
+    <string name="home_chart_24h">24 óra</string>
+    <string name="home_chart_7d">7 nap</string>
+    <string name="home_top_blocked">Leggyakrabban blokkolt domainek</string>
+    <string name="home_chart_no_data">Nincs elérhető adat</string>
+    <string name="home_paused_trusted_short">Szüneteltetve megbízható hálózaton</string>
+    <string name="cancel">Mégse</string>
+    <string name="nav_statistics">Statisztika</string>
+    <string name="nav_browser">Böngésző</string>
+    <string name="open_settings">Beállítások megnyitása</string>
+    <string name="accessibility_stat_card">%1$s: %2$s</string>
+    <string name="accessibility_navigate_back">Vissza</string>
+    <string name="home_disconnecting_desc">VPN-kapcsolat leállítása…</string>
+    <string name="home_disconnecting_desc_root">Root proxy leállítása…</string>
+</resources>

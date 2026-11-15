@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Browser Navigation & Bottom Bar -->
+    <string name="browser_omnibox_hint">Keresés vagy URL megadása</string>
+    <string name="browser_action_navigate_back">Vissza</string>
+    <string name="browser_action_home">Kezdőlap</string>
+    <string name="browser_action_pip">Lebegő videó</string>
+    <string name="browser_action_menu">Menü</string>
+    <string name="browser_action_close">Bezárás</string>
+
+    <!-- Browser Home / Shortcuts -->
+    <string name="browser_home_protecting">Védett</string>
+    <string name="browser_home_hero_tagline">Reklámmentes böngészés • Háttérben futó videólejátszás</string>
+    <string name="browser_home_search_hint">Keresés vagy webcím megadása…</string>
+    <string name="browser_home_banner_title">Reklámblokkolás és háttérvideó</string>
+    <string name="browser_home_banner_subtitle">Automatikusan szűri a videóreklámokat és felugró ablakokat, támogatja a PiP-lejátszást</string>
+
+    <!-- Search Suggestion Sheet -->
+    <string name="browser_search_input_hint">Írjon be kulcsszavakat vagy webcímet…</string>
+    <string name="browser_search_visit_site">Ugrás a weboldalra</string>
+    <string name="browser_search_with_engine">Keresés ezzel: %1$s</string>
+    <string name="browser_search_popular_shortcuts">Népszerű parancsikonok</string>
+
+    <!-- Bento Menu Sheet -->
+    <string name="browser_bento_privacy_header">Adatvédelem és tartalomszűrés</string>
+    <string name="browser_blocked_badge">BLOKKOLVA</string>
+    <string name="browser_check_rule_updates">Szabályfrissítések keresése</string>
+    <string name="browser_ads_and_trackers">Reklámok és nyomkövetők</string>
+    <string name="browser_rule_stats_format">Szabály v%1$d • %2$s</string>
+    <string name="browser_rule_stats_domains">%1$d domain</string>
+    <string name="browser_rule_stats_local_db">Helyi adatbázis</string>
+
+    <string name="browser_adblock_title">Reklámblokkolás</string>
+    <string name="browser_status_active">Aktív</string>
+    <string name="browser_status_paused">Szüneteltetve</string>
+
+    <string name="browser_popup_title">Felugró ablakok blokkolása</string>
+
+    <string name="browser_desktop_title">Asztali nézet</string>
+    <string name="browser_desktop_active">Asztali User-Agent használata</string>
+    <string name="browser_desktop_inactive">Mobilnézet</string>
+
+    <string name="browser_pip_mode_pip">Lebegő videó (PiP)</string>
+    <string name="browser_pip_mode_audio">Háttérhang</string>
+    <string name="browser_pip_desc_pip">Lebegő videó automatikus megnyitása az alkalmazás elhagyásakor</string>
+    <string name="browser_pip_desc_audio">Kilépéskor csak a hang szól tovább, értesítésből vezérelve</string>
+
+    <string name="browser_pip_card_title">Lebegő videó (PiP)</string>
+    <string name="browser_pip_card_subtitle">Nézzen kisméretű videót, miközben más alkalmazásokat használ</string>
+    <string name="browser_pip_card_btn">BE</string>
+
+    <string name="browser_action_clear_cache">Gyorsítótár törlése</string>
+    <string name="browser_action_share">Megosztás</string>
+    <string name="browser_action_open_external">Megnyitás külső alkalmazásban</string>
+
+    <string name="browser_pick_element_title">Elem blokkolása</string>
+    <string name="browser_pick_element_desc">Koppintson a reklámok vagy nem kívánt oldalelemek elrejtéséhez</string>
+    <string name="browser_manage_rules_title">Elemszabályok kezelése</string>
+    <string name="browser_manage_rules_desc">Az Ön által blokkolt egyéni elemek megtekintése és törlése</string>
+    <string name="browser_exit_title">Kilépés a böngészőből</string>
+
+    <!-- Browser WebView & ViewModel Toasts -->
+    <string name="browser_download_desc">Fájl letöltése: %1$s…</string>
+    <string name="browser_download_started">Letöltés indítása: %1$s</string>
+    <string name="browser_open_external_error">Nem sikerült megnyitni a külső alkalmazást</string>
+    <string name="browser_element_blocked_on">Elem blokkolva itt: %1$s</string>
+    <string name="browser_rules_updated_format">Szűrőszabályok frissítve: v%1$d (%2$d domain)</string>
+    <string name="browser_rules_already_latest">A böngésző szűrőszabályai már naprakészek (v%1$d)</string>
+    <string name="browser_rules_update_error">Nem sikerült letölteni a frissítéseket: %1$s</string>
+    <string name="browser_rules_update_error_network">Kapcsolódási hiba</string>
+    <string name="browser_data_cleared">Sütik és gyorsítótár törölve</string>
+    <string name="browser_data_clear_error">Hiba az adatok törlésekor: %1$s</string>
+
+    <!-- Element Rules Screen -->
+    <string name="element_rules_title">Elemszabályok</string>
+    <string name="element_rules_search_hint">Domain vagy szelektor keresése…</string>
+    <string name="element_rules_clear">Törlés</string>
+    <string name="element_rules_search">Keresés</string>
+    <string name="element_rules_delete_all_title">Törli az összes szabályt?</string>
+    <string name="element_rules_delete_all_desc">A(z) %1$s oldalon elrejtett összes elem újra látható lesz.</string>
+    <string name="element_rules_delete">Törlés</string>
+    <string name="element_rules_cancel">Mégse</string>
+    <string name="element_rules_hiding_count">%1$d elem elrejtve</string>
+    <string name="element_rules_domains_count">%1$d weboldalon alkalmazva</string>
+    <string name="element_rules_delete_domain_content_desc">Összes törlése ennél a domainnél</string>
+    <string name="element_rules_delete_rule_content_desc">Szabály törlése</string>
+    <string name="element_rules_empty_searching">Nincs találat</string>
+    <string name="element_rules_empty_normal">Még nincsenek elemblokkoló szabályok</string>
+    <string name="element_rules_empty_searching_desc">Próbáljon más kulcsszóval keresni</string>
+    <string name="element_rules_empty_normal_desc">Böngészés közben nyissa meg a menüt, és válassza az \"Elem blokkolása\" lehetőséget bármely reklám vagy nem kívánt elem kijelöléséhez és elrejtéséhez.</string>
+    <string name="element_rules_toast_deleted">Szabály törölve</string>
+    <string name="element_rules_toast_deleted_all">Az összes szabály törölve: %1$s</string>
+</resources>
