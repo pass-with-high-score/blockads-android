@@ -167,13 +167,18 @@ class TvVpnService : VpnService() {
                 val activeProxy = if (isProxyVpn) tvPrefs.getActiveProxyProfileSnapshot() else null
                 val proxyProtocol = activeProxy?.protocol?.value ?: ""
                 val proxyConfigJson = activeProxy?.toEngineJson() ?: ""
+                val initialSniRules = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(
+                    tvPrefs.getSniProxyRulesJsonSnapshot()
+                )
+                val hasActiveSniProxy = initialSniRules.any { it.enabled && it.targetIp.isNotBlank() }
+                val needsFullTunnel = isProxyVpn || hasActiveSniProxy
 
                 Timber.d("DNS: protocol=$dnsProtocol, primary=$upstreamDns, fallback=$fallbackDns")
-                Timber.d("Response type: $dnsResponseType, routingMode: $routingMode, proxy: ${activeProxy?.displayName}")
+                Timber.d("Response type: $dnsResponseType, routingMode: $routingMode, fullTunnel: $needsFullTunnel, proxy: ${activeProxy?.displayName}")
 
                 // Phase 3: Establish VPN
-                Timber.d("Phase 3: Establishing VPN tunnel (isProxyVpn=$isProxyVpn)...")
-                val established = establishVpn(whitelistedApps, isProxyVpn)
+                Timber.d("Phase 3: Establishing VPN tunnel (isProxyVpn=$isProxyVpn, fullTunnel=$needsFullTunnel)...")
+                val established = establishVpn(whitelistedApps, needsFullTunnel)
                 if (!established) {
                     Timber.e("Failed to establish VPN")
                     stopVpn()
@@ -202,9 +207,6 @@ class TvVpnService : VpnService() {
                     odohRelayUrl = odohRelayUrl,
                 )
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
-                val initialSniRules = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(
-                    tvPrefs.getSniProxyRulesJsonSnapshot()
-                )
                 goTunnelAdapter.setSniProxyRules(
                     app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
                         initialSniRules,
@@ -255,14 +257,22 @@ class TvVpnService : VpnService() {
 
                 // Dynamically update SNI proxy rules
                 launch {
+                    var wasFullTunnel = needsFullTunnel
                     tvPrefs.sniProxyRulesJson.drop(1).collectLatest { raw ->
                         val parsed = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(raw)
-                        goTunnelAdapter.setSniProxyRules(
-                            app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
-                                parsed,
-                                packageManager
+                        val nowNeedsFull = isProxyVpn || parsed.any { it.enabled && it.targetIp.isNotBlank() }
+                        if (nowNeedsFull != wasFullTunnel) {
+                            wasFullTunnel = nowNeedsFull
+                            Timber.d("SNI proxy full-tunnel requirement changed to $nowNeedsFull, restarting VPN")
+                            requestRestart(this@TvVpnService)
+                        } else {
+                            goTunnelAdapter.setSniProxyRules(
+                                app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
+                                    parsed,
+                                    packageManager
+                                )
                             )
-                        )
+                        }
                     }
                 }
 
@@ -274,6 +284,7 @@ class TvVpnService : VpnService() {
                         },
                         proxyProtocol = proxyProtocol,
                         proxyConfigJson = proxyConfigJson,
+                        useFullTunnel = needsFullTunnel,
                     )
                 }
 

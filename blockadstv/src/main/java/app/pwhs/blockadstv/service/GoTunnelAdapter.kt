@@ -119,6 +119,7 @@ class GoTunnelAdapter(
         socketProtector: ((Int) -> Boolean)? = null,
         proxyProtocol: String = "",
         proxyConfigJson: String = "",
+        useFullTunnel: Boolean = false,
     ) {
         if (isRunning) return
         isRunning = true
@@ -138,13 +139,14 @@ class GoTunnelAdapter(
         updateTries()
 
         val fd = vpnInterface.fd
-        Timber.d("Starting Go tunnel engine with fd=$fd, hasProxy=${proxyConfigJson.isNotEmpty()}")
+        val fullTunnel = useFullTunnel || proxyConfigJson.isNotEmpty()
+        Timber.d("Starting Go tunnel engine with fd=$fd, fullTunnel=$fullTunnel, hasProxy=${proxyConfigJson.isNotEmpty()}")
 
         val protector = SocketProtector { fd ->
             socketProtector?.invoke(fd.toInt()) ?: false
         }
 
-        if (proxyConfigJson.isNotEmpty()) {
+        if (fullTunnel) {
             engine.startFull(fd.toLong(), protector)
         } else {
             engine.start(fd.toLong(), protector, "")
