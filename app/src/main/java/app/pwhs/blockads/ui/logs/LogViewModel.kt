@@ -39,6 +39,11 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FirewallRule
 import app.pwhs.blockads.service.ServiceController
 
+sealed interface LogUndoEvent {
+    data class Whitelisted(val domain: String) : LogUndoEvent
+    data class Blocked(val domain: String) : LogUndoEvent
+}
+
 class LogViewModel(
     private val dnsLogDao: DnsLogDao,
     private val filterListDao: FilterListDao,
@@ -87,6 +92,9 @@ class LogViewModel(
 
     private val _selectionMode = MutableStateFlow(false)
     val selectionMode: StateFlow<Boolean> = _selectionMode.asStateFlow()
+
+    private val _undoEvents = MutableSharedFlow<LogUndoEvent>(extraBufferCapacity = 1)
+    val undoEvents: SharedFlow<LogUndoEvent> = _undoEvents.asSharedFlow()
 
     private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
     val selectedIds: StateFlow<Set<Long>> = _selectedIds.asStateFlow()
@@ -199,10 +207,17 @@ class LogViewModel(
             if (exists == 0) {
                 whitelistDomainDao.insert(WhitelistDomain(domain = cleanDomain))
                 filterListRepository.loadWhitelist()
-                _events.toast(R.string.log_whitelisted, listOf(": $cleanDomain"))
+                _undoEvents.tryEmit(LogUndoEvent.Whitelisted(cleanDomain))
             } else {
                 _events.toast(R.string.log_already_whitelisted)
             }
+        }
+    }
+
+    fun undoWhitelist(domain: String) {
+        viewModelScope.launch {
+            whitelistDomainDao.deleteByDomain(domain)
+            filterListRepository.loadWhitelist()
         }
     }
 
@@ -216,11 +231,18 @@ class LogViewModel(
                 if (customDnsRuleDao.exists(rule.rule) == 0) {
                     customDnsRuleDao.insert(rule)
                     filterListRepository.loadCustomRules()
-                    _events.toast(R.string.rule_added)
+                    _undoEvents.tryEmit(LogUndoEvent.Blocked(cleanDomain))
                 } else {
-                    _events.toast(R.string.rule_added) // Or a different string for "already exists" if desired
+                    _events.toast(R.string.rule_added)
                 }
             }
+        }
+    }
+
+    fun undoBlock(domain: String) {
+        viewModelScope.launch {
+            customDnsRuleDao.deleteBlockRuleByDomain(domain)
+            filterListRepository.loadCustomRules()
         }
     }
 

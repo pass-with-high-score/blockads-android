@@ -10,6 +10,8 @@
     <string name="log_search_hint">Search domains…</string>
     <string name="domain_copied">Domain copied</string>
     <string name="log_whitelisted">Whitelisted: %s</string>
+    <string name="log_blocked_named">Blocked: %s</string>
+    <string name="log_action_undone">Action undone</string>
     <string name="log_already_whitelisted">Already whitelisted</string>
     <string name="log_status_blocked">Blocked</string>
     <string name="log_status_allowed">Allowed</string>

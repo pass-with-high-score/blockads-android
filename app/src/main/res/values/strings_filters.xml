@@ -12,9 +12,12 @@
     <string name="whitelist_domains_empty">No whitelisted domains</string>
     <string name="whitelist_domain_added">Domain whitelisted: %s</string>
     <string name="whitelist_domain_removed">Domain removed from whitelist</string>
+    <string name="whitelist_domain_removed_named">Removed %s from whitelist</string>
     <string name="blocklist_domains_empty">No blocklisted domains</string>
     <string name="blocklist_domain_added">Domain blocklisted: %s</string>
     <string name="blocklist_domain_removed">Domain removed from blocklist</string>
+    <string name="blocklist_domain_removed_named">Removed %s from blocklist</string>
+    <string name="filter_list_removed_named">Removed \"%s\"</string>
     <string name="blocklist_domain_already_exists">Domain is already blocklisted</string>
     <string name="domain_rules_title">Domain Rules</string>
     <string name="domain_rules_tab_whitelist">Whitelist</string>
