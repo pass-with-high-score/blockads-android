@@ -217,4 +217,36 @@
     <string name="filter_tag_delete_confirm">Delete tag \"%1$s\"?</string>
     <string name="filter_tag_empty">No filters with this tag yet</string>
     <string name="filter_tag_quick_presets">Suggestions</string>
+
+    <!-- Filter Overlap & Combined List -->
+    <string name="filter_overlap_title">Filter Overlap</string>
+    <string name="filter_overlap_action">Check overlap</string>
+    <string name="filter_overlap_tab_overview">Overview</string>
+    <string name="filter_overlap_tab_duplicates">Duplicates</string>
+    <string name="filter_overlap_export_combined">Export Combined List</string>
+    <string name="filter_overlap_export_desc">Save all unique domains from your enabled lists into a single deduplicated file.</string>
+    <string name="filter_overlap_headline_redundant">%1$.0f%% of your filter rules are duplicates</string>
+    <string name="filter_overlap_headline_clean">No duplicate rules found</string>
+    <string name="filter_overlap_summary_explain">%1$d enabled lists contain %2$s rules, but only %3$s unique domains are needed.</string>
+    <string name="filter_overlap_unified_domains">Unique Domains</string>
+    <string name="filter_overlap_redundant_saved">Duplicates Removed</string>
+    <string name="filter_overlap_overlapping_domains">Overlapping</string>
+    <string name="filter_overlap_raw_total">%1$s total entries across %2$d lists</string>
+    <string name="filter_overlap_per_filter_section">Enabled Lists Breakdown</string>
+    <string name="filter_overlap_per_filter_hint">Lists with high overlap are mostly covered by your other lists. You can disable them to save memory.</string>
+    <string name="filter_overlap_high_overlap_badge">High overlap</string>
+    <string name="filter_overlap_disable_filter">Disable</string>
+    <string name="filter_overlap_filter_disabled">Disabled %1$s</string>
+    <string name="filter_overlap_filtering_by">Filtered by: %1$s</string>
+    <string name="filter_overlap_pairwise_section">Pairwise Overlap</string>
+    <string name="filter_overlap_duplicates_section">Duplicate Domains</string>
+    <string name="filter_overlap_filter_stat_detail">%1$.1f%% covered (%2$s / %3$s domains)</string>
+    <string name="filter_overlap_shared_count">%1$s shared</string>
+    <string name="filter_overlap_search_hint">Search duplicate domains…</string>
+    <string name="filter_overlap_need_two_title">Find Redundant Filter Lists</string>
+    <string name="filter_overlap_need_two">Enable at least 2 downloaded filter lists to detect duplicate rules, spot redundant lists you can turn off, and export one clean combined list.</string>
+    <string name="filter_overlap_no_duplicates">No overlapping domains found between the selected filters.</string>
+    <string name="filter_overlap_showing_capped">Showing first %1$d matching duplicates</string>
+    <string name="filter_overlap_exported">Exported %1$s unique domains</string>
+    <string name="filter_overlap_export_failed">Failed to export combined filter list</string>
 </resources>

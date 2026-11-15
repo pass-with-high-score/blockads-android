@@ -55,6 +55,7 @@ import app.pwhs.blockads.ui.data.ElementRulesKey
 import app.pwhs.blockads.ui.data.DnsProviderKey
 import app.pwhs.blockads.ui.data.DomainRulesKey
 import app.pwhs.blockads.ui.data.FilterDetailKey
+import app.pwhs.blockads.ui.data.FilterOverlapKey
 import app.pwhs.blockads.ui.data.FilterKey
 import app.pwhs.blockads.ui.data.FireWallKey
 import app.pwhs.blockads.ui.data.HomeKey
@@ -79,6 +80,7 @@ import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.domainrules.DomainRulesScreen
 import app.pwhs.blockads.ui.filter.FilterSetupScreen
 import app.pwhs.blockads.ui.filter.detail.FilterDetailScreen
+import app.pwhs.blockads.ui.filter.overlap.FilterOverlapScreen
 import app.pwhs.blockads.ui.firewall.FirewallScreen
 import app.pwhs.blockads.ui.home.HomeScreen
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
@@ -258,6 +260,10 @@ fun HomeApp(
                         onNavigateToFilterDetail = { filterId ->
                             showBottomBar = false
                             currentBackStack.add(FilterDetailKey(filterId))
+                        },
+                        onNavigateToOverlap = {
+                            showBottomBar = false
+                            currentBackStack.add(FilterOverlapKey)
                         }
                     )
                 }
@@ -336,6 +342,13 @@ fun HomeApp(
                 entry<FilterDetailKey> {
                     FilterDetailScreen(
                         filterId = it.filterId,
+                        onNavigateBack = {
+                            safePop(currentBackStack)
+                        }
+                    )
+                }
+                entry<FilterOverlapKey> {
+                    FilterOverlapScreen(
                         onNavigateBack = {
                             safePop(currentBackStack)
                         }

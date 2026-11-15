@@ -68,7 +68,8 @@ fun FilterSetupScreen(
     canNavigateBack: Boolean = false,
     onNavigateBack: () -> Unit = {},
     viewModel: FilterSetupViewModel = koinViewModel(),
-    onNavigateToFilterDetail: (filterId: Long) -> Unit = {}
+    onNavigateToFilterDetail: (filterId: Long) -> Unit = {},
+    onNavigateToOverlap: () -> Unit = {}
 ) {
     val allLists by viewModel.filterLists.collectAsStateWithLifecycle()
     val filterLists by viewModel.filteredFilterLists.collectAsStateWithLifecycle()
@@ -179,6 +180,7 @@ fun FilterSetupScreen(
                 },
                 canNavigateBack = canNavigateBack,
                 onNavigateBack = onNavigateBack,
+                onOpenOverlap = onNavigateToOverlap,
                 isUpdatingFilter = isUpdatingFilter,
                 updateProgress = updateProgress,
                 onUpdateAllFilters = { viewModel.updateAllFilters() }
