@@ -31,4 +31,5 @@
     <string name="home_downloaded">Завантажено</string>
     <string name="home_uploaded">Відвантажено</string>
     <string name="nav_proxy">Проксі</string>
+    <string name="action_undo">Скасувати</string>
 </resources>

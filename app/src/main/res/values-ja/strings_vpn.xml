@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Taildropでファイルを受信しました</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">ファイルを開く</string>
+    <string name="vpn_phase_closing_tunnel">VPNトンネルを切断中…</string>
+    <string name="vpn_phase_stopping_engine">フィルターエンジンを停止中…</string>
+    <string name="vpn_phase_clearing_network">ネットワークを解放中…</string>
+    <string name="tailscale_send_file">ファイルを送信 (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Tailscale経由でこのデバイスにファイルを直接転送します。</string>
+    <string name="tailscale_send_file_btn">ファイルを選択</string>
+    <string name="tailscale_sending_file">%1$sを送信中…</string>
+    <string name="tailscale_send_file_offline">オフライン中はファイルを送信できません</string>
+    <string name="tailscale_send_file_success">%1$sを%2$sに送信しました</string>
+    <string name="tailscale_send_file_failed">%1$sの送信に失敗しました: %2$s</string>
+    <string name="tailscale_exit_node_empty">TailnetでアドバタイズされているExit Nodeはありません。</string>
+    <string name="tailscale_open_admin">Webコンソールを開く</string>
+    <string name="tailscale_settings_title">Tailscale 設定</string>
+    <string name="tailscale_advertise_exit_node">Exit Node として実行</string>
+    <string name="tailscale_advertise_exit_node_desc">Tailnet 上の他のデバイスがこのデバイスを経由してインターネットトラフィックをルーティングすることを許可します。Tailscale 管理コンソールでも有効にしてください。</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">この Exit Node を使用するデバイスの広告とトラッカーをフィルタリングします。いずれの場合も BlockAds で設定された DNS が使用されます。</string>
 </resources>

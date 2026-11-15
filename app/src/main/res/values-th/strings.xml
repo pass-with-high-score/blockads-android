@@ -31,4 +31,5 @@
     <string name="home_downloaded">ดาวน์โหลดแล้ว</string>
     <string name="home_uploaded">อัปโหลดแล้ว</string>
     <string name="nav_proxy">พร็อกซี</string>
+    <string name="action_undo">เลิกทำ</string>
 </resources>

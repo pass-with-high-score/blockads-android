@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">%s 的热门域名</string>
     <string name="stats_country_top_domains_empty">未记录该国家/地区的域名查询</string>
     <string name="log_unknown_app">未知</string>
+    <string name="log_action_whitelist_app">将应用加入白名单（绕过 VPN）</string>
+    <string name="log_action_unwhitelist_app">从白名单中移除应用</string>
+    <string name="log_blocked_named">已拦截：%s</string>
+    <string name="log_action_undone">已撤销操作</string>
+    <string name="log_retention_title">自动删除旧日志</string>
+    <string name="log_retention_off">从不（保留全部）</string>
+    <string name="log_retention_1d">1 天后</string>
+    <string name="log_retention_3d">3 天后</string>
+    <string name="log_retention_7d">7 天后</string>
 </resources>

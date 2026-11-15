@@ -31,4 +31,5 @@
     <string name="home_downloaded">Baixado</string>
     <string name="home_uploaded">Enviado</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="action_undo">Desfazer</string>
 </resources>

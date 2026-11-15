@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Soubor přijat přes Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Otevřít soubor</string>
+    <string name="vpn_phase_closing_tunnel">Zavírání tunelu VPN…</string>
+    <string name="vpn_phase_stopping_engine">Zastavování filtračního jádra…</string>
+    <string name="vpn_phase_clearing_network">Uvolňování sítě…</string>
+    <string name="tailscale_send_file">Odeslat soubor (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Přeneste soubor přímo do tohoto zařízení přes Tailscale.</string>
+    <string name="tailscale_send_file_btn">Vybrat soubor</string>
+    <string name="tailscale_sending_file">Odesílání %1$s…</string>
+    <string name="tailscale_send_file_offline">V režimu offline nelze odeslat soubor</string>
+    <string name="tailscale_send_file_success">Odesláno %1$s do %2$s</string>
+    <string name="tailscale_send_file_failed">Nepodařilo se odeslat %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">V síti Tailnet nejsou inzerovány žádné výstupní uzly.</string>
+    <string name="tailscale_open_admin">Otevřít webovou konzoli</string>
+    <string name="tailscale_settings_title">Nastavení Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Spustit jako výstupní uzel</string>
+    <string name="tailscale_advertise_exit_node_desc">Umožňuje ostatním zařízením v síti Tailnet směrovat internetový provoz přes toto zařízení. Povolte také v administrační konzoli Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtruje reklamy a sledovače pro zařízení používající tento výstupní uzel. V obou případech používá nakonfigurovaný DNS aplikace BlockAds.</string>
 </resources>

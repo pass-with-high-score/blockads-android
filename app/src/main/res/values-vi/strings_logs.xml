@@ -77,4 +77,6 @@
     <string name="log_retention_1d">Sau 1 ngày</string>
     <string name="log_retention_3d">Sau 3 ngày</string>
     <string name="log_retention_7d">Sau 7 ngày</string>
+    <string name="log_blocked_named">Đã chặn: %s</string>
+    <string name="log_action_undone">Đã hoàn tác hành động</string>
 </resources>

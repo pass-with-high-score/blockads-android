@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Top-Domains in %s</string>
     <string name="stats_country_top_domains_empty">Keine Domain-Anfragen für dieses Land aufgezeichnet</string>
     <string name="log_unknown_app">Unbekannt</string>
+    <string name="log_action_whitelist_app">App zur Whitelist hinzufügen (VPN umgehen)</string>
+    <string name="log_action_unwhitelist_app">App von der Whitelist entfernen</string>
+    <string name="log_blocked_named">Blockiert: %s</string>
+    <string name="log_action_undone">Aktion rückgängig gemacht</string>
+    <string name="log_retention_title">Alte Protokolle automatisch löschen</string>
+    <string name="log_retention_off">Nie (alle behalten)</string>
+    <string name="log_retention_1d">Nach 1 Tag</string>
+    <string name="log_retention_3d">Nach 3 Tagen</string>
+    <string name="log_retention_7d">Nach 7 Tagen</string>
 </resources>

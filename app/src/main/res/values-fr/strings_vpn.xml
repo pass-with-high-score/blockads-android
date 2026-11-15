@@ -172,4 +172,21 @@
     <string name="tailscale_taildrop_received_title">Fichier reçu via Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Ouvrir le fichier</string>
+    <string name="vpn_phase_closing_tunnel">Fermeture du tunnel VPN…</string>
+    <string name="vpn_phase_stopping_engine">Arrêt du moteur de filtrage…</string>
+    <string name="vpn_phase_clearing_network">Libération du réseau…</string>
+    <string name="tailscale_send_file">Envoyer un fichier (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Transférer un fichier directement vers cet appareil via Tailscale.</string>
+    <string name="tailscale_send_file_btn">Choisir un fichier</string>
+    <string name="tailscale_sending_file">Envoi de %1$s…</string>
+    <string name="tailscale_send_file_offline">Impossible d\'envoyer un fichier hors ligne</string>
+    <string name="tailscale_send_file_success">%1$s envoyé à %2$s</string>
+    <string name="tailscale_send_file_failed">Échec de l\'envoi de %1$s : %2$s</string>
+    <string name="tailscale_exit_node_empty">Aucun nœud de sortie annoncé sur votre Tailnet.</string>
+    <string name="tailscale_open_admin">Ouvrir la console Web</string>
+    <string name="tailscale_settings_title">Paramètres de Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Exécuter en tant que nœud de sortie</string>
+    <string name="tailscale_advertise_exit_node_desc">Autoriser les autres appareils de votre Tailnet à acheminer le trafic Internet via cet appareil. À activer également dans la console d\'administration Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtrer les publicités et les traceurs pour les appareils utilisant ce nœud de sortie. Utilise dans tous les cas le DNS configuré de BlockAds.</string>
 </resources>

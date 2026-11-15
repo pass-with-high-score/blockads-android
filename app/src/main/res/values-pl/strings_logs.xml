@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Najpopularniejsze domeny w %s</string>
     <string name="stats_country_top_domains_empty">Nie zarejestrowano zapytań o domeny dla tego kraju</string>
     <string name="log_unknown_app">Nieznana</string>
+    <string name="log_action_whitelist_app">Dodaj aplikację do białej listy (Omiń VPN)</string>
+    <string name="log_action_unwhitelist_app">Usuń aplikację z białej listy</string>
+    <string name="log_blocked_named">Zablokowano: %s</string>
+    <string name="log_action_undone">Cofnięto akcję</string>
+    <string name="log_retention_title">Automatyczne usuwanie starych logów</string>
+    <string name="log_retention_off">Nigdy (zachowaj wszystko)</string>
+    <string name="log_retention_1d">Po 1 dniu</string>
+    <string name="log_retention_3d">Po 3 dniach</string>
+    <string name="log_retention_7d">Po 7 dniach</string>
 </resources>

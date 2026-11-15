@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Datei über Taildrop empfangen</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Datei öffnen</string>
+    <string name="vpn_phase_closing_tunnel">VPN-Tunnel wird geschlossen…</string>
+    <string name="vpn_phase_stopping_engine">Filter-Engine wird gestoppt…</string>
+    <string name="vpn_phase_clearing_network">Netzwerk wird freigegeben…</string>
+    <string name="tailscale_send_file">Datei senden (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Übertragen Sie eine Datei über Tailscale direkt auf dieses Gerät.</string>
+    <string name="tailscale_send_file_btn">Datei auswählen</string>
+    <string name="tailscale_sending_file">%1$s wird gesendet…</string>
+    <string name="tailscale_send_file_offline">Datei kann offline nicht gesendet werden</string>
+    <string name="tailscale_send_file_success">%1$s an %2$s gesendet</string>
+    <string name="tailscale_send_file_failed">Fehler beim Senden von %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">Keine Exit-Nodes in Ihrem Tailnet angekündigt.</string>
+    <string name="tailscale_open_admin">Webkonsole öffnen</string>
+    <string name="tailscale_settings_title">Tailscale-Einstellungen</string>
+    <string name="tailscale_advertise_exit_node">Als Exit-Node ausführen</string>
+    <string name="tailscale_advertise_exit_node_desc">Anderen Geräten in Ihrem Tailnet erlauben, den Internetverkehr über dieses Gerät weiterzuleiten. Auch in der Tailscale-Admin-Konsole aktivieren.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Werbung und Tracker für Geräte filtern, die diesen Exit-Node verwenden. Verwendet in jedem Fall das in BlockAds konfigurierte DNS.</string>
 </resources>

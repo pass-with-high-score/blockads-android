@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">通过 Taildrop 收到文件</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">打开文件</string>
+    <string name="vpn_phase_closing_tunnel">正在关闭 VPN 隧道…</string>
+    <string name="vpn_phase_stopping_engine">正在停止过滤引擎…</string>
+    <string name="vpn_phase_clearing_network">正在释放网络…</string>
+    <string name="tailscale_send_file">发送文件 (Taildrop)</string>
+    <string name="tailscale_send_file_desc">通过 Tailscale 将文件直接传输到此设备。</string>
+    <string name="tailscale_send_file_btn">选择文件</string>
+    <string name="tailscale_sending_file">正在发送 %1$s…</string>
+    <string name="tailscale_send_file_offline">离线时无法发送文件</string>
+    <string name="tailscale_send_file_success">已将 %1$s 发送至 %2$s</string>
+    <string name="tailscale_send_file_failed">发送 %1$s 失败：%2$s</string>
+    <string name="tailscale_exit_node_empty">您的 Tailnet 中没有广播的出口节点。</string>
+    <string name="tailscale_open_admin">打开 Web 控制台</string>
+    <string name="tailscale_settings_title">Tailscale 设置</string>
+    <string name="tailscale_advertise_exit_node">作为出口节点运行</string>
+    <string name="tailscale_advertise_exit_node_desc">允许您的 Tailnet 上的其他设备通过此设备路由互联网流量。还需在 Tailscale 管理控制台中启用。</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">为使用此出口节点的设备过滤广告和跟踪器。无论如何都使用 BlockAds 配置的 DNS。</string>
 </resources>

@@ -31,4 +31,5 @@
     <string name="home_downloaded">Pobrane</string>
     <string name="home_uploaded">Wysłane</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="action_undo">Cofnij</string>
 </resources>

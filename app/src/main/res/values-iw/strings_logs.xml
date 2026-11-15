@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">הדומיינים המובילים ב-%s</string>
     <string name="stats_country_top_domains_empty">לא נרשמו שאילתות דומיין עבור מדינה זו</string>
     <string name="log_unknown_app">לא ידוע</string>
+    <string name="log_action_whitelist_app">הוספת האפליקציה לרשימה המורשית (עקיפת VPN)</string>
+    <string name="log_action_unwhitelist_app">הסרת האפליקציה מהרשימה המורשית</string>
+    <string name="log_blocked_named">נחסם: %s</string>
+    <string name="log_action_undone">הפעולה בוטלה</string>
+    <string name="log_retention_title">מחיקה אוטומטית של יומנים ישנים</string>
+    <string name="log_retention_off">לעולם לא (שמור הכל)</string>
+    <string name="log_retention_1d">לאחר יום אחד</string>
+    <string name="log_retention_3d">לאחר 3 ימים</string>
+    <string name="log_retention_7d">לאחר 7 ימים</string>
 </resources>

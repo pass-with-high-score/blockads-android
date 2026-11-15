@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Популярные домены в %s</string>
     <string name="stats_country_top_domains_empty">Для этой страны не зарегистрировано запросов к доменам</string>
     <string name="log_unknown_app">Неизвестно</string>
+    <string name="log_action_whitelist_app">Добавить приложение в белый список (В обход VPN)</string>
+    <string name="log_action_unwhitelist_app">Удалить приложение из белого списка</string>
+    <string name="log_blocked_named">Заблокировано: %s</string>
+    <string name="log_action_undone">Действие отменено</string>
+    <string name="log_retention_title">Автоудаление старых журналов</string>
+    <string name="log_retention_off">Никогда (хранить все)</string>
+    <string name="log_retention_1d">Через 1 день</string>
+    <string name="log_retention_3d">Через 3 дня</string>
+    <string name="log_retention_7d">Через 7 дней</string>
 </resources>

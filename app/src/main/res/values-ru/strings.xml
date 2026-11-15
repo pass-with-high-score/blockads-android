@@ -31,4 +31,5 @@
     <string name="home_downloaded">Скачано</string>
     <string name="home_uploaded">Отправлено</string>
     <string name="nav_proxy">Прокси</string>
+    <string name="action_undo">Отменить</string>
 </resources>

@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Taildrop ile dosya alındı</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Dosyayı aç</string>
+    <string name="vpn_phase_closing_tunnel">VPN tüneli kapatılıyor…</string>
+    <string name="vpn_phase_stopping_engine">Filtreleme motoru durduruluyor…</string>
+    <string name="vpn_phase_clearing_network">Ağ serbest bırakılıyor…</string>
+    <string name="tailscale_send_file">Dosya Gönder (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Tailscale üzerinden bu cihaza doğrudan bir dosya aktarın.</string>
+    <string name="tailscale_send_file_btn">Dosya Seç</string>
+    <string name="tailscale_sending_file">%1$s gönderiliyor…</string>
+    <string name="tailscale_send_file_offline">Çevrimdışıyken dosya gönderilemez</string>
+    <string name="tailscale_send_file_success">%1$s, %2$s konumuna gönderildi</string>
+    <string name="tailscale_send_file_failed">%1$s gönderilemedi: %2$s</string>
+    <string name="tailscale_exit_node_empty">Tailnet\'inizde duyurulan çıkış düğümü yok.</string>
+    <string name="tailscale_open_admin">Web Konsolunu Aç</string>
+    <string name="tailscale_settings_title">Tailscale Ayarları</string>
+    <string name="tailscale_advertise_exit_node">Çıkış Düğümü (Exit Node) Olarak Çalıştır</string>
+    <string name="tailscale_advertise_exit_node_desc">Tailnet\'inizdeki diğer cihazların internet trafiğini bu cihaz üzerinden yönlendirmesine izin verin. Ayrıca Tailscale Yönetici Konsolu\'nda da etkinleştirin.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Bu Exit Node\'u kullanan cihazlar için reklamları ve izleyicileri filtreleyin. Her durumda BlockAds\'te yapılandırılmış DNS kullanılır.</string>
 </resources>

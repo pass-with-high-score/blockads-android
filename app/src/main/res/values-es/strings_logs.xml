@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Principales dominios en %s</string>
     <string name="stats_country_top_domains_empty">No se registraron consultas de dominio para este país</string>
     <string name="log_unknown_app">Desconocido</string>
+    <string name="log_action_whitelist_app">Añadir app a lista blanca (Omitir VPN)</string>
+    <string name="log_action_unwhitelist_app">Quitar app de la lista blanca</string>
+    <string name="log_blocked_named">Bloqueado: %s</string>
+    <string name="log_action_undone">Acción deshecha</string>
+    <string name="log_retention_title">Eliminar automáticamente registros antiguos</string>
+    <string name="log_retention_off">Nunca (conservar todo)</string>
+    <string name="log_retention_1d">Después de 1 día</string>
+    <string name="log_retention_3d">Después de 3 días</string>
+    <string name="log_retention_7d">Después de 7 días</string>
 </resources>

@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Получен файл через Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Открыть файл</string>
+    <string name="vpn_phase_closing_tunnel">Закрытие VPN-туннеля…</string>
+    <string name="vpn_phase_stopping_engine">Остановка движка фильтрации…</string>
+    <string name="vpn_phase_clearing_network">Освобождение сети…</string>
+    <string name="tailscale_send_file">Отправить файл (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Передайте файл напрямую на это устройство через Tailscale.</string>
+    <string name="tailscale_send_file_btn">Выбрать файл</string>
+    <string name="tailscale_sending_file">Отправка %1$s…</string>
+    <string name="tailscale_send_file_offline">Нельзя отправить файл, когда устройство не в сети</string>
+    <string name="tailscale_send_file_success">%1$s успешно отправлен на %2$s</string>
+    <string name="tailscale_send_file_failed">Не удалось отправить %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">В вашем Tailnet нет объявленных выходных узлов.</string>
+    <string name="tailscale_open_admin">Открыть веб-консоль</string>
+    <string name="tailscale_settings_title">Настройки Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Работать как выходной узел</string>
+    <string name="tailscale_advertise_exit_node_desc">Разрешить другим устройствам в вашем Tailnet маршрутизировать интернет-трафик через это устройство. Также включите в панели администратора Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Фильтровать рекламу и трекеры для устройств, использующих этот Exit Node. В любом случае используется настроенный в BlockAds DNS.</string>
 </resources>

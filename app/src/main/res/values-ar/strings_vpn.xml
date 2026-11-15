@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">تم استلام ملف عبر Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">فتح الملف</string>
+    <string name="vpn_phase_closing_tunnel">جاري إغلاق نفق VPN…</string>
+    <string name="vpn_phase_stopping_engine">جاري إيقاف محرك التصفية…</string>
+    <string name="vpn_phase_clearing_network">جاري تحرير الشبكة…</string>
+    <string name="tailscale_send_file">إرسال ملف (Taildrop)</string>
+    <string name="tailscale_send_file_desc">نقل ملف مباشرة إلى هذا الجهاز عبر Tailscale.</string>
+    <string name="tailscale_send_file_btn">اختيار ملف</string>
+    <string name="tailscale_sending_file">جاري إرسال %1$s…</string>
+    <string name="tailscale_send_file_offline">لا يمكن إرسال الملف أثناء عدم الاتصال</string>
+    <string name="tailscale_send_file_success">تم إرسال %1$s إلى %2$s</string>
+    <string name="tailscale_send_file_failed">فشل إرسال %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">لا توجد عقد خروج معلن عنها في شبكة Tailnet الخاصة بك.</string>
+    <string name="tailscale_open_admin">فتح وحدة التحكم على الويب</string>
+    <string name="tailscale_settings_title">إعدادات Tailscale</string>
+    <string name="tailscale_advertise_exit_node">التشغيل كعقدة خروج</string>
+    <string name="tailscale_advertise_exit_node_desc">السماح للأجهزة الأخرى في شبكة Tailnet بتوجيه حركة مرور الإنترنت عبر هذا الجهاز. قم بتمكينه أيضًا في لوحة تحكم Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">تصفية الإعلانات وأدوات التتبع للأجهزة التي تستخدم عقدة الخروج هذه. يستخدم DNS المكوّن في BlockAds في كلتا الحالتين.</string>
 </resources>

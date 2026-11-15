@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Файл Taildrop арқылы алынды</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Файлды ашу</string>
+    <string name="vpn_phase_closing_tunnel">VPN туннелі жабылуда…</string>
+    <string name="vpn_phase_stopping_engine">Сүзгілеу жүйесі тоқтатылуда…</string>
+    <string name="vpn_phase_clearing_network">Желі босатылуда…</string>
+    <string name="tailscale_send_file">Файл жіберу (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Tailscale арқылы файлды осы құрылғыға тікелей тасымалдау.</string>
+    <string name="tailscale_send_file_btn">Файлды таңдау</string>
+    <string name="tailscale_sending_file">%1$s жіберілуде…</string>
+    <string name="tailscale_send_file_offline">Желіден тыс кезде файл жіберілмейді</string>
+    <string name="tailscale_send_file_success">%1$s мынаған жіберілді: %2$s</string>
+    <string name="tailscale_send_file_failed">%1$s жіберілмеді: %2$s</string>
+    <string name="tailscale_exit_node_empty">Tailnet желісінде шығу түйіндері жарияланбаған.</string>
+    <string name="tailscale_open_admin">Веб-консольді ашу</string>
+    <string name="tailscale_settings_title">Tailscale баптаулары</string>
+    <string name="tailscale_advertise_exit_node">Шығу түйіні ретінде жұмыс істеу</string>
+    <string name="tailscale_advertise_exit_node_desc">Tailnet желісіндегі басқа құрылғыларға интернет трафигін осы құрылғы арқылы бағыттауға рұқсат беру. Сонымен қатар Tailscale басқару тақтасында қосыңыз.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Осы Exit Node түйінін пайдаланатын құрылғылар үшін жарнамалар мен трекерлерді сүзгіден өткізу. Қалай болғанда да BlockAds бапталған DNS серверін пайдаланады.</string>
 </resources>

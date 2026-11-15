@@ -31,4 +31,5 @@
     <string name="accessibility_navigate_back">Vissza</string>
     <string name="home_disconnecting_desc">VPN-kapcsolat leállítása…</string>
     <string name="home_disconnecting_desc_root">Root proxy leállítása…</string>
+    <string name="action_undo">Visszavonás</string>
 </resources>

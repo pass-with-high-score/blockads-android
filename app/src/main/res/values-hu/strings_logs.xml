@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Leggyakoribb domainek – %s</string>
     <string name="stats_country_top_domains_empty">Ehhez az országhoz nem rögzítettek domain-lekérdezést</string>
     <string name="log_unknown_app">Ismeretlen</string>
+    <string name="log_action_whitelist_app">Alkalmazás engedélyezőlistára helyezése (VPN megkerülése)</string>
+    <string name="log_action_unwhitelist_app">Alkalmazás eltávolítása az engedélyezőlistáról</string>
+    <string name="log_blocked_named">Blokkolva: %s</string>
+    <string name="log_action_undone">Művelet visszavonva</string>
+    <string name="log_retention_title">Régi naplók automatikus törlése</string>
+    <string name="log_retention_off">Soha (összes megtartása)</string>
+    <string name="log_retention_1d">1 nap után</string>
+    <string name="log_retention_3d">3 nap után</string>
+    <string name="log_retention_7d">7 nap után</string>
 </resources>

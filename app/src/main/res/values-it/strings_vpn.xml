@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">File ricevuto tramite Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Apri file</string>
+    <string name="vpn_phase_closing_tunnel">Chiusura del tunnel VPN…</string>
+    <string name="vpn_phase_stopping_engine">Arresto del motore di filtraggio…</string>
+    <string name="vpn_phase_clearing_network">Rilascio della rete…</string>
+    <string name="tailscale_send_file">Invia file (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Trasferisci un file direttamente su questo dispositivo tramite Tailscale.</string>
+    <string name="tailscale_send_file_btn">Scegli file</string>
+    <string name="tailscale_sending_file">Invio di %1$s…</string>
+    <string name="tailscale_send_file_offline">Impossibile inviare il file non in linea</string>
+    <string name="tailscale_send_file_success">Inviato %1$s a %2$s</string>
+    <string name="tailscale_send_file_failed">Invio di %1$s non riuscito: %2$s</string>
+    <string name="tailscale_exit_node_empty">Nessun Exit Node annunciato nella tua Tailnet.</string>
+    <string name="tailscale_open_admin">Apri console Web</string>
+    <string name="tailscale_settings_title">Impostazioni Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Esegui come Exit Node</string>
+    <string name="tailscale_advertise_exit_node_desc">Consenti agli altri dispositivi della tua Tailnet di instradare il traffico Internet attraverso questo dispositivo. Abilita anche nella console di amministrazione Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtra annunci e tracker per i dispositivi che utilizzano questo Exit Node. Utilizza comunque il DNS configurato di BlockAds.</string>
 </resources>

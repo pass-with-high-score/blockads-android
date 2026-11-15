@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">%s бойынша үздік домендер</string>
     <string name="stats_country_top_domains_empty">Бұл ел үшін домендік сұраулар жазылмаған</string>
     <string name="log_unknown_app">Белгісіз</string>
+    <string name="log_action_whitelist_app">Қолданбаны ақ тізімге қосу (VPN айналып өту)</string>
+    <string name="log_action_unwhitelist_app">Қолданбаны ақ тізімнен жою</string>
+    <string name="log_blocked_named">Бұғатталды: %s</string>
+    <string name="log_action_undone">Әрекет қайтарылды</string>
+    <string name="log_retention_title">Ескі журналдарды автоматты түрде жою</string>
+    <string name="log_retention_off">Ешқашан (барлығын сақтау)</string>
+    <string name="log_retention_1d">1 күннен кейін</string>
+    <string name="log_retention_3d">3 күннен кейін</string>
+    <string name="log_retention_7d">7 күннен кейін</string>
 </resources>
