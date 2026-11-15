@@ -276,3 +276,31 @@ jobs:
           name: BlockAds-universal-debug
           path: app/build/outputs/apk/**/debug/*universal*.apk
           retention-days: 7
+
+      - name: Upload TV arm64-v8a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-arm64-v8a-debug
+          path: blockadstv/build/outputs/apk/**/debug/*arm64-v8a*.apk
+          retention-days: 7
+
+      - name: Upload TV armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-armeabi-v7a-debug
+          path: blockadstv/build/outputs/apk/**/debug/*armeabi-v7a*.apk
+          retention-days: 7
+
+      - name: Upload TV x86_64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-x86_64-debug
+          path: blockadstv/build/outputs/apk/**/debug/*x86_64*.apk
+          retention-days: 7
+
+      - name: Upload TV Universal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-universal-debug
+          path: blockadstv/build/outputs/apk/**/debug/*universal*.apk
+          retention-days: 7
