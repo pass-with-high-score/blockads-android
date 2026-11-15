@@ -74,6 +74,18 @@ class VpnStateBridgeTest {
 
         assertEquals(VpnState.STOPPED, store.state.value)
         assertEquals(0L, store.startTimestamp)
+
+        // Saved STOPPING state must also reconcile to STOPPED when no VPN transport is active
+        VpnStateBridge.persistState(
+            context = context,
+            state = VpnState.STOPPING,
+            startTimestamp = 123456L,
+            lastStoppedTimestamp = 0L,
+            privateDnsStrict = false
+        )
+        VpnStateBridge.hydrateState(context, store)
+        assertEquals(VpnState.STOPPED, store.state.value)
+        assertEquals(0L, store.startTimestamp)
     }
 
     @Test

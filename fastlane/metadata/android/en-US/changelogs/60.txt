@@ -1,0 +1,7 @@
+- Per-app SNI proxy routing and domain rules UI
+- Interactive firewall prompt for new app connections
+- Per-app privacy report and DNS log retention settings
+- Filter overlap detection and combined list export
+- Tailscale exit node and DNS adblock support
+- Route upstream DNS through active outbound proxy
+- Undo snackbar for accidental actions and UI polish

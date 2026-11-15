@@ -85,9 +85,9 @@ object VpnStateBridge {
             status.lastStoppedTimestamp = prefs.getLong(KEY_LAST_STOPPED_TIMESTAMP, 0L)
             status.privateDnsStrict.value = prefs.getBoolean(KEY_PRIVATE_DNS_STRICT, false)
 
-            // Reconcile: If hydrated state is RUNNING or STARTING on cold boot, verify against OS active VPN transport.
+            // Reconcile: If hydrated state is non-STOPPED on cold boot, verify against OS active VPN transport.
             // If the OS reports no active VPN transport, fall back to STOPPED and reset startTimestamp.
-            if ((status.state.value == VpnState.RUNNING || status.state.value == VpnState.STARTING) &&
+            if (status.state.value != VpnState.STOPPED &&
                 !VpnUtils.isVpnTransportActive(context)
             ) {
                 Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")

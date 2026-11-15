@@ -174,6 +174,42 @@ class TailscaleServiceClient(
             }
         }
 
+    fun resolveFileName(uri: android.net.Uri): String {
+        context.contentResolver.query(
+            uri,
+            arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0) {
+                    val name = cursor.getString(idx)
+                    if (!name.isNullOrBlank()) return name
+                }
+            }
+        }
+        return uri.lastPathSegment?.substringAfterLast('/')?.ifBlank { null } ?: "file"
+    }
+
+    suspend fun sendFileUri(target: String, fileName: String, uri: android.net.Uri): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            val tempDir = java.io.File(context.cacheDir, "taildrop_out").apply { mkdirs() }
+            val tempFile = java.io.File(tempDir, "send_${System.currentTimeMillis()}_$fileName")
+            try {
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { output -> input.copyTo(output) }
+                } ?: return@withContext Result.failure(IllegalStateException("Cannot open selected file"))
+                sendFile(target, fileName, tempFile.absolutePath)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to stage Taildrop file")
+                Result.failure(e)
+            } finally {
+                tempFile.delete()
+            }
+        }
+
     suspend fun pingPeer(target: String): String = withContext(Dispatchers.IO) {
         try {
             tailscaleService?.pingTailscalePeer(target) ?: ""

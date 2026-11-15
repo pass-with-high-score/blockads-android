@@ -33,8 +33,8 @@ android {
         applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2000
-        versionName = "7.1.2"
+        versionCode = 2001
+        versionName = "7.2.0"
     }
 
     flavorDimensions += "distribution"

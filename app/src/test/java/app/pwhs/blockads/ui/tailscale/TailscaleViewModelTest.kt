@@ -278,4 +278,95 @@ class TailscaleViewModelTest {
         io.mockk.coVerify { client.setAdvertiseExitNode(true) }
         io.mockk.coVerify { client.setAdBlockEnabled(false) }
     }
+
+    @Test
+    fun `disable teardown completes stopTailscale before unbind when ViewModel is cleared while join is pending`() = runTest {
+        coEvery { tailscalePrefs.isEnabledSnapshot() } returns true
+        coEvery { tailscalePrefs.getStateJsonSnapshot() } returns """{"node_key":"k1","machine_key":"k2"}"""
+        AdBlockVpnService.status.state.value = VpnState.RUNNING
+
+        val syncGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val callOrder = mutableListOf<String>()
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        every { client.isConnected } returns true
+        coEvery { client.getStatus() } returns ""
+        coEvery { client.syncSession(any(), any(), any(), any(), any(), any(), any()) } coAnswers {
+            callOrder.add("sync_start")
+            kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                syncGate.await()
+            }
+            callOrder.add("sync_end")
+            "{}"
+        }
+        coEvery { client.stopTailscale() } coAnswers {
+            callOrder.add("stop")
+            true
+        }
+        every { client.unbind() } answers {
+            callOrder.add("unbind")
+        }
+
+        val vm = TailscaleViewModel(app, client)
+        testScheduler.runCurrent()
+
+        vm.processIntent(TailscaleUiIntent.ToggleEnabled(false))
+        testScheduler.runCurrent()
+
+        // Clear the ViewModel while cancelAndJoin() is suspended on the non-cancellable RPC gate
+        vm.onCleared()
+        assertFalse("unbind must be deferred while disable teardown is active", callOrder.contains("unbind"))
+
+        syncGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(callOrder.contains("stop"))
+        assertTrue(callOrder.contains("unbind"))
+        assertTrue("stop must complete before unbind", callOrder.indexOf("stop") < callOrder.indexOf("unbind"))
+    }
+
+    @Test
+    fun `overlapping disable and enable transitions serialize without stopping newer session`() = runTest {
+        coEvery { tailscalePrefs.isEnabledSnapshot() } returns true
+        coEvery { tailscalePrefs.getStateJsonSnapshot() } returns """{"node_key":"k1","machine_key":"k2"}"""
+        AdBlockVpnService.status.state.value = VpnState.RUNNING
+
+        val syncGate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var firstSync = true
+        val callOrder = mutableListOf<String>()
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        every { client.isConnected } returns true
+        coEvery { client.getStatus() } returns ""
+        coEvery { client.syncSession(any(), any(), any(), any(), any(), any(), any()) } coAnswers {
+            if (firstSync) {
+                firstSync = false
+                callOrder.add("sync1_start")
+                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                    syncGate.await()
+                }
+                callOrder.add("sync1_end")
+            } else {
+                callOrder.add("sync_subsequent")
+            }
+            "{}"
+        }
+        coEvery { client.stopTailscale() } coAnswers {
+            callOrder.add("stop")
+            true
+        }
+
+        val vm = TailscaleViewModel(app, client)
+        testScheduler.runCurrent()
+
+        // Disable then immediately re-enable while sync1 is still finishing
+        vm.processIntent(TailscaleUiIntent.ToggleEnabled(false))
+        vm.processIntent(TailscaleUiIntent.ToggleEnabled(true))
+        testScheduler.runCurrent()
+
+        syncGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue("stop must precede the re-enable sync", callOrder.indexOf("stop") < callOrder.lastIndexOf("sync_subsequent"))
+        assertTrue(vm.uiState.value.isEnabled)
+        assertTrue(vm.uiState.value.connectionState != "DISCONNECTED")
+    }
 }

@@ -105,4 +105,25 @@ object TailscaleStatusParser {
             exitNodes = exitList
         )
     }
+
+    fun updatePinnedPeers(peers: List<TailscalePeer>, pinnedIds: Set<Long>): List<TailscalePeer> {
+        return peers.map { p -> p.copy(isPinned = pinnedIds.contains(p.id)) }.sortedWith(
+            compareByDescending<TailscalePeer> { it.isPinned }
+                .thenByDescending { it.isSelf }
+                .thenByDescending { it.online }
+                .thenBy { it.name.lowercase() }
+        )
+    }
+
+    fun parsePingResponse(rawJson: String, isVpnRunning: Boolean): Pair<Long?, String?> {
+        if (rawJson.isEmpty()) {
+            return null to if (isVpnRunning) "Peer unreachable" else "Tunnel not active"
+        }
+        val obj = JSONObject(rawJson)
+        return when {
+            obj.has("latency_ms") -> obj.optLong("latency_ms") to null
+            obj.has("error") -> null to obj.optString("error")
+            else -> null to null
+        }
+    }
 }
