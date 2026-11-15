@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Uygulama bağlandığında sor</string>
+    <string name="firewall_prompt_toggle_desc">Kuralı olmayan uygulamalar için ağ erişimine izin vermeden önce sor</string>
+    <string name="firewall_prompt_channel_name">Güvenlik duvarı istekleri</string>
+    <string name="firewall_prompt_channel_desc">Bir uygulamanın internete erişip erişemeyeceğini sorar</string>
+    <string name="firewall_prompt_notification_title">%1$s internete erişmek istiyor</string>
+    <string name="firewall_prompt_notification_text">Siz karar verene kadar %1$s engellendi</string>
+    <string name="firewall_prompt_action_allow">İzin ver</string>
+    <string name="firewall_prompt_action_block">Engelle</string>
+    <string name="firewall_prompt_dialog_title">%1$s internete erişmek istiyor</string>
+    <string name="firewall_prompt_dialog_message">Siz seçiminizi yapana kadar bu uygulama için ağ erişimi duraklatıldı.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d uygulama daha bekliyor</string>
+    <string name="firewall_prompt_always_allow">Her zaman izin ver</string>
+    <string name="firewall_prompt_allow_once">Bir kez izin ver</string>
+</resources>

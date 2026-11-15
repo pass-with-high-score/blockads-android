@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Bei App-Verbindung fragen</string>
+    <string name="firewall_prompt_toggle_desc">Vor dem Zulassen des Netzwerkzugriffs für Apps ohne Regel fragen</string>
+    <string name="firewall_prompt_channel_name">Firewall-Abfragen</string>
+    <string name="firewall_prompt_channel_desc">Fragt, ob eine App auf das Internet zugreifen darf</string>
+    <string name="firewall_prompt_notification_title">%1$s möchte auf das Internet zugreifen</string>
+    <string name="firewall_prompt_notification_text">%1$s ist blockiert, bis Sie entscheiden</string>
+    <string name="firewall_prompt_action_allow">Zulassen</string>
+    <string name="firewall_prompt_action_block">Blockieren</string>
+    <string name="firewall_prompt_dialog_title">%1$s möchte auf das Internet zugreifen</string>
+    <string name="firewall_prompt_dialog_message">Der Netzwerkzugriff ist für diese App pausiert, bis Sie wählen.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d weitere App(s) warten</string>
+    <string name="firewall_prompt_always_allow">Immer zulassen</string>
+    <string name="firewall_prompt_allow_once">Einmal zulassen</string>
+</resources>

@@ -59,18 +59,18 @@ class TrustedNetworksStateTest {
 
     @Test
     fun `refresh reads the connected SSID`() {
-        every { TrustedNetworkManager.currentSsid(any()) } returns "Cafe"
+        every { TrustedNetworkManager.currentWifiInfo(any()) } returns ("Cafe" to null)
         vm.refreshCurrentSsid()
         assertEquals("Cafe", vm.currentSsid.value)
 
-        every { TrustedNetworkManager.currentSsid(any()) } returns null
+        every { TrustedNetworkManager.currentWifiInfo(any()) } returns null
         vm.refreshCurrentSsid()
         assertNull(vm.currentSsid.value)
     }
 
     @Test
     fun `adding without a Wi-Fi SSID does nothing`() {
-        every { TrustedNetworkManager.currentSsid(any()) } returns null
+        every { TrustedNetworkManager.currentWifiInfo(any()) } returns null
         vm.addCurrentNetwork()
         coVerify(exactly = 0) { appPrefs.toggleTrustedSsid(any()) }
         coVerify(exactly = 0) { appPrefs.setTrustedSsids(any()) }

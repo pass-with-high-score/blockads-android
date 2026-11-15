@@ -35,7 +35,8 @@ class DnsLeakTestViewModelTest {
         viewModel = DnsLeakTestViewModel(
             dnsLeakRepository = repository,
             ioDispatcher = testDispatcher,
-            latencyProvider = { 20L }
+            latencyProvider = { 20L },
+            dnssecProvider = { DnssecSecurityStatus(isValidating = true, algorithms = emptyList()) }
         )
     }
 

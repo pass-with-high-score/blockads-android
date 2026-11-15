@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Zeptat se při připojení aplikace</string>
+    <string name="firewall_prompt_toggle_desc">Zeptat se před povolením přístupu k síti pro aplikace bez pravidla</string>
+    <string name="firewall_prompt_channel_name">Výzvy brány firewall</string>
+    <string name="firewall_prompt_channel_desc">Ptá se, zda může aplikace přistupovat k internetu</string>
+    <string name="firewall_prompt_notification_title">%1$s chce přistupovat k internetu</string>
+    <string name="firewall_prompt_notification_text">Aplikace %1$s je blokována, dokud se nerozhodnete</string>
+    <string name="firewall_prompt_action_allow">Povolit</string>
+    <string name="firewall_prompt_action_block">Blokovat</string>
+    <string name="firewall_prompt_dialog_title">%1$s chce přistupovat k internetu</string>
+    <string name="firewall_prompt_dialog_message">Přístup k síti je pro tuto aplikaci pozastaven, dokud nevyberete.</string>
+    <string name="firewall_prompt_dialog_pending">Další čekající aplikace: %1$d</string>
+    <string name="firewall_prompt_always_allow">Vždy povolit</string>
+    <string name="firewall_prompt_allow_once">Povolit jednou</string>
+</resources>

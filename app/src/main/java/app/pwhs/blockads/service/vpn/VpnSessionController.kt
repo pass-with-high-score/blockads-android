@@ -55,26 +55,28 @@ class VpnSessionController(
     }
 
     private fun notifyStateChanged() {
-        val currentState = status.state.value
-        val currentPhase = status.phase.value
-        val startTime = status.startTimestamp
-        val stopTime = status.lastStoppedTimestamp
-        val strictDns = status.privateDnsStrict.value
+        synchronized(AdBlockVpnService.stateNotifyLock) {
+            val currentState = status.state.value
+            val currentPhase = status.phase.value
+            val startTime = status.startTimestamp
+            val stopTime = status.lastStoppedTimestamp
+            val strictDns = status.privateDnsStrict.value
 
-        context?.let { ctx ->
-            VpnStateBridge.persistState(ctx, currentState, startTime, stopTime, strictDns, currentPhase)
-            try {
-                val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
-                    setPackage(ctx.packageName)
-                    putExtra(AdBlockVpnService.EXTRA_VPN_STATE, currentState.name)
-                    putExtra(AdBlockVpnService.EXTRA_VPN_PHASE, currentPhase)
-                    putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, startTime)
-                    putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, stopTime)
-                    putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, strictDns)
+            context?.let { ctx ->
+                VpnStateBridge.persistState(ctx, currentState, startTime, stopTime, strictDns, currentPhase)
+                try {
+                    val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
+                        setPackage(ctx.packageName)
+                        putExtra(AdBlockVpnService.EXTRA_VPN_STATE, currentState.name)
+                        putExtra(AdBlockVpnService.EXTRA_VPN_PHASE, currentPhase)
+                        putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, startTime)
+                        putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, stopTime)
+                        putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, strictDns)
+                    }
+                    ctx.sendBroadcast(intent)
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to broadcast VPN state change")
                 }
-                ctx.sendBroadcast(intent)
-            } catch (e: Exception) {
-                Timber.w(e, "Failed to broadcast VPN state change")
             }
         }
     }
@@ -377,7 +379,8 @@ class VpnSessionController(
     fun onDestroy() {
         if (status.state.value != VpnState.STOPPING) {
             status.state.value = VpnState.STOPPED
-            setPhase("")
+            connectingPhase = ""
+            status.phase.value = ""
             status.lastStoppedTimestamp = clock()
         }
         status.privateDnsStrict.value = false

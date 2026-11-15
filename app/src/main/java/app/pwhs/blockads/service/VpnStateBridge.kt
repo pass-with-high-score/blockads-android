@@ -113,7 +113,9 @@ object VpnStateBridge {
         synchronized(this) {
             if (isLivenessBound) return
             val conn = object : ServiceConnection {
-                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    // Liveness monitor only tracks remote process disconnection
+                }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
                     handleRemoteProcessDied(appContext, status)

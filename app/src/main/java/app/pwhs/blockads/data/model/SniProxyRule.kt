@@ -77,6 +77,7 @@ object SniProxyRuleCodec {
      * routing avoids JNI calls on the hot path.
      */
     fun toEngineJson(rules: List<SniProxyRule>, packageManager: PackageManager): String {
+        if (rules.isEmpty()) return "[]"
         val arr = JSONArray()
         rules.forEach { rule ->
             if (!rule.enabled || rule.targetIp.isBlank()) return@forEach

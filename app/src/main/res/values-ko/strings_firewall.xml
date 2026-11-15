@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">앱 연결 시 묻기</string>
+    <string name="firewall_prompt_toggle_desc">규칙이 없는 앱의 네트워크 액세스를 허용하기 전에 묻습니다</string>
+    <string name="firewall_prompt_channel_name">방화벽 요청</string>
+    <string name="firewall_prompt_channel_desc">앱이 인터넷에 액세스할 수 있는지 묻습니다</string>
+    <string name="firewall_prompt_notification_title">%1$s에서 인터넷에 액세스하려고 합니다</string>
+    <string name="firewall_prompt_notification_text">결정할 때까지 %1$s이(가) 차단됩니다</string>
+    <string name="firewall_prompt_action_allow">허용</string>
+    <string name="firewall_prompt_action_block">차단</string>
+    <string name="firewall_prompt_dialog_title">%1$s에서 인터넷에 액세스하려고 합니다</string>
+    <string name="firewall_prompt_dialog_message">선택할 때까지 이 앱의 네트워크 액세스가 일시 중지됩니다.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d개의 앱이 더 대기 중</string>
+    <string name="firewall_prompt_always_allow">항상 허용</string>
+    <string name="firewall_prompt_allow_once">한 번만 허용</string>
+</resources>

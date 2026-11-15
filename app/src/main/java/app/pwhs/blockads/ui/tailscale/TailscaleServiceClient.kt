@@ -8,6 +8,9 @@ import android.os.IBinder
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.tailscale.ITailscaleService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -20,6 +23,7 @@ class TailscaleServiceClient(
         private set
 
     private var tailscaleService: ITailscaleService? = null
+    private val rpcMutex = Mutex()
 
     val isConnected: Boolean
         get() = tailscaleService != null
@@ -38,7 +42,11 @@ class TailscaleServiceClient(
         }
 
         override fun onBindingDied(name: ComponentName?) {
+            val shouldRebind = isBound
             unbind()
+            if (shouldRebind) {
+                bind()
+            }
         }
     }
 
@@ -99,45 +107,53 @@ class TailscaleServiceClient(
     suspend fun stopTailscale(): Boolean {
         val service = tailscaleService
         return withContext(Dispatchers.IO) {
-            try {
-                service?.stopTailscale()
-                true
-            } catch (e: Exception) {
-                Timber.w(e, "Failed to stop Tailscale session via service")
-                false
+            rpcMutex.withLock {
+                try {
+                    (tailscaleService ?: service)?.stopTailscale()
+                    true
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to stop Tailscale session via service")
+                    false
+                }
             }
         }
     }
 
     suspend fun setExitNode(nodeId: Long): Boolean = withContext(Dispatchers.IO) {
-        try {
-            tailscaleService?.setTailscaleExitNode(nodeId)
-            true
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to set Tailscale exit node via service")
-            false
+        rpcMutex.withLock {
+            try {
+                tailscaleService?.setTailscaleExitNode(nodeId)
+                true
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to set Tailscale exit node via service")
+                false
+            }
         }
     }
 
     suspend fun setAdvertiseExitNode(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val service = tailscaleService ?: return@withContext false
-            service.setTailscaleAdvertiseExitNode(enabled)
-            true
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to set Tailscale advertise exit node via service")
-            false
+        rpcMutex.withLock {
+            try {
+                val service = tailscaleService ?: return@withLock false
+                service.setTailscaleAdvertiseExitNode(enabled)
+                true
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to set Tailscale advertise exit node via service")
+                false
+            }
         }
     }
 
     suspend fun setAdBlockEnabled(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val service = tailscaleService ?: return@withContext false
-            service.setTailscaleAdBlockEnabled(enabled)
-            true
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to set Tailscale adblock via service")
-            false
+        rpcMutex.withLock {
+            try {
+                val service = tailscaleService ?: return@withLock false
+                service.setTailscaleAdBlockEnabled(enabled)
+                true
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to set Tailscale adblock via service")
+                false
+            }
         }
     }
 
@@ -176,19 +192,26 @@ class TailscaleServiceClient(
         adblockEnabled: Boolean = true,
         hostname: String = "blockads-android"
     ): String? = withContext(Dispatchers.IO) {
-        val service = tailscaleService ?: return@withContext null
-        try {
-            val updatedState = service.configureTailscale(stateJson, controlUrl, authKey)
-            if (exitNodeId != 0L) {
-                service.setTailscaleExitNode(exitNodeId)
+        rpcMutex.withLock {
+            val service = tailscaleService ?: return@withLock null
+            try {
+                coroutineContext.ensureActive()
+                val updatedState = service.configureTailscale(stateJson, controlUrl, authKey)
+                coroutineContext.ensureActive()
+                if (exitNodeId != 0L) {
+                    service.setTailscaleExitNode(exitNodeId)
+                }
+                service.setTailscaleAdvertiseExitNode(advertiseExitNode)
+                service.setTailscaleAdBlockEnabled(adblockEnabled)
+                coroutineContext.ensureActive()
+                service.startTailscaleSession(hostname)
+                updatedState
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to sync active Tailscale session via service")
+                null
             }
-            service.setTailscaleAdvertiseExitNode(advertiseExitNode)
-            service.setTailscaleAdBlockEnabled(adblockEnabled)
-            service.startTailscaleSession(hostname)
-            updatedState
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to sync active Tailscale session via service")
-            null
         }
     }
 }

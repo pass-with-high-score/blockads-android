@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Chiedi quando un\'app si connette</string>
+    <string name="firewall_prompt_toggle_desc">Chiedi prima di consentire l\'accesso alla rete per le app senza regola</string>
+    <string name="firewall_prompt_channel_name">Richieste firewall</string>
+    <string name="firewall_prompt_channel_desc">Chiede se un\'app può accedere a Internet</string>
+    <string name="firewall_prompt_notification_title">%1$s vuole accedere a Internet</string>
+    <string name="firewall_prompt_notification_text">%1$s è bloccata finché non decidi</string>
+    <string name="firewall_prompt_action_allow">Consenti</string>
+    <string name="firewall_prompt_action_block">Blocca</string>
+    <string name="firewall_prompt_dialog_title">%1$s vuole accedere a Internet</string>
+    <string name="firewall_prompt_dialog_message">L\'accesso alla rete è in pausa per questa app finché non scegli.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d altra/e app in attesa</string>
+    <string name="firewall_prompt_always_allow">Consenti sempre</string>
+    <string name="firewall_prompt_allow_once">Consenti una volta</string>
+</resources>

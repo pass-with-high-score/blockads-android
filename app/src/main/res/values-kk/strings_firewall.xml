@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Қолданба қосылғанда сұрау</string>
+    <string name="firewall_prompt_toggle_desc">Ережесі жоқ қолданбаларға желіге кіруге рұқсат бермес бұрын сұрау</string>
+    <string name="firewall_prompt_channel_name">Брандмауэр сұраулары</string>
+    <string name="firewall_prompt_channel_desc">Қолданбаның интернетке кіруіне рұқсат бар-жоғын сұрайды</string>
+    <string name="firewall_prompt_notification_title">%1$s интернетке кіргісі келеді</string>
+    <string name="firewall_prompt_notification_text">Шешім қабылдағанша %1$s бұғатталған</string>
+    <string name="firewall_prompt_action_allow">Рұқсат ету</string>
+    <string name="firewall_prompt_action_block">Бұғаттау</string>
+    <string name="firewall_prompt_dialog_title">%1$s интернетке кіргісі келеді</string>
+    <string name="firewall_prompt_dialog_message">Таңдағанша бұл қолданба үшін желіге кіру уақытша тоқтатылды.</string>
+    <string name="firewall_prompt_dialog_pending">Тағы %1$d қолданба күтуде</string>
+    <string name="firewall_prompt_always_allow">Әрқашан рұқсат ету</string>
+    <string name="firewall_prompt_allow_once">Бір рет рұқсат ету</string>
+</resources>

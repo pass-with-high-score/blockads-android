@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Tanya saat aplikasi terhubung</string>
+    <string name="firewall_prompt_toggle_desc">Tanya sebelum mengizinkan akses jaringan untuk aplikasi tanpa aturan</string>
+    <string name="firewall_prompt_channel_name">Permintaan firewall</string>
+    <string name="firewall_prompt_channel_desc">Menanyakan apakah aplikasi boleh mengakses internet</string>
+    <string name="firewall_prompt_notification_title">%1$s ingin mengakses internet</string>
+    <string name="firewall_prompt_notification_text">%1$s diblokir hingga Anda memutuskan</string>
+    <string name="firewall_prompt_action_allow">Izinkan</string>
+    <string name="firewall_prompt_action_block">Blokir</string>
+    <string name="firewall_prompt_dialog_title">%1$s ingin mengakses internet</string>
+    <string name="firewall_prompt_dialog_message">Akses jaringan dijeda untuk aplikasi ini hingga Anda memilih.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d aplikasi lain menunggu</string>
+    <string name="firewall_prompt_always_allow">Selalu izinkan</string>
+    <string name="firewall_prompt_allow_once">Izinkan sekali</string>
+</resources>

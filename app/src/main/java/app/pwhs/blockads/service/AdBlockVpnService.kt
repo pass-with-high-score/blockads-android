@@ -88,25 +88,29 @@ class AdBlockVpnService : VpnService() {
         @Volatile
         var tunnelSocketProtector: tunnel.SocketProtector? = null
 
+        internal val stateNotifyLock = Any()
+
         fun updatePrivateDnsState(linkProperties: android.net.LinkProperties?, context: Context? = null) {
             val strict = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
                 linkProperties?.privateDnsServerName != null
-            if (status.privateDnsStrict.value != strict) {
-                status.privateDnsStrict.value = strict
-                if (context != null) {
-                    VpnStateBridge.persistState(context, status.state.value, status.startTimestamp, status.lastStoppedTimestamp, strict, status.phase.value)
-                    try {
-                        val intent = Intent(ACTION_VPN_STATE_CHANGED).apply {
-                            setPackage(context.packageName)
-                            putExtra(EXTRA_VPN_STATE, status.state.value.name)
-                            putExtra(EXTRA_VPN_PHASE, status.phase.value)
-                            putExtra(EXTRA_START_TIMESTAMP, status.startTimestamp)
-                            putExtra(EXTRA_LAST_STOPPED_TIMESTAMP, status.lastStoppedTimestamp)
-                            putExtra(EXTRA_PRIVATE_DNS_STRICT, strict)
+            synchronized(stateNotifyLock) {
+                if (status.privateDnsStrict.value != strict) {
+                    status.privateDnsStrict.value = strict
+                    if (context != null) {
+                        VpnStateBridge.persistState(context, status.state.value, status.startTimestamp, status.lastStoppedTimestamp, strict, status.phase.value)
+                        try {
+                            val intent = Intent(ACTION_VPN_STATE_CHANGED).apply {
+                                setPackage(context.packageName)
+                                putExtra(EXTRA_VPN_STATE, status.state.value.name)
+                                putExtra(EXTRA_VPN_PHASE, status.phase.value)
+                                putExtra(EXTRA_START_TIMESTAMP, status.startTimestamp)
+                                putExtra(EXTRA_LAST_STOPPED_TIMESTAMP, status.lastStoppedTimestamp)
+                                putExtra(EXTRA_PRIVATE_DNS_STRICT, strict)
+                            }
+                            context.sendBroadcast(intent)
+                        } catch (e: Exception) {
+                            Timber.w(e, "Failed to broadcast private DNS state change")
                         }
-                        context.sendBroadcast(intent)
-                    } catch (e: Exception) {
-                        Timber.w(e, "Failed to broadcast private DNS state change")
                     }
                 }
             }

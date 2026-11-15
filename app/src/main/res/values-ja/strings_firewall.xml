@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">アプリの接続時に確認する</string>
+    <string name="firewall_prompt_toggle_desc">ルールのないアプリのネットワークアクセスを許可する前に確認します</string>
+    <string name="firewall_prompt_channel_name">ファイアウォールの確認</string>
+    <string name="firewall_prompt_channel_desc">アプリがインターネットにアクセスしてよいか確認します</string>
+    <string name="firewall_prompt_notification_title">%1$s がインターネットへのアクセスを求めています</string>
+    <string name="firewall_prompt_notification_text">選択するまで %1$s はブロックされます</string>
+    <string name="firewall_prompt_action_allow">許可</string>
+    <string name="firewall_prompt_action_block">ブロック</string>
+    <string name="firewall_prompt_dialog_title">%1$s がインターネットへのアクセスを求めています</string>
+    <string name="firewall_prompt_dialog_message">選択するまで、このアプリのネットワークアクセスは一時停止されます。</string>
+    <string name="firewall_prompt_dialog_pending">ほか %1$d 個のアプリが待機中</string>
+    <string name="firewall_prompt_always_allow">常に許可</string>
+    <string name="firewall_prompt_allow_once">1回のみ許可</string>
+</resources>

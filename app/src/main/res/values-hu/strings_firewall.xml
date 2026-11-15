@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Kérdezzen, ha az alkalmazás csatlakozik</string>
+    <string name="firewall_prompt_toggle_desc">Kérdezzen a hálózati hozzáférés engedélyezése előtt szabály nélküli alkalmazásoknál</string>
+    <string name="firewall_prompt_channel_name">Tűzfal kérések</string>
+    <string name="firewall_prompt_channel_desc">Megkérdezi, hogy egy alkalmazás hozzáférhet-e az internethez</string>
+    <string name="firewall_prompt_notification_title">A(z) %1$s internet-hozzáférést kér</string>
+    <string name="firewall_prompt_notification_text">A(z) %1$s blokkolva van, amíg nem dönt</string>
+    <string name="firewall_prompt_action_allow">Engedélyezés</string>
+    <string name="firewall_prompt_action_block">Tiltás</string>
+    <string name="firewall_prompt_dialog_title">A(z) %1$s internet-hozzáférést kér</string>
+    <string name="firewall_prompt_dialog_message">Az alkalmazás hálózati hozzáférése szünetel, amíg nem választ.</string>
+    <string name="firewall_prompt_dialog_pending">Még %1$d alkalmazás várakozik</string>
+    <string name="firewall_prompt_always_allow">Mindig engedélyez</string>
+    <string name="firewall_prompt_allow_once">Engedélyezés egyszer</string>
+</resources>

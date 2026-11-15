@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">应用连接时询问</string>
+    <string name="firewall_prompt_toggle_desc">在允许没有规则的应用访问网络前先询问</string>
+    <string name="firewall_prompt_channel_name">防火墙提示</string>
+    <string name="firewall_prompt_channel_desc">询问是否允许应用访问互联网</string>
+    <string name="firewall_prompt_notification_title">%1$s 请求访问互联网</string>
+    <string name="firewall_prompt_notification_text">在您决定之前，%1$s 已被拦截</string>
+    <string name="firewall_prompt_action_allow">允许</string>
+    <string name="firewall_prompt_action_block">拦截</string>
+    <string name="firewall_prompt_dialog_title">%1$s 请求访问互联网</string>
+    <string name="firewall_prompt_dialog_message">在您选择之前，该应用的网络访问已暂停。</string>
+    <string name="firewall_prompt_dialog_pending">还有 %1$d 个应用在等待</string>
+    <string name="firewall_prompt_always_allow">始终允许</string>
+    <string name="firewall_prompt_allow_once">仅允许这一次</string>
+</resources>

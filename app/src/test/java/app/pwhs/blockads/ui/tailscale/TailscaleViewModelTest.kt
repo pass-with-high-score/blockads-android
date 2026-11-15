@@ -214,28 +214,35 @@ class TailscaleViewModelTest {
         assertTrue("isBound must remain true on service disconnection", client.isBound)
         assertFalse("isConnected must be false after service disconnection", client.isConnected)
 
+        conn.onBindingDied(null)
+        assertTrue("isBound must remain true after onBindingDied rebind", client.isBound)
+
         client.unbind()
         assertFalse("isBound is cleared only on explicit unbind", client.isBound)
     }
 
     @Test
-    fun `logout cancels ongoing sync and keeps state disabled`() = runTest {
+    fun `logout drains ongoing sync before calling stopTailscale and keeps state disabled`() = runTest {
         coEvery { tailscalePrefs.isEnabledSnapshot() } returns true
         coEvery { tailscalePrefs.getStateJsonSnapshot() } returns """{"node_key":"k1","machine_key":"k2"}"""
         AdBlockVpnService.status.state.value = VpnState.RUNNING
 
-        var syncWasCancelled = false
+        val callOrder = mutableListOf<String>()
         val client = mockk<TailscaleServiceClient>(relaxed = true)
         every { client.isConnected } returns true
         coEvery { client.getStatus() } returns ""
         coEvery { client.syncSession(any(), any(), any(), any(), any(), any(), any()) } coAnswers {
             try {
+                callOrder.add("sync_start")
                 kotlinx.coroutines.delay(60_000L)
                 """{"node_key":"stale","machine_key":"stale"}"""
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                syncWasCancelled = true
-                throw e
+            } finally {
+                callOrder.add("sync_end")
             }
+        }
+        coEvery { client.stopTailscale() } coAnswers {
+            callOrder.add("stop")
+            true
         }
 
         val vm = TailscaleViewModel(app, client)
@@ -244,7 +251,9 @@ class TailscaleViewModelTest {
         vm.processIntent(TailscaleUiIntent.Logout)
         advanceUntilIdle()
 
-        assertTrue("Active sync coroutine must be cancelled on logout", syncWasCancelled)
+        assertTrue("Sync must have started and ended", callOrder.contains("sync_end"))
+        assertEquals("stop must be the final RPC after all syncs drain", "stop", callOrder.last())
+        assertTrue(callOrder.lastIndexOf("sync_end") < callOrder.indexOf("stop"))
         assertFalse(vm.uiState.value.isEnabled)
         assertFalse(vm.uiState.value.isLoggedIn)
         assertEquals("DISCONNECTED", vm.uiState.value.connectionState)

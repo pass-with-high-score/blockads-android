@@ -12,6 +12,7 @@ import app.pwhs.blockads.service.tailscale.TailscalePeerNotifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -204,9 +205,10 @@ class TailscaleViewModel(
                     startStatusPolling()
                 }
             } else {
-                syncJob?.cancel()
+                val jobToCancel = syncJob
                 syncJob = null
                 pollJob?.cancel()
+                jobToCancel?.cancelAndJoin()
                 serviceClient.stopTailscale()
                 _uiState.update { it.copy(connectionState = "DISCONNECTED") }
             }
@@ -329,28 +331,28 @@ class TailscaleViewModel(
     }
 
     private fun logout() {
+        val jobToCancel = syncJob
+        syncJob = null
+        pollJob?.cancel()
+        _uiState.update { state ->
+            TailscaleUiState(
+                isEnabled = false, isLoggedIn = false,
+                isVpnRunning = AdBlockVpnService.isRunning,
+                connectionState = "DISCONNECTED", controlUrl = state.controlUrl,
+                taildropDirUri = state.taildropDirUri, taildropDirName = state.taildropDirName
+            )
+        }
         viewModelScope.launch {
-            syncJob?.cancel()
-            syncJob = null
-            pollJob?.cancel()
             authEngine?.stopTailscale()
             authEngine = null
             withContext(NonCancellable) {
+                jobToCancel?.cancelAndJoin()
                 serviceClient.stopTailscale()
                 appPrefs.tailscale.setEnabled(false)
                 appPrefs.tailscale.setStateJson("")
                 appPrefs.tailscale.setAuthKey("")
                 appPrefs.tailscale.setExitNodeId(0L)
                 appPrefs.tailscale.setAdvertiseExitNode(false)
-            }
-
-            _uiState.update { state ->
-                TailscaleUiState(
-                    isEnabled = false, isLoggedIn = false,
-                    isVpnRunning = AdBlockVpnService.isRunning,
-                    connectionState = "DISCONNECTED", controlUrl = state.controlUrl,
-                    taildropDirUri = state.taildropDirUri, taildropDirName = state.taildropDirName
-                )
             }
         }
     }
@@ -605,6 +607,17 @@ class TailscaleViewModel(
             )
             if (!updatedState.isNullOrEmpty() && updatedState != "{}") {
                 appPrefs.tailscale.setStateJson(updatedState)
+            }
+            // Re-apply any settings updated in UI state while syncSession was in flight
+            val latestState = _uiState.value
+            if (latestState.activeExitNodeId != exitNodeId) {
+                serviceClient.setExitNode(latestState.activeExitNodeId)
+            }
+            if (latestState.advertiseExitNode != advertiseExit) {
+                serviceClient.setAdvertiseExitNode(latestState.advertiseExitNode)
+            }
+            if (latestState.adblockEnabled != adblockEnabled) {
+                serviceClient.setAdBlockEnabled(latestState.adblockEnabled)
             }
         } else if (!AdBlockVpnService.isRunning) {
             ServiceController.requestStart(getApplication<Application>().applicationContext)

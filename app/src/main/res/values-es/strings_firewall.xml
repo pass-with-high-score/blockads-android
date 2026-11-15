@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Preguntar cuando la app se conecte</string>
+    <string name="firewall_prompt_toggle_desc">Preguntar antes de permitir el acceso a la red para apps sin regla</string>
+    <string name="firewall_prompt_channel_name">Avisos del cortafuegos</string>
+    <string name="firewall_prompt_channel_desc">Pregunta si una app puede acceder a internet</string>
+    <string name="firewall_prompt_notification_title">%1$s quiere acceder a internet</string>
+    <string name="firewall_prompt_notification_text">%1$s está bloqueada hasta que decidas</string>
+    <string name="firewall_prompt_action_allow">Permitir</string>
+    <string name="firewall_prompt_action_block">Bloquear</string>
+    <string name="firewall_prompt_dialog_title">%1$s quiere acceder a internet</string>
+    <string name="firewall_prompt_dialog_message">El acceso a la red está pausado para esta app hasta que elijas.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d app(s) más en espera</string>
+    <string name="firewall_prompt_always_allow">Permitir siempre</string>
+    <string name="firewall_prompt_allow_once">Permitir una vez</string>
+</resources>
