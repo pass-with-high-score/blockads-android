@@ -10,6 +10,7 @@ import app.pwhs.blockads.service.VpnState
 import app.pwhs.blockads.service.tailscale.TailscalePeerNotifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -300,11 +301,13 @@ class TailscaleViewModel(
             pollJob?.cancel()
             authEngine?.stopTailscale()
             authEngine = null
-            serviceClient.stopTailscale()
-            appPrefs.tailscale.setEnabled(false)
-            appPrefs.tailscale.setStateJson("")
-            appPrefs.tailscale.setAuthKey("")
-            appPrefs.tailscale.setExitNodeId(0L)
+            withContext(NonCancellable) {
+                serviceClient.stopTailscale()
+                appPrefs.tailscale.setEnabled(false)
+                appPrefs.tailscale.setStateJson("")
+                appPrefs.tailscale.setAuthKey("")
+                appPrefs.tailscale.setExitNodeId(0L)
+            }
 
             _uiState.update { state ->
                 TailscaleUiState(
