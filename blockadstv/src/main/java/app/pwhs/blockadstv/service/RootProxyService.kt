@@ -167,6 +167,15 @@ class RootProxyService : Service() {
 
                 goTunnelAdapter.configureDns(protocol, primary, fallback, dohUrl, odohRelayUrl)
                 goTunnelAdapter.setBlockResponseType(responseType)
+                val initialSniRules = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(
+                    tvPrefs.getSniProxyRulesJsonSnapshot()
+                )
+                goTunnelAdapter.setSniProxyRules(
+                    app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
+                        initialSniRules,
+                        packageManager
+                    )
+                )
 
                 // 3. Resolve whitelisted apps to UIDs
                 whitelistedUids = tvPrefs.getWhitelistedAppsSnapshot().mapNotNull { pkg ->
@@ -211,6 +220,17 @@ class RootProxyService : Service() {
                 launch {
                     filterRepo.domainCountFlow.drop(1).collectLatest {
                         goTunnelAdapter.updateTries()
+                    }
+                }
+                launch {
+                    tvPrefs.sniProxyRulesJson.drop(1).collectLatest { raw ->
+                        val parsed = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(raw)
+                        goTunnelAdapter.setSniProxyRules(
+                            app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
+                                parsed,
+                                packageManager
+                            )
+                        )
                     }
                 }
 

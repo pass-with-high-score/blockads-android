@@ -202,6 +202,15 @@ class TvVpnService : VpnService() {
                     odohRelayUrl = odohRelayUrl,
                 )
                 goTunnelAdapter.setBlockResponseType(dnsResponseType)
+                val initialSniRules = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(
+                    tvPrefs.getSniProxyRulesJsonSnapshot()
+                )
+                goTunnelAdapter.setSniProxyRules(
+                    app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
+                        initialSniRules,
+                        packageManager
+                    )
+                )
                 Timber.d("Go engine configured, starting tunnel...")
 
                 // Dynamically update Go Engine tries whenever filters change
@@ -241,6 +250,19 @@ class TvVpnService : VpnService() {
                     tvPrefs.dnsResponseType.drop(1).collectLatest { responseType ->
                         Timber.d("DNS response type changed to $responseType")
                         goTunnelAdapter.setBlockResponseType(responseType)
+                    }
+                }
+
+                // Dynamically update SNI proxy rules
+                launch {
+                    tvPrefs.sniProxyRulesJson.drop(1).collectLatest { raw ->
+                        val parsed = app.pwhs.blockadstv.data.model.SniProxyRuleCodec.fromJsonList(raw)
+                        goTunnelAdapter.setSniProxyRules(
+                            app.pwhs.blockadstv.data.model.SniProxyRuleCodec.toEngineJson(
+                                parsed,
+                                packageManager
+                            )
+                        )
                     }
                 }
 

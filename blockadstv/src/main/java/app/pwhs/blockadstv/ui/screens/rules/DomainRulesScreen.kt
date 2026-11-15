@@ -47,6 +47,7 @@ import androidx.tv.material3.Text
 import app.pwhs.blockadstv.R
 import app.pwhs.blockadstv.data.dao.CustomDnsRuleDao
 import app.pwhs.blockadstv.data.dao.WhitelistDomainDao
+import app.pwhs.blockadstv.data.datastore.TvPreferences
 import app.pwhs.blockadstv.data.entities.CustomDnsRule
 import app.pwhs.blockadstv.data.entities.RuleType
 import app.pwhs.blockadstv.data.entities.WhitelistDomain
@@ -64,11 +65,13 @@ fun DomainRulesScreen(
     modifier: Modifier = Modifier,
     whitelistDao: WhitelistDomainDao = koinInject(),
     customRuleDao: CustomDnsRuleDao = koinInject(),
+    tvPrefs: TvPreferences = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val whitelistDomains by whitelistDao.getAll().collectAsStateWithLifecycle(initialValue = emptyList())
     val customRules by customRuleDao.getAllFlow().collectAsStateWithLifecycle(initialValue = emptyList())
     var domainInput by remember { mutableStateOf("") }
+    var selectedTab by remember { mutableStateOf(0) } // 0 = Domain Rules, 1 = SNI Proxy IP
 
     Column(
         modifier = modifier
@@ -89,12 +92,36 @@ fun DomainRulesScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Whitelist or blacklist specific domains",
+            text = if (selectedTab == 0) {
+                "Whitelist or blacklist specific domains"
+            } else {
+                "Route TLS/HTTPS traffic to a custom SNI Proxy IP"
+            },
             style = MaterialTheme.typography.bodyLarge,
             color = TextSecondary,
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            RulesTabChip(
+                label = "Domain Rules",
+                selected = selectedTab == 0,
+                onClick = { selectedTab = 0 },
+            )
+            RulesTabChip(
+                label = "SNI Proxy IP",
+                selected = selectedTab == 1,
+                onClick = { selectedTab = 1 },
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (selectedTab == 1) {
+            SniProxyRulesSection(tvPrefs = tvPrefs)
+            return@Column
+        }
 
         // Input row
         Row(
@@ -312,4 +339,49 @@ private fun ActionButton(
             color = if (isFocused) color else TextSecondary,
         )
     }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun RulesTabChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val activeColor = MaterialTheme.colorScheme.primary
+
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelLarge,
+        color = when {
+            isFocused || selected -> activeColor
+            else -> TextSecondary
+        },
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                when {
+                    isFocused -> activeColor.copy(alpha = 0.25f)
+                    selected -> activeColor.copy(alpha = 0.14f)
+                    else -> MaterialTheme.colorScheme.surface
+                }
+            )
+            .border(
+                width = if (isFocused || selected) 2.dp else 1.dp,
+                color = if (isFocused || selected) activeColor else MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp),
+            )
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyUp && (event.key == Key.Enter || event.key == Key.DirectionCenter)) {
+                    onClick()
+                    true
+                } else {
+                    false
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+    )
 }

@@ -211,6 +211,14 @@ class GoTunnelAdapter(
         )
     }
 
+    fun setSniProxyRules(rulesJson: String) {
+        try {
+            engine.setSniProxyRules(rulesJson)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to update SNI proxy rules")
+        }
+    }
+
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {
             1 -> "A"
