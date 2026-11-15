@@ -85,14 +85,19 @@ jobs:
       - name: Build APK
         run: bundle exec fastlane build_release
 
+      - name: Build Store AAB
+        run: ./gradlew :app:bundleStoreRelease :blockadstv:bundleStoreRelease
+
       # Artifacts
-      - name: Upload release APK
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-build
           path: |
             app/build/outputs/apk/release/*.apk
             blockadstv/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/storeRelease/*.aab
+            blockadstv/build/outputs/bundle/storeRelease/*.aab
           retention-days: 30
 
       # Upload assets to existing GitHub Release (or create if missing).
@@ -108,4 +113,6 @@ jobs:
           files: |
             app/build/outputs/apk/release/*.apk
             blockadstv/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/storeRelease/*.aab
+            blockadstv/build/outputs/bundle/storeRelease/*.aab
           token: ${{ secrets.GITHUB_TOKEN }}
