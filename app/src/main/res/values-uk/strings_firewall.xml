@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Запитувати при підключенні</string>
+    <string name="firewall_prompt_toggle_desc">Запитувати перед наданням доступу до мережі для програм без правила</string>
+    <string name="firewall_prompt_channel_name">Запити брандмауера</string>
+    <string name="firewall_prompt_channel_desc">Запитує, чи може програма мати доступ до інтернету</string>
+    <string name="firewall_prompt_notification_title">%1$s запитує доступ до інтернету</string>
+    <string name="firewall_prompt_notification_text">%1$s заблоковано до вашого рішення</string>
+    <string name="firewall_prompt_action_allow">Дозволити</string>
+    <string name="firewall_prompt_action_block">Заблокувати</string>
+    <string name="firewall_prompt_dialog_title">%1$s запитує доступ до інтернету</string>
+    <string name="firewall_prompt_dialog_message">Доступ до мережі для цієї програми призупинено до вашого вибору.</string>
+    <string name="firewall_prompt_dialog_pending">Очікує ще %1$d прогр.</string>
+    <string name="firewall_prompt_always_allow">Завжди дозволяти</string>
+    <string name="firewall_prompt_allow_once">Дозволити один раз</string>
+</resources>

@@ -26,7 +26,10 @@ import kotlin.math.abs
 class DailySummaryWorkerTest {
 
     private var enabled = true
-    private val prefs: AppPreferences = mockk { every { dailySummaryEnabled } answers { flowOf(enabled) } }
+    private val prefs: AppPreferences = mockk {
+        every { dailySummaryEnabled } answers { flowOf(enabled) }
+        every { logRetentionDays } returns flowOf(14)
+    }
     private val cutoff = slot<Long>()
     private val dao: DnsLogDao = mockk {
         coEvery { getBlockedCountSinceSync(any()) } returns 42

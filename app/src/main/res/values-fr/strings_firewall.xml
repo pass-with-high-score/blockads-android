@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Demander lors de la connexion</string>
+    <string name="firewall_prompt_toggle_desc">Demander avant d\'autoriser l\'accès réseau aux applications sans règle</string>
+    <string name="firewall_prompt_channel_name">Demandes du pare-feu</string>
+    <string name="firewall_prompt_channel_desc">Demande si une application peut accéder à Internet</string>
+    <string name="firewall_prompt_notification_title">%1$s souhaite accéder à Internet</string>
+    <string name="firewall_prompt_notification_text">%1$s est bloquée jusqu\'à votre décision</string>
+    <string name="firewall_prompt_action_allow">Autoriser</string>
+    <string name="firewall_prompt_action_block">Bloquer</string>
+    <string name="firewall_prompt_dialog_title">%1$s souhaite accéder à Internet</string>
+    <string name="firewall_prompt_dialog_message">L\'accès réseau est suspendu pour cette application jusqu\'à votre choix.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d autre(s) application(s) en attente</string>
+    <string name="firewall_prompt_always_allow">Toujours autoriser</string>
+    <string name="firewall_prompt_allow_once">Autoriser une fois</string>
+</resources>

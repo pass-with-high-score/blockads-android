@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">שאל כשאפליקציה מתחברת</string>
+    <string name="firewall_prompt_toggle_desc">שאל לפני מתן גישה לרשת לאפליקציות ללא כלל</string>
+    <string name="firewall_prompt_channel_name">בקשות חומת אש</string>
+    <string name="firewall_prompt_channel_desc">שואל האם אפליקציה רשאית לגשת לאינטרנט</string>
+    <string name="firewall_prompt_notification_title">%1$s מבקשת גישה לאינטרנט</string>
+    <string name="firewall_prompt_notification_text">%1$s חסומה עד שתחליט</string>
+    <string name="firewall_prompt_action_allow">אפשר</string>
+    <string name="firewall_prompt_action_block">חסום</string>
+    <string name="firewall_prompt_dialog_title">%1$s מבקשת גישה לאינטרנט</string>
+    <string name="firewall_prompt_dialog_message">הגישה לרשת מושהית עבור אפליקציה זו עד שתבחר.</string>
+    <string name="firewall_prompt_dialog_pending">עוד %1$d אפליקציות ממתינות</string>
+    <string name="firewall_prompt_always_allow">אפשר תמיד</string>
+    <string name="firewall_prompt_allow_once">אפשר פעם אחת</string>
+</resources>

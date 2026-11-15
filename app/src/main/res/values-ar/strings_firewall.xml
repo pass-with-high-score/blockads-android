@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">السؤال عند اتصال التطبيق</string>
+    <string name="firewall_prompt_toggle_desc">السؤال قبل السماح بالوصول إلى الشبكة للتطبيقات التي ليس لها قاعدة</string>
+    <string name="firewall_prompt_channel_name">طلبات جدار الحماية</string>
+    <string name="firewall_prompt_channel_desc">يسأل عما إذا كان يُسمح للتطبيق بالوصول إلى الإنترنت</string>
+    <string name="firewall_prompt_notification_title">%1$s يريد الوصول إلى الإنترنت</string>
+    <string name="firewall_prompt_notification_text">تم حظر %1$s حتى تقرر</string>
+    <string name="firewall_prompt_action_allow">سماح</string>
+    <string name="firewall_prompt_action_block">حظر</string>
+    <string name="firewall_prompt_dialog_title">%1$s يريد الوصول إلى الإنترنت</string>
+    <string name="firewall_prompt_dialog_message">تم إيقاف الوصول إلى الشبكة مؤقتًا لهذا التطبيق حتى تختار.</string>
+    <string name="firewall_prompt_dialog_pending">%1$d تطبيق(ات) أخرى في الانتظار</string>
+    <string name="firewall_prompt_always_allow">السماح دائمًا</string>
+    <string name="firewall_prompt_allow_once">السماح مرة واحدة</string>
+</resources>

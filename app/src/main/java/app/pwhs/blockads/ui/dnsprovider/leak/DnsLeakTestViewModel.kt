@@ -20,7 +20,8 @@ import kotlin.system.measureTimeMillis
 class DnsLeakTestViewModel(
     private val dnsLeakRepository: DnsLeakRepository,
     private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO,
-    private val latencyProvider: (suspend () -> Long?)? = null
+    private val latencyProvider: (suspend () -> Long?)? = null,
+    private val dnssecProvider: (suspend () -> DnssecSecurityStatus)? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DnsLeakTestUiState())
@@ -58,7 +59,7 @@ class DnsLeakTestViewModel(
             }
 
             val dnssecDeferred = async(ioDispatcher) {
-                testDnssec()
+                dnssecProvider?.invoke() ?: testDnssec()
             }
 
             val reservedIps = withContext(ioDispatcher) {

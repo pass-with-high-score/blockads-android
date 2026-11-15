@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Pytaj, gdy aplikacja się łączy</string>
+    <string name="firewall_prompt_toggle_desc">Pytaj przed zezwoleniem na dostęp do sieci dla aplikacji bez reguły</string>
+    <string name="firewall_prompt_channel_name">Monity zapory</string>
+    <string name="firewall_prompt_channel_desc">Pyta, czy aplikacja może uzyskać dostęp do internetu</string>
+    <string name="firewall_prompt_notification_title">%1$s chce uzyskać dostęp do internetu</string>
+    <string name="firewall_prompt_notification_text">Aplikacja %1$s jest zablokowana do czasu decyzji</string>
+    <string name="firewall_prompt_action_allow">Zezwól</string>
+    <string name="firewall_prompt_action_block">Zablokuj</string>
+    <string name="firewall_prompt_dialog_title">%1$s chce uzyskać dostęp do internetu</string>
+    <string name="firewall_prompt_dialog_message">Dostęp do sieci dla tej aplikacji jest wstrzymany do czasu wyboru.</string>
+    <string name="firewall_prompt_dialog_pending">Oczekuje jeszcze %1$d aplikacja/e</string>
+    <string name="firewall_prompt_always_allow">Zawsze zezwalaj</string>
+    <string name="firewall_prompt_allow_once">Zezwól raz</string>
+</resources>

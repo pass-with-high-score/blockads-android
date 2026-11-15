@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">Спрашивать при подключении</string>
+    <string name="firewall_prompt_toggle_desc">Спрашивать перед разрешением доступа к сети для приложений без правила</string>
+    <string name="firewall_prompt_channel_name">Запросы брандмауэра</string>
+    <string name="firewall_prompt_channel_desc">Спрашивает, может ли приложение выходить в интернет</string>
+    <string name="firewall_prompt_notification_title">%1$s запрашивает доступ в интернет</string>
+    <string name="firewall_prompt_notification_text">%1$s заблокировано до вашего решения</string>
+    <string name="firewall_prompt_action_allow">Разрешить</string>
+    <string name="firewall_prompt_action_block">Заблокировать</string>
+    <string name="firewall_prompt_dialog_title">%1$s запрашивает доступ в интернет</string>
+    <string name="firewall_prompt_dialog_message">Доступ к сети для этого приложения приостановлен до вашего выбора.</string>
+    <string name="firewall_prompt_dialog_pending">Ожидает ещё %1$d прилож.</string>
+    <string name="firewall_prompt_always_allow">Всегда разрешать</string>
+    <string name="firewall_prompt_allow_once">Разрешить один раз</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="firewall_prompt_toggle_title">ถามเมื่อแอปเชื่อมต่อ</string>
+    <string name="firewall_prompt_toggle_desc">ถามก่อนอนุญาตให้แอปที่ยังไม่มีกฎเข้าถึงเครือข่าย</string>
+    <string name="firewall_prompt_channel_name">การแจ้งเตือนไฟร์วอลล์</string>
+    <string name="firewall_prompt_channel_desc">ถามว่าแอปสามารถเข้าถึงอินเทอร์เน็ตได้หรือไม่</string>
+    <string name="firewall_prompt_notification_title">%1$s ต้องการเข้าถึงอินเทอร์เน็ต</string>
+    <string name="firewall_prompt_notification_text">%1$s ถูกบล็อกไว้จนกว่าคุณจะตัดสินใจ</string>
+    <string name="firewall_prompt_action_allow">อนุญาต</string>
+    <string name="firewall_prompt_action_block">บล็อก</string>
+    <string name="firewall_prompt_dialog_title">%1$s ต้องการเข้าถึงอินเทอร์เน็ต</string>
+    <string name="firewall_prompt_dialog_message">การเข้าถึงเครือข่ายสำหรับแอปนี้ถูกหยุดชั่วคราวจนกว่าคุณจะเลือก</string>
+    <string name="firewall_prompt_dialog_pending">มีอีก %1$d แอปที่รออยู่</string>
+    <string name="firewall_prompt_always_allow">อนุญาตเสมอ</string>
+    <string name="firewall_prompt_allow_once">อนุญาตครั้งเดียว</string>
+</resources>

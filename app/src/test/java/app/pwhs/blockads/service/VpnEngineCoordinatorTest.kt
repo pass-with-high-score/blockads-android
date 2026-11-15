@@ -65,6 +65,7 @@ class VpnEngineCoordinatorTest {
         coEvery { getTrustedSsidsSnapshot() } returns emptySet()
         coEvery { getActiveProxyTypeSnapshot() } returns AppPreferences.PROXY_TYPE_WIREGUARD
         coEvery { getSsProfileSnapshot() } returns null
+        coEvery { getSniProxyRulesJsonSnapshot() } returns ""
         every { tailscale } returns mockk {
             coEvery { isEnabledSnapshot() } returns false
             coEvery { getStateJsonSnapshot() } returns ""
@@ -89,6 +90,7 @@ class VpnEngineCoordinatorTest {
     private val context: Context = mockk {
         every { getSystemService(Context.CONNECTIVITY_SERVICE) } returns cm
         every { filesDir } returns testDir
+        every { packageManager } returns mockk(relaxed = true)
     }
     private val adapter: GoTunnelAdapter = mockk(relaxed = true)
     private val tun: ParcelFileDescriptor = mockk()
