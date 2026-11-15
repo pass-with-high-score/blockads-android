@@ -1,0 +1,2 @@
+- Rebranded Android TV Store build to ZephyrNG TV
+- Unified ZephyrNG branding across Store notifications, browser UI, and VPN strings
