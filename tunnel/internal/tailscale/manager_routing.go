@@ -30,17 +30,41 @@ func (m *Manager) MatchPeer(ip net.IP) *Node {
 	return m.matchPeerLocked(ip)
 }
 
+// peerIsExitNode reports whether p advertises a default internet route (0.0.0.0/0 or ::/0).
+func peerIsExitNode(p *Node) bool {
+	if p == nil {
+		return false
+	}
+	for _, allowed := range p.AllowedIPs {
+		trimmed := strings.TrimSpace(allowed)
+		if trimmed == "0.0.0.0/0" || trimmed == "::/0" {
+			return true
+		}
+	}
+	return false
+}
+
+func isNonPublicIP(ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	return ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsMulticast() || ip.IsUnspecified()
+}
+
 func (m *Manager) matchPeerLocked(ip net.IP) *Node {
 	if ip == nil {
 		return nil
 	}
 	var bestPeer *Node
 	bestMaskLen := -1
+	nonPublic := isNonPublicIP(ip)
 
 	checkCIDR := func(p *Node, raw string) {
 		raw = strings.TrimSpace(raw)
-		if (raw == "0.0.0.0/0" || raw == "::/0") && (m.activeExitID == 0 || p.ID != m.activeExitID) {
-			return
+		if raw == "0.0.0.0/0" || raw == "::/0" {
+			if m.activeExitID == 0 || p.ID != m.activeExitID || nonPublic {
+				return
+			}
 		}
 		if !strings.Contains(raw, "/") {
 			if parsed := net.ParseIP(raw); parsed != nil {
@@ -68,7 +92,7 @@ func (m *Manager) matchPeerLocked(ip net.IP) *Node {
 		for _, addr := range p.Addresses {
 			checkCIDR(p, addr)
 		}
-		if m.activeExitID != 0 && p.ID == m.activeExitID && bestPeer == nil {
+		if m.activeExitID != 0 && p.ID == m.activeExitID && !nonPublic && peerIsExitNode(p) && bestPeer == nil {
 			bestPeer = p
 			bestMaskLen = 0
 		}
@@ -149,6 +173,38 @@ func (m *Manager) SetExitNode(id int64) {
 	m.status.ActiveExitID = id
 	if m.dataPlane != nil {
 		_ = m.dataPlane.Sync(m.status.SelfNode, m.peersByID, m.derpMap, m.activeExitID)
+	}
+}
+
+// SetAdvertiseExitNode toggles whether this device advertises itself as an internet exit node.
+func (m *Manager) SetAdvertiseExitNode(enabled bool) {
+	m.mu.Lock()
+	m.advertiseExit = enabled
+	dp := m.dataPlane
+	client := m.client
+	hostname := m.hostname
+	var endpoints []string
+	var homeDERP int
+	if dp != nil {
+		dp.SetAdvertiseExitNode(enabled)
+		if dp.Bind() != nil {
+			endpoints = dp.Bind().LocalEndpoints()
+			homeDERP = dp.Bind().HomeDERP()
+		}
+	}
+	if client != nil {
+		client.SetAdvertiseExitNode(enabled)
+	}
+	m.mu.Unlock()
+
+	if client != nil {
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if err := client.UpdateEndpoints(ctx, hostname, endpoints, homeDERP); err != nil {
+				logf("[Tailscale] advertise exit node update failed: %v", err)
+			}
+		}()
 	}
 }
 

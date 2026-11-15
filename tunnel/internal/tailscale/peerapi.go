@@ -32,6 +32,7 @@ type PeerAPIServer struct {
 	port     uint16
 	tempDir  string
 	receiver TaildropReceiver
+	dp       *DataPlane
 	listener net.Listener
 	server   *http.Server
 	running  bool
@@ -80,6 +81,7 @@ func (s *PeerAPIServer) Start(dp *DataPlane) error {
 	if dp == nil {
 		return fmt.Errorf("peerapi: dataplane is nil")
 	}
+	s.dp = dp
 
 	ln, err := dp.ListenTCP(nil, int(s.port))
 	if err != nil {
@@ -129,6 +131,10 @@ func (s *PeerAPIServer) Stop() {
 
 // ServeHTTP routes incoming requests directly without ServeMux path cleaning.
 func (s *PeerAPIServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/dns-query" {
+		s.handleDNSQuery(w, r)
+		return
+	}
 	if r.Method == http.MethodPut && (strings.HasPrefix(r.URL.Path, "/v0/put/") || strings.HasPrefix(r.URL.EscapedPath(), "/v0/put/")) {
 		s.handleTaildropPut(w, r)
 		return

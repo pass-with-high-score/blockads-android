@@ -137,4 +137,34 @@ func TestManagerExitNodeSelectionAndLeakGuard(t *testing.T) {
 	if p := mgr.MatchPeer(net.ParseIP("8.8.8.8")); p == nil || p.ID != 2 {
 		t.Fatalf("expected 8.8.8.8 to match exit node 2 when enabled, got %+v", p)
 	}
+
+	// 6. Private LAN IP (192.168.1.1, e.g. local router DNS) must NOT be hijacked by 0.0.0.0/0 exit node.
+	if p := mgr.MatchPeer(net.ParseIP("192.168.1.1")); p != nil {
+		t.Fatalf("expected private IP 192.168.1.1 not to match exit node 0.0.0.0/0, got %+v", p)
+	}
+
+	// 7. If Peer 2 stops advertising 0.0.0.0/0, stale activeExitID must be cleared and 8.8.8.8 must NOT match Peer 2.
+	mgr.handleMapResponse(&MapResponse{
+		Node: &Node{
+			ID:        1,
+			Name:      "self.tail.ts.net.",
+			Key:       st.NodeKey().PublicHex("nodekey:"),
+			Addresses: []string{"100.64.0.1/32"},
+		},
+		Peers: []*Node{
+			{
+				ID:         2,
+				Name:       "exit-mac.tail.ts.net.",
+				Key:        peerSt.NodeKey().PublicHex("nodekey:"),
+				Addresses:  []string{"100.64.0.2/32"},
+				AllowedIPs: []string{"100.64.0.2/32"},
+			},
+		},
+	})
+	if mgr.activeExitID != 0 {
+		t.Fatalf("expected stale activeExitID to be cleared when peer stops advertising exit route, got %d", mgr.activeExitID)
+	}
+	if p := mgr.MatchPeer(net.ParseIP("8.8.8.8")); p != nil {
+		t.Fatalf("expected 8.8.8.8 not to match peer 2 after exit route removed, got %+v", p)
+	}
 }

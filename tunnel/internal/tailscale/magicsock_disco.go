@@ -8,6 +8,7 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -356,7 +357,23 @@ func (b *MagicBind) localEndpointsLocked() []netip.AddrPort {
 		}
 	}
 
-	logf("[Tailscale/Disco] localEndpoints: localPort=%d endpoints=%v", b.localPort, out)
+	if len(out) == 0 {
+		// Android 11+ SELinux blocks netlink interface enumeration; probe the outbound local IP via a protected UDP socket.
+		d := net.Dialer{Timeout: 100 * time.Millisecond}
+		if b.protectFn != nil {
+			pf := b.protectFn
+			d.Control = func(network, address string, c syscall.RawConn) error {
+				return c.Control(func(fd uintptr) { pf(int(fd)) })
+			}
+		}
+		if conn, err := d.Dial("udp4", "8.8.8.8:53"); err == nil {
+			if ua, ok := conn.LocalAddr().(*net.UDPAddr); ok {
+				addCandidate(ua.IP)
+			}
+			_ = conn.Close()
+		}
+	}
+
 	return out
 }
 

@@ -60,9 +60,12 @@ import java.util.Date
 @Composable
 fun TailscalePeerDetailSheet(
     peer: TailscalePeer,
+    isSendingFile: Boolean,
+    sendingFileName: String?,
     onDismiss: () -> Unit,
     onTogglePin: (Long) -> Unit,
     onPing: (Long, String) -> Unit,
+    onSendFile: (TailscalePeer) -> Unit,
     onCopy: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -317,6 +320,61 @@ fun TailscalePeerDetailSheet(
                             Icon(Icons.Default.NetworkCheck, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(stringResource(R.string.tailscale_ping))
+                        }
+                    }
+                }
+            }
+
+            // Send File (Taildrop) Card
+            if (!peer.isSelf) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.tailscale_send_file),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = when {
+                                    isSendingFile && !sendingFileName.isNullOrBlank() ->
+                                        stringResource(R.string.tailscale_sending_file, sendingFileName)
+                                    !peer.online -> stringResource(R.string.tailscale_send_file_offline)
+                                    else -> stringResource(R.string.tailscale_send_file_desc)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = when {
+                                    isSendingFile -> MaterialTheme.colorScheme.primary
+                                    !peer.online -> MaterialTheme.colorScheme.error
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        OutlinedButton(
+                            onClick = { onSendFile(peer) },
+                            enabled = peer.online && !isSendingFile
+                        ) {
+                            if (isSendingFile) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            } else {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Send,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(stringResource(R.string.tailscale_send_file_btn))
+                            }
                         }
                     }
                 }

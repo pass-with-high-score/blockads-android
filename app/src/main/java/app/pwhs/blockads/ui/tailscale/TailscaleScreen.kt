@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,6 +69,7 @@ fun TailscaleScreen(
     val context = LocalContext.current
     val resources = LocalResources.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var showSettingsSheet by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -131,6 +136,40 @@ fun TailscaleScreen(
                             contentDescription = stringResource(R.string.accessibility_navigate_back)
                         )
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            val adminUrl = if (uiState.controlUrl == "https://controlplane.tailscale.com" || uiState.controlUrl.isBlank()) {
+                                "https://login.tailscale.com/admin/machines"
+                            } else {
+                                uiState.controlUrl
+                            }
+                            runCatching {
+                                androidx.browser.customtabs.CustomTabsIntent.Builder()
+                                    .setShowTitle(true)
+                                    .build()
+                                    .launchUrl(context, Uri.parse(adminUrl))
+                            }.onFailure {
+                                runCatching {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(adminUrl)))
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                            contentDescription = stringResource(R.string.tailscale_open_admin)
+                        )
+                    }
+                    if (uiState.isLoggedIn) {
+                        IconButton(onClick = { showSettingsSheet = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.tailscale_settings_title)
+                            )
+                        }
+                    }
                 }
             )
         }
@@ -172,19 +211,6 @@ fun TailscaleScreen(
                         onStartVpn = { viewModel.processIntent(TailscaleUiIntent.StartVpn) },
                         onSelectSelfPeer = selfPeer?.let { sp ->
                             { viewModel.processIntent(TailscaleUiIntent.SelectPeerForDetail(sp)) }
-                        }
-                    )
-                }
-
-                item {
-                    TailscaleTaildropCard(
-                        dirName = uiState.taildropDirName,
-                        hasCustomDir = uiState.hasCustomTaildropDir,
-                        onSetDirectory = { uri, name ->
-                            viewModel.processIntent(TailscaleUiIntent.SetTaildropDirectory(uri, name))
-                        },
-                        onResetDirectory = {
-                            viewModel.processIntent(TailscaleUiIntent.ResetTaildropDirectory)
                         }
                     )
                 }
@@ -247,12 +273,45 @@ fun TailscaleScreen(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
 
-        if (uiState.selectedPeerForDetail != null) {
+        if (showSettingsSheet) {
+            TailscaleSettingsSheet(
+                uiState = uiState,
+                onDismiss = { showSettingsSheet = false },
+                onSelectExitNode = { nodeId ->
+                    viewModel.processIntent(TailscaleUiIntent.SelectExitNode(nodeId))
+                },
+                onToggleAdvertiseExitNode = { enabled ->
+                    viewModel.processIntent(TailscaleUiIntent.ToggleAdvertiseExitNode(enabled))
+                },
+                onToggleAdBlock = { enabled ->
+                    viewModel.processIntent(TailscaleUiIntent.ToggleAdBlock(enabled))
+                },
+                onSetTaildropDirectory = { uri, name ->
+                    viewModel.processIntent(TailscaleUiIntent.SetTaildropDirectory(uri, name))
+                },
+                onResetTaildropDirectory = {
+                    viewModel.processIntent(TailscaleUiIntent.ResetTaildropDirectory)
+                }
+            )
+        }
+
+        val selectedPeer = uiState.selectedPeerForDetail
+        if (selectedPeer != null) {
+            val filePickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+            ) { uri ->
+                if (uri != null) {
+                    viewModel.processIntent(TailscaleUiIntent.SendFileToPeer(selectedPeer, uri))
+                }
+            }
             TailscalePeerDetailSheet(
-                peer = uiState.selectedPeerForDetail!!,
+                peer = selectedPeer,
+                isSendingFile = uiState.isSendingFile,
+                sendingFileName = uiState.sendingFileName,
                 onDismiss = { viewModel.processIntent(TailscaleUiIntent.SelectPeerForDetail(null)) },
                 onTogglePin = { viewModel.processIntent(TailscaleUiIntent.TogglePinPeer(it)) },
                 onPing = { id, target -> viewModel.processIntent(TailscaleUiIntent.PingPeer(id, target)) },
+                onSendFile = { filePickerLauncher.launch(arrayOf("*/*")) },
                 onCopy = { text, label -> viewModel.processIntent(TailscaleUiIntent.CopyToClipboard(text, label)) }
             )
         }

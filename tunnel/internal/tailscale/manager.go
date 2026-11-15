@@ -61,11 +61,12 @@ type Manager struct {
 	cancelMap    context.CancelFunc
 	status       Status
 
-	peersByID    map[int64]*Node
-	dnsRecords   map[string]net.IP // lowercase fqdn -> IP
-	activeExitID int64
-	derpMap      *DERPMap
-	dataPlane    *DataPlane
+	peersByID     map[int64]*Node
+	dnsRecords    map[string]net.IP // lowercase fqdn -> IP
+	activeExitID  int64
+	advertiseExit bool
+	derpMap       *DERPMap
+	dataPlane     *DataPlane
 
 	hostname                string
 	lastAdvertisedEndpoints []string
@@ -74,6 +75,7 @@ type Manager struct {
 	taildropReceiver TaildropReceiver
 	taildropDir      string
 	peerAPIServer    *PeerAPIServer
+	exitDNSHandler   func(context.Context, string, []byte) ([]byte, error)
 }
 
 // NewManager creates a Tailscale Manager.
@@ -99,6 +101,39 @@ func (m *Manager) DataPlane() *DataPlane {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.dataPlane
+}
+
+// SetExitDNSHandler registers a custom DNS handler for Exit Node /dns-query requests.
+func (m *Manager) SetExitDNSHandler(fn func(context.Context, string, []byte) ([]byte, error)) {
+	m.mu.Lock()
+	m.exitDNSHandler = fn
+	dp := m.dataPlane
+	m.mu.Unlock()
+	if dp != nil {
+		dp.SetExitDNSHandler(fn)
+	}
+}
+
+// LookupPeerNameByIP returns the short machine name for a Tailnet IP (e.g. "100.77.228.59").
+func (m *Manager) LookupPeerNameByIP(ip string) string {
+	if ip == "" {
+		return ""
+	}
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, peer := range m.peersByID {
+		for _, cidr := range peer.Addresses {
+			addrOnly, _, _ := strings.Cut(cidr, "/")
+			if addrOnly == ip {
+				name := strings.TrimSuffix(peer.Name, ".")
+				if short, _, ok := strings.Cut(name, "."); ok {
+					return short
+				}
+				return name
+			}
+		}
+	}
+	return ""
 }
 
 // StartAuth begins registration. If interactive login is required, AuthURL is returned.
@@ -204,7 +239,11 @@ func (m *Manager) StartSession(hostname string) error {
 		m.client.SetProtectFn(m.protectFn)
 	}
 	m.client.SetPeerAPIPort(DefaultPeerAPIPort)
+	m.client.SetAdvertiseExitNode(m.advertiseExit)
 	m.startPeerAPILocked()
+	if m.dataPlane != nil {
+		m.dataPlane.SetAdvertiseExitNode(m.advertiseExit)
+	}
 	if m.dataPlane != nil && m.dataPlane.Bind() != nil {
 		m.client.SetNetMeta(m.dataPlane.Bind().LocalEndpoints(), m.dataPlane.Bind().HomeDERP())
 	}
@@ -465,6 +504,14 @@ func (m *Manager) handleMapResponse(resp *MapResponse) {
 
 	m.status.Peers = peerSummaries
 	m.status.ExitNodes = exitNodes
+
+	if m.activeExitID != 0 && m.status.SelfNode != nil && len(m.peersByID) > 0 {
+		if exitPeer := m.peersByID[m.activeExitID]; exitPeer == nil || !peerIsExitNode(exitPeer) {
+			logf("[Tailscale] Cleared stale exit node %d (peer missing or not advertising exit route)", m.activeExitID)
+			m.activeExitID = 0
+			m.status.ActiveExitID = 0
+		}
+	}
 
 	if m.dataPlane != nil {
 		_ = m.dataPlane.Sync(m.status.SelfNode, m.peersByID, m.derpMap, m.activeExitID)

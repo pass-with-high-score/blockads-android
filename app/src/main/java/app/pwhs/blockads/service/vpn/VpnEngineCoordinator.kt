@@ -162,9 +162,9 @@ class VpnEngineCoordinator(
 
     suspend fun isTrustedNetworkWithSystemDns(): Boolean {
         if (!appPrefs.getUseSystemDnsOnTrustedEnabledSnapshot()) return false
-        val ssid = TrustedNetworkManager.currentSsid(context) ?: return false
+        val wifiInfo = TrustedNetworkManager.currentWifiInfo(context) ?: return false
         val trusted = appPrefs.getTrustedSsidsSnapshot()
-        return ssid in trusted
+        return TrustedNetworkManager.isTrusted(trusted, wifiInfo.first, wifiInfo.second)
     }
 
     suspend fun reloadDns(goTunnelAdapter: GoTunnelAdapter) {
@@ -257,6 +257,10 @@ class VpnEngineCoordinator(
             if (exitNodeId != 0L) {
                 goTunnelAdapter.setTailscaleExitNode(exitNodeId)
             }
+            if (appPrefs.tailscale.getAdvertiseExitNodeSnapshot()) {
+                goTunnelAdapter.setTailscaleAdvertiseExitNode(true)
+            }
+            goTunnelAdapter.setTailscaleAdBlockEnabled(appPrefs.tailscale.getAdblockEnabledSnapshot())
         }
 
         goTunnelAdapter.start(

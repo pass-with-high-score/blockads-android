@@ -46,6 +46,7 @@ func (c *ControlClient) StartMapSession(ctx context.Context, hostname string, up
 		prefDERP = 1
 	}
 	peerPort := c.peerAPIPort
+	advExit := c.advertiseExit
 	c.mu.Unlock()
 
 	var svcs []Service
@@ -54,6 +55,10 @@ func (c *ControlClient) StartMapSession(ctx context.Context, hostname string, up
 			{Proto: "peerapi4", Port: peerPort},
 			{Proto: "peerapi6", Port: peerPort},
 		}
+	}
+	var routableIPs []string
+	if advExit {
+		routableIPs = []string{"0.0.0.0/0", "::/0"}
 	}
 
 	mapReq := MapRequest{
@@ -65,8 +70,9 @@ func (c *ControlClient) StartMapSession(ctx context.Context, hostname string, up
 		Stream:    true,
 		OmitPeers: false,
 		Hostinfo: &Hostinfo{
-			OS:       "android",
-			Hostname: hostname,
+			OS:          "android",
+			Hostname:    hostname,
+			RoutableIPs: routableIPs,
 			NetInfo: &NetInfo{
 				PreferredDERP: prefDERP,
 			},
@@ -154,6 +160,7 @@ func (c *ControlClient) UpdateEndpoints(ctx context.Context, hostname string, en
 		pref = 1
 	}
 	peerPort := c.peerAPIPort
+	advExit := c.advertiseExit
 	c.mu.Unlock()
 
 	var svcs []Service
@@ -162,6 +169,10 @@ func (c *ControlClient) UpdateEndpoints(ctx context.Context, hostname string, en
 			{Proto: "peerapi4", Port: peerPort},
 			{Proto: "peerapi6", Port: peerPort},
 		}
+	}
+	var routableIPs []string
+	if advExit {
+		routableIPs = []string{"0.0.0.0/0", "::/0"}
 	}
 
 	mapReq := MapRequest{
@@ -173,8 +184,9 @@ func (c *ControlClient) UpdateEndpoints(ctx context.Context, hostname string, en
 		Stream:    false,
 		OmitPeers: true,
 		Hostinfo: &Hostinfo{
-			OS:       "android",
-			Hostname: hostname,
+			OS:          "android",
+			Hostname:    hostname,
+			RoutableIPs: routableIPs,
 			NetInfo: &NetInfo{
 				PreferredDERP: pref,
 			},

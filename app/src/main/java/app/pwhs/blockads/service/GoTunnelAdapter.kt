@@ -331,6 +331,8 @@ class GoTunnelAdapter(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to init stack MITM on VPN boot")
             }
+        } else {
+            engine.stopStackMitm()
         }
 
         setupAppResolver()
@@ -466,6 +468,9 @@ class GoTunnelAdapter(
         runCatching { engine.setTailscaleTaildropDir(dir) }
     }
 
+    fun sendTailscaleFile(target: String, fileName: String, filePath: String): Result<Unit> =
+        runCatching { engine.sendTailscaleFile(target, fileName, filePath) }
+
     fun startTailscaleAuth(host: String): String =
         runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
 
@@ -487,6 +492,14 @@ class GoTunnelAdapter(
         runCatching { engine.setTailscaleExitNode(id) }
     }
 
+    fun setTailscaleAdvertiseExitNode(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdvertiseExitNode(enabled) }
+    }
+
+    fun setTailscaleAdBlockEnabled(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdBlockEnabled(enabled) }
+    }
+
     fun pingTailscalePeer(target: String): String =
         runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
 
@@ -495,7 +508,7 @@ class GoTunnelAdapter(
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {
-            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; else -> "OTHER"
+            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; 65 -> "HTTPS"; else -> "OTHER"
         }
     }
 }

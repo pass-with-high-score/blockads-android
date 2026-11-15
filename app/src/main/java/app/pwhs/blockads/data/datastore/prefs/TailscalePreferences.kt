@@ -22,6 +22,8 @@ class TailscalePreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_TAILSCALE_CONTROL_URL = stringPreferencesKey("tailscale_control_url")
         val KEY_TAILSCALE_AUTH_KEY = stringPreferencesKey("tailscale_auth_key")
         val KEY_TAILSCALE_EXIT_NODE_ID = longPreferencesKey("tailscale_exit_node_id")
+        val KEY_TAILSCALE_ADVERTISE_EXIT_NODE = booleanPreferencesKey("tailscale_advertise_exit_node")
+        val KEY_TAILSCALE_ADBLOCK_ENABLED = booleanPreferencesKey("tailscale_adblock_enabled")
         val KEY_TAILSCALE_AUTO_MAGIC_DNS = booleanPreferencesKey("tailscale_auto_magic_dns")
         val KEY_TAILSCALE_PINNED_PEERS = stringSetPreferencesKey("tailscale_pinned_peers")
         val KEY_TAILSCALE_TAILDROP_DIR_URI = stringPreferencesKey("tailscale_taildrop_dir_uri")
@@ -33,6 +35,8 @@ class TailscalePreferences(private val dataStore: DataStore<Preferences>) {
             prefs.remove(KEY_TAILSCALE_CONTROL_URL)
             prefs.remove(KEY_TAILSCALE_AUTH_KEY)
             prefs.remove(KEY_TAILSCALE_EXIT_NODE_ID)
+            prefs.remove(KEY_TAILSCALE_ADVERTISE_EXIT_NODE)
+            prefs.remove(KEY_TAILSCALE_ADBLOCK_ENABLED)
             prefs.remove(KEY_TAILSCALE_AUTO_MAGIC_DNS)
             prefs.remove(KEY_TAILSCALE_PINNED_PEERS)
             prefs.remove(KEY_TAILSCALE_TAILDROP_DIR_URI)
@@ -58,6 +62,14 @@ class TailscalePreferences(private val dataStore: DataStore<Preferences>) {
 
     val exitNodeId: Flow<Long> = dataStore.data.map { prefs ->
         prefs[KEY_TAILSCALE_EXIT_NODE_ID] ?: 0L
+    }
+
+    val advertiseExitNode: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_TAILSCALE_ADVERTISE_EXIT_NODE] ?: false
+    }
+
+    val adblockEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_TAILSCALE_ADBLOCK_ENABLED] ?: true
     }
 
     val autoMagicDns: Flow<Boolean> = dataStore.data.map { prefs ->
@@ -133,6 +145,18 @@ class TailscalePreferences(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun setAdvertiseExitNode(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[KEY_TAILSCALE_ADVERTISE_EXIT_NODE] = enabled
+        }
+    }
+
+    suspend fun setAdblockEnabled(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[KEY_TAILSCALE_ADBLOCK_ENABLED] = enabled
+        }
+    }
+
     suspend fun setAutoMagicDns(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[KEY_TAILSCALE_AUTO_MAGIC_DNS] = enabled
@@ -144,6 +168,8 @@ class TailscalePreferences(private val dataStore: DataStore<Preferences>) {
     suspend fun getControlUrlSnapshot(): String = controlUrl.first()
     suspend fun getAuthKeySnapshot(): String = authKey.first()
     suspend fun getExitNodeIdSnapshot(): Long = exitNodeId.first()
+    suspend fun getAdvertiseExitNodeSnapshot(): Boolean = advertiseExitNode.first()
+    suspend fun getAdblockEnabledSnapshot(): Boolean = adblockEnabled.first()
     suspend fun getPinnedPeerIdsSnapshot(): Set<Long> = pinnedPeerIds.first()
     suspend fun getTaildropDirUriSnapshot(): String = taildropDirUri.first()
     suspend fun getTaildropDirNameSnapshot(): String = taildropDirName.first()
