@@ -48,7 +48,13 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 
 	// Tailscale MagicDNS: resolve local Tailnet machine names directly with 0ms latency.
 	if ip := e.resolveTailscaleMagicDNS(domain); ip != nil {
-		response := BuildRedirectResponse(queryInfo, ip)
+		var redirectIP net.IP
+		if queryInfo.QueryType == dns.TypeA && ip.To4() != nil {
+			redirectIP = ip
+		} else if queryInfo.QueryType == dns.TypeAAAA && ip.To4() == nil {
+			redirectIP = ip
+		}
+		response := BuildRedirectResponse(queryInfo, redirectIP)
 		e.writeToTUN(response)
 		e.totalQueries.Add(1)
 		return

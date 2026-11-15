@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -102,9 +103,23 @@ func (r *Resolver) queryDoT(rawQuery []byte, server string) ([]byte, error) {
 		}
 	}
 
-	conn, err := dialer.Dial("tcp", net.JoinHostPort(targetIP, port))
-	if err != nil {
-		return nil, fmt.Errorf("DoT dial: %w", err)
+	var conn net.Conn
+	if portNum, err := strconv.Atoi(port); err == nil && portNum > 0 {
+		if ip := net.ParseIP(targetIP); ip != nil {
+			if proxyConn, used, dialErr := r.dialProxy(ip, portNum); used {
+				if dialErr != nil {
+					return nil, fmt.Errorf("DoT proxy dial: %w", dialErr)
+				}
+				conn = proxyConn
+			}
+		}
+	}
+	if conn == nil {
+		var err error
+		conn, err = dialer.Dial("tcp", net.JoinHostPort(targetIP, port))
+		if err != nil {
+			return nil, fmt.Errorf("DoT dial: %w", err)
+		}
 	}
 
 	tlsConn := tls.Client(conn, &tls.Config{
@@ -306,6 +321,25 @@ func (d *protectedDialer) DialContext(ctx context.Context, network, addr string)
 			targetIP := resolveBootstrapIP(host, d.resolver)
 			if targetIP != "" {
 				targetAddr = net.JoinHostPort(targetIP, port)
+			}
+		}
+
+		if strings.HasPrefix(network, "tcp") && d.resolver != nil {
+			targetHost, targetPort, splitErr := net.SplitHostPort(targetAddr)
+			if splitErr == nil {
+				if portNum, convErr := strconv.Atoi(targetPort); convErr == nil && portNum > 0 {
+					ip := net.ParseIP(targetHost)
+					if ip == nil {
+						if ips, lookupErr := net.DefaultResolver.LookupIP(ctx, "ip4", targetHost); lookupErr == nil && len(ips) > 0 {
+							ip = ips[0]
+						}
+					}
+					if ip != nil {
+						if conn, used, dialErr := d.resolver.dialProxy(ip, portNum); used {
+							return conn, dialErr
+						}
+					}
+				}
 			}
 		}
 	}

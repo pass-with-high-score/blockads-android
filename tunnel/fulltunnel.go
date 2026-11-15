@@ -79,40 +79,9 @@ func (b *bufferedTun) halt() { close(b.stop) }
 
 var _ io.ReadWriter = (*bufferedTun)(nil)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// fulltunnel.go — dedicated FULL-NETWORK HTTPS-filtering data path.
-//
-// This is a separate, isolated engine mode from the DNS-only / WireGuard
-// modes. Where the legacy path bridges the TUN into the userspace stack
-// through DnsInterceptor + a bounded packetPipe (which deadlocks under
-// real browser load — the inbound queue fills, backpressure stalls every
-// flow), this path hands the TUN fd DIRECTLY to the gVisor stack, exactly
-// as tun2socks is designed to run:
-//
-//	 apps ─► TUN ─► gVisor stack (owns the fd; native flow control)
-//	                 ├─ TCP any        → MITM handler (browser) / passthrough
-//	                 ├─ UDP :53        → engine.ServeDNS (adblock + resolve)
-//	                 ├─ UDP :443 (br)  → drop (force TCP so HTTP/3 can't dodge MITM)
-//	                 └─ UDP other      → protected passthrough
-//
-// One dispatcher owns the TUN, reads AND writes it, so there is no
-// second reader, no pipe, no separate outbound-writer goroutine, and no
-// double-hop bottleneck. The legacy Start()/DnsInterceptor/packetPipe
-// path is left completely untouched and still serves the current modes;
-// StartFull is only entered when the app selects full-network filtering.
-// ─────────────────────────────────────────────────────────────────────────────
-
 // StartFull runs the engine in full-network capture mode. The gVisor
 // stack reads the TUN fd directly and terminates every flow in userspace.
-// StartStackMitm MUST have been called first to initialise the MITM CA +
-// filter. Blocks until Stop() is called.
-//
-// gomobile usage (Kotlin), when full-network HTTPS filtering is on:
-//
-//	engine.setUseTcpStack(true)          // (informational; not used by StartFull)
-//	engine.startStackMitm(certDir)       // CA + filter
-//	engine.setMitmAllowedUIDs(uids)
-//	engine.startFull(fd, protector)      // instead of engine.start(...)
+// Blocks until Stop() is called.
 func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	e.mu.Lock()
 	if e.running {
@@ -126,6 +95,8 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	// Fresh connection-log dedup set for this session.
 	connLogSeen.Range(func(k, _ any) bool { connLogSeen.Delete(k); return true })
 	uidPackageCache.Range(func(k, _ any) bool { uidPackageCache.Delete(k); return true })
+	mitmQuerySeen.Clear()
+	flowFirewallCache.Clear()
 
 	var protectFn func(fd int) bool
 	if protector != nil {
@@ -135,6 +106,7 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	e.resolver = NewResolver(protectFn)
 	e.resolver.Configure(ParseProtocol(e.protocol), e.primaryDNS, e.fallbackDNS, e.dohURL)
 	e.resolver.SetODoHRelay(e.odohRelayURL)
+	e.resolver.SetProxyDialer(e.DialProxy)
 
 	certMgr := e.stackCertMgr
 	filter := e.stackMitmFilter
@@ -193,7 +165,7 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	stack.SetUIDResolver(uidr)
 	var tcpHandler TcpFlowHandler
 	if mitmActive {
-		tcpHandler = newMitmTcpHandler(certMgr, filter, e, uidr, protectFn)
+		tcpHandler = newMitmTcpHandler(certMgr, filter, &mitmBlockerAdapter{e}, uidr, protectFn)
 	} else {
 		tcpHandler = newFullPassthroughTcpHandler(e, uidr, protectFn)
 	}
@@ -201,6 +173,10 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 		flow := tcpFlowID(conn)
 		if flow.serverPort == 53 {
 			handleDNSOverTCP(conn, e)
+			return
+		}
+		if e.isFlowFirewalled(flow, ProtocolTCP) {
+			_ = conn.Close()
 			return
 		}
 		tcpHandler(conn)
@@ -251,8 +227,13 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 			handleDNSOverUDP(conn, engine)
 			return
 		}
+		if engine.isFlowFirewalled(flow, ProtocolUDP) {
+			_ = conn.Close()
+			return
+		}
 		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if engine.IsDomainBlocked(flow.serverIP.String()) {
+		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
+			engine.reportBlockedFlow(flow, ProtocolUDP, reason)
 			_ = conn.Close()
 			return
 		}
@@ -263,9 +244,20 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 		}
 		engine.logConnection(flow, ProtocolUDP)
 
-		// When Proxy (Shadowsocks, Trojan, VLESS) is active, drop QUIC (UDP 443) so browsers fall back to TCP through the proxy.
-		if (engine.proxyClient.Load() != nil || engine.ssClient.Load() != nil) && flow.serverPort == 443 {
+		// When Proxy (Shadowsocks, Trojan, VLESS) or Tailscale peer routing is active, drop QUIC (UDP 443)
+		// so browsers fall back to TCP through the tunnel.
+		if (engine.proxyClient.Load() != nil || engine.ssClient.Load() != nil || engine.matchTailscalePeer(flow.serverIP)) && flow.serverPort == 443 {
 			_ = conn.Close()
+			return
+		}
+
+		if udpRemote, used, err := engine.dialTailscaleUDP(flow.serverIP, flow.serverPort); used {
+			defer conn.Close()
+			if err != nil {
+				return
+			}
+			defer udpRemote.Close()
+			bidiCopyUDP(conn, udpRemote, udpFlowIdleTimeout)
 			return
 		}
 
@@ -279,6 +271,10 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 				_ = conn.Close()
 				return
 			}
+		}
+		if flow.serverPort == 443 && engine.shouldDropQuicForSniProxy(uidr, flow) {
+			_ = conn.Close()
+			return
 		}
 		relay(conn)
 	}
@@ -308,10 +304,12 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 		}
 		// Gate -1.5: Hardcoded DoH Direct-IP (port 443) - close to force fallback if DoH/DoT blocking is enabled
 		if engine.IsDoHBlockingEnabled() && flow.serverPort == 443 && isKnownPublicDoHIP(flow.serverIP) {
+			engine.reportBlockedFlow(flow, ProtocolTCP, "doh")
 			return
 		}
 		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if engine.IsDomainBlocked(flow.serverIP.String()) {
+		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
+			engine.reportBlockedFlow(flow, ProtocolTCP, reason)
 			return
 		}
 		// Gate -1.7: WebRTC STUN/TURN over TCP (ports 3478, 5349)
@@ -319,6 +317,14 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 			return
 		}
 		engine.logConnection(flow, ProtocolTCP)
+		if flow.serverPort == 443 {
+			if handled, nextConn := trySniProxyRedirect(conn, flow, engine, uidr, protectFn); handled {
+				return
+			} else if nextConn != nil {
+				relayDirectFromFlow(nextConn, flow, engine, protectFn)
+				return
+			}
+		}
 		relayDirectFromFlow(conn, flow, engine, protectFn)
 	}
 }

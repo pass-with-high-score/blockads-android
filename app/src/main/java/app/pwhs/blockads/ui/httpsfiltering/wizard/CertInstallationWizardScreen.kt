@@ -77,6 +77,22 @@ fun CertInstallationWizardScreen(
         viewModel.processIntent(CertInstallationWizardUiIntent.VerifyCert)
     }
 
+    val safExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/x-x509-ca-cert")
+    ) { uri ->
+        uri?.let { viewModel.processIntent(CertInstallationWizardUiIntent.ExportCertToUri(it)) }
+    }
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert)
+        } else {
+            safExportLauncher.launch(uiState.fileName)
+        }
+    }
+
     // Handle system back navigation to navigate between steps or exit
     BackHandler(enabled = true) {
         if (uiState.currentStep.ordinal > 0) {
@@ -193,7 +209,19 @@ fun CertInstallationWizardScreen(
                         WizardSaveCaPage(
                             fileName = uiState.fileName,
                             isExported = uiState.isCertExported,
-                            onExport = { viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert) },
+                            onExport = {
+                                val needsLegacyPermission =
+                                    android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q &&
+                                        androidx.core.content.ContextCompat.checkSelfPermission(
+                                            context,
+                                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                        ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                                if (needsLegacyPermission) {
+                                    storagePermissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                } else {
+                                    viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert)
+                                }
+                            },
                             onCopyFileName = {
                                 val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
                                 val clip = android.content.ClipData.newPlainText("cert_filename", uiState.fileName)

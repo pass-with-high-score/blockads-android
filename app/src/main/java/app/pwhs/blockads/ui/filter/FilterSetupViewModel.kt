@@ -85,11 +85,17 @@ class FilterSetupViewModel(
         }
     }
 
+    private val _pendingDeleteFilterIds = MutableStateFlow<Set<Long>>(emptySet())
+
+    private val _undoDeleteEvent = MutableSharedFlow<FilterList>(extraBufferCapacity = 1)
+    val undoDeleteEvent: SharedFlow<FilterList> = _undoDeleteEvent.asSharedFlow()
+
     val filteredFilterLists: StateFlow<List<FilterList>> = combine(
-        filterLists, _searchQuery
-    ) { lists, query ->
-        if (query.isBlank()) lists
-        else lists.filter {
+        filterLists, _searchQuery, _pendingDeleteFilterIds
+    ) { lists, query, pendingIds ->
+        val visibleLists = if (pendingIds.isEmpty()) lists else lists.filterNot { pendingIds.contains(it.id) }
+        if (query.isBlank()) visibleLists
+        else visibleLists.filter {
             it.name.contains(query, ignoreCase = true) ||
                     it.description.contains(query, ignoreCase = true)
         }
@@ -286,6 +292,22 @@ class FilterSetupViewModel(
                 )
             }
         }
+    }
+
+    fun requestDeleteFilterList(filter: FilterList) {
+        if (filter.isBuiltIn) return
+        _pendingDeleteFilterIds.value = _pendingDeleteFilterIds.value + filter.id
+        _undoDeleteEvent.tryEmit(filter)
+    }
+
+    fun cancelDeleteFilterList(filter: FilterList) {
+        _pendingDeleteFilterIds.value = _pendingDeleteFilterIds.value - filter.id
+    }
+
+    fun commitDeleteFilterList(filter: FilterList) {
+        if (!_pendingDeleteFilterIds.value.contains(filter.id)) return
+        _pendingDeleteFilterIds.value = _pendingDeleteFilterIds.value - filter.id
+        deleteFilterList(filter)
     }
 
     fun deleteFilterList(filter: FilterList) {

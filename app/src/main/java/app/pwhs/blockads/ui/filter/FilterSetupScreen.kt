@@ -20,6 +20,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,7 @@ import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FilterList as FilterListEntity
+import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterBottomSheet
 import app.pwhs.blockads.ui.filter.component.CustomTabContent
@@ -63,7 +68,8 @@ fun FilterSetupScreen(
     canNavigateBack: Boolean = false,
     onNavigateBack: () -> Unit = {},
     viewModel: FilterSetupViewModel = koinViewModel(),
-    onNavigateToFilterDetail: (filterId: Long) -> Unit = {}
+    onNavigateToFilterDetail: (filterId: Long) -> Unit = {},
+    onNavigateToOverlap: () -> Unit = {}
 ) {
     val allLists by viewModel.filterLists.collectAsStateWithLifecycle()
     val filterLists by viewModel.filteredFilterLists.collectAsStateWithLifecycle()
@@ -93,8 +99,35 @@ fun FilterSetupScreen(
 
     val pagerState = rememberPagerState(initialPage = 0) { categories.size }
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalContext.current.resources
 
     UiEventEffect(viewModel.events)
+
+    LaunchedEffect(viewModel) {
+        viewModel.undoDeleteEvent.collect { filter ->
+            snackbarHostState.currentSnackbarData?.dismiss()
+            var handled = false
+            try {
+                val result = snackbarHostState.showSnackbar(
+                    message = resources.getString(R.string.filter_list_removed_named, filter.name),
+                    actionLabel = resources.getString(R.string.action_undo),
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Short
+                )
+                handled = true
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.cancelDeleteFilterList(filter)
+                } else {
+                    viewModel.commitDeleteFilterList(filter)
+                }
+            } finally {
+                if (!handled) {
+                    viewModel.commitDeleteFilterList(filter)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.filterAddedEvent.collect {
@@ -136,6 +169,7 @@ fun FilterSetupScreen(
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { UndoSnackbarHost(snackbarHostState) },
         topBar = {
             FilterTopBar(
                 title = if (isStore) stringResource(R.string.settings_category_filters) else stringResource(R.string.filter_setup_title),
@@ -146,6 +180,7 @@ fun FilterSetupScreen(
                 },
                 canNavigateBack = canNavigateBack,
                 onNavigateBack = onNavigateBack,
+                onOpenOverlap = onNavigateToOverlap,
                 isUpdatingFilter = isUpdatingFilter,
                 updateProgress = updateProgress,
                 onUpdateAllFilters = { viewModel.updateAllFilters() }
@@ -226,7 +261,7 @@ fun FilterSetupScreen(
                                 CustomTabContent(
                                     customFilters = displayFilters,
                                     onToggle = { viewModel.toggleFilterList(it) },
-                                    onDelete = { viewModel.deleteFilterList(it) },
+                                    onDelete = { viewModel.requestDeleteFilterList(it) },
                                     onEdit = { filterToEdit = it },
                                     onFilterClick = onNavigateToFilterDetail,
                                     onShowAddDialog = { showAddDialog = true },

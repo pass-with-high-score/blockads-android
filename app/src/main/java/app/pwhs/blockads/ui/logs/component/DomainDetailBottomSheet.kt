@@ -90,6 +90,7 @@ fun DomainDetailBottomSheet(
     }
 
     val blockedFirewallPackages by viewModel.blockedFirewallPackages.collectAsStateWithLifecycle()
+    val whitelistedApps by viewModel.whitelistedApps.collectAsStateWithLifecycle()
 
     ModalBottomSheet(
         modifier = modifier,
@@ -322,11 +323,54 @@ fun DomainDetailBottomSheet(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Firewall app toggle action
+            // Whitelist / Firewall app toggle actions
             val isValidApp = entry.packageName.isNotBlank() &&
                     entry.packageName != "android" &&
                     !entry.packageName.startsWith("local.")
             if (isValidApp) {
+                val isAppWhitelisted = whitelistedApps.contains(entry.packageName)
+                Card(
+                    onClick = { viewModel.toggleWhitelistApp(entry.packageName) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = null,
+                            tint = if (isAppWhitelisted) MaterialTheme.colorScheme.primary else WhitelistAmber,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column {
+                            Text(
+                                text = stringResource(
+                                    if (isAppWhitelisted) R.string.log_action_unwhitelist_app
+                                    else R.string.log_action_whitelist_app
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (entry.appName.isNotBlank()) {
+                                Text(
+                                    text = entry.appName,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
                 val isAppInFirewall = blockedFirewallPackages.contains(entry.packageName)
                 Card(
                     onClick = { viewModel.toggleAppFirewall(entry.packageName) },

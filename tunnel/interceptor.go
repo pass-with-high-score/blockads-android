@@ -110,6 +110,9 @@ func (i *DnsInterceptor) Run(tunFile *os.File) {
 				isDoH = i.engine.IsDoHBlockingEnabled()
 			}
 			action := classifyNonDNSPacket(buf, n, isDoH)
+			if action == packetActionForward && i.engine != nil {
+				action = i.engine.classifyPacketFirewall(buf, n)
+			}
 			switch action {
 			case packetActionReset:
 				if rst := buildTCPReset(buf, n); rst != nil && tunFile != nil {

@@ -134,6 +134,7 @@ fun LanguageSelectionDialog(
             TvLanguageItem(TvPreferences.LANGUAGE_RU, R.string.settings_lang_ru, emoji = "🇷🇺"),
             TvLanguageItem(TvPreferences.LANGUAGE_TH, R.string.settings_lang_th, emoji = "🇹🇭"),
             TvLanguageItem(TvPreferences.LANGUAGE_TR, R.string.settings_lang_tr, emoji = "🇹🇷"),
+            TvLanguageItem(TvPreferences.LANGUAGE_HU, R.string.settings_lang_hu, emoji = "🇭🇺"),
             TvLanguageItem(TvPreferences.LANGUAGE_UK, R.string.settings_lang_uk, emoji = "🇺🇦"),
             TvLanguageItem(TvPreferences.LANGUAGE_ZH, R.string.settings_lang_zh, emoji = "🇨🇳"),
         )

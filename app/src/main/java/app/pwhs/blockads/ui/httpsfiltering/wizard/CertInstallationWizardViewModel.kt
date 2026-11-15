@@ -59,6 +59,7 @@ class CertInstallationWizardViewModel(
                 _uiState.update { it.copy(currentStep = intent.step) }
             }
             CertInstallationWizardUiIntent.ExportCert -> exportCert()
+            is CertInstallationWizardUiIntent.ExportCertToUri -> exportCertToUri(intent.uri)
             CertInstallationWizardUiIntent.OpenSecuritySettings -> openSecuritySettings()
             CertInstallationWizardUiIntent.VerifyCert -> verifyCert()
             CertInstallationWizardUiIntent.FinishWizard -> finishWizard()
@@ -119,33 +120,11 @@ class CertInstallationWizardViewModel(
             }
 
             try {
+                val context = getApplication<Application>()
                 withContext(Dispatchers.IO) {
-                    val fileName = _uiState.value.fileName
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        val resolver = getApplication<Application>().contentResolver
-                        resolver.delete(
-                            MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                            "${MediaStore.Downloads.DISPLAY_NAME} = ?",
-                            arrayOf(fileName)
-                        )
-                        val values = ContentValues().apply {
-                            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                            put(MediaStore.Downloads.MIME_TYPE, "application/x-x509-ca-cert")
-                            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                        }
-                        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-                            ?: throw Exception("Failed to create MediaStore entry")
-
-                        resolver.openOutputStream(uri)?.use { it.write(pem.toByteArray()) }
-                            ?: throw Exception("Failed to write certificate")
-                    } else {
-                        @Suppress("DEPRECATION")
-                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                        File(downloadsDir, fileName).writeText(pem)
-                    }
+                    CaCertHelper.saveCertToDownloads(context, pem, _uiState.value.fileName)
                 }
                 _uiState.update { it.copy(isCertExported = true) }
-                val context = getApplication<Application>()
                 _uiEffect.emit(
                     CertInstallationWizardUiEffect.ShowSnackbar(
                         context.getString(R.string.https_filtering_cert_saved_downloads, _uiState.value.fileName)
@@ -153,6 +132,32 @@ class CertInstallationWizardViewModel(
                 )
             } catch (e: Exception) {
                 Timber.e(e, "Failed to export CA cert in wizard")
+                _uiEffect.emit(CertInstallationWizardUiEffect.ShowSnackbar("Export failed: ${e.message}"))
+            }
+        }
+    }
+
+    private fun exportCertToUri(uri: android.net.Uri) {
+        viewModelScope.launch {
+            val pem = ensureCaPem()
+            if (pem.isEmpty()) {
+                _uiEffect.emit(CertInstallationWizardUiEffect.ShowSnackbar("Error: could not generate CA certificate"))
+                return@launch
+            }
+
+            try {
+                val context = getApplication<Application>()
+                withContext(Dispatchers.IO) {
+                    CaCertHelper.saveCertToUri(context, pem, uri)
+                }
+                _uiState.update { it.copy(isCertExported = true) }
+                _uiEffect.emit(
+                    CertInstallationWizardUiEffect.ShowSnackbar(
+                        context.getString(R.string.https_filtering_cert_saved_downloads, _uiState.value.fileName)
+                    )
+                )
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to export CA cert to URI in wizard")
                 _uiEffect.emit(CertInstallationWizardUiEffect.ShowSnackbar("Export failed: ${e.message}"))
             }
         }

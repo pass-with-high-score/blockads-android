@@ -148,32 +148,35 @@ object TunnelRuleLoader {
     }
 
     /**
-     * Reads modules.json, resolves any bundled script names, merges external filter modules,
+     * Reads modules.json, resolves any bundled script names,
      * and returns the JSON string.
      */
-    fun loadModulesJson(context: Context, filterModulesPath: String? = null): String {
+    fun loadModulesJson(context: Context, @Suppress("UNUSED_PARAMETER") filterModulesPath: String? = null): String {
         return try {
-            val cachedFile = java.io.File(context.filesDir, "browser_rules/modules.json")
-            val raw = if (cachedFile.exists() && cachedFile.length() > 0) {
-                cachedFile.readText()
-            } else {
-                runCatching {
-                    context.assets.open("browser/modules.json").bufferedReader().use { it.readText() }
-                }.getOrDefault("")
-            }
-            if (raw.isBlank()) return ""
-
             val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
-            val pkg = json.decodeFromString<app.pwhs.blockads.data.models.ModulesPackage>(raw)
+            val assetRaw = runCatching {
+                context.assets.open("browser/modules.json").bufferedReader().use { it.readText() }
+            }.getOrDefault("")
+            val cachedFile = java.io.File(context.filesDir, "browser_rules/modules.json")
+            val cachedRaw = if (cachedFile.exists() && cachedFile.length() > 0) {
+                runCatching { cachedFile.readText() }.getOrDefault("")
+            } else {
+                ""
+            }
 
-            val extPkg = if (!filterModulesPath.isNullOrBlank()) {
-                runCatching {
-                    val f = java.io.File(filterModulesPath)
-                    if (f.exists() && f.length() > 0) {
-                        json.decodeFromString<app.pwhs.blockads.data.models.ModuleRulesPackage>(f.readText())
-                    } else null
-                }.getOrNull()
+            val assetPkg = if (assetRaw.isNotBlank()) {
+                runCatching { json.decodeFromString<app.pwhs.blockads.data.models.ModulesPackage>(assetRaw) }.getOrNull()
             } else null
+            val cachedPkg = if (cachedRaw.isNotBlank()) {
+                runCatching { json.decodeFromString<app.pwhs.blockads.data.models.ModulesPackage>(cachedRaw) }.getOrNull()
+            } else null
+
+            val pkg = when {
+                cachedPkg != null && assetPkg != null -> if (assetPkg.version >= cachedPkg.version) assetPkg else cachedPkg
+                assetPkg != null -> assetPkg
+                cachedPkg != null -> cachedPkg
+                else -> return ""
+            }
 
             val resolvedModules = pkg.modules.map { mod ->
                 val resolvedScripts = mod.scripts.map { scriptRef ->
@@ -188,19 +191,9 @@ object TunnelRuleLoader {
                 mod.copy(scripts = resolvedScripts)
             }
 
-            val mergedGlobalPaths = if (extPkg != null && extPkg.globalBlockPaths.isNotEmpty()) {
-                (pkg.globalBlockPaths + extPkg.globalBlockPaths).distinct()
-            } else {
-                pkg.globalBlockPaths
-            }
-
             json.encodeToString(
                 app.pwhs.blockads.data.models.ModulesPackage.serializer(),
-                pkg.copy(
-                    modules = resolvedModules,
-                    globalBlockPaths = mergedGlobalPaths,
-                    domains = extPkg?.domains ?: pkg.domains
-                )
+                pkg.copy(modules = resolvedModules)
             )
         } catch (e: Exception) {
             Timber.w(e, "Failed to load and resolve modules.json")

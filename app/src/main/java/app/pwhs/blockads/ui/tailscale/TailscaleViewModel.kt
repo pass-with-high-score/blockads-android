@@ -3,9 +3,12 @@ package app.pwhs.blockads.ui.tailscale
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.ServiceController
+import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.service.tailscale.TailscalePeerNotifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -34,11 +37,12 @@ class TailscaleViewModel(
     private val _uiState = MutableStateFlow(TailscaleUiState())
     val uiState: StateFlow<TailscaleUiState> = _uiState.asStateFlow()
 
-    private val _uiEffect = MutableSharedFlow<TailscaleUiEffect>()
+    private val _uiEffect = MutableSharedFlow<TailscaleUiEffect>(extraBufferCapacity = 64)
     val uiEffect: SharedFlow<TailscaleUiEffect> = _uiEffect.asSharedFlow()
 
     private var pollJob: Job? = null
     private var authEngine: tunnel.Engine? = null
+    private val tailscalePeerNotifier by lazy { TailscalePeerNotifier(getApplication()) }
 
     init {
         loadPreferences()
@@ -50,31 +54,81 @@ class TailscaleViewModel(
             val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val authKey = appPrefs.tailscale.getAuthKeySnapshot()
             val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+            val advertiseExit = appPrefs.tailscale.getAdvertiseExitNodeSnapshot()
+            val adblockEnabled = appPrefs.tailscale.getAdblockEnabledSnapshot()
             val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
             val hasKeys = stateJson.contains("node_key") && stateJson.contains("machine_key")
+
+            val pinned = appPrefs.tailscale.getPinnedPeerIdsSnapshot()
+            val tdUri = appPrefs.tailscale.getTaildropDirUriSnapshot()
+            val tdName = appPrefs.tailscale.getTaildropDirNameSnapshot()
+            val isVpnRunning = AdBlockVpnService.isRunning
 
             _uiState.update {
                 it.copy(
                     isEnabled = enabled,
                     isLoggedIn = hasKeys,
+                    isVpnRunning = isVpnRunning,
                     controlUrl = controlUrl,
                     authKey = authKey,
                     activeExitNodeId = exitNodeId,
-                    connectionState = if (enabled) "CONNECTING" else "DISCONNECTED"
+                    advertiseExitNode = advertiseExit,
+                    adblockEnabled = adblockEnabled,
+                    pinnedPeerIds = pinned,
+                    taildropDirUri = tdUri,
+                    taildropDirName = tdName,
+                    connectionState = when {
+                        !enabled -> "DISCONNECTED"
+                        !isVpnRunning -> "VPN_DISCONNECTED"
+                        else -> "CONNECTING"
+                    }
                 )
             }
-            if (enabled && hasKeys) {
-                val adapter = AdBlockVpnService.activeTunnelAdapter
-                if (adapter != null && !adapter.isTailscaleActive()) {
-                    adapter.configureTailscale(stateJson, controlUrl, authKey)
-                    if (exitNodeId != 0L) {
-                        adapter.setTailscaleExitNode(exitNodeId)
+            if (enabled && hasKeys && isVpnRunning) {
+                syncActiveSession(stateJson)
+                startStatusPolling()
+            } else if (hasKeys && isVpnRunning) {
+                startStatusPolling()
+            }
+
+            viewModelScope.launch {
+                AdBlockVpnService.state.collect { vpnState ->
+                    val running = vpnState == VpnState.RUNNING
+                    _uiState.update { state ->
+                        val connState = when {
+                            !state.isEnabled -> "DISCONNECTED"
+                            !running -> "VPN_DISCONNECTED"
+                            state.connectionState == "VPN_DISCONNECTED" -> "CONNECTING"
+                            else -> state.connectionState
+                        }
+                        state.copy(isVpnRunning = running, connectionState = connState)
                     }
-                    adapter.startTailscaleSession("blockads-android")
+                    if (running && _uiState.value.isEnabled && _uiState.value.isLoggedIn) {
+                        syncActiveSession()
+                        startStatusPolling()
+                    }
                 }
-                startStatusPolling()
-            } else if (hasKeys) {
-                startStatusPolling()
+            }
+
+            viewModelScope.launch {
+                appPrefs.tailscale.pinnedPeerIds.collect { pinnedIds ->
+                    _uiState.update { state ->
+                        val updated = state.peers.map { p -> p.copy(isPinned = pinnedIds.contains(p.id)) }
+                        val sorted = updated.sortedWith(
+                            compareByDescending<TailscalePeer> { it.isPinned }
+                                .thenByDescending { it.isSelf }
+                                .thenByDescending { it.online }
+                                .thenBy { it.name.lowercase() }
+                        )
+                        state.copy(
+                            pinnedPeerIds = pinnedIds,
+                            peers = sorted,
+                            selectedPeerForDetail = state.selectedPeerForDetail?.let { cur ->
+                                cur.copy(isPinned = pinnedIds.contains(cur.id))
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -82,12 +136,22 @@ class TailscaleViewModel(
     fun processIntent(intent: TailscaleUiIntent) {
         when (intent) {
             is TailscaleUiIntent.ToggleEnabled -> toggleTailscale(intent.enabled)
+            is TailscaleUiIntent.StartVpn -> ServiceController.requestStart(getApplication<Application>().applicationContext)
             is TailscaleUiIntent.SignInWithBrowser -> signInWithBrowser()
             is TailscaleUiIntent.SignInWithAuthKey -> signInWithAuthKey(intent.key)
             is TailscaleUiIntent.SetControlUrl -> setControlUrl(intent.url)
             is TailscaleUiIntent.SelectExitNode -> selectExitNode(intent.nodeId)
+            is TailscaleUiIntent.ToggleAdvertiseExitNode -> toggleAdvertiseExitNode(intent.enabled)
+            is TailscaleUiIntent.ToggleAdBlock -> toggleAdBlock(intent.enabled)
             is TailscaleUiIntent.RefreshStatus -> viewModelScope.launch { pollStatusOnce() }
             is TailscaleUiIntent.Logout -> logout()
+            is TailscaleUiIntent.SelectPeerForDetail -> _uiState.update { it.copy(selectedPeerForDetail = intent.peer) }
+            is TailscaleUiIntent.TogglePinPeer -> togglePinPeer(intent.peerId)
+            is TailscaleUiIntent.PingPeer -> pingPeer(intent.peerId, intent.target)
+            is TailscaleUiIntent.SetTaildropDirectory -> setTaildropDirectory(intent.uri, intent.displayName)
+            is TailscaleUiIntent.ResetTaildropDirectory -> resetTaildropDirectory()
+            is TailscaleUiIntent.SendFileToPeer -> sendFileToPeer(intent.peer, intent.uri)
+            is TailscaleUiIntent.CopyToClipboard -> copyToClipboard(intent.text, intent.label)
         }
     }
 
@@ -107,19 +171,7 @@ class TailscaleViewModel(
                 if (!hasKeys) {
                     signInWithBrowser()
                 } else {
-                    val adapter = AdBlockVpnService.activeTunnelAdapter
-                    if (adapter != null) {
-                        val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
-                        val authKey = appPrefs.tailscale.getAuthKeySnapshot()
-                        adapter.configureTailscale(stateJson, controlUrl, authKey)
-                        val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
-                        if (exitNodeId != 0L) {
-                            adapter.setTailscaleExitNode(exitNodeId)
-                        }
-                        adapter.startTailscaleSession("blockads-android")
-                    } else {
-                        ServiceController.requestStart(getApplication<Application>().applicationContext)
-                    }
+                    syncActiveSession(stateJson)
                     startStatusPolling()
                 }
             } else {
@@ -135,6 +187,9 @@ class TailscaleViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, errorMessage = "") }
             try {
+                authEngine?.stopTailscale()
+                authEngine = null
+
                 val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
                 val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
                 val authKey = appPrefs.tailscale.getAuthKeySnapshot()
@@ -157,6 +212,11 @@ class TailscaleViewModel(
 
                 if (authUrl.isNotEmpty()) {
                     _uiEffect.emit(TailscaleUiEffect.OpenBrowser(authUrl))
+                } else {
+                    val activeState = engine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
+                    engine.stopTailscale()
+                    authEngine = null
+                    applyActiveTailscaleSession(activeState)
                 }
                 startStatusPolling()
             } catch (e: Exception) {
@@ -170,6 +230,9 @@ class TailscaleViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(isLoading = true, errorMessage = "", authKey = key) }
             try {
+                authEngine?.stopTailscale()
+                authEngine = null
+
                 appPrefs.tailscale.setAuthKey(key)
                 val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
                 val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
@@ -194,19 +257,7 @@ class TailscaleViewModel(
                     val activeState = engine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
                     engine.stopTailscale()
                     authEngine = null
-                    if (activeState != null) {
-                        appPrefs.tailscale.setStateJson(activeState)
-                    }
-                    appPrefs.tailscale.setEnabled(true)
-                    _uiState.update { it.copy(isEnabled = true, isLoggedIn = true) }
-                    _uiEffect.emit(TailscaleUiEffect.ShowSnackbar("Tailscale authorized!"))
-                    val adapter = AdBlockVpnService.activeTunnelAdapter
-                    if (adapter != null && activeState != null) {
-                        adapter.configureTailscale(activeState, controlUrl, key)
-                        adapter.startTailscaleSession("blockads-android")
-                    } else {
-                        ServiceController.requestStart(getApplication<Application>().applicationContext)
-                    }
+                    applyActiveTailscaleSession(activeState)
                 }
                 startStatusPolling()
             } catch (e: Exception) {
@@ -236,6 +287,32 @@ class TailscaleViewModel(
         }
     }
 
+    private fun toggleAdvertiseExitNode(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.tailscale.setAdvertiseExitNode(enabled)
+            _uiState.update { it.copy(advertiseExitNode = enabled) }
+            val adapter = AdBlockVpnService.activeTunnelAdapter
+            if (adapter != null) {
+                adapter.setTailscaleAdvertiseExitNode(enabled)
+            } else {
+                authEngine?.setTailscaleAdvertiseExitNode(enabled)
+            }
+        }
+    }
+
+    private fun toggleAdBlock(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.tailscale.setAdblockEnabled(enabled)
+            _uiState.update { it.copy(adblockEnabled = enabled) }
+            val adapter = AdBlockVpnService.activeTunnelAdapter
+            if (adapter != null) {
+                adapter.setTailscaleAdBlockEnabled(enabled)
+            } else {
+                authEngine?.setTailscaleAdBlockEnabled(enabled)
+            }
+        }
+    }
+
     private fun logout() {
         viewModelScope.launch {
             pollJob?.cancel()
@@ -246,6 +323,7 @@ class TailscaleViewModel(
             appPrefs.tailscale.setStateJson("")
             appPrefs.tailscale.setAuthKey("")
             appPrefs.tailscale.setExitNodeId(0L)
+            appPrefs.tailscale.setAdvertiseExitNode(false)
 
             _uiState.update {
                 TailscaleUiState(
@@ -257,12 +335,150 @@ class TailscaleViewModel(
         }
     }
 
+    private fun togglePinPeer(peerId: Long) {
+        viewModelScope.launch {
+            appPrefs.tailscale.togglePinPeer(peerId)
+        }
+    }
+
+    private fun setTaildropDirectory(uri: String, name: String) {
+        viewModelScope.launch {
+            appPrefs.tailscale.setTaildropDirectory(uri, name)
+            _uiState.update { it.copy(taildropDirUri = uri, taildropDirName = name) }
+        }
+    }
+
+    private fun resetTaildropDirectory() {
+        viewModelScope.launch {
+            appPrefs.tailscale.resetTaildropDirectory()
+            _uiState.update { it.copy(taildropDirUri = "", taildropDirName = "Downloads/Taildrop") }
+        }
+    }
+
+    private fun copyToClipboard(text: String, label: String) {
+        viewModelScope.launch {
+            _uiEffect.emit(TailscaleUiEffect.CopyToClipboard(text, label))
+        }
+    }
+
+    private fun sendFileToPeer(peer: TailscalePeer, uri: android.net.Uri) {
+        val adapter = AdBlockVpnService.activeTunnelAdapter ?: return
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val fileName = resolveFileName(app, uri)
+            _uiState.update { it.copy(isSendingFile = true, sendingFileName = fileName) }
+            val tempDir = java.io.File(app.cacheDir, "taildrop_out").apply { mkdirs() }
+            val tempFile = java.io.File(tempDir, "send_${System.currentTimeMillis()}_$fileName")
+            try {
+                app.contentResolver.openInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { output -> input.copyTo(output) }
+                } ?: error("Cannot open selected file")
+
+                val target = peer.id.toString()
+                adapter.sendTailscaleFile(target, fileName, tempFile.absolutePath)
+                    .onSuccess {
+                        _uiEffect.emit(
+                            TailscaleUiEffect.ShowSnackbar(
+                                app.getString(R.string.tailscale_send_file_success, fileName, peer.name)
+                            )
+                        )
+                    }
+                    .onFailure { err ->
+                        _uiEffect.emit(
+                            TailscaleUiEffect.ShowSnackbar(
+                                app.getString(
+                                    R.string.tailscale_send_file_failed,
+                                    fileName,
+                                    err.message ?: "Unknown error"
+                                )
+                            )
+                        )
+                    }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to send Taildrop file")
+                _uiEffect.emit(
+                    TailscaleUiEffect.ShowSnackbar(
+                        app.getString(
+                            R.string.tailscale_send_file_failed,
+                            fileName,
+                            e.message ?: "Unknown error"
+                        )
+                    )
+                )
+            } finally {
+                tempFile.delete()
+                _uiState.update { it.copy(isSendingFile = false, sendingFileName = null) }
+            }
+        }
+    }
+
+    private fun resolveFileName(app: Application, uri: android.net.Uri): String {
+        app.contentResolver.query(
+            uri,
+            arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0) {
+                    val name = cursor.getString(idx)
+                    if (!name.isNullOrBlank()) return name
+                }
+            }
+        }
+        return uri.lastPathSegment?.substringAfterLast('/')?.ifBlank { null } ?: "file"
+    }
+
+    private fun pingPeer(peerId: Long, target: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { state ->
+                val updated = state.peers.map {
+                    if (it.id == peerId) it.copy(isPingLoading = true, pingError = null) else it
+                }
+                state.copy(
+                    peers = updated,
+                    selectedPeerForDetail = state.selectedPeerForDetail?.takeIf { it.id == peerId }
+                        ?.copy(isPingLoading = true, pingError = null) ?: state.selectedPeerForDetail
+                )
+            }
+
+            val adapter = AdBlockVpnService.activeTunnelAdapter
+            val rawJson = adapter?.pingTailscalePeer(target) ?: ""
+            var rtt: Long? = null
+            var errorStr: String? = null
+            if (rawJson.isNotEmpty()) {
+                val obj = JSONObject(rawJson)
+                if (obj.has("latency_ms")) {
+                    rtt = obj.optLong("latency_ms")
+                } else if (obj.has("error")) {
+                    errorStr = obj.optString("error")
+                }
+            } else {
+                errorStr = "Tunnel not active"
+            }
+
+            _uiState.update { state ->
+                val updated = state.peers.map {
+                    if (it.id == peerId) it.copy(isPingLoading = false, lastPingMs = rtt, pingError = errorStr) else it
+                }
+                state.copy(
+                    peers = updated,
+                    selectedPeerForDetail = state.selectedPeerForDetail?.takeIf { it.id == peerId }
+                        ?.copy(isPingLoading = false, lastPingMs = rtt, pingError = errorStr) ?: state.selectedPeerForDetail
+                )
+            }
+        }
+    }
+
     private fun startStatusPolling() {
         pollJob?.cancel()
         pollJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
                 pollStatusOnce()
-                delay(3000)
+                val interval = if (authEngine != null) 1000L else 3000L
+                delay(interval)
             }
         }
     }
@@ -280,6 +496,13 @@ class TailscaleViewModel(
 
             if (statusJson.isNotEmpty() && statusJson != "{}") {
                 parseAndApplyStatus(statusJson)
+            } else {
+                val hasKeys = appPrefs.tailscale.getStateJsonSnapshot().let {
+                    it.contains("node_key") && it.contains("machine_key")
+                }
+                if (hasKeys && !_uiState.value.isLoggedIn) {
+                    _uiState.update { it.copy(isLoggedIn = true) }
+                }
             }
         } catch (e: Exception) {
             Timber.e(e, "Error polling status")
@@ -288,67 +511,38 @@ class TailscaleViewModel(
 
     private fun parseAndApplyStatus(json: String) {
         try {
-            val obj = JSONObject(json)
-            val state = obj.optString("state", "DISCONNECTED")
-            val ipsList = mutableListOf<String>()
-            val ipsArr = obj.optJSONArray("tailscale_ips")
-            if (ipsArr != null) {
-                for (i in 0 until ipsArr.length()) {
-                    ipsList.add(ipsArr.getString(i))
-                }
-            }
-            val dnsName = obj.optString("magic_dns_name", "")
+            tailscalePeerNotifier.checkAndNotifyJson(json)
+            val currentPinned = _uiState.value.pinnedPeerIds
+            val currentPeersMap = _uiState.value.peers.associateBy { it.id }
+            val parsed = TailscaleStatusParser.parse(json, currentPinned, currentPeersMap)
 
-            val peersList = mutableListOf<TailscalePeer>()
-            val peersArr = obj.optJSONArray("peers")
-            if (peersArr != null) {
-                for (i in 0 until peersArr.length()) {
-                    val p = peersArr.getJSONObject(i)
-                    val pIps = mutableListOf<String>()
-                    val pIpsArr = p.optJSONArray("ips")
-                    if (pIpsArr != null) {
-                        for (j in 0 until pIpsArr.length()) {
-                            pIps.add(pIpsArr.getString(j))
-                        }
-                    }
-                    peersList.add(
-                        TailscalePeer(
-                            id = p.optLong("id"),
-                            name = p.optString("name"),
-                            ips = pIps,
-                            os = p.optString("os"),
-                            online = p.optBoolean("online"),
-                            isExitNode = p.optBoolean("is_exit_node")
-                        )
-                    )
-                }
-            }
+            val isNowConnected = parsed.state == "CONNECTED"
+            val staleExitCleared = isNowConnected &&
+                parsed.peers.isNotEmpty() &&
+                _uiState.value.activeExitNodeId != 0L &&
+                parsed.exitNodes.none { it.id == _uiState.value.activeExitNodeId }
 
-            val exitList = mutableListOf<TailscaleExitNodeItem>()
-            val exitsArr = obj.optJSONArray("exit_nodes")
-            if (exitsArr != null) {
-                for (i in 0 until exitsArr.length()) {
-                    val ex = exitsArr.getJSONObject(i)
-                    exitList.add(
-                        TailscaleExitNodeItem(
-                            id = ex.optLong("id"),
-                            name = ex.optString("name"),
-                            ip = ex.optString("ip")
-                        )
-                    )
-                }
-            }
-
-            val isNowConnected = state == "CONNECTED"
             _uiState.update {
+                val updatedSelected = it.selectedPeerForDetail?.let { sel ->
+                    parsed.peers.find { p -> p.id == sel.id } ?: sel
+                }
                 it.copy(
-                    connectionState = state,
+                    connectionState = parsed.state,
                     isLoggedIn = it.isLoggedIn || isNowConnected,
-                    selfIp = ipsList.firstOrNull() ?: it.selfIp,
-                    magicDnsName = dnsName.ifEmpty { it.magicDnsName },
-                    peers = peersList,
-                    exitNodes = exitList
+                    selfIp = parsed.selfIp ?: it.selfIp,
+                    magicDnsName = parsed.magicDnsName.ifEmpty { it.magicDnsName },
+                    peers = parsed.peers,
+                    exitNodes = parsed.exitNodes,
+                    activeExitNodeId = if (staleExitCleared) 0L else it.activeExitNodeId,
+                    selectedPeerForDetail = updatedSelected
                 )
+            }
+
+            if (staleExitCleared) {
+                viewModelScope.launch {
+                    appPrefs.tailscale.setExitNodeId(0L)
+                    AdBlockVpnService.activeTunnelAdapter?.setTailscaleExitNode(0L)
+                }
             }
 
             if (isNowConnected && authEngine != null) {
@@ -357,28 +551,37 @@ class TailscaleViewModel(
                     authEngine = null
                     val activeState = engine?.tailscaleState?.takeIf { it.isNotEmpty() && it != "{}" }
                     engine?.stopTailscale()
-                    if (activeState != null) {
-                        appPrefs.tailscale.setStateJson(activeState)
-                    }
-                    appPrefs.tailscale.setEnabled(true)
-                    _uiState.update { it.copy(isEnabled = true, isLoggedIn = true) }
-                    val adapter = AdBlockVpnService.activeTunnelAdapter
-                    if (adapter != null) {
-                        val stateToUse = activeState ?: appPrefs.tailscale.getStateJsonSnapshot()
-                        val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
-                        val authKey = appPrefs.tailscale.getAuthKeySnapshot()
-                        adapter.configureTailscale(stateToUse, controlUrl, authKey)
-                        val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
-                        if (exitNodeId != 0L) {
-                            adapter.setTailscaleExitNode(exitNodeId)
-                        }
-                        adapter.startTailscaleSession("blockads-android")
-                    } else {
-                        ServiceController.requestStart(getApplication<Application>().applicationContext)
-                    }
+                    applyActiveTailscaleSession(activeState)
                 }
             }
         } catch (_: Exception) {
+        }
+    }
+
+    private suspend fun applyActiveTailscaleSession(activeState: String?) {
+        if (activeState != null) {
+            appPrefs.tailscale.setStateJson(activeState)
+        }
+        appPrefs.tailscale.setEnabled(true)
+        _uiState.update { it.copy(isEnabled = true, isLoggedIn = true, authUrl = "") }
+        _uiEffect.emit(TailscaleUiEffect.AuthSuccess)
+        syncActiveSession(activeState)
+    }
+
+    private suspend fun syncActiveSession(stateJson: String? = null) {
+        val adapter = AdBlockVpnService.activeTunnelAdapter
+        if (adapter != null) {
+            val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
+            val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
+            val authKey = appPrefs.tailscale.getAuthKeySnapshot()
+            adapter.configureTailscale(stateToUse, controlUrl, authKey)
+            val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+            if (exitNodeId != 0L) {
+                adapter.setTailscaleExitNode(exitNodeId)
+            }
+            adapter.startTailscaleSession("blockads-android")
+        } else {
+            ServiceController.requestStart(getApplication<Application>().applicationContext)
         }
     }
 

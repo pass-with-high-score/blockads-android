@@ -25,6 +25,7 @@
     <string name="home_chart_no_data">No data available</string>
     <string name="home_paused_trusted_short">Paused on a trusted network</string>
     <string name="cancel">Cancel</string>
+    <string name="action_undo">Undo</string>
     <string name="ok" translatable="false">OK</string>
     <string name="nav_statistics">Stats</string>
     <string name="nav_browser">Browser</string>

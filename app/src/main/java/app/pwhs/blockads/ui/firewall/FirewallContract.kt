@@ -16,6 +16,7 @@ enum class FirewallTab {
 
 data class FirewallUiState(
     val isFirewallEnabled: Boolean = false,
+    val isPromptEnabled: Boolean = false,
     val isLoading: Boolean = true,
     val searchQuery: String = "",
     val filterType: FirewallFilterType = FirewallFilterType.ALL,
@@ -39,15 +40,19 @@ data class FirewallUiState(
                 app.packageName.contains(searchQuery, ignoreCase = true)
             val matchesFilter = when (filterType) {
                 FirewallFilterType.ALL -> true
-                FirewallFilterType.BLOCKED -> app.packageName in rulesMap
-                FirewallFilterType.ALLOWED -> app.packageName !in rulesMap
+                FirewallFilterType.BLOCKED -> isBlocked(app.packageName)
+                FirewallFilterType.ALLOWED -> !isBlocked(app.packageName)
             }
             matchesSearch && matchesFilter
         }
+
+    /** A stored rule with isEnabled = false is a remembered "allow", not a block. */
+    fun isBlocked(packageName: String): Boolean = rulesMap[packageName]?.isEnabled == true
 }
 
 sealed interface FirewallUiIntent {
     data class SetFirewallEnabled(val enabled: Boolean) : FirewallUiIntent
+    data class SetPromptEnabled(val enabled: Boolean) : FirewallUiIntent
     data class UpdateSearchQuery(val query: String) : FirewallUiIntent
     data class SelectFilterType(val filterType: FirewallFilterType) : FirewallUiIntent
     data class SelectTab(val tab: FirewallTab) : FirewallUiIntent

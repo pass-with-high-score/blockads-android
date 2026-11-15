@@ -18,7 +18,13 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:name=".BlockAdsApplication"
@@ -123,6 +129,10 @@
 
         <receiver
             android:name=".widget.WidgetToggleReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".service.FirewallPromptReceiver"
             android:exported="false" />
 
         <!-- Tasker / Automation integration -->

@@ -148,6 +148,7 @@ func (e *Engine) StartStandalone(port int) error {
 	e.resolver = NewResolver(nil)
 	e.resolver.Configure(ParseProtocol(e.protocol), e.primaryDNS, e.fallbackDNS, e.dohURL)
 	e.resolver.SetODoHRelay(e.odohRelayURL)
+	e.resolver.SetProxyDialer(e.DialProxy)
 	e.mu.Unlock()
 
 	if oldUdp != nil {

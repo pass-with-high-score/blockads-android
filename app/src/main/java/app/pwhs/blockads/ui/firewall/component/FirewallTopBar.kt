@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +44,8 @@ fun FirewallTopBar(
     enabledCount: Int,
     allUserEnabled: Boolean,
     allSystemEnabled: Boolean,
+    isSearchVisible: Boolean,
+    onToggleSearch: () -> Unit,
     onToggleFirewall: (Boolean) -> Unit,
     onRefresh: () -> Unit,
     onToggleAllUserApps: () -> Unit,
@@ -88,16 +92,18 @@ fun FirewallTopBar(
                     )
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                IconButton(onClick = onRefresh) {
+                IconButton(onClick = onToggleSearch) {
                     Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = stringResource(R.string.app_management_refresh)
+                        imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = TextSecondary
                     )
                 }
                 IconButton(onClick = { showMenuDropdown = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = TextSecondary
                     )
                 }
             }
@@ -107,6 +113,19 @@ fun FirewallTopBar(
                 expanded = showMenuDropdown,
                 onDismissRequest = { showMenuDropdown = false }
             ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.app_management_refresh)) },
+                    onClick = {
+                        showMenuDropdown = false
+                        onRefresh()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = null
+                        )
+                    }
+                )
                 DropdownMenuItem(
                     text = {
                         Text(

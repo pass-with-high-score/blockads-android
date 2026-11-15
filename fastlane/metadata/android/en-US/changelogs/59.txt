@@ -1,0 +1,4 @@
+• Added Tailscale VPN support (Tailnet access, device details, ping & Taildrop)
+• Fixed IPv6 routing issues on IPv4-only networks
+• Fixed block reasons to display the actual filter list name
+• General bug fixes and stability improvements

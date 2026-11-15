@@ -23,7 +23,8 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 const (
-	flowDialTimeout = 10 * time.Second
+	flowDialTimeout    = 10 * time.Second
+	udpFlowIdleTimeout = 20 * time.Second
 )
 
 // newProtectedTcpHandler returns a TcpFlowHandler that forwards the
@@ -65,10 +66,10 @@ func newProtectedTcpHandler(uidr UIDResolver, protectFn func(fd int) bool) TcpFl
 
 		// Idle deadline on both sides so a stalled flow can't hold
 		// stack goroutines forever.
-		// No absolute deadline — rely on tun2socks' TCP keepalive
-		// (60s idle / 30s interval / 9 probes) to clean up stuck
-		// connections. Hard deadlines killed long-lived streams.
-		bidiCopyFlow(conn, remote)
+		// UDP has no connection teardown signal (no FIN/keepalive); reap idle
+		// flows with a rolling inactivity deadline so socket FDs and
+		// goroutines are released promptly.
+		bidiCopyUDP(conn, remote, udpFlowIdleTimeout)
 	}
 }
 
@@ -105,10 +106,10 @@ func newProtectedUdpHandler(uidr UIDResolver, protectFn func(fd int) bool) UdpFl
 
 		logf("[TcpStack] UDP uid=%d %s ↔ %s", uid, flow.appIP, dst)
 
-		// No absolute deadline — rely on tun2socks' TCP keepalive
-		// (60s idle / 30s interval / 9 probes) to clean up stuck
-		// connections. Hard deadlines killed long-lived streams.
-		bidiCopyFlow(conn, remote)
+		// UDP has no connection teardown signal (no FIN/keepalive); reap idle
+		// flows with a rolling inactivity deadline so socket FDs and
+		// goroutines are released promptly.
+		bidiCopyUDP(conn, remote, udpFlowIdleTimeout)
 	}
 }
 
@@ -155,5 +156,37 @@ func bidiCopyFlow(a, b net.Conn) {
 		}
 	}()
 
+	wg.Wait()
+}
+
+// bidiCopyUDP relays datagrams in both directions until either side errors or
+// no traffic flows in either direction for idleTimeout. Closing both conns on
+// exit unblocks the sibling goroutine immediately.
+func bidiCopyUDP(a, b net.Conn, idleTimeout time.Duration) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	relay := func(dst, src net.Conn) {
+		defer wg.Done()
+		defer dst.Close()
+		defer src.Close()
+		buf := make([]byte, 65535)
+		for {
+			_ = src.SetReadDeadline(time.Now().Add(idleTimeout))
+			n, err := src.Read(buf)
+			if n > 0 {
+				_ = dst.SetReadDeadline(time.Now().Add(idleTimeout))
+				if _, werr := dst.Write(buf[:n]); werr != nil {
+					return
+				}
+			}
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	go relay(b, a)
+	go relay(a, b)
 	wg.Wait()
 }

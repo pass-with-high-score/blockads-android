@@ -30,11 +30,9 @@ func spinUntilRunning(e *Engine) {
 	}
 }
 
-// Every relayed UDP flow holds two goroutines and a protected socket
-// with no idle timeout, and bidiCopyFlow's upstream read never unblocks, so
-// the flows outlive Stop as well.
+// Every relayed UDP flow uses a rolling idle timeout so idle flows
+// release their goroutines and socket FDs promptly.
 func TestIdleUDPFlowsReleased(t *testing.T) {
-	t.Skip("known bug: UDP passthrough flows never time out and survive Stop (2 goroutines + 1 fd each)")
 	if testing.Short() {
 		t.Skip("waits for idle flows to be reaped")
 	}

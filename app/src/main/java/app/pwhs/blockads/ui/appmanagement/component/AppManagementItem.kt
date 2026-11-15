@@ -1,8 +1,10 @@
 package app.pwhs.blockads.ui.appmanagement.component
 
+import android.text.format.Formatter
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -41,8 +44,10 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 fun AppManagementItem(
     app: AppManagementData,
     onToggle: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val backgroundColor by animateColorAsState(
         targetValue = if (app.isWhitelisted)
             MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
@@ -55,7 +60,9 @@ fun AppManagementItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -104,6 +111,17 @@ fun AppManagementItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (app.totalBytes > 0L) {
+                    val rxStr = Formatter.formatShortFileSize(context, app.rxBytes)
+                    val txStr = Formatter.formatShortFileSize(context, app.txBytes)
+                    val totalStr = Formatter.formatShortFileSize(context, app.totalBytes)
+                    Text(
+                        text = "↓ $rxStr · ↑ $txStr · ∑ $totalStr",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
                 if (app.totalQueries > 0) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),

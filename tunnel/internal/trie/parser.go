@@ -47,6 +47,20 @@ func parseCosmeticRule(line string) ([]string, string, bool) {
 	return domains, selector, true
 }
 
+func isSafePathRuleOptions(options string) bool {
+	for _, opt := range strings.Split(options, ",") {
+		opt = strings.ToLower(strings.TrimSpace(opt))
+		switch opt {
+		case "", "important", "all", "script", "xmlhttprequest", "xhr",
+			"subdocument", "image", "media", "ping", "beacon", "fetch", "other":
+			continue
+		default:
+			return false
+		}
+	}
+	return true
+}
+
 func parseNetworkPathRule(line string) (string, string, bool) {
 	line = strings.TrimSpace(line)
 	if strings.HasPrefix(line, "@@") || strings.HasPrefix(line, "!") || strings.HasPrefix(line, "#") {
@@ -55,7 +69,7 @@ func parseNetworkPathRule(line string) (string, string, bool) {
 	if strings.HasPrefix(line, "||") {
 		rest := strings.TrimPrefix(line, "||")
 		if dollarIdx := strings.IndexByte(rest, '$'); dollarIdx != -1 {
-			if strings.Contains(rest[dollarIdx+1:], "badfilter") {
+			if !isSafePathRuleOptions(rest[dollarIdx+1:]) {
 				return "", "", false
 			}
 			rest = rest[:dollarIdx]
@@ -74,7 +88,9 @@ func parseNetworkPathRule(line string) (string, string, bool) {
 			}
 		}
 		pathPattern := strings.TrimRight(pathPart, "*^")
-		if len(pathPattern) >= 3 && domain != "" && !strings.ContainsAny(domain, "/*?#") {
+		if len(strings.Trim(pathPattern, "/?")) >= 4 && domain != "" &&
+			!strings.ContainsAny(domain, "/*?#") &&
+			!strings.ContainsAny(pathPattern, "*|^\\[](){}") {
 			return domain, pathPattern, true
 		}
 		return "", "", false
@@ -82,10 +98,18 @@ func parseNetworkPathRule(line string) (string, string, bool) {
 	if strings.HasPrefix(line, "/") && !strings.HasPrefix(line, "//") && !strings.HasPrefix(line, "/*") {
 		clean := line
 		if dollarIdx := strings.IndexByte(clean, '$'); dollarIdx != -1 {
+			if !isSafePathRuleOptions(clean[dollarIdx+1:]) {
+				return "", "", false
+			}
 			clean = clean[:dollarIdx]
 		}
+		if strings.HasSuffix(clean, "/") {
+			return "", "", false
+		}
 		clean = strings.TrimRight(clean, "*^")
-		if len(clean) >= 4 && strings.HasPrefix(clean, "/") {
+		if len(strings.Trim(clean, "/?")) >= 5 &&
+			strings.HasPrefix(clean, "/") &&
+			!strings.ContainsAny(clean, "*?|^\\[](){}+") {
 			return "*", clean, true
 		}
 	}
@@ -144,13 +168,15 @@ func parseDomainLine(line string) string {
 
 		// Handle modifiers after $
 		if dollarIdx := strings.IndexByte(domain, '$'); dollarIdx != -1 {
+			domainName := strings.TrimSuffix(domain[:dollarIdx], "^")
+			isSingleLabelTLD := domainName != "" && !strings.Contains(domainName, ".")
 			options := domain[dollarIdx+1:]
 			for _, opt := range strings.Split(options, ",") {
-				opt = strings.TrimSpace(opt)
-				if opt == "" || opt == "important" || opt == "empty" || opt == "mp4" ||
-					opt == "all" || opt == "popup" || opt == "document" || opt == "doc" ||
+				opt = strings.ToLower(strings.TrimSpace(opt))
+				if opt == "" || opt == "important" || opt == "all" ||
 					opt == "dns" || strings.HasPrefix(opt, "dnstype") || opt == "cname" ||
-					opt == "network" || strings.HasPrefix(opt, "ctag") || strings.HasPrefix(opt, "denyallow") {
+					opt == "network" || strings.HasPrefix(opt, "ctag") ||
+					(isSingleLabelTLD && strings.HasPrefix(opt, "denyallow=")) {
 					continue
 				}
 				return ""

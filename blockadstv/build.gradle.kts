@@ -30,11 +30,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.pwhs.blockadstv"
+        applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 58
-        versionName = "7.1.1"
+        versionCode = 2000
+        versionName = "7.1.2"
     }
 
     flavorDimensions += "distribution"

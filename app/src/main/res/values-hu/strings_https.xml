@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Certificate Status Card -->
+    <string name="cert_status_installed">A CA-tanúsítvány telepítve van és megbízható. A fejlett HTTPS-reklámblokkolás használatra kész.</string>
+    <string name="cert_status_checking">Tanúsítvány ellenőrzése az eszköz biztonságos tárolójában…</string>
+    <string name="cert_status_not_installed">A BlockAds CA-tanúsítvány szükséges a HTTPS-kapcsolatokon megjelenő reklámok visszafejtéséhez és szűréséhez.</string>
+    <string name="cert_action_check_again">Újraellenőrzés</string>
+    <string name="cert_action_reinstall">Újratelepítés</string>
+    <string name="cert_action_install">Tanúsítvány telepítése</string>
+
+    <!-- Device Installation Steps (DeviceManager) -->
+    <string name="device_step_open_settings">Nyissa meg a rendszer Beállításait</string>
+    <string name="device_step_samsung_security_privacy">Válassza a Biztonság és adatvédelem lehetőséget</string>
+    <string name="device_step_samsung_more_security">Görgessen le, és válassza a További biztonsági beállítások lehetőséget</string>
+    <string name="device_step_samsung_install_from_storage">Válassza a Telepítés az eszköz tárhelyéről lehetőséget</string>
+    <string name="device_step_samsung_ca_cert_confirm">Válassza a CA-tanúsítvány lehetőséget, és erősítse meg: \'Telepítés mindenképp\'</string>
+    <string name="device_step_select_downloaded_cert">Válassza ki a letöltött BlockAds-RootCA.crt fájlt</string>
+    <string name="device_step_samsung_biometrics">Válassza a Biometrikus adatok és biztonság lehetőséget</string>
+    <string name="device_step_samsung_other_security">Válassza az Egyéb biztonsági beállítások lehetőséget</string>
+    <string name="device_step_samsung_ca_cert_warn">Válassza a CA-tanúsítvány lehetőséget, és fogadja el a figyelmeztetést</string>
+    <string name="device_step_samsung_other_sec_install_storage">Válassza: Egyéb biztonsági beállítások &gt; Telepítés a tárhelyről</string>
+    <string name="device_step_select_ca_cert">Válassza a CA-tanúsítvány lehetőséget</string>
+    <string name="device_step_google_security_privacy">Válassza a Biztonság és adatvédelem lehetőséget</string>
+    <string name="device_step_google_more_security">Válassza a További biztonsági beállítások lehetőséget</string>
+    <string name="device_step_google_encryption_credentials">Válassza a Titkosítás és hitelesítési adatok lehetőséget</string>
+    <string name="device_step_google_install_ca_cert">Válassza: Tanúsítvány telepítése &gt; CA-tanúsítvány</string>
+    <string name="device_step_google_confirm_and_select">Koppintson a \'Telepítés mindenképp\' gombra, és válassza ki a BlockAds-RootCA.crt fájlt</string>
+    <string name="device_step_google_security_encryption">Válassza: Biztonság &gt; Titkosítás és hitelesítési adatok</string>
+    <string name="device_step_google_install_certificate">Válassza a Tanúsítvány telepítése lehetőséget</string>
+    <string name="device_step_google_ca_cert_confirm">Válassza a CA-tanúsítvány lehetőséget, és erősítse meg</string>
+    <string name="device_step_xiaomi_open_settings">Nyissa meg a Beállításokat</string>
+    <string name="device_step_xiaomi_passwords_security">Válassza a Jelszavak és biztonság lehetőséget</string>
+    <string name="device_step_xiaomi_privacy_encryption">Válassza: Adatvédelem &gt; Titkosítás és hitelesítési adatok</string>
+    <string name="device_step_xiaomi_install_ca">Válassza: Tanúsítvány telepítése &gt; CA-tanúsítvány</string>
+    <string name="device_step_xiaomi_confirm_select">Fogadja el a figyelmeztetést, és válassza ki a BlockAds-RootCA.crt fájlt</string>
+    <string name="device_step_oppo_security_more">Válassza: Biztonság &gt; További biztonsági beállítások</string>
+    <string name="device_step_oppo_credential_storage">Válassza a Hitelesítési adatok tárolása lehetőséget</string>
+    <string name="device_step_oppo_install_ca">Válassza: Telepítés az eszköz tárhelyéről &gt; CA-tanúsítvány</string>
+    <string name="device_step_vivo_security_encryption">Válassza: Biztonság &gt; Titkosítás és hitelesítési adatok</string>
+    <string name="device_step_vivo_install_ca">Válassza: Tanúsítvány telepítése &gt; CA-tanúsítvány</string>
+    <string name="device_step_generic_search_certificate">Keressen rá a \'Tanúsítvány\' szóra a keresősávban</string>
+    <string name="device_step_generic_choose_ca">Válassza a \'CA-tanúsítvány\' vagy a \'Telepítés a tárhelyről\' lehetőséget</string>
+    <string name="device_step_generic_confirm">Ha a rendszer kéri, erősítse meg: \'Telepítés mindenképp\'</string>
+    <string name="device_step_generic_select_downloads">Válassza ki a BlockAds-RootCA.crt fájlt a Letöltések mappából</string>
+</resources>

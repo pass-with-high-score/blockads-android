@@ -96,7 +96,8 @@ class VpnTunnelBuilderTest {
     @After
     fun tearDown() = unmockkAll()
 
-    private fun establish(vararg whitelist: String) = VpnTunnelBuilder(service, prefs).establish(whitelist.toSet())
+    private fun establish(vararg whitelist: String, hasIpv6: Boolean = true) =
+        VpnTunnelBuilder(service, prefs) { hasIpv6 }.establish(whitelist.toSet())
 
     @Test
     fun `revoked permission is reported before building anything`() {
@@ -114,6 +115,37 @@ class VpnTunnelBuilderTest {
         assertTrue(routes.containsAll(listOf("0.0.0.0/0", "::/0", "100.64.100.1/32", "fd00::1/128")))
         assertEquals(listOf("com.bank", "app.pwhs.blockads"), disallowed)
         assertEquals(false, bypass)
+    }
+
+    @Test
+    fun `direct mode omits IPv6 routes and address when physical network has no IPv6`() {
+        val result = establish("com.bank", hasIpv6 = false) as TunnelResult.Success
+        assertEquals("", result.resolvedWgConfigJson)
+        assertTrue(routes.contains("0.0.0.0/0"))
+        assertTrue("::/0" !in routes)
+        assertTrue("fd00::1/128" !in routes)
+        assertTrue("fd00::2/128" !in addresses)
+        assertTrue("100.64.100.2/32" in addresses)
+    }
+
+    @Test
+    fun `direct mode omits IPv6 when preferredIPType is IPv4 even if physical network has IPv6`() {
+        every { prefs.preferredIPType } returns flowOf(AppPreferences.PREFERRED_IP_IPV4)
+        val result = establish("com.bank", hasIpv6 = true) as TunnelResult.Success
+        assertEquals("", result.resolvedWgConfigJson)
+        assertTrue(routes.contains("0.0.0.0/0"))
+        assertTrue("::/0" !in routes)
+        assertTrue("fd00::1/128" !in routes)
+        assertTrue("fd00::2/128" !in addresses)
+    }
+
+    @Test
+    fun `direct mode forces IPv6 when preferredIPType is IPv6 even if physical network has no IPv6`() {
+        every { prefs.preferredIPType } returns flowOf(AppPreferences.PREFERRED_IP_IPV6)
+        val result = establish("com.bank", hasIpv6 = false) as TunnelResult.Success
+        assertEquals("", result.resolvedWgConfigJson)
+        assertTrue("::/0" in routes)
+        assertTrue("fd00::2/128" in addresses)
     }
 
     @Test

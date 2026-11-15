@@ -33,7 +33,7 @@ class FirewallManagerNetworkTest {
     }
     private val context: Context = mockk { every { getSystemService(Context.CONNECTIVITY_SERVICE) } returns cm }
     private var rules = listOf<FirewallRule>()
-    private val dao: FirewallRuleDao = mockk { coEvery { getEnabledRules() } answers { rules } }
+    private val dao: FirewallRuleDao = mockk { coEvery { getAllSnapshot() } answers { rules } }
 
     private suspend fun manager(vararg r: FirewallRule) = FirewallManager(context, dao).also {
         rules = r.toList()

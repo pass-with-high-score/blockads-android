@@ -110,7 +110,15 @@ class GoTunnelAdapter(
     private fun setupAppUidResolver() {
         engine.setAppUidResolver(tunnel.AppUidResolver { uid ->
             try {
-                context.packageManager.getPackagesForUid(uid.toInt())?.firstOrNull() ?: ""
+                val uidInt = uid.toInt()
+                // Fallback to appId (uid % 100_000) for Secure Folder / Private Space / Work Profile UIDs.
+                context.packageManager.getPackagesForUid(uidInt)?.firstOrNull()
+                    ?: (if (uidInt >= 100_000) {
+                        context.packageManager.getPackagesForUid(uidInt % 100_000)?.firstOrNull()
+                    } else {
+                        null
+                    })
+                    ?: ""
             } catch (e: Exception) {
                 ""
             }
@@ -148,6 +156,8 @@ class GoTunnelAdapter(
      * Receives the already resolved appName from Go, and checks [FirewallManager.shouldBlock].
      */
     private fun setupFirewallChecker() {
+        val initialFwManager = firewallManagerProvider()
+        engine.setFirewallEnabled(initialFwManager != null && initialFwManager.hasActiveRules())
         engine.setFirewallChecker(FirewallChecker { appName ->
             val fwManager = firewallManagerProvider() ?: return@FirewallChecker false
             try {
@@ -172,6 +182,14 @@ class GoTunnelAdapter(
      */
     fun setConnLogEnabled(enabled: Boolean) {
         engine.setConnLogEnabled(enabled)
+    }
+
+    fun setSniProxyRules(rulesJson: String) {
+        try {
+            engine.setSniProxyRules(rulesJson)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to update SNI proxy rules")
+        }
     }
 
     fun setBlockDohBypass(enabled: Boolean) {
@@ -321,6 +339,8 @@ class GoTunnelAdapter(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to init stack MITM on VPN boot")
             }
+        } else {
+            engine.stopStackMitm()
         }
 
         setupAppResolver()
@@ -448,6 +468,17 @@ class GoTunnelAdapter(
     fun configureTailscale(state: String, url: String, key: String): String =
         runCatching { engine.configureTailscale(state, url, key) }.getOrDefault("{}")
 
+    fun setTailscaleTaildropReceiver(receiver: tunnel.TaildropReceiver) {
+        runCatching { engine.setTailscaleTaildropReceiver(receiver) }
+    }
+
+    fun setTailscaleTaildropDir(dir: String) {
+        runCatching { engine.setTailscaleTaildropDir(dir) }
+    }
+
+    fun sendTailscaleFile(target: String, fileName: String, filePath: String): Result<Unit> =
+        runCatching { engine.sendTailscaleFile(target, fileName, filePath) }
+
     fun startTailscaleAuth(host: String): String =
         runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
 
@@ -469,12 +500,23 @@ class GoTunnelAdapter(
         runCatching { engine.setTailscaleExitNode(id) }
     }
 
+    fun setTailscaleAdvertiseExitNode(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdvertiseExitNode(enabled) }
+    }
+
+    fun setTailscaleAdBlockEnabled(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdBlockEnabled(enabled) }
+    }
+
+    fun pingTailscalePeer(target: String): String =
+        runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
+
     fun isTailscaleActive(): Boolean =
         runCatching { engine.isTailscaleActive }.getOrDefault(false)
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {
-            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; else -> "OTHER"
+            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; 65 -> "HTTPS"; else -> "OTHER"
         }
     }
 }

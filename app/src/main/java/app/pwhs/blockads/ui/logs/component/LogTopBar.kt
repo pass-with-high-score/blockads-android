@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoDelete
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.PauseCircle
@@ -39,7 +40,9 @@ fun LogTopBar(
     onToggleRecordDnsLogs: () -> Unit,
     onExportLogs: () -> Unit,
     onClearLogs: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    logRetentionDays: Int = 0,
+    onOpenRetentionSettings: () -> Unit = {},
 ) {
     TopAppBar(
         modifier = modifier,
@@ -99,6 +102,15 @@ fun LogTopBar(
                     imageVector = Icons.Default.UploadFile,
                     contentDescription = "Export logs",
                     tint = TextSecondary
+                )
+            }
+
+            // Auto-delete old logs setting
+            IconButton(onClick = onOpenRetentionSettings) {
+                Icon(
+                    imageVector = Icons.Default.AutoDelete,
+                    contentDescription = stringResource(R.string.log_retention_title),
+                    tint = if (logRetentionDays > 0) MaterialTheme.colorScheme.primary else TextSecondary
                 )
             }
 

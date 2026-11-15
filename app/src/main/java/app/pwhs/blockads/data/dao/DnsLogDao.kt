@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import app.pwhs.blockads.data.entities.AppNamePackage
 import app.pwhs.blockads.data.entities.AppStat
 import app.pwhs.blockads.data.entities.BlockReasonRawStat
 import app.pwhs.blockads.data.entities.CountryStat
@@ -43,6 +44,9 @@ interface DnsLogDao {
 
     @Query("SELECT DISTINCT appName FROM dns_logs WHERE appName != '' ORDER BY appName ASC")
     fun getDistinctAppNames(): Flow<List<String>>
+
+    @Query("SELECT appName, MAX(packageName) AS packageName FROM dns_logs WHERE appName != '' AND packageName != '' GROUP BY appName")
+    fun getDistinctAppPackages(): Flow<List<AppNamePackage>>
 
     @Query("SELECT * FROM dns_logs ORDER BY timestamp DESC LIMIT :limit")
     fun getRecentLogs(limit: Int): Flow<List<DnsLogEntry>>
@@ -311,5 +315,20 @@ interface DnsLogDao {
     fun getAllCountryTopDomains(
         countryCode: String,
         limit: Int = 10
+    ): Flow<List<CountryTopDomain>>
+    @Query(
+        """
+        SELECT domain, COUNT(*) AS count,
+               SUM(CASE WHEN isBlocked = 1 THEN 1 ELSE 0 END) AS blockedCount
+        FROM dns_logs
+        WHERE packageName = :packageName
+        GROUP BY domain
+        ORDER BY blockedCount DESC, count DESC
+        LIMIT :limit
+        """
+    )
+    fun getAppTopDomains(
+        packageName: String,
+        limit: Int = 20
     ): Flow<List<CountryTopDomain>>
 }

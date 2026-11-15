@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoDelete
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -20,7 +22,9 @@ fun DataSection(
     onImport: () -> Unit,
     onClearLogs: () -> Unit,
     onResetSettings: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    logRetentionDays: Int = 0,
+    onOpenLogRetentionDialog: () -> Unit = {},
 ) {
     val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
 
@@ -53,7 +57,24 @@ fun DataSection(
 
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
 
-                // 3. Clear logs
+                // 3. Auto-delete old logs
+                val retentionLabel = when (logRetentionDays) {
+                    1 -> stringResource(R.string.log_retention_1d)
+                    3 -> stringResource(R.string.log_retention_3d)
+                    7 -> stringResource(R.string.log_retention_7d)
+                    else -> stringResource(R.string.log_retention_off)
+                }
+                SettingItem(
+                    icon = Icons.Default.AutoDelete,
+                    iconTint = Color(0xFF0EA5E9),
+                    title = stringResource(R.string.log_retention_title),
+                    desc = retentionLabel,
+                    onClick = onOpenLogRetentionDialog
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
+
+                // 4. Clear logs
                 SettingItem(
                     iconPainter = painterResource(R.drawable.ic_settings_trash),
                     iconTint = Color(0xFFE11D48),

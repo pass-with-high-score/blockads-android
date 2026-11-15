@@ -29,6 +29,8 @@ import app.pwhs.blockads.service.NotificationHelper
 import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.service.VpnState
+import app.pwhs.blockads.ui.home.component.ActiveFeatureBadge
+import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.ui.home.data.RecentLogFilter
@@ -136,6 +138,9 @@ class HomeViewModel(
     val dismissedFeatureTips: StateFlow<Set<String>> = appPrefs.dismissedFeatureTips
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
+    val homeTipsEnabled: StateFlow<Boolean> = appPrefs.homeTipsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     private val _hasInteractedWithTipThisSession = MutableStateFlow(false)
     val hasInteractedWithTipThisSession: StateFlow<Boolean> = _hasInteractedWithTipThisSession.asStateFlow()
 
@@ -177,6 +182,62 @@ class HomeViewModel(
     ) { state1, state2 ->
         state1 == VpnState.STOPPING || state2 == VpnState.STOPPING
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val vpnPhase: StateFlow<String> = AdBlockVpnService.status.phase
+
+    val activeFeatureBadges: StateFlow<List<ActiveFeatureBadge>> = combine(
+        combine(
+            appPrefs.dnsProtocol,
+            appPrefs.httpsFilteringEnabled,
+            appPrefs.firewallEnabled,
+            appPrefs.tailscale.enabled
+        ) { protocol, httpsEnabled, firewallEnabled, tailscaleEnabled ->
+            listOf(protocol, httpsEnabled, firewallEnabled, tailscaleEnabled)
+        },
+        appPrefs.routingMode,
+        filterRepo.domainCountFlow
+    ) { core, mode, rulesCount ->
+        val protocol = core[0] as app.pwhs.blockads.data.entities.DnsProtocol
+        val httpsEnabled = core[1] as Boolean
+        val firewallEnabled = core[2] as Boolean
+        val tailscaleEnabled = core[3] as Boolean
+        buildList {
+            add(
+                ActiveFeatureBadge(
+                    kind = FeatureBadgeKind.DNS_PROTOCOL,
+                    label = when (protocol.name) {
+                        "DOH" -> "DoH"
+                        "DOT" -> "DoT"
+                        "DOQ" -> "DoQ"
+                        else -> "DNS"
+                    }
+                )
+            )
+            if (httpsEnabled) {
+                add(ActiveFeatureBadge(FeatureBadgeKind.HTTPS_FILTER, "HTTPS"))
+            }
+            if (firewallEnabled) {
+                add(ActiveFeatureBadge(FeatureBadgeKind.FIREWALL, "Firewall"))
+            }
+            if (tailscaleEnabled) {
+                add(ActiveFeatureBadge(FeatureBadgeKind.TAILSCALE, "Tailscale"))
+            }
+            when (mode) {
+                AppPreferences.ROUTING_MODE_WIREGUARD ->
+                    add(ActiveFeatureBadge(FeatureBadgeKind.TUNNEL_MODE, "WireGuard"))
+                AppPreferences.ROUTING_MODE_SHADOWSOCKS ->
+                    add(ActiveFeatureBadge(FeatureBadgeKind.TUNNEL_MODE, "Shadowsocks"))
+                AppPreferences.ROUTING_MODE_PROXY_VPN ->
+                    add(ActiveFeatureBadge(FeatureBadgeKind.TUNNEL_MODE, "Proxy"))
+                AppPreferences.ROUTING_MODE_ROOT ->
+                    add(ActiveFeatureBadge(FeatureBadgeKind.TUNNEL_MODE, "Root"))
+            }
+            if (rulesCount > 0) {
+                val formatted = if (rulesCount >= 1000) "${rulesCount / 1000}K" else "$rulesCount"
+                add(ActiveFeatureBadge(FeatureBadgeKind.FILTER_RULES, formatted))
+            }
+        }.take(4)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val blockedCount: StateFlow<Int> = dnsLogDao.getBlockedCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)

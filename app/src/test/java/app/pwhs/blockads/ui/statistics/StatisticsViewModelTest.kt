@@ -3,6 +3,8 @@ package app.pwhs.blockads.ui.statistics
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.entities.AppStat
+import app.pwhs.blockads.data.entities.BlockReasonRawStat
+import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.entities.TopBlockedDomain
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.ui.MainDispatcherRule
@@ -79,6 +81,44 @@ class StatisticsViewModelTest {
         assertEquals("google.com", vm.countryTopDomains.value.single().domain)
         assertEquals(20, vm.countryTopDomains.value.single().count)
         assertEquals(2, vm.countryTopDomains.value.single().blockedCount)
+    }
+
+    @Test
+    fun `blockReasons maps filter lists correctly including AD category`() = runTest {
+        val filter1 = FilterList(id = 101, name = "AdGuard Base", url = "https://example.com/adguard", category = "AD")
+        val filter2 = FilterList(id = 202, name = "EasyPrivacy", url = "https://example.com/easyprivacy", category = "PRIVACY")
+        every { filterListDao.getAll() } returns flowOf(listOf(filter1, filter2))
+        every { dao.getBlockReasonStatsSince(any()) } returns flowOf(
+            listOf(
+                BlockReasonRawStat(blockedBy = "101", count = 50),
+                BlockReasonRawStat(blockedBy = "202", count = 30),
+                BlockReasonRawStat(blockedBy = "firewall", count = 10)
+            )
+        )
+
+        val vm = StatisticsViewModel(dao, filterListDao) { now }
+        keepHot(vm.blockReasons)
+
+        val reasons = vm.blockReasons.value
+        assertEquals(3, reasons.size)
+
+        val adReason = reasons.find { it.reasonKey == "101" }!!
+        assertEquals("AdGuard Base", adReason.displayName)
+        assertEquals(101L, adReason.filterId)
+        assertEquals("AD", adReason.category)
+        assertEquals(50, adReason.count)
+
+        val privacyReason = reasons.find { it.reasonKey == "202" }!!
+        assertEquals("EasyPrivacy", privacyReason.displayName)
+        assertEquals(202L, privacyReason.filterId)
+        assertEquals("PRIVACY", privacyReason.category)
+        assertEquals(30, privacyReason.count)
+
+        val firewallReason = reasons.find { it.reasonKey == "firewall" }!!
+        assertEquals("App Firewall", firewallReason.displayName)
+        assertEquals(null, firewallReason.filterId)
+        assertEquals("FIREWALL", firewallReason.category)
+        assertEquals(10, firewallReason.count)
     }
 
     @Ignore("known bug: todayStart is computed once, so 'today' counters keep counting from yesterday after midnight")

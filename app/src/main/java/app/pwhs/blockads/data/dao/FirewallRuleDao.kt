@@ -18,6 +18,10 @@ interface FirewallRuleDao {
     @Query("SELECT * FROM firewall_rules WHERE isEnabled = 1")
     suspend fun getEnabledRules(): List<FirewallRule>
 
+    /** All rules: isEnabled = 1 means blocked, isEnabled = 0 means explicitly allowed. */
+    @Query("SELECT * FROM firewall_rules")
+    suspend fun getAllSnapshot(): List<FirewallRule>
+
     @Query("SELECT * FROM firewall_rules WHERE packageName = :packageName LIMIT 1")
     suspend fun getByPackageName(packageName: String): FirewallRule?
 

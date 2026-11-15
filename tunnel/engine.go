@@ -119,9 +119,10 @@ type Engine struct {
 	// path reads it without holding e.mu — racing with Stop would be a
 	// data race otherwise. The pipe's own Close is panic-free so a
 	// stale pointer read + Push is safe (silently drops).
-	tcpStack     *TcpIpStack
-	tcpStackPipe atomic.Pointer[packetPipe]
-	useTcpStack  atomic.Bool
+	tcpStack        *TcpIpStack
+	tcpStackPipe    atomic.Pointer[packetPipe]
+	useTcpStack     atomic.Bool
+	firewallEnabled atomic.Bool
 
 	// connLogEnabled mirrors the app's "record logs" preference. Connection
 	// logging resolves the owning app per flow, which costs two binder round
@@ -153,6 +154,9 @@ type Engine struct {
 	rulesetMatcher   atomic.Pointer[RulesetMatcher]
 	activeRulesetCfg atomic.Pointer[RulesetConfig]
 
+	// SNI Proxy routing rules (per-app / per-SNI TCP 443 redirect)
+	sniProxyRules atomic.Pointer[[]compiledSniProxyRule]
+
 	// GeoIP database
 	geoIPDB atomic.Pointer[GeoIPDatabase]
 
@@ -163,7 +167,11 @@ type Engine struct {
 	proxyClient atomic.Pointer[proxy.Client]
 
 	// Tailscale manager (lightweight integration)
-	tsManager atomic.Pointer[tailscale.Manager]
+	tsManager                 atomic.Pointer[tailscale.Manager]
+	taildropReceiver          TaildropReceiver
+	taildropDir               string
+	advertiseExitNode         bool
+	blockAdsTailscaleDisabled atomic.Bool
 
 	// preferredIPType controls whether IPv4 or IPv6 DNS records are preferred:
 	// "auto" (default): dual stack, allow both A and AAAA queries.
@@ -336,9 +344,17 @@ func (e *Engine) SetTries(adTriePathsCsv, secTriePathsCsv, adBloomPathsCsv, secB
 }
 
 // SetFirewallChecker sets the Kotlin-side firewall checker.
-// This is called before Start() to enable per-app DNS blocking.
+// This is called before Start() to enable per-app DNS and flow blocking.
 func (e *Engine) SetFirewallChecker(checker FirewallChecker) {
 	e.firewallChecker = checker
+}
+
+// SetFirewallEnabled toggles per-flow L4 firewall checks in full-tunnel and WireGuard modes.
+// When false, TCP/UDP flows skip UID resolution entirely.
+func (e *Engine) SetFirewallEnabled(enabled bool) {
+	flowFirewallCache.Clear()
+	e.firewallEnabled.Store(enabled)
+	logf("SetFirewallEnabled: L4 firewall = %t", enabled)
 }
 
 // SetAppResolver sets the Kotlin-side app name resolver for logging who made the request.

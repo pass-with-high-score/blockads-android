@@ -224,11 +224,21 @@ class AppNameResolver(private val context: Context) {
         return null
     }
 
+    private fun packagesForUid(uid: Int): Array<String>? {
+        val pm = context.packageManager
+        return pm.getPackagesForUid(uid)?.takeIf { it.isNotEmpty() }
+            ?: if (uid >= 100_000) {
+                pm.getPackagesForUid(uid % 100_000)?.takeIf { it.isNotEmpty() }
+            } else {
+                null
+            }
+    }
+
     internal fun getAppNameForUid(uid: Int): String {
         uidToAppNameCache[uid]?.let { return it }
 
         val pm = context.packageManager
-        val packages = pm.getPackagesForUid(uid)
+        val packages = packagesForUid(uid)
         if (packages.isNullOrEmpty()) {
             // System UIDs
             val name = when {
@@ -260,8 +270,7 @@ class AppNameResolver(private val context: Context) {
     internal fun getPackageNameForUid(uid: Int): String {
         uidToPackageNameCache[uid]?.let { return it }
 
-        val pm = context.packageManager
-        val packages = pm.getPackagesForUid(uid)
+        val packages = packagesForUid(uid)
         if (packages.isNullOrEmpty()) return ""
 
         val packageName = packages[0]

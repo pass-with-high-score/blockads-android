@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FirewallRule
+import app.pwhs.blockads.service.FirewallPromptManager
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.ui.MainDispatcherRule
 import app.pwhs.blockads.ui.awaitUntil
@@ -44,7 +45,9 @@ class FirewallViewModelTest {
     private val enabled = MutableStateFlow(false)
     private val appPrefs: AppPreferences = mockk(relaxed = true) {
         every { firewallEnabled } returns enabled
+        every { firewallPromptEnabled } returns flowOf(false)
     }
+    private val promptManager: FirewallPromptManager = mockk(relaxed = true)
     private val rules = MutableStateFlow(listOf(FirewallRule(id = 1, packageName = "com.user")))
     private val dao: FirewallRuleDao = mockk(relaxed = true) {
         every { getAll() } returns rules
@@ -64,7 +67,7 @@ class FirewallViewModelTest {
     fun tearDown() = unmockkAll()
 
     private fun loadedVm(): FirewallViewModel {
-        val vm = FirewallViewModel(appPrefs, dao, app)
+        val vm = FirewallViewModel(appPrefs, dao, promptManager, app)
         awaitUntil(message = "apps loaded") { !vm.isLoading.value }
         return vm
     }
@@ -143,7 +146,7 @@ class FirewallViewModelTest {
         }
         val ctx = mockk<Context>(relaxed = true) { every { packageManager } returns pm }
         val failingApp = mockk<Application>(relaxed = true) { every { applicationContext } returns ctx }
-        val vm = FirewallViewModel(appPrefs, dao, failingApp)
+        val vm = FirewallViewModel(appPrefs, dao, promptManager, failingApp)
         awaitUntil(timeoutMs = 2_000, message = "loading cleared") { !vm.isLoading.value }
     }
 }
