@@ -1,0 +1,3 @@
+- Rebranded Android TV Store build to ZephyrNG TV
+- Required android.software.leanback for Android TV Play Store track
+- Unified ZephyrNG branding across Store notifications, browser UI, and VPN strings
