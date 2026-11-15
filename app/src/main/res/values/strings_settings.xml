@@ -70,6 +70,10 @@
     <string name="trusted_networks_use_system_dns_toggle">Use system DNS on trusted networks</string>
     <string name="trusted_networks_use_system_dns_desc">Keep ad blocking active but use the Wi-Fi network\'s local DNS server to resolve internal domains.</string>
     <string name="trusted_networks_add_current">Add current Wi-Fi network</string>
+    <string name="trusted_networks_add_manual">Add Wi-Fi manually</string>
+    <string name="trusted_networks_add_manual_desc">Enter a Wi-Fi network name (SSID)</string>
+    <string name="trusted_networks_ssid_label">Wi-Fi name (SSID)</string>
+    <string name="trusted_networks_add_action">Add</string>
     <string name="trusted_networks_no_wifi">Not connected to Wi-Fi (or location permission needed)</string>
     <string name="trusted_networks_list_header">Trusted Wi-Fi networks</string>
     <string name="trusted_networks_empty">No trusted networks yet. Add the one you\'re on to pause BlockAds there.</string>

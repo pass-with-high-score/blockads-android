@@ -163,6 +163,10 @@
     <string name="trusted_networks_use_system_dns_toggle">Dùng DNS hệ thống trên mạng tin cậy</string>
     <string name="trusted_networks_use_system_dns_desc">Vẫn bật chặn quảng cáo nhưng dùng máy chủ DNS của Wi-Fi để phân giải tên miền nội bộ.</string>
     <string name="trusted_networks_add_current">Thêm Wi-Fi hiện tại</string>
+    <string name="trusted_networks_add_manual">Thêm Wi-Fi thủ công</string>
+    <string name="trusted_networks_add_manual_desc">Nhập tên mạng Wi-Fi (SSID)</string>
+    <string name="trusted_networks_ssid_label">Tên Wi-Fi (SSID)</string>
+    <string name="trusted_networks_add_action">Thêm</string>
     <string name="trusted_networks_no_wifi">Chưa kết nối Wi-Fi (hoặc cần quyền vị trí)</string>
     <string name="trusted_networks_list_header">Wi-Fi tin cậy</string>
     <string name="trusted_networks_empty">Chưa có mạng tin cậy nào. Thêm mạng đang dùng để tạm dừng BlockAds tại đó.</string>

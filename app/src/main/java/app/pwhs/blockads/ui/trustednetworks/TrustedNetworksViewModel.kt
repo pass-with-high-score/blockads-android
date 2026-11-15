@@ -55,7 +55,18 @@ class TrustedNetworksViewModel(
 
     fun addCurrentNetwork() {
         val ssid = TrustedNetworkManager.currentSsid(getApplication()) ?: return
-        viewModelScope.launch { appPrefs.toggleTrustedSsid(ssid) }
+        addSsid(ssid)
+    }
+
+    fun addSsid(rawSsid: String) {
+        val ssid = rawSsid.trim()
+        if (ssid.isEmpty()) return
+        viewModelScope.launch {
+            val current = appPrefs.getTrustedSsidsSnapshot()
+            if (ssid !in current) {
+                appPrefs.setTrustedSsids(current + ssid)
+            }
+        }
     }
 
     fun removeSsid(ssid: String) {
