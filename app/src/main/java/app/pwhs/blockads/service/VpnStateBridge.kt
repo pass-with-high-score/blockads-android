@@ -8,7 +8,9 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import app.pwhs.blockads.service.vpn.VpnStatusStore
@@ -23,6 +25,7 @@ object VpnStateBridge {
     const val KEY_LAST_STOPPED_TIMESTAMP = "direct_boot_last_stopped_timestamp"
     const val KEY_PRIVATE_DNS_STRICT = "direct_boot_private_dns_strict"
     const val KEY_VPN_ENABLED = "direct_boot_vpn_enabled"
+    internal const val LIVENESS_CONFIRM_TIMEOUT_MS = 2_000L
 
     @Volatile
     private var isBridgeInitialized = false
@@ -31,7 +34,13 @@ object VpnStateBridge {
     internal var isLivenessBound = false
         private set
 
+    @Volatile
+    internal var isLivenessConfirmed = false
+        private set
+
     private var livenessConnection: ServiceConnection? = null
+    private var livenessTimeoutHandler: Handler? = null
+    private var livenessTimeoutRunnable: Runnable? = null
 
     private fun getPrefs(context: Context): SharedPreferences {
         val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -85,27 +94,29 @@ object VpnStateBridge {
             status.lastStoppedTimestamp = prefs.getLong(KEY_LAST_STOPPED_TIMESTAMP, 0L)
             status.privateDnsStrict.value = prefs.getBoolean(KEY_PRIVATE_DNS_STRICT, false)
 
-            // Reconcile: If hydrated state is non-STOPPED on cold boot, verify against OS active VPN transport.
-            // If the OS reports no active VPN transport, fall back to STOPPED and reset startTimestamp.
-            if (status.state.value != VpnState.STOPPED &&
-                !VpnUtils.isVpnTransportActive(context)
-            ) {
-                Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")
-                status.state.value = VpnState.STOPPED
-                status.phase.value = ""
-                status.startTimestamp = 0L
-                persistState(
-                    context = context,
-                    state = VpnState.STOPPED,
-                    startTimestamp = 0L,
-                    lastStoppedTimestamp = status.lastStoppedTimestamp,
-                    privateDnsStrict = status.privateDnsStrict.value,
-                    phase = ""
-                )
+            // Reconcile: If hydrated state is non-STOPPED on cold boot, verify against OS active VPN transport
+            // and confirm AdBlockVpnService liveness via bounded check. Keep corrections local to memory
+            // so main-process reconciliation cannot overwrite a newer service-published snapshot.
+            if (status.state.value != VpnState.STOPPED) {
+                if (!VpnUtils.isVpnTransportActive(context)) {
+                    Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")
+                    status.state.value = VpnState.STOPPED
+                    status.phase.value = ""
+                    status.startTimestamp = 0L
+                } else {
+                    isLivenessConfirmed = false
+                    bindLivenessMonitor(context, status)
+                }
             }
         } catch (e: Exception) {
             Timber.w(e, "Failed to hydrate VPN state from DirectBoot preferences")
         }
+    }
+
+    private fun cancelLivenessTimeout() {
+        livenessTimeoutRunnable?.let { livenessTimeoutHandler?.removeCallbacks(it) }
+        livenessTimeoutRunnable = null
+        livenessTimeoutHandler = null
     }
 
     internal fun bindLivenessMonitor(context: Context, status: VpnStatusStore) {
@@ -114,7 +125,10 @@ object VpnStateBridge {
             if (isLivenessBound) return
             val conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    // Liveness monitor only tracks remote process disconnection
+                    if (service != null && service.pingBinder()) {
+                        isLivenessConfirmed = true
+                        cancelLivenessTimeout()
+                    }
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
@@ -133,9 +147,25 @@ object VpnStateBridge {
                 isLivenessBound = appContext.bindService(intent, conn, 0)
                 if (isLivenessBound) {
                     livenessConnection = conn
+                    cancelLivenessTimeout()
+                    if (!isLivenessConfirmed) {
+                        val timeoutTask = Runnable {
+                            if (isLivenessBound && !isLivenessConfirmed) {
+                                Timber.w("AdBlockVpnService liveness confirmation timed out; clearing restored active state")
+                                handleRemoteProcessDied(appContext, status)
+                            }
+                        }
+                        val handler = Handler(Looper.getMainLooper())
+                        livenessTimeoutHandler = handler
+                        livenessTimeoutRunnable = timeoutTask
+                        handler.postDelayed(timeoutTask, LIVENESS_CONFIRM_TIMEOUT_MS)
+                    }
+                } else {
+                    handleRemoteProcessDied(appContext, status)
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Failed to bind VPN liveness monitor")
+                handleRemoteProcessDied(appContext, status)
             }
         }
     }
@@ -143,6 +173,8 @@ object VpnStateBridge {
     internal fun unbindLivenessMonitor(context: Context) {
         val appContext = context.applicationContext ?: context
         synchronized(this) {
+            cancelLivenessTimeout()
+            isLivenessConfirmed = false
             if (!isLivenessBound) return
             try {
                 livenessConnection?.let { appContext.unbindService(it) }
@@ -158,20 +190,12 @@ object VpnStateBridge {
     private fun handleRemoteProcessDied(context: Context, status: VpnStatusStore) {
         unbindLivenessMonitor(context)
         if (status.state.value != VpnState.STOPPED) {
-            Timber.w("VPN process (:vpn) died unexpectedly; resetting state to STOPPED")
+            Timber.w("VPN process (:vpn) died unexpectedly; resetting local state to STOPPED")
             val now = System.currentTimeMillis()
             status.state.value = VpnState.STOPPED
             status.phase.value = ""
             status.startTimestamp = 0L
             status.lastStoppedTimestamp = now
-            persistState(
-                context = context,
-                state = VpnState.STOPPED,
-                startTimestamp = 0L,
-                lastStoppedTimestamp = now,
-                privateDnsStrict = status.privateDnsStrict.value,
-                phase = ""
-            )
         }
     }
 
@@ -209,6 +233,10 @@ object VpnStateBridge {
                         status.startTimestamp = startTime
                         status.lastStoppedTimestamp = stopTime
                         status.privateDnsStrict.value = privateDns
+                        if (status.state.value != VpnState.STOPPED) {
+                            isLivenessConfirmed = true
+                            cancelLivenessTimeout()
+                        }
                         syncLivenessBinding(context, status)
                     }
                 }
@@ -223,8 +251,10 @@ object VpnStateBridge {
 
     @VisibleForTesting
     internal fun resetBridgeForTesting() {
+        cancelLivenessTimeout()
         isBridgeInitialized = false
         isLivenessBound = false
+        isLivenessConfirmed = false
         livenessConnection = null
     }
 }

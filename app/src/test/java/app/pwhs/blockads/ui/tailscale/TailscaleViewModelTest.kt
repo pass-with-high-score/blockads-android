@@ -20,6 +20,7 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -306,14 +307,21 @@ class TailscaleViewModelTest {
             callOrder.add("unbind")
         }
 
-        val vm = TailscaleViewModel(app, client)
+        val viewModelStore = androidx.lifecycle.ViewModelStore()
+        val factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return TailscaleViewModel(app, client) as T
+            }
+        }
+        val vm = androidx.lifecycle.ViewModelProvider(viewModelStore, factory)[TailscaleViewModel::class.java]
         testScheduler.runCurrent()
 
         vm.processIntent(TailscaleUiIntent.ToggleEnabled(false))
         testScheduler.runCurrent()
 
-        // Clear the ViewModel while cancelAndJoin() is suspended on the non-cancellable RPC gate
-        vm.onCleared()
+        // Clear the ViewModelStore while cancelAndJoin() is suspended on the non-cancellable RPC gate
+        viewModelStore.clear()
         assertFalse("unbind must be deferred while disable teardown is active", callOrder.contains("unbind"))
 
         syncGate.complete(Unit)
@@ -322,6 +330,71 @@ class TailscaleViewModelTest {
         assertTrue(callOrder.contains("stop"))
         assertTrue(callOrder.contains("unbind"))
         assertTrue("stop must complete before unbind", callOrder.indexOf("stop") < callOrder.indexOf("unbind"))
+    }
+
+    @Test
+    fun `sendFileToPeer handles SecurityException from resolveFileName with failure snackbar`() = runTest {
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        every { client.isConnected } returns true
+        every { client.resolveFileName(any()) } throws SecurityException("URI permission revoked")
+
+        val vm = TailscaleViewModel(app, client)
+        advanceUntilIdle()
+
+        val effectDeferred = kotlinx.coroutines.CompletableDeferred<TailscaleUiEffect>()
+        backgroundScope.launch(kotlinx.coroutines.Dispatchers.Unconfined) {
+            vm.uiEffect.collect { effectDeferred.complete(it) }
+        }
+
+        val peer = TailscalePeer(
+            id = 100L, name = "peer-a", ips = listOf("100.64.0.5"),
+            ipv4 = "100.64.0.5", ipv6 = null, os = "linux", online = true,
+            isExitNode = false, isPinned = false, isSelf = false,
+            keyExpiry = 0L, keyExpired = false, curAddr = "", relay = ""
+        )
+        vm.processIntent(TailscaleUiIntent.SendFileToPeer(peer, android.net.Uri.parse("content://test/file")))
+        val effect = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.withTimeout(2_000L) { effectDeferred.await() }
+        }
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.withTimeout(2_000L) {
+                while (vm.uiState.value.isSendingFile) {
+                    kotlinx.coroutines.delay(10L)
+                }
+            }
+        }
+
+        assertFalse(vm.uiState.value.isSendingFile)
+        assertTrue("Must emit failure snackbar on SecurityException", effect is TailscaleUiEffect.ShowSnackbar)
+    }
+
+    @Test
+    fun `logout invalidates in-flight startAuthFlow while loading preferences`() = runTest {
+        val prefGate = kotlinx.coroutines.CompletableDeferred<String>()
+        var firstControlCall = true
+        coEvery { tailscalePrefs.getControlUrlSnapshot() } coAnswers {
+            if (firstControlCall) {
+                firstControlCall = false
+                ""
+            } else {
+                prefGate.await()
+            }
+        }
+
+        val vm = TailscaleViewModel(app)
+        advanceUntilIdle()
+
+        vm.processIntent(TailscaleUiIntent.SignInWithBrowser)
+        testScheduler.runCurrent()
+
+        vm.processIntent(TailscaleUiIntent.Logout)
+        prefGate.complete("https://control.example.com")
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.isLoading)
+        assertFalse(vm.uiState.value.isEnabled)
+        assertFalse(vm.uiState.value.isLoggedIn)
+        assertEquals("DISCONNECTED", vm.uiState.value.connectionState)
     }
 
     @Test

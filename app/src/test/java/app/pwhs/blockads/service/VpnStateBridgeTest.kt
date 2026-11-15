@@ -86,6 +86,39 @@ class VpnStateBridgeTest {
         VpnStateBridge.hydrateState(context, store)
         assertEquals(VpnState.STOPPED, store.state.value)
         assertEquals(0L, store.startTimestamp)
+        val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (context.isDeviceProtectedStorage) context else context.createDeviceProtectedStorageContext()
+        } else {
+            context
+        }
+        val prefs = deContext.getSharedPreferences(VpnStateBridge.PREF_NAME, Context.MODE_PRIVATE)
+        assertEquals(
+            "Main-process reconciliation must not overwrite the service-owned snapshot",
+            VpnState.STOPPING.name,
+            prefs.getString(VpnStateBridge.KEY_VPN_STATE, null)
+        )
+    }
+
+    @Test
+    fun testBoundedLivenessTimeoutClearsUnconfirmedActiveState() {
+        VpnStateBridge.resetBridgeForTesting()
+        val store = VpnStatusStore().apply {
+            state.value = VpnState.RUNNING
+            startTimestamp = 4242L
+        }
+
+        VpnStateBridge.bindLivenessMonitor(context, store)
+        assertTrue(VpnStateBridge.isLivenessBound)
+        assertFalse(VpnStateBridge.isLivenessConfirmed)
+
+        shadowOf(Looper.getMainLooper()).idleFor(
+            VpnStateBridge.LIVENESS_CONFIRM_TIMEOUT_MS + 100L,
+            java.util.concurrent.TimeUnit.MILLISECONDS
+        )
+
+        assertEquals(VpnState.STOPPED, store.state.value)
+        assertEquals(0L, store.startTimestamp)
+        assertFalse(VpnStateBridge.isLivenessBound)
     }
 
     @Test

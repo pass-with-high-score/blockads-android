@@ -168,6 +168,8 @@ class TailscaleServiceClient(
                 } else {
                     Result.failure(RuntimeException(err))
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "Failed to send Tailscale file via service")
                 Result.failure(e)
@@ -202,6 +204,8 @@ class TailscaleServiceClient(
                     tempFile.outputStream().use { output -> input.copyTo(output) }
                 } ?: return@withContext Result.failure(IllegalStateException("Cannot open selected file"))
                 sendFile(target, fileName, tempFile.absolutePath)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.e(e, "Failed to stage Taildrop file")
                 Result.failure(e)
