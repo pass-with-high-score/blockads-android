@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG aktif</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG menghubungkan ulang</string>
+    <string name="vpn_notification_retrying">ZephyrNG mencoba lagi</string>
+    <string name="vpn_revoked_text">Aplikasi VPN lain mengambil alih koneksi. Ketuk untuk mengaktifkan kembali ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG dijeda</string>
+    <string name="vpn_paused_title">ZephyrNG dijeda</string>
+    <string name="vpn_conflict_desc">Android hanya mengizinkan satu koneksi VPN dalam satu waktu. VPN lain saat ini sedang aktif di perangkat Anda.\n\nHarap putuskan koneksi VPN lain terlebih dahulu atau nonaktifkan \&quot;VPN selalu aktif\&quot; di Pengaturan sebelum menghubungkan ZephyrNG.</string>
+    <string name="vpn_notification_stopping">ZephyrNG sedang berhenti</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG berhenti alih-alih berjalan tanpa tunnel.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG gagal dimulai</string>
+    <string name="private_dns_warning_text">DNS Pribadi Android melewati ZephyrNG, sehingga pemfilteran mungkin tidak diterapkan. Setel DNS Pribadi ke Nonaktif atau Otomatis di setelan sistem.</string>
+    <string name="vpn_revoked_card_desc">Aplikasi VPN lain terhubung. Lalu lintas Anda tidak lagi difilter oleh ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Gunakan server VPN pribadi Anda bersama ZephyrNG</string>
+    <string name="tailscale_subtitle">Hubungkan ke Tailnet Anda bersama ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN harus berjalan untuk merutekan lalu lintas Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filter iklan dan pelacak untuk perangkat yang menggunakan Exit Node ini. Bagaimanapun tetap menggunakan DNS yang dikonfigurasi di ZephyrNG.</string>
+</resources>

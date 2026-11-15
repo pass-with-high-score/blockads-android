@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BlockAds TV</string>
+    <string name="app_name" translatable="false">BlockAds TV</string>
     <string name="nav_home">Home</string>
     <string name="nav_filters">Filters</string>
     <string name="nav_rules">Rules</string>

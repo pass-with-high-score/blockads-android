@@ -225,7 +225,7 @@ class GoTunnelAdapter(
         val ownAppName = runCatching {
             val pm = context.packageManager
             pm.getApplicationLabel(context.applicationInfo).toString()
-        }.getOrDefault("BlockAds")
+        }.getOrDefault(context.getString(app.pwhs.blockads.R.string.app_name))
 
         engine.setLogCallback { domain, blocked, queryType, responseTimeMs, packageNameOrAppName, resolvedIP, blockedBy ->
             if (!recordLogProvider()) return@setLogCallback

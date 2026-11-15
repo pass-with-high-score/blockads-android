@@ -123,7 +123,7 @@ class BrowserMediaService : Service() {
                 val dur = intent.getLongExtra(EXTRA_DURATION_MS, 0L)
 
                 currentTitle = title.ifBlank { "Media" }
-                currentArtist = artist.ifBlank { "BlockAds Browser" }
+                currentArtist = artist.ifBlank { "${getString(app.pwhs.blockads.R.string.app_name)} Browser" }
                 isPlaying = playing
                 positionMs = pos
                 durationMs = dur

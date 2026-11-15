@@ -197,7 +197,7 @@ private fun HomeHeroBrand() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "BlockAds",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.displayMedium.copy(
                 fontWeight = FontWeight.Black,
                 fontFamily = FontFamily.SansSerif,

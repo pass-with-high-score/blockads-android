@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG פעיל</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG מתחבר מחדש</string>
+    <string name="vpn_notification_retrying">ZephyrNG מנסה שוב</string>
+    <string name="vpn_revoked_text">אפליקציית VPN אחרת השתלטה על החיבור. הקש כדי להפעיל מחדש את ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG מושהה</string>
+    <string name="vpn_conflict_desc">Android מאפשר רק חיבור VPN אחד בכל פעם. אפליקציית VPN אחרת פעילה כרגע במכשיר שלך.\n\nאנא נתק את ה-VPN האחר או בטל את האפשרות \&quot;VPN פעיל תמיד\&quot; בהגדרות לפני התחברות ל-ZephyrNG.</string>
+    <string name="vpn_paused_title">ZephyrNG מושהה</string>
+    <string name="vpn_notification_stopping">ZephyrNG נעצר</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG נעצר במקום לפעול ללא המנהרה.</string>
+    <string name="root_proxy_start_failed_title">ההפעלה של ZephyrNG נכשלה</string>
+    <string name="private_dns_warning_text">‏DNS פרטי של Android עוקף את ZephyrNG, ולכן הסינון עלול לא לחול. הגדירו את ה-DNS הפרטי לכבוי או אוטומטי בהגדרות המערכת.</string>
+    <string name="vpn_revoked_card_desc">אפליקציית VPN אחרת מחוברת. התעבורה שלך אינה מסוננת עוד על ידי ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">השתמש בשרת ה-VPN האישי שלך לצד ZephyrNG</string>
+    <string name="tailscale_subtitle">התחבר ל-Tailnet שלך לצד ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN חייב לפעול כדי לנתב תעבורת Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">סנן מודעות וכלי מעקב עבור מכשירים המשתמשים בצומת יציאה זו. משתמש ב-DNS שהוגדר ב-ZephyrNG בכל מקרה.</string>
+</resources>

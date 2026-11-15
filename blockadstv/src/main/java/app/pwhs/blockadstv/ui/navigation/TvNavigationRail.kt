@@ -86,7 +86,7 @@ fun TvNavigationDrawer(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "BlockAds Logo",
+                    contentDescription = stringResource(R.string.app_name),
                     modifier = Modifier.size(26.dp),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 )

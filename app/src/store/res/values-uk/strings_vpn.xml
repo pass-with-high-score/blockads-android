@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG активний</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG перепідключається</string>
+    <string name="vpn_notification_retrying">ZephyrNG повторює спробу</string>
+    <string name="vpn_revoked_text">Інший додаток VPN перехопив з\'єднання. Натисніть, щоб знову ввімкнути ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG призупинено</string>
+    <string name="vpn_paused_title">ZephyrNG призупинено</string>
+    <string name="vpn_conflict_desc">Android дозволяє лише одне активне VPN-з\'єднання одночасно. На вашому пристрої зараз працює інший VPN.\n\nБудь ласка, відключіть інший VPN або вимкніть «Постійний VPN» у Налаштуваннях перед підключенням ZephyrNG.</string>
+    <string name="vpn_notification_stopping">ZephyrNG зупиняється</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG зупинено, щоб не працювати без тунелю.</string>
+    <string name="root_proxy_start_failed_title">Не вдалося запустити ZephyrNG</string>
+    <string name="private_dns_warning_text">Приватний DNS Android обходить ZephyrNG, тож фільтрування може не застосовуватися. Установіть приватний DNS на «Вимкнено» або «Автоматично» в налаштуваннях системи.</string>
+    <string name="vpn_revoked_card_desc">Підключено іншу програму VPN. Ваш трафік більше не фільтрується ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Використовуйте власний VPN-сервер разом із ZephyrNG</string>
+    <string name="tailscale_subtitle">Підключіться до свого Tailnet разом із ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN має бути запущено для маршрутизації трафіку Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Фільтрувати рекламу та трекери для пристроїв, що використовують цей Exit Node. У будь-якому разі використовується налаштований у ZephyrNG DNS.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG est actif</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG se reconnecte</string>
+    <string name="vpn_notification_retrying">ZephyrNG réessaie</string>
+    <string name="vpn_revoked_text">Une autre application VPN a pris le contrôle de la connexion. Appuyez pour réactiver ZephyrNG.</string>
+    <string name="vpn_revoked_card_desc">Une autre application VPN s\'est connectée. Votre trafic n\'est plus filtré par ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG est en pause</string>
+    <string name="vpn_conflict_desc">Android n\'autorise qu\'une seule connexion VPN à la fois. Un autre VPN est actuellement actif sur votre appareil.\n\nVeuillez d\'abord déconnecter l\'autre VPN ou désactiver \&quot;VPN toujours actif\&quot; dans les Paramètres avant de connecter ZephyrNG.</string>
+    <string name="vpn_paused_title">ZephyrNG en pause</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG s\'est arrêté au lieu de s\'exécuter sans le tunnel.</string>
+    <string name="root_proxy_start_failed_title">Échec du démarrage de ZephyrNG</string>
+    <string name="private_dns_warning_text">Le DNS privé d\'Android contourne ZephyrNG, le filtrage peut donc ne pas s\'appliquer. Réglez le DNS privé sur Désactivé ou Automatique dans les paramètres système.</string>
+    <string name="vpn_notification_stopping">ZephyrNG s\'arrête</string>
+    <string name="home_tip_feature_wireguard_desc">Utiliser votre propre serveur VPN conjointement avec ZephyrNG</string>
+    <string name="tailscale_subtitle">Connectez-vous à votre Tailnet tout en utilisant ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN doit être actif pour acheminer le trafic Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtrer les publicités et les traceurs pour les appareils utilisant ce nœud de sortie. Utilise dans tous les cas le DNS configuré de ZephyrNG.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG is active</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG is reconnecting</string>
+    <string name="vpn_notification_retrying">ZephyrNG is retrying</string>
+    <string name="vpn_revoked_text">Another VPN app took over the connection. Tap to re-enable ZephyrNG.</string>
+    <string name="vpn_revoked_card_desc">Another VPN app connected. Your traffic is no longer filtered by ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG is paused</string>
+    <string name="vpn_conflict_desc">Android only allows one VPN connection at a time. Another VPN is currently active on your device.\n\nPlease disconnect the other VPN first or disable \&quot;Always-on VPN\&quot; in Settings before connecting ZephyrNG.</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG stopped rather than run without the tunnel.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG failed to start</string>
+    <string name="tailscale_subtitle">Connect to your Tailnet alongside ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN must be running to route Tailscale traffic.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filter ads and trackers for devices using this Exit Node. Uses ZephyrNG\'s configured DNS either way.</string>
+</resources>

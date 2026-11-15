@@ -77,7 +77,7 @@ fun BentoHeader(modifier: Modifier = Modifier) {
             }
             Column {
                 Text(
-                    text = "BlockAds Control Center",
+                    text = "${stringResource(R.string.app_name)} Control Center",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White
                 )

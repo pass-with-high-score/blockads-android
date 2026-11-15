@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG เปิดใช้งานอยู่</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG กำลังเชื่อมต่อใหม่</string>
+    <string name="vpn_notification_retrying">ZephyrNG กำลังลองใหม่</string>
+    <string name="vpn_revoked_text">แอป VPN อื่นเข้ามาควบคุมการเชื่อมต่อ แตะเพื่อเปิดใช้งาน ZephyrNG อีกครั้ง</string>
+    <string name="vpn_stopped_title">ZephyrNG หยุดชั่วคราว</string>
+    <string name="vpn_paused_title">ZephyrNG หยุดชั่วคราว</string>
+    <string name="vpn_conflict_desc">Android อนุญาตให้มีการเชื่อมต่อ VPN ได้เพียงครั้งละหนึ่งรายการเท่านั้น ขณะนี้มี VPN อื่นเปิดใช้งานบนอุปกรณ์ของคุณ\n\nโปรดยกเลิกการเชื่อมต่อ VPN อื่นก่อน หรือปิดใช้งาน \&quot;VPN ที่เปิดตลอดเวลา\&quot; ในการตั้งค่าก่อนที่จะเชื่อมต่อ ZephyrNG</string>
+    <string name="vpn_notification_stopping">ZephyrNG กำลังหยุดทำงาน</string>
+    <string name="wireguard_config_invalid_text">%1$s ZephyrNG หยุดทำงานแทนการทำงานโดยไม่มีอุโมงค์</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG เริ่มทำงานไม่สำเร็จ</string>
+    <string name="private_dns_warning_text">DNS ส่วนตัวของ Android จะข้าม ZephyrNG การกรองจึงอาจไม่ทำงาน โปรดตั้งค่า DNS ส่วนตัวเป็นปิดหรืออัตโนมัติในการตั้งค่าระบบ</string>
+    <string name="vpn_revoked_card_desc">มีแอป VPN อื่นเชื่อมต่อแล้ว ปริมาณข้อมูลของคุณจะไม่ถูกกรองโดย ZephyrNG อีกต่อไป</string>
+    <string name="home_tip_feature_wireguard_desc">ใช้เซิร์ฟเวอร์ VPN ส่วนตัวของคุณร่วมกับ ZephyrNG</string>
+    <string name="tailscale_subtitle">เชื่อมต่อกับ Tailnet ของคุณควบคู่กับ ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ต้องเปิด ZephyrNG VPN เพื่อกำหนดเส้นทางการรับส่งข้อมูล Tailscale</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">กรองโฆษณาและตัวติดตามสำหรับอุปกรณ์ที่ใช้ Exit Node นี้ โดยจะใช้ DNS ที่กำหนดค่าไว้ของ ZephyrNG ในทุกกรณี</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG белсенді</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG қайта қосылуда</string>
+    <string name="vpn_notification_retrying">ZephyrNG қайталап көруде</string>
+    <string name="vpn_revoked_text">Басқа VPN қолданбасы қосылымды өз меншігіне алды. ZephyrNG-ты қайта қосу үшін түртіңіз.</string>
+    <string name="vpn_stopped_title">ZephyrNG кідіртілді</string>
+    <string name="vpn_conflict_desc">Android бір уақытта тек бір VPN қосылымына рұқсат етеді. Қазір құрылғыңызда басқа VPN белсенді.\n\nZephyrNG-ты қосу алдында басқа VPN-ды ажыратыңыз немесе «Параметрлер» бөлімінде «Әрқашан қосулы VPN» опциясын өшіріңіз.</string>
+    <string name="vpn_paused_title">ZephyrNG кідіртілді</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG туннельсіз жұмыс істеудің орнына тоқтатылды.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG іске қосылмады</string>
+    <string name="private_dns_warning_text">Android жеке DNS-і ZephyrNG-ты айналып өтеді, сондықтан сүзу қолданылмауы мүмкін. Жүйе параметрлерінде «Жеке DNS» опциясын «Өшірулі» немесе «Автоматты» етіп орнатыңыз.</string>
+    <string name="vpn_notification_stopping">ZephyrNG тоқтатылуда</string>
+    <string name="vpn_revoked_card_desc">Басқа VPN қолданбасы қосылды. Трафигіңіз енді ZephyrNG арқылы сүзілмейді.</string>
+    <string name="home_tip_feature_wireguard_desc">Жеке VPN серверіңізді ZephyrNG-пен бірге пайдаланыңыз</string>
+    <string name="tailscale_subtitle">ZephyrNG-пен бірге Tailnet желісіне қосылу</string>
+    <string name="tailscale_vpn_required_desc">Tailscale трафигін бағыттау үшін ZephyrNG VPN іске қосылуы керек.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Осы Exit Node түйінін пайдаланатын құрылғылар үшін жарнамалар мен трекерлерді сүзгіден өткізу. Қалай болғанда да ZephyrNG бапталған DNS серверін пайдаланады.</string>
+</resources>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BlockAds TV</string>
     <string name="nav_home">Início</string>
     <string name="nav_filters">Filtros</string>
     <string name="nav_rules">Regras</string>

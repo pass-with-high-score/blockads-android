@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG 已启用</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG 正在重新连接</string>
+    <string name="vpn_notification_retrying">ZephyrNG 正在重试</string>
+    <string name="vpn_revoked_text">另一个VPN应用已接管连接。点击以重新启用ZephyrNG。</string>
+    <string name="vpn_stopped_title">ZephyrNG 已暂停</string>
+    <string name="vpn_paused_title">ZephyrNG 已暂停</string>
+    <string name="vpn_conflict_desc">Android 同时只允许一个 VPN 连接。您的设备上当前有另一个 VPN 正在运行。\n\n在连接 ZephyrNG 之前，请先断开另一个 VPN 或在设置中禁用“始终开启的 VPN”。</string>
+    <string name="vpn_notification_stopping">ZephyrNG 正在停止</string>
+    <string name="wireguard_config_invalid_text">%1$s。ZephyrNG 已停止，而不是在没有隧道的情况下运行。</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG 启动失败</string>
+    <string name="private_dns_warning_text">Android 私人 DNS 会绕过 ZephyrNG，因此过滤可能不生效。请在系统设置中将私人 DNS 设为“关闭”或“自动”。</string>
+    <string name="vpn_revoked_card_desc">已连接其他VPN应用。您的流量不再经由ZephyrNG过滤。</string>
+    <string name="home_tip_feature_wireguard_desc">与ZephyrNG配合使用您的个人VPN服务器</string>
+    <string name="tailscale_subtitle">与 ZephyrNG 同时连接到您的 Tailnet</string>
+    <string name="tailscale_vpn_required_desc">必须运行 ZephyrNG VPN 才能路由 Tailscale 流量。</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">为使用此出口节点的设备过滤广告和跟踪器。无论如何都使用 ZephyrNG 配置的 DNS。</string>
+</resources>

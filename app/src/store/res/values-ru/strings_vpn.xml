@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG активен</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG переподключается</string>
+    <string name="vpn_notification_retrying">ZephyrNG повторяет попытку</string>
+    <string name="vpn_revoked_text">Другое VPN-приложение перехватило подключение. Нажмите, чтобы снова включить ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG приостановлен</string>
+    <string name="vpn_paused_title">ZephyrNG приостановлен</string>
+    <string name="vpn_conflict_desc">Android разрешает только одно активное VPN-соединение. В данный момент на вашем устройстве работает другой VPN.\n\nПожалуйста, отключите другой VPN или деактивируйте «Постоянный VPN» в Настройках перед подключением ZephyrNG.</string>
+    <string name="vpn_notification_stopping">ZephyrNG останавливается</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG остановлен, чтобы не работать без туннеля.</string>
+    <string name="root_proxy_start_failed_title">Не удалось запустить ZephyrNG</string>
+    <string name="private_dns_warning_text">Частный DNS Android обходит ZephyrNG, поэтому фильтрация может не работать. Установите «Частный DNS» в значение «Выкл.» или «Автоматически» в настройках системы.</string>
+    <string name="vpn_revoked_card_desc">Подключено другое VPN-приложение. Трафик больше не фильтруется ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Используйте собственный VPN-сервер вместе с ZephyrNG</string>
+    <string name="tailscale_subtitle">Подключитесь к вашему Tailnet вместе с ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN должен быть запущен для маршрутизации трафика Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Фильтровать рекламу и трекеры для устройств, использующих этот Exit Node. В любом случае используется настроенный в ZephyrNG DNS.</string>
+</resources>

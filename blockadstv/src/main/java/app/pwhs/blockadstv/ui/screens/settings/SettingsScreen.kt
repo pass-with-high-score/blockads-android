@@ -273,7 +273,7 @@ fun SettingsScreen(
                 SettingListItem(
                     iconRes = R.drawable.ic_shield,
                     title = stringResource(R.string.settings_about),
-                    subtitle = "BlockAds TV v${app.pwhs.blockadstv.BuildConfig.VERSION_NAME} (Build ${app.pwhs.blockadstv.BuildConfig.VERSION_CODE})",
+                    subtitle = "${stringResource(R.string.app_name)} v${app.pwhs.blockadstv.BuildConfig.VERSION_NAME} (Build ${app.pwhs.blockadstv.BuildConfig.VERSION_CODE})",
                     isToggle = false,
                     isEnabled = false,
                     onClick = {},

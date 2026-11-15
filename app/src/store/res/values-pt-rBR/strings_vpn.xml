@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG está ativo</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG está reconectando</string>
+    <string name="vpn_notification_retrying">ZephyrNG está tentando novamente</string>
+    <string name="vpn_revoked_text">Outro aplicativo VPN assumiu a conexão. Toque para reativar o ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG está pausado</string>
+    <string name="vpn_paused_title">ZephyrNG pausado</string>
+    <string name="vpn_conflict_desc">O Android permite apenas uma conexão VPN por vez. Outra VPN está ativa no seu dispositivo.\n\nPor favor, desconecte a outra VPN primeiro ou desative a \&quot;VPN sempre ativa\&quot; nas Configurações antes de conectar o ZephyrNG.</string>
+    <string name="vpn_notification_stopping">ZephyrNG está parando</string>
+    <string name="wireguard_config_invalid_text">%1$s. O ZephyrNG parou em vez de funcionar sem o túnel.</string>
+    <string name="root_proxy_start_failed_title">Falha ao iniciar o ZephyrNG</string>
+    <string name="private_dns_warning_text">O DNS privado do Android ignora o ZephyrNG, então a filtragem pode não ser aplicada. Defina o DNS privado como Desativado ou Automático nas configurações do sistema.</string>
+    <string name="vpn_revoked_card_desc">Outro app VPN foi conectado. Seu tráfego não está mais sendo filtrado pelo ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Use seu próprio servidor VPN junto com o ZephyrNG</string>
+    <string name="tailscale_subtitle">Conecte-se à sua Tailnet junto com o ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">A ZephyrNG VPN deve estar em execução para rotear o tráfego do Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtre anúncios e rastreadores para dispositivos usando este Exit Node. Usa o DNS configurado do ZephyrNG de qualquer forma.</string>
+</resources>

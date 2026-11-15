@@ -212,7 +212,7 @@ class RootProxyService : Service() {
                     val nm = getSystemService(NotificationManager::class.java)
                     nm.notify(
                         NOTIFICATION_ID,
-                        buildNotification("BlockAds TV Root Proxy Active", "$domainCount filter rules loaded")
+                        buildNotification("${getString(R.string.app_name)} Root Proxy Active", "$domainCount filter rules loaded")
                     )
                 }
 
@@ -302,7 +302,7 @@ class RootProxyService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "BlockAds TV Root Proxy",
+                "${getString(R.string.app_name)} Root Proxy",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = "Root Proxy mode notification"

@@ -1,6 +1,7 @@
 package app.pwhs.blockads.service.vpn
 
 import android.os.Build
+import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.WireGuardConfig
 import app.pwhs.blockads.utils.SubnetDecomposer
@@ -9,8 +10,9 @@ import timber.log.Timber
 /** Pure computation of the tunnel shape; endpoint DNS resolution is injected so tests stay offline. */
 object TunnelPlanner {
 
-    private const val SESSION_DIRECT = "BlockAds"
-    private const val SESSION_WIREGUARD = "BlockAds WireGuard"
+    private val APP_NAME = if (BuildConfig.IS_STORE) "ZephyrNG" else "BlockAds"
+    private val SESSION_DIRECT = APP_NAME
+    private val SESSION_WIREGUARD = "$APP_NAME WireGuard"
     private const val MTU_DIRECT = 1350
     private const val MTU_WIREGUARD = 1280
     private val LAN_EXCLUDES = listOf(

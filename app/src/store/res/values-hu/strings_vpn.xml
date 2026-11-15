@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">A ZephyrNG aktív</string>
+    <string name="vpn_notification_reconnecting">A ZephyrNG újracsatlakozik</string>
+    <string name="vpn_notification_retrying">A ZephyrNG újrapróbálkozik</string>
+    <string name="vpn_revoked_text">Egy másik VPN-alkalmazás átvette a kapcsolatot. Koppintson a ZephyrNG újbóli bekapcsolásához.</string>
+    <string name="vpn_revoked_card_desc">Egy másik VPN-alkalmazás csatlakozott. A forgalmát már nem szűri a ZephyrNG.</string>
+    <string name="vpn_stopped_title">A ZephyrNG szünetel</string>
+    <string name="vpn_conflict_desc">Az Android egyszerre csak egy VPN-kapcsolatot engedélyez. Jelenleg egy másik VPN aktív az eszközén.\n\nA ZephyrNG csatlakoztatása előtt bontsa a másik VPN-kapcsolatot, vagy kapcsolja ki a \&quot;Mindig bekapcsolt VPN\&quot; opciót a Beállításokban.</string>
+    <string name="vpn_paused_title">A ZephyrNG szünetel</string>
+    <string name="wireguard_config_invalid_text">%1$s. A ZephyrNG inkább leállt, mint hogy alagút nélkül fusson.</string>
+    <string name="root_proxy_start_failed_title">A ZephyrNG indítása sikertelen</string>
+    <string name="private_dns_warning_text">Az Android privát DNS megkerüli a ZephyrNG-t, így a szűrés nem feltétlenül érvényesül. A rendszerbeállításokban állítsa a privát DNS-t Ki vagy Automatikus értékre.</string>
+    <string name="vpn_notification_stopping">A ZephyrNG leáll</string>
+    <string name="home_tip_feature_wireguard_desc">Saját VPN-szerver használata a ZephyrNG mellett</string>
+    <string name="tailscale_subtitle">Csatlakozás a Tailnethez a ZephyrNG mellett</string>
+    <string name="tailscale_vpn_required_desc">A Tailscale forgalom irányításához a ZephyrNG VPN-nek futnia kell.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Hirdetések és nyomkövetők szűrése a kilépési csomópontot használó eszközök számára. Mindenképpen a ZephyrNG beállított DNS-ét használja.</string>
+</resources>

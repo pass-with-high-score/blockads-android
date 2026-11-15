@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG đang hoạt động</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG đang kết nối lại</string>
+    <string name="vpn_notification_retrying">ZephyrNG đang thử lại</string>
+    <string name="vpn_revoked_text">Ứng dụng VPN khác đã chiếm kết nối. Nhấn để bật lại ZephyrNG.</string>
+    <string name="vpn_revoked_card_desc">Một ứng dụng VPN khác vừa kết nối. Lưu lượng của bạn hiện không được ZephyrNG lọc.</string>
+    <string name="vpn_stopped_title">ZephyrNG đã tạm dừng</string>
+    <string name="vpn_conflict_desc">Android chỉ cho phép một kết nối VPN hoạt động cùng lúc. Một VPN khác đang chạy trên thiết bị của bạn.\n\nVui lòng ngắt kết nối VPN kia hoặc tắt \&quot;VPN luôn bật\&quot; trong Cài đặt trước khi kết nối ZephyrNG.</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG đã dừng thay vì chạy mà không có đường hầm.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG không thể khởi động</string>
+    <string name="tailscale_subtitle">Kết nối mạng Tailnet song song cùng ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN cần được bật để định tuyến mạng Tailscale.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Chặn quảng cáo cho các thiết bị dùng máy này làm Exit Node. Dù bật hay tắt vẫn dùng chung DNS của ZephyrNG.</string>
+</resources>

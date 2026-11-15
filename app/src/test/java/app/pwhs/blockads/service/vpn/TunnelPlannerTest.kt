@@ -37,7 +37,7 @@ class TunnelPlannerTest {
         val plan = TunnelPlanner.plan(input())
         assertEquals(
             TunnelPlan(
-                session = "BlockAds",
+                session = if (app.pwhs.blockads.BuildConfig.IS_STORE) "ZephyrNG" else "BlockAds",
                 mtu = 1350,
                 addresses = listOf(Cidr("100.64.100.2", 32), Cidr("fd00::2", 128)),
                 routes = listOf(
@@ -83,7 +83,7 @@ class TunnelPlannerTest {
     @Test
     fun `wireguard uses interface addresses with default host prefixes plus the DNS shim`() {
         val plan = TunnelPlanner.plan(wg())
-        assertEquals("BlockAds WireGuard", plan.session)
+        assertEquals(if (app.pwhs.blockads.BuildConfig.IS_STORE) "ZephyrNG WireGuard" else "BlockAds WireGuard", plan.session)
         assertEquals(1280, plan.mtu)
         assertTrue(plan.isWireGuard)
         assertFalse(plan.fellBackToDirect)

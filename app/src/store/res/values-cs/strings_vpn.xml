@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG je aktivní</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG se znovu připojuje</string>
+    <string name="vpn_notification_retrying">ZephyrNG opakuje pokus</string>
+    <string name="vpn_revoked_text">Jiná aplikace VPN převzala připojení. Klepnutím znovu aktivujete ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG je pozastaveno</string>
+    <string name="vpn_conflict_desc">Android umožňuje pouze jedno aktivní připojení VPN současně. Ve vašem zařízení je již aktivní jiná VPN.\n\nNež se připojíte k ZephyrNG, odpojte prosím jinou VPN nebo v Nastavení vypněte funkci „Vždy zapnutá VPN“.</string>
+    <string name="vpn_paused_title">ZephyrNG pozastaveno</string>
+    <string name="vpn_notification_stopping">ZephyrNG se zastavuje</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG se zastavil, místo aby běžel bez tunelu.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG se nepodařilo spustit</string>
+    <string name="private_dns_warning_text">Soukromé DNS systému Android obchází ZephyrNG, takže filtrování nemusí fungovat. Nastavte soukromé DNS na Vypnuto nebo Automaticky v nastavení systému.</string>
+    <string name="vpn_revoked_card_desc">Připojila se jiná aplikace VPN. Váš provoz již není filtrován aplikací ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Používejte svůj osobní server VPN společně s ZephyrNG</string>
+    <string name="tailscale_subtitle">Připojte se ke svému Tailnetu společně s ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">Pro směrování provozu Tailscale musí být spuštěna ZephyrNG VPN.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtruje reklamy a sledovače pro zařízení používající tento výstupní uzel. V obou případech používá nakonfigurovaný DNS aplikace ZephyrNG.</string>
+</resources>

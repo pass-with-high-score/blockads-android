@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">&quot;ZephyrNG aktif durumda.&quot;</string>
+    <string name="vpn_notification_reconnecting">&quot;ZephyrNG yeniden bağlantı kuruyor.&quot;</string>
+    <string name="vpn_notification_retrying">&quot;ZephyrNG yeniden deniyor.&quot;</string>
+    <string name="vpn_revoked_text">&quot;Başka bir VPN uygulaması bağlantıyı devraldı. ZephyrNG'i yeniden etkinleştirmek için dokunun.&quot;</string>
+    <string name="vpn_stopped_title">&quot;ZephyrNG duraklatıldı.&quot;</string>
+    <string name="vpn_paused_title">ZephyrNG duraklatıldı</string>
+    <string name="vpn_conflict_desc">Android aynı anda yalnızca bir VPN bağlantısına izin verir. Şu anda cihazınızda başka bir VPN aktif.\n\nZephyrNG\'e bağlanmadan önce lütfen diğer VPN\'in bağlantısını kesin veya Ayarlar\'dan \&quot;Her zaman açık VPN\&quot;i devre dışı bırakın.</string>
+    <string name="vpn_notification_stopping">ZephyrNG durduruluyor</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG tünel olmadan çalışmak yerine durduruldu.</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG başlatılamadı</string>
+    <string name="private_dns_warning_text">Android Özel DNS, ZephyrNG\'i atlar; bu nedenle filtreleme uygulanmayabilir. Sistem ayarlarından Özel DNS\'i Kapalı veya Otomatik yapın.</string>
+    <string name="vpn_revoked_card_desc">Başka bir VPN uygulaması bağlandı. Trafiğiniz artık ZephyrNG tarafından filtrelenmiyor.</string>
+    <string name="home_tip_feature_wireguard_desc">ZephyrNG ile birlikte kişisel VPN sunucunuzu kullanın</string>
+    <string name="tailscale_subtitle">ZephyrNG ile birlikte Tailnet ağınıza bağlanın</string>
+    <string name="tailscale_vpn_required_desc">Tailscale trafiğini yönlendirmek için ZephyrNG VPN çalışıyor olmalıdır.</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Bu Exit Node\'u kullanan cihazlar için reklamları ve izleyicileri filtreleyin. Her durumda ZephyrNG\'te yapılandırılmış DNS kullanılır.</string>
+</resources>

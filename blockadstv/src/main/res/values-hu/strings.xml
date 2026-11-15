@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">BlockAds TV</string>
     <string name="nav_home">Kezdőlap</string>
     <string name="nav_filters">Szűrők</string>
     <string name="nav_rules">Szabályok</string>

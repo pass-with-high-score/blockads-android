@@ -201,7 +201,8 @@ class TvVpnService : VpnService() {
 
                 withContext(Dispatchers.Main) {
                     val nm = getSystemService(NotificationManager::class.java)
-                    val title = if (isProxyVpn) "BlockAds TV Proxy Active" else "BlockAds TV Active"
+                    val appName = getString(R.string.app_name)
+                    val title = if (isProxyVpn) "$appName Proxy Active" else "$appName Active"
                     nm.notify(
                         NOTIFICATION_ID,
                         buildNotification(title, "$domainCount filter rules loaded")
@@ -312,8 +313,9 @@ class TvVpnService : VpnService() {
         }
 
         return try {
+            val appName = getString(R.string.app_name)
             val builder = Builder()
-                .setSession(if (isProxyVpn) "BlockAds TV Proxy" else "BlockAds TV")
+                .setSession(if (isProxyVpn) "$appName Proxy" else appName)
                 .addAddress("100.64.100.2", 32)
                 .addAddress("fd00::2", 128)
                 .addDnsServer("100.64.100.1")
@@ -453,7 +455,7 @@ class TvVpnService : VpnService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "BlockAds TV VPN",
+                "${getString(R.string.app_name)} VPN",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = "VPN service notification"

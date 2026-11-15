@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNGは有効です</string>
+    <string name="vpn_notification_reconnecting">ZephyrNGは再接続中です</string>
+    <string name="vpn_notification_retrying">ZephyrNGは再試行中です</string>
+    <string name="vpn_revoked_text">別のVPNアプリが接続を引き継ぎました。タップしてZephyrNGを再有効化してください。</string>
+    <string name="vpn_stopped_title">ZephyrNGは一時停止中です</string>
+    <string name="vpn_paused_title">ZephyrNGは一時停止中です</string>
+    <string name="vpn_conflict_desc">Androidでは同時に1つのVPN接続のみが許可されています。現在、お使いのデバイスで別のVPNがアクティブになっています。\n\nZephyrNGに接続する前に、まず別のVPNを切断するか、設定で「常時接続VPN」を無効にしてください。</string>
+    <string name="vpn_notification_stopping">ZephyrNGを停止しています</string>
+    <string name="wireguard_config_invalid_text">%1$s。トンネルなしで動作する代わりに ZephyrNG を停止しました。</string>
+    <string name="root_proxy_start_failed_title">ZephyrNG を開始できませんでした</string>
+    <string name="private_dns_warning_text">Android のプライベート DNS は ZephyrNG を迂回するため、フィルタリングが適用されないことがあります。システム設定でプライベート DNS をオフまたは自動に設定してください。</string>
+    <string name="vpn_revoked_card_desc">別のVPNアプリが接続されました。ZephyrNGによる通信のフィルタリングは停止しています。</string>
+    <string name="home_tip_feature_wireguard_desc">ZephyrNGと併せて個人用VPNサーバーを利用</string>
+    <string name="tailscale_subtitle">ZephyrNGと併用してTailnetに接続</string>
+    <string name="tailscale_vpn_required_desc">TailscaleのトラフィックをルーティングするにはZephyrNG VPNが実行中である必要があります。</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">この Exit Node を使用するデバイスの広告とトラッカーをフィルタリングします。いずれの場合も ZephyrNG で設定された DNS が使用されます。</string>
+</resources>

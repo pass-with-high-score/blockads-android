@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_notification_title">ZephyrNG jest aktywny</string>
+    <string name="vpn_notification_reconnecting">ZephyrNG łączy się ponownie</string>
+    <string name="vpn_notification_retrying">ZephyrNG ponawia próbę</string>
+    <string name="vpn_revoked_text">Inna aplikacja VPN przejęła połączenie. Dotknij, aby ponownie włączyć ZephyrNG.</string>
+    <string name="vpn_stopped_title">ZephyrNG jest wstrzymany</string>
+    <string name="vpn_paused_title">ZephyrNG wstrzymany</string>
+    <string name="vpn_conflict_desc">System Android zezwala tylko na jedno aktywne połączenie VPN. Obecnie na Twoim urządzeniu działa inny VPN.\n\nZanim połączysz się z ZephyrNG, rozłącz inny VPN lub wyłącz „Zawsze włączony VPN” w Ustawieniach.</string>
+    <string name="vpn_notification_stopping">ZephyrNG zatrzymuje się</string>
+    <string name="wireguard_config_invalid_text">%1$s. ZephyrNG zatrzymał się zamiast działać bez tunelu.</string>
+    <string name="root_proxy_start_failed_title">Nie udało się uruchomić ZephyrNG</string>
+    <string name="private_dns_warning_text">Prywatny DNS systemu Android omija ZephyrNG, więc filtrowanie może nie działać. Ustaw prywatny DNS na Wyłączony lub Automatyczny w ustawieniach systemu.</string>
+    <string name="vpn_revoked_card_desc">Połączono z inną aplikacją VPN. Twój ruch sieciowy nie jest już filtrowany przez ZephyrNG.</string>
+    <string name="home_tip_feature_wireguard_desc">Używaj własnego serwera VPN razem z ZephyrNG</string>
+    <string name="tailscale_subtitle">Połącz się ze swoim Tailnetem razem z ZephyrNG</string>
+    <string name="tailscale_vpn_required_desc">ZephyrNG VPN musi działać</string>
+    <string name="tailscale_adblock_title">ZephyrNG Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtruj reklamy i moduły śledzące dla urządzeń korzystających z tego Exit Node. W obu przypadkach używa DNS skonfigurowanego w ZephyrNG.</string>
+</resources>
