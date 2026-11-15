@@ -1,0 +1,4 @@
+- Added SNI Proxy IP routing and domain rules UI for Android TV
+- Enabled full-tunnel routing and UID matching for TV SNI proxy rules
+- Trimmed YouTube SNI preset domains to keep thumbnails loading
+- Improved VPN disconnect and restart speed on Android TV
