@@ -434,7 +434,7 @@ class TailscaleViewModel(
                     selectedPeerForDetail = it.selectedPeerForDetail?.let { sel -> parsed.peers.find { p -> p.id == sel.id } ?: sel }
                 )
             }
-            if (staleExitCleared) {
+            if (staleExitCleared && authGeneration.get() == polledGen) {
                 viewModelScope.launch {
                     appPrefs.tailscale.setExitNodeId(0L)
                     serviceClient.setExitNode(0L)
