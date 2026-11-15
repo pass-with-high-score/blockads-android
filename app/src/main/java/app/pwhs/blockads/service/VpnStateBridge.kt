@@ -1,5 +1,6 @@
 package app.pwhs.blockads.service
 
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -41,6 +42,9 @@ object VpnStateBridge {
     private var livenessConnection: ServiceConnection? = null
     private var livenessTimeoutHandler: Handler? = null
     private var livenessTimeoutRunnable: Runnable? = null
+    private var pendingRestoredState: VpnState? = null
+    private var pendingRestoredPhase: String = ""
+    private var pendingRestoredStartTimestamp: Long = 0L
 
     private fun getPrefs(context: Context): SharedPreferences {
         val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -119,6 +123,25 @@ object VpnStateBridge {
         livenessTimeoutHandler = null
     }
 
+    internal fun isAdBlockVpnServiceRunning(context: Context): Boolean {
+        return try {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return false
+            val vpnProcessName = "${context.packageName}:vpn"
+            val processAlive = am.runningAppProcesses?.any {
+                it.processName == vpnProcessName && it.pid != 0
+            } == true
+            @Suppress("DEPRECATION")
+            val serviceAlive = am.getRunningServices(Int.MAX_VALUE)?.any {
+                it.service.packageName == context.packageName &&
+                    it.service.className == AdBlockVpnService::class.java.name &&
+                    it.pid != 0
+            } == true
+            processAlive || serviceAlive
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     internal fun bindLivenessMonitor(context: Context, status: VpnStatusStore) {
         val appContext = context.applicationContext ?: context
         synchronized(this) {
@@ -126,8 +149,17 @@ object VpnStateBridge {
             val conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                     if (service != null && service.pingBinder()) {
-                        isLivenessConfirmed = true
-                        cancelLivenessTimeout()
+                        synchronized(this@VpnStateBridge) {
+                            isLivenessConfirmed = true
+                            cancelLivenessTimeout()
+                            val restored = pendingRestoredState
+                            if (status.state.value == VpnState.STOPPED && restored != null && restored != VpnState.STOPPED) {
+                                status.state.value = restored
+                                status.phase.value = pendingRestoredPhase
+                                status.startTimestamp = pendingRestoredStartTimestamp
+                            }
+                            pendingRestoredState = null
+                        }
                     }
                 }
 
@@ -136,6 +168,10 @@ object VpnStateBridge {
                 }
 
                 override fun onBindingDied(name: ComponentName?) {
+                    handleRemoteProcessDied(appContext, status)
+                }
+
+                override fun onNullBinding(name: ComponentName?) {
                     handleRemoteProcessDied(appContext, status)
                 }
             }
@@ -149,10 +185,25 @@ object VpnStateBridge {
                     livenessConnection = conn
                     cancelLivenessTimeout()
                     if (!isLivenessConfirmed) {
-                        val timeoutTask = Runnable {
-                            if (isLivenessBound && !isLivenessConfirmed) {
-                                Timber.w("AdBlockVpnService liveness confirmation timed out; clearing restored active state")
-                                handleRemoteProcessDied(appContext, status)
+                        val timeoutTask = object : Runnable {
+                            override fun run() {
+                                synchronized(this@VpnStateBridge) {
+                                    if (!isLivenessBound || isLivenessConfirmed) return
+                                    if (isAdBlockVpnServiceRunning(appContext) && VpnUtils.isVpnTransportActive(appContext)) {
+                                        livenessTimeoutHandler?.postDelayed(this, LIVENESS_CONFIRM_TIMEOUT_MS)
+                                        return
+                                    }
+                                    Timber.w("AdBlockVpnService liveness confirmation timed out; clearing restored active state while awaiting late bind")
+                                    if (status.state.value != VpnState.STOPPED) {
+                                        pendingRestoredState = status.state.value
+                                        pendingRestoredPhase = status.phase.value
+                                        pendingRestoredStartTimestamp = status.startTimestamp
+                                        status.state.value = VpnState.STOPPED
+                                        status.phase.value = ""
+                                        status.startTimestamp = 0L
+                                        status.lastStoppedTimestamp = System.currentTimeMillis()
+                                    }
+                                }
                             }
                         }
                         val handler = Handler(Looper.getMainLooper())
@@ -175,6 +226,7 @@ object VpnStateBridge {
         synchronized(this) {
             cancelLivenessTimeout()
             isLivenessConfirmed = false
+            pendingRestoredState = null
             if (!isLivenessBound) return
             try {
                 livenessConnection?.let { appContext.unbindService(it) }
@@ -233,6 +285,7 @@ object VpnStateBridge {
                         status.startTimestamp = startTime
                         status.lastStoppedTimestamp = stopTime
                         status.privateDnsStrict.value = privateDns
+                        pendingRestoredState = null
                         if (status.state.value != VpnState.STOPPED) {
                             isLivenessConfirmed = true
                             cancelLivenessTimeout()
@@ -256,5 +309,8 @@ object VpnStateBridge {
         isLivenessBound = false
         isLivenessConfirmed = false
         livenessConnection = null
+        pendingRestoredState = null
+        pendingRestoredPhase = ""
+        pendingRestoredStartTimestamp = 0L
     }
 }

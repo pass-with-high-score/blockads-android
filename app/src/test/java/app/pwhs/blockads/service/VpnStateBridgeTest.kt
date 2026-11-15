@@ -118,7 +118,15 @@ class VpnStateBridgeTest {
 
         assertEquals(VpnState.STOPPED, store.state.value)
         assertEquals(0L, store.startTimestamp)
-        assertFalse(VpnStateBridge.isLivenessBound)
+        assertTrue("Binding remains open so a late onServiceConnected can still restore state", VpnStateBridge.isLivenessBound)
+
+        val liveBinder = android.os.Binder()
+        val conn = shadowOf(context as Application).boundServiceConnections.last()
+        conn.onServiceConnected(null, liveBinder)
+
+        assertTrue(VpnStateBridge.isLivenessConfirmed)
+        assertEquals(VpnState.RUNNING, store.state.value)
+        assertEquals(4242L, store.startTimestamp)
     }
 
     @Test
