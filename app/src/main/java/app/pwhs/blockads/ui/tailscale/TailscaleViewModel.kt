@@ -28,7 +28,8 @@ import org.koin.core.component.inject
 import timber.log.Timber
 
 class TailscaleViewModel(
-    application: Application
+    application: Application,
+    private val serviceClient: TailscaleServiceClient = TailscaleServiceClient(application.applicationContext),
 ) : AndroidViewModel(application), KoinComponent {
 
     private val appPrefs: AppPreferences by inject()
@@ -43,14 +44,6 @@ class TailscaleViewModel(
     private var authEngine: tunnel.Engine? = null
     private val tailscalePeerNotifier by lazy { TailscalePeerNotifier(getApplication()) }
     private var syncJob: Job? = null
-    private val serviceClient = TailscaleServiceClient(
-        context = getApplication<Application>().applicationContext,
-        onConnected = {
-            if (_uiState.value.isEnabled && _uiState.value.isLoggedIn) {
-                launchSync()
-            }
-        }
-    )
 
     private fun launchSync(stateJson: String? = null) {
         syncJob?.cancel()
@@ -63,6 +56,11 @@ class TailscaleViewModel(
     }
 
     init {
+        serviceClient.onConnected = {
+            if (_uiState.value.isEnabled && _uiState.value.isLoggedIn) {
+                launchSync()
+            }
+        }
         loadPreferences()
     }
 
@@ -191,6 +189,8 @@ class TailscaleViewModel(
                     startStatusPolling()
                 }
             } else {
+                syncJob?.cancel()
+                syncJob = null
                 pollJob?.cancel()
                 serviceClient.stopTailscale()
                 _uiState.update { it.copy(connectionState = "DISCONNECTED") }
@@ -336,7 +336,7 @@ class TailscaleViewModel(
     }
 
     private fun pingPeer(peerId: Long, target: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             _uiState.update { state ->
                 val updated = state.peers.map {
                     if (it.id == peerId) it.copy(isPingLoading = true, pingError = null) else it

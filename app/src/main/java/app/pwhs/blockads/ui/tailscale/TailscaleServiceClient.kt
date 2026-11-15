@@ -13,8 +13,8 @@ import timber.log.Timber
 
 class TailscaleServiceClient(
     private val context: Context,
-    private val onConnected: () -> Unit = {},
-    private val onDisconnected: () -> Unit = {},
+    var onConnected: () -> Unit = {},
+    var onDisconnected: () -> Unit = {},
 ) {
     var isBound: Boolean = false
         private set
@@ -96,8 +96,8 @@ class TailscaleServiceClient(
             }
         }
 
-    fun stopTailscale(): Boolean {
-        return try {
+    suspend fun stopTailscale(): Boolean = withContext(Dispatchers.IO) {
+        try {
             tailscaleService?.stopTailscale()
             true
         } catch (e: Exception) {

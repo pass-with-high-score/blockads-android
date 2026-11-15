@@ -162,15 +162,25 @@ class TailscaleViewModelTest {
     @Test
     fun `peer ping reports peer unreachable when vpn is running without bound service`() = runTest {
         AdBlockVpnService.status.state.value = VpnState.RUNNING
-        val vm = TailscaleViewModel(app)
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        coEvery { client.pingPeer("100.64.0.5") } returns ""
+
+        val vm = TailscaleViewModel(app, client)
         advanceUntilIdle()
 
+        val initialPeer = TailscalePeer(
+            id = 100L, name = "peer-a", ips = listOf("100.64.0.5"),
+            ipv4 = "100.64.0.5", ipv6 = null, os = "linux", online = true,
+            isExitNode = false, isPinned = false, isSelf = false,
+            keyExpiry = 0L, keyExpired = false, curAddr = "", relay = ""
+        )
+        vm.processIntent(TailscaleUiIntent.SelectPeerForDetail(initialPeer))
         vm.processIntent(TailscaleUiIntent.PingPeer(100L, "100.64.0.5"))
         advanceUntilIdle()
 
-        val peer = vm.uiState.value.peers.find { it.id == 100L }
-        // Peer was not in peer list originally, but ping handles target safely without crashing
-        assertFalse(vm.uiState.value.isLoading)
+        val updatedPeer = vm.uiState.value.selectedPeerForDetail
+        assertEquals("Peer unreachable", updatedPeer?.pingError)
+        assertFalse(updatedPeer!!.isPingLoading)
     }
 
     @Test
@@ -179,14 +189,25 @@ class TailscaleViewModelTest {
         client.bind()
         assertTrue(client.isBound)
 
+        val stub = object : ITailscaleService.Stub() {
+            override fun getTailscaleStatus(): String = """{"state":"CONNECTED"}"""
+            override fun configureTailscale(stateJson: String?, controlUrl: String?, authKey: String?): String = "{}"
+            override fun startTailscaleSession(hostname: String?) {}
+            override fun stopTailscale() {}
+            override fun setTailscaleExitNode(nodeId: Long) {}
+            override fun pingTailscalePeer(target: String?): String = ""
+        }
+
         val shadowApp = shadowOf(app)
         val conn = shadowApp.boundServiceConnections.first()
-        conn.onServiceConnected(null, null)
+        conn.onServiceConnected(null, stub)
+        assertTrue("isConnected must be true after onServiceConnected with valid binder", client.isConnected)
+
         conn.onServiceDisconnected(null)
 
         // Requirement R4: onServiceDisconnected must NOT clear isBound
         assertTrue("isBound must remain true on service disconnection", client.isBound)
-        assertFalse(client.isConnected)
+        assertFalse("isConnected must be false after service disconnection", client.isConnected)
 
         client.unbind()
         assertFalse("isBound is cleared only on explicit unbind", client.isBound)
@@ -198,14 +219,30 @@ class TailscaleViewModelTest {
         coEvery { tailscalePrefs.getStateJsonSnapshot() } returns """{"node_key":"k1","machine_key":"k2"}"""
         AdBlockVpnService.status.state.value = VpnState.RUNNING
 
-        val vm = TailscaleViewModel(app)
-        advanceUntilIdle()
+        var syncWasCancelled = false
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        every { client.isConnected } returns true
+        coEvery { client.getStatus() } returns ""
+        coEvery { client.syncSession(any(), any(), any(), any(), any()) } coAnswers {
+            try {
+                kotlinx.coroutines.delay(60_000L)
+                """{"node_key":"stale","machine_key":"stale"}"""
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                syncWasCancelled = true
+                throw e
+            }
+        }
+
+        val vm = TailscaleViewModel(app, client)
+        testScheduler.runCurrent()
 
         vm.processIntent(TailscaleUiIntent.Logout)
         advanceUntilIdle()
 
+        assertTrue("Active sync coroutine must be cancelled on logout", syncWasCancelled)
         assertFalse(vm.uiState.value.isEnabled)
         assertFalse(vm.uiState.value.isLoggedIn)
         assertEquals("DISCONNECTED", vm.uiState.value.connectionState)
+        io.mockk.coVerify(exactly = 0) { tailscalePrefs.setStateJson("""{"node_key":"stale","machine_key":"stale"}""") }
     }
 }

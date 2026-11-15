@@ -331,9 +331,11 @@ val appModule = module {
             dnsLeakRepository = get()
         )
     }
+    factory { app.pwhs.blockads.ui.tailscale.TailscaleServiceClient(androidContext()) }
     viewModel {
         app.pwhs.blockads.ui.tailscale.TailscaleViewModel(
-            application = androidApplication()
+            application = androidApplication(),
+            serviceClient = get()
         )
     }
 }

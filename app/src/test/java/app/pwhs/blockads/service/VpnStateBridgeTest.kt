@@ -164,4 +164,31 @@ class VpnStateBridgeTest {
         assertEquals(VpnState.RUNNING, AdBlockVpnService.status.state.value)
         assertEquals(8888L, AdBlockVpnService.status.startTimestamp)
     }
+
+    @Test
+    fun testLivenessMonitorResetsStateOnServiceDisconnected() {
+        VpnStateBridge.resetBridgeForTesting()
+        val store = VpnStatusStore()
+        VpnStateBridge.initMainProcessBridge(context, store)
+
+        val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
+            putExtra(AdBlockVpnService.EXTRA_VPN_STATE, VpnState.RUNNING.name)
+            putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, 7777L)
+            putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, 0L)
+            putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, false)
+        }
+        context.sendBroadcast(intent)
+        shadowOf(Looper.getMainLooper()).idle()
+
+        assertEquals(VpnState.RUNNING, store.state.value)
+        assertTrue(VpnStateBridge.isLivenessBound)
+
+        val shadowApp = shadowOf(context as Application)
+        val conn = shadowApp.boundServiceConnections.last()
+        conn.onServiceDisconnected(null)
+
+        assertEquals(VpnState.STOPPED, store.state.value)
+        assertEquals(0L, store.startTimestamp)
+        assertFalse(VpnStateBridge.isLivenessBound)
+    }
 }

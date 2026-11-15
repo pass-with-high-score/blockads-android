@@ -1,11 +1,14 @@
 package app.pwhs.blockads.service
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.IBinder
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import app.pwhs.blockads.service.vpn.VpnStatusStore
@@ -22,6 +25,12 @@ object VpnStateBridge {
 
     @Volatile
     private var isBridgeInitialized = false
+
+    @Volatile
+    internal var isLivenessBound = false
+        private set
+
+    private var livenessConnection: ServiceConnection? = null
 
     private fun getPrefs(context: Context): SharedPreferences {
         val deContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -93,6 +102,77 @@ object VpnStateBridge {
         }
     }
 
+    internal fun bindLivenessMonitor(context: Context, status: VpnStatusStore) {
+        val appContext = context.applicationContext ?: context
+        synchronized(this) {
+            if (isLivenessBound) return
+            val conn = object : ServiceConnection {
+                override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
+
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    handleRemoteProcessDied(appContext, status)
+                }
+
+                override fun onBindingDied(name: ComponentName?) {
+                    handleRemoteProcessDied(appContext, status)
+                }
+            }
+            val intent = Intent(appContext, AdBlockVpnService::class.java).apply {
+                action = AdBlockVpnService.ACTION_TAILSCALE_BIND
+            }
+            try {
+                // Flag 0 binds to an existing service without auto-creating :vpn if stopped
+                isLivenessBound = appContext.bindService(intent, conn, 0)
+                if (isLivenessBound) {
+                    livenessConnection = conn
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to bind VPN liveness monitor")
+            }
+        }
+    }
+
+    internal fun unbindLivenessMonitor(context: Context) {
+        val appContext = context.applicationContext ?: context
+        synchronized(this) {
+            if (!isLivenessBound) return
+            try {
+                livenessConnection?.let { appContext.unbindService(it) }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to unbind VPN liveness monitor")
+            } finally {
+                isLivenessBound = false
+                livenessConnection = null
+            }
+        }
+    }
+
+    private fun handleRemoteProcessDied(context: Context, status: VpnStatusStore) {
+        unbindLivenessMonitor(context)
+        if (status.state.value != VpnState.STOPPED) {
+            Timber.w("VPN process (:vpn) died unexpectedly; resetting state to STOPPED")
+            val now = System.currentTimeMillis()
+            status.state.value = VpnState.STOPPED
+            status.startTimestamp = 0L
+            status.lastStoppedTimestamp = now
+            persistState(
+                context = context,
+                state = VpnState.STOPPED,
+                startTimestamp = 0L,
+                lastStoppedTimestamp = now,
+                privateDnsStrict = status.privateDnsStrict.value
+            )
+        }
+    }
+
+    private fun syncLivenessBinding(context: Context, status: VpnStatusStore) {
+        when (status.state.value) {
+            VpnState.STARTING, VpnState.RUNNING, VpnState.RESTARTING -> bindLivenessMonitor(context, status)
+            VpnState.STOPPED -> unbindLivenessMonitor(context)
+            VpnState.STOPPING -> {}
+        }
+    }
+
     fun initMainProcessBridge(context: Context, status: VpnStatusStore) {
         if (isBridgeInitialized) return
         synchronized(this) {
@@ -115,12 +195,14 @@ object VpnStateBridge {
                         status.startTimestamp = startTime
                         status.lastStoppedTimestamp = stopTime
                         status.privateDnsStrict.value = privateDns
+                        syncLivenessBinding(context, status)
                     }
                 }
             }
             val filter = IntentFilter(AdBlockVpnService.ACTION_VPN_STATE_CHANGED)
             ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
             hydrateState(context, status)
+            syncLivenessBinding(context, status)
             isBridgeInitialized = true
         }
     }
@@ -128,5 +210,7 @@ object VpnStateBridge {
     @VisibleForTesting
     internal fun resetBridgeForTesting() {
         isBridgeInitialized = false
+        isLivenessBound = false
+        livenessConnection = null
     }
 }
