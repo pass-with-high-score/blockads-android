@@ -169,7 +169,10 @@ class AdBlockVpnService : VpnService() {
             isEngineRunning = { goTunnelAdapter.isEngineRunning() },
             onTearDownForRestart = { session.tearDownForRestart() },
             onStartVpn = { session.startFromSupervisor() },
-            onPhaseChanged = { phase -> session.connectingPhase = phase },
+            onPhaseChanged = { phase ->
+                session.connectingPhase = phase
+                status.phase.value = phase
+            },
             onRefreshStats = {
                 session.todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
             },

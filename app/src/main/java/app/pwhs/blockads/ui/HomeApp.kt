@@ -83,6 +83,7 @@ import app.pwhs.blockads.ui.filter.detail.FilterDetailScreen
 import app.pwhs.blockads.ui.filter.overlap.FilterOverlapScreen
 import app.pwhs.blockads.ui.firewall.FirewallScreen
 import app.pwhs.blockads.ui.home.HomeScreen
+import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.logs.LogsScreen
@@ -247,6 +248,31 @@ fun HomeApp(
                                 HomeFeatureTipType.TRUSTED_NETWORKS -> homeStack.add(TrustedNetworksKey)
                                 HomeFeatureTipType.HTTPS_FILTERING -> homeStack.add(HttpsFilteringKey)
                                 HomeFeatureTipType.WIREGUARD -> homeStack.add(WireGuardImportKey)
+                            }
+                        },
+                        onFeatureBadgeClick = { kind ->
+                            when (kind) {
+                                FeatureBadgeKind.DNS_PROTOCOL -> {
+                                    showBottomBar = false
+                                    homeStack.add(DnsProviderKey)
+                                }
+                                FeatureBadgeKind.HTTPS_FILTER -> {
+                                    showBottomBar = false
+                                    homeStack.add(HttpsFilteringKey)
+                                }
+                                FeatureBadgeKind.TAILSCALE -> {
+                                    showBottomBar = false
+                                    homeStack.add(TailscaleKey)
+                                }
+                                FeatureBadgeKind.FIREWALL -> {
+                                    showBottomBar = true
+                                    currentTab = BottomBarScreen.Firewall
+                                }
+                                FeatureBadgeKind.FILTER_RULES -> {
+                                    showBottomBar = true
+                                    currentTab = BottomBarScreen.FilterSetup
+                                }
+                                FeatureBadgeKind.TUNNEL_MODE -> Unit
                             }
                         }
                     )

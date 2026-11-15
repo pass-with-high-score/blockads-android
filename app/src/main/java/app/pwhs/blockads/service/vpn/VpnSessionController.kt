@@ -63,6 +63,11 @@ class VpnSessionController(
     @Volatile var isPhysicalNetworkLost = false
         private set
     @Volatile var connectingPhase: String = ""
+
+    private fun setPhase(phase: String) {
+        connectingPhase = phase
+        status.phase.value = phase
+    }
     @Volatile var firewallManager: FirewallManager? = null
         private set
 
@@ -114,26 +119,26 @@ class VpnSessionController(
             try {
                 val startupTime = clock()
 
-                connectingPhase = host.getString(R.string.vpn_phase_loading_filters)
+                setPhase(host.getString(R.string.vpn_phase_loading_filters))
                 host.updateNotification()
 
                 val config = engine.prepareStartupConfig()
                 firewallManager = config.firewallManager
 
-                connectingPhase = host.getString(R.string.vpn_phase_preparing_dns)
+                setPhase(host.getString(R.string.vpn_phase_preparing_dns))
                 host.updateNotification()
 
                 val httpsFilteringEnabled = appPrefs.getHttpsFilteringEnabledSnapshot()
 
                 if (startedFromBoot && !network.isNetworkAvailable()) {
-                    connectingPhase = host.getString(R.string.vpn_phase_waiting_network)
+                    setPhase(host.getString(R.string.vpn_phase_waiting_network))
                     host.updateNotification()
                     Timber.d("Waiting for network before establishing VPN tunnel...")
                     network.networkAvailableFlow.first()
                     Timber.d("Network is now available, proceeding with VPN establishment")
                 }
 
-                connectingPhase = host.getString(R.string.vpn_phase_establishing)
+                setPhase(host.getString(R.string.vpn_phase_establishing))
                 host.updateNotification()
 
                 var vpnEstablished = false
@@ -169,13 +174,13 @@ class VpnSessionController(
 
                 if (!vpnEstablished) {
                     Timber.e("Failed to establish VPN after ${retryManager.getMaxRetries()} attempts")
-                    connectingPhase = ""
+                    setPhase("")
                     stop()
                     return@launch
                 }
 
                 retryManager.reset()
-                connectingPhase = ""
+                setPhase("")
                 val resumedFromReconnect = isReconnecting && vpnStartTime > 0L
                 isReconnecting = false
                 status.state.value = VpnState.RUNNING
@@ -230,6 +235,7 @@ class VpnSessionController(
         restartJob?.cancel()
         restartJob = null
         status.state.value = VpnState.STOPPING
+        setPhase(host.getString(R.string.vpn_phase_closing_tunnel))
         isReconnecting = false
         isPhysicalNetworkLost = false
         network.cancelNetworkSwitch()
@@ -248,6 +254,7 @@ class VpnSessionController(
             }
             vpnInterface = null
 
+            setPhase(host.getString(R.string.vpn_phase_stopping_engine))
             val goStop = scope.launch(NonCancellable + ioDispatcher) { engine.stop() }
             if (withTimeoutOrNull(GO_STOP_TIMEOUT_MS) { goStop.join() } == null) {
                 Timber.w("Go tunnel stop still running after ${GO_STOP_TIMEOUT_MS}ms — finishing shutdown anyway")
@@ -258,6 +265,7 @@ class VpnSessionController(
                     Timber.w("Shutdown superseded by ${status.state.value} — leaving the new session alone")
                     return@withContext
                 }
+                setPhase(host.getString(R.string.vpn_phase_clearing_network))
                 host.stopForeground(removeNotification = true)
                 if (showStoppedNotification) {
                     host.showStoppedNotification()
@@ -270,6 +278,8 @@ class VpnSessionController(
             host.scheduleStopFinalization {
                 if (status.state.value == VpnState.STOPPING) {
                     status.state.value = VpnState.STOPPED
+        setPhase("")
+                    setPhase("")
                     status.lastStoppedTimestamp = clock()
                     status.privateDnsStrict.value = false
                     Timber.d("VPN fully stopped (OS transport cleared)")
@@ -284,6 +294,7 @@ class VpnSessionController(
         Timber.w("VPN revoked by system or another VPN app")
         host.showRevokedNotification()
         status.state.value = VpnState.STOPPED
+        setPhase("")
         status.lastStoppedTimestamp = 0L
         status.privateDnsStrict.value = false
         isReconnecting = false
@@ -326,6 +337,7 @@ class VpnSessionController(
     fun onDestroy() {
         if (status.state.value != VpnState.STOPPING) {
             status.state.value = VpnState.STOPPED
+        setPhase("")
             status.lastStoppedTimestamp = clock()
         }
         status.privateDnsStrict.value = false

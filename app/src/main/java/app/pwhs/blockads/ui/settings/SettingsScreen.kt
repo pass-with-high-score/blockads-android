@@ -79,6 +79,7 @@ fun SettingsScreen(
     val youtubeRestrictedMode by viewModel.youtubeRestrictedMode.collectAsStateWithLifecycle()
     val dailySummaryEnabled by viewModel.dailySummaryEnabled.collectAsStateWithLifecycle()
     val milestoneNotificationsEnabled by viewModel.milestoneNotificationsEnabled.collectAsStateWithLifecycle()
+    val homeTipsEnabled by viewModel.homeTipsEnabled.collectAsStateWithLifecycle()
     val upstreamDNS by viewModel.upstreamDns.collectAsStateWithLifecycle()
     val logRetentionDays by viewModel.logRetentionDays.collectAsStateWithLifecycle()
 
@@ -187,8 +188,10 @@ fun SettingsScreen(
             NotificationsSection(
                 dailySummaryEnabled = dailySummaryEnabled,
                 milestoneNotificationsEnabled = milestoneNotificationsEnabled,
+                homeTipsEnabled = homeTipsEnabled,
                 onSetDailySummaryEnabled = { viewModel.setDailySummaryEnabled(it) },
-                onSetMilestoneNotificationsEnabled = { viewModel.setMilestoneNotificationsEnabled(it) }
+                onSetMilestoneNotificationsEnabled = { viewModel.setMilestoneNotificationsEnabled(it) },
+                onSetHomeTipsEnabled = { viewModel.setHomeTipsEnabled(it) }
             )
 
             Spacer(modifier = Modifier.height(20.dp))

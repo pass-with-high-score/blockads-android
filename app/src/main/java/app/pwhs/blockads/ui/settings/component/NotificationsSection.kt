@@ -18,8 +18,10 @@ import app.pwhs.blockads.R
 fun NotificationsSection(
     dailySummaryEnabled: Boolean,
     milestoneNotificationsEnabled: Boolean,
+    homeTipsEnabled: Boolean,
     onSetDailySummaryEnabled: (Boolean) -> Unit,
     onSetMilestoneNotificationsEnabled: (Boolean) -> Unit,
+    onSetHomeTipsEnabled: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
@@ -51,6 +53,18 @@ fun NotificationsSection(
                     subtitle = stringResource(R.string.settings_milestone_notifications_desc),
                     isChecked = milestoneNotificationsEnabled,
                     onCheckedChange = onSetMilestoneNotificationsEnabled
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = dividerColor
+                )
+                SettingsToggleItem(
+                    iconPainter = painterResource(R.drawable.ic_settings_notification_bell),
+                    iconTint = Color(0xFF10B981),
+                    title = stringResource(R.string.settings_home_tips),
+                    subtitle = stringResource(R.string.settings_home_tips_desc),
+                    isChecked = homeTipsEnabled,
+                    onCheckedChange = onSetHomeTipsEnabled
                 )
             }
         }

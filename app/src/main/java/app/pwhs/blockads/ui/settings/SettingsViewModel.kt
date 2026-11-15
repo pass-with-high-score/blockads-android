@@ -114,6 +114,9 @@ class SettingsViewModel(
     val milestoneNotificationsEnabled: StateFlow<Boolean> = appPrefs.milestoneNotificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val homeTipsEnabled: StateFlow<Boolean> = appPrefs.homeTipsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val logRetentionDays: StateFlow<Int> = appPrefs.logRetentionDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
@@ -292,6 +295,12 @@ class SettingsViewModel(
     fun setMilestoneNotificationsEnabled(enabled: Boolean) {
         viewModelScope.launch {
             appPrefs.setMilestoneNotificationsEnabled(enabled)
+        }
+    }
+
+    fun setHomeTipsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.setHomeTipsEnabled(enabled)
         }
     }
 

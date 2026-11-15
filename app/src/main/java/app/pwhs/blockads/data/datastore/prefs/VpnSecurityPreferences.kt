@@ -24,6 +24,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_DAILY_SUMMARY_ENABLED = booleanPreferencesKey("daily_summary_enabled")
         val KEY_MILESTONE_NOTIFICATIONS_ENABLED =
             booleanPreferencesKey("milestone_notifications_enabled")
+        val KEY_HOME_TIPS_ENABLED = booleanPreferencesKey("home_tips_enabled")
         val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
         val KEY_LAST_SEEN_MILESTONE_DIALOG = longPreferencesKey("last_seen_milestone_dialog")
         val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
@@ -128,6 +129,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] ?: false
     }
 
+    val homeTipsEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_HOME_TIPS_ENABLED] ?: true
+    }
+
     val lastMilestoneBlocked: Flow<Long> = dataStore.data.map { prefs ->
         prefs[KEY_LAST_MILESTONE_BLOCKED] ?: 0L
     }
@@ -228,6 +233,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] = enabled }
+    }
+
+    suspend fun setHomeTipsEnabled(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[KEY_HOME_TIPS_ENABLED] = enabled }
     }
 
     suspend fun setLastMilestoneBlocked(count: Long) {
