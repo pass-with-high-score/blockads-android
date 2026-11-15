@@ -425,6 +425,7 @@ class TailscaleViewModel(
                 _uiState.value.activeExitNodeId != 0L && parsed.exitNodes.none { it.id == _uiState.value.activeExitNodeId }
 
             _uiState.update {
+                if (authGeneration.get() != polledGen) return@update it
                 it.copy(
                     connectionState = parsed.state, isLoggedIn = it.isLoggedIn || isNowConnected,
                     selfIp = parsed.selfIp ?: it.selfIp, magicDnsName = parsed.magicDnsName.ifEmpty { it.magicDnsName },

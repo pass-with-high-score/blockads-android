@@ -446,4 +446,38 @@ class TailscaleViewModelTest {
         assertTrue(vm.uiState.value.isEnabled)
         assertTrue(vm.uiState.value.connectionState != "DISCONNECTED")
     }
+
+    @Test
+    fun `stale poll from pre-logout generation does not restore connectionState or peers after logout`() = runTest {
+        val statusEntered = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val statusGate = kotlinx.coroutines.CompletableDeferred<String>()
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        coEvery { client.getStatus() } coAnswers {
+            statusEntered.complete(Unit)
+            statusGate.await()
+        }
+
+        val vm = TailscaleViewModel(app, client)
+        advanceUntilIdle()
+
+        vm.processIntent(TailscaleUiIntent.RefreshStatus)
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.withTimeout(2_000L) { statusEntered.await() }
+        }
+
+        vm.processIntent(TailscaleUiIntent.Logout)
+        advanceUntilIdle()
+
+        statusGate.complete(
+            """{"state":"CONNECTED","self_ip":"100.64.0.1","peers":[{"id":1,"name":"peer-1","ips":["100.64.0.2"],"os":"linux","online":true}]}"""
+        )
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.delay(50L)
+        }
+        advanceUntilIdle()
+
+        assertEquals("DISCONNECTED", vm.uiState.value.connectionState)
+        assertFalse(vm.uiState.value.isLoggedIn)
+        assertTrue(vm.uiState.value.peers.isEmpty())
+    }
 }
