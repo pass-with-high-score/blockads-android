@@ -51,8 +51,7 @@ class TailscaleViewModel(
     private val transitionMutex = Mutex()
     private val activeTeardowns = AtomicInteger(0)
     private val authGeneration = AtomicInteger(0)
-    @Volatile
-    private var isCleared = false
+    @Volatile private var isCleared = false
 
     private fun launchSync(stateJson: String? = null) {
         syncJob?.cancel()
@@ -63,9 +62,7 @@ class TailscaleViewModel(
     }
 
     init {
-        serviceClient.onConnected = {
-            if (_uiState.value.isEnabled && _uiState.value.isLoggedIn) launchSync()
-        }
+        serviceClient.onConnected = { if (_uiState.value.isEnabled && _uiState.value.isLoggedIn) launchSync() }
         loadPreferences()
     }
 
@@ -97,9 +94,7 @@ class TailscaleViewModel(
             if (enabled && hasKeys && isVpnRunning) {
                 launchSync(stateJson)
                 startStatusPolling()
-            } else if (hasKeys && isVpnRunning) {
-                startStatusPolling()
-            }
+            } else if (hasKeys && isVpnRunning) startStatusPolling()
 
             viewModelScope.launch {
                 AdBlockVpnService.state.collect { vpnState ->
@@ -123,7 +118,6 @@ class TailscaleViewModel(
                     }
                 }
             }
-
             viewModelScope.launch {
                 appPrefs.tailscale.pinnedPeerIds.collect { pinnedIds ->
                     _uiState.update { state ->
@@ -185,9 +179,9 @@ class TailscaleViewModel(
                         transitionMutex.withLock {
                             appPrefs.tailscale.setEnabled(false)
                             _uiState.update { it.copy(isEnabled = false, connectionState = "DISCONNECTED") }
+                            pollJob?.cancel()
                             val authToCancel = authJob.also { authJob = null }
                             val jobToCancel = syncJob.also { syncJob = null }
-                            pollJob?.cancel()
                             authToCancel?.cancelAndJoin()
                             authEngine?.stopTailscale()
                             authEngine = null
@@ -290,9 +284,9 @@ class TailscaleViewModel(
     private fun logout() {
         activeTeardowns.incrementAndGet()
         authGeneration.incrementAndGet()
+        pollJob?.cancel()
         val initialAuthJob = authJob.also { authJob = null }
         val initialSyncJob = syncJob.also { syncJob = null }
-        pollJob?.cancel()
         _uiState.update { state ->
             TailscaleUiState(
                 isEnabled = false, isLoggedIn = false, isVpnRunning = AdBlockVpnService.isRunning,
@@ -304,6 +298,7 @@ class TailscaleViewModel(
             try {
                 withContext(NonCancellable) {
                     transitionMutex.withLock {
+                        pollJob?.cancel()
                         val latestAuthJob = authJob.also { authJob = null }
                         initialAuthJob?.cancelAndJoin()
                         latestAuthJob?.cancelAndJoin()
@@ -398,14 +393,13 @@ class TailscaleViewModel(
 
     private suspend fun pollStatusOnce() = withContext(Dispatchers.IO) {
         try {
-            val statusJson = if (authEngine != null) {
-                val s = authEngine?.tailscaleStatus ?: ""
-                if (s.isNotEmpty() && s != "{}") s else serviceClient.getStatus()
-            } else {
-                serviceClient.getStatus()
-            }
+            val polledGen = authGeneration.get()
+            val polledEngine = authEngine
+            val engineStatus = polledEngine?.tailscaleStatus ?: ""
+            val fromAuthEngine = engineStatus.isNotEmpty() && engineStatus != "{}"
+            val statusJson = if (fromAuthEngine) engineStatus else serviceClient.getStatus()
             if (statusJson.isNotEmpty() && statusJson != "{}") {
-                parseAndApplyStatus(statusJson)
+                parseAndApplyStatus(statusJson, if (fromAuthEngine) polledEngine else null, polledGen)
             } else {
                 val hasKeys = appPrefs.tailscale.getStateJsonSnapshot().let { it.contains("node_key") && it.contains("machine_key") }
                 if (hasKeys && !_uiState.value.isLoggedIn) _uiState.update { it.copy(isLoggedIn = true) }
@@ -415,12 +409,14 @@ class TailscaleViewModel(
                     _uiState.update { it.copy(connectionState = "READY") }
                 }
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Timber.e(e, "Error polling status")
         }
     }
 
-    private fun parseAndApplyStatus(json: String) {
+    private fun parseAndApplyStatus(json: String, polledEngine: tunnel.Engine?, polledGen: Int) {
         try {
             tailscalePeerNotifier.checkAndNotifyJson(json)
             val parsed = TailscaleStatusParser.parse(json, _uiState.value.pinnedPeerIds, _uiState.value.peers.associateBy { it.id })
@@ -443,13 +439,13 @@ class TailscaleViewModel(
                     serviceClient.setExitNode(0L)
                 }
             }
-            if (isNowConnected && authEngine != null) {
-                val gen = authGeneration.get()
-                viewModelScope.launch {
-                    val engine = authEngine.also { authEngine = null }
-                    val activeState = engine?.tailscaleState?.takeIf { it.isNotEmpty() && it != "{}" }
-                    engine?.stopTailscale()
-                    applyActiveTailscaleSession(activeState, gen)
+            if (isNowConnected && polledEngine != null && authEngine === polledEngine && authGeneration.get() == polledGen) {
+                authJob = viewModelScope.launch {
+                    if (authEngine !== polledEngine || authGeneration.get() != polledGen) return@launch
+                    authEngine = null
+                    val activeState = polledEngine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
+                    polledEngine.stopTailscale()
+                    applyActiveTailscaleSession(activeState, polledGen)
                 }
             }
         } catch (_: Exception) {
@@ -461,6 +457,7 @@ class TailscaleViewModel(
         if (activeState != null) appPrefs.tailscale.setStateJson(activeState)
         if (authGeneration.get() != expectedGen) return
         appPrefs.tailscale.setEnabled(true)
+        if (authGeneration.get() != expectedGen) return
         _uiState.update { it.copy(isEnabled = true, isLoggedIn = true, authUrl = "") }
         _uiEffect.emit(TailscaleUiEffect.AuthSuccess)
         launchSync(activeState)

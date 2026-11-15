@@ -370,6 +370,7 @@ class TailscaleViewModelTest {
 
     @Test
     fun `logout invalidates in-flight startAuthFlow while loading preferences`() = runTest {
+        val entered = kotlinx.coroutines.CompletableDeferred<Unit>()
         val prefGate = kotlinx.coroutines.CompletableDeferred<String>()
         var firstControlCall = true
         coEvery { tailscalePrefs.getControlUrlSnapshot() } coAnswers {
@@ -377,6 +378,7 @@ class TailscaleViewModelTest {
                 firstControlCall = false
                 ""
             } else {
+                entered.complete(Unit)
                 prefGate.await()
             }
         }
@@ -385,7 +387,9 @@ class TailscaleViewModelTest {
         advanceUntilIdle()
 
         vm.processIntent(TailscaleUiIntent.SignInWithBrowser)
-        testScheduler.runCurrent()
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.withTimeout(2_000L) { entered.await() }
+        }
 
         vm.processIntent(TailscaleUiIntent.Logout)
         prefGate.complete("https://control.example.com")

@@ -107,26 +107,33 @@ class VpnStateBridgeTest {
             startTimestamp = 4242L
         }
 
-        VpnStateBridge.bindLivenessMonitor(context, store)
-        assertTrue(VpnStateBridge.isLivenessBound)
-        assertFalse(VpnStateBridge.isLivenessConfirmed)
+        io.mockk.mockkObject(app.pwhs.blockads.utils.VpnUtils)
+        try {
+            every { app.pwhs.blockads.utils.VpnUtils.isVpnTransportActive(any()) } returns false
+            VpnStateBridge.bindLivenessMonitor(context, store)
+            assertTrue(VpnStateBridge.isLivenessBound)
+            assertFalse(VpnStateBridge.isLivenessConfirmed)
 
-        shadowOf(Looper.getMainLooper()).idleFor(
-            VpnStateBridge.LIVENESS_CONFIRM_TIMEOUT_MS + 100L,
-            java.util.concurrent.TimeUnit.MILLISECONDS
-        )
+            shadowOf(Looper.getMainLooper()).idleFor(
+                VpnStateBridge.LIVENESS_CONFIRM_TIMEOUT_MS + 100L,
+                java.util.concurrent.TimeUnit.MILLISECONDS
+            )
 
-        assertEquals(VpnState.STOPPED, store.state.value)
-        assertEquals(0L, store.startTimestamp)
-        assertTrue("Binding remains open so a late onServiceConnected can still restore state", VpnStateBridge.isLivenessBound)
+            assertEquals(VpnState.STOPPED, store.state.value)
+            assertEquals(0L, store.startTimestamp)
+            assertTrue("Binding remains open so a late onServiceConnected can still restore state", VpnStateBridge.isLivenessBound)
 
-        val liveBinder = android.os.Binder()
-        val conn = shadowOf(context as Application).boundServiceConnections.last()
-        conn.onServiceConnected(null, liveBinder)
+            every { app.pwhs.blockads.utils.VpnUtils.isVpnTransportActive(any()) } returns true
+            val liveBinder = android.os.Binder()
+            val conn = shadowOf(context as Application).boundServiceConnections.last()
+            conn.onServiceConnected(null, liveBinder)
 
-        assertTrue(VpnStateBridge.isLivenessConfirmed)
-        assertEquals(VpnState.RUNNING, store.state.value)
-        assertEquals(4242L, store.startTimestamp)
+            assertTrue(VpnStateBridge.isLivenessConfirmed)
+            assertEquals(VpnState.RUNNING, store.state.value)
+            assertEquals(4242L, store.startTimestamp)
+        } finally {
+            io.mockk.unmockkObject(app.pwhs.blockads.utils.VpnUtils)
+        }
     }
 
     @Test

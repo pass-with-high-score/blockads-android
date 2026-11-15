@@ -153,7 +153,8 @@ object VpnStateBridge {
                             isLivenessConfirmed = true
                             cancelLivenessTimeout()
                             val restored = pendingRestoredState
-                            if (status.state.value == VpnState.STOPPED && restored != null && restored != VpnState.STOPPED) {
+                            if (status.state.value == VpnState.STOPPED && restored != null && restored != VpnState.STOPPED &&
+                                VpnUtils.isVpnTransportActive(appContext)) {
                                 status.state.value = restored
                                 status.phase.value = pendingRestoredPhase
                                 status.startTimestamp = pendingRestoredStartTimestamp
