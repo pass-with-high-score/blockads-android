@@ -23,10 +23,7 @@ object SniProxyRuleCodec {
     val YOUTUBE_PRESET_DOMAINS = listOf(
         "youtubei.googleapis.com",
         "googlevideo.com",
-        "youtube.com",
-        "ytimg.com",
-        "youtu.be",
-        "ggpht.com"
+        "youtube.com"
     )
 
     fun fromJsonList(raw: String): List<SniProxyRule> {

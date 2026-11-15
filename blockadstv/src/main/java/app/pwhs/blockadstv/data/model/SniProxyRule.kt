@@ -24,9 +24,6 @@ object SniProxyRuleCodec {
         "youtubei.googleapis.com",
         "googlevideo.com",
         "youtube.com",
-        "ytimg.com",
-        "youtu.be",
-        "ggpht.com",
     )
 
     fun fromJsonList(raw: String): List<SniProxyRule> {

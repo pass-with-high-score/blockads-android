@@ -17,6 +17,8 @@ import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.utils.AppNameResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 enum class VpnState {
@@ -42,8 +45,10 @@ class TvVpnService : VpnService() {
     companion object {
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "blockadstv_vpn_channel"
+        private const val GO_STOP_TIMEOUT_MS = 2000L
         const val ACTION_START = "app.pwhs.blockadstv.START_VPN"
         const val ACTION_STOP = "app.pwhs.blockadstv.STOP_VPN"
+        const val ACTION_RESTART = "app.pwhs.blockadstv.RESTART_VPN"
 
         private val _state = MutableStateFlow(VpnState.STOPPED)
         val state: StateFlow<VpnState> = _state.asStateFlow()
@@ -71,10 +76,9 @@ class TvVpnService : VpnService() {
 
         fun requestRestart(context: Context) {
             val s = _state.value
-            if (s == VpnState.RUNNING) {
-                stop(context)
+            if (s == VpnState.RUNNING || s == VpnState.STARTING) {
                 val intent = Intent(context, TvVpnService::class.java).apply {
-                    action = ACTION_START
+                    action = ACTION_RESTART
                 }
                 androidx.core.content.ContextCompat.startForegroundService(context, intent)
             }
@@ -82,6 +86,8 @@ class TvVpnService : VpnService() {
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
+    private var startJob: Job? = null
+    private var restartJob: Job? = null
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var filterRepo: FilterListRepository
     private lateinit var tvPrefs: TvPreferences
@@ -115,6 +121,10 @@ class TvVpnService : VpnService() {
                 stopVpn()
                 return START_NOT_STICKY
             }
+            ACTION_RESTART -> {
+                restartVpn()
+                return START_STICKY
+            }
             else -> {
                 startVpn()
                 return START_STICKY
@@ -130,7 +140,7 @@ class TvVpnService : VpnService() {
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification("Connecting...", "Loading filters..."))
 
-        serviceScope.launch {
+        startJob = serviceScope.launch {
             try {
                 // Phase 1: Load filters
                 val isFirstDownload = !tvPrefs.filtersDownloaded.first()
@@ -370,18 +380,52 @@ class TvVpnService : VpnService() {
         }
     }
 
+    private fun restartVpn() {
+        startJob?.cancel()
+        startJob = null
+        restartJob?.cancel()
+        _state.value = VpnState.STOPPING
+        startTimestamp = 0L
+
+        restartJob = serviceScope.launch(Dispatchers.IO) {
+            try { vpnInterface?.close() } catch (_: Exception) {}
+            vpnInterface = null
+
+            val goStop = launch(NonCancellable + Dispatchers.IO) { goTunnelAdapter.stop() }
+            if (withTimeoutOrNull(GO_STOP_TIMEOUT_MS) { goStop.join() } == null) {
+                Timber.w("Go tunnel stop still running after ${GO_STOP_TIMEOUT_MS}ms during restart")
+            }
+
+            withContext(Dispatchers.Main) {
+                if (_state.value != VpnState.STOPPING) return@withContext
+                _state.value = VpnState.STOPPED
+                startVpn()
+            }
+        }
+    }
+
     private fun stopVpn() {
+        startJob?.cancel()
+        startJob = null
+        restartJob?.cancel()
+        restartJob = null
         _state.value = VpnState.STOPPING
         startTimestamp = 0L
 
         serviceScope.launch(Dispatchers.IO) {
-            goTunnelAdapter.stop()
             tvPrefs.setVpnEnabled(false)
 
+            // Close TUN fd first so OS tears down routes immediately, even if Go stack drain takes longer.
             try { vpnInterface?.close() } catch (_: Exception) {}
             vpnInterface = null
 
+            val goStop = launch(NonCancellable + Dispatchers.IO) { goTunnelAdapter.stop() }
+            if (withTimeoutOrNull(GO_STOP_TIMEOUT_MS) { goStop.join() } == null) {
+                Timber.w("Go tunnel stop still running after ${GO_STOP_TIMEOUT_MS}ms — finishing shutdown anyway")
+            }
+
             withContext(Dispatchers.Main) {
+                if (_state.value != VpnState.STOPPING) return@withContext
                 _state.value = VpnState.STOPPED
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()

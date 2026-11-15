@@ -1,19 +1,26 @@
 package app.pwhs.blockadstv.service
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.system.OsConstants
 import app.pwhs.blockadstv.data.dao.DnsLogDao
 import app.pwhs.blockadstv.data.entities.DnsLogEntry
 import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.utils.AppNameResolver
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import tunnel.AppResolver
+import tunnel.AppUidResolver
 import tunnel.DomainChecker
 import tunnel.FirewallChecker
 import tunnel.SocketProtector
+import tunnel.UIDResolver
 
 class GoTunnelAdapter(
     private val context: Context,
@@ -50,6 +57,42 @@ class GoTunnelAdapter(
             override fun isBlocked(domain: String): Boolean = filterRepo.isBlocked(domain)
             override fun getBlockReason(domain: String): String = filterRepo.getBlockReason(domain)
             override fun hasCustomRule(domain: String): Long = filterRepo.hasCustomRule(domain)
+        })
+    }
+
+    private fun setupUidResolver() {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        if (cm == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        engine.setUIDResolver(UIDResolver { protocol, localIP, localPort, remoteIP, remotePort ->
+            try {
+                val proto = when (protocol.toInt()) {
+                    6 -> OsConstants.IPPROTO_TCP
+                    17 -> OsConstants.IPPROTO_UDP
+                    else -> return@UIDResolver -1L
+                }
+                val local = InetSocketAddress(InetAddress.getByName(localIP), localPort.toInt())
+                val remote = InetSocketAddress(InetAddress.getByName(remoteIP), remotePort.toInt())
+                cm.getConnectionOwnerUid(proto, local, remote).toLong()
+            } catch (e: Exception) {
+                -1L
+            }
+        })
+    }
+
+    private fun setupAppUidResolver() {
+        engine.setAppUidResolver(AppUidResolver { uid ->
+            try {
+                val uidInt = uid.toInt()
+                context.packageManager.getPackagesForUid(uidInt)?.firstOrNull()
+                    ?: (if (uidInt >= 100_000) {
+                        context.packageManager.getPackagesForUid(uidInt % 100_000)?.firstOrNull()
+                    } else {
+                        null
+                    })
+                    ?: ""
+            } catch (e: Exception) {
+                ""
+            }
         })
     }
 
@@ -132,6 +175,8 @@ class GoTunnelAdapter(
             }
         }
 
+        setupUidResolver()
+        setupAppUidResolver()
         setupAppResolver()
         setupDomainChecker()
         setupFirewallChecker()
@@ -159,6 +204,8 @@ class GoTunnelAdapter(
             kotlinx.coroutines.delay(300)
         }
 
+        setupUidResolver()
+        setupAppUidResolver()
         setupAppResolver()
         setupDomainChecker()
         setupFirewallChecker()
