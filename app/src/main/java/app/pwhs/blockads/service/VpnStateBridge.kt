@@ -18,6 +18,7 @@ import timber.log.Timber
 object VpnStateBridge {
     const val PREF_NAME = "blockads_vpn_state_bridge"
     const val KEY_VPN_STATE = "direct_boot_vpn_state"
+    const val KEY_VPN_PHASE = "direct_boot_vpn_phase"
     const val KEY_START_TIMESTAMP = "direct_boot_start_timestamp"
     const val KEY_LAST_STOPPED_TIMESTAMP = "direct_boot_last_stopped_timestamp"
     const val KEY_PRIVATE_DNS_STRICT = "direct_boot_private_dns_strict"
@@ -46,11 +47,13 @@ object VpnStateBridge {
         state: VpnState,
         startTimestamp: Long,
         lastStoppedTimestamp: Long,
-        privateDnsStrict: Boolean
+        privateDnsStrict: Boolean,
+        phase: String = ""
     ) {
         try {
             getPrefs(context).edit()
                 .putString(KEY_VPN_STATE, state.name)
+                .putString(KEY_VPN_PHASE, phase)
                 .putLong(KEY_START_TIMESTAMP, startTimestamp)
                 .putLong(KEY_LAST_STOPPED_TIMESTAMP, lastStoppedTimestamp)
                 .putBoolean(KEY_PRIVATE_DNS_STRICT, privateDnsStrict)
@@ -77,6 +80,7 @@ object VpnStateBridge {
             } else if (prefs.getBoolean(KEY_VPN_ENABLED, false)) {
                 status.state.value = VpnState.RUNNING
             }
+            status.phase.value = prefs.getString(KEY_VPN_PHASE, "") ?: ""
             status.startTimestamp = prefs.getLong(KEY_START_TIMESTAMP, 0L)
             status.lastStoppedTimestamp = prefs.getLong(KEY_LAST_STOPPED_TIMESTAMP, 0L)
             status.privateDnsStrict.value = prefs.getBoolean(KEY_PRIVATE_DNS_STRICT, false)
@@ -88,13 +92,15 @@ object VpnStateBridge {
             ) {
                 Timber.i("Cold-boot reconciliation: No active VPN transport detected, falling back to STOPPED")
                 status.state.value = VpnState.STOPPED
+                status.phase.value = ""
                 status.startTimestamp = 0L
                 persistState(
                     context = context,
                     state = VpnState.STOPPED,
                     startTimestamp = 0L,
                     lastStoppedTimestamp = status.lastStoppedTimestamp,
-                    privateDnsStrict = status.privateDnsStrict.value
+                    privateDnsStrict = status.privateDnsStrict.value,
+                    phase = ""
                 )
             }
         } catch (e: Exception) {
@@ -153,6 +159,7 @@ object VpnStateBridge {
             Timber.w("VPN process (:vpn) died unexpectedly; resetting state to STOPPED")
             val now = System.currentTimeMillis()
             status.state.value = VpnState.STOPPED
+            status.phase.value = ""
             status.startTimestamp = 0L
             status.lastStoppedTimestamp = now
             persistState(
@@ -160,7 +167,8 @@ object VpnStateBridge {
                 state = VpnState.STOPPED,
                 startTimestamp = 0L,
                 lastStoppedTimestamp = now,
-                privateDnsStrict = status.privateDnsStrict.value
+                privateDnsStrict = status.privateDnsStrict.value,
+                phase = ""
             )
         }
     }
@@ -181,6 +189,7 @@ object VpnStateBridge {
                 override fun onReceive(c: Context?, intent: Intent?) {
                     if (intent?.action == AdBlockVpnService.ACTION_VPN_STATE_CHANGED) {
                         val stateStr = intent.getStringExtra(AdBlockVpnService.EXTRA_VPN_STATE)
+                        val phaseStr = intent.getStringExtra(AdBlockVpnService.EXTRA_VPN_PHASE)
                         val startTime = intent.getLongExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, 0L)
                         val stopTime = intent.getLongExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, 0L)
                         val privateDns = intent.getBooleanExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, false)
@@ -191,6 +200,9 @@ object VpnStateBridge {
                             } catch (e: Exception) {
                                 Timber.w(e, "Failed to parse VPN state: $stateStr")
                             }
+                        }
+                        if (phaseStr != null) {
+                            status.phase.value = phaseStr
                         }
                         status.startTimestamp = startTime
                         status.lastStoppedTimestamp = stopTime

@@ -200,7 +200,6 @@ func TestRelayHTTPFlowEarlyResponses(t *testing.T) {
 // "Connection: close" with an unframed body while the relay keeps the
 // connection open. The client waits for EOF that never comes.
 func TestRelayHTTPFlowAdJSONIsFramed(t *testing.T) {
-	t.Skip("known bug: ad-JSON stub is written unframed with Connection: close while the relay keeps the connection open")
 	filter := NewMitmFilter()
 	filter.SetAdPathPatterns([]string{"/ad_break", "/ads/"})
 	h := newRelayHarness(t, "site.example", filter, nil, func(*http.Request) string { return okResp("upstream") })
@@ -253,7 +252,6 @@ func TestRelayHTTPFlowErrors(t *testing.T) {
 // Early-response paths skip the request body, so the next request on
 // the connection is parsed from the middle of the previous body.
 func TestRelayHTTPFlowDrainsBodiesOnEarlyPaths(t *testing.T) {
-	t.Skip("known bug: 403/204/local-asset paths do not drain request bodies, desyncing the stream")
 	filter := NewMitmFilter()
 	filter.SetAdPathPatterns([]string{"/pagead"})
 	blocker := &fakeBlocker{blocked: map[string]bool{"tracker.example": true}}
@@ -370,5 +368,100 @@ func TestWrapResponseSkipsNonInjectable(t *testing.T) {
 				t.Fatalf("%s: ContentLength was set to -1", tc.name)
 			}
 		})
+	}
+}
+
+type recordedMitmEvent struct {
+	domain  string
+	blocked bool
+	reason  string
+	qtype   int
+}
+
+type fakeEventLoggerBlocker struct {
+	fakeBlocker
+	whitelisted map[string]bool
+	events      []recordedMitmEvent
+}
+
+func (f *fakeEventLoggerBlocker) CheckDomainBlock(host string) (bool, string) {
+	if f.blocked[host] {
+		return true, "testlist"
+	}
+	return false, ""
+}
+
+func (f *fakeEventLoggerBlocker) IsDomainWhitelisted(host string) bool {
+	return f.whitelisted[host]
+}
+
+func (f *fakeEventLoggerBlocker) LogMitmQuery(_ FlowID, domain string, blocked bool, reason string, qtype int) {
+	f.mu.Lock()
+	f.events = append(f.events, recordedMitmEvent{
+		domain:  domain,
+		blocked: blocked,
+		reason:  reason,
+		qtype:   qtype,
+	})
+	f.mu.Unlock()
+}
+
+func (f *fakeEventLoggerBlocker) snapshot() []recordedMitmEvent {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := make([]recordedMitmEvent, len(f.events))
+	copy(out, f.events)
+	return out
+}
+
+func TestRelayHTTPFlowLogsMitmEventsAndBypassesWhitelist(t *testing.T) {
+	filter := NewMitmFilter()
+	filter.SetAdPathPatterns([]string{"/pagead"})
+	blocker := &fakeEventLoggerBlocker{
+		fakeBlocker: fakeBlocker{blocked: map[string]bool{"ads.example": true}},
+		whitelisted: map[string]bool{"white.example": true},
+	}
+
+	h := newRelayHarness(t, "site.example", filter, blocker, func(req *http.Request) string {
+		if req.Host == "white.example" {
+			return "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 41\r\n\r\n<html><head></head><body>ok</body></html>"
+		}
+		return okResp("upstream")
+	})
+
+	h.send("GET /app.js HTTP/1.1\r\nHost: site.example\r\n\r\n")
+	if resp, body := h.read(t); resp.StatusCode != 200 || body != "upstream" {
+		t.Fatalf("allowed req = %d %q", resp.StatusCode, body)
+	}
+
+	h.send("GET /pixel HTTP/1.1\r\nHost: ads.example\r\n\r\n")
+	if resp, _ := h.read(t); resp.StatusCode != 403 {
+		t.Fatalf("blocked domain status = %d", resp.StatusCode)
+	}
+
+	h.send("GET /pagead/a HTTP/1.1\r\nHost: site.example\r\n\r\n")
+	if resp, _ := h.read(t); resp.StatusCode != 204 {
+		t.Fatalf("blocked ad path status = %d", resp.StatusCode)
+	}
+
+	h.send("GET /pagead/a HTTP/1.1\r\nHost: white.example\r\n\r\n")
+	if resp, body := h.read(t); resp.StatusCode != 200 || strings.Contains(body, injectionTags) {
+		t.Fatalf("whitelisted status=%d injected=%v body=%q", resp.StatusCode, strings.Contains(body, injectionTags), body)
+	}
+
+	got := blocker.snapshot()
+	want := []recordedMitmEvent{
+		{domain: "site.example", blocked: false, reason: "", qtype: 65},
+		{domain: "ads.example", blocked: true, reason: "testlist", qtype: 65},
+		{domain: "site.example", blocked: true, reason: "ad_path", qtype: 65},
+		{domain: "white.example", blocked: false, reason: "", qtype: 65},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("events len = %d (%+v), want %d", len(got), got, len(want))
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("event[%d] = %+v, want %+v", i, got[i], want[i])
+		}
 	}
 }

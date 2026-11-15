@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">โดเมนยอดนิยมใน %s</string>
     <string name="stats_country_top_domains_empty">ไม่มีการบันทึกคำขอโดเมนสำหรับประเทศนี้</string>
     <string name="log_unknown_app">ไม่ระบุ</string>
+    <string name="log_action_whitelist_app">เพิ่มแอปลงในไวท์ลิสต์ (ข้าม VPN)</string>
+    <string name="log_action_unwhitelist_app">ลบแอปออกจากไวท์ลิสต์</string>
+    <string name="log_blocked_named">ถูกบล็อก: %s</string>
+    <string name="log_action_undone">เลิกทำแล้ว</string>
+    <string name="log_retention_title">ลบบันทึกเก่าโดยอัตโนมัติ</string>
+    <string name="log_retention_off">ไม่เคย (เก็บทั้งหมด)</string>
+    <string name="log_retention_1d">หลังจาก 1 วัน</string>
+    <string name="log_retention_3d">หลังจาก 3 วัน</string>
+    <string name="log_retention_7d">หลังจาก 7 วัน</string>
 </resources>

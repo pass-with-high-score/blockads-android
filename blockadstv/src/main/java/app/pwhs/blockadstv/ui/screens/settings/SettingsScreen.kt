@@ -457,6 +457,7 @@ private fun getLanguageDisplayName(code: String): String = when (code) {
     TvPreferences.LANGUAGE_RU -> stringResource(R.string.settings_lang_ru) + " (🇷🇺)"
     TvPreferences.LANGUAGE_TH -> stringResource(R.string.settings_lang_th) + " (🇹🇭)"
     TvPreferences.LANGUAGE_TR -> stringResource(R.string.settings_lang_tr) + " (🇹🇷)"
+    TvPreferences.LANGUAGE_HU -> stringResource(R.string.settings_lang_hu) + " (🇭🇺)"
     TvPreferences.LANGUAGE_UK -> stringResource(R.string.settings_lang_uk) + " (🇺🇦)"
     TvPreferences.LANGUAGE_ZH -> stringResource(R.string.settings_lang_zh) + " (🇨🇳)"
     else -> stringResource(R.string.settings_lang_system)

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /** Process-wide VPN status, exposed to the rest of the app through AdBlockVpnService's companion. */
 class VpnStatusStore {
     val state = MutableStateFlow(VpnState.STOPPED)
+    val phase = MutableStateFlow("")
     var startTimestamp = 0L
     var lastStoppedTimestamp = 0L
     val privateDnsStrict = MutableStateFlow(false)

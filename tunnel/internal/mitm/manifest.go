@@ -192,14 +192,25 @@ func (r *ManifestRegistry) GetDomainScripts(host string) []string {
 // ManifestInterceptor implements TrafficInterceptor using ManifestRegistry rules.
 type ManifestInterceptor struct {
 	registry *ManifestRegistry
+	blocker  adBlockChecker
+	flow     FlowID
 }
 
 // NewManifestInterceptor creates an interceptor bound to a registry.
 func NewManifestInterceptor(registry *ManifestRegistry) *ManifestInterceptor {
+	return NewManifestInterceptorWithFlow(registry, nil, FlowID{})
+}
+
+// NewManifestInterceptorWithFlow creates a ManifestInterceptor bound to a blocker and flow for whitelist/logging.
+func NewManifestInterceptorWithFlow(registry *ManifestRegistry, blocker adBlockChecker, flow FlowID) *ManifestInterceptor {
 	if registry == nil {
 		registry = defaultManifest
 	}
-	return &ManifestInterceptor{registry: registry}
+	return &ManifestInterceptor{
+		registry: registry,
+		blocker:  blocker,
+		flow:     flow,
+	}
 }
 
 func (m *ManifestInterceptor) Name() string {
@@ -212,6 +223,9 @@ func (m *ManifestInterceptor) Matches(host string, req *http.Request) bool {
 
 func (m *ManifestInterceptor) OnRequest(req *http.Request) (bool, *http.Response) {
 	host := normalizeHost(req.Host)
+	if host != "" && isDomainWhitelisted(m.blocker, host) {
+		return false, nil
+	}
 	modules := m.registry.findModules(host)
 	if len(modules) == 0 {
 		return false, nil
@@ -233,7 +247,15 @@ func (m *ManifestInterceptor) OnRequest(req *http.Request) (bool, *http.Response
 			}
 
 			if matched {
-				return true, executeInterceptAction(ic, req)
+				if resp := executeInterceptAction(ic, req); resp != nil {
+					blocked := resp.StatusCode != http.StatusFound
+					reason := ""
+					if blocked {
+						reason = "manifest:" + mod.ID
+					}
+					logMitmQuery(m.blocker, m.flow, host, blocked, reason, 65)
+					return true, resp
+				}
 			}
 		}
 	}
@@ -274,10 +296,12 @@ func executeInterceptAction(ic PathIntercept, req *http.Request) *http.Response 
 			status = http.StatusNoContent
 		}
 		resp := &http.Response{
-			StatusCode: status,
-			ProtoMajor: 1, ProtoMinor: 1,
-			Header: make(http.Header),
-			Body:   io.NopCloser(strings.NewReader("")),
+			StatusCode:    status,
+			ProtoMajor:    1,
+			ProtoMinor:    1,
+			Header:        make(http.Header),
+			ContentLength: 0,
+			Body:          io.NopCloser(strings.NewReader("")),
 		}
 		resp.Header.Set("Connection", "keep-alive")
 		return resp

@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -42,11 +42,12 @@ fun FirewallControlBar(
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        // Clean Material 3 SecondaryTabRow with Underline Indicator
-        SecondaryTabRow(
+        // Scrollable Material 3 SecondaryScrollableTabRow so long labels stay on 1 line
+        SecondaryScrollableTabRow(
             selectedTabIndex = if (selectedTab == FirewallTab.USER) 0 else 1,
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.primary,
+            edgePadding = 16.dp,
             indicator = {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(if (selectedTab == FirewallTab.USER) 0 else 1),
@@ -63,6 +64,8 @@ fun FirewallControlBar(
                     Text(
                         text = "${stringResource(R.string.whitelist_tab_user)} ($userAppsCount)",
                         style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        softWrap = false,
                         fontWeight = if (selectedTab == FirewallTab.USER) FontWeight.Bold else FontWeight.Medium,
                         color = if (selectedTab == FirewallTab.USER) {
                             MaterialTheme.colorScheme.primary
@@ -79,6 +82,8 @@ fun FirewallControlBar(
                     Text(
                         text = "${stringResource(R.string.whitelist_tab_system)} ($systemAppsCount)",
                         style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        softWrap = false,
                         fontWeight = if (selectedTab == FirewallTab.SYSTEM) FontWeight.Bold else FontWeight.Medium,
                         color = if (selectedTab == FirewallTab.SYSTEM) {
                             MaterialTheme.colorScheme.primary

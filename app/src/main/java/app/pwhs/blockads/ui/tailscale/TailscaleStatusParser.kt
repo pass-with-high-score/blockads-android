@@ -82,11 +82,16 @@ object TailscaleStatusParser {
         if (exitsArr != null) {
             for (i in 0 until exitsArr.length()) {
                 val ex = exitsArr.getJSONObject(i)
+                val exId = ex.optLong("id")
+                val exIp = ex.optString("ip")
+                if ((exId != 0L && exId == selfNodeId) || (selfIp != null && exIp == selfIp)) {
+                    continue
+                }
                 exitList.add(
                     TailscaleExitNodeItem(
-                        id = ex.optLong("id"),
+                        id = exId,
                         name = ex.optString("name"),
-                        ip = ex.optString("ip")
+                        ip = exIp
                     )
                 )
             }

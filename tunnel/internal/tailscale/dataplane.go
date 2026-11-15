@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/amnezia-vpn/amneziawg-go/v3/device"
 	"github.com/amnezia-vpn/amneziawg-go/v3/tun"
@@ -106,15 +107,19 @@ func (t *netstackTUN) Close() error {
 
 // DataPlane manages the userspace WireGuard device, MagicBind, and gVisor TCP/IP netstack for Tailscale.
 type DataPlane struct {
-	mu           sync.Mutex
-	state        *State
-	bind         *MagicBind
-	tunDev       *netstackTUN
-	wgDev        *device.Device
-	netStack     *stack.Stack
-	chanEP       *channel.Endpoint
-	assignedAddrs map[netip.Addr]bool
-	running      bool
+	mu            sync.Mutex
+	state         *State
+	protectFn     func(fd int) bool
+	bind          *MagicBind
+	tunDev        *netstackTUN
+	wgDev         *device.Device
+	netStack      *stack.Stack
+	chanEP        *channel.Endpoint
+	assignedAddrs  map[netip.Addr]bool
+	lastUAPI       string
+	advertiseExit  atomic.Bool
+	exitDNSHandler func(context.Context, string, []byte) ([]byte, error)
+	running        bool
 }
 
 // NewDataPlane initializes a new Tailscale DataPlane.
@@ -165,8 +170,9 @@ func NewDataPlane(state *State, protectFn func(fd int) bool) (*DataPlane, error)
 		return nil, fmt.Errorf("bring up tailscale wg device: %w", err)
 	}
 
-	return &DataPlane{
+	dp := &DataPlane{
 		state:         state,
+		protectFn:     protectFn,
 		bind:          bind,
 		tunDev:        tunDev,
 		wgDev:         wgDev,
@@ -174,7 +180,9 @@ func NewDataPlane(state *State, protectFn func(fd int) bool) (*DataPlane, error)
 		chanEP:        ep,
 		assignedAddrs: make(map[netip.Addr]bool),
 		running:       true,
-	}, nil
+	}
+	dp.installExitForwarders()
+	return dp, nil
 }
 
 // Bind returns the underlying MagicBind.
@@ -182,8 +190,11 @@ func (dp *DataPlane) Bind() *MagicBind {
 	return dp.bind
 }
 
-// SetProtectFn updates the socket protection callback on the underlying MagicBind.
+// SetProtectFn updates the socket protection callback on the underlying MagicBind and exit forwarder.
 func (dp *DataPlane) SetProtectFn(fn func(fd int) bool) {
+	dp.mu.Lock()
+	dp.protectFn = fn
+	dp.mu.Unlock()
 	if dp.bind != nil {
 		dp.bind.SetProtectFn(fn)
 	}
@@ -278,17 +289,22 @@ func (dp *DataPlane) Sync(selfNode *Node, peers map[int64]*Node, derpMap *DERPMa
 		for _, a := range p.Addresses {
 			addCIDR(a)
 		}
-		if activeExitID != 0 && p.ID == activeExitID {
+		if activeExitID != 0 && p.ID == activeExitID && peerIsExitNode(p) {
 			addCIDR("0.0.0.0/0")
 			addCIDR("::/0")
 		}
 		peerCount++
 	}
 
-	if err := dp.wgDev.IpcSet(uapi.String()); err != nil {
+	uapiStr := uapi.String()
+	if uapiStr == dp.lastUAPI {
+		return nil
+	}
+	if err := dp.wgDev.IpcSet(uapiStr); err != nil {
 		logf("[Tailscale/WG] IpcSet failed: %v", err)
 		return err
 	}
+	dp.lastUAPI = uapiStr
 	logf("[Tailscale/WG] Synced %d peers into WireGuard engine (exitNode=%d)", peerCount, activeExitID)
 	return nil
 }

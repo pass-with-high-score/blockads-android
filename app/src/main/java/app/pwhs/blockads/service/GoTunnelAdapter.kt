@@ -186,6 +186,14 @@ class GoTunnelAdapter(
         engine.setConnLogEnabled(enabled)
     }
 
+    fun setSniProxyRules(rulesJson: String) {
+        try {
+            engine.setSniProxyRules(rulesJson)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to update SNI proxy rules")
+        }
+    }
+
     fun setBlockDohBypass(enabled: Boolean) {
         try {
             if (enabled) {
@@ -333,6 +341,8 @@ class GoTunnelAdapter(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to init stack MITM on VPN boot")
             }
+        } else {
+            engine.stopStackMitm()
         }
 
         setupAppResolver()
@@ -468,6 +478,9 @@ class GoTunnelAdapter(
         runCatching { engine.setTailscaleTaildropDir(dir) }
     }
 
+    fun sendTailscaleFile(target: String, fileName: String, filePath: String): Result<Unit> =
+        runCatching { engine.sendTailscaleFile(target, fileName, filePath) }
+
     fun startTailscaleAuth(host: String): String =
         runCatching { engine.startTailscaleAuth(host) }.getOrDefault("")
 
@@ -481,13 +494,22 @@ class GoTunnelAdapter(
 
     fun setTailscaleExitNode(id: Long) { runCatching { engine.setTailscaleExitNode(id) } }
 
-    fun pingTailscalePeer(target: String): String = runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
+    fun setTailscaleAdvertiseExitNode(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdvertiseExitNode(enabled) }
+    }
+
+    fun setTailscaleAdBlockEnabled(enabled: Boolean) {
+        runCatching { engine.setTailscaleAdBlockEnabled(enabled) }
+    }
+
+    fun pingTailscalePeer(target: String): String =
+        runCatching { engine.pingTailscalePeer(target) }.getOrDefault("""{"error":"Ping failed"}""")
 
     fun isTailscaleActive(): Boolean = runCatching { engine.isTailscaleActive }.getOrDefault(false)
 
     companion object {
         private fun dnsQueryTypeToString(type: Int): String = when (type) {
-            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; else -> "OTHER"
+            1 -> "A"; 28 -> "AAAA"; 5 -> "CNAME"; 65 -> "HTTPS"; else -> "OTHER"
         }
     }
 }

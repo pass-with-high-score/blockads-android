@@ -36,6 +36,9 @@
     <string name="vpn_phase_preparing_dns">Preparing DNS…</string>
     <string name="vpn_phase_establishing">Establishing VPN…</string>
     <string name="vpn_phase_waiting_network">Waiting for network…</string>
+    <string name="vpn_phase_closing_tunnel">Closing VPN tunnel…</string>
+    <string name="vpn_phase_stopping_engine">Stopping filter engine…</string>
+    <string name="vpn_phase_clearing_network">Releasing network…</string>
     <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
     <string name="vpn_notification_action_pause">Pause 1h</string>
     <string name="vpn_notification_action_stop">Stop</string>
@@ -172,4 +175,18 @@
     <string name="tailscale_taildrop_received_title">File received via Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Open file</string>
+    <string name="tailscale_send_file">Send File (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Transfer a file directly to this device over Tailscale.</string>
+    <string name="tailscale_send_file_btn">Choose File</string>
+    <string name="tailscale_sending_file">Sending %1$s…</string>
+    <string name="tailscale_send_file_offline">Cannot send file while offline</string>
+    <string name="tailscale_send_file_success">Sent %1$s to %2$s</string>
+    <string name="tailscale_send_file_failed">Failed to send %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">No exit nodes advertised in your Tailnet.</string>
+    <string name="tailscale_open_admin">Open Web Console</string>
+    <string name="tailscale_settings_title">Tailscale Settings</string>
+    <string name="tailscale_advertise_exit_node">Run as Exit Node</string>
+    <string name="tailscale_advertise_exit_node_desc">Allow other devices on your Tailnet to route internet traffic through this device. Also enable in Tailscale Admin Console.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filter ads and trackers for devices using this Exit Node. Uses BlockAds\'s configured DNS either way.</string>
 </resources>

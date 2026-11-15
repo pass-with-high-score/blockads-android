@@ -31,4 +31,5 @@
     <string name="home_downloaded">Жүктелді</string>
     <string name="home_uploaded">Жүктеп салынды</string>
     <string name="nav_proxy">Прокси</string>
+    <string name="action_undo">Қайтару</string>
 </resources>

@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">%s の上位ドメイン</string>
     <string name="stats_country_top_domains_empty">この国のドメインクエリは記録されていません</string>
     <string name="log_unknown_app">不明</string>
+    <string name="log_action_whitelist_app">アプリをホワイトリストに追加 (VPNをバイパス)</string>
+    <string name="log_action_unwhitelist_app">アプリをホワイトリストから削除</string>
+    <string name="log_blocked_named">ブロック済み: %s</string>
+    <string name="log_action_undone">操作を取り消しました</string>
+    <string name="log_retention_title">古いログを自動削除</string>
+    <string name="log_retention_off">なし (すべて保持)</string>
+    <string name="log_retention_1d">1日後</string>
+    <string name="log_retention_3d">3日後</string>
+    <string name="log_retention_7d">7日後</string>
 </resources>

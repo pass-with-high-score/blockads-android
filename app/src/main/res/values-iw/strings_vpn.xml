@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">התקבל קובץ דרך Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">פתח קובץ</string>
+    <string name="vpn_phase_closing_tunnel">סוגר מנהרת VPN…</string>
+    <string name="vpn_phase_stopping_engine">עוצר מנוע סינון…</string>
+    <string name="vpn_phase_clearing_network">משחרר רשת…</string>
+    <string name="tailscale_send_file">שלח קובץ (Taildrop)</string>
+    <string name="tailscale_send_file_desc">העבר קובץ ישירות למכשיר זה דרך Tailscale.</string>
+    <string name="tailscale_send_file_btn">בחר קובץ</string>
+    <string name="tailscale_sending_file">שולח %1$s…</string>
+    <string name="tailscale_send_file_offline">לא ניתן לשלוח קובץ במצב לא מקוון</string>
+    <string name="tailscale_send_file_success">%1$s נשלח אל %2$s</string>
+    <string name="tailscale_send_file_failed">שליחת %1$s נכשלה: %2$s</string>
+    <string name="tailscale_exit_node_empty">אין צומתי יציאה שפורסמו ב-Tailnet שלך.</string>
+    <string name="tailscale_open_admin">פתח מסוף אינטרנט</string>
+    <string name="tailscale_settings_title">הגדרות Tailscale</string>
+    <string name="tailscale_advertise_exit_node">הפעל כצומת יציאה</string>
+    <string name="tailscale_advertise_exit_node_desc">אפשר למכשירים אחרים ב-Tailnet שלך לנתב תעבורת אינטרנט דרך מכشיר זה. יש להפעיל גם בלוח הניהול של Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">סנן מודעות וכלי מעקב עבור מכשירים המשתמשים בצומת יציאה זו. משתמש ב-DNS שהוגדר ב-BlockAds בכל מקרה.</string>
 </resources>

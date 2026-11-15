@@ -31,4 +31,5 @@
     <string name="home_downloaded">ダウンロード済み</string>
     <string name="home_uploaded">アップロード済み</string>
     <string name="nav_proxy">プロキシ</string>
+    <string name="action_undo">元に戻す</string>
 </resources>

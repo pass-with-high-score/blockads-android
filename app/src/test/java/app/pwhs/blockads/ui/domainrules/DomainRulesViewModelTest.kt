@@ -39,7 +39,15 @@ class DomainRulesViewModelTest {
     private val whitelistDao = FakeWhitelistDomainDao()
     private val ruleDao = FakeCustomDnsRuleDao()
     private val filterRepo: FilterListRepository = mockk(relaxed = true)
-    private val vm by lazy { DomainRulesViewModel(whitelistDao, ruleDao, filterRepo, mockk<Application>(relaxed = true)) }
+    private val vm by lazy {
+        DomainRulesViewModel(
+            whitelistDao,
+            ruleDao,
+            filterRepo,
+            mockk(relaxed = true),
+            mockk<Application>(relaxed = true)
+        )
+    }
 
     @Before
     fun setUp() {

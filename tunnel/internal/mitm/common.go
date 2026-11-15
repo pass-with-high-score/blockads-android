@@ -132,6 +132,46 @@ type AdBlockChecker interface {
 
 type adBlockChecker = AdBlockChecker
 
+// MitmEventLogger is an optional interface that AdBlockChecker implementations
+// can satisfy to report MITM-level requests, rule reasons, and whitelist bypasses.
+type MitmEventLogger interface {
+	CheckDomainBlock(host string) (blocked bool, reason string)
+	IsDomainWhitelisted(host string) bool
+	LogMitmQuery(flow FlowID, domain string, blocked bool, reason string, queryType int)
+}
+
+func checkDomainBlock(blocker AdBlockChecker, host string) (bool, string) {
+	if blocker == nil {
+		return false, ""
+	}
+	if logger, ok := blocker.(MitmEventLogger); ok {
+		return logger.CheckDomainBlock(host)
+	}
+	if blocker.IsDomainBlocked(host) {
+		return true, "blocklist"
+	}
+	return false, ""
+}
+
+func isDomainWhitelisted(blocker AdBlockChecker, host string) bool {
+	if blocker == nil {
+		return false
+	}
+	if logger, ok := blocker.(MitmEventLogger); ok {
+		return logger.IsDomainWhitelisted(host)
+	}
+	return false
+}
+
+func logMitmQuery(blocker AdBlockChecker, flow FlowID, domain string, blocked bool, reason string, queryType int) {
+	if blocker == nil || domain == "" {
+		return
+	}
+	if logger, ok := blocker.(MitmEventLogger); ok {
+		logger.LogMitmQuery(flow, domain, blocked, reason, queryType)
+	}
+}
+
 // requestAcceptsHTML returns true when the request's Accept header
 // explicitly includes text/html — i.e., the client is requesting an
 // HTML document, not a subresource. Used to decide when to strip

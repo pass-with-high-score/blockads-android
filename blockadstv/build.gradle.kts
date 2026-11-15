@@ -89,6 +89,17 @@ android {
         compose = true
         buildConfig = true
     }
+
+    val isBuildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) }
+
+    splits {
+        abi {
+            isEnable = !isBuildingBundle
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
 }
 
 kotlin {

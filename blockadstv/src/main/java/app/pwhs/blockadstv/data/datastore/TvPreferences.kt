@@ -76,6 +76,7 @@ class TvPreferences(private val context: Context) {
         const val LANGUAGE_RU = "ru"
         const val LANGUAGE_TH = "th"
         const val LANGUAGE_TR = "tr"
+        const val LANGUAGE_HU = "hu"
         const val LANGUAGE_UK = "uk"
         const val LANGUAGE_ZH = "zh"
     }

@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Найпопулярніші домени в %s</string>
     <string name="stats_country_top_domains_empty">Для цієї країни не зареєстровано запитів до доменів</string>
     <string name="log_unknown_app">Невідомо</string>
+    <string name="log_action_whitelist_app">Додати додаток до білого списку (В обход VPN)</string>
+    <string name="log_action_unwhitelist_app">Видалити додаток із білого списку</string>
+    <string name="log_blocked_named">Заблоковано: %s</string>
+    <string name="log_action_undone">Дію скасовано</string>
+    <string name="log_retention_title">Автоматичне видалення старих журналів</string>
+    <string name="log_retention_off">Ніколи (зберігати все)</string>
+    <string name="log_retention_1d">Через 1 день</string>
+    <string name="log_retention_3d">Через 3 дні</string>
+    <string name="log_retention_7d">Через 7 днів</string>
 </resources>

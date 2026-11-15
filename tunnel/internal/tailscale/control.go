@@ -37,6 +37,7 @@ type ControlClient struct {
 	endpoints     []string
 	preferredDERP int
 	peerAPIPort   uint16
+	advertiseExit bool
 }
 
 // SetNetMeta updates the local UDP endpoints and preferred DERP region sent in MapRequest.
@@ -52,6 +53,13 @@ func (c *ControlClient) SetPeerAPIPort(port uint16) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.peerAPIPort = port
+}
+
+// SetAdvertiseExitNode configures whether this node advertises 0.0.0.0/0 and ::/0 as an exit node.
+func (c *ControlClient) SetAdvertiseExitNode(enabled bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.advertiseExit = enabled
 }
 
 // NewControlClient creates a new ControlClient.

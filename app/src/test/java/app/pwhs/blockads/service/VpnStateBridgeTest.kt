@@ -133,6 +133,7 @@ class VpnStateBridgeTest {
         // Send a state change broadcast to verify the registered receiver updates the store
         val intent = Intent(AdBlockVpnService.ACTION_VPN_STATE_CHANGED).apply {
             putExtra(AdBlockVpnService.EXTRA_VPN_STATE, VpnState.RUNNING.name)
+            putExtra(AdBlockVpnService.EXTRA_VPN_PHASE, "Loading filters...")
             putExtra(AdBlockVpnService.EXTRA_START_TIMESTAMP, 9999L)
             putExtra(AdBlockVpnService.EXTRA_LAST_STOPPED_TIMESTAMP, 2000L)
             putExtra(AdBlockVpnService.EXTRA_PRIVATE_DNS_STRICT, true)
@@ -141,6 +142,7 @@ class VpnStateBridgeTest {
         shadowOf(Looper.getMainLooper()).idle()
 
         assertEquals(VpnState.RUNNING, store.state.value)
+        assertEquals("Loading filters...", store.phase.value)
         assertEquals(9999L, store.startTimestamp)
         assertTrue(store.privateDnsStrict.value)
     }

@@ -31,4 +31,5 @@
     <string name="home_downloaded">Diunduh</string>
     <string name="home_uploaded">Diunggah</string>
     <string name="nav_proxy">Proksi</string>
+    <string name="action_undo">Urungkan</string>
 </resources>

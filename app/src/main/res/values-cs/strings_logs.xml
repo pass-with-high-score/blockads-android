@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Nejčastější domény v %s</string>
     <string name="stats_country_top_domains_empty">Pro tuto zemi nebyly zaznamenány žádné dotazy na domény</string>
     <string name="log_unknown_app">Neznámé</string>
+    <string name="log_action_whitelist_app">Povolit aplikaci (Obejít VPN)</string>
+    <string name="log_action_unwhitelist_app">Odebrat aplikaci ze seznamu povolených</string>
+    <string name="log_blocked_named">Blokováno: %s</string>
+    <string name="log_action_undone">Akce byla vrácena zpět</string>
+    <string name="log_retention_title">Automaticky mazat staré záznamy</string>
+    <string name="log_retention_off">Nikdy (ponechat vše)</string>
+    <string name="log_retention_1d">Po 1 dni</string>
+    <string name="log_retention_3d">Po 3 dnech</string>
+    <string name="log_retention_7d">Po 7 dnech</string>
 </resources>

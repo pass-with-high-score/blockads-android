@@ -27,6 +27,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.AppFilterBottomSheet
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
@@ -89,10 +93,36 @@ fun LogsScreen(
     var showRetentionDialog by remember { mutableStateOf(false) }
 
     val appSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val resource = LocalResources.current
 
     UiEventEffect(viewModel.events)
+
+    LaunchedEffect(viewModel) {
+        viewModel.undoEvents.collect { event ->
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val undoLabel = resource.getString(R.string.action_undo)
+            val message = when (event) {
+                is LogUndoEvent.Whitelisted ->
+                    resource.getString(R.string.log_whitelisted, event.domain)
+                is LogUndoEvent.Blocked ->
+                    resource.getString(R.string.log_blocked_named, event.domain)
+            }
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = undoLabel,
+                withDismissAction = true,
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                when (event) {
+                    is LogUndoEvent.Whitelisted -> viewModel.undoWhitelist(event.domain)
+                    is LogUndoEvent.Blocked -> viewModel.undoBlock(event.domain)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(initialFilterStatus) {
         if (initialFilterStatus != LogFilterStatus.ALL) {
@@ -109,6 +139,7 @@ fun LogsScreen(
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { UndoSnackbarHost(snackbarHostState) },
         topBar = {
             LogTopBar(
                 selectionMode = selectionMode,

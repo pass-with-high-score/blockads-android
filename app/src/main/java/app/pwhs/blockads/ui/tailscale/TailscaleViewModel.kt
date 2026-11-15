@@ -3,6 +3,7 @@ package app.pwhs.blockads.ui.tailscale
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.ServiceController
@@ -71,6 +72,8 @@ class TailscaleViewModel(
             val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val authKey = appPrefs.tailscale.getAuthKeySnapshot()
             val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+            val advertiseExit = appPrefs.tailscale.getAdvertiseExitNodeSnapshot()
+            val adblockEnabled = appPrefs.tailscale.getAdblockEnabledSnapshot()
             val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
             val hasKeys = stateJson.contains("node_key") && stateJson.contains("machine_key")
 
@@ -81,9 +84,17 @@ class TailscaleViewModel(
 
             _uiState.update {
                 it.copy(
-                    isEnabled = enabled, isLoggedIn = hasKeys, isVpnRunning = isVpnRunning,
-                    controlUrl = controlUrl, authKey = authKey, activeExitNodeId = exitNodeId,
-                    pinnedPeerIds = pinned, taildropDirUri = tdUri, taildropDirName = tdName,
+                    isEnabled = enabled,
+                    isLoggedIn = hasKeys,
+                    isVpnRunning = isVpnRunning,
+                    controlUrl = controlUrl,
+                    authKey = authKey,
+                    activeExitNodeId = exitNodeId,
+                    advertiseExitNode = advertiseExit,
+                    adblockEnabled = adblockEnabled,
+                    pinnedPeerIds = pinned,
+                    taildropDirUri = tdUri,
+                    taildropDirName = tdName,
                     connectionState = when {
                         !enabled -> "DISCONNECTED"
                         !isVpnRunning -> "VPN_DISCONNECTED"
@@ -159,6 +170,8 @@ class TailscaleViewModel(
             is TailscaleUiIntent.SignInWithAuthKey -> signInWithAuthKey(intent.key)
             is TailscaleUiIntent.SetControlUrl -> setControlUrl(intent.url)
             is TailscaleUiIntent.SelectExitNode -> selectExitNode(intent.nodeId)
+            is TailscaleUiIntent.ToggleAdvertiseExitNode -> toggleAdvertiseExitNode(intent.enabled)
+            is TailscaleUiIntent.ToggleAdBlock -> toggleAdBlock(intent.enabled)
             is TailscaleUiIntent.RefreshStatus -> viewModelScope.launch { pollStatusOnce() }
             is TailscaleUiIntent.Logout -> logout()
             is TailscaleUiIntent.SelectPeerForDetail -> _uiState.update { it.copy(selectedPeerForDetail = intent.peer) }
@@ -166,6 +179,7 @@ class TailscaleViewModel(
             is TailscaleUiIntent.PingPeer -> pingPeer(intent.peerId, intent.target)
             is TailscaleUiIntent.SetTaildropDirectory -> setTaildropDirectory(intent.uri, intent.displayName)
             is TailscaleUiIntent.ResetTaildropDirectory -> resetTaildropDirectory()
+            is TailscaleUiIntent.SendFileToPeer -> sendFileToPeer(intent.peer, intent.uri)
             is TailscaleUiIntent.CopyToClipboard -> copyToClipboard(intent.text, intent.label)
         }
     }
@@ -294,6 +308,26 @@ class TailscaleViewModel(
         serviceClient.setExitNode(nodeId)
     }
 
+    private fun toggleAdvertiseExitNode(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.tailscale.setAdvertiseExitNode(enabled)
+            _uiState.update { it.copy(advertiseExitNode = enabled) }
+            if (!serviceClient.setAdvertiseExitNode(enabled)) {
+                authEngine?.setTailscaleAdvertiseExitNode(enabled)
+            }
+        }
+    }
+
+    private fun toggleAdBlock(enabled: Boolean) {
+        viewModelScope.launch {
+            appPrefs.tailscale.setAdblockEnabled(enabled)
+            _uiState.update { it.copy(adblockEnabled = enabled) }
+            if (!serviceClient.setAdBlockEnabled(enabled)) {
+                authEngine?.setTailscaleAdBlockEnabled(enabled)
+            }
+        }
+    }
+
     private fun logout() {
         viewModelScope.launch {
             syncJob?.cancel()
@@ -307,6 +341,7 @@ class TailscaleViewModel(
                 appPrefs.tailscale.setStateJson("")
                 appPrefs.tailscale.setAuthKey("")
                 appPrefs.tailscale.setExitNodeId(0L)
+                appPrefs.tailscale.setAdvertiseExitNode(false)
             }
 
             _uiState.update { state ->
@@ -336,6 +371,76 @@ class TailscaleViewModel(
 
     private fun copyToClipboard(text: String, label: String) = viewModelScope.launch {
         _uiEffect.emit(TailscaleUiEffect.CopyToClipboard(text, label))
+    }
+
+    private fun sendFileToPeer(peer: TailscalePeer, uri: android.net.Uri) {
+        if (!serviceClient.isConnected && !AdBlockVpnService.isRunning) return
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val fileName = resolveFileName(app, uri)
+            _uiState.update { it.copy(isSendingFile = true, sendingFileName = fileName) }
+            val tempDir = java.io.File(app.cacheDir, "taildrop_out").apply { mkdirs() }
+            val tempFile = java.io.File(tempDir, "send_${System.currentTimeMillis()}_$fileName")
+            try {
+                app.contentResolver.openInputStream(uri)?.use { input ->
+                    tempFile.outputStream().use { output -> input.copyTo(output) }
+                } ?: error("Cannot open selected file")
+
+                val target = peer.id.toString()
+                serviceClient.sendFile(target, fileName, tempFile.absolutePath)
+                    .onSuccess {
+                        _uiEffect.emit(
+                            TailscaleUiEffect.ShowSnackbar(
+                                app.getString(R.string.tailscale_send_file_success, fileName, peer.name)
+                            )
+                        )
+                    }
+                    .onFailure { err ->
+                        _uiEffect.emit(
+                            TailscaleUiEffect.ShowSnackbar(
+                                app.getString(
+                                    R.string.tailscale_send_file_failed,
+                                    fileName,
+                                    err.message ?: "Unknown error"
+                                )
+                            )
+                        )
+                    }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to send Taildrop file")
+                _uiEffect.emit(
+                    TailscaleUiEffect.ShowSnackbar(
+                        app.getString(
+                            R.string.tailscale_send_file_failed,
+                            fileName,
+                            e.message ?: "Unknown error"
+                        )
+                    )
+                )
+            } finally {
+                tempFile.delete()
+                _uiState.update { it.copy(isSendingFile = false, sendingFileName = null) }
+            }
+        }
+    }
+
+    private fun resolveFileName(app: Application, uri: android.net.Uri): String {
+        app.contentResolver.query(
+            uri,
+            arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0) {
+                    val name = cursor.getString(idx)
+                    if (!name.isNullOrBlank()) return name
+                }
+            }
+        }
+        return uri.lastPathSegment?.substringAfterLast('/')?.ifBlank { null } ?: "file"
     }
 
     private fun pingPeer(peerId: Long, target: String) {
@@ -431,6 +536,11 @@ class TailscaleViewModel(
             val parsed = TailscaleStatusParser.parse(json, currentPinned, currentPeersMap)
 
             val isNowConnected = parsed.state == "CONNECTED"
+            val staleExitCleared = isNowConnected &&
+                parsed.peers.isNotEmpty() &&
+                _uiState.value.activeExitNodeId != 0L &&
+                parsed.exitNodes.none { it.id == _uiState.value.activeExitNodeId }
+
             _uiState.update {
                 val updatedSelected = it.selectedPeerForDetail?.let { sel ->
                     parsed.peers.find { p -> p.id == sel.id } ?: sel
@@ -442,8 +552,16 @@ class TailscaleViewModel(
                     magicDnsName = parsed.magicDnsName.ifEmpty { it.magicDnsName },
                     peers = parsed.peers,
                     exitNodes = parsed.exitNodes,
+                    activeExitNodeId = if (staleExitCleared) 0L else it.activeExitNodeId,
                     selectedPeerForDetail = updatedSelected
                 )
+            }
+
+            if (staleExitCleared) {
+                viewModelScope.launch {
+                    appPrefs.tailscale.setExitNodeId(0L)
+                    serviceClient.setExitNode(0L)
+                }
             }
 
             if (isNowConnected && authEngine != null) {
@@ -475,7 +593,16 @@ class TailscaleViewModel(
             val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val authKey = appPrefs.tailscale.getAuthKeySnapshot()
             val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
-            val updatedState = serviceClient.syncSession(stateToUse, controlUrl, authKey, exitNodeId)
+            val advertiseExit = appPrefs.tailscale.getAdvertiseExitNodeSnapshot()
+            val adblockEnabled = appPrefs.tailscale.getAdblockEnabledSnapshot()
+            val updatedState = serviceClient.syncSession(
+                stateJson = stateToUse,
+                controlUrl = controlUrl,
+                authKey = authKey,
+                exitNodeId = exitNodeId,
+                advertiseExitNode = advertiseExit,
+                adblockEnabled = adblockEnabled
+            )
             if (!updatedState.isNullOrEmpty() && updatedState != "{}") {
                 appPrefs.tailscale.setStateJson(updatedState)
             }

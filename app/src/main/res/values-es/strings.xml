@@ -31,4 +31,5 @@
     <string name="home_downloaded">Descargado</string>
     <string name="home_uploaded">Subido</string>
     <string name="nav_proxy">Proxy</string>
+    <string name="action_undo">Deshacer</string>
 </resources>

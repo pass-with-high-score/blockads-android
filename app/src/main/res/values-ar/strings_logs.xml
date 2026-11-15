@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">أهم النطاقات في %s</string>
     <string name="stats_country_top_domains_empty">لم يتم تسجيل أي استعلامات نطاق لهذا البلد</string>
     <string name="log_unknown_app">غير معروف</string>
+    <string name="log_action_whitelist_app">إدراج التطبيق في القائمة البيضاء (تجاوز VPN)</string>
+    <string name="log_action_unwhitelist_app">إزالة التطبيق من القائمة البيضاء</string>
+    <string name="log_blocked_named">محظور: %s</string>
+    <string name="log_action_undone">تم التراجع عن الإجراء</string>
+    <string name="log_retention_title">الحذف التلقائي للسجلات القديمة</string>
+    <string name="log_retention_off">أبداً (الاحتفاظ بالكل)</string>
+    <string name="log_retention_1d">بعد يوم واحد</string>
+    <string name="log_retention_3d">بعد 3 أيام</string>
+    <string name="log_retention_7d">بعد 7 أيام</string>
 </resources>

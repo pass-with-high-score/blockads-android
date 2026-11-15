@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Отримано файл через Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Відкрити файл</string>
+    <string name="vpn_phase_closing_tunnel">Закриття VPN-тунелю…</string>
+    <string name="vpn_phase_stopping_engine">Зупинка механізму фільтрації…</string>
+    <string name="vpn_phase_clearing_network">Звільнення мережі…</string>
+    <string name="tailscale_send_file">Надіслати файл (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Передавайте файл безпосередньо на цей пристрій через Tailscale.</string>
+    <string name="tailscale_send_file_btn">Вибрати файл</string>
+    <string name="tailscale_sending_file">Надсилання %1$s…</string>
+    <string name="tailscale_send_file_offline">Неможливо надіслати файл, коли пристрій не в мережі</string>
+    <string name="tailscale_send_file_success">Надіслано %1$s на %2$s</string>
+    <string name="tailscale_send_file_failed">Не вдалося надіслати %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">У вашому Tailnet немає оголошених вихідних вузлів.</string>
+    <string name="tailscale_open_admin">Відкрити веб-консоль</string>
+    <string name="tailscale_settings_title">Налаштування Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Працювати як вихідний вузол</string>
+    <string name="tailscale_advertise_exit_node_desc">Дозволити іншим пристроям у вашому Tailnet маршрутизувати інтернет-трафік через цей пристрій. Також увімкніть у консолі адміністратора Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Фільтрувати рекламу та трекери для пристроїв, що використовують цей Exit Node. У будь-якому разі використовується налаштований у BlockAds DNS.</string>
 </resources>

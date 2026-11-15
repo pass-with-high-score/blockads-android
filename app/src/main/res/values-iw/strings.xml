@@ -31,4 +31,5 @@
     <string name="home_downloaded">הורדו</string>
     <string name="home_uploaded">הועלו</string>
     <string name="nav_proxy">פרוקסי</string>
+    <string name="action_undo">ביטול</string>
 </resources>

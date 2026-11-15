@@ -42,6 +42,9 @@
     <string name="accessibility_vpn_inactive">Bảo vệ VPN không hoạt động</string>
     <string name="accessibility_vpn_connecting">VPN đang kết nối</string>
     <string name="vpn_phase_waiting_network">Đang chờ mạng…</string>
+    <string name="vpn_phase_closing_tunnel">Đang đóng đường hầm VPN…</string>
+    <string name="vpn_phase_stopping_engine">Đang dừng bộ lọc…</string>
+    <string name="vpn_phase_clearing_network">Đang giải phóng kết nối mạng…</string>
     <string name="wireguard_import_title">Nhập WireGuard</string>
     <string name="wireguard_import_button">Nhập .conf</string>
     <string name="wireguard_empty_title">Chưa tải cấu hình nào</string>
@@ -171,4 +174,18 @@
     <string name="tailscale_taildrop_received_title">Đã nhận file từ Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Mở file</string>
+    <string name="tailscale_send_file">Gửi tệp (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Truyền tệp trực tiếp sang thiết bị này qua Tailscale.</string>
+    <string name="tailscale_send_file_btn">Chọn tệp</string>
+    <string name="tailscale_sending_file">Đang gửi %1$s…</string>
+    <string name="tailscale_send_file_offline">Thiết bị đang ngoại tuyến</string>
+    <string name="tailscale_send_file_success">Đã gửi %1$s tới %2$s</string>
+    <string name="tailscale_send_file_failed">Gửi %1$s thất bại: %2$s</string>
+    <string name="tailscale_exit_node_empty">Chưa có thiết bị nào bật Exit Node trong Tailnet.</string>
+    <string name="tailscale_open_admin">Mở trang quản lý Tailscale</string>
+    <string name="tailscale_settings_title">Cài đặt Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Làm Exit Node</string>
+    <string name="tailscale_advertise_exit_node_desc">Cho phép các thiết bị khác trong Tailnet đi internet qua thiết bị này. Cần duyệt thêm trên trang quản lý Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Chặn quảng cáo cho các thiết bị dùng máy này làm Exit Node. Dù bật hay tắt vẫn dùng chung DNS của BlockAds.</string>
 </resources>

@@ -26,6 +26,7 @@ fun rememberHomeTipState(
 
     val stabilityDismissedAt by viewModel.stabilityTipDismissedAt.collectAsStateWithLifecycle()
     val dismissedFeatures by viewModel.dismissedFeatureTips.collectAsStateWithLifecycle()
+    val homeTipsEnabled by viewModel.homeTipsEnabled.collectAsStateWithLifecycle()
 
     var isBatteryIgnored by remember { mutableStateOf(checkBatteryIgnored(context)) }
     var isAlwaysOn by remember { mutableStateOf(checkAlwaysOnVpn(context)) }
@@ -63,7 +64,7 @@ fun rememberHomeTipState(
 
     val hasInteractedThisSession by viewModel.hasInteractedWithTipThisSession.collectAsStateWithLifecycle()
 
-    if (hasInteractedThisSession) {
+    if (!homeTipsEnabled || hasInteractedThisSession) {
         return HomeTipState.None
     }
 

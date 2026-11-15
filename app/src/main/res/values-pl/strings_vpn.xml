@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Odebrano plik przez Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Otwórz plik</string>
+    <string name="vpn_phase_closing_tunnel">Zamykanie tunelu VPN…</string>
+    <string name="vpn_phase_stopping_engine">Zatrzymywanie silnika filtrów…</string>
+    <string name="vpn_phase_clearing_network">Zwalnianie sieci…</string>
+    <string name="tailscale_send_file">Wyślij plik (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Prześlij plik bezpośrednio na to urządzenie przez Tailscale.</string>
+    <string name="tailscale_send_file_btn">Wybierz plik</string>
+    <string name="tailscale_sending_file">Wysyłanie %1$s…</string>
+    <string name="tailscale_send_file_offline">Nie można wysłać pliku w trybie offline</string>
+    <string name="tailscale_send_file_success">Wysłano %1$s do %2$s</string>
+    <string name="tailscale_send_file_failed">Nie udało się wysłać %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">Brak ogłoszonych węzłów wyjściowych w Twoim Tailnecie.</string>
+    <string name="tailscale_open_admin">Otwórz konsolę internetową</string>
+    <string name="tailscale_settings_title">Ustawienia Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Uruchom jako węzeł wyjściowy (Exit Node)</string>
+    <string name="tailscale_advertise_exit_node_desc">Zezwól innym urządzeniom w Twoim Tailnecie na kierowanie ruchu internetowego przez to urządzenie. Włącz to również w konsoli administracyjnej Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filtruj reklamy i moduły śledzące dla urządzeń korzystających z tego Exit Node. W obu przypadkach używa DNS skonfigurowanego w BlockAds.</string>
 </resources>

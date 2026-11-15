@@ -1,5 +1,7 @@
 package app.pwhs.blockads.ui.appmanagement
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -46,13 +49,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.appmanagement.component.AppManagementItem
+import app.pwhs.blockads.ui.appmanagement.component.AppPrivacyReportSheet
 import app.pwhs.blockads.ui.appmanagement.data.AppSortOption
+import app.pwhs.blockads.ui.appmanagement.data.AppUsageTimeRange
 import app.pwhs.blockads.ui.theme.TextSecondary
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -69,7 +77,16 @@ fun AppManagementScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
     val totalAppCount by viewModel.totalAppCount.collectAsStateWithLifecycle()
+    val hasUsageStatsPermission by viewModel.hasUsageStatsPermission.collectAsStateWithLifecycle()
+    val usageTimeRange by viewModel.usageTimeRange.collectAsStateWithLifecycle()
+    val selectedAppPackage by viewModel.selectedAppPackage.collectAsStateWithLifecycle()
+    val selectedAppDomains by viewModel.selectedAppDomains.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showSortMenu by remember { mutableStateOf(false) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshUsageStats()
+    }
     // 0 = All, 1 = Enabled (whitelisted), 2 = Disabled
     var filterOption by remember { mutableStateOf(0) }
 
@@ -171,6 +188,18 @@ fun AppManagementScreen(
                                     showSortMenu = false
                                 }
                             )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        stringResource(R.string.app_management_sort_data),
+                                        fontWeight = if (sortOption == AppSortOption.DATA_USAGE) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.setSortOption(AppSortOption.DATA_USAGE)
+                                    showSortMenu = false
+                                }
+                            )
                         }
                     }
                 },
@@ -269,6 +298,71 @@ fun AppManagementScreen(
                 )
             }
 
+            // Time range chips (when Usage Access is granted) or optional permission hint
+            if (hasUsageStatsPermission) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val ranges = listOf(
+                        AppUsageTimeRange.TODAY to R.string.app_management_range_today,
+                        AppUsageTimeRange.SEVEN_DAYS to R.string.app_management_range_7d,
+                        AppUsageTimeRange.THIRTY_DAYS to R.string.app_management_range_30d
+                    )
+                    ranges.forEach { (range, labelRes) ->
+                        FilterChip(
+                            selected = usageTimeRange == range,
+                            onClick = { viewModel.setUsageTimeRange(range) },
+                            label = {
+                                Text(
+                                    text = stringResource(labelRes),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        )
+                    }
+                }
+            } else {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.app_management_usage_access_hint),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    )
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(R.string.app_management_grant_permission),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+            }
+
             // Info notice
             Surface(
                 modifier = Modifier
@@ -352,13 +446,28 @@ fun AppManagementScreen(
                             items(filteredApps, key = { it.packageName }) { app ->
                                 AppManagementItem(
                                     app = app,
-                                    onToggle = { viewModel.toggleApp(app.packageName) }
+                                    onToggle = { viewModel.toggleApp(app.packageName) },
+                                    onClick = { viewModel.selectApp(app.packageName) }
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+
+        val selectedApp = remember(apps, selectedAppPackage) {
+            selectedAppPackage?.let { pkg -> apps.firstOrNull { it.packageName == pkg } }
+        }
+        if (selectedApp != null) {
+            AppPrivacyReportSheet(
+                app = selectedApp,
+                domains = selectedAppDomains,
+                hasUsageStatsPermission = hasUsageStatsPermission,
+                timeRange = usageTimeRange,
+                onToggleVpn = { viewModel.toggleApp(selectedApp.packageName) },
+                onDismiss = { viewModel.selectApp(null) }
+            )
         }
     }
 }

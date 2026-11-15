@@ -91,6 +91,7 @@ type Engine struct
 	method Engine.PingTailscalePeer(target string) string
 	method Engine.QuanXRuleCount() int
 	method Engine.RulesetRuleCount() int
+	method Engine.SendTailscaleFile(target string, fileName string, filePath string) error
 	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
 	method Engine.SetAdPathPatterns(patternsCsv string)
 	method Engine.SetAppResolver(resolver AppResolver)
@@ -126,7 +127,10 @@ type Engine struct
 	method Engine.SetScriptletRulesFromFile(filePath string) error
 	method Engine.SetScriptletsRuntime(js string)
 	method Engine.SetShadowsocksConfig(configJSON string) error
+	method Engine.SetSniProxyRules(rulesJSON string)
 	method Engine.SetSplitDNSZones(zones string)
+	method Engine.SetTailscaleAdBlockEnabled(enabled bool)
+	method Engine.SetTailscaleAdvertiseExitNode(enabled bool)
 	method Engine.SetTailscaleExitNode(nodeID int64)
 	method Engine.SetTailscaleTaildropDir(dir string)
 	method Engine.SetTailscaleTaildropReceiver(receiver TaildropReceiver)

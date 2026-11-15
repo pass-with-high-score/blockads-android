@@ -54,6 +54,7 @@ class AdBlockVpnService : VpnService() {
 
         const val ACTION_VPN_STATE_CHANGED = "app.pwhs.blockads.ACTION_VPN_STATE_CHANGED"
         const val EXTRA_VPN_STATE = "extra_vpn_state"
+        const val EXTRA_VPN_PHASE = "extra_vpn_phase"
         const val EXTRA_START_TIMESTAMP = "extra_start_timestamp"
         const val EXTRA_LAST_STOPPED_TIMESTAMP = "extra_last_stopped_timestamp"
         const val EXTRA_PRIVATE_DNS_STRICT = "extra_private_dns_strict"
@@ -93,11 +94,12 @@ class AdBlockVpnService : VpnService() {
             if (status.privateDnsStrict.value != strict) {
                 status.privateDnsStrict.value = strict
                 if (context != null) {
-                    VpnStateBridge.persistState(context, status.state.value, status.startTimestamp, status.lastStoppedTimestamp, strict)
+                    VpnStateBridge.persistState(context, status.state.value, status.startTimestamp, status.lastStoppedTimestamp, strict, status.phase.value)
                     try {
                         val intent = Intent(ACTION_VPN_STATE_CHANGED).apply {
                             setPackage(context.packageName)
                             putExtra(EXTRA_VPN_STATE, status.state.value.name)
+                            putExtra(EXTRA_VPN_PHASE, status.phase.value)
                             putExtra(EXTRA_START_TIMESTAMP, status.startTimestamp)
                             putExtra(EXTRA_LAST_STOPPED_TIMESTAMP, status.lastStoppedTimestamp)
                             putExtra(EXTRA_PRIVATE_DNS_STRICT, strict)
@@ -221,7 +223,9 @@ class AdBlockVpnService : VpnService() {
             isEngineRunning = { goTunnelAdapter.isEngineRunning() },
             onTearDownForRestart = { session.tearDownForRestart() },
             onStartVpn = { session.startFromSupervisor() },
-            onPhaseChanged = { phase -> session.connectingPhase = phase },
+            onPhaseChanged = { phase ->
+                session.updatePhase(phase)
+            },
             onRefreshStats = {
                 session.todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
             },
@@ -285,6 +289,29 @@ class AdBlockVpnService : VpnService() {
         serviceScope.launch {
             appPrefs.preferredIPType.collect { ipType ->
                 if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setPreferredIPType(ipType)
+            }
+        }
+        serviceScope.launch {
+            appPrefs.sniProxyRulesJson.collect { rulesJson ->
+                if (::goTunnelAdapter.isInitialized) {
+                    val sniRules = app.pwhs.blockads.data.model.SniProxyRuleCodec.fromJsonList(rulesJson)
+                    goTunnelAdapter.setSniProxyRules(
+                        app.pwhs.blockads.data.model.SniProxyRuleCodec.toEngineJson(
+                            sniRules,
+                            packageManager
+                        )
+                    )
+                }
+            }
+        }
+        serviceScope.launch {
+            appPrefs.tailscale.advertiseExitNode.collect { enabled ->
+                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setTailscaleAdvertiseExitNode(enabled)
+            }
+        }
+        serviceScope.launch {
+            appPrefs.tailscale.adblockEnabled.collect { enabled ->
+                if (::goTunnelAdapter.isInitialized) goTunnelAdapter.setTailscaleAdBlockEnabled(enabled)
             }
         }
         serviceScope.launch {

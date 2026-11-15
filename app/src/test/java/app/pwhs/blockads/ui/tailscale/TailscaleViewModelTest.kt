@@ -56,6 +56,8 @@ class TailscaleViewModelTest {
         coEvery { tailscalePrefs.getControlUrlSnapshot() } returns ""
         coEvery { tailscalePrefs.getAuthKeySnapshot() } returns ""
         coEvery { tailscalePrefs.getExitNodeIdSnapshot() } returns 0L
+        coEvery { tailscalePrefs.getAdvertiseExitNodeSnapshot() } returns false
+        coEvery { tailscalePrefs.getAdblockEnabledSnapshot() } returns true
         coEvery { tailscalePrefs.getStateJsonSnapshot() } returns ""
         coEvery { tailscalePrefs.getPinnedPeerIdsSnapshot() } returns emptySet()
         coEvery { tailscalePrefs.getTaildropDirUriSnapshot() } returns ""
@@ -195,6 +197,9 @@ class TailscaleViewModelTest {
             override fun startTailscaleSession(hostname: String?) {}
             override fun stopTailscale() {}
             override fun setTailscaleExitNode(nodeId: Long) {}
+            override fun setTailscaleAdvertiseExitNode(enabled: Boolean) {}
+            override fun setTailscaleAdBlockEnabled(enabled: Boolean) {}
+            override fun sendTailscaleFile(target: String?, fileName: String?, filePath: String?): String = ""
             override fun pingTailscalePeer(target: String?): String = ""
         }
 
@@ -223,7 +228,7 @@ class TailscaleViewModelTest {
         val client = mockk<TailscaleServiceClient>(relaxed = true)
         every { client.isConnected } returns true
         coEvery { client.getStatus() } returns ""
-        coEvery { client.syncSession(any(), any(), any(), any(), any()) } coAnswers {
+        coEvery { client.syncSession(any(), any(), any(), any(), any(), any(), any()) } coAnswers {
             try {
                 kotlinx.coroutines.delay(60_000L)
                 """{"node_key":"stale","machine_key":"stale"}"""
@@ -244,5 +249,24 @@ class TailscaleViewModelTest {
         assertFalse(vm.uiState.value.isLoggedIn)
         assertEquals("DISCONNECTED", vm.uiState.value.connectionState)
         io.mockk.coVerify(exactly = 0) { tailscalePrefs.setStateJson("""{"node_key":"stale","machine_key":"stale"}""") }
+    }
+
+    @Test
+    fun `toggleAdvertiseExitNode and toggleAdBlock delegate to serviceClient`() = runTest {
+        val client = mockk<TailscaleServiceClient>(relaxed = true)
+        coEvery { client.setAdvertiseExitNode(true) } returns true
+        coEvery { client.setAdBlockEnabled(false) } returns true
+
+        val vm = TailscaleViewModel(app, client)
+        advanceUntilIdle()
+
+        vm.processIntent(TailscaleUiIntent.ToggleAdvertiseExitNode(true))
+        vm.processIntent(TailscaleUiIntent.ToggleAdBlock(false))
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.advertiseExitNode)
+        assertFalse(vm.uiState.value.adblockEnabled)
+        io.mockk.coVerify { client.setAdvertiseExitNode(true) }
+        io.mockk.coVerify { client.setAdBlockEnabled(false) }
     }
 }

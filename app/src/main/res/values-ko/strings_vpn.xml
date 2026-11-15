@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">Taildrop으로 파일 수신됨</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">파일 열기</string>
+    <string name="vpn_phase_closing_tunnel">VPN 터널 종료 중…</string>
+    <string name="vpn_phase_stopping_engine">필터 엔진 중지 중…</string>
+    <string name="vpn_phase_clearing_network">네트워크 해제 중…</string>
+    <string name="tailscale_send_file">파일 보내기 (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Tailscale을 통해 이 기기로 직접 파일을 전송합니다.</string>
+    <string name="tailscale_send_file_btn">파일 선택</string>
+    <string name="tailscale_sending_file">%1$s 전송 중…</string>
+    <string name="tailscale_send_file_offline">오프라인 상태에서는 파일을 보낼 수 없습니다</string>
+    <string name="tailscale_send_file_success">%1$s을(를) %2$s(으)로 전송했습니다</string>
+    <string name="tailscale_send_file_failed">%1$s 전송 실패: %2$s</string>
+    <string name="tailscale_exit_node_empty">Tailnet에 알림된 Exit Node가 없습니다.</string>
+    <string name="tailscale_open_admin">웹 콘솔 열기</string>
+    <string name="tailscale_settings_title">Tailscale 설정</string>
+    <string name="tailscale_advertise_exit_node">Exit Node로 실행</string>
+    <string name="tailscale_advertise_exit_node_desc">Tailnet의 다른 기기가 이 기기를 통해 인터넷 트래픽을 라우팅하도록 허용합니다. Tailscale 관리 콘솔에서도 활성화해야 합니다.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">이 Exit Node를 사용하는 기기의 광고 및 트래커를 필터링합니다. 어느 쪽이든 BlockAds에 구성된 DNS를 사용합니다.</string>
 </resources>

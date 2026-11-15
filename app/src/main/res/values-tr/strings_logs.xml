@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">%s İçindeki En İyi Alan Adları</string>
     <string name="stats_country_top_domains_empty">Bu ülke için kaydedilmiş alan adı sorgusu yok</string>
     <string name="log_unknown_app">Bilinmeyen</string>
+    <string name="log_action_whitelist_app">Uygulamayı Beyaz Listeye Ekle (VPN\'i Atla)</string>
+    <string name="log_action_unwhitelist_app">Uygulamayı Beyaz Listeden Kaldır</string>
+    <string name="log_blocked_named">Engellendi: %s</string>
+    <string name="log_action_undone">Eylem geri alındı</string>
+    <string name="log_retention_title">Eski günlükleri otomatik sil</string>
+    <string name="log_retention_off">Asla (tümünü sakla)</string>
+    <string name="log_retention_1d">1 gün sonra</string>
+    <string name="log_retention_3d">3 gün sonra</string>
+    <string name="log_retention_7d">7 gün sonra</string>
 </resources>

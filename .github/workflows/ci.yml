@@ -10,9 +10,32 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+  TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
+
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      tunnel: ${{ steps.filter.outputs.tunnel }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            tunnel:
+              - 'tunnel/**'
+
   go-test:
     name: Go vet & test
+    needs: changes
+    if: needs.changes.outputs.tunnel == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,23 +56,23 @@ jobs:
       - name: Test
         run: go test -race -short -cover ./...
 
-      # Each Fuzz* target must run against its own package, so enumerate per package.
-      # Keep going after a crash so one run reports every failing target.
-      - name: Fuzz smoke (30s per target)
+      # Shorter fuzz budget on PRs to keep feedback fast; full 30s on main.
+      - name: Fuzz smoke
         shell: bash
+        env:
+          FUZZTIME: ${{ github.event_name == 'pull_request' && '10s' || '30s' }}
         run: |
           failed=0
           for pkg in $(go list ./...); do
             listing=$(go test -list '^Fuzz' "$pkg")
             for target in $(grep '^Fuzz' <<<"$listing" || true); do
               echo "::group::$target ($pkg)"
-              go test -run='^$' -fuzz="^${target}\$" -fuzztime="${FUZZTIME:-30s}" "$pkg" || failed=1
+              go test -run='^$' -fuzz="^${target}\$" -fuzztime="$FUZZTIME" "$pkg" || failed=1
               echo "::endgroup::"
             done
           done
           exit $failed
 
-      # A crash writes its input under testdata/fuzz/; commit it as a regression seed.
       - name: Upload fuzz crashers
         if: failure()
         uses: actions/upload-artifact@v4
@@ -58,69 +81,82 @@ jobs:
           path: tunnel/**/testdata/fuzz/
           retention-days: 7
 
-  build:
-    name: Build & Lint
+  build-tunnel:
+    name: Build Go Tunnel
+    needs: changes
+    if: needs.changes.outputs.tunnel == 'true'
     runs-on: ubuntu-latest
-    env:
-      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
-      # Forks set a repository variable TUNNEL_REPO pointing at their own
-      # releases; unset resolves from upstream (see settings.gradle.kts).
-      TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          # 21 for the unit-test toolchain (Robolectric's SDK 36 runtime); 17, listed last, stays the default.
-          java-version: |
-            21
-            17
-          distribution: 'temurin'
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches
-            ~/.gradle/daemon
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: Grant execute permission
-        run: chmod +x gradlew
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.26.1'
-          cache: true
+          cache-dependency-path: tunnel/go.sum
+
+      - name: Cache gomobile
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: gomobile-${{ runner.os }}-v0.1.12
 
       - name: Install gomobile
         run: |
-          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
-          export PATH="$HOME/go/bin:$PATH"
-          gomobile init
+          if [ ! -x "$HOME/go/bin/gomobile" ] || [ ! -x "$HOME/go/bin/gobind" ]; then
+            go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+            "$HOME/go/bin/gomobile" init
+          fi
+          echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
-      - name: Add gomobile to PATH
-        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+      - name: Grant execute permission
+        run: chmod +x gradlew
 
-      # CI builds the tunnel from source so PRs touching tunnel/ are actually
-      # compiled, rather than resolving the last published artifact.
-      - name: Build Go Tunnel (tunnel.aar)
+      - name: Build tunnel.aar
         run: ./gradlew -Ptunnel.source=local buildGoTunnel
 
-      # Separately, prove the pinned release artifact still resolves and matches
-      # gradle/tunnel.aar.sha256.
-      - name: Verify published tunnel.aar
-        run: ./gradlew verifyTunnelAar
+      - name: Upload tunnel.aar
+        uses: actions/upload-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel/tunnel.aar
+          retention-days: 1
 
-      - name: Unit tests
-        run: ./gradlew -Ptunnel.source=local :app:testFdroidDebugUnitTest :app:testStoreDebugUnitTest :app:koverXmlReportUnit :app:koverLogUnit
+  unit-test:
+    name: Unit tests
+    needs: [changes, build-tunnel]
+    if: always() && !cancelled() && (needs.build-tunnel.result == 'success' || needs.build-tunnel.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 & 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: |
+            21
+            17
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download tunnel.aar
+        if: needs.changes.outputs.tunnel == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel
+
+      - name: Run unit tests & coverage
+        run: |
+          TUNNEL_ARG=""
+          if [ "${{ needs.changes.outputs.tunnel }}" = "true" ]; then
+            TUNNEL_ARG="-Ptunnel.source=prebuilt"
+          fi
+          ./gradlew $TUNNEL_ARG :app:testFdroidDebugUnitTest :app:testStoreDebugUnitTest :app:koverXmlReportUnit :app:koverLogUnit
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -139,13 +175,79 @@ jobs:
             app/build/test-results/
           retention-days: 7
 
-      - name: Lint
-        run: ./gradlew -Ptunnel.source=local lint
+  lint:
+    name: Lint
+    needs: [changes, build-tunnel]
+    if: always() && !cancelled() && (needs.build-tunnel.result == 'success' || needs.build-tunnel.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 & 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: |
+            21
+            17
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download tunnel.aar
+        if: needs.changes.outputs.tunnel == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel
+
+      - name: Run Lint
+        run: |
+          TUNNEL_ARG=""
+          if [ "${{ needs.changes.outputs.tunnel }}" = "true" ]; then
+            TUNNEL_ARG="-Ptunnel.source=prebuilt"
+          fi
+          ./gradlew $TUNNEL_ARG :app:lintFdroidDebug :blockadstv:lintFdroidDebug
+
+  build-apk:
+    name: Build debug APK
+    needs: [changes, build-tunnel]
+    if: always() && !cancelled() && (needs.build-tunnel.result == 'success' || needs.build-tunnel.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 & 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: |
+            21
+            17
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download tunnel.aar
+        if: needs.changes.outputs.tunnel == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: tunnel-aar
+          path: build/tunnel
+
+      - name: Verify published tunnel.aar
+        if: needs.changes.outputs.tunnel != 'true'
+        run: ./gradlew verifyTunnelAar
 
       - name: Build debug APK
         run: |
-          ./gradlew --stop
-          ./gradlew -Ptunnel.source=local assembleDebug
+          TUNNEL_ARG=""
+          if [ "${{ needs.changes.outputs.tunnel }}" = "true" ]; then
+            TUNNEL_ARG="-Ptunnel.source=prebuilt"
+          fi
+          ./gradlew $TUNNEL_ARG assembleDebug
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
@@ -173,4 +275,32 @@ jobs:
         with:
           name: BlockAds-universal-debug
           path: app/build/outputs/apk/**/debug/*universal*.apk
+          retention-days: 7
+
+      - name: Upload TV arm64-v8a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-arm64-v8a-debug
+          path: blockadstv/build/outputs/apk/**/debug/*arm64-v8a*.apk
+          retention-days: 7
+
+      - name: Upload TV armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-armeabi-v7a-debug
+          path: blockadstv/build/outputs/apk/**/debug/*armeabi-v7a*.apk
+          retention-days: 7
+
+      - name: Upload TV x86_64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-x86_64-debug
+          path: blockadstv/build/outputs/apk/**/debug/*x86_64*.apk
+          retention-days: 7
+
+      - name: Upload TV Universal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlockAdsTV-universal-debug
+          path: blockadstv/build/outputs/apk/**/debug/*universal*.apk
           retention-days: 7

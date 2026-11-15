@@ -24,6 +24,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_DAILY_SUMMARY_ENABLED = booleanPreferencesKey("daily_summary_enabled")
         val KEY_MILESTONE_NOTIFICATIONS_ENABLED =
             booleanPreferencesKey("milestone_notifications_enabled")
+        val KEY_HOME_TIPS_ENABLED = booleanPreferencesKey("home_tips_enabled")
         val KEY_LAST_MILESTONE_BLOCKED = longPreferencesKey("last_milestone_blocked")
         val KEY_LAST_SEEN_MILESTONE_DIALOG = longPreferencesKey("last_seen_milestone_dialog")
         val KEY_ACTIVE_PROFILE_ID = longPreferencesKey("active_profile_id")
@@ -52,6 +53,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_PREFERRED_IP_TYPE = stringPreferencesKey("preferred_ip_type")
         val KEY_HAS_RATED_APP = booleanPreferencesKey("has_rated_app")
         val KEY_RATE_PROMPT_LAST_DISMISSED = longPreferencesKey("rate_prompt_last_dismissed")
+        val KEY_SNI_PROXY_RULES = stringPreferencesKey("sni_proxy_rules")
 
         const val PREFERRED_IP_AUTO = "auto"
         const val PREFERRED_IP_IPV4 = "ipv4"
@@ -126,6 +128,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     val milestoneNotificationsEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] ?: false
+    }
+
+    val homeTipsEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_HOME_TIPS_ENABLED] ?: true
     }
 
     val lastMilestoneBlocked: Flow<Long> = dataStore.data.map { prefs ->
@@ -228,6 +234,20 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[KEY_MILESTONE_NOTIFICATIONS_ENABLED] = enabled }
+    }
+
+    suspend fun setHomeTipsEnabled(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[KEY_HOME_TIPS_ENABLED] = enabled }
+    }
+
+    val sniProxyRulesJson: Flow<String> = dataStore.data.map { prefs ->
+        prefs[KEY_SNI_PROXY_RULES] ?: ""
+    }
+
+    suspend fun getSniProxyRulesJsonSnapshot(): String = sniProxyRulesJson.first()
+
+    suspend fun setSniProxyRulesJson(json: String) {
+        dataStore.edit { prefs -> prefs[KEY_SNI_PROXY_RULES] = json }
     }
 
     suspend fun setLastMilestoneBlocked(count: Long) {

@@ -10,6 +10,7 @@ import app.pwhs.blockads.data.repository.CustomFilterManager
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderViewModel
 import app.pwhs.blockads.ui.filter.detail.FilterDetailViewModel
+import app.pwhs.blockads.ui.filter.overlap.FilterOverlapViewModel
 import app.pwhs.blockads.ui.filter.FilterSetupViewModel
 import app.pwhs.blockads.ui.home.HomeViewModel
 import app.pwhs.blockads.ui.logs.LogViewModel
@@ -253,10 +254,17 @@ val appModule = module {
         )
     }
     viewModel {
+        FilterOverlapViewModel(
+            filterListDao = get(),
+            application = androidApplication()
+        )
+    }
+    viewModel {
         DomainRulesViewModel(
             whitelistDomainDao = get(),
             customDnsRuleDao = get(),
             filterRepo = get(),
+            appPrefs = get(),
             application = androidApplication()
         )
     }

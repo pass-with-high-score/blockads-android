@@ -98,12 +98,16 @@ func NewMitmTcpHandler(
 		// and an app tries to connect directly to known public DoH server IPs,
 		// close immediately so it falls back to system DNS on port 53.
 		if blocker != nil && blocker.IsDoHBlockingEnabled() && flow.serverPort == 443 && IsKnownPublicDoHIP(flow.serverIP) {
+			logMitmQuery(blocker, flow, flow.serverIP.String(), true, "doh", 65)
 			return
 		}
 
 		// Gate -1.6 — Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if blocker != nil && blocker.IsDomainBlocked(flow.serverIP.String()) {
-			return
+		if blocker != nil {
+			if blocked, reason := checkDomainBlock(blocker, flow.serverIP.String()); blocked {
+				logMitmQuery(blocker, flow, flow.serverIP.String(), true, reason, 65)
+				return
+			}
 		}
 
 		// Gate 0 — never MITM private / loopback destinations. These
@@ -159,8 +163,11 @@ func NewMitmTcpHandler(
 		// Gate 4 — ad-block blocker (by SNI / Host).
 		// Must run BEFORE browser UID allowlist check so ad/tracker domains
 		// are blocked for ALL apps (both browsers and non-browsers like SayDuo).
-		if blocker != nil && blocker.IsDomainBlocked(hostname) {
-			return
+		if blocker != nil && !isDomainWhitelisted(blocker, hostname) {
+			if blocked, reason := checkDomainBlock(blocker, hostname); blocked {
+				logMitmQuery(blocker, flow, hostname, true, reason, 65)
+				return
+			}
 		}
 
 		// Gate 5 — browser allowlist (UID). When Kotlin has configured
@@ -168,12 +175,14 @@ func NewMitmTcpHandler(
 		// If UID is unknown (API < 29, resolver failure), err on the safe side:
 		// passthrough rather than MITM an unknown app.
 		if filter.HasAllowedUIDs() && (uid == UIDUnknown || !filter.IsUIDAllowed(uid)) {
+			logMitmQuery(blocker, flow, hostname, false, "", 65)
 			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
 			return
 		}
 
-		// Gate 6 — sensitive / cert-pinned domain.
-		if !filter.IsInterceptionAllowed(hostname) {
+		// Gate 6 — sensitive / cert-pinned / whitelisted domain.
+		if isDomainWhitelisted(blocker, hostname) || !filter.IsInterceptionAllowed(hostname) {
+			logMitmQuery(blocker, flow, hostname, false, "", 65)
 			relayDirectPeeked(conn, peekedReader, flow, hostname, blocker, protectFn)
 			return
 		}
@@ -220,6 +229,9 @@ const (
 // returns both those bytes for classification and a Reader that
 // replays them followed by anything the client sends next.
 func peekFlow(conn net.Conn, maxBytes int, timeout time.Duration) ([]byte, io.Reader, error) {
+	if maxBytes <= 0 {
+		return nil, nil, io.ErrShortBuffer
+	}
 	conn.SetReadDeadline(time.Now().Add(timeout))
 	defer conn.SetReadDeadline(time.Time{})
 
@@ -228,8 +240,39 @@ func peekFlow(conn net.Conn, maxBytes int, timeout time.Duration) ([]byte, io.Re
 	if n == 0 {
 		return nil, nil, err
 	}
+
+	// Collect split TLS ClientHello segments up to the record length so SNI stays intact.
+	for err == nil && n < maxBytes && buf[0] == 0x16 {
+		if n >= 2 && buf[1] != 0x03 {
+			break
+		}
+		target := maxBytes
+		if n >= 5 {
+			recLen := int(binary.BigEndian.Uint16(buf[3:5]))
+			target = 5 + recLen
+			if target > maxBytes {
+				target = maxBytes
+			}
+			if n >= target {
+				break
+			}
+		}
+		m, rerr := conn.Read(buf[n:target])
+		if m > 0 {
+			n += m
+		}
+		if m <= 0 || rerr != nil {
+			break
+		}
+	}
+
 	peeked := buf[:n]
 	return peeked, io.MultiReader(bytes.NewReader(peeked), conn), nil
+}
+
+// ParseClientHelloSNI extracts the server_name extension from a TLS ClientHello record.
+func ParseClientHelloSNI(record []byte) string {
+	return parseClientHelloSNI(record)
 }
 
 // parseClientHelloSNI extracts the server_name extension from a TLS

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title_1">Okos reklámblokkolás</string>
+    <string name="onboarding_desc_1">Blokkolja a reklámokat minden alkalmazásban és böngészőben egyetlen koppintással. DNS-szűrési technológiát használ — nincs szükség rootra.\n\n🔒 Adatvédelmi ígéret: soha nem gyűjtjük, tároljuk vagy továbbítjuk a böngészési adatait. Minden feldolgozás kizárólag az eszközén történik.</string>
+    <string name="onboarding_skip">Kihagyás</string>
+    <string name="onboarding_next">Tovább</string>
+    <string name="onboarding_get_started">Kezdés</string>
+    <string name="onboarding_recommended">★ Ajánlott</string>
+    <string name="onboarding_dns_title">DNS-szerver kiválasztása</string>
+    <string name="onboarding_dns_desc">Válasszon DNS-szervert a domainnevek feloldásához. Ezt később a Beállításokban módosíthatja.</string>
+    <string name="onboarding_vpn_title">VPN-engedély szükséges</string>
+    <string name="onboarding_vpn_desc">A BlockAds helyi VPN-t használ a DNS-lekérdezések szűrésére és a reklámok blokkolására. Semmilyen adat nem hagyja el az eszközt — ez a VPN csak helyben működik a DNS-kérések elfogására és szűrésére.</string>
+    <string name="onboarding_vpn_grant">VPN-engedély megadása</string>
+    <string name="onboarding_notification_title">Maradjon tájékozott</string>
+    <string name="onboarding_notification_desc">Engedélyezze az értesítéseket a valós idejű blokkolási statisztikák megtekintéséhez, és hogy lássa, mikor aktív a védelem. Android 13+ rendszeren az állandó VPN-értesítéshez szükséges.</string>
+    <string name="onboarding_notification_grant">Értesítések engedélyezése</string>
+    <string name="onboarding_battery_title">Folyamatos védelem</string>
+    <string name="onboarding_battery_desc">Vegye ki a BlockAds alkalmazást az akkumulátor-optimalizálás alól, hogy a VPN-szolgáltatás a háttérben is aktív maradjon, és a rendszer ne állítsa le.</string>
+    <string name="onboarding_battery_grant">Akkumulátor-optimalizálás kikapcsolása</string>
+    <string name="onboarding_battery_unsupported">Nem támogatott</string>
+    <string name="onboarding_permission_granted">✓ Engedély megadva</string>
+    <string name="onboarding_complete_title">Most már védve van!</string>
+    <string name="onboarding_complete_desc">Gratulálunk! A BlockAds be van állítva, és készen áll, hogy megvédje eszközét a reklámoktól és nyomkövetőktől.</string>
+    <string name="onboarding_complete_stats">Koppintson a \&quot;Kezdés\&quot; gombra a védelem bekapcsolásához</string>
+    <string name="onboarding_crash_report_title">Segítsen fejleszteni a BlockAds-t</string>
+    <string name="onboarding_crash_report_desc" formatted="false">A BlockAds az adatvédelmet helyezi az első helyre. Engedélyét kérjük névtelen hibajelentések gyűjtéséhez, hogy gyorsan javíthassuk a hibákat.\n\nEz szigorúan ÖNKÉNTES, NEM tartalmaz személyazonosításra alkalmas adatot (PII), és bármikor kikapcsolható a Beállításokban.</string>
+    <string name="onboarding_crash_report_btn_yes">Igen, segítek fejleszteni</string>
+    <string name="onboarding_crash_report_btn_no">Nem, köszönöm</string>
+</resources>

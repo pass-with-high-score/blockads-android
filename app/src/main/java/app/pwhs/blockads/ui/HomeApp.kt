@@ -55,6 +55,7 @@ import app.pwhs.blockads.ui.data.ElementRulesKey
 import app.pwhs.blockads.ui.data.DnsProviderKey
 import app.pwhs.blockads.ui.data.DomainRulesKey
 import app.pwhs.blockads.ui.data.FilterDetailKey
+import app.pwhs.blockads.ui.data.FilterOverlapKey
 import app.pwhs.blockads.ui.data.FilterKey
 import app.pwhs.blockads.ui.data.FireWallKey
 import app.pwhs.blockads.ui.data.HomeKey
@@ -79,8 +80,10 @@ import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.domainrules.DomainRulesScreen
 import app.pwhs.blockads.ui.filter.FilterSetupScreen
 import app.pwhs.blockads.ui.filter.detail.FilterDetailScreen
+import app.pwhs.blockads.ui.filter.overlap.FilterOverlapScreen
 import app.pwhs.blockads.ui.firewall.FirewallScreen
 import app.pwhs.blockads.ui.home.HomeScreen
+import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.logs.LogsScreen
@@ -246,6 +249,31 @@ fun HomeApp(
                                 HomeFeatureTipType.HTTPS_FILTERING -> homeStack.add(HttpsFilteringKey)
                                 HomeFeatureTipType.WIREGUARD -> homeStack.add(WireGuardImportKey)
                             }
+                        },
+                        onFeatureBadgeClick = { kind ->
+                            when (kind) {
+                                FeatureBadgeKind.DNS_PROTOCOL -> {
+                                    showBottomBar = false
+                                    homeStack.add(DnsProviderKey)
+                                }
+                                FeatureBadgeKind.HTTPS_FILTER -> {
+                                    showBottomBar = false
+                                    homeStack.add(HttpsFilteringKey)
+                                }
+                                FeatureBadgeKind.TAILSCALE -> {
+                                    showBottomBar = false
+                                    homeStack.add(TailscaleKey)
+                                }
+                                FeatureBadgeKind.FIREWALL -> {
+                                    showBottomBar = true
+                                    currentTab = BottomBarScreen.Firewall
+                                }
+                                FeatureBadgeKind.FILTER_RULES -> {
+                                    showBottomBar = true
+                                    currentTab = BottomBarScreen.FilterSetup
+                                }
+                                FeatureBadgeKind.TUNNEL_MODE -> Unit
+                            }
                         }
                     )
                 }
@@ -258,6 +286,10 @@ fun HomeApp(
                         onNavigateToFilterDetail = { filterId ->
                             showBottomBar = false
                             currentBackStack.add(FilterDetailKey(filterId))
+                        },
+                        onNavigateToOverlap = {
+                            showBottomBar = false
+                            currentBackStack.add(FilterOverlapKey)
                         }
                     )
                 }
@@ -336,6 +368,13 @@ fun HomeApp(
                 entry<FilterDetailKey> {
                     FilterDetailScreen(
                         filterId = it.filterId,
+                        onNavigateBack = {
+                            safePop(currentBackStack)
+                        }
+                    )
+                }
+                entry<FilterOverlapKey> {
+                    FilterOverlapScreen(
                         onNavigateBack = {
                             safePop(currentBackStack)
                         }

@@ -99,19 +99,21 @@ class TrustedNetworkManager(
                         return@withLock
                     }
 
-                    val ssid = currentSsid(context)
-                    val onTrusted = ssid != null && ssid in trusted
+                    val wifiInfo = currentWifiInfo(context)
+                    val ssid = wifiInfo?.first
+                    val bssid = wifiInfo?.second
+                    val onTrusted = isTrusted(trusted, ssid, bssid)
                     val running = AdBlockVpnService.isRunning || RootProxyService.isRunning
                     val pausedByUs = appPrefs.getPausedByTrustedSnapshot()
-                    Timber.d("TrustedNet evaluate: ssid=$ssid trusted=$trusted onTrusted=$onTrusted running=$running pausedByUs=$pausedByUs")
+                    Timber.d("TrustedNet evaluate: ssid=$ssid bssid=$bssid trusted=$trusted onTrusted=$onTrusted running=$running pausedByUs=$pausedByUs")
 
                     when {
                         // Entered a trusted network while protected → pause.
                         onTrusted && running -> {
                             Timber.d("Trusted network '$ssid' — pausing BlockAds")
-                            appPrefs.setPausedByTrusted(true, ssid)
+                            appPrefs.setPausedByTrusted(true, ssid.orEmpty())
                             ServiceController.requestStop(context)
-                            showPausedNotification(ssid)
+                            showPausedNotification(ssid.orEmpty())
                         }
                         // Left the trusted network and we had paused → resume.
                         !onTrusted && pausedByUs && !running -> {
@@ -177,16 +179,54 @@ class TrustedNetworkManager(
         }
     }
 
+    data class TrustedNetworkEntry(
+        val ssid: String,
+        val bssid: String? = null
+    ) {
+        fun encode(): String = if (bssid.isNullOrBlank()) ssid else "$ssid|${bssid.lowercase()}"
+
+        fun matches(currentSsid: String?, currentBssid: String?): Boolean {
+            if (currentSsid == null || currentSsid != ssid) return false
+            if (bssid.isNullOrBlank()) return true
+            return currentBssid != null && currentBssid.equals(bssid, ignoreCase = true)
+        }
+    }
+
     companion object {
         private const val CHANNEL_ID = "blockads_trusted_channel"
         private const val NOTIFICATION_ID = 30
+        private const val INVALID_BSSID = "02:00:00:00:00:00"
+        private val BSSID_REGEX = Regex("^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$")
+
+        fun parseEntry(raw: String): TrustedNetworkEntry {
+            val sep = raw.lastIndexOf('|')
+            if (sep > 0 && sep < raw.lastIndex) {
+                val candidateBssid = raw.substring(sep + 1)
+                if (BSSID_REGEX.matches(candidateBssid)) {
+                    return TrustedNetworkEntry(
+                        ssid = raw.substring(0, sep),
+                        bssid = candidateBssid.lowercase()
+                    )
+                }
+            }
+            return TrustedNetworkEntry(ssid = raw, bssid = null)
+        }
+
+        fun isTrusted(
+            trustedEntries: Set<String>,
+            currentSsid: String?,
+            currentBssid: String?
+        ): Boolean {
+            if (currentSsid == null || trustedEntries.isEmpty()) return false
+            return trustedEntries.any { parseEntry(it).matches(currentSsid, currentBssid) }
+        }
 
         /**
-         * Returns the connected Wi-Fi SSID (without surrounding quotes), or null
+         * Returns the connected Wi-Fi (SSID, optional BSSID), or null
          * if not on Wi-Fi / unavailable / location permission missing.
          */
-        fun currentSsid(context: Context): String? {
-            // SSID requires location permission on Android 10+.
+        fun currentWifiInfo(context: Context): Pair<String, String?>? {
+            // SSID/BSSID requires location permission on Android 10+.
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
             ) return null
@@ -194,13 +234,27 @@ class TrustedNetworkManager(
                 val wifi = context.applicationContext
                     .getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return null
                 @Suppress("DEPRECATION")
-                val raw = wifi.connectionInfo?.ssid ?: return null
-                val ssid = raw.trim('"')
-                if (ssid.isEmpty() || ssid == "<unknown ssid>") null else ssid
+                val info = wifi.connectionInfo ?: return null
+                @Suppress("DEPRECATION")
+                val rawSsid = info.ssid ?: return null
+                val ssid = rawSsid.trim('"')
+                if (ssid.isEmpty() || ssid == "<unknown ssid>") return null
+                @Suppress("DEPRECATION")
+                val rawBssid = info.bssid
+                val bssid = rawBssid
+                    ?.takeIf { it.isNotBlank() && it != INVALID_BSSID && BSSID_REGEX.matches(it) }
+                    ?.lowercase()
+                ssid to bssid
             } catch (e: Exception) {
-                Timber.w(e, "currentSsid failed")
+                Timber.w(e, "currentWifiInfo failed")
                 null
             }
         }
+
+        /**
+         * Returns the connected Wi-Fi SSID (without surrounding quotes), or null
+         * if not on Wi-Fi / unavailable / location permission missing.
+         */
+        fun currentSsid(context: Context): String? = currentWifiInfo(context)?.first
     }
 }

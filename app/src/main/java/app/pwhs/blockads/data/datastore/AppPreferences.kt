@@ -89,6 +89,7 @@ class AppPreferences internal constructor(
         const val LANGUAGE_IT = AppearancePreferences.LANGUAGE_IT
         const val LANGUAGE_AR = AppearancePreferences.LANGUAGE_AR
         const val LANGUAGE_TR = AppearancePreferences.LANGUAGE_TR
+        const val LANGUAGE_HU = AppearancePreferences.LANGUAGE_HU
         const val LANGUAGE_PL = AppearancePreferences.LANGUAGE_PL
         const val LANGUAGE_IN = AppearancePreferences.LANGUAGE_IN
         const val LANGUAGE_PT_BR = AppearancePreferences.LANGUAGE_PT_BR
@@ -128,6 +129,10 @@ class AppPreferences internal constructor(
     val whitelistedApps: Flow<Set<String>> get() = vpnSecurity.whitelistedApps
     val dailySummaryEnabled: Flow<Boolean> get() = vpnSecurity.dailySummaryEnabled
     val milestoneNotificationsEnabled: Flow<Boolean> get() = vpnSecurity.milestoneNotificationsEnabled
+    val homeTipsEnabled: Flow<Boolean> get() = vpnSecurity.homeTipsEnabled
+    val sniProxyRulesJson: Flow<String> get() = vpnSecurity.sniProxyRulesJson
+    suspend fun getSniProxyRulesJsonSnapshot(): String = vpnSecurity.getSniProxyRulesJsonSnapshot()
+    suspend fun setSniProxyRulesJson(json: String) = vpnSecurity.setSniProxyRulesJson(json)
     val lastMilestoneBlocked: Flow<Long> get() = vpnSecurity.lastMilestoneBlocked
     val lastSeenMilestoneDialog: Flow<Long> get() = vpnSecurity.lastSeenMilestoneDialog
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId
@@ -211,6 +216,7 @@ class AppPreferences internal constructor(
     suspend fun getWhitelistedAppsSnapshot(): Set<String> = vpnSecurity.getWhitelistedAppsSnapshot()
     suspend fun setDailySummaryEnabled(enabled: Boolean) = vpnSecurity.setDailySummaryEnabled(enabled)
     suspend fun setMilestoneNotificationsEnabled(enabled: Boolean) = vpnSecurity.setMilestoneNotificationsEnabled(enabled)
+    suspend fun setHomeTipsEnabled(enabled: Boolean) = vpnSecurity.setHomeTipsEnabled(enabled)
     suspend fun setLastMilestoneBlocked(count: Long) = vpnSecurity.setLastMilestoneBlocked(count)
     suspend fun setLastSeenMilestoneDialog(milestone: Long) = vpnSecurity.setLastSeenMilestoneDialog(milestone)
     suspend fun setActiveProfileId(id: Long) = vpnSecurity.setActiveProfileId(id)

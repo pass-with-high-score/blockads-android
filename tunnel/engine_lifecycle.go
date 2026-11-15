@@ -177,6 +177,8 @@ func (e *Engine) Stop() {
 	e.resolver = nil
 
 	e.safeSearch.ClearCache()
+	mitmQuerySeen.Clear()
+	flowFirewallCache.Clear()
 
 	for _, t := range e.adTries {
 		if t != nil {

@@ -62,6 +62,29 @@ internal class TailscaleBinder(
         }
     }
 
+    override fun setTailscaleAdvertiseExitNode(enabled: Boolean) {
+        val adapter = getGoTunnelAdapter()
+        if (adapter != null) {
+            adapter.setTailscaleAdvertiseExitNode(enabled)
+        }
+    }
+
+    override fun setTailscaleAdBlockEnabled(enabled: Boolean) {
+        val adapter = getGoTunnelAdapter()
+        if (adapter != null) {
+            adapter.setTailscaleAdBlockEnabled(enabled)
+        }
+    }
+
+    override fun sendTailscaleFile(target: String?, fileName: String?, filePath: String?): String {
+        val adapter = getGoTunnelAdapter() ?: return "Tunnel not active"
+        return adapter.sendTailscaleFile(target ?: "", fileName ?: "", filePath ?: "")
+            .fold(
+                onSuccess = { "" },
+                onFailure = { it.message ?: "Unknown error" }
+            )
+    }
+
     override fun pingTailscalePeer(target: String?): String {
         val adapter = getGoTunnelAdapter()
         return if (adapter != null) {

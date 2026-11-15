@@ -119,6 +119,45 @@ class TailscaleServiceClient(
         }
     }
 
+    suspend fun setAdvertiseExitNode(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val service = tailscaleService ?: return@withContext false
+            service.setTailscaleAdvertiseExitNode(enabled)
+            true
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to set Tailscale advertise exit node via service")
+            false
+        }
+    }
+
+    suspend fun setAdBlockEnabled(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val service = tailscaleService ?: return@withContext false
+            service.setTailscaleAdBlockEnabled(enabled)
+            true
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to set Tailscale adblock via service")
+            false
+        }
+    }
+
+    suspend fun sendFile(target: String, fileName: String, filePath: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val service = tailscaleService
+                    ?: return@withContext Result.failure(IllegalStateException("Tunnel not active"))
+                val err = service.sendTailscaleFile(target, fileName, filePath)
+                if (err.isNullOrEmpty()) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(RuntimeException(err))
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to send Tailscale file via service")
+                Result.failure(e)
+            }
+        }
+
     suspend fun pingPeer(target: String): String = withContext(Dispatchers.IO) {
         try {
             tailscaleService?.pingTailscalePeer(target) ?: ""
@@ -133,6 +172,8 @@ class TailscaleServiceClient(
         controlUrl: String,
         authKey: String,
         exitNodeId: Long,
+        advertiseExitNode: Boolean = false,
+        adblockEnabled: Boolean = true,
         hostname: String = "blockads-android"
     ): String? = withContext(Dispatchers.IO) {
         val service = tailscaleService ?: return@withContext null
@@ -141,6 +182,8 @@ class TailscaleServiceClient(
             if (exitNodeId != 0L) {
                 service.setTailscaleExitNode(exitNodeId)
             }
+            service.setTailscaleAdvertiseExitNode(advertiseExitNode)
+            service.setTailscaleAdBlockEnabled(adblockEnabled)
             service.startTailscaleSession(hostname)
             updatedState
         } catch (e: Exception) {

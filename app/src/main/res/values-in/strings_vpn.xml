@@ -167,4 +167,21 @@
     <string name="tailscale_taildrop_received_title">File diterima melalui Taildrop</string>
     <string name="tailscale_taildrop_received_text">%1$s (%2$s)</string>
     <string name="tailscale_taildrop_open_file">Buka file</string>
+    <string name="vpn_phase_closing_tunnel">Menutup terowongan VPN…</string>
+    <string name="vpn_phase_stopping_engine">Menghentikan mesin filter…</string>
+    <string name="vpn_phase_clearing_network">Melepaskan jaringan…</string>
+    <string name="tailscale_send_file">Kirim File (Taildrop)</string>
+    <string name="tailscale_send_file_desc">Transfer file secara langsung ke perangkat ini melalui Tailscale.</string>
+    <string name="tailscale_send_file_btn">Pilih File</string>
+    <string name="tailscale_sending_file">Mengirim %1$s…</string>
+    <string name="tailscale_send_file_offline">Tidak dapat mengirim file saat offline</string>
+    <string name="tailscale_send_file_success">Mengirim %1$s ke %2$s</string>
+    <string name="tailscale_send_file_failed">Gagal mengirim %1$s: %2$s</string>
+    <string name="tailscale_exit_node_empty">Tidak ada Exit Node yang diiklankan di Tailnet Anda.</string>
+    <string name="tailscale_open_admin">Buka Konsol Web</string>
+    <string name="tailscale_settings_title">Pengaturan Tailscale</string>
+    <string name="tailscale_advertise_exit_node">Jalankan sebagai Exit Node</string>
+    <string name="tailscale_advertise_exit_node_desc">Izinkan perangkat lain di Tailnet Anda merutekan lalu lintas internet melalui perangkat ini. Aktifkan juga di Konsol Admin Tailscale.</string>
+    <string name="tailscale_adblock_title">BlockAds Tailscale</string>
+    <string name="tailscale_adblock_desc">Filter iklan dan pelacak untuk perangkat yang menggunakan Exit Node ini. Bagaimanapun tetap menggunakan DNS yang dikonfigurasi di BlockAds.</string>
 </resources>

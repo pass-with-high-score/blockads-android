@@ -84,7 +84,10 @@ import app.pwhs.blockads.ui.home.component.HomeStatusHeader
 import app.pwhs.blockads.ui.home.component.MilestoneBottomSheet
 import app.pwhs.blockads.ui.home.component.MiniBarChartDefaults
 import app.pwhs.blockads.ui.home.component.NetworkSpeedSection
+import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
+import app.pwhs.blockads.ui.home.component.FloatingFeatureChips
 import app.pwhs.blockads.ui.home.component.PowerButton
+import app.pwhs.blockads.ui.home.component.VpnPhaseActivityBanner
 import app.pwhs.blockads.ui.home.component.PrivateDnsWarningCard
 import app.pwhs.blockads.ui.home.component.RecentBlockedSection
 import app.pwhs.blockads.ui.home.component.RoutingModeBottomSheet
@@ -116,10 +119,13 @@ fun HomeScreen(
     onNavigateToLogsWithQuery: (String) -> Unit = {},
     onNavigateToBrowser: (String) -> Unit = {},
     onNavigateToFeature: (HomeFeatureTipType) -> Unit = {},
+    onFeatureBadgeClick: (FeatureBadgeKind) -> Unit = {},
 ) {
     val vpnEnabled by viewModel.vpnEnabled.collectAsStateWithLifecycle()
     val vpnConnecting by viewModel.vpnConnecting.collectAsStateWithLifecycle()
     val vpnStopping by viewModel.vpnStopping.collectAsStateWithLifecycle()
+    val vpnPhase by viewModel.vpnPhase.collectAsStateWithLifecycle()
+    val activeFeatureBadges by viewModel.activeFeatureBadges.collectAsStateWithLifecycle()
     val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
     val domainCount by viewModel.domainCount.collectAsStateWithLifecycle()
     val totalCount by viewModel.totalCount.collectAsStateWithLifecycle()
@@ -236,24 +242,49 @@ fun HomeScreen(
                 }
             }
 
-            // Power button — never blocked by filter loading
-            PowerButton(
-                isActive = vpnEnabled,
-                isConnecting = vpnConnecting,
-                isStopping = vpnStopping,
-                onClick = {
-                    if (!vpnConnecting && !vpnStopping) {
-                        if (vpnEnabled) {
-                            viewModel.stopVpn(context)
+            // Power button with floating active-feature chips around it
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(198.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingFeatureChips(
+                    visible = vpnEnabled && !vpnStopping,
+                    badges = activeFeatureBadges,
+                    onBadgeClick = { kind ->
+                        if (kind == FeatureBadgeKind.TUNNEL_MODE) {
+                            showRoutingModeSheet = true
                         } else {
-                            viewModel.dismissVpnRevokedWarning()
-                            onRequestVpnPermission()
+                            onFeatureBadgeClick(kind)
                         }
                     }
-                }
+                )
+                PowerButton(
+                    isActive = vpnEnabled,
+                    isConnecting = vpnConnecting,
+                    isStopping = vpnStopping,
+                    onClick = {
+                        if (!vpnConnecting && !vpnStopping) {
+                            if (vpnEnabled) {
+                                viewModel.stopVpn(context)
+                            } else {
+                                viewModel.dismissVpnRevokedWarning()
+                                onRequestVpnPermission()
+                            }
+                        }
+                    }
+                )
+            }
+
+            VpnPhaseActivityBanner(
+                isConnecting = vpnConnecting,
+                isStopping = vpnStopping,
+                isActive = vpnEnabled,
+                phase = vpnPhase
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             // Stats cards
             val totalChartData = remember(hourlyStats) {
                 MiniBarChartDefaults.createSparklineData(hourlyStats, isBlocked = false)

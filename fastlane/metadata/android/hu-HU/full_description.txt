@@ -1,0 +1,35 @@
+Elege van a tolakodó reklámokból, amelyek lelassítják a telefonját?
+A BlockAds egyetlen koppintással blokkolja a reklámokat minden alkalmazásban és böngészőben — root nélkül.
+
+<b>FŐBB FUNKCIÓK</b>
+
+- Rendszerszintű reklámblokkolás: Okos, DNS-alapú szűrés minden alkalmazáshoz és böngészőhöz. Nincs szükség root hozzáférésre.
+- Adatvédelem: Blokkolja a nyomkövetőket és kémprogramokat. Semmilyen adatgyűjtés — minden helyben, az eszközén marad.
+- Alkalmazás-tűzfal és profilok: Letilthatja egyes alkalmazások internet-hozzáférését (Wi-Fi/mobiladat). Azonnal válthat az Alapértelmezett, Szigorú, Családi és Játék profilok között.
+- Szülői felügyelet: Kényszerítse a Biztonságos keresést (Google/Bing) és a YouTube korlátozott módot családbarát DNS-szolgáltatókon keresztül.
+- Részletes statisztikák: Valós idejű blokkolásszámláló, 24 órás aktivitási diagramok és részletes DNS-lekérdezési naplók.
+- Teljesen testreszabható: Egyéni szűrőlisták hozzáadása URL-ből (ABPVN, AdGuard, EasyList stb.), engedélyező és tiltó szabályok, valamint egyéni DoH/DoT titkosított DNS.
+- Modern felület: Jetpack Compose-zal készült Material 3 dizájn. Sötét/világos téma, egyéni kiemelőszínek, Gyorsbeállítások csempe és kezdőképernyő-widgetek.
+- Biztonsági mentés és visszaállítás: Exportálja beállításait JSON-fájlba, és importálja őket egyszerűen egy új eszközön.
+- Kíméli az akkumulátort és az adatforgalmat: Minimális hatás a teljesítményre. Csak a DNS-forgalmat szűri, így csökkenti a felesleges reklámadatok letöltését.
+
+<b>HASZNÁLAT</b>
+
+- Nyissa meg a BlockAds alkalmazást.
+- Koppintson a bekapcsológombra, és engedélyezze a VPN-kapcsolatot.
+- Élvezze a reklámmentes internetet! (A védelmet a Gyorsbeállítások csempével vagy a widgettel is be- és kikapcsolhatja.)
+
+<b>GYIK</b>
+
+- Biztonságos a BlockAds?
+Igen. A BlockAds csak helyben szűri a DNS-lekérdezéseket. Semmilyen személyes adatot nem fog el, és nem továbbít külső szerverekre.
+- Miért kell neki VPN-engedély?
+Egy helyi VPN-alagutat hoz létre az eszközén, hogy a DNS-kéréseket helyben irányítsa és szűrje. Ez nem távoli VPN-szolgáltatás.
+- Minden alkalmazással működik?
+Igen, rendszerszinten működik. Egyes alkalmazásokat engedélyezőlistára is tehet, vagy a tűzfal funkcióval szabályozhatja a hozzáférést.
+- Tényleg ingyenes?
+Igen! A BlockAds 100%-ban ingyenes, nyílt forráskódú, és nem tartalmaz alkalmazáson belüli vásárlást vagy reklámot.
+- Lelassítja az internetet?
+Nem. A DNS-szűrés rendkívül könnyű. Valójában gyorsítja a böngészést és kíméli az akkumulátort, mert megakadályozza a reklámok betöltését.
+
+A BlockAds ingyenes, nyílt forráskódú, és az adatvédelem jegyében készült. Töltse le most, és vegye vissza az irányítást Android-élménye felett!

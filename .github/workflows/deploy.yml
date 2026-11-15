@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+      - 'beta-*'
+      - 'pre-*'
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -93,14 +95,16 @@ jobs:
             blockadstv/build/outputs/apk/release/*.apk
           retention-days: 30
 
-      # Upload assets to existing GitHub Release (or create if missing)
+      # Upload assets to existing GitHub Release (or create if missing).
+      # Tags without a leading 'v' (beta-*, pre-*) are marked as pre-release so
+      # F-Droid's ^v.* tag check and GitHub /releases/latest ignore them.
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.VERSION_NAME }}
           draft: false
-          prerelease: false
+          prerelease: ${{ !startsWith(github.ref_name, 'v') }}
           files: |
             app/build/outputs/apk/release/*.apk
             blockadstv/build/outputs/apk/release/*.apk

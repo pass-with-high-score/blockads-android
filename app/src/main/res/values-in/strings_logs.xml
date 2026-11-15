@@ -70,4 +70,13 @@
     <string name="stats_country_top_domains_title">Domain Teratas di %s</string>
     <string name="stats_country_top_domains_empty">Tidak ada kueri domain yang dicatat untuk negara ini</string>
     <string name="log_unknown_app">Tidak dikenal</string>
+    <string name="log_action_whitelist_app">Masukkan Aplikasi ke Daftar Putih (Lewati VPN)</string>
+    <string name="log_action_unwhitelist_app">Hapus Aplikasi dari Daftar Putih</string>
+    <string name="log_blocked_named">Diblokir: %s</string>
+    <string name="log_action_undone">Tindakan diurungkan</string>
+    <string name="log_retention_title">Hapus otomatis log lama</string>
+    <string name="log_retention_off">Tidak pernah (simpan semua)</string>
+    <string name="log_retention_1d">Setelah 1 hari</string>
+    <string name="log_retention_3d">Setelah 3 hari</string>
+    <string name="log_retention_7d">Setelah 7 hari</string>
 </resources>
