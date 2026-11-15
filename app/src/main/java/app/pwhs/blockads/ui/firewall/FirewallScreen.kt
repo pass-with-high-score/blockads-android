@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.firewall
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -37,6 +41,7 @@ fun FirewallScreen(
     viewModel: FirewallViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var isSearchVisible by rememberSaveable { mutableStateOf(false) }
 
     val allUserEnabled = uiState.userApps.isNotEmpty() &&
         uiState.userApps.all { uiState.isBlocked(it.packageName) }
@@ -67,6 +72,14 @@ fun FirewallScreen(
                 enabledCount = uiState.enabledCount,
                 allUserEnabled = allUserEnabled,
                 allSystemEnabled = allSystemEnabled,
+                isSearchVisible = isSearchVisible,
+                onToggleSearch = {
+                    val next = !isSearchVisible
+                    isSearchVisible = next
+                    if (!next && uiState.searchQuery.isNotEmpty()) {
+                        viewModel.processIntent(FirewallUiIntent.UpdateSearchQuery(""))
+                    }
+                },
                 onToggleFirewall = { viewModel.processIntent(FirewallUiIntent.SetFirewallEnabled(it)) },
                 onRefresh = { viewModel.processIntent(FirewallUiIntent.RefreshApps) },
                 onToggleAllUserApps = { viewModel.processIntent(FirewallUiIntent.ToggleAllUserApps) },
@@ -79,11 +92,12 @@ fun FirewallScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Ultra-compact Search Bar
-            FirewallSearchBar(
-                query = uiState.searchQuery,
-                onQueryChange = { viewModel.processIntent(FirewallUiIntent.UpdateSearchQuery(it)) }
-            )
+            AnimatedVisibility(visible = isSearchVisible) {
+                FirewallSearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = { viewModel.processIntent(FirewallUiIntent.UpdateSearchQuery(it)) }
+                )
+            }
 
             FirewallPromptToggle(
                 enabled = uiState.isPromptEnabled,
