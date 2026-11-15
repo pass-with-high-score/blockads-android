@@ -272,6 +272,10 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 				return
 			}
 		}
+		if flow.serverPort == 443 && engine.shouldDropQuicForSniProxy(uidr, flow) {
+			_ = conn.Close()
+			return
+		}
 		relay(conn)
 	}
 }
@@ -313,6 +317,14 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 			return
 		}
 		engine.logConnection(flow, ProtocolTCP)
+		if flow.serverPort == 443 {
+			if handled, nextConn := trySniProxyRedirect(conn, flow, engine, uidr, protectFn); handled {
+				return
+			} else if nextConn != nil {
+				relayDirectFromFlow(nextConn, flow, engine, protectFn)
+				return
+			}
+		}
 		relayDirectFromFlow(conn, flow, engine, protectFn)
 	}
 }

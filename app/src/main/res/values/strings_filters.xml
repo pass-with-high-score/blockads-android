@@ -20,6 +20,10 @@
     <string name="filter_list_removed_named">Removed \"%s\"</string>
     <string name="blocklist_domain_already_exists">Domain is already blocklisted</string>
     <string name="domain_rules_title">Domain Rules</string>
+    <plurals name="domain_rules_count">
+        <item quantity="one">%d rule</item>
+        <item quantity="other">%d rules</item>
+    </plurals>
     <string name="domain_rules_tab_whitelist">Whitelist</string>
     <string name="domain_rules_tab_blocklist">Blocklist</string>
     <string name="domain_rules_import_desc">Import allowed or blocked domains from hosts file, Adblock syntax, or plain text</string>
@@ -249,4 +253,22 @@
     <string name="filter_overlap_showing_capped">Showing first %1$d matching duplicates</string>
     <string name="filter_overlap_exported">Exported %1$s unique domains</string>
     <string name="filter_overlap_export_failed">Failed to export combined filter list</string>
+    <string name="domain_rules_tab_sni_proxy">SNI Proxy</string>
+    <string name="sni_proxy_empty_title">SNI Proxy Routing</string>
+    <string name="sni_proxy_empty_desc">Route TLS 443 traffic of specific apps (e.g. YouTube) and domains directly to a custom SNI Proxy IP without changing system DNS.</string>
+    <string name="sni_proxy_quick_youtube">Add YouTube Preset</string>
+    <string name="sni_proxy_add_title">Add SNI Proxy Rule</string>
+    <string name="sni_proxy_edit_title">Edit SNI Proxy Rule</string>
+    <string name="sni_proxy_name_label">Rule Name (optional)</string>
+    <string name="sni_proxy_target_ip_label">Target SNI Proxy IP</string>
+    <string name="sni_proxy_target_ip_hint">e.g. 91.239.7.227 or 91.239.7.227:443</string>
+    <string name="sni_proxy_apps_label">Target Apps (empty = all apps)</string>
+    <string name="sni_proxy_apps_all">All apps</string>
+    <string name="sni_proxy_apps_pick">Select Apps (%1$d)</string>
+    <string name="sni_proxy_domains_label">Domains / SNI (comma or newline separated, empty = all TLS 443)</string>
+    <string name="sni_proxy_preset_youtube">YouTube Preset</string>
+    <string name="sni_proxy_invalid_ip">Please enter a valid IPv4/IPv6 address</string>
+    <string name="sni_proxy_saved">SNI Proxy rule saved</string>
+    <string name="sni_proxy_deleted">SNI Proxy rule deleted</string>
+    <string name="sni_proxy_all_domains">All TLS 443 domains</string>
 </resources>

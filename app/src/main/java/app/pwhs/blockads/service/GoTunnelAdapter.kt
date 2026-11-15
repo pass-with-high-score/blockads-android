@@ -184,6 +184,14 @@ class GoTunnelAdapter(
         engine.setConnLogEnabled(enabled)
     }
 
+    fun setSniProxyRules(rulesJson: String) {
+        try {
+            engine.setSniProxyRules(rulesJson)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to update SNI proxy rules")
+        }
+    }
+
     fun setBlockDohBypass(enabled: Boolean) {
         try {
             if (enabled) {

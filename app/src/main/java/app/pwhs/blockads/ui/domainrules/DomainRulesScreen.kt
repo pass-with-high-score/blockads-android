@@ -9,6 +9,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
@@ -41,14 +42,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
+import app.pwhs.blockads.ui.domainrules.component.SniProxyTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
+import app.pwhs.blockads.ui.domainrules.dialog.AddEditSniProxyRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
@@ -66,14 +72,19 @@ fun DomainRulesScreen(
     viewModel: DomainRulesViewModel = koinViewModel()
 ) {
     val profileFilterRules by viewModel.profileFilterRules.collectAsStateWithLifecycle()
+    val sniProxyRules by viewModel.sniProxyRules.collectAsStateWithLifecycle()
+    val installedApps by viewModel.installedApps.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
+    var showSniProxyDialog by remember { mutableStateOf(false) }
+    var sniProxyPresetYouTube by remember { mutableStateOf(false) }
+    var editingSniProxyRule by remember { mutableStateOf<SniProxyRule?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showRuleDocSheet by remember { mutableStateOf(false) }
     var editingRule by remember { mutableStateOf<ParsedFilterRule?>(null) }
 
-    val pagerState = rememberPagerState(initialPage = 0) { 2 }
+    val pagerState = rememberPagerState(initialPage = 0) { 3 }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalContext.current.resources
@@ -93,6 +104,12 @@ fun DomainRulesScreen(
         displayableRules.filter {
             it.policy.startsWith("REJECT", ignoreCase = true) &&
                 (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage == 2) {
+            viewModel.loadInstalledAppsIfNeeded()
         }
     }
 
@@ -130,8 +147,9 @@ fun DomainRulesScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
+                        val totalRules = displayableRules.size + sniProxyRules.size
                         Text(
-                            text = "${displayableRules.size} rules",
+                            text = pluralStringResource(R.plurals.domain_rules_count, totalRules, totalRules),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -155,7 +173,16 @@ fun DomainRulesScreen(
                         )
                     }
                     IconButton(
-                        onClick = { showAddDialog = true }
+                        onClick = {
+                            if (pagerState.currentPage == 2) {
+                                viewModel.loadInstalledAppsIfNeeded()
+                                editingSniProxyRule = null
+                                sniProxyPresetYouTube = false
+                                showSniProxyDialog = true
+                            } else {
+                                showAddDialog = true
+                            }
+                        }
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null)
                     }
@@ -167,7 +194,16 @@ fun DomainRulesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddDialog = true },
+                onClick = {
+                    if (pagerState.currentPage == 2) {
+                        viewModel.loadInstalledAppsIfNeeded()
+                        editingSniProxyRule = null
+                        sniProxyPresetYouTube = false
+                        showSniProxyDialog = true
+                    } else {
+                        showAddDialog = true
+                    }
+                },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -195,6 +231,10 @@ fun DomainRulesScreen(
                     text = {
                         Text(
                             stringResource(R.string.domain_rules_tab_whitelist),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
                             fontWeight = if (pagerState.currentPage == 0) FontWeight.Bold else FontWeight.Normal
                         )
                     },
@@ -212,12 +252,37 @@ fun DomainRulesScreen(
                     text = {
                         Text(
                             stringResource(R.string.domain_rules_tab_blocklist),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
                             fontWeight = if (pagerState.currentPage == 1) FontWeight.Bold else FontWeight.Normal
                         )
                     },
                     icon = {
                         Icon(
                             Icons.Default.Block,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+                Tab(
+                    selected = pagerState.currentPage == 2,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+                    text = {
+                        Text(
+                            stringResource(R.string.domain_rules_tab_sni_proxy),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            fontWeight = if (pagerState.currentPage == 2) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.AltRoute,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
@@ -273,9 +338,54 @@ fun DomainRulesScreen(
                         onRemove = { viewModel.removeProfileRule(it) },
                         onEdit = { editingRule = it }
                     )
+                    2 -> {
+                        val filteredSniRules = remember(sniProxyRules, searchQuery) {
+                            if (searchQuery.isBlank()) sniProxyRules
+                            else sniProxyRules.filter {
+                                it.name.contains(searchQuery, ignoreCase = true) ||
+                                    it.targetIp.contains(searchQuery, ignoreCase = true) ||
+                                    it.domains.any { d -> d.contains(searchQuery, ignoreCase = true) }
+                            }
+                        }
+                        SniProxyTab(
+                            rules = filteredSniRules,
+                            installedApps = installedApps,
+                            onToggle = { viewModel.toggleSniProxyRule(it) },
+                            onDelete = { viewModel.deleteSniProxyRule(it) },
+                            onEdit = {
+                                viewModel.loadInstalledAppsIfNeeded()
+                                editingSniProxyRule = it
+                                sniProxyPresetYouTube = false
+                                showSniProxyDialog = true
+                            },
+                            onQuickAddYouTube = {
+                                viewModel.loadInstalledAppsIfNeeded()
+                                editingSniProxyRule = null
+                                sniProxyPresetYouTube = true
+                                showSniProxyDialog = true
+                            }
+                        )
+                    }
                 }
             }
         }
+    }
+
+    if (showSniProxyDialog) {
+        AddEditSniProxyRuleDialog(
+            initialRule = editingSniProxyRule,
+            presetYouTube = sniProxyPresetYouTube,
+            installedApps = installedApps,
+            onDismiss = {
+                showSniProxyDialog = false
+                editingSniProxyRule = null
+            },
+            onSave = { rule ->
+                viewModel.saveSniProxyRule(rule)
+                showSniProxyDialog = false
+                editingSniProxyRule = null
+            }
+        )
     }
 
     if (showAddDialog) {

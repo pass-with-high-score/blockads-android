@@ -154,6 +154,9 @@ type Engine struct {
 	rulesetMatcher   atomic.Pointer[RulesetMatcher]
 	activeRulesetCfg atomic.Pointer[RulesetConfig]
 
+	// SNI Proxy routing rules (per-app / per-SNI TCP 443 redirect)
+	sniProxyRules atomic.Pointer[[]compiledSniProxyRule]
+
 	// GeoIP database
 	geoIPDB atomic.Pointer[GeoIPDatabase]
 

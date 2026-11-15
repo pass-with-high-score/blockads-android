@@ -53,6 +53,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_PREFERRED_IP_TYPE = stringPreferencesKey("preferred_ip_type")
         val KEY_HAS_RATED_APP = booleanPreferencesKey("has_rated_app")
         val KEY_RATE_PROMPT_LAST_DISMISSED = longPreferencesKey("rate_prompt_last_dismissed")
+        val KEY_SNI_PROXY_RULES = stringPreferencesKey("sni_proxy_rules")
 
         const val PREFERRED_IP_AUTO = "auto"
         const val PREFERRED_IP_IPV4 = "ipv4"
@@ -237,6 +238,16 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setHomeTipsEnabled(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[KEY_HOME_TIPS_ENABLED] = enabled }
+    }
+
+    val sniProxyRulesJson: Flow<String> = dataStore.data.map { prefs ->
+        prefs[KEY_SNI_PROXY_RULES] ?: ""
+    }
+
+    suspend fun getSniProxyRulesJsonSnapshot(): String = sniProxyRulesJson.first()
+
+    suspend fun setSniProxyRulesJson(json: String) {
+        dataStore.edit { prefs -> prefs[KEY_SNI_PROXY_RULES] = json }
     }
 
     suspend fun setLastMilestoneBlocked(count: Long) {

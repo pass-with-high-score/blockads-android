@@ -129,6 +129,9 @@ class AppPreferences internal constructor(
     val dailySummaryEnabled: Flow<Boolean> get() = vpnSecurity.dailySummaryEnabled
     val milestoneNotificationsEnabled: Flow<Boolean> get() = vpnSecurity.milestoneNotificationsEnabled
     val homeTipsEnabled: Flow<Boolean> get() = vpnSecurity.homeTipsEnabled
+    val sniProxyRulesJson: Flow<String> get() = vpnSecurity.sniProxyRulesJson
+    suspend fun getSniProxyRulesJsonSnapshot(): String = vpnSecurity.getSniProxyRulesJsonSnapshot()
+    suspend fun setSniProxyRulesJson(json: String) = vpnSecurity.setSniProxyRulesJson(json)
     val lastMilestoneBlocked: Flow<Long> get() = vpnSecurity.lastMilestoneBlocked
     val lastSeenMilestoneDialog: Flow<Long> get() = vpnSecurity.lastSeenMilestoneDialog
     val activeProfileId: Flow<Long> get() = vpnSecurity.activeProfileId

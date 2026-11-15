@@ -270,6 +270,11 @@ func peekFlow(conn net.Conn, maxBytes int, timeout time.Duration) ([]byte, io.Re
 	return peeked, io.MultiReader(bytes.NewReader(peeked), conn), nil
 }
 
+// ParseClientHelloSNI extracts the server_name extension from a TLS ClientHello record.
+func ParseClientHelloSNI(record []byte) string {
+	return parseClientHelloSNI(record)
+}
+
 // parseClientHelloSNI extracts the server_name extension from a TLS
 // ClientHello record. Returns "" if the bytes aren't a ClientHello or
 // the SNI extension is absent.

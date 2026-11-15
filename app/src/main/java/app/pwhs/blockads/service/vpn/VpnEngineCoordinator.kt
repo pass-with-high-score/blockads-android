@@ -240,6 +240,15 @@ class VpnEngineCoordinator(
         val filterHttp3 = httpsFilteringEnabled && appPrefs.getFilterHttp3Snapshot()
         val blockDohBypass = appPrefs.getBlockDohBypassSnapshot()
         val blockWebRtc = appPrefs.getBlockWebRtcLeakSnapshot()
+        val sniProxyRules = app.pwhs.blockads.data.model.SniProxyRuleCodec.fromJsonList(
+            appPrefs.getSniProxyRulesJsonSnapshot()
+        )
+        goTunnelAdapter.setSniProxyRules(
+            app.pwhs.blockads.data.model.SniProxyRuleCodec.toEngineJson(
+                sniProxyRules,
+                context.packageManager
+            )
+        )
 
         if (appPrefs.tailscale.isEnabledSnapshot()) {
             val tdCache = java.io.File(context.cacheDir, "taildrop").apply { mkdirs() }

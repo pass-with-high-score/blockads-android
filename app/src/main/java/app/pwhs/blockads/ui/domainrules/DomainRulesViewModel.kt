@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.CustomDnsRule
 import app.pwhs.blockads.data.entities.RuleType
 import app.pwhs.blockads.data.entities.WhitelistDomain
+import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.ServiceController
 import app.pwhs.blockads.ui.event.UiEvent
@@ -30,8 +32,13 @@ class DomainRulesViewModel(
     private val whitelistDomainDao: WhitelistDomainDao,
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val filterRepo: FilterListRepository,
+    appPrefs: AppPreferences,
     application: Application
 ) : AndroidViewModel(application) {
+
+    private val sniProxyDelegate = SniProxyRulesDelegate(appPrefs, application, viewModelScope)
+    val sniProxyRules: StateFlow<List<SniProxyRule>> = sniProxyDelegate.rules
+    val installedApps: StateFlow<List<InstalledAppOption>> = sniProxyDelegate.installedApps
 
     val whitelistDomains: StateFlow<List<WhitelistDomain>> = whitelistDomainDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -446,6 +453,28 @@ class DomainRulesViewModel(
                 }
             }
             requestVpnRestart()
+        }
+    }
+
+    fun loadInstalledAppsIfNeeded() = sniProxyDelegate.loadInstalledAppsIfNeeded()
+
+    fun saveSniProxyRule(rule: SniProxyRule) {
+        viewModelScope.launch(Dispatchers.IO) {
+            sniProxyDelegate.saveRule(rule)
+            _events.toast(R.string.sni_proxy_saved)
+        }
+    }
+
+    fun toggleSniProxyRule(ruleId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            sniProxyDelegate.toggleRule(ruleId)
+        }
+    }
+
+    fun deleteSniProxyRule(ruleId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            sniProxyDelegate.deleteRule(ruleId)
+            _events.toast(R.string.sni_proxy_deleted)
         }
     }
 
