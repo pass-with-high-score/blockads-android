@@ -95,6 +95,8 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	// Fresh connection-log dedup set for this session.
 	connLogSeen.Range(func(k, _ any) bool { connLogSeen.Delete(k); return true })
 	uidPackageCache.Range(func(k, _ any) bool { uidPackageCache.Delete(k); return true })
+	mitmQuerySeen.Clear()
+	flowFirewallCache.Clear()
 
 	var protectFn func(fd int) bool
 	if protector != nil {
@@ -163,7 +165,7 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 	stack.SetUIDResolver(uidr)
 	var tcpHandler TcpFlowHandler
 	if mitmActive {
-		tcpHandler = newMitmTcpHandler(certMgr, filter, e, uidr, protectFn)
+		tcpHandler = newMitmTcpHandler(certMgr, filter, &mitmBlockerAdapter{e}, uidr, protectFn)
 	} else {
 		tcpHandler = newFullPassthroughTcpHandler(e, uidr, protectFn)
 	}
@@ -230,7 +232,8 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 			return
 		}
 		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if engine.IsDomainBlocked(flow.serverIP.String()) {
+		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
+			engine.reportBlockedFlow(flow, ProtocolUDP, reason)
 			_ = conn.Close()
 			return
 		}
@@ -297,10 +300,12 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 		}
 		// Gate -1.5: Hardcoded DoH Direct-IP (port 443) - close to force fallback if DoH/DoT blocking is enabled
 		if engine.IsDoHBlockingEnabled() && flow.serverPort == 443 && isKnownPublicDoHIP(flow.serverIP) {
+			engine.reportBlockedFlow(flow, ProtocolTCP, "doh")
 			return
 		}
 		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if engine.IsDomainBlocked(flow.serverIP.String()) {
+		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
+			engine.reportBlockedFlow(flow, ProtocolTCP, reason)
 			return
 		}
 		// Gate -1.7: WebRTC STUN/TURN over TCP (ports 3478, 5349)

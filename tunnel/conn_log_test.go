@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
 )
 
 // countingUIDResolver stands in for the Kotlin resolver, whose real
@@ -196,5 +198,98 @@ func TestLogConnectionKeepsPerAppEntries(t *testing.T) {
 	e.logConnection(testFlow(40001), ProtocolTCP)
 	if !waitFor(t, func() bool { return cb.count() == 2 }) {
 		t.Errorf("second app emitted %d entries total, want 2", cb.count())
+	}
+}
+
+type recordedQueryEvent struct {
+	domain    string
+	blocked   bool
+	queryType int
+	appName   string
+	blockedBy string
+}
+
+type detailedLogCallback struct {
+	mu     sync.Mutex
+	events []recordedQueryEvent
+}
+
+func (d *detailedLogCallback) OnDNSQuery(domain string, blocked bool, queryType int, _ int64, appName string, _ string, blockedBy string) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.events = append(d.events, recordedQueryEvent{
+		domain:    domain,
+		blocked:   blocked,
+		queryType: queryType,
+		appName:   appName,
+		blockedBy: blockedBy,
+	})
+}
+
+func (d *detailedLogCallback) snapshot() []recordedQueryEvent {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	out := make([]recordedQueryEvent, len(d.events))
+	copy(out, d.events)
+	return out
+}
+
+func TestMitmBlockerAdapterAndL4FirewallLogging(t *testing.T) {
+	resetConnLogState()
+	mitmQuerySeen.Clear()
+	flowFirewallCache.Clear()
+
+	cb := &detailedLogCallback{}
+	e := NewEngine()
+	e.SetDomainChecker(&fakeChecker{
+		custom: map[string]int{
+			"allow.example": 0,
+			"deny.example":  1,
+		},
+		blocked: map[string]bool{
+			"ads.example": true,
+		},
+		reason: map[string]string{
+			"deny.example": "CUSTOM_RULE",
+			"ads.example":  "FILTER_LIST",
+		},
+	})
+	e.SetFirewallChecker(&fakeFirewall{block: map[string]bool{"com.blocked.app": true}})
+	e.SetFirewallEnabled(true)
+	e.SetUIDResolver(&countingUIDResolver{uid: 10999})
+	e.SetAppUidResolver(&countingPackageResolver{pkg: "com.blocked.app"})
+	e.SetLogCallback(cb)
+
+	adapter := &mitmBlockerAdapter{e}
+	if !adapter.IsDomainWhitelisted("allow.example") {
+		t.Errorf("expected allow.example to be whitelisted")
+	}
+	if adapter.IsDomainWhitelisted("ads.example") {
+		t.Errorf("did not expect ads.example to be whitelisted")
+	}
+	if blocked, reason := adapter.CheckDomainBlock("ads.example"); !blocked || reason != "FILTER_LIST" {
+		t.Errorf("CheckDomainBlock(ads.example) = (%v, %q), want (true, FILTER_LIST)", blocked, reason)
+	}
+	if blocked, reason := adapter.CheckDomainBlock("deny.example"); !blocked || reason != "CUSTOM_RULE" {
+		t.Errorf("CheckDomainBlock(deny.example) = (%v, %q), want (true, CUSTOM_RULE)", blocked, reason)
+	}
+
+	adapter.LogMitmQuery(mitm.FlowID{}, "ads.example", true, "FILTER_LIST", 65)
+	// Duplicate within 3s TTL should be deduped.
+	adapter.LogMitmQuery(mitm.FlowID{}, "ads.example", true, "FILTER_LIST", 65)
+	adapter.LogMitmQuery(mitm.FlowID{}, "allow.example", false, "", 65)
+
+	if !e.isFlowFirewalled(testFlow(42000), ProtocolTCP) {
+		t.Fatalf("expected flow to be firewalled")
+	}
+
+	if !waitFor(t, func() bool { return len(cb.snapshot()) == 3 }) {
+		t.Fatalf("got %d log events (%+v), want 3", len(cb.snapshot()), cb.snapshot())
+	}
+	if got := e.totalQueries.Load(); got != 3 {
+		t.Errorf("totalQueries = %d, want 3", got)
+	}
+	if got := e.blockedQueries.Load(); got != 2 {
+		t.Errorf("blockedQueries = %d, want 2", got)
 	}
 }

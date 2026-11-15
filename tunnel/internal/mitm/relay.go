@@ -84,6 +84,7 @@ func mitmTLSFlow(
 	serverConn := tls.Client(rawServer, upstreamTLSConfig(hostname, &clientCertRequested))
 	if err := serverConn.Handshake(); err != nil {
 		rawServer.Close()
+		logMitmQuery(blocker, flow, hostname, false, "", 65)
 		relayDirectPeeked(clientConn, clientReader, flow, hostname, blocker, protectFn)
 		return
 	}
@@ -99,6 +100,7 @@ func mitmTLSFlow(
 			logf("MITM: not filtering '%s' — %s; passthrough", hostname, reason)
 			filter.BlacklistDomain(hostname)
 			serverConn.Close()
+			logMitmQuery(blocker, flow, hostname, false, "", 65)
 			relayDirectPeeked(clientConn, clientReader, flow, hostname, blocker, protectFn)
 			return
 		}
@@ -123,7 +125,7 @@ func mitmTLSFlow(
 		logf("[YouTube] TLS handshake successful with %s — MITM active", hostname)
 	}
 
-	relayHTTPFlow(clientTLS, serverConn, hostname, filter, blocker)
+	relayHTTPFlowWithFlow(clientTLS, serverConn, hostname, filter, blocker, flow)
 }
 
 // mitmHTTPFlow handles plaintext HTTP (port 80) flows. Same gates
@@ -143,28 +145,29 @@ func mitmHTTPFlow(
 	}
 	defer serverConn.Close()
 
-	relayHTTPFlow(&peekReplayConn{Conn: clientConn, r: clientReader}, serverConn, hostname, filter, blocker)
+	relayHTTPFlowWithFlow(&peekReplayConn{Conn: clientConn, r: clientReader}, serverConn, hostname, filter, blocker, flow)
 }
 
-// relayHTTPFlow reads HTTP requests from the client connection, forwards to
-// the server, decompresses and injects into HTML responses, and supports
-// local.pwhs.app sub-requests inside the same session.
-func buildFlowPipeline(hostname string, filter *MitmFilter, blocker adBlockChecker) *InterceptorPipeline {
+func buildFlowPipeline(hostname string, filter *MitmFilter, blocker adBlockChecker, flow FlowID) *InterceptorPipeline {
 	return NewInterceptorPipeline(
 		NewLocalAssetInterceptor(),
-		NewModuleInterceptor(ActiveModuleStore),
-		NewManifestInterceptor(defaultManifest),
-		NewYouTubeInterceptor(),
-		NewBlocklistInterceptor(hostname, blocker, filter),
+		NewModuleInterceptorWithFlow(ActiveModuleStore, blocker, flow),
+		NewManifestInterceptorWithFlow(defaultManifest, blocker, flow),
+		NewYouTubeInterceptorWithFlow(blocker, flow),
+		NewBlocklistInterceptorWithFlow(hostname, blocker, filter, flow),
 	)
 }
 
 // relayHTTPFlow reads HTTP requests from the client connection, runs the
 // interceptor pipeline, forwards to upstream, decompresses and injects into HTML responses.
 func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *MitmFilter, blocker adBlockChecker) {
+	relayHTTPFlowWithFlow(clientConn, serverConn, hostname, filter, blocker, FlowID{})
+}
+
+func relayHTTPFlowWithFlow(clientConn, serverConn net.Conn, hostname string, filter *MitmFilter, blocker adBlockChecker, flow FlowID) {
 	cr := bufio.NewReader(clientConn)
 	sr := bufio.NewReader(serverConn)
-	pipeline := buildFlowPipeline(hostname, filter, blocker)
+	pipeline := buildFlowPipeline(hostname, filter, blocker, flow)
 
 	for {
 		req, err := http.ReadRequest(cr)
@@ -178,13 +181,25 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *Mit
 		reqHost := normalizeHost(req.Host)
 
 		if handled, resp := pipeline.ExecuteRequest(reqHost, req); handled && resp != nil {
-			if err := resp.Write(clientConn); err != nil {
+			if req.Body != nil {
+				_, _ = io.Copy(io.Discard, req.Body)
+				req.Body.Close()
+			}
+			writeErr := resp.Write(clientConn)
+			if resp.Body != nil {
+				resp.Body.Close()
+			}
+			if writeErr != nil {
 				return
 			}
 			if resp.Close || req.Close {
 				return
 			}
 			continue
+		}
+
+		if reqHost != "" && !IsLocalAssetHost(reqHost) {
+			logMitmQuery(blocker, flow, reqHost, false, "", 65)
 		}
 
 		if requestAcceptsHTML(req) {
@@ -223,7 +238,9 @@ func relayHTTPFlow(clientConn, serverConn net.Conn, hostname string, filter *Mit
 
 		pipeline.ExecuteResponse(reqHost, req, resp)
 
-		if ShouldInjectHTML(resp.Header.Get("Content-Type")) && canInjectResponse(req, resp) {
+		baseHost := normalizeHost(hostname)
+		whitelisted := isDomainWhitelisted(blocker, reqHost) || (baseHost != "" && baseHost != reqHost && isDomainWhitelisted(blocker, baseHost))
+		if !whitelisted && ShouldInjectHTML(resp.Header.Get("Content-Type")) && canInjectResponse(req, resp) {
 			wrapResponseForInjection(resp)
 		}
 		if err := resp.Write(clientConn); err != nil {

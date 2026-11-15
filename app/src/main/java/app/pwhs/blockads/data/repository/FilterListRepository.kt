@@ -33,6 +33,7 @@ class FilterListRepository(
 
     companion object {
         private const val CACHE_DIR = "filter_cache"
+        private const val FILTER_CACHE_SCHEMA_MARKER = ".filter_cache_v713"
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
         const val BLOCK_REASON_SECURITY = "SECURITY"
@@ -163,9 +164,42 @@ class FilterListRepository(
     internal fun parseRemoteFilterJson(json: String): List<app.pwhs.blockads.data.remote.models.FilterList> =
         seeder.parseFilterJson(json)
 
+    private suspend fun invalidateLegacyFilterCacheIfNeeded() {
+        val marker = File(context.filesDir, FILTER_CACHE_SCHEMA_MARKER)
+        if (marker.exists()) return
+        try {
+            File(context.filesDir, CACHE_DIR).deleteRecursively()
+            val remoteDir = File(context.filesDir, "remote_filters").apply { mkdirs() }
+            val allFilters = filterListDao.getAllSync()
+            val localFilters = allFilters.filter { it.trieUrl.startsWith("local://") }
+            val localIds = localFilters.map { it.id }.toSet()
+
+            remoteDir.listFiles()?.forEach { file ->
+                val idPrefix = file.name.substringBefore('.').toLongOrNull()
+                if (file.name.endsWith(".modules.json") || idPrefix == null || idPrefix !in localIds) {
+                    file.delete()
+                }
+            }
+
+            val compiler = CustomFilterLocalCompiler(context, client, filterListDao)
+            for (filter in localFilters) {
+                val rawUrl = filter.originalUrl.ifEmpty { filter.url }.trim()
+                if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+                    runCatching { compiler.recompileOrUpdateLocally(filter) }
+                }
+            }
+
+            marker.writeText("713")
+            Timber.d("Invalidated legacy filter cache and wrote $FILTER_CACHE_SCHEMA_MARKER")
+        } catch (t: Throwable) {
+            Timber.w(t, "Failed to invalidate legacy filter cache")
+        }
+    }
+
     suspend fun loadAllEnabledFilters(): Result<Int> = withContext(Dispatchers.IO) {
         loadMutex.withLock {
             try {
+                invalidateLegacyFilterCacheIfNeeded()
                 val enabledLists = filterListDao.getEnabled()
                 if (enabledLists.isEmpty()) {
                     adTriePaths = ""

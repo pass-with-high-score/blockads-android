@@ -72,6 +72,14 @@ func TestParseDomainLine(t *testing.T) {
 		{"||*.actor^", "actor"},
 		{"||*.africa^$denyallow=nation.africa", "africa"},
 
+		// Browser-only / risky modifiers must not become full-domain DNS blocks
+		{"||example.com^$popup", ""},
+		{"||example.com^$document", ""},
+		{"||example.com^$doc", ""},
+		{"||example.com^$empty", ""},
+		{"||example.com^$mp4", ""},
+		{"||cdn.example.com^$denyallow=app.example.com", ""},
+
 		// Comments and cosmetic rules
 		{"", ""},
 		{"# comment", ""},
@@ -83,6 +91,32 @@ func TestParseDomainLine(t *testing.T) {
 	for _, c := range cases {
 		if got := parseDomainLine(c.line); got != c.want {
 			t.Errorf("parseDomainLine(%q) = %q, want %q", c.line, got, c.want)
+		}
+	}
+}
+
+func TestParseNetworkPathRuleSafety(t *testing.T) {
+	cases := []struct {
+		line       string
+		wantDomain string
+		wantPath   string
+		wantOK     bool
+	}{
+		{"||ads.example.com/banner.js", "ads.example.com", "/banner.js", true},
+		{"||ads.example.com/banner.js$important", "ads.example.com", "/banner.js", true},
+		{"||ads.example.com/api$removeparam=utm_source", "", "", false},
+		{"||ads.example.com/page$csp=script-src", "", "", false},
+		{"||ads.example.com/lib.js$third-party", "", "", false},
+		{"||ads.example.com/tr/", "", "", false},
+		{"||ads.example.com/a/*/b.js", "", "", false},
+		{"/banner/", "", "", false},
+		{"/tr/", "", "", false},
+	}
+	for _, c := range cases {
+		dom, p, ok := parseNetworkPathRule(c.line)
+		if dom != c.wantDomain || p != c.wantPath || ok != c.wantOK {
+			t.Errorf("parseNetworkPathRule(%q) = (%q, %q, %v), want (%q, %q, %v)",
+				c.line, dom, p, ok, c.wantDomain, c.wantPath, c.wantOK)
 		}
 	}
 }

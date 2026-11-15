@@ -104,8 +104,28 @@ func (e *Engine) isFlowFirewalled(flow flowID, protocol int) bool {
 		}
 		logf("BLOCKED L4 (%s): %s:%d -> %s:%d (by: firewall, app: %s)",
 			protoName, flow.appIP, flow.appPort, flow.serverIP, flow.serverPort, pkg)
+		e.totalQueries.Add(1)
+		e.blockedQueries.Add(1)
+		if cb := e.logCallback; cb != nil {
+			dest := flow.serverIP.String()
+			go cb.OnDNSQuery(dest, true, 65, 0, pkg, dest, "firewall")
+		}
 	}
 	return blocked
+}
+
+func (e *Engine) reportBlockedFlow(flow flowID, protocol int, reason string) {
+	e.totalQueries.Add(1)
+	e.blockedQueries.Add(1)
+	cb := e.logCallback
+	if cb == nil {
+		return
+	}
+	dest := flow.serverIP.String()
+	go func() {
+		app := e.appNameForFlow(flow, protocol)
+		cb.OnDNSQuery(dest, true, 65, 0, app, dest, reason)
+	}()
 }
 
 // logConnection reports a connection to the DNS-log callback so it shows in

@@ -125,8 +125,10 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 			formattedCSS = append(formattedCSS, c)
 		}
 
+		safeExtBlockPaths := sanitizeModulePaths(extRules.BlockPaths, 4)
+
 		if existing, exists := domainIdx[d]; exists {
-			existing.BlockPaths = append(existing.BlockPaths, extRules.BlockPaths...)
+			existing.BlockPaths = append(existing.BlockPaths, safeExtBlockPaths...)
 			existing.CosmeticCSS = append(existing.CosmeticCSS, formattedCSS...)
 		} else {
 			mod := &WebModule{
@@ -134,7 +136,7 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 				Name:        d,
 				Enabled:     true,
 				Domains:     []string{d},
-				BlockPaths:  extRules.BlockPaths,
+				BlockPaths:  safeExtBlockPaths,
 				CosmeticCSS: formattedCSS,
 			}
 			modulesMap[mod.ID] = mod
@@ -142,17 +144,27 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 		}
 	}
 
-	globalPaths := append([]string(nil), cfg.GlobalBlockPaths...)
-	if len(cfg.GlobalPathsSnake) > 0 {
-		seen := make(map[string]struct{}, len(globalPaths))
-		for _, gp := range globalPaths {
-			seen[gp] = struct{}{}
+	rawGlobalPaths := cfg.GlobalBlockPaths
+	globalPaths := make([]string, 0, len(rawGlobalPaths)+len(cfg.GlobalPathsSnake))
+	seen := make(map[string]struct{}, len(rawGlobalPaths)+len(cfg.GlobalPathsSnake))
+	for _, gp := range rawGlobalPaths {
+		gp = strings.TrimSpace(gp)
+		if !isSafeModulePath(gp, 5) {
+			continue
 		}
-		for _, gp := range cfg.GlobalPathsSnake {
-			if _, exists := seen[gp]; !exists {
-				seen[gp] = struct{}{}
-				globalPaths = append(globalPaths, gp)
-			}
+		if _, exists := seen[gp]; !exists {
+			seen[gp] = struct{}{}
+			globalPaths = append(globalPaths, gp)
+		}
+	}
+	for _, gp := range cfg.GlobalPathsSnake {
+		gp = strings.TrimSpace(gp)
+		if !isSafeModulePath(gp, 5) {
+			continue
+		}
+		if _, exists := seen[gp]; !exists {
+			seen[gp] = struct{}{}
+			globalPaths = append(globalPaths, gp)
 		}
 	}
 
@@ -181,8 +193,42 @@ func (s *ModuleStore) findModuleForHost(host string) *WebModule {
 	return nil
 }
 
+func isSafeModulePath(p string, minLen int) bool {
+	p = strings.TrimSpace(p)
+	if p == "" || p == "/" || len(p) < minLen {
+		return false
+	}
+	for i := 0; i < len(p); i++ {
+		c := p[i]
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') {
+			return true
+		}
+	}
+	return false
+}
+
+func sanitizeModulePaths(paths []string, minLen int) []string {
+	if len(paths) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(paths))
+	for _, p := range paths {
+		p = strings.TrimSpace(p)
+		if isSafeModulePath(p, minLen) {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
 // MatchAndHandle checks if a request should be mocked or blocked.
 func (s *ModuleStore) MatchAndHandle(req *http.Request, host string) (*http.Response, bool) {
+	resp, _, handled := s.MatchAndHandleWithReason(req, host)
+	return resp, handled
+}
+
+// MatchAndHandleWithReason checks if a request should be mocked or blocked and returns the attribution reason.
+func (s *ModuleStore) MatchAndHandleWithReason(req *http.Request, host string) (*http.Response, string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -198,10 +244,12 @@ func (s *ModuleStore) MatchAndHandle(req *http.Request, host string) (*http.Resp
 					status = http.StatusOK
 				}
 				resp := &http.Response{
-					StatusCode: status,
-					ProtoMajor: 1, ProtoMinor: 1,
-					Header: make(http.Header),
-					Body:   io.NopCloser(strings.NewReader(mp.Body)),
+					StatusCode:    status,
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Header:        make(http.Header),
+					ContentLength: int64(len(mp.Body)),
+					Body:          io.NopCloser(strings.NewReader(mp.Body)),
 				}
 				if mp.ContentType != "" {
 					resp.Header.Set("Content-Type", mp.ContentType)
@@ -210,7 +258,7 @@ func (s *ModuleStore) MatchAndHandle(req *http.Request, host string) (*http.Resp
 				}
 				resp.Header.Set("Connection", "keep-alive")
 				logf("[Module %s] MOCKED path %s -> %d", mod.ID, req.URL.Path, status)
-				return resp, true
+				return resp, "module:" + mod.ID, true
 			}
 		}
 
@@ -218,12 +266,16 @@ func (s *ModuleStore) MatchAndHandle(req *http.Request, host string) (*http.Resp
 		for _, bp := range mod.BlockPaths {
 			if bp != "" && strings.Contains(path, strings.ToLower(bp)) {
 				logf("[Module %s] BLOCKED path %s", mod.ID, req.URL.Path)
-				return &http.Response{
-					StatusCode: http.StatusNoContent,
-					ProtoMajor: 1, ProtoMinor: 1,
-					Header: make(http.Header),
-					Body:   io.NopCloser(strings.NewReader("")),
-				}, true
+				resp := &http.Response{
+					StatusCode:    http.StatusNoContent,
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Header:        make(http.Header),
+					ContentLength: 0,
+					Body:          io.NopCloser(strings.NewReader("")),
+				}
+				resp.Header.Set("Connection", "keep-alive")
+				return resp, "module:" + mod.ID, true
 			}
 		}
 	}
@@ -232,16 +284,20 @@ func (s *ModuleStore) MatchAndHandle(req *http.Request, host string) (*http.Resp
 	for _, gp := range s.globalPaths {
 		if gp != "" && strings.Contains(path, strings.ToLower(gp)) {
 			logf("[Global] BLOCKED path %s", req.URL.Path)
-			return &http.Response{
-				StatusCode: http.StatusNoContent,
-				ProtoMajor: 1, ProtoMinor: 1,
-				Header: make(http.Header),
-				Body:   io.NopCloser(strings.NewReader("")),
-			}, true
+			resp := &http.Response{
+				StatusCode:    http.StatusNoContent,
+				ProtoMajor:    1,
+				ProtoMinor:    1,
+				Header:        make(http.Header),
+				ContentLength: 0,
+				Body:          io.NopCloser(strings.NewReader("")),
+			}
+			resp.Header.Set("Connection", "keep-alive")
+			return resp, "module_global:" + gp, true
 		}
 	}
 
-	return nil, false
+	return nil, "", false
 }
 
 // GetCosmeticCSS returns all cosmetic CSS rules for a given host.
@@ -274,12 +330,23 @@ func (s *ModuleStore) GetScripts(host string) []string {
 
 // ModuleInterceptor wraps ModuleStore into the TrafficInterceptor pipeline.
 type ModuleInterceptor struct {
-	store *ModuleStore
+	store   *ModuleStore
+	blocker adBlockChecker
+	flow    FlowID
 }
 
 // NewModuleInterceptor creates a new interceptor.
 func NewModuleInterceptor(store *ModuleStore) *ModuleInterceptor {
-	return &ModuleInterceptor{store: store}
+	return NewModuleInterceptorWithFlow(store, nil, FlowID{})
+}
+
+// NewModuleInterceptorWithFlow creates a ModuleInterceptor bound to a blocker and flow for whitelist/logging.
+func NewModuleInterceptorWithFlow(store *ModuleStore, blocker adBlockChecker, flow FlowID) *ModuleInterceptor {
+	return &ModuleInterceptor{
+		store:   store,
+		blocker: blocker,
+		flow:    flow,
+	}
 }
 
 func (m *ModuleInterceptor) Name() string {
@@ -291,7 +358,18 @@ func (m *ModuleInterceptor) Matches(host string, req *http.Request) bool {
 }
 
 func (m *ModuleInterceptor) OnRequest(req *http.Request) (bool, *http.Response) {
-	resp, handled := m.store.MatchAndHandle(req, req.Host)
+	host := normalizeHost(req.Host)
+	if host != "" && isDomainWhitelisted(m.blocker, host) {
+		return false, nil
+	}
+	matchHost := host
+	if matchHost == "" {
+		matchHost = req.Host
+	}
+	resp, reason, handled := m.store.MatchAndHandleWithReason(req, matchHost)
+	if handled && host != "" {
+		logMitmQuery(m.blocker, m.flow, host, true, reason, 65)
+	}
 	return handled, resp
 }
 

@@ -20,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -67,6 +69,7 @@ fun TrustedNetworksScreen(
     val enabled by viewModel.pauseOnTrustedEnabled.collectAsStateWithLifecycle()
     val useSystemDns by viewModel.useSystemDnsOnTrustedEnabled.collectAsStateWithLifecycle()
     val currentSsid by viewModel.currentSsid.collectAsStateWithLifecycle()
+    val currentBssid by viewModel.currentBssid.collectAsStateWithLifecycle()
     var showManualDialog by remember { mutableStateOf(false) }
     var manualSsidInput by remember { mutableStateOf("") }
 
@@ -183,7 +186,8 @@ fun TrustedNetworksScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val isCurrentAlreadyAdded = currentSsid != null && currentSsid in trusted
+            val isCurrentAlreadyAdded = currentSsid != null &&
+                app.pwhs.blockads.service.TrustedNetworkManager.isTrusted(trusted, currentSsid, currentBssid)
             SettingsCard {
                 Column {
                     if (!isCurrentAlreadyAdded) {
@@ -299,7 +303,11 @@ fun TrustedNetworksScreen(
                 SettingsCard {
                     Column {
                         val trustedList = trusted.toList()
-                        trustedList.forEachIndexed { index, ssid ->
+                        trustedList.forEachIndexed { index, rawEntry ->
+                            val entry = app.pwhs.blockads.service.TrustedNetworkManager.parseEntry(rawEntry)
+                            val canPinCurrent = entry.bssid == null &&
+                                currentSsid == entry.ssid &&
+                                currentBssid != null
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -311,14 +319,45 @@ fun TrustedNetworksScreen(
                                     tint = Color(0xFF059669)
                                 )
                                 Spacer(modifier = Modifier.width(14.dp))
-                                Text(
-                                    text = ssid,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                IconButton(onClick = { viewModel.removeSsid(ssid) }) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = entry.ssid,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = if (entry.bssid != null) {
+                                            stringResource(R.string.trusted_networks_bssid_pinned, entry.bssid)
+                                        } else {
+                                            stringResource(R.string.trusted_networks_any_router)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (entry.bssid != null) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        }
+                                    )
+                                }
+                                if (entry.bssid != null || canPinCurrent) {
+                                    IconButton(onClick = { viewModel.togglePinBssid(rawEntry) }) {
+                                        Icon(
+                                            imageVector = if (entry.bssid != null) Icons.Default.Lock else Icons.Default.LockOpen,
+                                            contentDescription = stringResource(
+                                                if (entry.bssid != null) R.string.trusted_networks_unpin_bssid
+                                                else R.string.trusted_networks_pin_bssid
+                                            ),
+                                            tint = if (entry.bssid != null) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = { viewModel.removeSsid(rawEntry) }) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_settings_trash),
                                         contentDescription = null,

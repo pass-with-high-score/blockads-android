@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
 )
@@ -125,7 +127,7 @@ func (e *Engine) startTcpStackParallel() error {
 	stack.SetUIDResolver(uidr)
 	if certMgr != nil && filter != nil {
 		// Phase D path — MITM handler applies the full filtering flow.
-		stack.SetTcpHandler(newMitmTcpHandler(certMgr, filter, e, uidr, protectFn))
+		stack.SetTcpHandler(newMitmTcpHandler(certMgr, filter, &mitmBlockerAdapter{e}, uidr, protectFn))
 		// Drop browser QUIC so HTTP/3 can't bypass the TCP-TLS MITM.
 		stack.SetUdpHandler(newMitmUdpHandler(filter, uidr, e.quicDrop.Load, newProtectedUdpHandler(uidr, protectFn)))
 		logf("TcpIpStack: MITM handler registered (TCP + QUIC-suppressing UDP)")
@@ -364,28 +366,76 @@ func (e *Engine) SetAdPathPatterns(patternsCsv string) {
 	filter.SetAdPathPatterns(patterns)
 }
 
+// mitmQuerySeen deduplicates identical MITM/HTTP query log emissions over a
+// short TTL window so burst sub-requests don't flood the query log.
+var mitmQuerySeen sync.Map // string -> int64 (UnixNano)
+
+// mitmBlockerAdapter bridges *Engine to mitm.AdBlockChecker and mitm.MitmEventLogger
+// without altering *Engine's exported gomobile API surface.
+type mitmBlockerAdapter struct {
+	*Engine
+}
+
+func (a *mitmBlockerAdapter) CheckDomainBlock(host string) (bool, string) {
+	return a.checkDomainBlockedWithReason(host)
+}
+
+func (a *mitmBlockerAdapter) IsDomainWhitelisted(host string) bool {
+	return a.isDomainWhitelisted(host)
+}
+
+func (a *mitmBlockerAdapter) LogMitmQuery(flow mitm.FlowID, domain string, blocked bool, reason string, queryType int) {
+	a.logMitmQuery(flow, domain, blocked, reason, queryType)
+}
+
+func (e *Engine) isDomainWhitelisted(host string) bool {
+	host = strings.ToLower(strings.TrimSpace(host))
+	if host == "" {
+		return false
+	}
+	if e.domainChecker != nil && e.domainChecker.HasCustomRule(host) == 0 {
+		return true
+	}
+	if rMatcher := e.rulesetMatcher.Load(); rMatcher != nil {
+		policy, matchedRule := rMatcher.MatchNetIP(host, net.ParseIP(host))
+		if strings.ToUpper(policy) == "DIRECT" && matchedRule != "FINAL" {
+			return true
+		}
+	}
+	return false
+}
+
 // ── AdBlockChecker implementation ────────────────────────────────────────────
 // IsDomainBlocked satisfies the AdBlockChecker interface used by the MITM
 // proxy.  It replicates the exact same blocking pipeline used for DNS queries:
 //   CustomRule(allow override) → SecurityTrie → AdTrie → Kotlin DomainChecker.
 func (e *Engine) IsDomainBlocked(host string) bool {
+	blocked, _ := e.checkDomainBlockedWithReason(host)
+	return blocked
+}
+
+func (e *Engine) checkDomainBlockedWithReason(host string) (bool, string) {
 	host = strings.ToLower(strings.TrimSpace(host))
 	if host == "" {
-		return false
+		return false, ""
 	}
 
 	if e.isDoHDomain(host) {
-		return true
+		return true, "doh"
 	}
 
 	// ── Custom rule allow/block override ──
 	if e.domainChecker != nil {
 		override := e.domainChecker.HasCustomRule(host)
 		if override == 0 {
-			return false // explicitly allowed
+			return false, "" // explicitly allowed
 		}
 		if override == 1 {
-			return true // explicitly blocked
+			reason := e.domainChecker.GetBlockReason(host)
+			if reason == "" {
+				reason = "CUSTOM_RULE"
+			}
+			return true, reason // explicitly blocked
 		}
 	}
 
@@ -396,20 +446,23 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		policyUpper := strings.ToUpper(policy)
 		if strings.HasPrefix(policyUpper, "REJECT") {
 			logf("Ruleset BLOCKED connection to %s (matched: %s)", host, matchedRule)
-			return true
+			return true, "ruleset:" + matchedRule
 		} else if policyUpper == "DIRECT" && matchedRule != "FINAL" {
-			return false
+			return false, ""
 		}
 	}
 
-	// ── Security trie (Bloom pre-filter → Mmap Trie) ──
+	// ── Security & Ad tries (Bloom pre-filter → Mmap Trie) ──
 	e.mu.Lock()
 	secBlooms := e.secBlooms
 	secTries := e.secTries
+	secTrieIDs := e.secTrieIDs
 	adBlooms := e.adBlooms
 	adTries := e.adTries
+	adTrieIDs := e.adTrieIDs
 	e.mu.Unlock()
 
+	var matchedIDs []string
 	for i, secTrie := range secTries {
 		if secTrie == nil {
 			continue
@@ -420,12 +473,15 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		}
 		if secBloom == nil || secBloom.MightContainDomainOrParent(host) {
 			if secTrie.ContainsOrParent(host) {
-				return true
+				id := "security"
+				if i < len(secTrieIDs) {
+					id = secTrieIDs[i]
+				}
+				matchedIDs = append(matchedIDs, id)
 			}
 		}
 	}
 
-	// ── Ad trie (Bloom pre-filter → Mmap Trie) ──
 	for i, adTrie := range adTries {
 		if adTrie == nil {
 			continue
@@ -436,19 +492,74 @@ func (e *Engine) IsDomainBlocked(host string) bool {
 		}
 		if adBloom == nil || adBloom.MightContainDomainOrParent(host) {
 			if adTrie.ContainsOrParent(host) {
-				return true
+				id := "filter_list"
+				if i < len(adTrieIDs) {
+					id = adTrieIDs[i]
+				}
+				matchedIDs = append(matchedIDs, id)
 			}
 		}
+	}
+
+	if len(matchedIDs) > 0 {
+		return true, strings.Join(matchedIDs, ",")
 	}
 
 	// ── Kotlin DomainChecker fallback ──
 	if e.domainChecker != nil {
 		if e.domainChecker.IsBlocked(host) {
-			return true
+			reason := e.domainChecker.GetBlockReason(host)
+			if reason == "" {
+				reason = "FILTER_LIST"
+			}
+			return true, reason
 		}
 	}
 
-	return false
+	return false, ""
+}
+
+func (e *Engine) logMitmQuery(flow mitm.FlowID, domain string, blocked bool, reason string, queryType int) {
+	domain = strings.ToLower(strings.TrimSpace(domain))
+	if domain == "" {
+		return
+	}
+
+	dedupKey := fmt.Sprintf("%s|%t|%s|%s:%d", domain, blocked, reason, flow.ClientIP(), flow.ClientPort())
+	now := time.Now().UnixNano()
+	if prev, ok := mitmQuerySeen.Load(dedupKey); ok && now-prev.(int64) < int64(3*time.Second) {
+		return
+	}
+	mitmQuerySeen.Store(dedupKey, now)
+
+	e.totalQueries.Add(1)
+	if blocked {
+		e.blockedQueries.Add(1)
+	}
+
+	cb := e.logCallback
+	if cb == nil {
+		return
+	}
+
+	f := flowID{
+		appIP:      flow.ClientIP(),
+		appPort:    int(flow.ClientPort()),
+		serverIP:   flow.ServerIP(),
+		serverPort: int(flow.ServerPort()),
+	}
+	qtype := queryType
+	if qtype <= 0 {
+		qtype = 65
+	}
+	go func() {
+		app := e.appNameForFlow(f, ProtocolTCP)
+		resolvedIP := ""
+		if f.serverIP != nil {
+			resolvedIP = f.serverIP.String()
+		}
+		cb.OnDNSQuery(domain, blocked, qtype, 0, app, resolvedIP, reason)
+	}()
 }
 
 // LookupIP resolves a hostname to an IP using the engine's internal resolver.

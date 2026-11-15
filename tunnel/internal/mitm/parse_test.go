@@ -85,7 +85,6 @@ func TestParseClientHelloSNI(t *testing.T) {
 // arrives in more than one TCP segment the SNI is lost, so the domain block
 // check fails open.
 func TestPeekFlowMultiSegmentClientHello(t *testing.T) {
-	t.Skip("known bug: peekFlow does a single Read, so a multi-segment ClientHello loses its SNI")
 	hello := captureClientHello(t, &tls.Config{ServerName: "split.example.com"})
 	c, s := net.Pipe()
 	defer c.Close()
