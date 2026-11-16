@@ -3,10 +3,12 @@ package app.pwhs.blockads.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,10 +21,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.about.AboutScreen
+import app.pwhs.blockads.ui.appearance.AppearanceScreen
+import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
+import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.dialog.ConfirmClearLogDialog
 import app.pwhs.blockads.ui.settings.component.AdvancedSection
@@ -46,7 +54,20 @@ import app.pwhs.blockads.ui.settings.component.InterfaceSection
 import app.pwhs.blockads.ui.settings.component.NotificationsSection
 import app.pwhs.blockads.ui.settings.component.PrivacySection
 import app.pwhs.blockads.ui.settings.component.ProtectionSection
+import app.pwhs.blockads.ui.settings.geoip.GeoIpScreen
+import app.pwhs.blockads.ui.tailscale.TailscaleScreen
+import app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen
 import org.koin.androidx.compose.koinViewModel
+
+private enum class SettingsDetailPane {
+    DNS_PROVIDER,
+    APP_MANAGEMENT,
+    TRUSTED_NETWORKS,
+    TAILSCALE,
+    GEO_IP,
+    APPEARANCE,
+    ABOUT,
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,165 +138,169 @@ fun SettingsScreen(
             )
         }
     ) { innerPadding ->
-        val protectionContent: @Composable () -> Unit = {
-            ProtectionSection(
-                autoReconnect = autoReconnect,
-                safeSearchEnabled = safeSearchEnabled,
-                youtubeRestrictedMode = youtubeRestrictedMode,
-                dnsResponseType = dnsResponseType,
-                upstreamDNS = upstreamDNS,
-                onSetAutoReconnect = { viewModel.setAutoReconnect(it) },
-                onSetSafeSearchEnabled = { viewModel.setSafeSearchEnabled(it) },
-                onSetYoutubeRestrictedMode = { viewModel.setYoutubeRestrictedMode(it) },
-                onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },
-                onNavigateToDNSProvider = onNavigateToDNSProvider
-            )
-        }
-        val advancedContent: @Composable () -> Unit = {
-            AdvancedSection(
-                routingMode = routingMode,
-                onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
-                onNavigateToHttpsFiltering = onNavigateToHttpsFiltering,
-                onNavigateToWireGuardImport = onNavigateToWireGuardImport,
-                onNavigateToTailscale = onNavigateToTailscale,
-                showVpnSetting = !hasVpnInBottomBar
-            )
-        }
-        val applicationsContent: @Composable () -> Unit = {
-            ApplicationsSection(
-                onNavigateToAppManagement = onNavigateToAppManagement,
-                onNavigateToTrustedNetworks = onNavigateToTrustedNetworks,
-                excludeLan = excludeLan,
-                onSetExcludeLan = { viewModel.setExcludeLan(it) }
-            )
-        }
-        val filterSetupContent: @Composable () -> Unit = {
-            FilterSetupSection(
-                modifier = Modifier.fillMaxWidth(),
-                autoUpdateNotification = autoUpdateNotification,
-                autoUpdateFrequency = autoUpdateFrequency,
-                autoUpdateWifiOnly = autoUpdateWifiOnly,
-                autoUpdateEnabled = autoUpdateEnabled,
-                filterBuildMode = filterBuildMode,
-                showFilterListSetting = !hasFilterInBottomBar,
-                onNavigateToFilterSetup = onNavigateToFilterSetup,
-                onSetFilterBuildMode = { viewModel.setFilterBuildMode(it) },
-                onSetAutoUpdateWifiOnly = { viewModel.setAutoUpdateWifiOnly(it) },
-                onSetAutoUpdateFrequency = { viewModel.setAutoUpdateFrequency(it) },
-                onSetAutoUpdateNotification = { viewModel.setAutoUpdateNotification(it) },
-                onSetAutoUpdateEnable = { viewModel.setAutoUpdateEnabled(it) },
-                onNavigateToGeoIp = onNavigateToGeoIp
-            )
-        }
-        val interfaceContent: @Composable () -> Unit = {
-            InterfaceSection(onNavigateToAppearance = onNavigateToAppearance)
-        }
-        val notificationsContent: @Composable () -> Unit = {
-            NotificationsSection(
-                dailySummaryEnabled = dailySummaryEnabled,
-                milestoneNotificationsEnabled = milestoneNotificationsEnabled,
-                homeTipsEnabled = homeTipsEnabled,
-                onSetDailySummaryEnabled = { viewModel.setDailySummaryEnabled(it) },
-                onSetMilestoneNotificationsEnabled = { viewModel.setMilestoneNotificationsEnabled(it) },
-                onSetHomeTipsEnabled = { viewModel.setHomeTipsEnabled(it) }
-            )
-        }
-        val privacyContent: @Composable () -> Unit = {
-            PrivacySection(
-                crashReportingEnabled = crashReportingEnabled,
-                onSetCrashReportingEnabled = { viewModel.setCrashReportingEnabled(it) },
-                hideFromRecents = hideFromRecents,
-                onSetHideFromRecents = { viewModel.setHideFromRecents(it) }
-            )
-        }
-        val dataContent: @Composable () -> Unit = {
-            DataSection(
-                onExport = { exportLauncher.launch("blockads_settings.json") },
-                onImport = { importLauncher.launch(arrayOf("application/json")) },
-                onClearLogs = { showClearConfirm = true },
-                onResetSettings = { showResetConfirm = true },
-                logRetentionDays = logRetentionDays,
-                onOpenLogRetentionDialog = { showRetentionDialog = true }
-            )
-        }
-        val informationContent: @Composable () -> Unit = {
-            InformationSection(onNavigateToAbout = onNavigateToAbout)
-        }
-        val communityContent: @Composable () -> Unit = {
-            CommunitySection()
-        }
-
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val isTwoColumn = maxWidth >= 600.dp
+            val isListDetail = maxWidth >= 600.dp
+            var activeDetailPane by rememberSaveable { mutableStateOf(SettingsDetailPane.DNS_PROVIDER) }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = if (isTwoColumn) 24.dp else 16.dp)
-            ) {
-                if (isTwoColumn) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(20.dp),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
-                        ) {
-                            protectionContent()
-                            applicationsContent()
-                            interfaceContent()
-                            privacyContent()
-                            informationContent()
-                        }
-
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
-                        ) {
-                            advancedContent()
-                            filterSetupContent()
-                            notificationsContent()
-                            dataContent()
-                            communityContent()
-                        }
-                    }
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                        protectionContent()
-                        advancedContent()
-                        applicationsContent()
-                        filterSetupContent()
-                        interfaceContent()
-                        notificationsContent()
-                        privacyContent()
-                        dataContent()
-                        informationContent()
-                        communityContent()
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(28.dp))
-
+            val settingsListContent: @Composable (Modifier) -> Unit = { listModifier ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = listModifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    Text(
-                        text = "${stringResource(R.string.app_name)} v${BuildConfig.VERSION_NAME}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        fontWeight = FontWeight.Medium
+                    ProtectionSection(
+                        autoReconnect = autoReconnect,
+                        safeSearchEnabled = safeSearchEnabled,
+                        youtubeRestrictedMode = youtubeRestrictedMode,
+                        dnsResponseType = dnsResponseType,
+                        upstreamDNS = upstreamDNS,
+                        onSetAutoReconnect = { viewModel.setAutoReconnect(it) },
+                        onSetSafeSearchEnabled = { viewModel.setSafeSearchEnabled(it) },
+                        onSetYoutubeRestrictedMode = { viewModel.setYoutubeRestrictedMode(it) },
+                        onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },
+                        onNavigateToDNSProvider = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.DNS_PROVIDER
+                            else onNavigateToDNSProvider()
+                        }
                     )
+
+                    AdvancedSection(
+                        routingMode = routingMode,
+                        onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
+                        onNavigateToHttpsFiltering = onNavigateToHttpsFiltering,
+                        onNavigateToWireGuardImport = onNavigateToWireGuardImport,
+                        onNavigateToTailscale = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.TAILSCALE
+                            else onNavigateToTailscale()
+                        },
+                        showVpnSetting = !hasVpnInBottomBar
+                    )
+
+                    ApplicationsSection(
+                        onNavigateToAppManagement = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.APP_MANAGEMENT
+                            else onNavigateToAppManagement()
+                        },
+                        onNavigateToTrustedNetworks = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.TRUSTED_NETWORKS
+                            else onNavigateToTrustedNetworks()
+                        },
+                        excludeLan = excludeLan,
+                        onSetExcludeLan = { viewModel.setExcludeLan(it) }
+                    )
+
+                    FilterSetupSection(
+                        modifier = Modifier.fillMaxWidth(),
+                        autoUpdateNotification = autoUpdateNotification,
+                        autoUpdateFrequency = autoUpdateFrequency,
+                        autoUpdateWifiOnly = autoUpdateWifiOnly,
+                        autoUpdateEnabled = autoUpdateEnabled,
+                        filterBuildMode = filterBuildMode,
+                        showFilterListSetting = !hasFilterInBottomBar,
+                        onNavigateToFilterSetup = onNavigateToFilterSetup,
+                        onSetFilterBuildMode = { viewModel.setFilterBuildMode(it) },
+                        onSetAutoUpdateWifiOnly = { viewModel.setAutoUpdateWifiOnly(it) },
+                        onSetAutoUpdateFrequency = { viewModel.setAutoUpdateFrequency(it) },
+                        onSetAutoUpdateNotification = { viewModel.setAutoUpdateNotification(it) },
+                        onSetAutoUpdateEnable = { viewModel.setAutoUpdateEnabled(it) },
+                        onNavigateToGeoIp = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.GEO_IP
+                            else onNavigateToGeoIp()
+                        }
+                    )
+
+                    InterfaceSection(
+                        onNavigateToAppearance = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.APPEARANCE
+                            else onNavigateToAppearance()
+                        }
+                    )
+
+                    NotificationsSection(
+                        dailySummaryEnabled = dailySummaryEnabled,
+                        milestoneNotificationsEnabled = milestoneNotificationsEnabled,
+                        homeTipsEnabled = homeTipsEnabled,
+                        onSetDailySummaryEnabled = { viewModel.setDailySummaryEnabled(it) },
+                        onSetMilestoneNotificationsEnabled = { viewModel.setMilestoneNotificationsEnabled(it) },
+                        onSetHomeTipsEnabled = { viewModel.setHomeTipsEnabled(it) }
+                    )
+
+                    PrivacySection(
+                        crashReportingEnabled = crashReportingEnabled,
+                        onSetCrashReportingEnabled = { viewModel.setCrashReportingEnabled(it) },
+                        hideFromRecents = hideFromRecents,
+                        onSetHideFromRecents = { viewModel.setHideFromRecents(it) }
+                    )
+
+                    DataSection(
+                        onExport = { exportLauncher.launch("blockads_settings.json") },
+                        onImport = { importLauncher.launch(arrayOf("application/json")) },
+                        onClearLogs = { showClearConfirm = true },
+                        onResetSettings = { showResetConfirm = true },
+                        logRetentionDays = logRetentionDays,
+                        onOpenLogRetentionDialog = { showRetentionDialog = true }
+                    )
+
+                    InformationSection(
+                        onNavigateToAbout = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.ABOUT
+                            else onNavigateToAbout()
+                        }
+                    )
+
+                    CommunitySection()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "${stringResource(R.string.app_name)} v${BuildConfig.VERSION_NAME}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
+            }
+
+            if (isListDetail) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    settingsListContent(
+                        Modifier
+                            .weight(0.45f)
+                            .fillMaxHeight()
+                    )
+
+                    VerticalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(0.55f)
+                            .fillMaxHeight()
+                    ) {
+                        when (activeDetailPane) {
+                            SettingsDetailPane.DNS_PROVIDER -> DnsProviderScreen(onNavigateBack = {})
+                            SettingsDetailPane.APP_MANAGEMENT -> AppManagementScreen(onNavigateBack = {})
+                            SettingsDetailPane.TRUSTED_NETWORKS -> TrustedNetworksScreen(onNavigateBack = {})
+                            SettingsDetailPane.TAILSCALE -> TailscaleScreen(onNavigateBack = {})
+                            SettingsDetailPane.GEO_IP -> GeoIpScreen(onNavigateBack = {})
+                            SettingsDetailPane.APPEARANCE -> AppearanceScreen(onNavigateBack = {})
+                            SettingsDetailPane.ABOUT -> AboutScreen(onNavigateBack = {})
+                        }
+                    }
+                }
+            } else {
+                settingsListContent(Modifier.fillMaxSize())
             }
         }
 

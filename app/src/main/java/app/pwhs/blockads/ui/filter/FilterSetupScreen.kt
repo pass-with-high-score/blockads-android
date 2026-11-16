@@ -5,14 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -29,12 +29,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,8 +53,8 @@ import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterBottomSheet
 import app.pwhs.blockads.ui.filter.component.CustomTabContent
-import app.pwhs.blockads.ui.filter.component.filterGridItems
 import app.pwhs.blockads.ui.filter.component.filterListItems
+import app.pwhs.blockads.ui.filter.detail.FilterDetailScreen
 import app.pwhs.blockads.ui.filter.component.FilterSearchBar
 import app.pwhs.blockads.ui.filter.component.FilterTabRow
 import app.pwhs.blockads.ui.filter.component.FilterTagChipRow
@@ -285,20 +287,43 @@ fun FilterSetupScreen(
                     } else {
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                             if (maxWidth >= 600.dp) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Adaptive(minSize = 320.dp),
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    filterGridItems(
-                                        filters = displayFilters,
-                                        onToggle = { viewModel.toggleFilterList(it) },
-                                        onFilterClick = onNavigateToFilterDetail,
-                                        starredUrls = starredUrls,
-                                        onToggleStar = { viewModel.toggleStarredFilter(it) }
+                                var selectedFilterId by rememberSaveable { mutableStateOf<Long?>(null) }
+                                val activeFilterId = selectedFilterId
+                                    ?.takeIf { id -> displayFilters.any { it.id == id } }
+                                    ?: displayFilters.firstOrNull()?.id
+
+                                Row(modifier = Modifier.fillMaxSize()) {
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .weight(0.46f)
+                                            .fillMaxHeight(),
+                                        contentPadding = PaddingValues(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 24.dp)
+                                    ) {
+                                        filterListItems(
+                                            filters = displayFilters,
+                                            onToggle = { viewModel.toggleFilterList(it) },
+                                            onFilterClick = { id -> selectedFilterId = id },
+                                            starredUrls = starredUrls,
+                                            onToggleStar = { viewModel.toggleStarredFilter(it) }
+                                        )
+                                    }
+
+                                    VerticalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
                                     )
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(0.54f)
+                                            .fillMaxHeight()
+                                    ) {
+                                        if (activeFilterId != null) {
+                                            FilterDetailScreen(
+                                                filterId = activeFilterId,
+                                                onNavigateBack = { selectedFilterId = null }
+                                            )
+                                        }
+                                    }
                                 }
                             } else {
                                 LazyColumn(
