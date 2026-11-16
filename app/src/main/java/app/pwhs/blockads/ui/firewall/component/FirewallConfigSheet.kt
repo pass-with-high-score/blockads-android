@@ -72,16 +72,7 @@ fun FirewallConfigSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    var blockWifi by remember { mutableStateOf(existingRule?.blockWifi ?: true) }
-    var blockMobileData by remember { mutableStateOf(existingRule?.blockMobileData ?: true) }
-    var scheduleEnabled by remember { mutableStateOf(existingRule?.scheduleEnabled ?: false) }
-    var startHour by remember { mutableIntStateOf(existingRule?.scheduleStartHour ?: 22) }
-    var startMinute by remember { mutableIntStateOf(existingRule?.scheduleStartMinute ?: 0) }
-    var endHour by remember { mutableIntStateOf(existingRule?.scheduleEndHour ?: 6) }
-    var endMinute by remember { mutableIntStateOf(existingRule?.scheduleEndMinute ?: 0) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -90,10 +81,51 @@ fun FirewallConfigSheet(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = modifier
     ) {
+        FirewallConfigContent(
+            app = app,
+            existingRule = existingRule,
+            onSave = onSave,
+            onDelete = onDelete,
+            modifier = Modifier.navigationBarsPadding()
+        )
+    }
+}
+
+@Composable
+fun FirewallConfigContent(
+    app: AppInfoData,
+    existingRule: FirewallRule?,
+    onSave: (FirewallRule) -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    var blockWifi by remember(app.packageName, existingRule) {
+        mutableStateOf(existingRule?.blockWifi ?: true)
+    }
+    var blockMobileData by remember(app.packageName, existingRule) {
+        mutableStateOf(existingRule?.blockMobileData ?: true)
+    }
+    var scheduleEnabled by remember(app.packageName, existingRule) {
+        mutableStateOf(existingRule?.scheduleEnabled ?: false)
+    }
+    var startHour by remember(app.packageName, existingRule) {
+        mutableIntStateOf(existingRule?.scheduleStartHour ?: 22)
+    }
+    var startMinute by remember(app.packageName, existingRule) {
+        mutableIntStateOf(existingRule?.scheduleStartMinute ?: 0)
+    }
+    var endHour by remember(app.packageName, existingRule) {
+        mutableIntStateOf(existingRule?.scheduleEndHour ?: 6)
+    }
+    var endMinute by remember(app.packageName, existingRule) {
+        mutableIntStateOf(existingRule?.scheduleEndMinute ?: 0)
+    }
+
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
@@ -298,7 +330,6 @@ fun FirewallConfigSheet(
                 )
             }
         }
-    }
 }
 
 @Composable
