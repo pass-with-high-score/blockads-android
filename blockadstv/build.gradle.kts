@@ -33,7 +33,7 @@ android {
         applicationId = "app.pwhs.blockads"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2004
+        versionCode = 2005
         versionName = "7.2.0"
     }
 

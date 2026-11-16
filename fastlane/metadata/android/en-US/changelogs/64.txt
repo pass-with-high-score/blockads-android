@@ -1,0 +1,6 @@
+- Adaptive two-pane layouts across Settings, Filters, Logs, Firewall, Onboarding, and VPN editors for tablets & foldables
+- Navigation position options (Left/Right/Bottom) for tablets/foldables and floating capsule style
+- Split Interface settings into Theme & Colors, Navigation, and Language
+- Material 3 TimePicker firewall schedules & auto-save rules
+- Added Reddit preset for SNI Proxy rules
+- Fixed DNS leak test routing and locked portrait on phones
