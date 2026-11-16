@@ -29,9 +29,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -137,6 +138,7 @@ fun CertInstallationWizardScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -157,16 +159,6 @@ fun CertInstallationWizardScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        },
-        bottomBar = {
-            val hideBottomBar = uiState.currentStep == WizardStep.VERIFY && uiState.certStatus == CertStatus.INSTALLED
-            if (!hideBottomBar) {
-                WizardBottomNav(
-                    currentStep = uiState.currentStep,
-                    onPrev = { viewModel.processIntent(CertInstallationWizardUiIntent.PrevStep) },
-                    onNext = { viewModel.processIntent(CertInstallationWizardUiIntent.NextStep) }
-                )
-            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -255,6 +247,16 @@ fun CertInstallationWizardScreen(
                             }
                         }
                     }
+
+                    val hideBottomNav = uiState.currentStep == WizardStep.VERIFY && uiState.certStatus == CertStatus.INSTALLED
+                    if (!hideBottomNav) {
+                        WizardBottomNav(
+                            currentStep = uiState.currentStep,
+                            isTwoPane = isTwoPane,
+                            onPrev = { viewModel.processIntent(CertInstallationWizardUiIntent.PrevStep) },
+                            onNext = { viewModel.processIntent(CertInstallationWizardUiIntent.NextStep) }
+                        )
+                    }
                 }
             }
 
@@ -291,74 +293,67 @@ fun CertInstallationWizardScreen(
 @Composable
 private fun WizardBottomNav(
     currentStep: WizardStep,
+    isTwoPane: Boolean,
     onPrev: () -> Unit,
     onNext: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 3.dp
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (!isTwoPane) Modifier.navigationBarsPadding() else Modifier)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-        ) {
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-            )
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+        if (currentStep.ordinal > 0) {
+            OutlinedButton(
+                onClick = onPrev,
+                modifier = Modifier
+                    .then(if (!isTwoPane) Modifier.weight(1f) else Modifier.widthIn(min = 132.dp))
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
-                Row(
-                    modifier = Modifier
-                        .widthIn(max = 720.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                if (currentStep.ordinal > 0) {
-                    OutlinedButton(
-                        onClick = onPrev,
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.https_wizard_prev),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                } else {
-                    Spacer(modifier = Modifier.width(1.dp))
-                }
-
-                if (currentStep != WizardStep.VERIFY) {
-                    Button(
-                        onClick = onNext,
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.https_wizard_next),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.https_wizard_prev),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
+        }
+
+        if (currentStep != WizardStep.VERIFY) {
+            Button(
+                onClick = onNext,
+                modifier = Modifier
+                    .then(if (!isTwoPane) Modifier.weight(1f) else Modifier.widthIn(min = 156.dp))
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = stringResource(R.string.https_wizard_next),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
             }
         }
     }
