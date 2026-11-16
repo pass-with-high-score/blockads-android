@@ -2,12 +2,18 @@ package app.pwhs.blockads.ui.proxyvpn.edit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
@@ -124,82 +130,158 @@ fun ProxyEditScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                return@Box
+                return@BoxWithConstraints
             }
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item {
-                    SectionHeader(stringResource(R.string.proxy_field_protocol))
-                    ProtocolSelector(
-                        selectedProtocol = state.protocol,
-                        onProtocolSelect = { viewModel.onIntent(ProxyEditIntent.SetProtocol(it)) }
-                    )
-                }
+            val hasTransport = state.protocol == ProxyProtocol.VLESS ||
+                state.protocol == ProxyProtocol.VMESS ||
+                state.protocol == ProxyProtocol.TROJAN
+            val hasTls = state.security != "none" && state.protocol != ProxyProtocol.SHADOWSOCKS
 
-                item {
-                    SectionHeader(stringResource(R.string.proxy_section_basic))
-                    BasicConfigCard(
-                        state = state,
-                        onIntent = viewModel::onIntent
-                    )
-                }
+            if (maxWidth >= 600.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SectionHeader(stringResource(R.string.proxy_field_protocol))
+                        ProtocolSelector(
+                            selectedProtocol = state.protocol,
+                            onProtocolSelect = { viewModel.onIntent(ProxyEditIntent.SetProtocol(it)) },
+                            useFlowLayout = true
+                        )
 
-                item {
-                    SectionHeader(stringResource(R.string.proxy_section_credentials))
-                    CredentialsCard(
-                        state = state,
-                        onIntent = viewModel::onIntent
-                    )
-                }
+                        SectionHeader(stringResource(R.string.proxy_section_basic))
+                        BasicConfigCard(
+                            state = state,
+                            onIntent = viewModel::onIntent
+                        )
 
-                val hasTransport = state.protocol == ProxyProtocol.VLESS ||
-                    state.protocol == ProxyProtocol.VMESS ||
-                    state.protocol == ProxyProtocol.TROJAN
-                if (hasTransport) {
+                        SectionHeader(stringResource(R.string.proxy_section_credentials))
+                        CredentialsCard(
+                            state = state,
+                            onIntent = viewModel::onIntent
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (hasTransport) {
+                            SectionHeader(stringResource(R.string.proxy_section_transport))
+                            TransportCard(
+                                state = state,
+                                onIntent = viewModel::onIntent
+                            )
+                        }
+
+                        if (hasTls) {
+                            SectionHeader(stringResource(R.string.proxy_section_tls))
+                            TlsRealityCard(
+                                state = state,
+                                onIntent = viewModel::onIntent
+                            )
+                        }
+
+                        SectionHeader(stringResource(R.string.proxy_section_advanced))
+                        RawJsonCard(
+                            isRawMode = state.isRawJsonMode,
+                            rawJson = state.rawJson,
+                            error = state.errors[ProxyEditViewModel.KEY_JSON],
+                            onToggle = { viewModel.onIntent(ProxyEditIntent.ToggleRawJsonMode(it)) },
+                            onChangeJson = { viewModel.onIntent(ProxyEditIntent.SetRawJson(it)) }
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     item {
-                        SectionHeader(stringResource(R.string.proxy_section_transport))
-                        TransportCard(
+                        SectionHeader(stringResource(R.string.proxy_field_protocol))
+                        ProtocolSelector(
+                            selectedProtocol = state.protocol,
+                            onProtocolSelect = { viewModel.onIntent(ProxyEditIntent.SetProtocol(it)) }
+                        )
+                    }
+
+                    item {
+                        SectionHeader(stringResource(R.string.proxy_section_basic))
+                        BasicConfigCard(
                             state = state,
                             onIntent = viewModel::onIntent
                         )
                     }
-                }
 
-                val hasTls = state.security != "none" && state.protocol != ProxyProtocol.SHADOWSOCKS
-                if (hasTls) {
                     item {
-                        SectionHeader(stringResource(R.string.proxy_section_tls))
-                        TlsRealityCard(
+                        SectionHeader(stringResource(R.string.proxy_section_credentials))
+                        CredentialsCard(
                             state = state,
                             onIntent = viewModel::onIntent
                         )
                     }
-                }
 
-                item {
-                    SectionHeader(stringResource(R.string.proxy_section_advanced))
-                    RawJsonCard(
-                        isRawMode = state.isRawJsonMode,
-                        rawJson = state.rawJson,
-                        error = state.errors[ProxyEditViewModel.KEY_JSON],
-                        onToggle = { viewModel.onIntent(ProxyEditIntent.ToggleRawJsonMode(it)) },
-                        onChangeJson = { viewModel.onIntent(ProxyEditIntent.SetRawJson(it)) }
-                    )
-                }
+                    if (hasTransport) {
+                        item {
+                            SectionHeader(stringResource(R.string.proxy_section_transport))
+                            TransportCard(
+                                state = state,
+                                onIntent = viewModel::onIntent
+                            )
+                        }
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(48.dp))
+                    if (hasTls) {
+                        item {
+                            SectionHeader(stringResource(R.string.proxy_section_tls))
+                            TlsRealityCard(
+                                state = state,
+                                onIntent = viewModel::onIntent
+                            )
+                        }
+                    }
+
+                    item {
+                        SectionHeader(stringResource(R.string.proxy_section_advanced))
+                        RawJsonCard(
+                            isRawMode = state.isRawJsonMode,
+                            rawJson = state.rawJson,
+                            error = state.errors[ProxyEditViewModel.KEY_JSON],
+                            onToggle = { viewModel.onIntent(ProxyEditIntent.ToggleRawJsonMode(it)) },
+                            onChangeJson = { viewModel.onIntent(ProxyEditIntent.SetRawJson(it)) }
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(48.dp))
+                    }
                 }
             }
         }

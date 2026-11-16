@@ -2,6 +2,8 @@ package app.pwhs.blockads.ui.proxyvpn.edit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,11 +40,13 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier) {
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProtocolSelector(
     selectedProtocol: ProxyProtocol,
     onProtocolSelect: (ProxyProtocol) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    useFlowLayout: Boolean = false
 ) {
     val protocols = remember {
         listOf(
@@ -55,17 +59,34 @@ fun ProtocolSelector(
         )
     }
 
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(protocols) { protocol ->
-            FilterChip(
-                selected = selectedProtocol == protocol,
-                onClick = { onProtocolSelect(protocol) },
-                label = { Text(protocol.displayName) },
-                shape = RoundedCornerShape(10.dp)
-            )
+    if (useFlowLayout) {
+        FlowRow(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            protocols.forEach { protocol ->
+                FilterChip(
+                    selected = selectedProtocol == protocol,
+                    onClick = { onProtocolSelect(protocol) },
+                    label = { Text(protocol.displayName) },
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
+        }
+    } else {
+        LazyRow(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(protocols) { protocol ->
+                FilterChip(
+                    selected = selectedProtocol == protocol,
+                    onClick = { onProtocolSelect(protocol) },
+                    label = { Text(protocol.displayName) },
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
         }
     }
 }
@@ -92,6 +113,8 @@ fun BasicConfigCard(
                 onValueChange = { onIntent(ProxyEditIntent.SetName(it)) },
                 label = { Text(stringResource(R.string.proxy_field_remark)) },
                 placeholder = { Text("My Proxy Server") },
+                shape = ProxyFieldShape,
+                colors = proxyFieldColors(),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -105,6 +128,8 @@ fun BasicConfigCard(
                     onValueChange = { onIntent(ProxyEditIntent.SetServer(it)) },
                     label = { Text(stringResource(R.string.proxy_field_server)) },
                     placeholder = { Text("1.2.3.4 or example.com") },
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     isError = state.errors.containsKey(ProxyEditViewModel.KEY_SERVER),
                     supportingText = state.errors[ProxyEditViewModel.KEY_SERVER]?.let { { Text(it) } },
                     singleLine = true,
@@ -115,6 +140,8 @@ fun BasicConfigCard(
                     value = state.port,
                     onValueChange = { onIntent(ProxyEditIntent.SetPort(it)) },
                     label = { Text(stringResource(R.string.proxy_field_port)) },
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     isError = state.errors.containsKey(ProxyEditViewModel.KEY_PORT),
                     supportingText = state.errors[ProxyEditViewModel.KEY_PORT]?.let { { Text(it) } },
@@ -156,6 +183,8 @@ fun TransportCard(
                     onValueChange = { onIntent(ProxyEditIntent.SetWsPath(it)) },
                     label = { Text(stringResource(R.string.proxy_field_ws_path)) },
                     placeholder = { Text("/") },
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -165,6 +194,8 @@ fun TransportCard(
                     onValueChange = { onIntent(ProxyEditIntent.SetWsHost(it)) },
                     label = { Text(stringResource(R.string.proxy_field_ws_host)) },
                     placeholder = { Text("example.com") },
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -194,6 +225,8 @@ fun TlsRealityCard(
                 value = state.sni,
                 onValueChange = { onIntent(ProxyEditIntent.SetSni(it)) },
                 label = { Text(stringResource(R.string.proxy_field_sni)) },
+                shape = ProxyFieldShape,
+                colors = proxyFieldColors(),
                 placeholder = { Text(state.server.ifEmpty { "example.com" }) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -225,6 +258,8 @@ fun TlsRealityCard(
                     value = state.publicKey,
                     onValueChange = { onIntent(ProxyEditIntent.SetPublicKey(it)) },
                     label = { Text(stringResource(R.string.proxy_field_public_key)) },
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -236,6 +271,8 @@ fun TlsRealityCard(
                         value = state.shortId,
                         onValueChange = { onIntent(ProxyEditIntent.SetShortId(it)) },
                         label = { Text(stringResource(R.string.proxy_field_short_id)) },
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
@@ -243,6 +280,8 @@ fun TlsRealityCard(
                         value = state.spiderX,
                         onValueChange = { onIntent(ProxyEditIntent.SetSpiderX(it)) },
                         label = { Text(stringResource(R.string.proxy_field_spider_x)) },
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
@@ -292,6 +331,8 @@ fun RawJsonCard(
                 OutlinedTextField(
                     value = rawJson,
                     onValueChange = onChangeJson,
+                    shape = ProxyFieldShape,
+                    colors = proxyFieldColors(),
                     isError = error != null,
                     supportingText = error?.let { { Text(it) } },
                     minLines = 8,

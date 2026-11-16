@@ -2,10 +2,12 @@ package app.pwhs.blockads.ui.wireguard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -95,44 +99,98 @@ fun WireGuardEditScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
         ) {
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                return@Box
+                return@BoxWithConstraints
             }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item { ProfileNameField(state.name, errors[WireGuardEditViewModel.FIELD_NAME], viewModel::setName) }
-                item { SectionHeader("Interface") }
-                item { InterfaceCard(state, errors, viewModel) }
-                item { SectionHeader("Peers") }
-                items(state.peers, key = { it.rowId }) { peer ->
-                    PeerCard(
-                        peer = peer,
-                        errors = errors,
-                        canDelete = state.peers.size > 1,
-                        onUpdate = { transform -> viewModel.updatePeer(peer.rowId, transform) },
-                        onDelete = { viewModel.removePeer(peer.rowId) },
-                    )
-                }
-                item {
-                    FilledTonalButton(
-                        onClick = { viewModel.addPeer() },
-                        modifier = Modifier.fillMaxWidth(),
+
+            if (maxWidth >= 600.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(0.46f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Add peer")
+                        ProfileNameField(state.name, errors[WireGuardEditViewModel.FIELD_NAME], viewModel::setName)
+                        SectionHeader("Interface")
+                        InterfaceCard(state, errors, viewModel)
+                        Spacer(Modifier.height(32.dp))
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(0.54f)
+                            .fillMaxHeight(),
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        item { SectionHeader("Peers") }
+                        items(state.peers, key = { it.rowId }) { peer ->
+                            PeerCard(
+                                peer = peer,
+                                errors = errors,
+                                canDelete = state.peers.size > 1,
+                                onUpdate = { transform -> viewModel.updatePeer(peer.rowId, transform) },
+                                onDelete = { viewModel.removePeer(peer.rowId) },
+                            )
+                        }
+                        item {
+                            FilledTonalButton(
+                                onClick = { viewModel.addPeer() },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Icon(Icons.Filled.Add, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Add peer")
+                            }
+                        }
+                        item { Spacer(Modifier.height(40.dp)) }
                     }
                 }
-                item { Spacer(Modifier.height(40.dp)) }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item { ProfileNameField(state.name, errors[WireGuardEditViewModel.FIELD_NAME], viewModel::setName) }
+                    item { SectionHeader("Interface") }
+                    item { InterfaceCard(state, errors, viewModel) }
+                    item { SectionHeader("Peers") }
+                    items(state.peers, key = { it.rowId }) { peer ->
+                        PeerCard(
+                            peer = peer,
+                            errors = errors,
+                            canDelete = state.peers.size > 1,
+                            onUpdate = { transform -> viewModel.updatePeer(peer.rowId, transform) },
+                            onDelete = { viewModel.removePeer(peer.rowId) },
+                        )
+                    }
+                    item {
+                        FilledTonalButton(
+                            onClick = { viewModel.addPeer() },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Add peer")
+                        }
+                    }
+                    item { Spacer(Modifier.height(40.dp)) }
+                }
             }
         }
     }
