@@ -82,6 +82,7 @@ fun FilterDetailScreen(
             filterId
         )
     },
+    showBackButton: Boolean = true,
     onNavigateBack: () -> Unit = { }
 ) {
     val filter by viewModel.filter.collectAsStateWithLifecycle()
@@ -105,6 +106,7 @@ fun FilterDetailScreen(
 
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = if (showBackButton) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = {
@@ -115,12 +117,15 @@ fun FilterDetailScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                 },
+                windowInsets = if (showBackButton) TopAppBarDefaults.windowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                    if (showBackButton) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
                     }
                 },
                 actions = {

@@ -48,6 +48,7 @@ import app.pwhs.blockads.ui.settings.component.CommunitySection
 import app.pwhs.blockads.ui.settings.component.ConfirmResetSettingsDialog
 import app.pwhs.blockads.ui.settings.component.DataSection
 import app.pwhs.blockads.ui.settings.component.DnsResponseTypeDialog
+import app.pwhs.blockads.ui.settings.component.DnsResponseTypePane
 import app.pwhs.blockads.ui.settings.component.FilterSetupSection
 import app.pwhs.blockads.ui.settings.component.InformationSection
 import app.pwhs.blockads.ui.settings.component.InterfaceSection
@@ -61,6 +62,7 @@ import org.koin.androidx.compose.koinViewModel
 
 private enum class SettingsDetailPane {
     DNS_PROVIDER,
+    DNS_RESPONSE_TYPE,
     APP_MANAGEMENT,
     TRUSTED_NETWORKS,
     TAILSCALE,
@@ -162,7 +164,10 @@ fun SettingsScreen(
                         onSetAutoReconnect = { viewModel.setAutoReconnect(it) },
                         onSetSafeSearchEnabled = { viewModel.setSafeSearchEnabled(it) },
                         onSetYoutubeRestrictedMode = { viewModel.setYoutubeRestrictedMode(it) },
-                        onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },
+                        onShowDnsResponseTypeDialog = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.DNS_RESPONSE_TYPE
+                            else showDnsResponseTypeDialog = true
+                        },
                         onNavigateToDNSProvider = {
                             if (isListDetail) activeDetailPane = SettingsDetailPane.DNS_PROVIDER
                             else onNavigateToDNSProvider()
@@ -289,7 +294,14 @@ fun SettingsScreen(
                             .fillMaxHeight()
                     ) {
                         when (activeDetailPane) {
-                            SettingsDetailPane.DNS_PROVIDER -> DnsProviderScreen(onNavigateBack = {})
+                            SettingsDetailPane.DNS_PROVIDER -> DnsProviderScreen(
+                                showBackButton = false,
+                                onNavigateBack = {}
+                            )
+                            SettingsDetailPane.DNS_RESPONSE_TYPE -> DnsResponseTypePane(
+                                dnsResponseType = dnsResponseType,
+                                onUpdateResponseType = { viewModel.setDnsResponseType(it) }
+                            )
                             SettingsDetailPane.APP_MANAGEMENT -> AppManagementScreen(onNavigateBack = {})
                             SettingsDetailPane.TRUSTED_NETWORKS -> TrustedNetworksScreen(onNavigateBack = {})
                             SettingsDetailPane.TAILSCALE -> TailscaleScreen(onNavigateBack = {})

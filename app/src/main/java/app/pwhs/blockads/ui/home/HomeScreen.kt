@@ -406,9 +406,9 @@ fun HomeScreen(
                                 .weight(0.44f)
                                 .fillMaxHeight()
                                 .verticalScroll(rememberScrollState())
-                                .padding(top = 16.dp, bottom = 24.dp),
+                                .padding(top = 24.dp, bottom = 24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.Top
                         ) {
                             heroContent()
                         }

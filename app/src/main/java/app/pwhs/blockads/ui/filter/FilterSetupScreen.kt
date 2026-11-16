@@ -320,6 +320,7 @@ fun FilterSetupScreen(
                                         if (activeFilterId != null) {
                                             FilterDetailScreen(
                                                 filterId = activeFilterId,
+                                                showBackButton = false,
                                                 onNavigateBack = { selectedFilterId = null }
                                             )
                                         }
