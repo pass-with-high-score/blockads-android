@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">앱 선택 (%1$d)</string>
     <string name="sni_proxy_domains_label">도메인 / SNI (쉼표 또는 줄바꿈으로 구분, 비어 있으면 모든 TLS 443)</string>
     <string name="sni_proxy_preset_youtube">YouTube 프리셋</string>
+    <string name="sni_proxy_preset_reddit">Reddit 프리셋</string>
     <string name="sni_proxy_invalid_ip">올바른 IPv4/IPv6 주소를 입력하세요</string>
     <string name="sni_proxy_saved">SNI Proxy 규칙이 저장되었습니다</string>
     <string name="sni_proxy_deleted">SNI Proxy 규칙이 삭제되었습니다</string>

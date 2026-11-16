@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">アプリを選択（%1$d）</string>
     <string name="sni_proxy_domains_label">ドメイン / SNI（カンマまたは改行で区切り、空 = すべての TLS 443）</string>
     <string name="sni_proxy_preset_youtube">YouTubeプリセット</string>
+    <string name="sni_proxy_preset_reddit">Redditプリセット</string>
     <string name="sni_proxy_invalid_ip">有効なIPv4/IPv6アドレスを入力してください</string>
     <string name="sni_proxy_saved">SNIプロキシルールを保存しました</string>
     <string name="sni_proxy_deleted">SNIプロキシルールを削除しました</string>

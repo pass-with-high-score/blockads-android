@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">เลือกแอป (%1$d)</string>
     <string name="sni_proxy_domains_label">โดเมน / SNI (คั่นด้วยเครื่องหมายจุลภาคหรือขึ้นบรรทัดใหม่ เว้นว่าง = TLS 443 ทั้งหมด)</string>
     <string name="sni_proxy_preset_youtube">ค่าที่ตั้งไว้ล่วงหน้าสำหรับ YouTube</string>
+    <string name="sni_proxy_preset_reddit">ค่าที่ตั้งไว้ล่วงหน้าสำหรับ Reddit</string>
     <string name="sni_proxy_invalid_ip">โปรดป้อนที่อยู่ IPv4/IPv6 ที่ถูกต้อง</string>
     <string name="sni_proxy_saved">บันทึกกฎ SNI Proxy แล้ว</string>
     <string name="sni_proxy_deleted">ลบกฎ SNI Proxy แล้ว</string>

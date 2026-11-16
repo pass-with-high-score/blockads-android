@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Seleccionar apps (%1$d)</string>
     <string name="sni_proxy_domains_label">Dominios / SNI (separados por coma o salto de línea, vacío = todo TLS 443)</string>
     <string name="sni_proxy_preset_youtube">Ajuste de YouTube</string>
+    <string name="sni_proxy_preset_reddit">Ajuste de Reddit</string>
     <string name="sni_proxy_invalid_ip">Por favor, introduce una dirección IPv4/IPv6 válida</string>
     <string name="sni_proxy_saved">Regla de SNI Proxy guardada</string>
     <string name="sni_proxy_deleted">Regla de SNI Proxy eliminada</string>

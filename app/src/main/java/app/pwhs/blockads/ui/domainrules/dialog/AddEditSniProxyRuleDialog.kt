@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -52,6 +51,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -73,6 +74,9 @@ fun AddEditSniProxyRuleDialog(
 ) {
     val hasYouTubeInstalled = remember(installedApps) {
         installedApps.any { it.packageName == SniProxyRuleCodec.YOUTUBE_PACKAGE }
+    }
+    val hasRedditInstalled = remember(installedApps) {
+        installedApps.any { it.packageName == SniProxyRuleCodec.REDDIT_PACKAGE }
     }
     var name by remember {
         mutableStateOf(
@@ -210,17 +214,23 @@ fun AddEditSniProxyRuleDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = { showAppPicker = true },
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            val label = if (selectedPackages.isEmpty()) {
-                                stringResource(R.string.sni_proxy_apps_all)
-                            } else {
-                                stringResource(R.string.sni_proxy_apps_pick, selectedPackages.size)
-                            }
-                            Text(label, maxLines = 1, softWrap = false)
+                        val appPickerLabel = if (selectedPackages.isEmpty()) {
+                            stringResource(R.string.sni_proxy_apps_all)
+                        } else {
+                            stringResource(R.string.sni_proxy_apps_pick, selectedPackages.size)
                         }
+                        FilterChip(
+                            selected = selectedPackages.isEmpty(),
+                            onClick = { showAppPicker = true },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Apps,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            },
+                            label = { Text(appPickerLabel, maxLines = 1, softWrap = false) }
+                        )
                         if (hasYouTubeInstalled) {
                             val ytSelected = SniProxyRuleCodec.YOUTUBE_PACKAGE in selectedPackages
                             FilterChip(
@@ -233,11 +243,20 @@ fun AddEditSniProxyRuleDialog(
                                     }
                                 },
                                 leadingIcon = {
-                                    Icon(
-                                        imageVector = if (ytSelected) Icons.Default.Check else Icons.Default.PlayCircle,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
-                                    )
+                                    if (ytSelected) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    } else {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_brand_youtube),
+                                            contentDescription = null,
+                                            tint = Color.Unspecified,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 },
                                 label = { Text("YouTube", maxLines = 1, softWrap = false) }
                             )
@@ -257,49 +276,37 @@ fun AddEditSniProxyRuleDialog(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Language,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.sni_proxy_domains_label),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        FilledTonalButton(
-                            onClick = {
-                                domainsInput = SniProxyRuleCodec.YOUTUBE_PRESET_DOMAINS.joinToString("\n")
-                                if (name.isBlank()) name = "YouTube SNI Proxy"
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.sni_proxy_preset_youtube),
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.sni_proxy_domains_label),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
+                    SniProxyPresetButtons(
+                        onSelectYouTube = {
+                            domainsInput = SniProxyRuleCodec.YOUTUBE_PRESET_DOMAINS.joinToString("\n")
+                            if (name.isBlank()) name = "YouTube SNI Proxy"
+                            if (selectedPackages.isEmpty() && hasYouTubeInstalled) {
+                                selectedPackages = setOf(SniProxyRuleCodec.YOUTUBE_PACKAGE)
+                            }
+                        },
+                        onSelectReddit = {
+                            domainsInput = SniProxyRuleCodec.REDDIT_PRESET_DOMAINS.joinToString("\n")
+                            if (name.isBlank()) name = "Reddit SNI Proxy"
+                            if (selectedPackages.isEmpty() && hasRedditInstalled) {
+                                selectedPackages = setOf(SniProxyRuleCodec.REDDIT_PACKAGE)
+                            }
+                        },
+                    )
                     OutlinedTextField(
                         value = domainsInput,
                         onValueChange = { domainsInput = it },

@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Вибрати додатки (%1$d)</string>
     <string name="sni_proxy_domains_label">Домени / SNI (розділені комою або новим рядком, порожньо = увесь TLS 443)</string>
     <string name="sni_proxy_preset_youtube">Шаблон YouTube</string>
+    <string name="sni_proxy_preset_reddit">Шаблон Reddit</string>
     <string name="sni_proxy_invalid_ip">Введіть дійсну адресу IPv4/IPv6</string>
     <string name="sni_proxy_saved">Правило SNI Proxy збережено</string>
     <string name="sni_proxy_deleted">Правило SNI Proxy видалено</string>

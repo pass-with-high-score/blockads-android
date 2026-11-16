@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Pilih Aplikasi (%1$d)</string>
     <string name="sni_proxy_domains_label">Domain / SNI (dipisahkan koma atau baris baru, kosong = semua TLS 443)</string>
     <string name="sni_proxy_preset_youtube">Preset YouTube</string>
+    <string name="sni_proxy_preset_reddit">Preset Reddit</string>
     <string name="sni_proxy_invalid_ip">Harap masukkan alamat IPv4/IPv6 yang valid</string>
     <string name="sni_proxy_saved">Aturan SNI Proxy disimpan</string>
     <string name="sni_proxy_deleted">Aturan SNI Proxy dihapus</string>

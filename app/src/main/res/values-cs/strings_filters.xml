@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Vybrat aplikace (%1$d)</string>
     <string name="sni_proxy_domains_label">Domény / SNI (oddělené čárkou nebo novým řádkem, prázdné = veškerý provoz TLS 443)</string>
     <string name="sni_proxy_preset_youtube">Předvolba YouTube</string>
+    <string name="sni_proxy_preset_reddit">Předvolba Reddit</string>
     <string name="sni_proxy_invalid_ip">Zadejte platnou adresu IPv4/IPv6</string>
     <string name="sni_proxy_saved">Pravidlo SNI Proxy uloženo</string>
     <string name="sni_proxy_deleted">Pravidlo SNI Proxy smazáno</string>

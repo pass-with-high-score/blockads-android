@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">选择应用（%1$d）</string>
     <string name="sni_proxy_domains_label">域名 / SNI（以逗号或换行符分隔，留空 = 全部 TLS 443）</string>
     <string name="sni_proxy_preset_youtube">YouTube 预设</string>
+    <string name="sni_proxy_preset_reddit">Reddit 预设</string>
     <string name="sni_proxy_invalid_ip">请输入有效的 IPv4/IPv6 地址</string>
     <string name="sni_proxy_saved">SNI Proxy 规则已保存</string>
     <string name="sni_proxy_deleted">SNI Proxy 规则已删除</string>

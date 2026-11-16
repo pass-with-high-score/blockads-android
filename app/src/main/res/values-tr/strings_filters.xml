@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Uygulamaları Seç (%1$d)</string>
     <string name="sni_proxy_domains_label">Alan Adları / SNI (virgül veya yeni satırla ayrılmış, boş = tüm TLS 443)</string>
     <string name="sni_proxy_preset_youtube">YouTube Ön Ayarı</string>
+    <string name="sni_proxy_preset_reddit">Reddit Ön Ayarı</string>
     <string name="sni_proxy_invalid_ip">Lütfen geçerli bir IPv4/IPv6 adresi girin</string>
     <string name="sni_proxy_saved">SNI Proxy kuralı kaydedildi</string>
     <string name="sni_proxy_deleted">SNI Proxy kuralı silindi</string>

@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">בחר אפליקציות (%1$d)</string>
     <string name="sni_proxy_domains_label">דומיינים / SNI (מופרדים בפסיק או שורה חדשה, ריק = כל TLS 443)</string>
     <string name="sni_proxy_preset_youtube">הגדרה קבועה של YouTube</string>
+    <string name="sni_proxy_preset_reddit">הגדרה קבועה של Reddit</string>
     <string name="sni_proxy_invalid_ip">נא להזין כתובת IPv4/IPv6 חוקית</string>
     <string name="sni_proxy_saved">כלל SNI Proxy נשמר</string>
     <string name="sni_proxy_deleted">כלל SNI Proxy נמחק</string>

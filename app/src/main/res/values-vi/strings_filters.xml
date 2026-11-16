@@ -230,6 +230,7 @@
     <string name="sni_proxy_apps_pick">Chọn ứng dụng (%1$d)</string>
     <string name="sni_proxy_domains_label">Tên miền / SNI (phân tách dấu phẩy hoặc xuống dòng, trống = mọi TLS 443)</string>
     <string name="sni_proxy_preset_youtube">Mẫu YouTube</string>
+    <string name="sni_proxy_preset_reddit">Mẫu Reddit</string>
     <string name="sni_proxy_invalid_ip">Vui lòng nhập địa chỉ IP hợp lệ</string>
     <string name="sni_proxy_saved">Đã lưu quy tắc SNI Proxy</string>
     <string name="sni_proxy_deleted">Đã xóa quy tắc SNI Proxy</string>

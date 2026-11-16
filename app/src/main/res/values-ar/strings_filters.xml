@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">تحديد التطبيقات (%1$d)</string>
     <string name="sni_proxy_domains_label">النطاقات / SNI (مفصولة بفاصلة أو سطر جديد، فارغ = كل TLS 443)</string>
     <string name="sni_proxy_preset_youtube">إعداد YouTube المسبق</string>
+    <string name="sni_proxy_preset_reddit">إعداد Reddit المسبق</string>
     <string name="sni_proxy_invalid_ip">يرجى إدخال عنوان IPv4/IPv6 صالح</string>
     <string name="sni_proxy_saved">تم حفظ قاعدة SNI Proxy</string>
     <string name="sni_proxy_deleted">تم حذف قاعدة SNI Proxy</string>

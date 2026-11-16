@@ -256,6 +256,7 @@
     <string name="sni_proxy_apps_pick">Қолданбаларды таңдау (%1$d)</string>
     <string name="sni_proxy_domains_label">Домендер / SNI (үтірмен немесе жаңа жолмен бөлінген, бос = барлық TLS 443)</string>
     <string name="sni_proxy_preset_youtube">YouTube алдын ала орнатуы</string>
+    <string name="sni_proxy_preset_reddit">Reddit алдын ала орнатуы</string>
     <string name="sni_proxy_invalid_ip">Жарамды IPv4/IPv6 мекенжайын енгізіңіз</string>
     <string name="sni_proxy_saved">SNI Proxy ережесі сақталды</string>
     <string name="sni_proxy_deleted">SNI Proxy ережесі жойылды</string>

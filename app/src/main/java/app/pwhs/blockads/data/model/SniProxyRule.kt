@@ -25,6 +25,11 @@ object SniProxyRuleCodec {
         "googlevideo.com",
         "youtube.com"
     )
+    const val REDDIT_PACKAGE = "com.reddit.frontpage"
+    val REDDIT_PRESET_DOMAINS = listOf(
+        "www.reddit.com",
+        "gql-fed.reddit.com"
+    )
 
     fun fromJsonList(raw: String): List<SniProxyRule> {
         if (raw.isBlank()) return emptyList()

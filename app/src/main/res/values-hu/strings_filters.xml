@@ -260,6 +260,7 @@
     <string name="sni_proxy_apps_pick">Alkalmazások kiválasztása (%1$d)</string>
     <string name="sni_proxy_domains_label">Domainek / SNI (vesszővel vagy új sorral elválasztva, üres = minden TLS 443)</string>
     <string name="sni_proxy_preset_youtube">YouTube-előbeállítás</string>
+    <string name="sni_proxy_preset_reddit">Reddit-előbeállítás</string>
     <string name="sni_proxy_invalid_ip">Kérjük, adjon meg érvényes IPv4/IPv6-címet</string>
     <string name="sni_proxy_saved">SNI Proxy szabály mentve</string>
     <string name="sni_proxy_deleted">SNI Proxy szabály törölve</string>
