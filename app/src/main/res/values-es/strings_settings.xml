@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Enrutar a través de BlockAds VPN</string>
     <string name="settings_home_tips">Consejos de pantalla de inicio</string>
     <string name="settings_home_tips_desc">Muestra sugerencias y consejos útiles en la pantalla de inicio</string>
+    <string name="settings_nav_position">Posición de navegación</string>
+    <string name="settings_nav_position_desc">Elige dónde aparece la barra de navegación en tabletas y plegables</string>
+    <string name="settings_nav_position_left">Izquierda</string>
+    <string name="settings_nav_position_right">Derecha</string>
+    <string name="settings_nav_position_bottom">Abajo</string>
+    <string name="settings_nav_capsule_style">Estilo de navegación en cápsula</string>
+    <string name="settings_nav_capsule_style_desc">Usar una barra de navegación flotante en forma de píldora</string>
+    <string name="settings_theme_and_colors">Tema y colores</string>
+    <string name="settings_theme_and_colors_desc">Modo oscuro, OLED y color de acento</string>
+    <string name="settings_navigation_desc">Etiquetas, pestañas y diseño de la barra de navegación</string>
+    <string name="settings_language_desc">Elige el idioma de visualización de la app</string>
 </resources>

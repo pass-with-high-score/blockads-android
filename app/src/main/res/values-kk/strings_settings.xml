@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">BlockAds VPN арқылы бағыттау</string>
     <string name="settings_home_tips">Басты экран бойынша кеңестер</string>
     <string name="settings_home_tips_desc">Басты экранда пайдалы кеңестер мен мүмкіндіктер ұсыныстарын көрсету</string>
+    <string name="settings_nav_position">Шарлау орны</string>
+    <string name="settings_nav_position_desc">Планшеттер мен жиналмалы құрылғыларда шарлау жолағының орнын таңдаңыз</string>
+    <string name="settings_nav_position_left">Сол жақ</string>
+    <string name="settings_nav_position_right">Оң жақ</string>
+    <string name="settings_nav_position_bottom">Төменгі жақ</string>
+    <string name="settings_nav_capsule_style">Капсула пішінді шарлау</string>
+    <string name="settings_nav_capsule_style_desc">Қалқымалы капсула пішінді шарлау жолағын пайдалану</string>
+    <string name="settings_theme_and_colors">Тақырып және түстер</string>
+    <string name="settings_theme_and_colors_desc">Қараңғы режим, OLED және екпін түсі</string>
+    <string name="settings_navigation_desc">Белгілер, қойындылар және шарлау жолағының орналасуы</string>
+    <string name="settings_language_desc">Қолданбаның көрсету тілін таңдаңыз</string>
 </resources>

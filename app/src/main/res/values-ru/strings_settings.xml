@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Маршрутизировать через BlockAds VPN</string>
     <string name="settings_home_tips">Советы на главном экране</string>
     <string name="settings_home_tips_desc">Показывать полезные советы и предложения функций на главном экране</string>
+    <string name="settings_nav_position">Позиция навигации</string>
+    <string name="settings_nav_position_desc">Выберите расположение панели навигации на планшетах и складных устройствах</string>
+    <string name="settings_nav_position_left">Слева</string>
+    <string name="settings_nav_position_right">Справа</string>
+    <string name="settings_nav_position_bottom">Снизу</string>
+    <string name="settings_nav_capsule_style">Капсульный стиль навигации</string>
+    <string name="settings_nav_capsule_style_desc">Использовать плавающую панель навигации в форме капсулы</string>
+    <string name="settings_theme_and_colors">Тема и цвета</string>
+    <string name="settings_theme_and_colors_desc">Тёмная тема, OLED и акцентный цвет</string>
+    <string name="settings_navigation_desc">Подписи, вкладки и макет панели навигации</string>
+    <string name="settings_language_desc">Выберите язык отображения приложения</string>
 </resources>

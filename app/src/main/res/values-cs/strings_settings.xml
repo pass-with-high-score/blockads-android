@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Směrovat přes BlockAds VPN</string>
     <string name="settings_home_tips">Tipy na domovské obrazovce</string>
     <string name="settings_home_tips_desc">Zobrazovat užitečné tipy a návrhy funkcí na domovské obrazovce</string>
+    <string name="settings_nav_position">Pozice navigace</string>
+    <string name="settings_nav_position_desc">Vyberte umístění navigační lišty na tabletech a skládacích zařízeních</string>
+    <string name="settings_nav_position_left">Vlevo</string>
+    <string name="settings_nav_position_right">Vpravo</string>
+    <string name="settings_nav_position_bottom">Dole</string>
+    <string name="settings_nav_capsule_style">Kapsulový styl navigace</string>
+    <string name="settings_nav_capsule_style_desc">Použít plovoucí navigační lištu ve tvaru pilulky</string>
+    <string name="settings_theme_and_colors">Motiv a barvy</string>
+    <string name="settings_theme_and_colors_desc">Tmavý režim, OLED a barva zvýraznění</string>
+    <string name="settings_navigation_desc">Popisky, karty a rozvržení navigační lišty</string>
+    <string name="settings_language_desc">Vyberte jazyk zobrazení aplikace</string>
 </resources>

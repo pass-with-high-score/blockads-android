@@ -430,4 +430,15 @@
     <string name="app_management_vpn_protection">Irányítás a BlockAds VPN-en keresztül</string>
     <string name="settings_home_tips">Kezdőképernyő tippek</string>
     <string name="settings_home_tips_desc">Hasznos tippek és funkciójavaslatok megjelenítése a kezdőképernyőn</string>
+    <string name="settings_nav_position">Navigáció pozíciója</string>
+    <string name="settings_nav_position_desc">Válassza ki a navigációs sáv helyét táblagépeken és összecsukható eszközökön</string>
+    <string name="settings_nav_position_left">Balra</string>
+    <string name="settings_nav_position_right">Jobbra</string>
+    <string name="settings_nav_position_bottom">Alul</string>
+    <string name="settings_nav_capsule_style">Kapszula stílusú navigáció</string>
+    <string name="settings_nav_capsule_style_desc">Lebegő kapszula alakú navigációs sáv használata</string>
+    <string name="settings_theme_and_colors">Téma és színek</string>
+    <string name="settings_theme_and_colors_desc">Sötét mód, OLED és kiemelőszín</string>
+    <string name="settings_navigation_desc">Címkék, lapok és a navigációs sáv elrendezése</string>
+    <string name="settings_language_desc">Válassza ki az alkalmazás megjelenítési nyelvét</string>
 </resources>

@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Rute melalui BlockAds VPN</string>
     <string name="settings_home_tips">Tips layar utama</string>
     <string name="settings_home_tips_desc">Tampilkan tips bermanfaat dan saran fitur di layar utama</string>
+    <string name="settings_nav_position">Posisi Navigasi</string>
+    <string name="settings_nav_position_desc">Pilih lokasi bilah navigasi di tablet dan ponsel lipat</string>
+    <string name="settings_nav_position_left">Kiri</string>
+    <string name="settings_nav_position_right">Kanan</string>
+    <string name="settings_nav_position_bottom">Bawah</string>
+    <string name="settings_nav_capsule_style">Gaya Navigasi Kapsul</string>
+    <string name="settings_nav_capsule_style_desc">Gunakan bilah navigasi mengambang berbentuk kapsul</string>
+    <string name="settings_theme_and_colors">Tema &amp; Warna</string>
+    <string name="settings_theme_and_colors_desc">Mode gelap, OLED, dan warna aksen</string>
+    <string name="settings_navigation_desc">Label, tab, dan tata letak bilah navigasi</string>
+    <string name="settings_language_desc">Pilih bahasa tampilan aplikasi</string>
 </resources>

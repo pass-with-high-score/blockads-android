@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Kieruj przez BlockAds VPN</string>
     <string name="settings_home_tips">Wskazówki na ekranie głównym</string>
     <string name="settings_home_tips_desc">Pokazuj przydatne wskazówki i sugestie funkcji na ekranie głównym</string>
+    <string name="settings_nav_position">Pozycja nawigacji</string>
+    <string name="settings_nav_position_desc">Wybierz miejsce paska nawigacji na tabletach i urządzeniach składanych</string>
+    <string name="settings_nav_position_left">Po lewej</string>
+    <string name="settings_nav_position_right">Po prawej</string>
+    <string name="settings_nav_position_bottom">Na dole</string>
+    <string name="settings_nav_capsule_style">Styl kapsułki nawigacji</string>
+    <string name="settings_nav_capsule_style_desc">Użyj pływającego paska nawigacji w kształcie pigułki</string>
+    <string name="settings_theme_and_colors">Motyw i kolory</string>
+    <string name="settings_theme_and_colors_desc">Tryb ciemny, OLED i kolor akcentu</string>
+    <string name="settings_navigation_desc">Etykiety, karty i układ paska nawigacji</string>
+    <string name="settings_language_desc">Wybierz język wyświetlania aplikacji</string>
 </resources>

@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">BlockAds VPN을 통해 라우팅</string>
     <string name="settings_home_tips">홈 화면 팁</string>
     <string name="settings_home_tips_desc">홈 화면에 유용한 팁과 기능 제안 표시</string>
+    <string name="settings_nav_position">탐색 모음 위치</string>
+    <string name="settings_nav_position_desc">태블릿 및 폴더블 기기에서 탐색 모음 위치를 선택합니다</string>
+    <string name="settings_nav_position_left">왼쪽</string>
+    <string name="settings_nav_position_right">오른쪽</string>
+    <string name="settings_nav_position_bottom">하단</string>
+    <string name="settings_nav_capsule_style">캡슐형 탐색 스타일</string>
+    <string name="settings_nav_capsule_style_desc">플로팅 알약 모양 탐색 모음 사용</string>
+    <string name="settings_theme_and_colors">테마 및 색상</string>
+    <string name="settings_theme_and_colors_desc">다크 모드, OLED 및 강조 색상</string>
+    <string name="settings_navigation_desc">레이블, 탭 및 탐색 모음 레이아웃</string>
+    <string name="settings_language_desc">앱 표시 언어 선택</string>
 </resources>

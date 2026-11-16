@@ -409,4 +409,15 @@ Veri toplama yok. İzleme yok.&quot;</string>
     <string name="app_management_vpn_protection">BlockAds VPN üzerinden yönlendir</string>
     <string name="settings_home_tips">Ana ekran ipuçları</string>
     <string name="settings_home_tips_desc">Ana ekranda faydalı ipuçları ve özellik önerileri göster</string>
+    <string name="settings_nav_position">Gezinme Konumu</string>
+    <string name="settings_nav_position_desc">Tabletlerde ve katlanabilir cihazlarda gezinme çubuğunun konumunu seçin</string>
+    <string name="settings_nav_position_left">Sol</string>
+    <string name="settings_nav_position_right">Sağ</string>
+    <string name="settings_nav_position_bottom">Alt</string>
+    <string name="settings_nav_capsule_style">Kapsül Gezinme Stili</string>
+    <string name="settings_nav_capsule_style_desc">Yüzen hap şeklinde gezinme çubuğu kullan</string>
+    <string name="settings_theme_and_colors">Tema ve Renkler</string>
+    <string name="settings_theme_and_colors_desc">Karanlık mod, OLED ve vurgu rengi</string>
+    <string name="settings_navigation_desc">Etiketler, sekmeler ve gezinme çubuğu düzeni</string>
+    <string name="settings_language_desc">Uygulama görüntüleme dilini seçin</string>
 </resources>

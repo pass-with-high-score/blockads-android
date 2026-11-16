@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">BlockAds VPN経由でルーティング</string>
     <string name="settings_home_tips">ホーム画面のヒント</string>
     <string name="settings_home_tips_desc">ホーム画面に役立つヒントや機能の提案を表示します</string>
+    <string name="settings_nav_position">ナビゲーションの位置</string>
+    <string name="settings_nav_position_desc">タブレットおよび折りたたみ端末でのナビゲーションバーの位置を選択</string>
+    <string name="settings_nav_position_left">左</string>
+    <string name="settings_nav_position_right">右</string>
+    <string name="settings_nav_position_bottom">下</string>
+    <string name="settings_nav_capsule_style">カプセル型ナビゲーション</string>
+    <string name="settings_nav_capsule_style_desc">フローティングのカプセル型ナビゲーションバーを使用</string>
+    <string name="settings_theme_and_colors">テーマとカラー</string>
+    <string name="settings_theme_and_colors_desc">ダークモード、OLED、アクセントカラー</string>
+    <string name="settings_navigation_desc">ラベル、タブ、ナビゲーションバーのレイアウト</string>
+    <string name="settings_language_desc">アプリの表示言語を選択</string>
 </resources>

@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">Über BlockAds VPN leiten</string>
     <string name="settings_home_tips">Tipps auf dem Startbildschirm</string>
     <string name="settings_home_tips_desc">Nützliche Tipps und Funktionsvorschläge auf dem Startbildschirm anzeigen</string>
+    <string name="settings_nav_position">Navigationsposition</string>
+    <string name="settings_nav_position_desc">Wählen Sie die Position der Navigationsleiste auf Tablets und Foldables</string>
+    <string name="settings_nav_position_left">Links</string>
+    <string name="settings_nav_position_right">Rechts</string>
+    <string name="settings_nav_position_bottom">Unten</string>
+    <string name="settings_nav_capsule_style">Kapsel-Navigationsstil</string>
+    <string name="settings_nav_capsule_style_desc">Schwebende Navigationsleiste in Pillenform verwenden</string>
+    <string name="settings_theme_and_colors">Design &amp; Farben</string>
+    <string name="settings_theme_and_colors_desc">Dunkelmodus, OLED und Akzentfarbe</string>
+    <string name="settings_navigation_desc">Beschriftungen, Tabs und Layout der Navigationsleiste</string>
+    <string name="settings_language_desc">Anzeigesprache der App wählen</string>
 </resources>

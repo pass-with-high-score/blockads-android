@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">通过 BlockAds VPN 路由</string>
     <string name="settings_home_tips">主屏幕提示</string>
     <string name="settings_home_tips_desc">在主屏幕上显示实用提示和功能建议</string>
+    <string name="settings_nav_position">导航栏位置</string>
+    <string name="settings_nav_position_desc">选择导航栏在平板和折叠屏设备上的显示位置</string>
+    <string name="settings_nav_position_left">左侧</string>
+    <string name="settings_nav_position_right">右侧</string>
+    <string name="settings_nav_position_bottom">底部</string>
+    <string name="settings_nav_capsule_style">胶囊导航样式</string>
+    <string name="settings_nav_capsule_style_desc">使用悬浮胶囊样式的导航栏</string>
+    <string name="settings_theme_and_colors">主题与颜色</string>
+    <string name="settings_theme_and_colors_desc">深色模式、OLED 与强调色</string>
+    <string name="settings_navigation_desc">标签、选项卡与导航栏布局</string>
+    <string name="settings_language_desc">选择应用显示语言</string>
 </resources>

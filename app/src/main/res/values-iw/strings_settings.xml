@@ -408,4 +408,15 @@
     <string name="app_management_vpn_protection">נתב דרך BlockAds VPN</string>
     <string name="settings_home_tips">טיפים במסך הבית</string>
     <string name="settings_home_tips_desc">הצג טיפים שימושיים והצעות לתכונות במסך הבית</string>
+    <string name="settings_nav_position">מיקום הניווט</string>
+    <string name="settings_nav_position_desc">בחר היכן יופיע סרגל הניווט בטאבלטים ובמכשירים מתקפלים</string>
+    <string name="settings_nav_position_left">שמאל</string>
+    <string name="settings_nav_position_right">ימין</string>
+    <string name="settings_nav_position_bottom">למטה</string>
+    <string name="settings_nav_capsule_style">סגנון ניווט קפסולה</string>
+    <string name="settings_nav_capsule_style_desc">השתמש בסרגל ניווט צף בצורת קפסולה</string>
+    <string name="settings_theme_and_colors">ערכת נושא וצבעים</string>
+    <string name="settings_theme_and_colors_desc">מצב כהה, OLED וצבע הדגשה</string>
+    <string name="settings_navigation_desc">תוויות, כרטיסיות ופריסת סרגל הניווט</string>
+    <string name="settings_language_desc">בחר את שפת התצוגה של האפליקציה</string>
 </resources>

@@ -458,4 +458,15 @@
     <string name="app_management_vpn_protection">Acheminer via le VPN BlockAds</string>
     <string name="settings_home_tips">Astuces de l\'écran d\'accueil</string>
     <string name="settings_home_tips_desc">Afficher des astuces utiles et des suggestions de fonctionnalités sur l\'écran d\'accueil</string>
+    <string name="settings_nav_position">Position de navigation</string>
+    <string name="settings_nav_position_desc">Choisissez l\'emplacement de la barre de navigation sur tablettes et pliables</string>
+    <string name="settings_nav_position_left">Gauche</string>
+    <string name="settings_nav_position_right">Droite</string>
+    <string name="settings_nav_position_bottom">Bas</string>
+    <string name="settings_nav_capsule_style">Style de navigation capsule</string>
+    <string name="settings_nav_capsule_style_desc">Utiliser une barre de navigation flottante en forme de pilule</string>
+    <string name="settings_theme_and_colors">Thème et couleurs</string>
+    <string name="settings_theme_and_colors_desc">Mode sombre, OLED et couleur d\'accentuation</string>
+    <string name="settings_navigation_desc">Étiquettes, onglets et disposition de la barre de navigation</string>
+    <string name="settings_language_desc">Choisir la langue d\'affichage de l\'application</string>
 </resources>
