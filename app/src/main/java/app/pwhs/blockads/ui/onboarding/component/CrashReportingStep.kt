@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -24,20 +25,26 @@ import app.pwhs.blockads.R
 
 @Composable
 fun CrashReportingStep(
-    onOptInChoiceMade: (Boolean) -> Unit
+    onOptInChoiceMade: (Boolean) -> Unit,
+    isTwoPane: Boolean = false
 ) {
+    val alignment = if (isTwoPane) Alignment.Start else Alignment.CenterHorizontally
+    val textAlign = if (isTwoPane) TextAlign.Start else TextAlign.Center
+    val buttonModifier = if (isTwoPane) Modifier.widthIn(min = 240.dp, max = 380.dp).fillMaxWidth() else Modifier.fillMaxWidth()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = alignment,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = stringResource(id = R.string.onboarding_crash_report_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = textAlign
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -45,17 +52,15 @@ fun CrashReportingStep(
         Text(
             text = stringResource(id = R.string.onboarding_crash_report_desc),
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
+            textAlign = textAlign,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Button(
             onClick = { onOptInChoiceMade(true) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = buttonModifier.height(56.dp),
             shape = MaterialTheme.shapes.medium
         ) {
             Text(
@@ -68,9 +73,7 @@ fun CrashReportingStep(
 
         OutlinedButton(
             onClick = { onOptInChoiceMade(false) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = buttonModifier.height(56.dp),
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface

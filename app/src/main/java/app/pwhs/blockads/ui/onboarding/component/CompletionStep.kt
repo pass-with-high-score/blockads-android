@@ -35,67 +35,75 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
 
 @Composable
-fun CompletionStep(modifier: Modifier = Modifier) {
-    val scale = remember { Animatable(0f) }
-
-    LaunchedEffect(Unit) {
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = 600,
-                easing = FastOutSlowInEasing
-            )
-        )
-    }
+fun CompletionStep(
+    modifier: Modifier = Modifier,
+    isTwoPane: Boolean = false
+) {
+    val alignment = if (isTwoPane) Alignment.Start else Alignment.CenterHorizontally
+    val textAlign = if (isTwoPane) TextAlign.Start else TextAlign.Center
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = alignment,
         verticalArrangement = Arrangement.Center
     ) {
-        // Animated check icon
-        Box(
-            modifier = Modifier
-                .size(160.dp)
-                .scale(scale.value)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            Color.Transparent
-                        )
+        if (!isTwoPane) {
+            val scale = remember { Animatable(0f) }
+
+            LaunchedEffect(Unit) {
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 600,
+                        easing = FastOutSlowInEasing
                     )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(110.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(72.dp),
-                    tint = MaterialTheme.colorScheme.primary
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(48.dp))
+            // Animated check icon
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .scale(scale.value)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                Color.Transparent
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(110.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(72.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
+        }
 
         Text(
             text = stringResource(R.string.onboarding_complete_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center
+            textAlign = textAlign
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -104,7 +112,7 @@ fun CompletionStep(modifier: Modifier = Modifier) {
             text = stringResource(R.string.onboarding_complete_desc),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            textAlign = textAlign,
             lineHeight = 24.sp
         )
 
@@ -114,7 +122,7 @@ fun CompletionStep(modifier: Modifier = Modifier) {
             text = stringResource(R.string.onboarding_complete_stats),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            textAlign = textAlign
         )
     }
 }

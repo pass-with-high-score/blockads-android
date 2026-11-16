@@ -4,8 +4,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,14 +49,18 @@ private val ONBOARDING_DNS_PROVIDERS = listOf(
 fun DnsServerStep(
     selectedProvider: DnsProvider,
     onProviderSelect: (DnsProvider) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isTwoPane: Boolean = false
 ) {
+    val alignment = if (isTwoPane) Alignment.Start else Alignment.CenterHorizontally
+    val textAlign = if (isTwoPane) TextAlign.Start else TextAlign.Center
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = alignment,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
@@ -62,7 +68,7 @@ fun DnsServerStep(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center
+            textAlign = textAlign
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -71,22 +77,51 @@ fun DnsServerStep(
             text = stringResource(R.string.onboarding_dns_desc),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            textAlign = textAlign,
             lineHeight = 24.sp
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        ONBOARDING_DNS_PROVIDERS.forEachIndexed { index, provider ->
-            val isRecommended = provider.id == DnsProviders.SYSTEM.id
-            DnsProviderCard(
-                provider = provider,
-                isSelected = selectedProvider.id == provider.id,
-                isRecommended = isRecommended,
-                onClick = { onProviderSelect(provider) }
-            )
-            if (index < ONBOARDING_DNS_PROVIDERS.size - 1) {
-                Spacer(modifier = Modifier.height(12.dp))
+        if (isTwoPane) {
+            val rows = ONBOARDING_DNS_PROVIDERS.chunked(2)
+            rows.forEachIndexed { rowIndex, rowProviders ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowProviders.forEach { provider ->
+                        DnsProviderCard(
+                            provider = provider,
+                            isSelected = selectedProvider.id == provider.id,
+                            isRecommended = provider.id == DnsProviders.SYSTEM.id,
+                            onClick = { onProviderSelect(provider) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        )
+                    }
+                    if (rowProviders.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                if (rowIndex < rows.size - 1) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        } else {
+            ONBOARDING_DNS_PROVIDERS.forEachIndexed { index, provider ->
+                DnsProviderCard(
+                    provider = provider,
+                    isSelected = selectedProvider.id == provider.id,
+                    isRecommended = provider.id == DnsProviders.SYSTEM.id,
+                    onClick = { onProviderSelect(provider) }
+                )
+                if (index < ONBOARDING_DNS_PROVIDERS.size - 1) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
     }
@@ -97,11 +132,12 @@ private fun DnsProviderCard(
     provider: DnsProvider,
     isSelected: Boolean,
     isRecommended: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)

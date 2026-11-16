@@ -20,14 +20,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +71,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.onboarding.component.CompletionStep
 import app.pwhs.blockads.ui.onboarding.component.CrashReportingStep
 import app.pwhs.blockads.ui.onboarding.component.DnsServerStep
+import app.pwhs.blockads.ui.onboarding.component.OnboardingHeroPane
 import app.pwhs.blockads.ui.onboarding.component.OnboardingPageContent
 import app.pwhs.blockads.ui.onboarding.component.PermissionStep
 import app.pwhs.blockads.ui.onboarding.data.OnboardingPage
@@ -170,31 +175,26 @@ fun OnboardingScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Pager content
+        val renderPager: @Composable (Boolean, Modifier) -> Unit = { isTwoPane, pagerModifier ->
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.weight(1f)
+                modifier = pagerModifier
             ) { page ->
                 when (page) {
                     // Step 1: Welcome + Privacy promise
                     0 -> OnboardingPageContent(
-                        OnboardingPage(
+                        page = OnboardingPage(
                             icon = Icons.Filled.Shield,
                             title = stringResource(R.string.onboarding_title_1),
                             description = stringResource(R.string.onboarding_desc_1)
-                        )
+                        ),
+                        isTwoPane = isTwoPane
                     )
                     // Step 2: DNS server
                     1 -> DnsServerStep(
                         selectedProvider = selectedDnsProvider,
-                        onProviderSelect = { viewModel.selectDnsProvider(it) }
+                        onProviderSelect = { viewModel.selectDnsProvider(it) },
+                        isTwoPane = isTwoPane
                     )
                     // Step 3: VPN permission
                     2 -> PermissionStep(
@@ -204,6 +204,7 @@ fun OnboardingScreen(
                         buttonText = stringResource(R.string.onboarding_vpn_grant),
                         isGranted = vpnPermissionGranted,
                         grantedText = stringResource(R.string.onboarding_permission_granted),
+                        isTwoPane = isTwoPane,
                         onRequestPermission = {
                             val intent = VpnService.prepare(context)
                             if (intent != null) {
@@ -222,6 +223,7 @@ fun OnboardingScreen(
                         accentColor = AccentBlue,
                         isGranted = notificationPermissionGranted,
                         grantedText = stringResource(R.string.onboarding_permission_granted),
+                        isTwoPane = isTwoPane,
                         onRequestPermission = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 notificationPermissionLauncher.launch(
@@ -246,6 +248,7 @@ fun OnboardingScreen(
                         isGranted = batteryOptimizationExcluded,
                         grantedText = stringResource(R.string.onboarding_permission_granted),
                         isSupported = isBatteryOptSupported,
+                        isTwoPane = isTwoPane,
                         onRequestPermission = {
                             try {
                                 @Suppress("BatteryLife")
@@ -272,69 +275,163 @@ fun OnboardingScreen(
                             scope.launch {
                                 pagerState.animateScrollToPage(6)
                             }
-                        }
+                        },
+                        isTwoPane = isTwoPane
                     )
                     // Completion
-                    6 -> CompletionStep()
+                    6 -> CompletionStep(isTwoPane = isTwoPane)
                 }
             }
+        }
 
-            // Page indicators
-            Row(
-                modifier = Modifier.padding(vertical = 24.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(TOTAL_PAGES) { index ->
-                    val isSelected = pagerState.currentPage == index
-                    val width by animateFloatAsState(
-                        targetValue = if (isSelected) 24f else 8f,
-                        animationSpec = tween(300), label = "indicator_width"
-                    )
-                    val color by animateColorAsState(
-                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                        animationSpec = tween(300), label = "indicator_color"
-                    )
-                    Box(
+        val onNextClick: () -> Unit = {
+            if (isLastPage) {
+                skipToHome()
+            } else {
+                scope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                }
+            }
+        }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            val isTwoPane = maxWidth >= 600.dp
+
+            if (isTwoPane) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 32.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OnboardingHeroPane(
+                        currentPage = pagerState.currentPage,
+                        totalPages = TOTAL_PAGES,
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .height(8.dp)
-                            .width(width.dp)
-                            .clip(CircleShape)
-                            .background(color)
+                            .weight(0.42f)
+                            .fillMaxHeight()
                     )
-                }
-            }
 
-            // Action button
-            Button(
-                onClick = {
-                    if (isLastPage) {
-                        skipToHome()
-                    } else {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    Column(
+                        modifier = Modifier
+                            .weight(0.58f)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        renderPager(
+                            true,
+                            Modifier
+                                .weight(1f)
+                                .widthIn(max = 560.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .widthIn(max = 560.dp)
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OnboardingPageIndicators(pagerState = pagerState)
+
+                            Button(
+                                onClick = onNextClick,
+                                modifier = Modifier
+                                    .widthIn(min = 160.dp, max = 220.dp)
+                                    .height(52.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text(
+                                    text = if (isLastPage) stringResource(R.string.onboarding_get_started)
+                                    else stringResource(R.string.onboarding_next),
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = if (isLastPage) stringResource(R.string.onboarding_get_started)
-                    else stringResource(R.string.onboarding_next),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    renderPager(false, Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    OnboardingPageIndicators(
+                        pagerState = pagerState,
+                        modifier = Modifier.padding(vertical = 24.dp)
+                    )
+
+                    Button(
+                        onClick = onNextClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = if (isLastPage) stringResource(R.string.onboarding_get_started)
+                            else stringResource(R.string.onboarding_next),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun OnboardingPageIndicators(
+    pagerState: PagerState,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        repeat(TOTAL_PAGES) { index ->
+            val isSelected = pagerState.currentPage == index
+            val width by animateFloatAsState(
+                targetValue = if (isSelected) 24f else 8f,
+                animationSpec = tween(300),
+                label = "indicator_width"
+            )
+            val color by animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                animationSpec = tween(300),
+                label = "indicator_color"
+            )
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .height(8.dp)
+                    .width(width.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
         }
     }
 }

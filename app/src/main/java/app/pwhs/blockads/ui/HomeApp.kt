@@ -2,23 +2,18 @@ package app.pwhs.blockads.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,14 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -82,6 +70,8 @@ import app.pwhs.blockads.ui.filter.FilterSetupScreen
 import app.pwhs.blockads.ui.filter.detail.FilterDetailScreen
 import app.pwhs.blockads.ui.filter.overlap.FilterOverlapScreen
 import app.pwhs.blockads.ui.firewall.FirewallScreen
+import app.pwhs.blockads.ui.component.BlockAdsNavigationBar
+import app.pwhs.blockads.ui.component.BlockAdsNavigationRail
 import app.pwhs.blockads.ui.home.HomeScreen
 import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
@@ -139,88 +129,22 @@ fun HomeApp(
         showBottomBar = stack.size <= 1
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            if (!showBottomBar) return@Scaffold
-            CompositionLocalProvider(
-                LocalDensity provides Density(
-                    density = LocalDensity.current.density,
-                    fontScale = 1f
-                )
-            ) {
-                NavigationBar(
-                    windowInsets = WindowInsets.navigationBars,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    bottomBarScreens.forEach { screen ->
-                        NavigationBarItem(
-                            selected = currentBackStack == when (screen) {
-                                BottomBarScreen.Home -> homeStack
-                                BottomBarScreen.FilterSetup -> filterStack
-                                BottomBarScreen.Proxy -> wireguardStack
-                                BottomBarScreen.Firewall -> firewallStack
-                                BottomBarScreen.DomainRule -> domainRuleStack
-                                BottomBarScreen.Settings -> settingsStack
-                            },
-                            onClick = {
-                                currentTab = screen
-                            },
-                            icon = {
-                                if (screen == BottomBarScreen.Firewall && firewallEnabled) {
-                                    app.pwhs.blockads.ui.component.BurningFireIcon(
-                                        contentDescription = stringResource(screen.labelRes)
-                                    )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(screen.icon),
-                                        contentDescription = stringResource(screen.labelRes),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            },
-                            label = if (showBottomNavLabels) {
-                                {
-                                    Text(
-                                        text = stringResource(screen.labelRes),
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = LocalTextStyle.current.copy(
-                                            fontSize = 10.5.sp,
-                                            letterSpacing = (-0.2).sp
-                                        )
-                                    )
-                                }
-                            } else null,
-                            alwaysShowLabel = showBottomNavLabels,
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val useNavRail = maxWidth >= 600.dp
+
         // When on a non-Home tab root, back should switch to Home tab instead of exiting
         BackHandler(enabled = currentTab != BottomBarScreen.Home && currentBackStack.size <= 1) {
             currentTab = BottomBarScreen.Home
             showBottomBar = true
         }
 
-        NavDisplay(
-            backStack = currentBackStack,
-            onBack = {
-                safePop(currentBackStack)
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding())
-                .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding())),
+        val renderNavDisplay: @Composable (Modifier) -> Unit = { navModifier ->
+            NavDisplay(
+                backStack = currentBackStack,
+                onBack = {
+                    safePop(currentBackStack)
+                },
+                modifier = navModifier,
             entryProvider = entryProvider {
                 entry<HomeKey> {
                     HomeScreen(
@@ -527,6 +451,51 @@ fun HomeApp(
                     )
                 }
             }
-        )
+            )
+        }
+
+        if (useNavRail) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                if (showBottomBar) {
+                    BlockAdsNavigationRail(
+                        screens = bottomBarScreens,
+                        currentTab = currentTab,
+                        firewallEnabled = firewallEnabled,
+                        showLabels = showBottomNavLabels,
+                        onSelectTab = { currentTab = it }
+                    )
+                    VerticalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+                }
+                renderNavDisplay(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                )
+            }
+        } else {
+            Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                bottomBar = {
+                    if (showBottomBar) {
+                        BlockAdsNavigationBar(
+                            screens = bottomBarScreens,
+                            currentTab = currentTab,
+                            firewallEnabled = firewallEnabled,
+                            showLabels = showBottomNavLabels,
+                            onSelectTab = { currentTab = it }
+                        )
+                    }
+                }
+            ) { innerPadding ->
+                renderNavDisplay(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(bottom = innerPadding.calculateBottomPadding())
+                        .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                )
+            }
+        }
     }
 }

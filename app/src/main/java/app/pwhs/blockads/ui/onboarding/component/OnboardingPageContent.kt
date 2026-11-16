@@ -30,54 +30,35 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.onboarding.data.OnboardingPage
 
 @Composable
-fun OnboardingPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
+fun OnboardingPageContent(
+    page: OnboardingPage,
+    modifier: Modifier = Modifier,
+    isTwoPane: Boolean = false
+) {
+    val alignment = if (isTwoPane) Alignment.Start else Alignment.CenterHorizontally
+    val textAlign = if (isTwoPane) TextAlign.Start else TextAlign.Center
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = alignment,
         verticalArrangement = Arrangement.Center
     ) {
-        // Icon with glow effect
-        Box(
-            modifier = Modifier
-                .size(140.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            Color.Transparent
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+        if (!isTwoPane) {
+            OnboardingGlowIcon(
+                painter = painterResource(R.drawable.ic_launcher_foreground)
+            )
+            Spacer(modifier = Modifier.height(48.dp))
         }
-
-        Spacer(modifier = Modifier.height(48.dp))
 
         Text(
             text = page.title,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Center
+            textAlign = textAlign
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -86,7 +67,7 @@ fun OnboardingPageContent(page: OnboardingPage, modifier: Modifier = Modifier) {
             text = page.description,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            textAlign = textAlign,
             lineHeight = 24.sp
         )
     }
