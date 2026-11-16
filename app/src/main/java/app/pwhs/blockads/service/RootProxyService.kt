@@ -65,6 +65,10 @@ class RootProxyService : Service() {
         var startTimestamp: Long = 0L
             private set
 
+        @Volatile
+        var activeTunnelAdapter: GoTunnelAdapter? = null
+            internal set
+
         fun start(context: Context) {
             val intent = Intent(context, RootProxyService::class.java).apply {
                 action = ACTION_START
@@ -151,6 +155,7 @@ class RootProxyService : Service() {
             firewallManagerProvider = { firewallManager },
             recordLogProvider = { isRecordDnsLogsEnabled },
         )
+        activeTunnelAdapter = goTunnelAdapter
         Timber.d("RootProxyService created")
     }
 
@@ -238,11 +243,36 @@ class RootProxyService : Service() {
 
                 // 3. Retry loop for Standalone mode and IPTables setup
                 // This is crucial on boot where Magisk `su` might take a few seconds to become available
+                val httpsFiltering = appPrefs.httpsFilteringEnabled.first()
+                val browserUids = if (httpsFiltering) {
+                    val browsers = TunnelRuleLoader.loadPresetBrowsers(this@RootProxyService)
+                    browsers.mapNotNull { pkg ->
+                        runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull()
+                    }.distinct()
+                } else emptyList()
+
                 val proxyStarted = RootProxyStartup.establish(
                     retryManager = { retryManager },
                     ensureRootShell = IptablesManager::ensureRootShell,
-                    startEngine = { goTunnelAdapter.startStandalone(port = 15353) },
-                    setupRules = { IptablesManager.setupRules(this@RootProxyService, whitelistUids = whitelistedUids) },
+                    startEngine = {
+                        val dnsOk = goTunnelAdapter.startStandalone(port = 15353)
+                        if (dnsOk && httpsFiltering) {
+                            val certDir = filesDir.absolutePath
+                            goTunnelAdapter.engine.startStackMitm(certDir)
+                            goTunnelAdapter.engine.setMitmAllowedUIDs(browserUids.joinToString(","))
+                            TunnelRuleLoader.loadExtraPassthrough(this@RootProxyService, goTunnelAdapter.engine)
+                            goTunnelAdapter.startTransparentMitm(port = 15354)
+                        }
+                        dnsOk
+                    },
+                    setupRules = {
+                        IptablesManager.setupRules(
+                            this@RootProxyService,
+                            whitelistUids = whitelistedUids,
+                            httpsFiltering = httpsFiltering,
+                            browserUids = browserUids
+                        )
+                    },
                     stopEngine = { goTunnelAdapter.stop() },
                 )
 
@@ -296,6 +326,7 @@ class RootProxyService : Service() {
 
         // Stop Go engine
         goTunnelAdapter.stop()
+        activeTunnelAdapter = null
 
         _state.value = VpnState.STOPPED
         serviceScope.launch {
@@ -396,6 +427,7 @@ class RootProxyService : Service() {
         stopNotificationUpdates()
         if (::appNameResolver.isInitialized) appNameResolver.stopSnapshotter()
         IptablesManager.teardownRules()
+        activeTunnelAdapter = null
         serviceScope.cancel()
         super.onDestroy()
     }

@@ -22,6 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import app.pwhs.blockads.service.AdBlockVpnService
+import app.pwhs.blockads.service.RootProxyService
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 
@@ -62,10 +64,16 @@ class DnsLeakRepositoryImpl(
                     coroutineScope {
                         // Launch DNS probe resolutions concurrently on IO dispatcher
                         launch(Dispatchers.IO) {
+                            val adapter = AdBlockVpnService.activeTunnelAdapter
+                                ?: RootProxyService.activeTunnelAdapter
                             initResponse.probeDomains.forEach { domain ->
                                 launch {
                                     runCatching {
-                                        InetAddress.getAllByName(domain)
+                                        if (adapter != null) {
+                                            adapter.lookupIP(domain)
+                                        } else {
+                                            InetAddress.getAllByName(domain)
+                                        }
                                     }.onFailure {
                                         Timber.v("Probe resolution failed for $domain: ${it.message}")
                                     }
