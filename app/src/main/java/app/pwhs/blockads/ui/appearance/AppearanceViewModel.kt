@@ -35,8 +35,22 @@ class AppearanceViewModel(
     val bottomNavSecondaryTab: StateFlow<String> = appPrefs.bottomNavSecondaryTab
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.BOTTOM_NAV_TAB_AUTO)
 
+    val navRailPosition: StateFlow<String> = appPrefs.navRailPosition
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppPreferences.NAV_POSITION_LEFT)
+
+    val floatingCapsuleNav: StateFlow<Boolean> = appPrefs.floatingCapsuleNav
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun setBottomNavSecondaryTab(tab: String) {
         viewModelScope.launch { appPrefs.setBottomNavSecondaryTab(tab) }
+    }
+
+    fun setNavRailPosition(position: String) {
+        viewModelScope.launch { appPrefs.setNavRailPosition(position) }
+    }
+
+    fun setFloatingCapsuleNav(enabled: Boolean) {
+        viewModelScope.launch { appPrefs.setFloatingCapsuleNav(enabled) }
     }
 
     fun setShowBottomNavLabels(show: Boolean) {

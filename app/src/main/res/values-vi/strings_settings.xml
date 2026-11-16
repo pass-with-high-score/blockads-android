@@ -421,6 +421,17 @@
     <string name="settings_bottom_nav_tab_auto">Tự động (Mặc định)</string>
     <string name="settings_bottom_nav_tab_filter">Bộ lọc (Filter)</string>
     <string name="settings_bottom_nav_tab_vpn">VPN &amp; Proxy</string>
+    <string name="settings_nav_position">Vị trí thanh điều hướng</string>
+    <string name="settings_nav_position_desc">Chọn vị trí hiển thị thanh điều hướng trên tablet và máy gập</string>
+    <string name="settings_nav_position_left">Trái</string>
+    <string name="settings_nav_position_right">Phải</string>
+    <string name="settings_nav_position_bottom">Dưới cùng (Bottom)</string>
+    <string name="settings_nav_capsule_style">Thanh điều hướng dạng con nhộng</string>
+    <string name="settings_nav_capsule_style_desc">Bo tròn nổi dạng viên nhộng cho thanh điều hướng</string>
+    <string name="settings_theme_and_colors">Chủ đề &amp; Màu nhấn</string>
+    <string name="settings_theme_and_colors_desc">Chế độ tối, OLED và màu nhấn</string>
+    <string name="settings_navigation_desc">Nhãn, tab hiển thị và bố cục thanh điều hướng</string>
+    <string name="settings_language_desc">Chọn ngôn ngữ hiển thị ứng dụng</string>
 
     <!-- Rating & Review -->
     <string name="rate_app_title">Bạn có hài lòng với BlockAds?</string>

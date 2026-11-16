@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.ui.component.AppListSkeleton
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallConfigContent
@@ -125,7 +126,7 @@ fun FirewallScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp + LocalFloatingBottomBarPadding.current),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         items(filteredApps, key = { it.packageName }) { app ->

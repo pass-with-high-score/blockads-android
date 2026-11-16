@@ -17,10 +17,16 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_ACCENT_COLOR = stringPreferencesKey("accent_color")
         val KEY_SHOW_BOTTOM_NAV_LABELS = booleanPreferencesKey("show_bottom_nav_labels")
         val KEY_BOTTOM_NAV_SECONDARY_TAB = stringPreferencesKey("bottom_nav_secondary_tab")
+        val KEY_NAV_RAIL_POSITION = stringPreferencesKey("nav_rail_position")
+        val KEY_FLOATING_CAPSULE_NAV = booleanPreferencesKey("floating_capsule_nav")
 
         const val BOTTOM_NAV_TAB_AUTO = "auto"
         const val BOTTOM_NAV_TAB_FILTER = "filter"
         const val BOTTOM_NAV_TAB_VPN = "vpn"
+
+        const val NAV_POSITION_LEFT = "left"
+        const val NAV_POSITION_RIGHT = "right"
+        const val NAV_POSITION_BOTTOM = "bottom"
 
         const val THEME_SYSTEM = "system"
         const val THEME_DARK = "dark"
@@ -65,6 +71,8 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
             prefs.remove(KEY_ACCENT_COLOR)
             prefs.remove(KEY_SHOW_BOTTOM_NAV_LABELS)
             prefs.remove(KEY_BOTTOM_NAV_SECONDARY_TAB)
+            prefs.remove(KEY_NAV_RAIL_POSITION)
+            prefs.remove(KEY_FLOATING_CAPSULE_NAV)
         }
     }
 
@@ -86,6 +94,14 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
 
     val bottomNavSecondaryTab: Flow<String> = dataStore.data.map { prefs ->
         prefs[KEY_BOTTOM_NAV_SECONDARY_TAB] ?: BOTTOM_NAV_TAB_AUTO
+    }
+
+    val navRailPosition: Flow<String> = dataStore.data.map { prefs ->
+        prefs[KEY_NAV_RAIL_POSITION] ?: NAV_POSITION_LEFT
+    }
+
+    val floatingCapsuleNav: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_FLOATING_CAPSULE_NAV] ?: false
     }
 
     suspend fun setThemeMode(mode: String) {
@@ -115,6 +131,18 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
     suspend fun setBottomNavSecondaryTab(tab: String) {
         dataStore.edit { prefs ->
             prefs[KEY_BOTTOM_NAV_SECONDARY_TAB] = tab
+        }
+    }
+
+    suspend fun setNavRailPosition(position: String) {
+        dataStore.edit { prefs ->
+            prefs[KEY_NAV_RAIL_POSITION] = position
+        }
+    }
+
+    suspend fun setFloatingCapsuleNav(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[KEY_FLOATING_CAPSULE_NAV] = enabled
         }
     }
 

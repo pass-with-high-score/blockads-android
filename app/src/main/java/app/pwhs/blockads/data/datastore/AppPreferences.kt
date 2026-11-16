@@ -63,6 +63,10 @@ class AppPreferences internal constructor(
         const val BOTTOM_NAV_TAB_FILTER = AppearancePreferences.BOTTOM_NAV_TAB_FILTER
         const val BOTTOM_NAV_TAB_VPN = AppearancePreferences.BOTTOM_NAV_TAB_VPN
 
+        const val NAV_POSITION_LEFT = AppearancePreferences.NAV_POSITION_LEFT
+        const val NAV_POSITION_RIGHT = AppearancePreferences.NAV_POSITION_RIGHT
+        const val NAV_POSITION_BOTTOM = AppearancePreferences.NAV_POSITION_BOTTOM
+
         const val THEME_SYSTEM = AppearancePreferences.THEME_SYSTEM
         const val THEME_DARK = AppearancePreferences.THEME_DARK
         const val THEME_LIGHT = AppearancePreferences.THEME_LIGHT
@@ -176,6 +180,10 @@ class AppPreferences internal constructor(
     val showBottomNavLabels: Flow<Boolean> get() = appearance.showBottomNavLabels
     val bottomNavSecondaryTab: Flow<String> get() = appearance.bottomNavSecondaryTab
     suspend fun setBottomNavSecondaryTab(tab: String) = appearance.setBottomNavSecondaryTab(tab)
+    val navRailPosition: Flow<String> get() = appearance.navRailPosition
+    suspend fun setNavRailPosition(position: String) = appearance.setNavRailPosition(position)
+    val floatingCapsuleNav: Flow<Boolean> get() = appearance.floatingCapsuleNav
+    suspend fun setFloatingCapsuleNav(enabled: Boolean) = appearance.setFloatingCapsuleNav(enabled)
 
     // ── Filter Flows ─────────────────────────────────────────────────────
     val filterUrl: Flow<String> get() = filter.filterUrl

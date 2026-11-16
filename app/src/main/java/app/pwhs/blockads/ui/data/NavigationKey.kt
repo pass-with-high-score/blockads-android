@@ -53,7 +53,13 @@ data object AppManagementKey : NavKey
 data object TrustedNetworksKey : NavKey
 
 @Serializable
-data object AppearanceKey : NavKey
+data object AppearanceThemeKey : NavKey
+
+@Serializable
+data object AppearanceNavigationKey : NavKey
+
+@Serializable
+data object AppearanceLanguageKey : NavKey
 
 @Serializable
 data object DomainRulesKey : NavKey

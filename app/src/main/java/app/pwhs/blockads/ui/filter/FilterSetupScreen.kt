@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FilterList as FilterListEntity
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
@@ -76,7 +77,9 @@ fun FilterSetupScreen(
     onNavigateBack: () -> Unit = {},
     viewModel: FilterSetupViewModel = koinViewModel(),
     onNavigateToFilterDetail: (filterId: Long) -> Unit = {},
-    onNavigateToOverlap: () -> Unit = {}
+    onNavigateToOverlap: () -> Unit = {},
+    externalFilterId: Long? = null,
+    onExternalFilterIdConsumed: () -> Unit = {},
 ) {
     val allLists by viewModel.filterLists.collectAsStateWithLifecycle()
     val filterLists by viewModel.filteredFilterLists.collectAsStateWithLifecycle()
@@ -262,7 +265,12 @@ fun FilterSetupScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 16.dp,
+                                bottom = 24.dp + LocalFloatingBottomBarPadding.current
+                            )
                         ) {
                             item {
                                 CustomTabContent(
@@ -288,6 +296,12 @@ fun FilterSetupScreen(
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                             if (maxWidth >= 600.dp) {
                                 var selectedFilterId by rememberSaveable { mutableStateOf<Long?>(null) }
+                                LaunchedEffect(externalFilterId) {
+                                    if (externalFilterId != null) {
+                                        selectedFilterId = externalFilterId
+                                        onExternalFilterIdConsumed()
+                                    }
+                                }
                                 val activeFilterId = selectedFilterId
                                     ?.takeIf { id -> displayFilters.any { it.id == id } }
                                     ?: displayFilters.firstOrNull()?.id
@@ -297,7 +311,12 @@ fun FilterSetupScreen(
                                         modifier = Modifier
                                             .weight(0.46f)
                                             .fillMaxHeight(),
-                                        contentPadding = PaddingValues(start = 16.dp, end = 12.dp, top = 16.dp, bottom = 24.dp)
+                                        contentPadding = PaddingValues(
+                                            start = 16.dp,
+                                            end = 12.dp,
+                                            top = 16.dp,
+                                            bottom = 24.dp + LocalFloatingBottomBarPadding.current
+                                        )
                                     ) {
                                         filterListItems(
                                             filters = displayFilters,
@@ -329,7 +348,12 @@ fun FilterSetupScreen(
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
+                                    contentPadding = PaddingValues(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 16.dp,
+                                        bottom = 24.dp + LocalFloatingBottomBarPadding.current
+                                    )
                                 ) {
                                     filterListItems(
                                         filters = displayFilters,

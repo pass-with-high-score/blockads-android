@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
@@ -197,6 +198,7 @@ fun DomainRulesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.padding(bottom = LocalFloatingBottomBarPadding.current),
                 onClick = {
                     if (pagerState.currentPage == 2) {
                         viewModel.loadInstalledAppsIfNeeded()

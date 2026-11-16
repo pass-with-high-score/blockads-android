@@ -2,6 +2,8 @@ package app.pwhs.blockads.ui
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,15 +12,19 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -29,11 +35,15 @@ import androidx.navigation3.ui.NavDisplay
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.about.AboutScreen
-import app.pwhs.blockads.ui.appearance.AppearanceScreen
+import app.pwhs.blockads.ui.appearance.AppearanceLanguageScreen
+import app.pwhs.blockads.ui.appearance.AppearanceNavigationScreen
+import app.pwhs.blockads.ui.appearance.AppearanceThemeScreen
 import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
 import app.pwhs.blockads.ui.data.AboutKey
 import app.pwhs.blockads.ui.data.AppManagementKey
-import app.pwhs.blockads.ui.data.AppearanceKey
+import app.pwhs.blockads.ui.data.AppearanceLanguageKey
+import app.pwhs.blockads.ui.data.AppearanceNavigationKey
+import app.pwhs.blockads.ui.data.AppearanceThemeKey
 import app.pwhs.blockads.ui.browser.BrowserActivity
 import app.pwhs.blockads.ui.browser.BrowserScreen
 import app.pwhs.blockads.ui.browser.elementrules.ElementRulesScreen
@@ -72,11 +82,13 @@ import app.pwhs.blockads.ui.filter.overlap.FilterOverlapScreen
 import app.pwhs.blockads.ui.firewall.FirewallScreen
 import app.pwhs.blockads.ui.component.BlockAdsNavigationBar
 import app.pwhs.blockads.ui.component.BlockAdsNavigationRail
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.ui.home.HomeScreen
 import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.logs.LogsScreen
+import app.pwhs.blockads.ui.settings.SettingsDetailPane
 import app.pwhs.blockads.ui.settings.SettingsScreen
 import app.pwhs.blockads.ui.statistics.StatisticsScreen
 import app.pwhs.blockads.ui.wireguard.WireGuardEditScreen
@@ -100,6 +112,12 @@ fun HomeApp(
     )
     val secondaryTab by appPrefs.bottomNavSecondaryTab.collectAsStateWithLifecycle(
         initialValue = AppPreferences.BOTTOM_NAV_TAB_AUTO,
+    )
+    val navRailPosition by appPrefs.navRailPosition.collectAsStateWithLifecycle(
+        initialValue = AppPreferences.NAV_POSITION_LEFT,
+    )
+    val floatingCapsuleNav by appPrefs.floatingCapsuleNav.collectAsStateWithLifecycle(
+        initialValue = false,
     )
     val homeStack = rememberNavBackStack(HomeKey)
     val filterStack = rememberNavBackStack(FilterKey)
@@ -129,8 +147,55 @@ fun HomeApp(
         showBottomBar = stack.size <= 1
     }
 
+    var pendingSettingsPane by remember { mutableStateOf<SettingsDetailPane?>(null) }
+    var pendingFilterId by remember { mutableStateOf<Long?>(null) }
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val useNavRail = maxWidth >= 600.dp
+        val isWideScreen = maxWidth >= 600.dp
+        val useNavRail = isWideScreen && navRailPosition != AppPreferences.NAV_POSITION_BOTTOM
+
+        // When unfolding from a single-pane detail screen into two-pane mode,
+        // collapse the backstack to the list root and open that item in the detail pane.
+        val settingsTopKey = settingsStack.lastOrNull()
+        LaunchedEffect(isWideScreen, settingsTopKey) {
+            if (isWideScreen && settingsStack.size > 1) {
+                val mappedPane = when (settingsTopKey) {
+                    is AboutKey -> SettingsDetailPane.ABOUT
+                    is AppearanceThemeKey -> SettingsDetailPane.APPEARANCE_THEME
+                    is AppearanceNavigationKey -> SettingsDetailPane.APPEARANCE_NAVIGATION
+                    is AppearanceLanguageKey -> SettingsDetailPane.APPEARANCE_LANGUAGE
+                    is AppManagementKey -> SettingsDetailPane.APP_MANAGEMENT
+                    is TrustedNetworksKey -> SettingsDetailPane.TRUSTED_NETWORKS
+                    is TailscaleKey -> SettingsDetailPane.TAILSCALE
+                    is HttpsFilteringKey -> SettingsDetailPane.HTTPS_FILTERING
+                    is DnsProviderKey -> SettingsDetailPane.DNS_PROVIDER
+                    is GeoIpKey -> SettingsDetailPane.GEO_IP
+                    else -> null
+                }
+                if (mappedPane != null) {
+                    pendingSettingsPane = mappedPane
+                    while (settingsStack.size > 1) {
+                        settingsStack.removeLastOrNull()
+                    }
+                    if (currentTab == BottomBarScreen.Settings) {
+                        showBottomBar = true
+                    }
+                }
+            }
+        }
+
+        val filterTopKey = filterStack.lastOrNull()
+        LaunchedEffect(isWideScreen, filterTopKey) {
+            if (isWideScreen && filterStack.size > 1 && filterTopKey is FilterDetailKey) {
+                pendingFilterId = filterTopKey.filterId
+                while (filterStack.size > 1) {
+                    filterStack.removeLastOrNull()
+                }
+                if (currentTab == BottomBarScreen.FilterSetup) {
+                    showBottomBar = true
+                }
+            }
+        }
 
         // When on a non-Home tab root, back should switch to Home tab instead of exiting
         BackHandler(enabled = currentTab != BottomBarScreen.Home && currentBackStack.size <= 1) {
@@ -214,7 +279,9 @@ fun HomeApp(
                         onNavigateToOverlap = {
                             showBottomBar = false
                             currentBackStack.add(FilterOverlapKey)
-                        }
+                        },
+                        externalFilterId = pendingFilterId,
+                        onExternalFilterIdConsumed = { pendingFilterId = null }
                     )
                 }
                 entry<FireWallKey> {
@@ -229,9 +296,17 @@ fun HomeApp(
                             showBottomBar = false
                             settingsStack.add(AboutKey)
                         },
-                        onNavigateToAppearance = {
+                        onNavigateToTheme = {
                             showBottomBar = false
-                            settingsStack.add(AppearanceKey)
+                            settingsStack.add(AppearanceThemeKey)
+                        },
+                        onNavigateToNavigation = {
+                            showBottomBar = false
+                            settingsStack.add(AppearanceNavigationKey)
+                        },
+                        onNavigateToLanguage = {
+                            showBottomBar = false
+                            settingsStack.add(AppearanceLanguageKey)
                         },
                         onNavigateToAppManagement = {
                             showBottomBar = false
@@ -270,7 +345,9 @@ fun HomeApp(
                         onNavigateToTailscale = {
                             showBottomBar = false
                             settingsStack.add(TailscaleKey)
-                        }
+                        },
+                        externalDetailPane = pendingSettingsPane,
+                        onExternalDetailPaneConsumed = { pendingSettingsPane = null }
                     )
                 }
                 entry<StatisticsKey> {
@@ -315,8 +392,22 @@ fun HomeApp(
                         }
                     )
                 }
-                entry<AppearanceKey> {
-                    AppearanceScreen(
+                entry<AppearanceThemeKey> {
+                    AppearanceThemeScreen(
+                        onNavigateBack = {
+                            safePop(settingsStack)
+                        }
+                    )
+                }
+                entry<AppearanceNavigationKey> {
+                    AppearanceNavigationScreen(
+                        onNavigateBack = {
+                            safePop(settingsStack)
+                        }
+                    )
+                }
+                entry<AppearanceLanguageKey> {
+                    AppearanceLanguageScreen(
                         onNavigateBack = {
                             safePop(settingsStack)
                         }
@@ -458,47 +549,91 @@ fun HomeApp(
             )
         }
 
-        if (useNavRail) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                if (showBottomBar) {
-                    BlockAdsNavigationRail(
-                        screens = bottomBarScreens,
-                        currentTab = currentTab,
-                        firewallEnabled = firewallEnabled,
-                        showLabels = showBottomNavLabels,
-                        onSelectTab = { currentTab = it }
-                    )
-                    VerticalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                    )
-                }
-                renderNavDisplay(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                )
-            }
+        val isRightRail = navRailPosition == AppPreferences.NAV_POSITION_RIGHT
+        val showFloatingBottomOverlay = !useNavRail && floatingCapsuleNav && showBottomBar
+        val showDockedBottomBar = !useNavRail && !floatingCapsuleNav && showBottomBar
+        val floatingBottomPadding = if (showFloatingBottomOverlay) {
+            if (showBottomNavLabels) 88.dp else 80.dp
         } else {
+            0.dp
+        }
+
+        CompositionLocalProvider(LocalFloatingBottomBarPadding provides floatingBottomPadding) {
             Scaffold(
                 contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 bottomBar = {
-                    if (showBottomBar) {
+                    if (showDockedBottomBar) {
                         BlockAdsNavigationBar(
                             screens = bottomBarScreens,
                             currentTab = currentTab,
                             firewallEnabled = firewallEnabled,
                             showLabels = showBottomNavLabels,
+                            floatingCapsule = false,
                             onSelectTab = { currentTab = it }
                         )
                     }
                 }
             ) { innerPadding ->
-                renderNavDisplay(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(bottom = innerPadding.calculateBottomPadding())
-                        .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(bottom = innerPadding.calculateBottomPadding())
+                            .consumeWindowInsets(PaddingValues(bottom = innerPadding.calculateBottomPadding()))
+                    ) {
+                        if (useNavRail && !isRightRail && showBottomBar) {
+                            BlockAdsNavigationRail(
+                                screens = bottomBarScreens,
+                                currentTab = currentTab,
+                                firewallEnabled = firewallEnabled,
+                                showLabels = showBottomNavLabels,
+                                floatingCapsule = floatingCapsuleNav,
+                                onSelectTab = { currentTab = it }
+                            )
+                            if (!floatingCapsuleNav) {
+                                VerticalDivider(
+                                    modifier = Modifier.statusBarsPadding(),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
+                        renderNavDisplay(
+                            Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        )
+                        if (useNavRail && isRightRail && showBottomBar) {
+                            if (!floatingCapsuleNav) {
+                                VerticalDivider(
+                                    modifier = Modifier.statusBarsPadding(),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                            }
+                            BlockAdsNavigationRail(
+                                screens = bottomBarScreens,
+                                currentTab = currentTab,
+                                firewallEnabled = firewallEnabled,
+                                showLabels = showBottomNavLabels,
+                                floatingCapsule = floatingCapsuleNav,
+                                onSelectTab = { currentTab = it }
+                            )
+                        }
+                    }
+
+                    if (showFloatingBottomOverlay) {
+                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                            BlockAdsNavigationBar(
+                                screens = bottomBarScreens,
+                                currentTab = currentTab,
+                                firewallEnabled = firewallEnabled,
+                                showLabels = showBottomNavLabels,
+                                floatingCapsule = true,
+                                onSelectTab = { currentTab = it }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

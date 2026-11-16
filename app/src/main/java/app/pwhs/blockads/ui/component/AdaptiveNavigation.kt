@@ -1,5 +1,7 @@
 package app.pwhs.blockads.ui.component
 
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,8 +23,11 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,11 +39,24 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.ui.data.BottomBarScreen
 
 @Composable
+fun rememberIsTabletOrFold(): Boolean {
+    val configuration = LocalConfiguration.current
+    val context = LocalContext.current
+    return remember(configuration.smallestScreenWidthDp, context) {
+        val isTablet = configuration.smallestScreenWidthDp >= 600
+        val hasHingeSensor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
+        isTablet || hasHingeSensor
+    }
+}
+
+@Composable
 fun BlockAdsNavigationBar(
     screens: List<BottomBarScreen>,
     currentTab: BottomBarScreen,
     firewallEnabled: Boolean,
     showLabels: Boolean,
+    floatingCapsule: Boolean = false,
     onSelectTab: (BottomBarScreen) -> Unit
 ) {
     CompositionLocalProvider(
@@ -47,61 +65,22 @@ fun BlockAdsNavigationBar(
             fontScale = 1f
         )
     ) {
-        NavigationBar(
-            windowInsets = WindowInsets.navigationBars,
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-            screens.forEach { screen ->
-                NavigationBarItem(
-                    selected = currentTab == screen,
-                    onClick = { onSelectTab(screen) },
-                    icon = { NavTabIcon(screen = screen, firewallEnabled = firewallEnabled) },
-                    label = if (showLabels) {
-                        { NavTabLabel(screen = screen) }
-                    } else null,
-                    alwaysShowLabel = showLabels,
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                    )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun BlockAdsNavigationRail(
-    screens: List<BottomBarScreen>,
-    currentTab: BottomBarScreen,
-    firewallEnabled: Boolean,
-    showLabels: Boolean,
-    onSelectTab: (BottomBarScreen) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    CompositionLocalProvider(
-        LocalDensity provides Density(
-            density = LocalDensity.current.density,
-            fontScale = 1f
-        )
-    ) {
-        NavigationRail(
-            modifier = modifier.fillMaxHeight(),
-            windowInsets = WindowInsets.statusBars.union(WindowInsets.navigationBars),
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+        if (floatingCapsule) {
+            FloatingCapsuleBottomBar(
+                screens = screens,
+                currentTab = currentTab,
+                firewallEnabled = firewallEnabled,
+                showLabels = showLabels,
+                onSelectTab = onSelectTab
+            )
+        } else {
+            NavigationBar(
+                windowInsets = WindowInsets.navigationBars,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 screens.forEach { screen ->
-                    NavigationRailItem(
+                    NavigationBarItem(
                         selected = currentTab == screen,
                         onClick = { onSelectTab(screen) },
                         icon = { NavTabIcon(screen = screen, firewallEnabled = firewallEnabled) },
@@ -109,7 +88,7 @@ fun BlockAdsNavigationRail(
                             { NavTabLabel(screen = screen) }
                         } else null,
                         alwaysShowLabel = showLabels,
-                        colors = NavigationRailItemDefaults.colors(
+                        colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
@@ -122,7 +101,68 @@ fun BlockAdsNavigationRail(
 }
 
 @Composable
-private fun NavTabIcon(
+fun BlockAdsNavigationRail(
+    screens: List<BottomBarScreen>,
+    currentTab: BottomBarScreen,
+    firewallEnabled: Boolean,
+    showLabels: Boolean,
+    floatingCapsule: Boolean = false,
+    onSelectTab: (BottomBarScreen) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CompositionLocalProvider(
+        LocalDensity provides Density(
+            density = LocalDensity.current.density,
+            fontScale = 1f
+        )
+    ) {
+        if (floatingCapsule) {
+            FloatingCapsuleNavigationRail(
+                screens = screens,
+                currentTab = currentTab,
+                firewallEnabled = firewallEnabled,
+                showLabels = showLabels,
+                onSelectTab = onSelectTab,
+                modifier = modifier
+            )
+        } else {
+            NavigationRail(
+                modifier = modifier.fillMaxHeight(),
+                windowInsets = WindowInsets.statusBars.union(WindowInsets.navigationBars),
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    screens.forEach { screen ->
+                        NavigationRailItem(
+                            selected = currentTab == screen,
+                            onClick = { onSelectTab(screen) },
+                            icon = { NavTabIcon(screen = screen, firewallEnabled = firewallEnabled) },
+                            label = if (showLabels) {
+                                { NavTabLabel(screen = screen) }
+                            } else null,
+                            alwaysShowLabel = showLabels,
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun NavTabIcon(
     screen: BottomBarScreen,
     firewallEnabled: Boolean
 ) {
@@ -138,7 +178,7 @@ private fun NavTabIcon(
 }
 
 @Composable
-private fun NavTabLabel(screen: BottomBarScreen) {
+internal fun NavTabLabel(screen: BottomBarScreen) {
     Text(
         text = stringResource(screen.labelRes),
         textAlign = TextAlign.Center,

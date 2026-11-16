@@ -451,6 +451,17 @@
     <string name="settings_bottom_nav_tab_auto">Auto (Default)</string>
     <string name="settings_bottom_nav_tab_filter">Filter Setup</string>
     <string name="settings_bottom_nav_tab_vpn">VPN &amp; Proxy</string>
+    <string name="settings_nav_position">Navigation Position</string>
+    <string name="settings_nav_position_desc">Choose where the navigation bar appears on tablets and foldables</string>
+    <string name="settings_nav_position_left">Left</string>
+    <string name="settings_nav_position_right">Right</string>
+    <string name="settings_nav_position_bottom">Bottom</string>
+    <string name="settings_nav_capsule_style">Capsule Navigation Style</string>
+    <string name="settings_nav_capsule_style_desc">Use a floating pill-shaped navigation bar</string>
+    <string name="settings_theme_and_colors">Theme &amp; Colors</string>
+    <string name="settings_theme_and_colors_desc">Dark mode, OLED, and accent color</string>
+    <string name="settings_navigation_desc">Labels, tabs, and navigation bar layout</string>
+    <string name="settings_language_desc">Choose app display language</string>
 
     <!-- Rating & Review -->
     <string name="rate_app_title">Enjoying BlockAds?</string>

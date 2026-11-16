@@ -2,17 +2,23 @@ package app.pwhs.blockads.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,8 +45,11 @@ import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.about.AboutScreen
-import app.pwhs.blockads.ui.appearance.AppearanceScreen
+import app.pwhs.blockads.ui.appearance.AppearanceLanguageScreen
+import app.pwhs.blockads.ui.appearance.AppearanceNavigationScreen
+import app.pwhs.blockads.ui.appearance.AppearanceThemeScreen
 import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -64,7 +74,7 @@ import app.pwhs.blockads.ui.tailscale.TailscaleScreen
 import app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen
 import org.koin.androidx.compose.koinViewModel
 
-private enum class SettingsDetailPane {
+enum class SettingsDetailPane {
     DNS_PROVIDER,
     DNS_RESPONSE_TYPE,
     UPDATE_FREQUENCY,
@@ -76,7 +86,9 @@ private enum class SettingsDetailPane {
     TRUSTED_NETWORKS,
     TAILSCALE,
     GEO_IP,
-    APPEARANCE,
+    APPEARANCE_THEME,
+    APPEARANCE_NAVIGATION,
+    APPEARANCE_LANGUAGE,
     ABOUT,
 }
 
@@ -86,7 +98,9 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinViewModel(),
     onNavigateToAbout: () -> Unit = { },
-    onNavigateToAppearance: () -> Unit = { },
+    onNavigateToTheme: () -> Unit = { },
+    onNavigateToNavigation: () -> Unit = { },
+    onNavigateToLanguage: () -> Unit = { },
     onNavigateToAppManagement: () -> Unit = { },
     onNavigateToTrustedNetworks: () -> Unit = { },
     onNavigateToWireGuardImport: () -> Unit = { },
@@ -98,6 +112,8 @@ fun SettingsScreen(
     onNavigateToFilterSetup: () -> Unit = { },
     hasVpnInBottomBar: Boolean = false,
     hasFilterInBottomBar: Boolean = false,
+    externalDetailPane: SettingsDetailPane? = null,
+    onExternalDetailPaneConsumed: () -> Unit = {},
 ) {
     val autoReconnect by viewModel.autoReconnect.collectAsStateWithLifecycle()
     val autoUpdateEnabled by viewModel.autoUpdateEnabled.collectAsStateWithLifecycle()
@@ -134,29 +150,16 @@ fun SettingsScreen(
 
     UiEventEffect(viewModel.events)
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.settings_title),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val isListDetail = maxWidth >= 600.dp
+        var activeDetailPane by rememberSaveable { mutableStateOf(SettingsDetailPane.DNS_PROVIDER) }
+
+        LaunchedEffect(externalDetailPane) {
+            if (externalDetailPane != null) {
+                activeDetailPane = externalDetailPane
+                onExternalDetailPaneConsumed()
+            }
         }
-    ) { innerPadding ->
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            val isListDetail = maxWidth >= 600.dp
-            var activeDetailPane by rememberSaveable { mutableStateOf(SettingsDetailPane.DNS_PROVIDER) }
 
             val settingsListContent: @Composable (Modifier) -> Unit = { listModifier ->
                 Column(
@@ -242,9 +245,17 @@ fun SettingsScreen(
                     )
 
                     InterfaceSection(
-                        onNavigateToAppearance = {
-                            if (isListDetail) activeDetailPane = SettingsDetailPane.APPEARANCE
-                            else onNavigateToAppearance()
+                        onNavigateToTheme = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.APPEARANCE_THEME
+                            else onNavigateToTheme()
+                        },
+                        onNavigateToNavigation = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.APPEARANCE_NAVIGATION
+                            else onNavigateToNavigation()
+                        },
+                        onNavigateToLanguage = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.APPEARANCE_LANGUAGE
+                            else onNavigateToLanguage()
                         }
                     )
 
@@ -298,16 +309,46 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Medium
                         )
                     }
+
+                    Spacer(modifier = Modifier.navigationBarsPadding())
+                    Spacer(modifier = Modifier.height(LocalFloatingBottomBarPadding.current))
                 }
             }
 
             if (isListDetail) {
-                Row(modifier = Modifier.fillMaxSize()) {
-                    settingsListContent(
-                        Modifier
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .consumeWindowInsets(WindowInsets.statusBars)
+                ) {
+                    Scaffold(
+                        modifier = Modifier
                             .weight(0.45f)
-                            .fillMaxHeight()
-                    )
+                            .fillMaxHeight(),
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        stringResource(R.string.settings_title),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                },
+                                windowInsets = WindowInsets(0, 0, 0, 0),
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.background
+                                )
+                            )
+                        }
+                    ) { listPadding ->
+                        settingsListContent(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(listPadding)
+                        )
+                    }
 
                     VerticalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
@@ -389,15 +430,46 @@ fun SettingsScreen(
                                 onNavigateToWizard = onNavigateToCertWizard
                             )
                             SettingsDetailPane.GEO_IP -> GeoIpScreen(onNavigateBack = {})
-                            SettingsDetailPane.APPEARANCE -> AppearanceScreen(onNavigateBack = {})
+                            SettingsDetailPane.APPEARANCE_THEME -> AppearanceThemeScreen(
+                                showBackButton = false,
+                                onNavigateBack = {}
+                            )
+                            SettingsDetailPane.APPEARANCE_NAVIGATION -> AppearanceNavigationScreen(
+                                showBackButton = false,
+                                onNavigateBack = {}
+                            )
+                            SettingsDetailPane.APPEARANCE_LANGUAGE -> AppearanceLanguageScreen(
+                                showBackButton = false,
+                                onNavigateBack = {}
+                            )
                             SettingsDetailPane.ABOUT -> AboutScreen(onNavigateBack = {})
                         }
                     }
                 }
             } else {
-                settingsListContent(Modifier.fillMaxSize())
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    stringResource(R.string.settings_title),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background
+                            )
+                        )
+                    }
+                ) { innerPadding ->
+                    settingsListContent(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    )
+                }
             }
-        }
 
         // Dialogs
         if (showDnsResponseTypeDialog) {

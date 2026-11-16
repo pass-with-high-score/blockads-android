@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.dnsprovider
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsProviders
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.ui.dnsprovider.component.ActiveDnsHeroCard
 import app.pwhs.blockads.ui.dnsprovider.component.CategoryHeader
 import app.pwhs.blockads.ui.dnsprovider.component.CustomDnsBottomSheet
@@ -116,6 +118,7 @@ fun DnsProviderScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp + LocalFloatingBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }

@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,7 +39,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -107,8 +108,9 @@ fun SniProxyTab(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.PlayCircle,
+                    painter = painterResource(R.drawable.ic_brand_youtube),
                     contentDescription = null,
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -150,7 +152,14 @@ private fun SniProxyRuleCard(
     onClick: () -> Unit
 ) {
     val title = rule.name.ifBlank { rule.targetAddress }
-    val isYouTube = SniProxyRuleCodec.YOUTUBE_PACKAGE in rule.packageNames
+    val isYouTube = SniProxyRuleCodec.YOUTUBE_PACKAGE in rule.packageNames ||
+        rule.domains.any {
+            it.contains("youtube", ignoreCase = true) ||
+                it.contains("youtu.be", ignoreCase = true) ||
+                it.contains("googlevideo", ignoreCase = true)
+        }
+    val isReddit = SniProxyRuleCodec.REDDIT_PACKAGE in rule.packageNames ||
+        rule.domains.any { it.contains("reddit", ignoreCase = true) }
     val appSummary = if (rule.packageNames.isEmpty()) {
         stringResource(R.string.sni_proxy_apps_all)
     } else {
@@ -202,13 +211,27 @@ private fun SniProxyRuleCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = if (isYouTube) Icons.Default.PlayCircle else Icons.AutoMirrored.Filled.AltRoute,
-                        contentDescription = null,
-                        tint = if (rule.enabled) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    when {
+                        isYouTube -> Icon(
+                            painter = painterResource(R.drawable.ic_brand_youtube),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        isReddit -> Icon(
+                            painter = painterResource(R.drawable.ic_brand_reddit),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        else -> Icon(
+                            imageVector = Icons.AutoMirrored.Filled.AltRoute,
+                            contentDescription = null,
+                            tint = if (rule.enabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
 
                 Column(modifier = Modifier.weight(1f)) {

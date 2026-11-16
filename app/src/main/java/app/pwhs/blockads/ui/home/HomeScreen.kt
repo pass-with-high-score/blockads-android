@@ -63,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.ui.home.data.RecentLogFilter
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -394,6 +395,7 @@ fun HomeScreen(
             ) {
                 val isTwoPane = maxWidth >= 600.dp
 
+                val floatingBottomPadding = LocalFloatingBottomBarPadding.current
                 if (isTwoPane) {
                     Row(
                         modifier = Modifier
@@ -406,7 +408,7 @@ fun HomeScreen(
                                 .weight(0.44f)
                                 .fillMaxHeight()
                                 .verticalScroll(rememberScrollState())
-                                .padding(top = 24.dp, bottom = 24.dp),
+                                .padding(top = 24.dp, bottom = 24.dp + floatingBottomPadding),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Top
                         ) {
@@ -420,7 +422,7 @@ fun HomeScreen(
                                 .verticalScroll(rememberScrollState())
                                 .padding(
                                     top = 16.dp,
-                                    bottom = if (tipState.isVisible) 100.dp else 24.dp
+                                    bottom = (if (tipState.isVisible) 100.dp else 24.dp) + floatingBottomPadding
                                 ),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -433,7 +435,7 @@ fun HomeScreen(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .padding(horizontal = 24.dp)
-                            .padding(bottom = if (tipState.isVisible) 100.dp else 24.dp),
+                            .padding(bottom = (if (tipState.isVisible) 100.dp else 24.dp) + floatingBottomPadding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -451,7 +453,12 @@ fun HomeScreen(
                     modifier = Modifier
                         .align(if (isTwoPane) Alignment.BottomEnd else Alignment.BottomCenter)
                         .widthIn(max = 520.dp)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 8.dp,
+                            bottom = 8.dp + floatingBottomPadding
+                        )
                 ) {
                     HomeActiveTipCard(tipState = tipState)
                 }
