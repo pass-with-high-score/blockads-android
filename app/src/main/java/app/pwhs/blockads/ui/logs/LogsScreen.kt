@@ -10,17 +10,20 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PauseCircle
@@ -33,6 +36,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +57,7 @@ import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.AppFilterBottomSheet
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
+import app.pwhs.blockads.ui.logs.component.DomainDetailContent
 import app.pwhs.blockads.ui.logs.component.LogEntryItem
 import app.pwhs.blockads.ui.logs.component.LogFilterControlBar
 import app.pwhs.blockads.ui.logs.component.LogSearchBar
@@ -163,17 +168,8 @@ fun LogsScreen(
             )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 760.dp)
-                    .fillMaxSize()
-            ) {
+        val logsListPane: @Composable (Modifier) -> Unit = { listModifier ->
+            Column(modifier = listModifier) {
             // Search bar
             LogSearchBar(
                 query = searchQuery,
@@ -292,41 +288,112 @@ fun LogsScreen(
                 }
             }
         }
-
-        // Domain detail bottom sheet
-        selectedEntry?.let { entry ->
-            val isDomainWhitelisted = whitelistedDomains.contains(entry.domain.lowercase())
-            DomainDetailBottomSheet(
-                entry = entry,
-                isWhitelisted = isDomainWhitelisted,
-                filterNames = filterNames,
-                onDismiss = { selectedEntry = null },
-                onAddToWhiteList = {
-                    viewModel.addToWhitelist(entry.domain)
-                    selectedEntry = null
-                },
-                onCopyDomain = {
-                    val clipboard =
-                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
-                    Toast.makeText(
-                        context,
-                        resource.getString(R.string.domain_copied),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    selectedEntry = null
-                },
-                onAddToCustomBlockRules = {
-                    viewModel.addToCustomBlockRules(entry.domain)
-                    selectedEntry = null
-                },
-                onAddWildcardWhitelist = {
-                    viewModel.addWildcardWhitelist(entry.domain)
-                    selectedEntry = null
-                },
-                viewModel = viewModel
-            )
         }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            val isListDetail = maxWidth >= 600.dp
+
+            if (isListDetail) {
+                val activeEntry = selectedEntry
+                    ?.takeIf { e -> logs.any { it.id == e.id } }
+                    ?: logs.firstOrNull()
+
+                Row(modifier = Modifier.fillMaxSize()) {
+                    logsListPane(
+                        Modifier
+                            .weight(0.54f)
+                            .fillMaxHeight()
+                    )
+
+                    VerticalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(0.46f)
+                            .fillMaxHeight()
+                    ) {
+                        if (activeEntry != null) {
+                            val isDomainWhitelisted = whitelistedDomains.contains(activeEntry.domain.lowercase())
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(vertical = 12.dp)
+                            ) {
+                                DomainDetailContent(
+                                    entry = activeEntry,
+                                    isWhitelisted = isDomainWhitelisted,
+                                    filterNames = filterNames,
+                                    onAddToWhiteList = { viewModel.addToWhitelist(activeEntry.domain) },
+                                    onCopyDomain = {
+                                        val clipboard =
+                                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        clipboard.setPrimaryClip(ClipData.newPlainText("domain", activeEntry.domain))
+                                        Toast.makeText(
+                                            context,
+                                            resource.getString(R.string.domain_copied),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    onAddToCustomBlockRules = { viewModel.addToCustomBlockRules(activeEntry.domain) },
+                                    onAddWildcardWhitelist = { viewModel.addWildcardWhitelist(activeEntry.domain) },
+                                    viewModel = viewModel
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.logs_empty),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextSecondary,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+            } else {
+                logsListPane(Modifier.fillMaxSize())
+
+                // Domain detail bottom sheet on compact screens
+                selectedEntry?.let { entry ->
+                    val isDomainWhitelisted = whitelistedDomains.contains(entry.domain.lowercase())
+                    DomainDetailBottomSheet(
+                        entry = entry,
+                        isWhitelisted = isDomainWhitelisted,
+                        filterNames = filterNames,
+                        onDismiss = { selectedEntry = null },
+                        onAddToWhiteList = {
+                            viewModel.addToWhitelist(entry.domain)
+                            selectedEntry = null
+                        },
+                        onCopyDomain = {
+                            val clipboard =
+                                context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("domain", entry.domain))
+                            Toast.makeText(
+                                context,
+                                resource.getString(R.string.domain_copied),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            selectedEntry = null
+                        },
+                        onAddToCustomBlockRules = {
+                            viewModel.addToCustomBlockRules(entry.domain)
+                            selectedEntry = null
+                        },
+                        onAddWildcardWhitelist = {
+                            viewModel.addWildcardWhitelist(entry.domain)
+                            selectedEntry = null
+                        },
+                        viewModel = viewModel
+                    )
+                }
+            }
         }
     }
 

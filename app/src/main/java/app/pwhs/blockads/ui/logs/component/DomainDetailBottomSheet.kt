@@ -62,6 +62,37 @@ fun DomainDetailBottomSheet(
     viewModel: app.pwhs.blockads.ui.logs.LogViewModel,
     modifier: Modifier = Modifier
 ) {
+    ModalBottomSheet(
+        modifier = modifier,
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(),
+        containerColor = MaterialTheme.colorScheme.background
+    ) {
+        DomainDetailContent(
+            entry = entry,
+            isWhitelisted = isWhitelisted,
+            filterNames = filterNames,
+            onCopyDomain = onCopyDomain,
+            onAddToWhiteList = onAddToWhiteList,
+            onAddToCustomBlockRules = onAddToCustomBlockRules,
+            onAddWildcardWhitelist = onAddWildcardWhitelist,
+            viewModel = viewModel
+        )
+    }
+}
+
+@Composable
+fun DomainDetailContent(
+    entry: DnsLogEntry,
+    isWhitelisted: Boolean,
+    filterNames: Map<String, String> = emptyMap(),
+    onCopyDomain: () -> Unit,
+    onAddToWhiteList: () -> Unit,
+    onAddToCustomBlockRules: () -> Unit,
+    onAddWildcardWhitelist: () -> Unit,
+    viewModel: app.pwhs.blockads.ui.logs.LogViewModel,
+    modifier: Modifier = Modifier
+) {
     val unknownLabel = stringResource(R.string.log_unknown_app)
     val displayInfo = remember(entry, unknownLabel) {
         entry.toDisplayInfo(unknownLabel)
@@ -78,8 +109,7 @@ fun DomainDetailBottomSheet(
         else -> stringResource(R.string.log_status_allowed)
     }
 
-    // State for fetching specific blocking lists
-    val blockingLists = remember { androidx.compose.runtime.mutableStateOf<List<String>?>(null) }
+    val blockingLists = remember(entry) { androidx.compose.runtime.mutableStateOf<List<String>?>(null) }
 
     LaunchedEffect(entry) {
         if (entry.isBlocked && entry.blockedBy.equals(FilterListRepository.BLOCK_REASON_FILTER_LIST, ignoreCase = true)) {
@@ -92,14 +122,8 @@ fun DomainDetailBottomSheet(
     val blockedFirewallPackages by viewModel.blockedFirewallPackages.collectAsStateWithLifecycle()
     val whitelistedApps by viewModel.whitelistedApps.collectAsStateWithLifecycle()
 
-    ModalBottomSheet(
-        modifier = modifier,
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(),
-        containerColor = MaterialTheme.colorScheme.background
-    ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 8.dp)
         ) {
@@ -444,7 +468,6 @@ fun DomainDetailBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
 }
 
 @Composable
