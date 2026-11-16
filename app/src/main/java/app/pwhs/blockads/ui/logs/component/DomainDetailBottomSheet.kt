@@ -122,323 +122,138 @@ fun DomainDetailContent(
     val blockedFirewallPackages by viewModel.blockedFirewallPackages.collectAsStateWithLifecycle()
     val whitelistedApps by viewModel.whitelistedApps.collectAsStateWithLifecycle()
 
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+    ) {
+        // Header with optional app icon
+        val context = LocalContext.current
+        val appIcon: Drawable? = remember(entry.packageName) {
+            if (entry.packageName.isNotEmpty() && entry.packageName.contains(".")) {
+                try {
+                    context.packageManager.getApplicationIcon(entry.packageName)
+                } catch (e: Exception) { null }
+            } else null
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header with optional app icon
-            val context = LocalContext.current
-            val appIcon: Drawable? = remember(entry.packageName) {
-                if (entry.packageName.isNotEmpty() && entry.packageName.contains(".")) {
-                    try {
-                        context.packageManager.getApplicationIcon(entry.packageName)
-                    } catch (e: Exception) { null }
-                } else null
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (appIcon != null) {
-                    Image(
-                        painter = rememberDrawablePainter(drawable = appIcon),
-                        contentDescription = entry.appName,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }
-                Column {
-                    Text(
-                        text = displayInfo.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = statusColor
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Detail info card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(
+            if (appIcon != null) {
+                Image(
+                    painter = rememberDrawablePainter(drawable = appIcon),
+                    contentDescription = entry.appName,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    DetailRow(
-                        label = stringResource(R.string.log_detail_query_type),
-                        value = displayInfo.protocolOrType
-                    )
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+            Column {
+                Text(
+                    text = displayInfo.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = statusColor
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Detail info card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                DetailRow(
+                    label = stringResource(R.string.log_detail_query_type),
+                    value = displayInfo.protocolOrType
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                DetailRow(
+                    label = stringResource(R.string.log_detail_response_time),
+                    value = if (entry.responseTimeMs > 0) "${entry.responseTimeMs}ms"
+                    else stringResource(R.string.log_detail_na)
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                DetailRow(
+                    label = stringResource(R.string.log_detail_timestamp),
+                    value = formatTimestamp(entry.timestamp)
+                )
+                if (displayInfo.displayAppName.isNotEmpty()) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     DetailRow(
-                        label = stringResource(R.string.log_detail_response_time),
-                        value = if (entry.responseTimeMs > 0) "${entry.responseTimeMs}ms"
-                        else stringResource(R.string.log_detail_na)
+                        label = stringResource(R.string.log_detail_app),
+                        value = displayInfo.displayAppName
                     )
+                }
+                if (entry.resolvedIp.isNotEmpty()) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     DetailRow(
-                        label = stringResource(R.string.log_detail_timestamp),
-                        value = formatTimestamp(entry.timestamp)
+                        label = stringResource(R.string.log_detail_resolved_ip),
+                        value = entry.resolvedIp
                     )
-                    if (displayInfo.displayAppName.isNotEmpty()) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        DetailRow(
-                            label = stringResource(R.string.log_detail_app),
-                            value = displayInfo.displayAppName
-                        )
-                    }
-                    if (entry.resolvedIp.isNotEmpty()) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        DetailRow(
-                            label = stringResource(R.string.log_detail_resolved_ip),
-                            value = entry.resolvedIp
-                        )
-                    }
-                    if (entry.blockedBy.isNotEmpty()) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        val blockedByText = when (entry.blockedBy.uppercase()) {
-                            FilterListRepository.BLOCK_REASON_CUSTOM_RULE ->
-                                stringResource(R.string.block_reason_custom_rule)
-                            FilterListRepository.BLOCK_REASON_FILTER_LIST -> {
-                                val baseText = stringResource(R.string.block_reason_filter_list)
-                                val lists = blockingLists.value
-                                if (lists == null) {
-                                    "$baseText (Loading...)"
-                                } else if (lists.isEmpty()) {
-                                    baseText
-                                } else {
-                                    "$baseText (${lists.joinToString(", ")})"
-                                }
-                            }
-                            FilterListRepository.BLOCK_REASON_SECURITY ->
-                                stringResource(R.string.block_reason_security)
-                            FilterListRepository.BLOCK_REASON_FIREWALL ->
-                                stringResource(R.string.block_reason_firewall)
-                            FilterListRepository.BLOCK_REASON_UPSTREAM_DNS.uppercase() ->
-                                stringResource(R.string.block_reason_upstream_dns)
-                            else -> {
-                                val ids = entry.blockedBy.split(",")
-                                val names = ids.mapNotNull { filterNames[it] }
-                                if (names.isNotEmpty()) names.joinToString(", ") else entry.blockedBy
+                }
+                if (entry.blockedBy.isNotEmpty()) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    val blockedByText = when (entry.blockedBy.uppercase()) {
+                        FilterListRepository.BLOCK_REASON_CUSTOM_RULE ->
+                            stringResource(R.string.block_reason_custom_rule)
+                        FilterListRepository.BLOCK_REASON_FILTER_LIST -> {
+                            val baseText = stringResource(R.string.block_reason_filter_list)
+                            val lists = blockingLists.value
+                            if (lists == null) {
+                                "$baseText (Loading...)"
+                            } else if (lists.isEmpty()) {
+                                baseText
+                            } else {
+                                "$baseText (${lists.joinToString(", ")})"
                             }
                         }
-                        DetailRow(
-                            label = stringResource(R.string.log_detail_blocked_by),
-                            value = blockedByText
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Actions
-            if (!isWhitelisted && !entry.isBlocked) {
-                // Block action showing only when allowed and not whitelisted
-                Card(
-                    onClick = onAddToCustomBlockRules,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Block,
-                            contentDescription = null,
-                            tint = DangerRed,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.block_this_domain),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            // Whitelist action (only if not already whitelisted)
-            if (!isWhitelisted) {
-                Card(
-                    onClick = onAddToWhiteList,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.PlaylistAdd,
-                            contentDescription = null,
-                            tint = WhitelistAmber,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.log_action_whitelist),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Wildcard Whitelist action
-                Card(
-                    onClick = onAddWildcardWhitelist,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.PlaylistAdd,
-                            contentDescription = null,
-                            tint = WhitelistAmber,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.log_wildcard_whitelist_domain),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            // Whitelist / Firewall app toggle actions
-            val isValidApp = entry.packageName.isNotBlank() &&
-                    entry.packageName != "android" &&
-                    !entry.packageName.startsWith("local.")
-            if (isValidApp) {
-                val isAppWhitelisted = whitelistedApps.contains(entry.packageName)
-                Card(
-                    onClick = { viewModel.toggleWhitelistApp(entry.packageName) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            tint = if (isAppWhitelisted) MaterialTheme.colorScheme.primary else WhitelistAmber,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Column {
-                            Text(
-                                text = stringResource(
-                                    if (isAppWhitelisted) R.string.log_action_unwhitelist_app
-                                    else R.string.log_action_whitelist_app
-                                ),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            if (entry.appName.isNotBlank()) {
-                                Text(
-                                    text = entry.appName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-                            }
+                        FilterListRepository.BLOCK_REASON_SECURITY ->
+                            stringResource(R.string.block_reason_security)
+                        FilterListRepository.BLOCK_REASON_FIREWALL ->
+                            stringResource(R.string.block_reason_firewall)
+                        FilterListRepository.BLOCK_REASON_UPSTREAM_DNS.uppercase() ->
+                            stringResource(R.string.block_reason_upstream_dns)
+                        else -> {
+                            val ids = entry.blockedBy.split(",")
+                            val names = ids.mapNotNull { filterNames[it] }
+                            if (names.isNotEmpty()) names.joinToString(", ") else entry.blockedBy
                         }
                     }
+                    DetailRow(
+                        label = stringResource(R.string.log_detail_blocked_by),
+                        value = blockedByText
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val isAppInFirewall = blockedFirewallPackages.contains(entry.packageName)
-                Card(
-                    onClick = { viewModel.toggleAppFirewall(entry.packageName) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isAppInFirewall) Icons.Default.Shield else Icons.Default.Block,
-                            contentDescription = null,
-                            tint = if (isAppInFirewall) WhitelistAmber else DangerRed,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Column {
-                            Text(
-                                text = "${stringResource(R.string.firewall_title)}: ${stringResource(if (isAppInFirewall) R.string.log_action_unblock else R.string.log_action_block)}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            if (entry.appName.isNotBlank()) {
-                                Text(
-                                    text = entry.appName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
             }
+        }
 
-            // Copy domain
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Actions
+        if (!isWhitelisted && !entry.isBlocked) {
+            // Block action showing only when allowed and not whitelisted
             Card(
-                onClick = onCopyDomain,
+                onClick = onAddToCustomBlockRules,
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -453,21 +268,206 @@ fun DomainDetailContent(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(
-                        Icons.Default.ContentCopy,
+                        Icons.Default.Block,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
+                        tint = DangerRed,
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = stringResource(R.string.log_action_copy),
+                        text = stringResource(R.string.block_this_domain),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
+
+        // Whitelist action (only if not already whitelisted)
+        if (!isWhitelisted) {
+            Card(
+                onClick = onAddToWhiteList,
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.PlaylistAdd,
+                        contentDescription = null,
+                        tint = WhitelistAmber,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.log_action_whitelist),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Wildcard Whitelist action
+            Card(
+                onClick = onAddWildcardWhitelist,
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.PlaylistAdd,
+                        contentDescription = null,
+                        tint = WhitelistAmber,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.log_wildcard_whitelist_domain),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Whitelist / Firewall app toggle actions
+        val isValidApp = entry.packageName.isNotBlank() &&
+                entry.packageName != "android" &&
+                !entry.packageName.startsWith("local.")
+        if (isValidApp) {
+            val isAppWhitelisted = whitelistedApps.contains(entry.packageName)
+            Card(
+                onClick = { viewModel.toggleWhitelistApp(entry.packageName) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = if (isAppWhitelisted) MaterialTheme.colorScheme.primary else WhitelistAmber,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(
+                                if (isAppWhitelisted) R.string.log_action_unwhitelist_app
+                                else R.string.log_action_whitelist_app
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (entry.appName.isNotBlank()) {
+                            Text(
+                                text = entry.appName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val isAppInFirewall = blockedFirewallPackages.contains(entry.packageName)
+            Card(
+                onClick = { viewModel.toggleAppFirewall(entry.packageName) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isAppInFirewall) Icons.Default.Shield else Icons.Default.Block,
+                        contentDescription = null,
+                        tint = if (isAppInFirewall) WhitelistAmber else DangerRed,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column {
+                        Text(
+                            text = "${stringResource(R.string.firewall_title)}: ${stringResource(if (isAppInFirewall) R.string.log_action_unblock else R.string.log_action_block)}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (entry.appName.isNotBlank()) {
+                            Text(
+                                text = entry.appName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Copy domain
+        Card(
+            onClick = onCopyDomain,
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    Icons.Default.ContentCopy,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = stringResource(R.string.log_action_copy),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
 }
 
 @Composable
