@@ -58,7 +58,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.utils.CurrentNetworkType
 
 @Composable
-fun WindscribeHeroCard(
+fun ProxyHeroCard(
     isConnected: Boolean,
     onToggleConnection: () -> Unit,
     serverName: String,
@@ -132,7 +132,7 @@ fun WindscribeHeroCard(
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp, vertical = 16.dp)
         ) {
-            // Subtle watermark flag in background (Windscribe style)
+            // Subtle watermark flag in background
             val flagRes = countryCode?.let { CountryFlagRegistry.getFlagResId(it) }
             if (flagRes != null) {
                 Image(

@@ -4,9 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,7 +69,7 @@ import app.pwhs.blockads.data.entities.ProxyProfile
 import app.pwhs.blockads.ui.proxyvpn.component.AddProxyNodeDialog
 import app.pwhs.blockads.ui.proxyvpn.component.CountryFlagRegistry
 import app.pwhs.blockads.ui.proxyvpn.component.UnifiedProxyNodesContent
-import app.pwhs.blockads.ui.proxyvpn.component.WindscribeHeroCard
+import app.pwhs.blockads.ui.proxyvpn.component.ProxyHeroCard
 import app.pwhs.blockads.utils.NodePingResult
 import app.pwhs.blockads.utils.WireGuardGeoIpHelper
 import org.koin.androidx.compose.koinViewModel
@@ -311,25 +313,14 @@ fun ProxyVpnScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 720.dp)
-                    .fillMaxSize()
-            ) {
-            val heroHost = if (isWgActive && activeWg != null) {
-                activeWg.config.peers.firstOrNull()?.endpoint?.substringBeforeLast(":")
-            } else {
-                activeProxy?.server ?: activeWg?.config?.peers?.firstOrNull()?.endpoint?.substringBeforeLast(":")
-            }
+        val heroHost = if (isWgActive && activeWg != null) {
+            activeWg.config.peers.firstOrNull()?.endpoint?.substringBeforeLast(":")
+        } else {
+            activeProxy?.server ?: activeWg?.config?.peers?.firstOrNull()?.endpoint?.substringBeforeLast(":")
+        }
 
-            // Windscribe-style Cyber Dark Cockpit Hero Card
-            WindscribeHeroCard(
+        val heroCardContent: @Composable () -> Unit = {
+            ProxyHeroCard(
                 isConnected = isCardConnected,
                 onToggleConnection = { viewModel.toggleProxyVpn() },
                 serverName = heroServerName,
@@ -344,9 +335,9 @@ fun ProxyVpnScreen(
                 isRefreshingIp = isRefreshingIp,
                 onRefreshIp = { viewModel.refreshNetworkAndIp() }
             )
+        }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
+        val nodesContent: @Composable (Modifier) -> Unit = { nodesModifier ->
             UnifiedProxyNodesContent(
                 wgProfiles = wgProfiles,
                 proxyProfiles = proxyProfiles,
@@ -378,8 +369,44 @@ fun ProxyVpnScreen(
                 onUpdateSubscription = { viewModel.updateSubscription() },
                 onOpenSubscriptions = { showSubscriptionsSheet = true },
                 onRemoveDuplicates = { viewModel.removeDuplicates() },
-                modifier = Modifier.weight(1f)
+                modifier = nodesModifier
             )
+        }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if (maxWidth >= 600.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(0.42f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        heroCardContent()
+                    }
+
+                    nodesContent(
+                        Modifier
+                            .weight(0.58f)
+                            .fillMaxHeight()
+                    )
+                }
+            } else {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    heroCardContent()
+                    Spacer(modifier = Modifier.height(4.dp))
+                    nodesContent(Modifier.weight(1f))
+                }
             }
         }
     }

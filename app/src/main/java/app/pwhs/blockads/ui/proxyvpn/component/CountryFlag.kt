@@ -97,7 +97,7 @@ fun CountryFlag(
     val flagRes = CountryFlagRegistry.getFlagResId(countryCode)
 
     if (flagRes != null) {
-        // High-definition circular flag image (Windscribe style)
+        // High-definition circular flag image
         Image(
             painter = painterResource(id = flagRes),
             contentDescription = countryCode,
