@@ -178,8 +178,16 @@ fun FirewallScreen(
                             FirewallConfigContent(
                                 app = activeApp,
                                 existingRule = existingRule,
-                                onSave = { rule -> viewModel.processIntent(FirewallUiIntent.SaveRule(rule)) },
-                                onDelete = { viewModel.processIntent(FirewallUiIntent.DeleteRule(activeApp.packageName)) }
+                                onSave = { rule ->
+                                    viewModel.processIntent(
+                                        FirewallUiIntent.SaveRule(rule, dismissSheet = false)
+                                    )
+                                },
+                                onDelete = {
+                                    viewModel.processIntent(
+                                        FirewallUiIntent.DeleteRule(activeApp.packageName, dismissSheet = false)
+                                    )
+                                }
                             )
                         } else {
                             Text(
@@ -199,7 +207,11 @@ fun FirewallScreen(
                     FirewallConfigSheet(
                         app = app,
                         existingRule = existingRule,
-                        onSave = { rule -> viewModel.processIntent(FirewallUiIntent.SaveRule(rule)) },
+                        onSave = { rule ->
+                            viewModel.processIntent(
+                                FirewallUiIntent.SaveRule(rule, dismissSheet = false)
+                            )
+                        },
                         onDelete = { viewModel.processIntent(FirewallUiIntent.DeleteRule(app.packageName)) },
                         onDismiss = { viewModel.processIntent(FirewallUiIntent.CloseAppConfig) }
                     )

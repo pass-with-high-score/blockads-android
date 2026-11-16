@@ -59,8 +59,8 @@ sealed interface FirewallUiIntent {
     data class ToggleAppBlock(val packageName: String) : FirewallUiIntent
     data class OpenAppConfig(val app: AppInfoData) : FirewallUiIntent
     data object CloseAppConfig : FirewallUiIntent
-    data class SaveRule(val rule: FirewallRule) : FirewallUiIntent
-    data class DeleteRule(val packageName: String) : FirewallUiIntent
+    data class SaveRule(val rule: FirewallRule, val dismissSheet: Boolean = true) : FirewallUiIntent
+    data class DeleteRule(val packageName: String, val dismissSheet: Boolean = true) : FirewallUiIntent
     data object ToggleAllUserApps : FirewallUiIntent
     data object ToggleAllSystemApps : FirewallUiIntent
     data object RefreshApps : FirewallUiIntent

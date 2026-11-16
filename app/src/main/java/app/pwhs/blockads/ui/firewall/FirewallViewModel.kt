@@ -179,11 +179,15 @@ class FirewallViewModel(
             is FirewallUiIntent.CloseAppConfig -> _configuringApp.value = null
             is FirewallUiIntent.SaveRule -> {
                 saveRule(intent.rule)
-                _configuringApp.value = null
+                if (intent.dismissSheet) {
+                    _configuringApp.value = null
+                }
             }
             is FirewallUiIntent.DeleteRule -> {
                 deleteRule(intent.packageName)
-                _configuringApp.value = null
+                if (intent.dismissSheet) {
+                    _configuringApp.value = null
+                }
             }
             is FirewallUiIntent.ToggleAllUserApps -> {
                 val userPackages = _installedApps.value.filter { !it.isSystemApp }

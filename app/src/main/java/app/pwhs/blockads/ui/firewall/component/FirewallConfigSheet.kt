@@ -126,6 +126,31 @@ fun FirewallConfigContent(
         mutableIntStateOf(existingRule?.scheduleEndMinute ?: 0)
     }
 
+    fun persistRule(
+        wifi: Boolean = blockWifi,
+        mobile: Boolean = blockMobileData,
+        schedule: Boolean = scheduleEnabled,
+        sHour: Int = startHour,
+        sMinute: Int = startMinute,
+        eHour: Int = endHour,
+        eMinute: Int = endMinute
+    ) {
+        onSave(
+            FirewallRule(
+                id = existingRule?.id ?: 0,
+                packageName = app.packageName,
+                blockWifi = wifi,
+                blockMobileData = mobile,
+                scheduleEnabled = schedule,
+                scheduleStartHour = sHour,
+                scheduleStartMinute = sMinute,
+                scheduleEndHour = eHour,
+                scheduleEndMinute = eMinute,
+                isEnabled = true
+            )
+        )
+    }
+
         Column(
             modifier = modifier
                 .fillMaxWidth()
@@ -199,7 +224,10 @@ fun FirewallConfigContent(
                 icon = Icons.Default.Wifi,
                 title = stringResource(R.string.firewall_block_wifi),
                 checked = blockWifi,
-                onCheckedChange = { blockWifi = it }
+                onCheckedChange = {
+                    blockWifi = it
+                    persistRule(wifi = it)
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -208,7 +236,10 @@ fun FirewallConfigContent(
                 icon = Icons.Default.SignalCellularAlt,
                 title = stringResource(R.string.firewall_block_mobile),
                 checked = blockMobileData,
-                onCheckedChange = { blockMobileData = it }
+                onCheckedChange = {
+                    blockMobileData = it
+                    persistRule(mobile = it)
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -247,7 +278,10 @@ fun FirewallConfigContent(
                         }
                         Switch(
                             checked = scheduleEnabled,
-                            onCheckedChange = { scheduleEnabled = it },
+                            onCheckedChange = {
+                                scheduleEnabled = it
+                                persistRule(schedule = it)
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = MaterialTheme.colorScheme.primary
@@ -266,15 +300,31 @@ fun FirewallConfigContent(
                                     label = stringResource(R.string.firewall_schedule_from),
                                     hour = startHour,
                                     minute = startMinute,
-                                    onHourInc = { startHour = (startHour + 1) % 24 },
-                                    onMinuteInc = { startMinute = (startMinute + 30) % 60 }
+                                    onHourInc = {
+                                        val next = (startHour + 1) % 24
+                                        startHour = next
+                                        persistRule(sHour = next)
+                                    },
+                                    onMinuteInc = {
+                                        val next = (startMinute + 30) % 60
+                                        startMinute = next
+                                        persistRule(sMinute = next)
+                                    }
                                 )
                                 TimeAdjusterColumn(
                                     label = stringResource(R.string.firewall_schedule_to),
                                     hour = endHour,
                                     minute = endMinute,
-                                    onHourInc = { endHour = (endHour + 1) % 24 },
-                                    onMinuteInc = { endMinute = (endMinute + 30) % 60 }
+                                    onHourInc = {
+                                        val next = (endHour + 1) % 24
+                                        endHour = next
+                                        persistRule(eHour = next)
+                                    },
+                                    onMinuteInc = {
+                                        val next = (endMinute + 30) % 60
+                                        endMinute = next
+                                        persistRule(eMinute = next)
+                                    }
                                 )
                             }
                         }
@@ -282,61 +332,23 @@ fun FirewallConfigContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            if (existingRule != null) {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (existingRule != null) {
-                    OutlinedButton(
-                        onClick = onDelete,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.firewall_reset_rule),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = {
-                        onSave(
-                            FirewallRule(
-                                id = existingRule?.id ?: 0,
-                                packageName = app.packageName,
-                                blockWifi = blockWifi,
-                                blockMobileData = blockMobileData,
-                                scheduleEnabled = scheduleEnabled,
-                                scheduleStartHour = startHour,
-                                scheduleStartMinute = startMinute,
-                                scheduleEndHour = endHour,
-                                scheduleEndMinute = endMinute,
-                                isEnabled = true
-                            )
-                        )
-                    },
+                OutlinedButton(
+                    onClick = onDelete,
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
                     Text(
-                        text = stringResource(R.string.wireguard_action_save),
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.firewall_reset_rule),
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
