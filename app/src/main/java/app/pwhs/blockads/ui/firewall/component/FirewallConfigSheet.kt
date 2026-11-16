@@ -23,9 +23,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -37,11 +39,14 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -290,43 +295,53 @@ fun FirewallConfigContent(
                     }
 
                     AnimatedVisibility(visible = scheduleEnabled) {
+                        var editingStartTime by remember { mutableStateOf<Boolean?>(null) }
+
                         Column {
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                TimeAdjusterColumn(
+                                ScheduleTimeCard(
                                     label = stringResource(R.string.firewall_schedule_from),
                                     hour = startHour,
                                     minute = startMinute,
-                                    onHourInc = {
-                                        val next = (startHour + 1) % 24
-                                        startHour = next
-                                        persistRule(sHour = next)
-                                    },
-                                    onMinuteInc = {
-                                        val next = (startMinute + 30) % 60
-                                        startMinute = next
-                                        persistRule(sMinute = next)
-                                    }
+                                    onClick = { editingStartTime = true },
+                                    modifier = Modifier.weight(1f)
                                 )
-                                TimeAdjusterColumn(
+                                ScheduleTimeCard(
                                     label = stringResource(R.string.firewall_schedule_to),
                                     hour = endHour,
                                     minute = endMinute,
-                                    onHourInc = {
-                                        val next = (endHour + 1) % 24
-                                        endHour = next
-                                        persistRule(eHour = next)
-                                    },
-                                    onMinuteInc = {
-                                        val next = (endMinute + 30) % 60
-                                        endMinute = next
-                                        persistRule(eMinute = next)
-                                    }
+                                    onClick = { editingStartTime = false },
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
+                        }
+
+                        editingStartTime?.let { isStart ->
+                            ScheduleTimePickerDialog(
+                                initialHour = if (isStart) startHour else endHour,
+                                initialMinute = if (isStart) startMinute else endMinute,
+                                title = stringResource(
+                                    if (isStart) R.string.firewall_schedule_from
+                                    else R.string.firewall_schedule_to
+                                ),
+                                onConfirm = { h, m ->
+                                    if (isStart) {
+                                        startHour = h
+                                        startMinute = m
+                                        persistRule(sHour = h, sMinute = m)
+                                    } else {
+                                        endHour = h
+                                        endMinute = m
+                                        persistRule(eHour = h, eMinute = m)
+                                    }
+                                    editingStartTime = null
+                                },
+                                onDismiss = { editingStartTime = null }
+                            )
                         }
                     }
                 }
@@ -403,39 +418,91 @@ private fun ConfigToggleRow(
 }
 
 @Composable
-private fun TimeAdjusterColumn(
+private fun ScheduleTimeCard(
     label: String,
     hour: Int,
     minute: Int,
-    onHourInc: () -> Unit,
-    onMinuteInc: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = TextSecondary
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = String.format(Locale.US, "%02d:%02d", hour, minute),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Row {
-            TextButton(onClick = onHourInc) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
                 Text(
-                    text = stringResource(R.string.firewall_schedule_hour_plus),
-                    style = MaterialTheme.typography.labelSmall
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = String.format(Locale.US, "%02d:%02d", hour, minute),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-            TextButton(onClick = onMinuteInc) {
-                Text(
-                    text = stringResource(R.string.firewall_schedule_minute_plus),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.AccessTime,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScheduleTimePickerDialog(
+    initialHour: Int,
+    initialMinute: Int,
+    title: String,
+    onConfirm: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = true
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        text = {
+            TimePicker(state = timePickerState)
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(timePickerState.hour, timePickerState.minute) }) {
+                Text(
+                    text = stringResource(android.R.string.ok),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_cancel))
+            }
+        }
+    )
 }
