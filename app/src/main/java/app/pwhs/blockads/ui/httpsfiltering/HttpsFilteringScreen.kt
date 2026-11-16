@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -66,6 +67,7 @@ fun HttpsFilteringScreen(
     onNavigateBack: () -> Unit,
     onNavigateToWizard: () -> Unit = {},
     modifier: Modifier = Modifier,
+    showBackButton: Boolean = true,
     viewModel: HttpsFilteringViewModel = koinViewModel()
 ) {
     val isEnabled by viewModel.isEnabled.collectAsStateWithLifecycle()
@@ -157,15 +159,19 @@ fun HttpsFilteringScreen(
 
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = if (showBackButton) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.https_filtering_title)) },
+                windowInsets = if (showBackButton) TopAppBarDefaults.windowInsets else WindowInsets(0, 0, 0, 0),
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.accessibility_navigate_back)
-                        )
+                    if (showBackButton) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.accessibility_navigate_back)
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

@@ -255,6 +255,10 @@ fun HomeApp(
                             showBottomBar = false
                             settingsStack.add(HttpsFilteringKey)
                         },
+                        onNavigateToCertWizard = {
+                            showBottomBar = false
+                            settingsStack.add(CertInstallationWizardKey)
+                        },
                         onNavigateToDNSProvider = {
                             showBottomBar = false
                             settingsStack.add(DnsProviderKey)

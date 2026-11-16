@@ -41,6 +41,7 @@ import app.pwhs.blockads.ui.about.AboutScreen
 import app.pwhs.blockads.ui.appearance.AppearanceScreen
 import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
+import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.dialog.ConfirmClearLogDialog
 import app.pwhs.blockads.ui.settings.component.AdvancedSection
@@ -70,6 +71,7 @@ private enum class SettingsDetailPane {
     UPDATE_NOTIFICATION,
     BUILD_MODE,
     LOG_RETENTION,
+    HTTPS_FILTERING,
     APP_MANAGEMENT,
     TRUSTED_NETWORKS,
     TAILSCALE,
@@ -90,6 +92,7 @@ fun SettingsScreen(
     onNavigateToWireGuardImport: () -> Unit = { },
     onNavigateToTailscale: () -> Unit = { },
     onNavigateToHttpsFiltering: () -> Unit = { },
+    onNavigateToCertWizard: () -> Unit = { },
     onNavigateToDNSProvider: () -> Unit = { },
     onNavigateToGeoIp: () -> Unit = { },
     onNavigateToFilterSetup: () -> Unit = { },
@@ -184,7 +187,10 @@ fun SettingsScreen(
                     AdvancedSection(
                         routingMode = routingMode,
                         onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
-                        onNavigateToHttpsFiltering = onNavigateToHttpsFiltering,
+                        onNavigateToHttpsFiltering = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.HTTPS_FILTERING
+                            else onNavigateToHttpsFiltering()
+                        },
                         onNavigateToWireGuardImport = onNavigateToWireGuardImport,
                         onNavigateToTailscale = {
                             if (isListDetail) activeDetailPane = SettingsDetailPane.TAILSCALE
@@ -376,6 +382,11 @@ fun SettingsScreen(
                             SettingsDetailPane.TAILSCALE -> TailscaleScreen(
                                 showBackButton = false,
                                 onNavigateBack = {}
+                            )
+                            SettingsDetailPane.HTTPS_FILTERING -> HttpsFilteringScreen(
+                                showBackButton = false,
+                                onNavigateBack = {},
+                                onNavigateToWizard = onNavigateToCertWizard
                             )
                             SettingsDetailPane.GEO_IP -> GeoIpScreen(onNavigateBack = {})
                             SettingsDetailPane.APPEARANCE -> AppearanceScreen(onNavigateBack = {})
