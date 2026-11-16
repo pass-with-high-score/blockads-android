@@ -35,6 +35,9 @@ fun FilterSetupSection(
     onSetAutoUpdateNotification: (String) -> Unit = {},
     onSetAutoUpdateEnable: (Boolean) -> Unit = {},
     onNavigateToGeoIp: () -> Unit = {},
+    onOpenFrequencyPane: (() -> Unit)? = null,
+    onOpenNotificationPane: (() -> Unit)? = null,
+    onOpenBuildModePane: (() -> Unit)? = null,
 ) {
     var showFrequencyDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
@@ -89,7 +92,7 @@ fun FilterSetupSection(
                         iconTint = Color(0xFF059669),
                         title = stringResource(R.string.settings_auto_update_frequency),
                         desc = frequencyDesc,
-                        onClick = { showFrequencyDialog = true }
+                        onClick = { onOpenFrequencyPane?.invoke() ?: run { showFrequencyDialog = true } }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)
@@ -118,7 +121,7 @@ fun FilterSetupSection(
                         iconTint = Color(0xFF059669),
                         title = stringResource(R.string.settings_auto_update_notification),
                         desc = notificationDesc,
-                        onClick = { showNotificationDialog = true }
+                        onClick = { onOpenNotificationPane?.invoke() ?: run { showNotificationDialog = true } }
                     )
                 }
 
@@ -134,7 +137,7 @@ fun FilterSetupSection(
                     iconTint = Color(0xFFD97706),
                     title = stringResource(R.string.filter_build_mode),
                     desc = buildModeDesc,
-                    onClick = { showBuildModeDialog = true }
+                    onClick = { onOpenBuildModePane?.invoke() ?: run { showBuildModeDialog = true } }
                 )
 
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = dividerColor)

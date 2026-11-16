@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.about.AboutScreen
 import app.pwhs.blockads.ui.appearance.AppearanceScreen
 import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
@@ -55,6 +56,8 @@ import app.pwhs.blockads.ui.settings.component.InterfaceSection
 import app.pwhs.blockads.ui.settings.component.NotificationsSection
 import app.pwhs.blockads.ui.settings.component.PrivacySection
 import app.pwhs.blockads.ui.settings.component.ProtectionSection
+import app.pwhs.blockads.ui.settings.component.SettingsOptionItem
+import app.pwhs.blockads.ui.settings.component.SettingsOptionPane
 import app.pwhs.blockads.ui.settings.geoip.GeoIpScreen
 import app.pwhs.blockads.ui.tailscale.TailscaleScreen
 import app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen
@@ -63,6 +66,10 @@ import org.koin.androidx.compose.koinViewModel
 private enum class SettingsDetailPane {
     DNS_PROVIDER,
     DNS_RESPONSE_TYPE,
+    UPDATE_FREQUENCY,
+    UPDATE_NOTIFICATION,
+    BUILD_MODE,
+    LOG_RETENTION,
     APP_MANAGEMENT,
     TRUSTED_NETWORKS,
     TAILSCALE,
@@ -216,7 +223,16 @@ fun SettingsScreen(
                         onNavigateToGeoIp = {
                             if (isListDetail) activeDetailPane = SettingsDetailPane.GEO_IP
                             else onNavigateToGeoIp()
-                        }
+                        },
+                        onOpenFrequencyPane = if (isListDetail) {
+                            { activeDetailPane = SettingsDetailPane.UPDATE_FREQUENCY }
+                        } else null,
+                        onOpenNotificationPane = if (isListDetail) {
+                            { activeDetailPane = SettingsDetailPane.UPDATE_NOTIFICATION }
+                        } else null,
+                        onOpenBuildModePane = if (isListDetail) {
+                            { activeDetailPane = SettingsDetailPane.BUILD_MODE }
+                        } else null
                     )
 
                     InterfaceSection(
@@ -248,7 +264,10 @@ fun SettingsScreen(
                         onClearLogs = { showClearConfirm = true },
                         onResetSettings = { showResetConfirm = true },
                         logRetentionDays = logRetentionDays,
-                        onOpenLogRetentionDialog = { showRetentionDialog = true }
+                        onOpenLogRetentionDialog = {
+                            if (isListDetail) activeDetailPane = SettingsDetailPane.LOG_RETENTION
+                            else showRetentionDialog = true
+                        }
                     )
 
                     InformationSection(
@@ -301,6 +320,56 @@ fun SettingsScreen(
                             SettingsDetailPane.DNS_RESPONSE_TYPE -> DnsResponseTypePane(
                                 dnsResponseType = dnsResponseType,
                                 onUpdateResponseType = { viewModel.setDnsResponseType(it) }
+                            )
+                            SettingsDetailPane.UPDATE_FREQUENCY -> SettingsOptionPane(
+                                title = stringResource(R.string.settings_auto_update_frequency),
+                                options = listOf(
+                                    SettingsOptionItem(AppPreferences.UPDATE_FREQUENCY_6H, R.string.settings_auto_update_frequency_6h),
+                                    SettingsOptionItem(AppPreferences.UPDATE_FREQUENCY_12H, R.string.settings_auto_update_frequency_12h),
+                                    SettingsOptionItem(AppPreferences.UPDATE_FREQUENCY_24H, R.string.settings_auto_update_frequency_24h),
+                                    SettingsOptionItem(AppPreferences.UPDATE_FREQUENCY_48H, R.string.settings_auto_update_frequency_48h),
+                                    SettingsOptionItem(AppPreferences.UPDATE_FREQUENCY_MANUAL, R.string.settings_auto_update_frequency_manual)
+                                ),
+                                selectedValue = autoUpdateFrequency,
+                                onSelect = { viewModel.setAutoUpdateFrequency(it) }
+                            )
+                            SettingsDetailPane.UPDATE_NOTIFICATION -> SettingsOptionPane(
+                                title = stringResource(R.string.settings_auto_update_notification),
+                                options = listOf(
+                                    SettingsOptionItem(AppPreferences.NOTIFICATION_NORMAL, R.string.settings_auto_update_notification_normal),
+                                    SettingsOptionItem(AppPreferences.NOTIFICATION_SILENT, R.string.settings_auto_update_notification_silent),
+                                    SettingsOptionItem(AppPreferences.NOTIFICATION_NONE, R.string.settings_auto_update_notification_none)
+                                ),
+                                selectedValue = autoUpdateNotification,
+                                onSelect = { viewModel.setAutoUpdateNotification(it) }
+                            )
+                            SettingsDetailPane.BUILD_MODE -> SettingsOptionPane(
+                                title = stringResource(R.string.filter_build_mode),
+                                options = listOf(
+                                    SettingsOptionItem(
+                                        AppPreferences.BUILD_MODE_ONLINE,
+                                        R.string.filter_build_mode_server,
+                                        R.string.filter_build_mode_server_desc
+                                    ),
+                                    SettingsOptionItem(
+                                        AppPreferences.BUILD_MODE_LOCAL,
+                                        R.string.filter_build_mode_local,
+                                        R.string.filter_build_mode_local_desc
+                                    )
+                                ),
+                                selectedValue = filterBuildMode,
+                                onSelect = { viewModel.setFilterBuildMode(it) }
+                            )
+                            SettingsDetailPane.LOG_RETENTION -> SettingsOptionPane(
+                                title = stringResource(R.string.log_retention_title),
+                                options = listOf(
+                                    SettingsOptionItem(0, R.string.log_retention_off),
+                                    SettingsOptionItem(1, R.string.log_retention_1d),
+                                    SettingsOptionItem(3, R.string.log_retention_3d),
+                                    SettingsOptionItem(7, R.string.log_retention_7d)
+                                ),
+                                selectedValue = logRetentionDays,
+                                onSelect = { viewModel.setLogRetentionDays(it) }
                             )
                             SettingsDetailPane.APP_MANAGEMENT -> AppManagementScreen(onNavigateBack = {})
                             SettingsDetailPane.TRUSTED_NETWORKS -> TrustedNetworksScreen(onNavigateBack = {})
