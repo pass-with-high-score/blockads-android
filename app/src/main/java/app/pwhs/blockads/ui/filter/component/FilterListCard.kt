@@ -1,9 +1,12 @@
 package app.pwhs.blockads.ui.filter.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -57,6 +60,38 @@ fun LazyListScope.filterListItems(
                     )
                 }
             }
+        }
+    }
+}
+
+fun LazyGridScope.filterGridItems(
+    filters: List<FilterList>,
+    onToggle: (FilterList) -> Unit,
+    onFilterClick: (Long) -> Unit,
+    starredUrls: Set<String> = emptySet(),
+    onToggleStar: ((FilterList) -> Unit)? = null,
+    onDelete: ((FilterList) -> Unit)? = null
+) {
+    items(
+        items = filters,
+        key = { it.id },
+        contentType = { "filter_item" }
+    ) { filter ->
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            FilterItem(
+                filter = filter,
+                onToggle = { onToggle(filter) },
+                onDelete = onDelete?.let { { it(filter) } },
+                isStarred = starredUrls.contains(filter.url),
+                onToggleStar = onToggleStar?.let { { it(filter) } },
+                onClick = { onFilterClick(filter.id) }
+            )
         }
     }
 }

@@ -2,7 +2,10 @@ package app.pwhs.blockads.ui.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -114,14 +117,7 @@ fun SettingsScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            // ── Protection & Connection ──────────────────────────
+        val protectionContent: @Composable () -> Unit = {
             ProtectionSection(
                 autoReconnect = autoReconnect,
                 safeSearchEnabled = safeSearchEnabled,
@@ -134,10 +130,8 @@ fun SettingsScreen(
                 onShowDnsResponseTypeDialog = { showDnsResponseTypeDialog = true },
                 onNavigateToDNSProvider = onNavigateToDNSProvider
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Advanced & Proxy ──────────────────────────────────
+        }
+        val advancedContent: @Composable () -> Unit = {
             AdvancedSection(
                 routingMode = routingMode,
                 onSetRoutingMode = { viewModel.setRoutingModeEnabled(it) },
@@ -146,20 +140,16 @@ fun SettingsScreen(
                 onNavigateToTailscale = onNavigateToTailscale,
                 showVpnSetting = !hasVpnInBottomBar
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Applications & Routing ───────────────────────────
+        }
+        val applicationsContent: @Composable () -> Unit = {
             ApplicationsSection(
                 onNavigateToAppManagement = onNavigateToAppManagement,
                 onNavigateToTrustedNetworks = onNavigateToTrustedNetworks,
                 excludeLan = excludeLan,
                 onSetExcludeLan = { viewModel.setExcludeLan(it) }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Filters & Blocklists ─────────────────────────────
+        }
+        val filterSetupContent: @Composable () -> Unit = {
             FilterSetupSection(
                 modifier = Modifier.fillMaxWidth(),
                 autoUpdateNotification = autoUpdateNotification,
@@ -176,15 +166,11 @@ fun SettingsScreen(
                 onSetAutoUpdateEnable = { viewModel.setAutoUpdateEnabled(it) },
                 onNavigateToGeoIp = onNavigateToGeoIp
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Interface & Theme ────────────────────────────────
+        }
+        val interfaceContent: @Composable () -> Unit = {
             InterfaceSection(onNavigateToAppearance = onNavigateToAppearance)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Notifications ────────────────────────────────────
+        }
+        val notificationsContent: @Composable () -> Unit = {
             NotificationsSection(
                 dailySummaryEnabled = dailySummaryEnabled,
                 milestoneNotificationsEnabled = milestoneNotificationsEnabled,
@@ -193,20 +179,16 @@ fun SettingsScreen(
                 onSetMilestoneNotificationsEnabled = { viewModel.setMilestoneNotificationsEnabled(it) },
                 onSetHomeTipsEnabled = { viewModel.setHomeTipsEnabled(it) }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Privacy & System ─────────────────────────────────
+        }
+        val privacyContent: @Composable () -> Unit = {
             PrivacySection(
                 crashReportingEnabled = crashReportingEnabled,
                 onSetCrashReportingEnabled = { viewModel.setCrashReportingEnabled(it) },
                 hideFromRecents = hideFromRecents,
                 onSetHideFromRecents = { viewModel.setHideFromRecents(it) }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Data Backup & Logs ───────────────────────────────
+        }
+        val dataContent: @Composable () -> Unit = {
             DataSection(
                 onExport = { exportLauncher.launch("blockads_settings.json") },
                 onImport = { importLauncher.launch(arrayOf("application/json")) },
@@ -215,32 +197,85 @@ fun SettingsScreen(
                 logRetentionDays = logRetentionDays,
                 onOpenLogRetentionDialog = { showRetentionDialog = true }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Information ──────────────────────────────────────
+        }
+        val informationContent: @Composable () -> Unit = {
             InformationSection(onNavigateToAbout = onNavigateToAbout)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Community ────────────────────────────────────────
+        }
+        val communityContent: @Composable () -> Unit = {
             CommunitySection()
+        }
 
-            Spacer(modifier = Modifier.height(28.dp))
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            val isTwoColumn = maxWidth >= 600.dp
 
-            // ── Footer ───────────────────────────────────────────
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = if (isTwoColumn) 24.dp else 16.dp)
             ) {
-                Text(
-                    text = "${stringResource(R.string.app_name)} v${BuildConfig.VERSION_NAME}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    fontWeight = FontWeight.Medium
-                )
+                if (isTwoColumn) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                        ) {
+                            protectionContent()
+                            applicationsContent()
+                            interfaceContent()
+                            privacyContent()
+                            informationContent()
+                        }
+
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                        ) {
+                            advancedContent()
+                            filterSetupContent()
+                            notificationsContent()
+                            dataContent()
+                            communityContent()
+                        }
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        protectionContent()
+                        advancedContent()
+                        applicationsContent()
+                        filterSetupContent()
+                        interfaceContent()
+                        notificationsContent()
+                        privacyContent()
+                        dataContent()
+                        informationContent()
+                        communityContent()
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "${stringResource(R.string.app_name)} v${BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
 

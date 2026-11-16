@@ -1,6 +1,8 @@
 package app.pwhs.blockads.ui.filter
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -47,6 +51,7 @@ import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.filter.component.AddFilterBottomSheet
 import app.pwhs.blockads.ui.filter.component.CustomTabContent
+import app.pwhs.blockads.ui.filter.component.filterGridItems
 import app.pwhs.blockads.ui.filter.component.filterListItems
 import app.pwhs.blockads.ui.filter.component.FilterSearchBar
 import app.pwhs.blockads.ui.filter.component.FilterTabRow
@@ -278,17 +283,37 @@ fun FilterSetupScreen(
                     if (isSearching && displayFilters.isEmpty()) {
                         EmptyCategorySearch(searchQuery)
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
-                        ) {
-                            filterListItems(
-                                filters = displayFilters,
-                                onToggle = { viewModel.toggleFilterList(it) },
-                                onFilterClick = onNavigateToFilterDetail,
-                                starredUrls = starredUrls,
-                                onToggleStar = { viewModel.toggleStarredFilter(it) }
-                            )
+                        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                            if (maxWidth >= 600.dp) {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Adaptive(minSize = 320.dp),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    filterGridItems(
+                                        filters = displayFilters,
+                                        onToggle = { viewModel.toggleFilterList(it) },
+                                        onFilterClick = onNavigateToFilterDetail,
+                                        starredUrls = starredUrls,
+                                        onToggleStar = { viewModel.toggleStarredFilter(it) }
+                                    )
+                                }
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp)
+                                ) {
+                                    filterListItems(
+                                        filters = displayFilters,
+                                        onToggle = { viewModel.toggleFilterList(it) },
+                                        onFilterClick = onNavigateToFilterDetail,
+                                        starredUrls = starredUrls,
+                                        onToggleStar = { viewModel.toggleStarredFilter(it) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
