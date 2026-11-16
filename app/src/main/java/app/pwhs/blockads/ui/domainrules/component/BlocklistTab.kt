@@ -22,6 +22,7 @@ import app.pwhs.blockads.utils.ParsedFilterRule
 @Composable
 fun BlocklistTab(
     rules: List<ParsedFilterRule>,
+    appLabelMap: Map<String, String> = emptyMap(),
     onToggle: (ParsedFilterRule) -> Unit = {},
     onRemove: (ParsedFilterRule) -> Unit,
     onEdit: (ParsedFilterRule) -> Unit = {}
@@ -57,6 +58,9 @@ fun BlocklistTab(
                             icon = Icons.Default.Block,
                             isEnabled = rule.isEnabled,
                             ruleType = rule.type,
+                            appLabel = if (rule.packageName.isNotEmpty()) {
+                                appLabelMap[rule.packageName] ?: rule.packageName.substringAfterLast('.')
+                            } else null,
                             onToggle = { onToggle(rule) },
                             onDelete = { onRemove(rule) },
                             onEdit = { onEdit(rule) }

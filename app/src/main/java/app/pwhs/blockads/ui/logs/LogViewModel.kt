@@ -257,6 +257,36 @@ class LogViewModel(
         }
     }
 
+    fun addDomainRuleForApp(domain: String, packageName: String, isBlock: Boolean) {
+        viewModelScope.launch {
+            val cleanDomain = domain.trim().lowercase()
+            val cleanPackage = packageName.trim()
+            if (cleanDomain.isBlank() || cleanPackage.isBlank()) return@launch
+            val ruleType = if (isBlock) {
+                app.pwhs.blockads.data.entities.RuleType.BLOCK
+            } else {
+                app.pwhs.blockads.data.entities.RuleType.ALLOW
+            }
+            val policy = if (isBlock) "reject" else "direct"
+            val ruleText = "host-suffix, $cleanDomain, $policy"
+            if (customDnsRuleDao.existsForApp(cleanDomain, ruleType.name, cleanPackage) == 0) {
+                customDnsRuleDao.insert(
+                    app.pwhs.blockads.data.entities.CustomDnsRule(
+                        rule = ruleText,
+                        ruleType = ruleType,
+                        domain = cleanDomain,
+                        packageName = cleanPackage
+                    )
+                )
+                filterListRepository.loadCustomRules()
+                val toastRes = if (isBlock) R.string.blocklist_domain_added else R.string.whitelist_domain_added
+                _events.toast(toastRes, listOf(cleanDomain))
+            } else {
+                _events.toast(R.string.blocklist_domain_already_exists)
+            }
+        }
+    }
+
     fun getBlockingFilterLists(domain: String, onResult: (List<String>) -> Unit) {
         viewModelScope.launch {
             val lists = filterListRepository.findBlockingFilterLists(domain)

@@ -268,4 +268,10 @@
     <string name="filter_overlap_showing_capped">Hiển thị %1$d mục trùng lặp đầu tiên phù hợp</string>
     <string name="filter_overlap_exported">Đã xuất %1$s tên miền duy nhất</string>
     <string name="filter_overlap_export_failed">Không thể xuất danh sách bộ lọc kết hợp</string>
+    <string name="rule_field_target_app">Ứng dụng áp dụng</string>
+    <string name="rule_target_app_all">Tất cả ứng dụng (Toàn hệ thống)</string>
+    <string name="rule_pick_app_title">Chọn ứng dụng áp dụng</string>
+    <string name="rule_pick_app_search">Tìm kiếm ứng dụng…</string>
+    <string name="log_action_block_for_app">Chặn riêng cho %1$s</string>
+    <string name="log_action_allow_for_app">Cho phép riêng cho %1$s</string>
 </resources>

@@ -16,9 +16,11 @@ class FakeCustomDnsRuleDao(initial: List<CustomDnsRule> = emptyList()) : CustomD
     override suspend fun getAll() = rules.value
     override suspend fun getEnabledRules() = rules.value.filter { it.isEnabled && it.ruleType != RuleType.COMMENT }
     override suspend fun getBlockDomains() =
-        rules.value.filter { it.isEnabled && it.ruleType == RuleType.BLOCK }.map { it.domain }
+        rules.value.filter { it.isEnabled && it.ruleType == RuleType.BLOCK && it.packageName.isEmpty() }.map { it.domain }
     override suspend fun getAllowDomains() =
-        rules.value.filter { it.isEnabled && it.ruleType == RuleType.ALLOW }.map { it.domain }
+        rules.value.filter { it.isEnabled && it.ruleType == RuleType.ALLOW && it.packageName.isEmpty() }.map { it.domain }
+    override suspend fun getPerAppRules() =
+        rules.value.filter { it.isEnabled && it.ruleType != RuleType.COMMENT && it.packageName.isNotEmpty() }
     override suspend fun insert(rule: CustomDnsRule): Long {
         val stored = if (rule.id == 0) rule.copy(id = (rules.value.maxOfOrNull { it.id } ?: 0) + 1) else rule
         rules.value = rules.value.filterNot { it.id == stored.id } + stored
@@ -39,7 +41,10 @@ class FakeCustomDnsRuleDao(initial: List<CustomDnsRule> = emptyList()) : CustomD
     }
     override suspend fun getRuleCount() = rules.value.count { it.ruleType != RuleType.COMMENT }
     override suspend fun exists(ruleText: String) = rules.value.count { it.rule == ruleText }
-    override suspend fun existsBlockDomain(domain: String) = rules.value.count { it.domain == domain && it.ruleType == RuleType.BLOCK }
+    override suspend fun existsBlockDomain(domain: String) =
+        rules.value.count { it.domain == domain && it.ruleType == RuleType.BLOCK && it.packageName.isEmpty() }
+    override suspend fun existsForApp(domain: String, ruleType: String, packageName: String) =
+        rules.value.count { it.domain == domain && it.ruleType.name == ruleType && it.packageName == packageName }
 }
 
 class FakeWhitelistDomainDao(initial: List<WhitelistDomain> = emptyList()) : WhitelistDomainDao {

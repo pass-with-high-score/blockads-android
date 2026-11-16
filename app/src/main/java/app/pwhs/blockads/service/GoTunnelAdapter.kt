@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import timber.log.Timber
+import tunnel.AppDomainChecker
 import tunnel.AppResolver
 import tunnel.DomainChecker
 import tunnel.FirewallChecker
@@ -85,6 +86,9 @@ class GoTunnelAdapter(
             override fun isBlocked(domain: String): Boolean = filterRepo.isBlocked(domain)
             override fun getBlockReason(domain: String): String = filterRepo.getBlockReason(domain)
             override fun hasCustomRule(domain: String): Long = filterRepo.hasCustomRule(domain)
+        })
+        engine.setAppDomainChecker(AppDomainChecker { domain, appName ->
+            filterRepo.checkAppRule(domain, appName)
         })
     }
 

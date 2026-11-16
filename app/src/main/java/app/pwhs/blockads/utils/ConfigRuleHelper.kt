@@ -6,7 +6,8 @@ data class ParsedFilterRule(
     val param: String,
     val policy: String,
     val rawLine: String,
-    val isEnabled: Boolean = true
+    val isEnabled: Boolean = true,
+    val packageName: String = ""
 )
 
 object ConfigRuleHelper {

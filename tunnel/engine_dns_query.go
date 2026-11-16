@@ -117,6 +117,19 @@ func (e *Engine) handleDNSQuery(queryInfo *DNSQueryInfo) {
 		}
 	}
 
+	// ── Per-App Custom Rules Override ──
+	// 1 = Block for this app, 0 = Allow for this app, -1 = No per-app rule
+	if e.appDomainChecker != nil && appName != "" {
+		appOverride := e.appDomainChecker.CheckAppRule(domain, appName)
+		if appOverride == 0 {
+			e.handleForward(queryInfo, appName, startTime)
+			return
+		} else if appOverride == 1 {
+			e.handleBlockedDomain(queryInfo, "custom_app_rule", appName, startTime)
+			return
+		}
+	}
+
 	// ── Early Return for Custom Rules Override ──
 	// Checks custom allow/block and whitelist rules in Kotlin BEFORE checking the fast-path Tries.
 	// 1 = Block Override, 0 = Allow Override, -1 = No Custom Rule

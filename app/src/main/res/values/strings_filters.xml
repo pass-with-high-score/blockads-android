@@ -272,4 +272,10 @@
     <string name="sni_proxy_saved">SNI Proxy rule saved</string>
     <string name="sni_proxy_deleted">SNI Proxy rule deleted</string>
     <string name="sni_proxy_all_domains">All TLS 443 domains</string>
+    <string name="rule_field_target_app">Target App</string>
+    <string name="rule_target_app_all">All apps (Global)</string>
+    <string name="rule_pick_app_title">Select Target App</string>
+    <string name="rule_pick_app_search">Search apps…</string>
+    <string name="log_action_block_for_app">Block for %1$s</string>
+    <string name="log_action_allow_for_app">Allow for %1$s</string>
 </resources>

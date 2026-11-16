@@ -103,7 +103,8 @@ class DomainRulesViewModel(
             param = param,
             policy = policy,
             isEnabled = rule.isEnabled,
-            rawLine = "custom:${rule.id}"
+            rawLine = "custom:${rule.id}",
+            packageName = rule.packageName
         )
     }
 
@@ -285,7 +286,8 @@ class DomainRulesViewModel(
     fun addProfileRule(
         type: String,
         param: String,
-        policy: String
+        policy: String,
+        packageName: String = ""
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val paramClean = if (type.startsWith("HOST", ignoreCase = true)) {
@@ -295,8 +297,9 @@ class DomainRulesViewModel(
             }
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
+            val cleanPackage = packageName.trim()
             val isDirect = policy.equals("DIRECT", ignoreCase = true)
-            if (isDirect && type.equals("HOST", ignoreCase = true)) {
+            if (isDirect && type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty()) {
                 if (whitelistDomainDao.exists(paramClean) == 0) {
                     whitelistDomainDao.insert(WhitelistDomain(domain = paramClean))
                     filterRepo.loadWhitelist()
@@ -308,12 +311,18 @@ class DomainRulesViewModel(
             } else {
                 val ruleLine = formatRuleLine(type, paramClean, policy)
                 val ruleType = if (isDirect) RuleType.ALLOW else RuleType.BLOCK
-                if (customDnsRuleDao.exists(ruleLine) == 0) {
+                val alreadyExists = if (cleanPackage.isNotEmpty()) {
+                    customDnsRuleDao.existsForApp(paramClean, ruleType.name, cleanPackage) > 0
+                } else {
+                    customDnsRuleDao.exists(ruleLine) > 0
+                }
+                if (!alreadyExists) {
                     customDnsRuleDao.insert(
                         CustomDnsRule(
                             rule = ruleLine,
                             ruleType = ruleType,
-                            domain = paramClean
+                            domain = paramClean,
+                            packageName = cleanPackage
                         )
                     )
                     filterRepo.loadCustomRules()
@@ -332,7 +341,8 @@ class DomainRulesViewModel(
         oldDomain: String,
         type: String,
         param: String,
-        policy: String
+        policy: String,
+        packageName: String = ""
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val paramClean = if (type.startsWith("HOST", ignoreCase = true)) {
@@ -342,8 +352,9 @@ class DomainRulesViewModel(
             }
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
+            val cleanPackage = packageName.trim()
             val isDirect = policy.equals("DIRECT", ignoreCase = true)
-            val newIsWhitelist = isDirect && type.equals("HOST", ignoreCase = true)
+            val newIsWhitelist = isDirect && type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty()
 
             if (oldRawLine.startsWith("whitelist:")) {
                 val id = oldRawLine.removePrefix("whitelist:").toIntOrNull() ?: return@launch
@@ -358,6 +369,7 @@ class DomainRulesViewModel(
                             rule = formatRuleLine(type, paramClean, policy),
                             ruleType = if (isDirect) RuleType.ALLOW else RuleType.BLOCK,
                             domain = paramClean,
+                            packageName = cleanPackage,
                             isEnabled = existing?.isEnabled ?: true
                         )
                     )
@@ -384,7 +396,8 @@ class DomainRulesViewModel(
                         existing.copy(
                             rule = formatRuleLine(type, paramClean, policy),
                             ruleType = if (isDirect) RuleType.ALLOW else RuleType.BLOCK,
-                            domain = paramClean
+                            domain = paramClean,
+                            packageName = cleanPackage
                         )
                     )
                     filterRepo.loadCustomRules()
@@ -432,7 +445,8 @@ class DomainRulesViewModel(
     fun restoreProfileRule(rule: ParsedFilterRule) {
         viewModelScope.launch(Dispatchers.IO) {
             val isDirect = rule.policy.equals("DIRECT", ignoreCase = true)
-            if (rule.rawLine.startsWith("whitelist:") || (isDirect && rule.type.equals("HOST", ignoreCase = true))) {
+            val cleanPackage = rule.packageName.trim()
+            if (rule.rawLine.startsWith("whitelist:") || (isDirect && rule.type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty())) {
                 val clean = sanitizeDomain(rule.param)
                 if (clean.isNotBlank() && whitelistDomainDao.exists(clean) == 0) {
                     whitelistDomainDao.insert(WhitelistDomain(domain = clean, isEnabled = rule.isEnabled))
@@ -440,12 +454,19 @@ class DomainRulesViewModel(
                 }
             } else {
                 val ruleLine = formatRuleLine(rule.type, rule.param, rule.policy)
-                if (customDnsRuleDao.exists(ruleLine) == 0) {
+                val ruleType = if (isDirect) RuleType.ALLOW else RuleType.BLOCK
+                val exists = if (cleanPackage.isNotEmpty()) {
+                    customDnsRuleDao.existsForApp(rule.param, ruleType.name, cleanPackage) > 0
+                } else {
+                    customDnsRuleDao.exists(ruleLine) > 0
+                }
+                if (!exists) {
                     customDnsRuleDao.insert(
                         CustomDnsRule(
                             rule = ruleLine,
-                            ruleType = if (isDirect) RuleType.ALLOW else RuleType.BLOCK,
+                            ruleType = ruleType,
                             domain = rule.param,
+                            packageName = cleanPackage,
                             isEnabled = rule.isEnabled
                         )
                     )

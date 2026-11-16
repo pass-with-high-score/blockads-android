@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
@@ -390,6 +391,54 @@ fun DomainDetailContent(
                                 color = TextSecondary
                             )
                         }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val displayApp = entry.appName.ifBlank { entry.packageName.substringAfterLast('.') }
+            Card(
+                onClick = {
+                    viewModel.addDomainRuleForApp(
+                        domain = entry.domain,
+                        packageName = entry.packageName,
+                        isBlock = !entry.isBlocked
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = if (entry.isBlocked) Icons.Default.Check else Icons.Default.Block,
+                        contentDescription = null,
+                        tint = if (entry.isBlocked) MaterialTheme.colorScheme.primary else DangerRed,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(
+                                if (entry.isBlocked) R.string.log_action_allow_for_app
+                                else R.string.log_action_block_for_app,
+                                displayApp
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = entry.domain,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextSecondary
+                        )
                     }
                 }
             }
