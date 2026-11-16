@@ -12,9 +12,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.httpsfiltering.CertStatus
+import app.pwhs.blockads.ui.httpsfiltering.wizard.component.CertWizardHeroPane
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardExplanationPage
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardInstallCaPage
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardSaveCaPage
@@ -167,93 +170,119 @@ fun CertInstallationWizardScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.TopCenter
+                .padding(padding)
         ) {
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 720.dp)
-                    .fillMaxSize()
-            ) {
-            // Segmented Step Indicator
-            WizardStepIndicator(
-                currentStep = uiState.currentStep,
-                onStepClick = { step ->
-                    viewModel.processIntent(CertInstallationWizardUiIntent.GoToStep(step))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-            )
+            val isTwoPane = maxWidth >= 600.dp
 
-            Spacer(modifier = Modifier.height(6.dp))
+            val wizardStepsContent: @Composable (Modifier) -> Unit = { contentModifier ->
+                Column(modifier = contentModifier) {
+                    // Segmented Step Indicator
+                    WizardStepIndicator(
+                        currentStep = uiState.currentStep,
+                        onStepClick = { step ->
+                            viewModel.processIntent(CertInstallationWizardUiIntent.GoToStep(step))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
+                    )
 
-            // Slide & Fade step transition
-            AnimatedContent(
-                targetState = uiState.currentStep,
-                transitionSpec = {
-                    if (targetState.ordinal > initialState.ordinal) {
-                        (slideInHorizontally(tween(280)) { it / 2 } + fadeIn(tween(280))) togetherWith
-                                (slideOutHorizontally(tween(220)) { -it / 2 } + fadeOut(tween(220)))
-                    } else {
-                        (slideInHorizontally(tween(280)) { -it / 2 } + fadeIn(tween(280))) togetherWith
-                                (slideOutHorizontally(tween(220)) { it / 2 } + fadeOut(tween(220)))
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                label = "WizardStepSlideTransition"
-            ) { step ->
-                when (step) {
-                    WizardStep.EXPLANATION -> {
-                        WizardExplanationPage()
-                    }
-                    WizardStep.SECURITY -> {
-                        WizardSecurityPage()
-                    }
-                    WizardStep.SAVE_CA -> {
-                        WizardSaveCaPage(
-                            fileName = uiState.fileName,
-                            isExported = uiState.isCertExported,
-                            onExport = {
-                                val needsLegacyPermission =
-                                    android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q &&
-                                        androidx.core.content.ContextCompat.checkSelfPermission(
-                                            context,
-                                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                        ) != android.content.pm.PackageManager.PERMISSION_GRANTED
-                                if (needsLegacyPermission) {
-                                    storagePermissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                } else {
-                                    viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert)
-                                }
-                            },
-                            onCopyFileName = {
-                                val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
-                                val clip = android.content.ClipData.newPlainText("cert_filename", uiState.fileName)
-                                clipboard?.setPrimaryClip(clip)
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Slide & Fade step transition
+                    AnimatedContent(
+                        targetState = uiState.currentStep,
+                        transitionSpec = {
+                            if (targetState.ordinal > initialState.ordinal) {
+                                (slideInHorizontally(tween(280)) { it / 2 } + fadeIn(tween(280))) togetherWith
+                                        (slideOutHorizontally(tween(220)) { -it / 2 } + fadeOut(tween(220)))
+                            } else {
+                                (slideInHorizontally(tween(280)) { -it / 2 } + fadeIn(tween(280))) togetherWith
+                                        (slideOutHorizontally(tween(220)) { it / 2 } + fadeOut(tween(220)))
                             }
-                        )
-                    }
-                    WizardStep.INSTALL_CA -> {
-                        WizardInstallCaPage(
-                            brandName = uiState.brandName,
-                            installSteps = uiState.installSteps,
-                            onOpenSettings = { viewModel.processIntent(CertInstallationWizardUiIntent.OpenSecuritySettings) }
-                        )
-                    }
-                    WizardStep.VERIFY -> {
-                        WizardVerifyPage(
-                            certStatus = uiState.certStatus,
-                            onVerify = { viewModel.processIntent(CertInstallationWizardUiIntent.VerifyCert) },
-                            onFinish = { viewModel.processIntent(CertInstallationWizardUiIntent.FinishWizard) },
-                            onPrevStep = { viewModel.processIntent(CertInstallationWizardUiIntent.PrevStep) }
-                        )
+                        },
+                        modifier = Modifier.weight(1f),
+                        label = "WizardStepSlideTransition"
+                    ) { step ->
+                        when (step) {
+                            WizardStep.EXPLANATION -> {
+                                WizardExplanationPage()
+                            }
+                            WizardStep.SECURITY -> {
+                                WizardSecurityPage()
+                            }
+                            WizardStep.SAVE_CA -> {
+                                WizardSaveCaPage(
+                                    fileName = uiState.fileName,
+                                    isExported = uiState.isCertExported,
+                                    onExport = {
+                                        val needsLegacyPermission =
+                                            android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q &&
+                                                androidx.core.content.ContextCompat.checkSelfPermission(
+                                                    context,
+                                                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                                        if (needsLegacyPermission) {
+                                            storagePermissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                        } else {
+                                            viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert)
+                                        }
+                                    },
+                                    onCopyFileName = {
+                                        val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+                                        val clip = android.content.ClipData.newPlainText("cert_filename", uiState.fileName)
+                                        clipboard?.setPrimaryClip(clip)
+                                    }
+                                )
+                            }
+                            WizardStep.INSTALL_CA -> {
+                                WizardInstallCaPage(
+                                    brandName = uiState.brandName,
+                                    installSteps = uiState.installSteps,
+                                    onOpenSettings = { viewModel.processIntent(CertInstallationWizardUiIntent.OpenSecuritySettings) }
+                                )
+                            }
+                            WizardStep.VERIFY -> {
+                                WizardVerifyPage(
+                                    certStatus = uiState.certStatus,
+                                    onVerify = { viewModel.processIntent(CertInstallationWizardUiIntent.VerifyCert) },
+                                    onFinish = { viewModel.processIntent(CertInstallationWizardUiIntent.FinishWizard) },
+                                    onPrevStep = { viewModel.processIntent(CertInstallationWizardUiIntent.PrevStep) }
+                                )
+                            }
+                        }
                     }
                 }
             }
+
+            if (isTwoPane) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 32.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CertWizardHeroPane(
+                        currentStep = uiState.currentStep,
+                        certStatus = uiState.certStatus,
+                        modifier = Modifier
+                            .weight(0.42f)
+                            .fillMaxHeight()
+                    )
+
+                    wizardStepsContent(
+                        Modifier
+                            .weight(0.58f)
+                            .fillMaxHeight()
+                            .widthIn(max = 560.dp)
+                    )
+                }
+            } else {
+                wizardStepsContent(Modifier.fillMaxSize())
             }
         }
     }
