@@ -373,7 +373,10 @@ fun SettingsScreen(
                             )
                             SettingsDetailPane.APP_MANAGEMENT -> AppManagementScreen(onNavigateBack = {})
                             SettingsDetailPane.TRUSTED_NETWORKS -> TrustedNetworksScreen(onNavigateBack = {})
-                            SettingsDetailPane.TAILSCALE -> TailscaleScreen(onNavigateBack = {})
+                            SettingsDetailPane.TAILSCALE -> TailscaleScreen(
+                                showBackButton = false,
+                                onNavigateBack = {}
+                            )
                             SettingsDetailPane.GEO_IP -> GeoIpScreen(onNavigateBack = {})
                             SettingsDetailPane.APPEARANCE -> AppearanceScreen(onNavigateBack = {})
                             SettingsDetailPane.ABOUT -> AboutScreen(onNavigateBack = {})
