@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.launch
@@ -310,11 +311,17 @@ fun ProxyVpnScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            contentAlignment = Alignment.TopCenter
         ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 720.dp)
+                    .fillMaxSize()
+            ) {
             val heroHost = if (isWgActive && activeWg != null) {
                 activeWg.config.peers.firstOrNull()?.endpoint?.substringBeforeLast(":")
             } else {
@@ -373,6 +380,7 @@ fun ProxyVpnScreen(
                 onRemoveDuplicates = { viewModel.removeDuplicates() },
                 modifier = Modifier.weight(1f)
             )
+            }
         }
     }
 
