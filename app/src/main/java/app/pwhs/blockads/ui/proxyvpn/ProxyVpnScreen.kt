@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.ProxyProfile
 import app.pwhs.blockads.ui.proxyvpn.component.AddProxyNodeDialog
@@ -378,7 +379,7 @@ fun ProxyVpnScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (maxWidth >= 600.dp) {
+            if (rememberIsExpandedLayout(maxWidth)) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()

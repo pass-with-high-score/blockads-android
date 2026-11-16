@@ -64,6 +64,7 @@ import app.pwhs.blockads.R
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.home.data.RecentLogFilter
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -393,7 +394,7 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                val isTwoPane = maxWidth >= 600.dp
+                val isTwoPane = rememberIsExpandedLayout(maxWidth)
 
                 val floatingBottomPadding = LocalFloatingBottomBarPadding.current
                 if (isTwoPane) {

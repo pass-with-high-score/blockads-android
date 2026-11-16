@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.data.entities.ProxyProtocol
 import org.koin.androidx.compose.koinViewModel
 
@@ -145,7 +146,7 @@ fun ProxyEditScreen(
                 state.protocol == ProxyProtocol.TROJAN
             val hasTls = state.security != "none" && state.protocol != ProxyProtocol.SHADOWSOCKS
 
-            if (maxWidth >= 600.dp) {
+            if (rememberIsExpandedLayout(maxWidth)) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()

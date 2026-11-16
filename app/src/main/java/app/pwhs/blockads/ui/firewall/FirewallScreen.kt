@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.component.AppListSkeleton
 import app.pwhs.blockads.ui.firewall.component.FirewallAppItem
 import app.pwhs.blockads.ui.firewall.component.FirewallConfigContent
@@ -152,7 +153,7 @@ fun FirewallScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val isListDetail = maxWidth >= 600.dp
+            val isListDetail = rememberIsExpandedLayout(maxWidth)
 
             if (isListDetail) {
                 val activeApp = uiState.configuringApp ?: filteredApps.firstOrNull()

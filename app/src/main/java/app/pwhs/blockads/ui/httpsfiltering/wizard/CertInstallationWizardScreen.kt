@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.httpsfiltering.CertStatus
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.CertWizardHeroPane
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardExplanationPage
@@ -167,7 +168,7 @@ fun CertInstallationWizardScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            val isTwoPane = maxWidth >= 600.dp
+            val isTwoPane = rememberIsExpandedLayout(maxWidth)
 
             val wizardStepsContent: @Composable (Modifier) -> Unit = { contentModifier ->
                 Column(modifier = contentModifier) {

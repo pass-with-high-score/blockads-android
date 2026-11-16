@@ -50,6 +50,7 @@ import app.pwhs.blockads.ui.appearance.AppearanceNavigationScreen
 import app.pwhs.blockads.ui.appearance.AppearanceThemeScreen
 import app.pwhs.blockads.ui.appmanagement.AppManagementScreen
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.dnsprovider.DnsProviderScreen
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -151,7 +152,7 @@ fun SettingsScreen(
     UiEventEffect(viewModel.events)
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isListDetail = maxWidth >= 600.dp
+        val isListDetail = rememberIsExpandedLayout(maxWidth)
         var activeDetailPane by rememberSaveable { mutableStateOf(SettingsDetailPane.DNS_PROVIDER) }
 
         LaunchedEffect(externalDetailPane) {

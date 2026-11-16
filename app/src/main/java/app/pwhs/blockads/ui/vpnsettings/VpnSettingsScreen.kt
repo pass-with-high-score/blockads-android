@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.proxyvpn.component.PreferredIpTypeCard
 import app.pwhs.blockads.ui.proxyvpn.component.SplitDnsCard
 import app.pwhs.blockads.ui.settings.component.SectionHeader
@@ -139,7 +140,7 @@ fun VpnSettingsContent(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (maxWidth >= 600.dp) {
+            if (rememberIsExpandedLayout(maxWidth)) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()

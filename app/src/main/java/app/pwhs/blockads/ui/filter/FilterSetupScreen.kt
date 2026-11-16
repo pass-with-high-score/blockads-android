@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.BuildConfig
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FilterList as FilterListEntity
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
@@ -294,7 +295,7 @@ fun FilterSetupScreen(
                         EmptyCategorySearch(searchQuery)
                     } else {
                         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                            if (maxWidth >= 600.dp) {
+                            if (rememberIsExpandedLayout(maxWidth)) {
                                 var selectedFilterId by rememberSaveable { mutableStateOf<Long?>(null) }
                                 LaunchedEffect(externalFilterId) {
                                     if (externalFilterId != null) {

@@ -68,6 +68,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.onboarding.component.CompletionStep
 import app.pwhs.blockads.ui.onboarding.component.CrashReportingStep
 import app.pwhs.blockads.ui.onboarding.component.DnsServerStep
@@ -299,7 +300,7 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val isTwoPane = maxWidth >= 600.dp
+            val isTwoPane = rememberIsExpandedLayout(maxWidth)
 
             if (isTwoPane) {
                 Row(

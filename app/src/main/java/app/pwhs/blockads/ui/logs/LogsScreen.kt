@@ -52,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.event.UiEventEffect
@@ -295,7 +296,7 @@ fun LogsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val isListDetail = maxWidth >= 600.dp
+            val isListDetail = rememberIsExpandedLayout(maxWidth)
 
             if (isListDetail) {
                 val activeEntry = selectedEntry

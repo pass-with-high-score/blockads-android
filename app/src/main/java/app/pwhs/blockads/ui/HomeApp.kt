@@ -83,6 +83,7 @@ import app.pwhs.blockads.ui.firewall.FirewallScreen
 import app.pwhs.blockads.ui.component.BlockAdsNavigationBar
 import app.pwhs.blockads.ui.component.BlockAdsNavigationRail
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.home.HomeScreen
 import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
@@ -151,7 +152,7 @@ fun HomeApp(
     var pendingFilterId by remember { mutableStateOf<Long?>(null) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val isWideScreen = maxWidth >= 600.dp
+        val isWideScreen = rememberIsExpandedLayout(maxWidth)
         val useNavRail = isWideScreen && navRailPosition != AppPreferences.NAV_POSITION_BOTTOM
 
         // When unfolding from a single-pane detail screen into two-pane mode,
