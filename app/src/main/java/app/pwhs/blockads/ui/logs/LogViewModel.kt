@@ -9,11 +9,13 @@ import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
+import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.utils.CustomRuleParser
@@ -142,6 +144,30 @@ class LogViewModel(
         }
     }
 
+    val securityFilterIds: StateFlow<Set<String>> = filterListDao.getAll()
+        .map { list ->
+            list.filter { it.category == FilterList.CATEGORY_SECURITY }
+                .map { it.id.toString() }
+                .toSet()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    private val _selectedBlockSources = MutableStateFlow(BlockSource.entries.toSet())
+    val selectedBlockSources: StateFlow<Set<BlockSource>> = _selectedBlockSources.asStateFlow()
+
+    fun toggleBlockSource(source: BlockSource) {
+        val current = _selectedBlockSources.value
+        _selectedBlockSources.value = if (source in current) {
+            current - source
+        } else {
+            current + source
+        }
+    }
+
+    fun resetBlockSources() {
+        _selectedBlockSources.value = BlockSource.entries.toSet()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val logs: StateFlow<List<DnsLogEntry>> = combine(
         _filterStatus,
@@ -166,6 +192,18 @@ class LogViewModel(
         .combine(_appFilter) { logs, app ->
             if (app.isBlank()) logs
             else logs.filter { it.appName.equals(app, ignoreCase = true) }
+        }
+        .combine(_selectedBlockSources) { logs, sources ->
+            Pair(logs, sources)
+        }
+        .combine(securityFilterIds) { (logs, sources), secIds ->
+            if (sources.size == BlockSource.entries.size) {
+                logs
+            } else {
+                logs.filter { entry ->
+                    BlockSource.matches(entry, sources, secIds)
+                }
+            }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

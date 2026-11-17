@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -60,6 +61,8 @@ fun LogFilterControlBar(
     appFilter: String,
     onOpenAppFilter: () -> Unit,
     onClearAppFilter: () -> Unit,
+    selectedBlockSources: Set<BlockSource> = BlockSource.entries.toSet(),
+    onToggleBlockSource: (BlockSource) -> Unit = {},
     onResetFilters: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -256,7 +259,8 @@ fun LogFilterControlBar(
             )
 
             // Reset Filter Button (visible if any custom filter is active)
-            val hasActiveFilter = isAppFiltered || timeRange != TimeRange.ALL || filterStatus != LogFilterStatus.ALL
+            val isBlockSourceFiltered = selectedBlockSources.size < BlockSource.entries.size
+            val hasActiveFilter = isAppFiltered || timeRange != TimeRange.ALL || filterStatus != LogFilterStatus.ALL || isBlockSourceFiltered
             AnimatedVisibility(
                 visible = hasActiveFilter,
                 enter = fadeIn(),
@@ -275,5 +279,13 @@ fun LogFilterControlBar(
                 }
             }
         }
+
+        // Block Source Filter Row (visible when filterStatus == LogFilterStatus.BLOCKED)
+        BlockSourceFilterRow(
+            visible = filterStatus == LogFilterStatus.BLOCKED,
+            selectedSources = selectedBlockSources,
+            onToggleSource = onToggleBlockSource,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
     }
 }

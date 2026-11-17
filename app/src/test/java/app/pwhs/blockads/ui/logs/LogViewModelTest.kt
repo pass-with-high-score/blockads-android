@@ -18,6 +18,7 @@ import app.pwhs.blockads.ui.FakeWhitelistDomainDao
 import app.pwhs.blockads.ui.MainDispatcherRule
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.keepHot
+import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.settle
@@ -328,5 +329,32 @@ class LogViewModelTest {
     fun `selection mode starts off`() {
         assertFalse(vm.selectionMode.value)
         verify(exactly = 0) { dnsLogDao.getAllSince(any()) }
+    }
+
+    @Test
+    fun `block source filter toggling excludes corresponding blocked entries`() = runTest {
+        table.value = listOf(
+            entry(1, "firewall.com", true, by = FilterListRepository.BLOCK_REASON_FIREWALL),
+            entry(2, "ad.com", true, by = "7"),
+            entry(3, "custom.com", true, by = FilterListRepository.BLOCK_REASON_CUSTOM_RULE),
+            entry(4, "allowed.com", false, by = "")
+        )
+        keepHot(vm.logs, vm.selectedBlockSources)
+        assertEquals(listOf(1L, 2L, 3L, 4L), vm.logs.value.map { it.id })
+
+        // Toggle off FIREWALL
+        vm.toggleBlockSource(BlockSource.FIREWALL)
+        assertFalse(vm.selectedBlockSources.value.contains(BlockSource.FIREWALL))
+        assertEquals(listOf(2L, 3L, 4L), vm.logs.value.map { it.id })
+
+        // Toggle off FILTER_LIST
+        vm.toggleBlockSource(BlockSource.FILTER_LIST)
+        assertFalse(vm.selectedBlockSources.value.contains(BlockSource.FILTER_LIST))
+        assertEquals(listOf(3L, 4L), vm.logs.value.map { it.id })
+
+        // Reset block sources restores all
+        vm.resetBlockSources()
+        assertEquals(BlockSource.entries.toSet(), vm.selectedBlockSources.value)
+        assertEquals(listOf(1L, 2L, 3L, 4L), vm.logs.value.map { it.id })
     }
 }

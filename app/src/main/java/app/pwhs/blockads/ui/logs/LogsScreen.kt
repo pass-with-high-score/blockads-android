@@ -81,6 +81,7 @@ fun LogsScreen(
 ) {
     val logs by viewModel.logs.collectAsStateWithLifecycle()
     val filterStatus by viewModel.filterStatus.collectAsStateWithLifecycle()
+    val selectedBlockSources by viewModel.selectedBlockSources.collectAsStateWithLifecycle()
     val filterNames by viewModel.filterNames.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
@@ -219,7 +220,7 @@ fun LogsScreen(
                 }
             }
 
-            // Compact Filter Bar (Status TabRow + Time Dropdown + App Sheet trigger)
+            // Compact Filter Bar (Status TabRow + Time Dropdown + App Sheet trigger + Block Source Chips)
             LogFilterControlBar(
                 filterStatus = filterStatus,
                 onFilterStatusChange = { viewModel.setFilterStatus(it) },
@@ -228,11 +229,14 @@ fun LogsScreen(
                 appFilter = appFilter,
                 onOpenAppFilter = { showAppFilterSheet = true },
                 onClearAppFilter = { viewModel.setAppFilter("") },
+                selectedBlockSources = selectedBlockSources,
+                onToggleBlockSource = { viewModel.toggleBlockSource(it) },
                 onResetFilters = {
                     viewModel.setAppFilter("")
                     viewModel.setTimeRange(TimeRange.ALL)
                     viewModel.setSearchQuery("")
                     viewModel.setFilterStatus(LogFilterStatus.ALL)
+                    viewModel.resetBlockSources()
                 }
             )
 
