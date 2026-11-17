@@ -55,7 +55,13 @@ fun ProtocolSelector(
             ProxyProtocol.SHADOWSOCKS,
             ProxyProtocol.TROJAN,
             ProxyProtocol.HYSTERIA2,
-            ProxyProtocol.TUIC
+            ProxyProtocol.TUIC,
+            ProxyProtocol.MASQUE,
+            ProxyProtocol.SOCKS5,
+            ProxyProtocol.SOCKS4,
+            ProxyProtocol.HTTP,
+            ProxyProtocol.HTTPS,
+            ProxyProtocol.SSH
         )
     }
 

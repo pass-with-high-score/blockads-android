@@ -144,7 +144,12 @@ fun ProxyEditScreen(
             val hasTransport = state.protocol == ProxyProtocol.VLESS ||
                 state.protocol == ProxyProtocol.VMESS ||
                 state.protocol == ProxyProtocol.TROJAN
-            val hasTls = state.security != "none" && state.protocol != ProxyProtocol.SHADOWSOCKS
+            val hasTls = state.security != "none" &&
+                state.protocol != ProxyProtocol.SHADOWSOCKS &&
+                state.protocol != ProxyProtocol.SOCKS5 &&
+                state.protocol != ProxyProtocol.SOCKS4 &&
+                state.protocol != ProxyProtocol.HTTP &&
+                state.protocol != ProxyProtocol.SSH
 
             if (rememberIsExpandedLayout(maxWidth)) {
                 Row(

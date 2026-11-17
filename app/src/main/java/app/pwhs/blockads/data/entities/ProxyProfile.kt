@@ -12,7 +12,12 @@ enum class ProxyProtocol(val value: String, val displayName: String) {
     VMESS("vmess", "VMess"),
     HYSTERIA2("hysteria2", "Hysteria 2"),
     TUIC("tuic", "TUIC"),
-    MASQUE("masque", "MASQUE");
+    MASQUE("masque", "MASQUE"),
+    SOCKS5("socks5", "SOCKS5"),
+    SOCKS4("socks4", "SOCKS4"),
+    HTTP("http", "HTTP"),
+    HTTPS("https", "HTTPS"),
+    SSH("ssh", "SSH");
 
     companion object {
         fun fromValue(value: String): ProxyProtocol = when (value.lowercase()) {
@@ -22,6 +27,11 @@ enum class ProxyProtocol(val value: String, val displayName: String) {
             "hysteria2", "hy2" -> HYSTERIA2
             "tuic" -> TUIC
             "masque" -> MASQUE
+            "socks5", "socks" -> SOCKS5
+            "socks4", "socks4a" -> SOCKS4
+            "http" -> HTTP
+            "https" -> HTTPS
+            "ssh" -> SSH
             else -> SHADOWSOCKS
         }
     }
@@ -65,6 +75,10 @@ data class ProxyProfile(
     val masquePath: String = "",
     val masqueUser: String = "",
     val masquePass: String = "",
+    // SOCKS / HTTP(S) / SSH specific
+    val username: String = "",
+    val privateKey: String = "",
+    val passphrase: String = "",
     // Metadata
     val tag: String = "",
     val rawUri: String = "",
@@ -104,6 +118,8 @@ data class ProxyProfile(
             ProxyProtocol.SHADOWSOCKS -> (method.isEmpty() || method == other.method) && password == other.password
             ProxyProtocol.TUIC -> (uuid.isNotEmpty() && uuid == other.uuid) || (password.isNotEmpty() && password == other.password)
             ProxyProtocol.MASQUE -> (masqueUser.isNotEmpty() && masqueUser == other.masqueUser) || (masquePass.isNotEmpty() && masquePass == other.masquePass)
+            ProxyProtocol.SOCKS5, ProxyProtocol.SOCKS4, ProxyProtocol.HTTP, ProxyProtocol.HTTPS, ProxyProtocol.SSH ->
+                username == other.username && password == other.password
         }
         if (credMatch) return true
         if (name.isNotEmpty() && name.equals(other.name, ignoreCase = true)) return true
@@ -140,7 +156,11 @@ data class ProxyProfile(
                 }
             }
         }
-        if (profile.security.isEmpty() || profile.security == "none") {
+        if (profile.protocol == ProxyProtocol.HTTPS && profile.security != "tls") {
+            profile = profile.copy(security = "tls")
+        } else if (profile.protocol !in setOf(ProxyProtocol.SOCKS5, ProxyProtocol.SOCKS4, ProxyProtocol.HTTP, ProxyProtocol.SSH) &&
+            (profile.security.isEmpty() || profile.security == "none")
+        ) {
             if (profile.sni.isNotEmpty() || profile.rawUri.contains("security=tls", ignoreCase = true) || profile.rawUri.contains("\"tls\":\"tls\"", ignoreCase = true)) {
                 profile = profile.copy(security = "tls")
             }

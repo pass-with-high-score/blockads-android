@@ -84,7 +84,12 @@ object SubscriptionImporter {
                 line.startsWith("hysteria2://", ignoreCase = true) ||
                 line.startsWith("hy2://", ignoreCase = true) ||
                 line.startsWith("tuic://", ignoreCase = true) ||
-                line.startsWith("masque://", ignoreCase = true) -> {
+                line.startsWith("masque://", ignoreCase = true) ||
+                line.startsWith("socks5://", ignoreCase = true) ||
+                line.startsWith("socks://", ignoreCase = true) ||
+                line.startsWith("socks4://", ignoreCase = true) ||
+                line.startsWith("socks4a://", ignoreCase = true) ||
+                line.startsWith("ssh://", ignoreCase = true) -> {
                     val result = ProxyLinkParser.parse(line)
                     result.onSuccess { proxyList.add(it) }
                         .onFailure {

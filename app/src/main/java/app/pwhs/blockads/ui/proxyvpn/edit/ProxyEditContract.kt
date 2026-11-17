@@ -40,6 +40,10 @@ data class ProxyEditUiState(
     val masqueUser: String = "",
     val masquePass: String = "",
     val masquePath: String = "/.well-known/masque/ip/*/*/",
+    // SOCKS / HTTP(S) / SSH specific
+    val username: String = "",
+    val privateKey: String = "",
+    val passphrase: String = "",
     // Custom JSON mode
     val isRawJsonMode: Boolean = false,
     val rawJson: String = "",
@@ -79,6 +83,9 @@ sealed interface ProxyEditIntent {
     data class SetMasqueUser(val user: String) : ProxyEditIntent
     data class SetMasquePass(val pass: String) : ProxyEditIntent
     data class SetMasquePath(val path: String) : ProxyEditIntent
+    data class SetUsername(val username: String) : ProxyEditIntent
+    data class SetPrivateKey(val privateKey: String) : ProxyEditIntent
+    data class SetPassphrase(val passphrase: String) : ProxyEditIntent
     data class ToggleRawJsonMode(val isRaw: Boolean) : ProxyEditIntent
     data class SetRawJson(val json: String) : ProxyEditIntent
     data object Save : ProxyEditIntent

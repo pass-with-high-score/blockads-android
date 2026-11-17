@@ -359,8 +359,10 @@ class ProxyVpnViewModel(
         val trimmed = rawUri.trim()
         if (trimmed.isEmpty()) return false
 
-        // 1. Subscription URL (http/https)
-        if (trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)) {
+        // 1. Subscription URL (http/https) — unless it's a single HTTP/HTTPS proxy URI (user:pass@host:port or host:port with no path)
+        if ((trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)) &&
+            !isLikelyHttpProxyUri(trimmed)
+        ) {
             val importResult = subscriptionDelegate.subscriptionManager.importOrUpdateSubscription(trimmed)
             return importResult.fold(
                 onSuccess = { (sub, res) ->
@@ -418,6 +420,14 @@ class ProxyVpnViewModel(
                 false
             }
         )
+    }
+
+    private fun isLikelyHttpProxyUri(raw: String): Boolean = try {
+        val uri = java.net.URI(raw)
+        !uri.rawUserInfo.isNullOrEmpty() ||
+            ((uri.path.isNullOrEmpty() || uri.path == "/") && uri.port != -1)
+    } catch (_: Exception) {
+        false
     }
 
     fun pingProxyNode(profileId: String) {

@@ -7,8 +7,11 @@ import (
 	"strings"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/httpproxy"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/hysteria2"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/masque"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/socks"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/ssh"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/trojan"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/tuic"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/vless"
@@ -16,12 +19,25 @@ import (
 	"github.com/nqmgaming/blockads-tunnel/internal/shadowsocks"
 )
 
-// SetProxyNodeConfig configures an outbound proxy node (shadowsocks, trojan, vless, vmess, hysteria2, tuic, masque).
+func (e *Engine) storeProxyClient(client proxy.Client) {
+	if prev := e.proxyClient.Load(); prev != nil && *prev != nil {
+		if closer, ok := (*prev).(interface{ Close() error }); ok {
+			_ = closer.Close()
+		}
+	}
+	if client == nil {
+		e.proxyClient.Store(nil)
+		return
+	}
+	e.proxyClient.Store(&client)
+}
+
+// SetProxyNodeConfig configures an outbound proxy node.
 // Empty string or empty protocol clears the active proxy node.
 func (e *Engine) SetProxyNodeConfig(protocol string, configJSON string) error {
 	protocol = strings.ToLower(strings.TrimSpace(protocol))
 	if configJSON == "" || protocol == "" {
-		e.proxyClient.Store(nil)
+		e.storeProxyClient(nil)
 		e.ssClient.Store(nil)
 		logf("Proxy node cleared")
 		return nil
@@ -128,9 +144,56 @@ func (e *Engine) SetProxyNodeConfig(protocol string, configJSON string) error {
 			return err
 		}
 		e.ssClient.Store(nil)
-		var pClient proxy.Client = client
-		e.proxyClient.Store(&pClient)
+		e.storeProxyClient(client)
 		logf("Proxy node (masque) configured for %s (tag: %s)", client.ServerAddress(), client.Tag())
+		return nil
+
+	case "socks5", "socks", "socks4", "socks4a":
+		cfg, err := socks.FromJSON(configJSON)
+		if err != nil {
+			return err
+		}
+		if protocol == "socks4" || protocol == "socks4a" {
+			cfg.Version = protocol
+		}
+		client, err := socks.NewClient(cfg, e.protectFn)
+		if err != nil {
+			return err
+		}
+		e.ssClient.Store(nil)
+		e.storeProxyClient(client)
+		logf("Proxy node (%s) configured for %s (tag: %s)", client.Protocol(), client.ServerAddress(), client.Tag())
+		return nil
+
+	case "http", "https":
+		cfg, err := httpproxy.FromJSON(configJSON)
+		if err != nil {
+			return err
+		}
+		if protocol == "https" {
+			cfg.TLS = true
+		}
+		client, err := httpproxy.NewClient(cfg, e.protectFn)
+		if err != nil {
+			return err
+		}
+		e.ssClient.Store(nil)
+		e.storeProxyClient(client)
+		logf("Proxy node (%s) configured for %s (tag: %s)", client.Protocol(), client.ServerAddress(), client.Tag())
+		return nil
+
+	case "ssh":
+		cfg, err := ssh.FromJSON(configJSON)
+		if err != nil {
+			return err
+		}
+		client, err := ssh.NewClient(cfg, e.protectFn)
+		if err != nil {
+			return err
+		}
+		e.ssClient.Store(nil)
+		e.storeProxyClient(client)
+		logf("Proxy node (ssh) configured for %s (tag: %s)", client.ServerAddress(), client.Tag())
 		return nil
 
 	default:

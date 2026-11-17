@@ -10,8 +10,11 @@ import (
 	"time"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/httpproxy"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/hysteria2"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/masque"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/socks"
+	"github.com/nqmgaming/blockads-tunnel/internal/proxy/ssh"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/trojan"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/tuic"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy/vless"
@@ -114,6 +117,33 @@ func testProxyNodeDelayWithProtect(protocol string, configJSON string, timeoutMs
 			return -1, fmt.Errorf("masque ping failed: %w", pingErr)
 		}
 		return duration.Milliseconds(), nil
+
+	case "socks5", "socks", "socks4", "socks4a":
+		cfg, parseErr := socks.FromJSON(configJSON)
+		if parseErr != nil {
+			return -1, parseErr
+		}
+		if protocol == "socks4" || protocol == "socks4a" {
+			cfg.Version = protocol
+		}
+		client, err = socks.NewClient(cfg, protectFn)
+
+	case "http", "https":
+		cfg, parseErr := httpproxy.FromJSON(configJSON)
+		if parseErr != nil {
+			return -1, parseErr
+		}
+		if protocol == "https" {
+			cfg.TLS = true
+		}
+		client, err = httpproxy.NewClient(cfg, protectFn)
+
+	case "ssh":
+		cfg, parseErr := ssh.FromJSON(configJSON)
+		if parseErr != nil {
+			return -1, parseErr
+		}
+		client, err = ssh.NewClient(cfg, protectFn)
 
 	default:
 		return -1, fmt.Errorf("unsupported protocol: %s", protocol)

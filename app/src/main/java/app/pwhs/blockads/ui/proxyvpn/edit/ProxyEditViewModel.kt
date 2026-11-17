@@ -59,6 +59,9 @@ class ProxyEditViewModel(
             is ProxyEditIntent.SetMasqueUser -> _uiState.update { it.copy(masqueUser = intent.user) }
             is ProxyEditIntent.SetMasquePass -> _uiState.update { it.copy(masquePass = intent.pass) }
             is ProxyEditIntent.SetMasquePath -> _uiState.update { it.copy(masquePath = intent.path) }
+            is ProxyEditIntent.SetUsername -> _uiState.update { it.copy(username = intent.username, errors = it.errors - KEY_USERNAME) }
+            is ProxyEditIntent.SetPrivateKey -> _uiState.update { it.copy(privateKey = intent.privateKey, errors = it.errors - KEY_PASSWORD) }
+            is ProxyEditIntent.SetPassphrase -> _uiState.update { it.copy(passphrase = intent.passphrase) }
             is ProxyEditIntent.ToggleRawJsonMode -> toggleRawJsonMode(intent.isRaw)
             is ProxyEditIntent.SetRawJson -> _uiState.update { it.copy(rawJson = intent.json, errors = it.errors - KEY_JSON) }
             is ProxyEditIntent.Save -> save()
@@ -111,6 +114,9 @@ class ProxyEditViewModel(
                     masqueUser = profile.masqueUser,
                     masquePass = profile.masquePass,
                     masquePath = profile.masquePath.ifEmpty { "/.well-known/masque/ip/*/*/" },
+                    username = profile.username,
+                    privateKey = profile.privateKey,
+                    passphrase = profile.passphrase,
                     rawJson = profile.toEngineJson(),
                     shareLink = profile.toShareLink(),
                     isLoading = false
@@ -126,11 +132,15 @@ class ProxyEditViewModel(
         _uiState.update { current ->
             val defaultPort = when (protocol) {
                 ProxyProtocol.SHADOWSOCKS -> "8388"
+                ProxyProtocol.SOCKS5, ProxyProtocol.SOCKS4 -> "1080"
+                ProxyProtocol.HTTP -> "8080"
+                ProxyProtocol.SSH -> "22"
                 else -> "443"
             }
             val defaultSecurity = when (protocol) {
                 ProxyProtocol.VLESS -> "reality"
                 ProxyProtocol.VMESS -> "auto"
+                ProxyProtocol.SOCKS5, ProxyProtocol.SOCKS4, ProxyProtocol.HTTP, ProxyProtocol.SSH -> "none"
                 else -> "tls"
             }
             val defaultUuid = if (current.uuid.isEmpty() && (protocol == ProxyProtocol.VLESS || protocol == ProxyProtocol.VMESS || protocol == ProxyProtocol.TUIC)) {
@@ -180,7 +190,10 @@ class ProxyEditViewModel(
                         obfsPassword = parsed.obfsPassword,
                         congestionControl = parsed.congestionControl,
                         udpRelayMode = parsed.udpRelayMode,
-                        alpn = parsed.alpn
+                        alpn = parsed.alpn,
+                        username = parsed.username,
+                        privateKey = parsed.privateKey,
+                        passphrase = parsed.passphrase
                     )
                 }
             } catch (_: Exception) {
@@ -219,7 +232,10 @@ class ProxyEditViewModel(
             alpn = state.alpn.trim(),
             masqueUser = state.masqueUser.trim(),
             masquePass = state.masquePass.trim(),
-            masquePath = state.masquePath.trim()
+            masquePath = state.masquePath.trim(),
+            username = state.username.trim(),
+            privateKey = state.privateKey.trim(),
+            passphrase = state.passphrase.trim()
         )
     }
 
@@ -262,6 +278,17 @@ class ProxyEditViewModel(
             }
             ProxyProtocol.MASQUE -> {
                 if (state.masqueUser.isBlank() && state.masquePass.isBlank()) {
+                    errors[KEY_PASSWORD] = context.getString(R.string.proxy_err_password_required)
+                }
+            }
+            ProxyProtocol.SOCKS5, ProxyProtocol.SOCKS4, ProxyProtocol.HTTP, ProxyProtocol.HTTPS -> {
+                // Username and password are optional for SOCKS/HTTP(S) proxies.
+            }
+            ProxyProtocol.SSH -> {
+                if (state.username.isBlank()) {
+                    errors[KEY_USERNAME] = "Username is required"
+                }
+                if (state.password.isBlank() && state.privateKey.isBlank()) {
                     errors[KEY_PASSWORD] = context.getString(R.string.proxy_err_password_required)
                 }
             }
@@ -308,6 +335,7 @@ class ProxyEditViewModel(
         const val KEY_SERVER = "server"
         const val KEY_PORT = "port"
         const val KEY_PASSWORD = "password"
+        const val KEY_USERNAME = "username"
         const val KEY_UUID = "uuid"
         const val KEY_JSON = "json"
     }

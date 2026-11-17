@@ -227,6 +227,76 @@ fun CredentialsCard(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
+                ProxyProtocol.SOCKS5, ProxyProtocol.HTTP, ProxyProtocol.HTTPS -> {
+                    OutlinedTextField(
+                        value = state.username,
+                        onValueChange = { onIntent(ProxyEditIntent.SetUsername(it)) },
+                        label = { Text("Username (optional)") },
+                        singleLine = true,
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    PasswordField(
+                        value = state.password,
+                        error = state.errors[ProxyEditViewModel.KEY_PASSWORD],
+                        onValueChange = { onIntent(ProxyEditIntent.SetPassword(it)) }
+                    )
+                }
+
+                ProxyProtocol.SOCKS4 -> {
+                    OutlinedTextField(
+                        value = state.username,
+                        onValueChange = { onIntent(ProxyEditIntent.SetUsername(it)) },
+                        label = { Text("User ID (optional)") },
+                        singleLine = true,
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                ProxyProtocol.SSH -> {
+                    val usernameError = state.errors[ProxyEditViewModel.KEY_USERNAME]
+                    OutlinedTextField(
+                        value = state.username,
+                        onValueChange = { onIntent(ProxyEditIntent.SetUsername(it)) },
+                        label = { Text("Username") },
+                        isError = usernameError != null,
+                        supportingText = usernameError?.let { msg -> { Text(msg) } },
+                        singleLine = true,
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    PasswordField(
+                        value = state.password,
+                        error = state.errors[ProxyEditViewModel.KEY_PASSWORD],
+                        onValueChange = { onIntent(ProxyEditIntent.SetPassword(it)) }
+                    )
+                    OutlinedTextField(
+                        value = state.privateKey,
+                        onValueChange = { onIntent(ProxyEditIntent.SetPrivateKey(it)) },
+                        label = { Text("Private Key PEM (optional)") },
+                        minLines = 3,
+                        maxLines = 5,
+                        shape = ProxyFieldShape,
+                        colors = proxyFieldColors(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (state.privateKey.isNotBlank()) {
+                        OutlinedTextField(
+                            value = state.passphrase,
+                            onValueChange = { onIntent(ProxyEditIntent.SetPassphrase(it)) },
+                            label = { Text("Key Passphrase (optional)") },
+                            singleLine = true,
+                            shape = ProxyFieldShape,
+                            colors = proxyFieldColors(),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
     }

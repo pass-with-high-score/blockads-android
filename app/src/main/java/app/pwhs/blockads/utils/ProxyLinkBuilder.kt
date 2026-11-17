@@ -19,6 +19,11 @@ object ProxyLinkBuilder {
             ProxyProtocol.HYSTERIA2 -> buildHysteria2(profile)
             ProxyProtocol.TUIC -> buildTuic(profile)
             ProxyProtocol.MASQUE -> buildMasque(profile)
+            ProxyProtocol.SOCKS5 -> buildUserPassUri("socks5", profile)
+            ProxyProtocol.SOCKS4 -> buildUserPassUri("socks4", profile)
+            ProxyProtocol.HTTP -> buildUserPassUri("http", profile)
+            ProxyProtocol.HTTPS -> buildHttps(profile)
+            ProxyProtocol.SSH -> buildUserPassUri("ssh", profile)
         }
     }
 
@@ -132,6 +137,34 @@ object ProxyLinkBuilder {
         val fragment = encodeFragment(p.displayName)
         val queryPart = if (query.isNotEmpty()) "?$query" else ""
         return "masque://${p.masqueUser}:${p.masquePass}@${p.server}:${p.port}$queryPart#$fragment"
+    }
+
+    private fun buildUserPassUri(scheme: String, p: ProxyProfile): String {
+        val authPart = buildAuthPart(p.username, p.password)
+        val fragment = encodeFragment(p.displayName)
+        return "$scheme://$authPart${p.server}:${p.port}#$fragment"
+    }
+
+    private fun buildHttps(p: ProxyProfile): String {
+        val authPart = buildAuthPart(p.username, p.password)
+        val params = mutableMapOf<String, String>()
+        if (p.sni.isNotEmpty() && p.sni != p.server) params["sni"] = p.sni
+        if (p.allowInsecure) params["allowInsecure"] = "1"
+        val query = encodeQuery(params)
+        val queryPart = if (query.isNotEmpty()) "?$query" else ""
+        val fragment = encodeFragment(p.displayName)
+        return "https://$authPart${p.server}:${p.port}$queryPart#$fragment"
+    }
+
+    private fun buildAuthPart(username: String, password: String): String {
+        if (username.isEmpty() && password.isEmpty()) return ""
+        val u = URLEncoder.encode(username, StandardCharsets.UTF_8.name())
+        return if (password.isNotEmpty()) {
+            val pw = URLEncoder.encode(password, StandardCharsets.UTF_8.name())
+            "$u:$pw@"
+        } else {
+            "$u@"
+        }
     }
 
     private fun encodeQuery(params: Map<String, String>): String {

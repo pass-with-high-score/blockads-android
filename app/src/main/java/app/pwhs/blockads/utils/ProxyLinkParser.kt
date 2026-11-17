@@ -22,7 +22,14 @@ object ProxyLinkParser {
             trimmed.startsWith("tuic://", ignoreCase = true) -> parseTuicUri(trimmed)
             trimmed.startsWith("masque://", ignoreCase = true) -> parseMasqueUri(trimmed)
             trimmed.startsWith("ss://", ignoreCase = true) -> parseShadowsocksUri(trimmed)
-            else -> throw IllegalArgumentException("Unsupported proxy URI. Expected trojan://, vless://, vmess://, hysteria2://, tuic://, masque://, or ss://")
+            trimmed.startsWith("socks5://", ignoreCase = true) || trimmed.startsWith("socks://", ignoreCase = true) ->
+                parseSocksUri(trimmed, ProxyProtocol.SOCKS5)
+            trimmed.startsWith("socks4://", ignoreCase = true) || trimmed.startsWith("socks4a://", ignoreCase = true) ->
+                parseSocksUri(trimmed, ProxyProtocol.SOCKS4)
+            trimmed.startsWith("http://", ignoreCase = true) -> parseHttpProxyUri(trimmed, isTls = false)
+            trimmed.startsWith("https://", ignoreCase = true) -> parseHttpProxyUri(trimmed, isTls = true)
+            trimmed.startsWith("ssh://", ignoreCase = true) -> parseSshUri(trimmed)
+            else -> throw IllegalArgumentException("Unsupported proxy URI. Expected trojan://, vless://, vmess://, hysteria2://, tuic://, masque://, ss://, socks5://, socks4://, http://, https://, or ssh://")
         }
     }
 
@@ -288,6 +295,86 @@ object ProxyLinkParser {
             allowInsecure = allowInsecure,
             security = if (security.isNotEmpty()) security else "none",
             network = network,
+            tag = tag,
+            rawUri = trimmed
+        )
+    }
+
+    private fun parseUserPass(rawUserInfo: String?): Pair<String, String> {
+        if (rawUserInfo.isNullOrEmpty()) return "" to ""
+        val decoded = URLDecoder.decode(rawUserInfo, StandardCharsets.UTF_8.name())
+        val colonIdx = decoded.indexOf(':')
+        return if (colonIdx != -1) {
+            decoded.substring(0, colonIdx) to decoded.substring(colonIdx + 1)
+        } else {
+            decoded to ""
+        }
+    }
+
+    private fun parseSocksUri(trimmed: String, protocol: ProxyProtocol): ProxyProfile {
+        val uri = URI(trimmed)
+        val server = uri.host.orEmpty()
+        require(server.isNotEmpty()) { "Missing server host in $protocol URI" }
+        val port = if (uri.port != -1) uri.port else 1080
+        val (user, pass) = parseUserPass(uri.rawUserInfo)
+        val tag = decodeFragment(uri.rawFragment)
+        return ProxyProfile(
+            name = tag.ifEmpty { "$server:$port" },
+            protocol = protocol,
+            server = server,
+            port = port,
+            username = user,
+            password = pass,
+            security = "none",
+            tag = tag,
+            rawUri = trimmed
+        )
+    }
+
+    private fun parseHttpProxyUri(trimmed: String, isTls: Boolean): ProxyProfile {
+        val uri = URI(trimmed)
+        val server = uri.host.orEmpty()
+        require(server.isNotEmpty()) { "Missing server host in HTTP proxy URI" }
+        val port = if (uri.port != -1) uri.port else if (isTls) 443 else 8080
+        val (user, pass) = parseUserPass(uri.rawUserInfo)
+        val query = parseQuery(uri.rawQuery)
+        val sni = if (isTls) query["sni"].orEmpty().ifEmpty { server } else ""
+        val allowInsecure = query["allowinsecure"] == "1" ||
+            query["allow_insecure"] == "1" ||
+            query["allowinsecure"].equals("true", ignoreCase = true) ||
+            query["allow_insecure"].equals("true", ignoreCase = true)
+        val tag = decodeFragment(uri.rawFragment)
+        return ProxyProfile(
+            name = tag.ifEmpty { "$server:$port" },
+            protocol = if (isTls) ProxyProtocol.HTTPS else ProxyProtocol.HTTP,
+            server = server,
+            port = port,
+            username = user,
+            password = pass,
+            security = if (isTls) "tls" else "none",
+            sni = sni,
+            allowInsecure = allowInsecure,
+            tag = tag,
+            rawUri = trimmed
+        )
+    }
+
+    private fun parseSshUri(trimmed: String): ProxyProfile {
+        val uri = URI(trimmed)
+        val server = uri.host.orEmpty()
+        require(server.isNotEmpty()) { "Missing server host in SSH URI" }
+        val port = if (uri.port != -1) uri.port else 22
+        val (user, pass) = parseUserPass(uri.rawUserInfo)
+        require(user.isNotEmpty()) { "Missing username in SSH URI" }
+        val tag = decodeFragment(uri.rawFragment)
+        return ProxyProfile(
+            name = tag.ifEmpty { "$server:$port" },
+            protocol = ProxyProtocol.SSH,
+            server = server,
+            port = port,
+            username = user,
+            password = pass,
+            security = "none",
             tag = tag,
             rawUri = trimmed
         )
