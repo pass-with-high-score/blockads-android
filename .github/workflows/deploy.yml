@@ -6,6 +6,7 @@ on:
       - 'v*'
       - 'beta-*'
       - 'pre-*'
+      - 'nightly*'
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -72,9 +73,10 @@ jobs:
         run: |
           ./gradlew :app:testFdroidDebugUnitTest
           ./gradlew :app:testStoreDebugUnitTest
+          ./gradlew :app:testGithubDebugUnitTest
 
       - name: Lint
-        run: ./gradlew :app:lintFdroidRelease :app:lintStoreRelease
+        run: ./gradlew :app:lintFdroidRelease :app:lintStoreRelease :app:lintGithubRelease
 
       - name: Build APK
         run: bundle exec fastlane build_release
@@ -89,7 +91,9 @@ jobs:
           name: release-build
           path: |
             app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/github/release/*.apk
             blockadstv/build/outputs/apk/release/*.apk
+            blockadstv/build/outputs/apk/github/release/*.apk
             app/build/outputs/bundle/storeRelease/*.aab
             blockadstv/build/outputs/bundle/storeRelease/*.aab
           retention-days: 30
@@ -106,7 +110,9 @@ jobs:
           prerelease: ${{ !startsWith(github.ref_name, 'v') }}
           files: |
             app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/github/release/*.apk
             blockadstv/build/outputs/apk/release/*.apk
+            blockadstv/build/outputs/apk/github/release/*.apk
             app/build/outputs/bundle/storeRelease/*.aab
             blockadstv/build/outputs/bundle/storeRelease/*.aab
           token: ${{ secrets.GITHUB_TOKEN }}

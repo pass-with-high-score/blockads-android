@@ -94,7 +94,12 @@ import app.pwhs.blockads.ui.settings.SettingsScreen
 import app.pwhs.blockads.ui.statistics.StatisticsScreen
 import app.pwhs.blockads.ui.wireguard.WireGuardEditScreen
 import app.pwhs.blockads.ui.proxyvpn.ProxyVpnScreen
+import app.pwhs.blockads.ui.update.AppUpdateDialog
+import app.pwhs.blockads.ui.update.findActivity
 import app.pwhs.blockads.ui.vpnsettings.VpnSettingsScreen
+import app.pwhs.blockads.update.AppUpdateController
+import app.pwhs.blockads.update.UpdateChannel
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -105,6 +110,21 @@ fun HomeApp(
 ) {
     val context = LocalContext.current
     val appPrefs: AppPreferences = koinInject()
+    val updateController: AppUpdateController = koinInject()
+    val updateState by updateController.state.collectAsStateWithLifecycle()
+    val updateScope = androidx.compose.runtime.rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (updateController.supportsInAppUpdate) {
+            val savedChannel = appPrefs.getUpdateChannelSnapshot()
+            val channel = if (savedChannel != null) {
+                UpdateChannel.fromId(savedChannel)
+            } else {
+                UpdateChannel.fromVersionName(BuildConfig.VERSION_NAME)
+            }
+            updateController.checkForUpdate(channel = channel, manual = false)
+        }
+    }
     val showBottomNavLabels by appPrefs.showBottomNavLabels.collectAsStateWithLifecycle(
         initialValue = true,
     )
@@ -637,5 +657,19 @@ fun HomeApp(
                 }
             }
         }
+    }
+
+    if (updateController.supportsInAppUpdate) {
+        AppUpdateDialog(
+            state = updateState,
+            onStartUpdate = {
+                val activity = context.findActivity() ?: return@AppUpdateDialog
+                updateScope.launch { updateController.startUpdate(activity) }
+            },
+            onCompleteUpdate = { updateController.completeUpdate() },
+            onDismiss = { skip ->
+                updateScope.launch { updateController.dismissUpdate(skip) }
+            },
+        )
     }
 }

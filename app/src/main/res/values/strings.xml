@@ -37,4 +37,22 @@
     <string name="test_block_link" translatable="false">https://adblock.turtlecute.org/</string>
     <string name="home_disconnecting_desc">Stopping VPN connection…</string>
     <string name="home_disconnecting_desc_root">Stopping Root Proxy…</string>
+    <string name="update_check_title">Check for updates</string>
+    <string name="update_check_desc">Check if a newer version is available</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_up_to_date">You are on the latest version</string>
+    <string name="update_channel_title">Update channel</string>
+    <string name="update_channel_stable">Stable</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Update Available (%1$s)</string>
+    <string name="update_available_default_notes">A new version of BlockAds is ready to install.</string>
+    <string name="update_action_now">Update Now</string>
+    <string name="update_action_later">Later</string>
+    <string name="update_action_skip">Skip this version</string>
+    <string name="update_downloading">Downloading update… %1$d%%</string>
+    <string name="update_ready_install">Update ready to install</string>
+    <string name="update_action_install">Install</string>
+    <string name="update_action_restart">Restart to Update</string>
+    <string name="update_error_prefix">Update error: %1$s</string>
 </resources>

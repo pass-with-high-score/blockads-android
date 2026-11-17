@@ -3,6 +3,7 @@ package app.pwhs.blockads
 import android.app.Application
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.di.appModule
+import app.pwhs.blockads.update.updateModule
 import app.pwhs.blockads.worker.DailySummaryScheduler
 import app.pwhs.blockads.worker.FilterUpdateScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,7 @@ class BlockAdsApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@BlockAdsApplication)
-            modules(appModule)
+            modules(appModule, updateModule)
         }
 
         if (BuildConfig.DEBUG) {

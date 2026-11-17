@@ -7,9 +7,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -32,10 +34,15 @@ import app.pwhs.blockadstv.ui.screens.proxy.ProxyScreen
 import app.pwhs.blockadstv.ui.screens.rules.DomainRulesScreen
 import app.pwhs.blockadstv.ui.screens.settings.SettingsScreen
 import app.pwhs.blockadstv.ui.theme.BlockadsTheme
+import app.pwhs.blockadstv.ui.update.TvUpdateDialog
+import app.pwhs.blockadstv.ui.update.findActivity
+import app.pwhs.blockadstv.update.TvUpdateController
+import app.pwhs.blockadstv.update.UpdateChannel
 import app.pwhs.blockadstv.utils.TvLocaleHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.compose.koinInject
 
 class MainActivity : AppCompatActivity() {
 
@@ -103,6 +110,23 @@ fun BlockAdsTvApp(
     onStopVpn: () -> Unit,
 ) {
     var selectedScreen by remember { mutableStateOf(TvScreen.Home) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val tvPrefs: TvPreferences = koinInject()
+    val updateController: TvUpdateController = koinInject()
+    val updateState by updateController.state.collectAsStateWithLifecycle()
+    val updateScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (updateController.supportsInAppUpdate) {
+            val savedChannel = tvPrefs.getUpdateChannelSnapshot()
+            val channel = if (savedChannel != null) {
+                UpdateChannel.fromId(savedChannel)
+            } else {
+                UpdateChannel.fromVersionName(BuildConfig.VERSION_NAME)
+            }
+            updateController.checkForUpdate(channel = channel, manual = false)
+        }
+    }
 
     TvNavigationDrawer(
         selectedScreen = selectedScreen,
@@ -121,5 +145,19 @@ fun BlockAdsTvApp(
             TvScreen.Proxy -> ProxyScreen()
             TvScreen.Settings -> SettingsScreen()
         }
+    }
+
+    if (updateController.supportsInAppUpdate) {
+        TvUpdateDialog(
+            state = updateState,
+            onStartUpdate = {
+                val activity = context.findActivity() ?: return@TvUpdateDialog
+                updateScope.launch { updateController.startUpdate(activity) }
+            },
+            onCompleteUpdate = { updateController.completeUpdate() },
+            onDismiss = { skip ->
+                updateScope.launch { updateController.dismissUpdate(skip) }
+            },
+        )
     }
 }

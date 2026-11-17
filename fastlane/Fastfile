@@ -14,10 +14,10 @@ platform :android do
     )
   end
 
-  desc "Build release APK"
+  desc "Build release APK (fdroid + github flavors)"
   lane :build_release do
     gradle(
-      task: ":app:assembleFdroidRelease :blockadstv:assembleFdroidRelease"
+      task: ":app:assembleFdroidRelease :blockadstv:assembleFdroidRelease :app:assembleGithubRelease :blockadstv:assembleGithubRelease"
     )
   end
 

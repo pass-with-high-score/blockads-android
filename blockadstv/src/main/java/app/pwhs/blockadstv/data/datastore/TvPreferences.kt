@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -13,13 +14,14 @@ import app.pwhs.blockadstv.data.entities.ProxyProfile
 import app.pwhs.blockadstv.data.entities.ProxyProfileList
 import app.pwhs.blockadstv.data.entities.ProxySubscription
 import app.pwhs.blockadstv.data.entities.ProxySubscriptionList
+import app.pwhs.blockadstv.update.UpdatePreferencesStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "blockadstv_prefs")
 
-class TvPreferences(private val context: Context) {
+class TvPreferences(private val context: Context) : UpdatePreferencesStore {
 
     companion object {
         private val KEY_VPN_ENABLED = booleanPreferencesKey("vpn_enabled")
@@ -41,6 +43,9 @@ class TvPreferences(private val context: Context) {
         private val KEY_ACTIVE_PROXY_PROFILE_ID = stringPreferencesKey("active_proxy_profile_id")
         private val KEY_SUBSCRIPTIONS_JSON = stringPreferencesKey("proxy_subscriptions_json")
         private val KEY_SNI_PROXY_RULES = stringPreferencesKey("sni_proxy_rules")
+        private val KEY_UPDATE_CHANNEL = stringPreferencesKey("update_channel")
+        private val KEY_LAST_UPDATE_CHECK_MS = longPreferencesKey("last_update_check_ms")
+        private val KEY_SKIPPED_UPDATE_VERSION = stringPreferencesKey("skipped_update_version")
 
         const val ROUTING_MODE_DIRECT = "direct"
         const val ROUTING_MODE_PROXY_VPN = "proxy_vpn"
@@ -367,5 +372,23 @@ class TvPreferences(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[KEY_SNI_PROXY_RULES] = json
         }
+    }
+
+    override val updateChannel: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[KEY_UPDATE_CHANNEL]
+    }
+    override suspend fun getUpdateChannelSnapshot(): String? = updateChannel.first()
+    override suspend fun setUpdateChannel(channel: String) {
+        context.dataStore.edit { prefs -> prefs[KEY_UPDATE_CHANNEL] = channel }
+    }
+
+    override suspend fun getLastUpdateCheckMs(): Long = context.dataStore.data.map { it[KEY_LAST_UPDATE_CHECK_MS] ?: 0L }.first()
+    override suspend fun setLastUpdateCheckMs(timestampMs: Long) {
+        context.dataStore.edit { prefs -> prefs[KEY_LAST_UPDATE_CHECK_MS] = timestampMs }
+    }
+
+    override suspend fun getSkippedUpdateVersion(): String = context.dataStore.data.map { it[KEY_SKIPPED_UPDATE_VERSION] ?: "" }.first()
+    override suspend fun setSkippedUpdateVersion(version: String) {
+        context.dataStore.edit { prefs -> prefs[KEY_SKIPPED_UPDATE_VERSION] = version }
     }
 }

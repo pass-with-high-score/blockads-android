@@ -296,3 +296,29 @@ private fun SelectionRow(
         }
     }
 }
+
+@Composable
+internal fun getLanguageDisplayName(code: String): String = when (code) {
+    TvPreferences.LANGUAGE_VI -> stringResource(R.string.settings_lang_vi) + " (🇻🇳)"
+    TvPreferences.LANGUAGE_EN -> stringResource(R.string.settings_lang_en) + " (🇺🇸)"
+    TvPreferences.LANGUAGE_AR -> stringResource(R.string.settings_lang_ar) + " (🇸🇦)"
+    TvPreferences.LANGUAGE_CS -> stringResource(R.string.settings_lang_cs) + " (🇨🇿)"
+    TvPreferences.LANGUAGE_DE -> stringResource(R.string.settings_lang_de) + " (🇩🇪)"
+    TvPreferences.LANGUAGE_ES -> stringResource(R.string.settings_lang_es) + " (🇪🇸)"
+    TvPreferences.LANGUAGE_FR -> stringResource(R.string.settings_lang_fr) + " (🇫🇷)"
+    TvPreferences.LANGUAGE_IN -> stringResource(R.string.settings_lang_in) + " (🇮🇩)"
+    TvPreferences.LANGUAGE_IT -> stringResource(R.string.settings_lang_it) + " (🇮🇹)"
+    TvPreferences.LANGUAGE_IW -> stringResource(R.string.settings_lang_iw) + " (🇮🇱)"
+    TvPreferences.LANGUAGE_JA -> stringResource(R.string.settings_lang_ja) + " (🇯🇵)"
+    TvPreferences.LANGUAGE_KK -> stringResource(R.string.settings_lang_kk) + " (🇰🇿)"
+    TvPreferences.LANGUAGE_KO -> stringResource(R.string.settings_lang_ko) + " (🇰🇷)"
+    TvPreferences.LANGUAGE_PL -> stringResource(R.string.settings_lang_pl) + " (🇵🇱)"
+    TvPreferences.LANGUAGE_PT_BR -> stringResource(R.string.settings_lang_pt_br) + " (🇧🇷)"
+    TvPreferences.LANGUAGE_RU -> stringResource(R.string.settings_lang_ru) + " (🇷🇺)"
+    TvPreferences.LANGUAGE_TH -> stringResource(R.string.settings_lang_th) + " (🇹🇭)"
+    TvPreferences.LANGUAGE_TR -> stringResource(R.string.settings_lang_tr) + " (🇹🇷)"
+    TvPreferences.LANGUAGE_HU -> stringResource(R.string.settings_lang_hu) + " (🇭🇺)"
+    TvPreferences.LANGUAGE_UK -> stringResource(R.string.settings_lang_uk) + " (🇺🇦)"
+    TvPreferences.LANGUAGE_ZH -> stringResource(R.string.settings_lang_zh) + " (🇨🇳)"
+    else -> stringResource(R.string.settings_lang_system)
+}

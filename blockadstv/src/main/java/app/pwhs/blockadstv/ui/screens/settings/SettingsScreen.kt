@@ -43,6 +43,10 @@ import app.pwhs.blockadstv.data.repository.FilterListRepository
 import app.pwhs.blockadstv.ui.components.TvSwitch
 import app.pwhs.blockadstv.ui.theme.NeonGreen
 import app.pwhs.blockadstv.ui.theme.TextSecondary
+import app.pwhs.blockadstv.ui.update.TvUpdateChannelDialog
+import app.pwhs.blockadstv.ui.update.tvUpdateSettingsItems
+import app.pwhs.blockadstv.update.TvUpdateController
+import app.pwhs.blockadstv.update.UpdateChannel
 import app.pwhs.blockadstv.utils.TvLocaleHelper
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -76,6 +80,28 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showModeDialog by remember { mutableStateOf(false) }
+    var showUpdateChannelDialog by remember { mutableStateOf(false) }
+    val updateController: TvUpdateController = koinInject()
+    val updateState by updateController.state.collectAsStateWithLifecycle()
+    val storedChannel by tvPrefs.updateChannel.collectAsStateWithLifecycle(initialValue = null)
+    val currentChannel = remember(storedChannel) {
+        if (storedChannel != null) {
+            UpdateChannel.fromId(storedChannel)
+        } else {
+            UpdateChannel.fromVersionName(app.pwhs.blockadstv.BuildConfig.VERSION_NAME)
+        }
+    }
+
+    if (showUpdateChannelDialog) {
+        TvUpdateChannelDialog(
+            selectedChannel = currentChannel,
+            onSelect = { selected ->
+                showUpdateChannelDialog = false
+                scope.launch { tvPrefs.setUpdateChannel(selected.id) }
+            },
+            onDismiss = { showUpdateChannelDialog = false },
+        )
+    }
 
     if (showModeDialog) {
         ModeSelectionDialog(
@@ -268,6 +294,19 @@ fun SettingsScreen(
                 )
             }
 
+            tvUpdateSettingsItems(
+                supportsInAppUpdate = updateController.supportsInAppUpdate,
+                supportsChannelSelection = updateController.supportsChannelSelection,
+                updateState = updateState,
+                currentChannel = currentChannel,
+                onCheckUpdate = {
+                    scope.launch {
+                        updateController.checkForUpdate(currentChannel, manual = true)
+                    }
+                },
+                onOpenChannelDialog = { showUpdateChannelDialog = true },
+            )
+
             // About
             item {
                 SettingListItem(
@@ -285,7 +324,7 @@ fun SettingsScreen(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun SettingListItem(
+internal fun SettingListItem(
     @DrawableRes iconRes: Int,
     title: String,
     subtitle: String,
@@ -435,30 +474,4 @@ private fun ResponseTypeDialog(
             }
         }
     }
-}
-
-@Composable
-private fun getLanguageDisplayName(code: String): String = when (code) {
-    TvPreferences.LANGUAGE_VI -> stringResource(R.string.settings_lang_vi) + " (🇻🇳)"
-    TvPreferences.LANGUAGE_EN -> stringResource(R.string.settings_lang_en) + " (🇺🇸)"
-    TvPreferences.LANGUAGE_AR -> stringResource(R.string.settings_lang_ar) + " (🇸🇦)"
-    TvPreferences.LANGUAGE_CS -> stringResource(R.string.settings_lang_cs) + " (🇨🇿)"
-    TvPreferences.LANGUAGE_DE -> stringResource(R.string.settings_lang_de) + " (🇩🇪)"
-    TvPreferences.LANGUAGE_ES -> stringResource(R.string.settings_lang_es) + " (🇪🇸)"
-    TvPreferences.LANGUAGE_FR -> stringResource(R.string.settings_lang_fr) + " (🇫🇷)"
-    TvPreferences.LANGUAGE_IN -> stringResource(R.string.settings_lang_in) + " (🇮🇩)"
-    TvPreferences.LANGUAGE_IT -> stringResource(R.string.settings_lang_it) + " (🇮🇹)"
-    TvPreferences.LANGUAGE_IW -> stringResource(R.string.settings_lang_iw) + " (🇮🇱)"
-    TvPreferences.LANGUAGE_JA -> stringResource(R.string.settings_lang_ja) + " (🇯🇵)"
-    TvPreferences.LANGUAGE_KK -> stringResource(R.string.settings_lang_kk) + " (🇰🇿)"
-    TvPreferences.LANGUAGE_KO -> stringResource(R.string.settings_lang_ko) + " (🇰🇷)"
-    TvPreferences.LANGUAGE_PL -> stringResource(R.string.settings_lang_pl) + " (🇵🇱)"
-    TvPreferences.LANGUAGE_PT_BR -> stringResource(R.string.settings_lang_pt_br) + " (🇧🇷)"
-    TvPreferences.LANGUAGE_RU -> stringResource(R.string.settings_lang_ru) + " (🇷🇺)"
-    TvPreferences.LANGUAGE_TH -> stringResource(R.string.settings_lang_th) + " (🇹🇭)"
-    TvPreferences.LANGUAGE_TR -> stringResource(R.string.settings_lang_tr) + " (🇹🇷)"
-    TvPreferences.LANGUAGE_HU -> stringResource(R.string.settings_lang_hu) + " (🇭🇺)"
-    TvPreferences.LANGUAGE_UK -> stringResource(R.string.settings_lang_uk) + " (🇺🇦)"
-    TvPreferences.LANGUAGE_ZH -> stringResource(R.string.settings_lang_zh) + " (🇨🇳)"
-    else -> stringResource(R.string.settings_lang_system)
 }

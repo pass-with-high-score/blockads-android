@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.pwhs.blockads.data.datastore.prefs.AppearancePreferences
 import app.pwhs.blockads.data.datastore.prefs.DnsPreferences
@@ -17,15 +19,17 @@ import app.pwhs.blockads.data.entities.ProxyProfile
 import app.pwhs.blockads.data.entities.ProxySubscription
 import app.pwhs.blockads.data.entities.ShadowsocksProfile
 import app.pwhs.blockads.data.entities.WireGuardProfile
+import app.pwhs.blockads.update.UpdatePreferencesStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 val Context.blockAdsDataStore: DataStore<Preferences> by preferencesDataStore(name = "blockads_prefs")
 
 class AppPreferences internal constructor(
     private val dataStore: DataStore<Preferences>,
     private val directBootPrefs: DirectBootPreferences,
-) {
+) : UpdatePreferencesStore {
 
     constructor(context: Context) : this(context.blockAdsDataStore, DirectBootPreferences(context))
 
@@ -354,6 +358,26 @@ class AppPreferences internal constructor(
 
     val ratePromptLastDismissed: Flow<Long> get() = vpnSecurity.ratePromptLastDismissed
     suspend fun setRatePromptLastDismissed(timestamp: Long) = vpnSecurity.setRatePromptLastDismissed(timestamp)
+
+    private val keyUpdateChannel = stringPreferencesKey("update_channel")
+    private val keyLastUpdateCheckMs = longPreferencesKey("last_update_check_ms")
+    private val keySkippedUpdateVersion = stringPreferencesKey("skipped_update_version")
+
+    override val updateChannel: Flow<String?> = dataStore.data.map { it[keyUpdateChannel] }
+    override suspend fun getUpdateChannelSnapshot(): String? = updateChannel.first()
+    override suspend fun setUpdateChannel(channel: String) {
+        dataStore.edit { it[keyUpdateChannel] = channel }
+    }
+
+    override suspend fun getLastUpdateCheckMs(): Long = dataStore.data.map { it[keyLastUpdateCheckMs] ?: 0L }.first()
+    override suspend fun setLastUpdateCheckMs(timestampMs: Long) {
+        dataStore.edit { it[keyLastUpdateCheckMs] = timestampMs }
+    }
+
+    override suspend fun getSkippedUpdateVersion(): String = dataStore.data.map { it[keySkippedUpdateVersion] ?: "" }.first()
+    override suspend fun setSkippedUpdateVersion(version: String) {
+        dataStore.edit { it[keySkippedUpdateVersion] = version }
+    }
 
     suspend fun resetSettings() {
         dataStore.edit { prefs ->

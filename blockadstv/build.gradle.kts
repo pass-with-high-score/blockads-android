@@ -42,10 +42,24 @@ android {
         create("fdroid") {
             dimension = "distribution"
             buildConfigField("Boolean", "IS_STORE", "false")
+            buildConfigField("String", "UPDATE_MODE", "\"none\"")
+            buildConfigField("Long", "BUILD_TIME_MS", "0L")
         }
         create("store") {
             dimension = "distribution"
             buildConfigField("Boolean", "IS_STORE", "true")
+            buildConfigField("String", "UPDATE_MODE", "\"play\"")
+            buildConfigField("Long", "BUILD_TIME_MS", "0L")
+        }
+        create("github") {
+            dimension = "distribution"
+            buildConfigField("Boolean", "IS_STORE", "false")
+            buildConfigField("String", "UPDATE_MODE", "\"github\"")
+            val buildTimeMs = providers.environmentVariable("SOURCE_DATE_EPOCH")
+                .map { it.toLong() * 1000L }
+                .orElse(System.currentTimeMillis())
+                .get()
+            buildConfigField("Long", "BUILD_TIME_MS", "${buildTimeMs}L")
         }
     }
 
@@ -188,6 +202,10 @@ dependencies {
     // libsu — root shell access for iptables mode
     implementation(libs.core)
     implementation(libs.service)
+
+    // Google Play In-App Update (store flavor only)
+    "storeImplementation"(libs.play.app.update)
+    "storeImplementation"(libs.play.app.update.ktx)
 
     // Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))
