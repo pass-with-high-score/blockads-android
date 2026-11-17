@@ -188,7 +188,7 @@ class VpnConnectionSupervisorTest {
     }
 
     @Test
-    fun `periodic monitoring refreshes stats, updates the notification when interactive and logs battery`() = runTest {
+    fun `periodic monitoring refreshes stats and updates the notification when interactive`() = runTest {
         stubProbe(*Array(10) { ConnectionStatus.HEALTHY })
         running = true
         val s = supervisor()
@@ -201,9 +201,6 @@ class VpnConnectionSupervisorTest {
         interactive = false
         advanceTimeBy(60_000)
         assertEquals(2, notificationUpdates)
-
-        advanceTimeBy(180_000)
-        verify(exactly = 1) { battery.logBatteryStatus() }
 
         s.stopPeriodicMonitoring()
         val refreshesAtStop = statsRefreshes

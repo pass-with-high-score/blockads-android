@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Nieprawidłowy link proxy lub nieobsługiwany protokół</string>
     <string name="proxy_subscription_success">Zaimportowano %1$d węzłów</string>
     <string name="settings_mode_title">Tryb ochrony</string>
+
+    <string name="update_section_title">Aktualizacje aplikacji</string>
+    <string name="update_check_title">Sprawdź aktualizacje</string>
+    <string name="update_check_desc">Sprawdź, czy jest dostępna nowsza wersja</string>
+    <string name="update_checking">Sprawdzanie aktualizacji…</string>
+    <string name="update_up_to_date">Korzystasz z najnowszej wersji</string>
+    <string name="update_channel_title">Kanał aktualizacji</string>
+    <string name="update_channel_stable">Stabilny</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Dostępna aktualizacja (%1$s)</string>
+    <string name="update_available_default_notes">Nowa wersja BlockAds TV jest gotowa do instalacji.</string>
+    <string name="update_action_now">Aktualizuj teraz</string>
+    <string name="update_action_later">Później</string>
+    <string name="update_action_skip">Pomiń tę wersję</string>
+    <string name="update_downloading">Pobieranie aktualizacji… %1$d%%</string>
+    <string name="update_ready_install">Aktualizacja gotowa do instalacji</string>
+    <string name="update_action_install">Zainstaluj</string>
+    <string name="update_action_restart">Uruchom ponownie, aby zaktualizować</string>
+    <string name="update_error_prefix">Błąd aktualizacji: %1$s</string>
 </resources>

@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Geçersiz proxy bağlantısı veya desteklenmeyen protokol</string>
     <string name="proxy_subscription_success">%1$d düğüm içe aktarıldı</string>
     <string name="settings_mode_title">Koruma Modu</string>
+
+    <string name="update_section_title">Uygulama Güncellemeleri</string>
+    <string name="update_check_title">Güncellemeleri denetle</string>
+    <string name="update_check_desc">Daha yeni bir sürüm olup olmadığını kontrol et</string>
+    <string name="update_checking">Güncellemeler denetleniyor…</string>
+    <string name="update_up_to_date">En güncel sürümü kullanıyorsunuz</string>
+    <string name="update_channel_title">Güncelleme kanalı</string>
+    <string name="update_channel_stable">Kararlı</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Güncelleme Mevcut (%1$s)</string>
+    <string name="update_available_default_notes">Yeni BlockAds TV sürümü yüklenmeye hazır.</string>
+    <string name="update_action_now">Şimdi Güncelle</string>
+    <string name="update_action_later">Sonra</string>
+    <string name="update_action_skip">Bu sürümü atla</string>
+    <string name="update_downloading">Güncelleme indiriliyor… %1$d%%</string>
+    <string name="update_ready_install">Güncelleme yüklenmeye hazır</string>
+    <string name="update_action_install">Yükle</string>
+    <string name="update_action_restart">Güncellemek için Yeniden Başlat</string>
+    <string name="update_error_prefix">Güncelleme hatası: %1$s</string>
 </resources>

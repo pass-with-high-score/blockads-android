@@ -55,15 +55,19 @@ class VpnNotificationManagerTest {
     fun `running shows today's blocks, uptime and pause-stop actions`() {
         val n = build(isRunning = true, blocked = 12, startTime = System.currentTimeMillis() - 3_725_000)
         assertEquals(s(R.string.vpn_notification_title), n.title)
-        assertEquals(s(R.string.vpn_notification_stats_today, 12, "1:02:05"), n.text)
+        assertEquals(s(R.string.vpn_notification_blocked_today, 12), n.text)
         assertEquals(listOf(s(R.string.vpn_notification_action_pause), s(R.string.vpn_notification_action_stop)), n.actionTitles)
         assertTrue(n.flags and Notification.FLAG_ONGOING_EVENT != 0)
+        assertTrue(n.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
     }
 
     @Test
     fun `short uptime drops the hour field`() {
-        val n = build(isRunning = true, blocked = 1, startTime = System.currentTimeMillis() - 65_000)
-        assertEquals(s(R.string.vpn_notification_stats_today, 1, "1:05"), n.text)
+        val start = System.currentTimeMillis() - 65_000
+        val n = build(isRunning = true, blocked = 1, startTime = start)
+        assertEquals(s(R.string.vpn_notification_blocked_today, 1), n.text)
+        assertEquals(start, n.`when`)
+        assertTrue(n.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
     }
 
     @Test

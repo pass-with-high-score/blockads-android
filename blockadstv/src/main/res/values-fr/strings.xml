@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Lien proxy non valide ou protocole non pris en charge</string>
     <string name="proxy_subscription_success">%1$d nœuds importés</string>
     <string name="settings_mode_title">Mode de protection</string>
+
+    <string name="update_section_title">Mises à jour de l\'application</string>
+    <string name="update_check_title">Rechercher des mises à jour</string>
+    <string name="update_check_desc">Vérifier si une version plus récente est disponible</string>
+    <string name="update_checking">Recherche de mises à jour…</string>
+    <string name="update_up_to_date">Vous utilisez la dernière version</string>
+    <string name="update_channel_title">Canal de mise à jour</string>
+    <string name="update_channel_stable">Stable</string>
+    <string name="update_channel_beta">Bêta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Mise à jour disponible (%1$s)</string>
+    <string name="update_available_default_notes">Une nouvelle version de BlockAds TV est prête à être installée.</string>
+    <string name="update_action_now">Mettre à jour</string>
+    <string name="update_action_later">Plus tard</string>
+    <string name="update_action_skip">Ignorer cette version</string>
+    <string name="update_downloading">Téléchargement de la mise à jour… %1$d%%</string>
+    <string name="update_ready_install">Mise à jour prête à être installée</string>
+    <string name="update_action_install">Installer</string>
+    <string name="update_action_restart">Redémarrer pour mettre à jour</string>
+    <string name="update_error_prefix">Erreur de mise à jour : %1$s</string>
 </resources>

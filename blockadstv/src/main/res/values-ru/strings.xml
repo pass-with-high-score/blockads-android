@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Недействительная ссылка на прокси или неподдерживаемый протокол</string>
     <string name="proxy_subscription_success">Импортировано узлов: %1$d</string>
     <string name="settings_mode_title">Режим защиты</string>
+
+    <string name="update_section_title">Обновления приложения</string>
+    <string name="update_check_title">Проверить обновления</string>
+    <string name="update_check_desc">Проверить наличие новой версии</string>
+    <string name="update_checking">Проверка обновлений…</string>
+    <string name="update_up_to_date">У вас установлена последняя версия</string>
+    <string name="update_channel_title">Канал обновлений</string>
+    <string name="update_channel_stable">Стабильный</string>
+    <string name="update_channel_beta">Бета</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Доступно обновление (%1$s)</string>
+    <string name="update_available_default_notes">Новая версия BlockAds TV готова к установке.</string>
+    <string name="update_action_now">Обновить сейчас</string>
+    <string name="update_action_later">Позже</string>
+    <string name="update_action_skip">Пропустить эту версию</string>
+    <string name="update_downloading">Загрузка обновления… %1$d%%</string>
+    <string name="update_ready_install">Обновление готово к установке</string>
+    <string name="update_action_install">Установить</string>
+    <string name="update_action_restart">Перезапустить для обновления</string>
+    <string name="update_error_prefix">Ошибка обновления: %1$s</string>
 </resources>

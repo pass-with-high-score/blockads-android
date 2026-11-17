@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Жарамсыз прокси сілтемесі немесе қолдау көрсетілмейтін хаттама</string>
     <string name="proxy_subscription_success">%1$d түйін импортталды</string>
     <string name="settings_mode_title">Қорғау режимі</string>
+
+    <string name="update_section_title">Қолданба жаңартулары</string>
+    <string name="update_check_title">Жаңартуларды тексеру</string>
+    <string name="update_check_desc">Жаңа нұсқаның бар-жоғын тексеру</string>
+    <string name="update_checking">Жаңартулар тексерілуде…</string>
+    <string name="update_up_to_date">Сізде ең соңғы нұсқа орнатылған</string>
+    <string name="update_channel_title">Жаңарту арнасы</string>
+    <string name="update_channel_stable">Тұрақты</string>
+    <string name="update_channel_beta">Бета</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Жаңарту қолжетімді (%1$s)</string>
+    <string name="update_available_default_notes">BlockAds TV жаңа нұсқасы орнатуға дайын.</string>
+    <string name="update_action_now">Қазір жаңарту</string>
+    <string name="update_action_later">Кейінірек</string>
+    <string name="update_action_skip">Бұл нұсқаны өткізіп жіберу</string>
+    <string name="update_downloading">Жаңарту жүктелуде… %1$d%%</string>
+    <string name="update_ready_install">Жаңарту орнатуға дайын</string>
+    <string name="update_action_install">Орнату</string>
+    <string name="update_action_restart">Жаңарту үшін қайта іске қосу</string>
+    <string name="update_error_prefix">Жаңарту қатесі: %1$s</string>
 </resources>

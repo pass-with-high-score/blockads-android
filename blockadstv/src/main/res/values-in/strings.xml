@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Tautan proksi tidak valid atau protokol tidak didukung</string>
     <string name="proxy_subscription_success">Berhasil mengimpor %1$d node</string>
     <string name="settings_mode_title">Mode Perlindungan</string>
+
+    <string name="update_section_title">Pembaruan Aplikasi</string>
+    <string name="update_check_title">Periksa pembaruan</string>
+    <string name="update_check_desc">Periksa apakah versi yang lebih baru tersedia</string>
+    <string name="update_checking">Memeriksa pembaruan…</string>
+    <string name="update_up_to_date">Anda menggunakan versi terbaru</string>
+    <string name="update_channel_title">Saluran pembaruan</string>
+    <string name="update_channel_stable">Stabil</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Pembaruan Tersedia (%1$s)</string>
+    <string name="update_available_default_notes">Versi baru BlockAds TV siap dipasang.</string>
+    <string name="update_action_now">Perbarui Sekarang</string>
+    <string name="update_action_later">Nanti</string>
+    <string name="update_action_skip">Lewati versi ini</string>
+    <string name="update_downloading">Mengunduh pembaruan… %1$d%%</string>
+    <string name="update_ready_install">Pembaruan siap dipasang</string>
+    <string name="update_action_install">Pasang</string>
+    <string name="update_action_restart">Mulai Ulang untuk Memperbarui</string>
+    <string name="update_error_prefix">Kesalahan pembaruan: %1$s</string>
 </resources>

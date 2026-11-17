@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">無効なプロキシリンクまたは未対応のプロトコルです</string>
     <string name="proxy_subscription_success">%1$d 個のノードをインポートしました</string>
     <string name="settings_mode_title">保護モード</string>
+
+    <string name="update_section_title">アプリの更新</string>
+    <string name="update_check_title">アップデートを確認</string>
+    <string name="update_check_desc">新しいバージョンがあるか確認します</string>
+    <string name="update_checking">アップデートを確認中…</string>
+    <string name="update_up_to_date">最新バージョンです</string>
+    <string name="update_channel_title">アップデートチャンネル</string>
+    <string name="update_channel_stable">安定版</string>
+    <string name="update_channel_beta">ベータ版</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">アップデートがあります (%1$s)</string>
+    <string name="update_available_default_notes">BlockAds TV の新しいバージョンをインストールできます。</string>
+    <string name="update_action_now">今すぐ更新</string>
+    <string name="update_action_later">後で</string>
+    <string name="update_action_skip">このバージョンをスキップ</string>
+    <string name="update_downloading">アップデートをダウンロード中… %1$d%%</string>
+    <string name="update_ready_install">インストールの準備ができました</string>
+    <string name="update_action_install">インストール</string>
+    <string name="update_action_restart">再起動して更新</string>
+    <string name="update_error_prefix">更新エラー: %1$s</string>
 </resources>

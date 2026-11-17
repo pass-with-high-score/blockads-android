@@ -89,4 +89,24 @@
     <string name="proxy_err_invalid_link">Érvénytelen proxylink vagy nem támogatott protokoll</string>
     <string name="proxy_subscription_success">%1$d csomópont importálva</string>
     <string name="settings_mode_title">Védelmi mód</string>
+
+    <string name="update_section_title">Alkalmazásfrissítések</string>
+    <string name="update_check_title">Frissítések keresése</string>
+    <string name="update_check_desc">Újabb verzió elérhetőségének ellenőrzése</string>
+    <string name="update_checking">Frissítések keresése…</string>
+    <string name="update_up_to_date">A legújabb verziót használja</string>
+    <string name="update_channel_title">Frissítési csatorna</string>
+    <string name="update_channel_stable">Stabil</string>
+    <string name="update_channel_beta">Béta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Frissítés érhető el (%1$s)</string>
+    <string name="update_available_default_notes">A BlockAds TV új verziója készen áll a telepítésre.</string>
+    <string name="update_action_now">Frissítés most</string>
+    <string name="update_action_later">Később</string>
+    <string name="update_action_skip">Verzió kihagyása</string>
+    <string name="update_downloading">Frissítés letöltése… %1$d%%</string>
+    <string name="update_ready_install">A frissítés telepítésre kész</string>
+    <string name="update_action_install">Telepítés</string>
+    <string name="update_action_restart">Újraindítás a frissítéshez</string>
+    <string name="update_error_prefix">Frissítési hiba: %1$s</string>
 </resources>

@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">Neplatný odkaz proxy nebo nepodporovaný protokol</string>
     <string name="proxy_subscription_success">Importováno %1$d uzlů</string>
     <string name="settings_mode_title">Režim ochrany</string>
+
+    <string name="update_section_title">Aktualizace aplikace</string>
+    <string name="update_check_title">Zkontrolovat aktualizace</string>
+    <string name="update_check_desc">Zkontrolujte, zda je k dispozici novější verze</string>
+    <string name="update_checking">Kontrola aktualizací…</string>
+    <string name="update_up_to_date">Máte nejnovější verzi</string>
+    <string name="update_channel_title">Kanál aktualizací</string>
+    <string name="update_channel_stable">Stabilní</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">K dispozici je aktualizace (%1$s)</string>
+    <string name="update_available_default_notes">Nová verze BlockAds TV je připravena k instalaci.</string>
+    <string name="update_action_now">Aktualizovat</string>
+    <string name="update_action_later">Později</string>
+    <string name="update_action_skip">Přeskočit tuto verzi</string>
+    <string name="update_downloading">Stahování aktualizace… %1$d%%</string>
+    <string name="update_ready_install">Aktualizace je připravena k instalaci</string>
+    <string name="update_action_install">Instalovat</string>
+    <string name="update_action_restart">Restartovat a aktualizovat</string>
+    <string name="update_error_prefix">Chyba aktualizace: %1$s</string>
 </resources>

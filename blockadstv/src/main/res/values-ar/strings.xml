@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">رابط الوكيل غير صالح أو البروتوكول غير مدعوم</string>
     <string name="proxy_subscription_success">تم استيراد %1$d عقدة</string>
     <string name="settings_mode_title">وضع الحماية</string>
+
+    <string name="update_section_title">تحديثات التطبيق</string>
+    <string name="update_check_title">التحقق من التحديثات</string>
+    <string name="update_check_desc">تحقق مما إذا كان هناك إصدار أحدث متاح</string>
+    <string name="update_checking">جارٍ التحقق من التحديثات…</string>
+    <string name="update_up_to_date">أنت تستخدم أحدث إصدار</string>
+    <string name="update_channel_title">قناة التحديثات</string>
+    <string name="update_channel_stable">مستقر</string>
+    <string name="update_channel_beta">تجريبي (Beta)</string>
+    <string name="update_channel_nightly">ليلي (Nightly)</string>
+    <string name="update_available_title">يتوفر تحديث (%1$s)</string>
+    <string name="update_available_default_notes">إصدار جديد من BlockAds TV جاهز للتثبيت.</string>
+    <string name="update_action_now">حدّث الآن</string>
+    <string name="update_action_later">لاحقًا</string>
+    <string name="update_action_skip">تخطي هذا الإصدار</string>
+    <string name="update_downloading">جارٍ تنزيل التحديث… %1$d%%</string>
+    <string name="update_ready_install">التحديث جاهز للتثبيت</string>
+    <string name="update_action_install">تثبيت</string>
+    <string name="update_action_restart">أعد التشغيل للتحديث</string>
+    <string name="update_error_prefix">خطأ في التحديث: %1$s</string>
 </resources>

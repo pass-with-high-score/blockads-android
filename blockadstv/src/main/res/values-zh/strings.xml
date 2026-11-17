@@ -102,4 +102,24 @@
     <string name="proxy_err_invalid_link">无效的代理链接或不支持的协议</string>
     <string name="proxy_subscription_success">已导入 %1$d 个节点</string>
     <string name="settings_mode_title">防护模式</string>
+
+    <string name="update_section_title">应用更新</string>
+    <string name="update_check_title">检查更新</string>
+    <string name="update_check_desc">检查是否有新版本可用</string>
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_up_to_date">您已是最新版本</string>
+    <string name="update_channel_title">更新通道</string>
+    <string name="update_channel_stable">稳定版</string>
+    <string name="update_channel_beta">测试版</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">有可用更新 (%1$s)</string>
+    <string name="update_available_default_notes">BlockAds TV 新版本已准备好安装。</string>
+    <string name="update_action_now">立即更新</string>
+    <string name="update_action_later">稍后</string>
+    <string name="update_action_skip">跳过此版本</string>
+    <string name="update_downloading">正在下载更新… %1$d%%</string>
+    <string name="update_ready_install">更新已准备好安装</string>
+    <string name="update_action_install">安装</string>
+    <string name="update_action_restart">重启以更新</string>
+    <string name="update_error_prefix">更新错误: %1$s</string>
 </resources>
