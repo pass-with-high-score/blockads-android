@@ -110,27 +110,55 @@ fun FilterDetailScreen(
         modifier = modifier,
         contentWindowInsets = if (showBackButton) androidx.compose.material3.ScaffoldDefaults.contentWindowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        filter?.name ?: "",
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                windowInsets = if (showBackButton) TopAppBarDefaults.windowInsets else androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
-                navigationIcon = {
-                    if (showBackButton) {
+            if (showBackButton) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            filter?.name ?: "",
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    windowInsets = TopAppBarDefaults.windowInsets,
+                    navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
-                    }
-                },
-                actions = {
+                    },
+                    actions = {
+                        if (filter?.isBuiltIn == false) {
+                            IconButton(onClick = { viewModel.openEditDialog() }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                )
+            } else if (filter != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = filter?.name ?: "",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
                     if (filter?.isBuiltIn == false) {
                         IconButton(onClick = { viewModel.openEditDialog() }) {
                             Icon(
@@ -139,11 +167,8 @@ fun FilterDetailScreen(
                             )
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
+                }
+            }
         }
     ) { innerPadding ->
         val f = filter
@@ -238,7 +263,10 @@ fun FilterDetailScreen(
                         }
 
                         // Stats
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
                             if (f.domainCount > 0) {
                                 Column {
                                     Text(

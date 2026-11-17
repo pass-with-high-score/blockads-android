@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -119,6 +120,20 @@ class SettingsViewModel(
 
     val logRetentionDays: StateFlow<Int> = appPrefs.logRetentionDays
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val updateChannel: StateFlow<app.pwhs.blockads.update.UpdateChannel> = appPrefs.updateChannel
+        .map { stored ->
+            if (stored != null) {
+                app.pwhs.blockads.update.UpdateChannel.fromId(stored)
+            } else {
+                app.pwhs.blockads.update.UpdateChannel.fromVersionName(app.pwhs.blockads.BuildConfig.VERSION_NAME)
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            app.pwhs.blockads.update.UpdateChannel.fromVersionName(app.pwhs.blockads.BuildConfig.VERSION_NAME)
+        )
 
     val upstreamDns: StateFlow<String> = kotlinx.coroutines.flow.combine(
         appPrefs.dnsProviderId,
@@ -320,6 +335,12 @@ class SettingsViewModel(
                 val cutoff = System.currentTimeMillis() - (days.toLong() * app.pwhs.blockads.worker.LogCleanupWorker.MILLIS_PER_DAY)
                 dnsLogDao.deleteLogsOlderThan(cutoff)
             }
+        }
+    }
+
+    fun setUpdateChannel(channel: app.pwhs.blockads.update.UpdateChannel) {
+        viewModelScope.launch {
+            appPrefs.setUpdateChannel(channel.id)
         }
     }
 

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -124,8 +126,12 @@ fun FloatingCapsuleNavigationRail(
     modifier: Modifier = Modifier
 ) {
     val selectedIndex = screens.indexOf(currentTab).coerceAtLeast(0)
-    val itemHeight = if (showLabels) 60.dp else 52.dp
+    val railWidth = if (showLabels) 84.dp else 64.dp
+    val itemHeight = if (showLabels) 64.dp else 56.dp
+    val innerPadding = 4.dp
     val innerHeight = itemHeight * screens.size.coerceAtLeast(1)
+    // Match outer corner radius to (indicatorRadius + innerPadding) so top/bottom indicators never clip.
+    val containerShape = RoundedCornerShape(itemHeight / 2 + innerPadding)
 
     Box(
         modifier = modifier
@@ -136,11 +142,12 @@ fun FloatingCapsuleNavigationRail(
         contentAlignment = Alignment.Center
     ) {
         CapsuleContainer(
-            modifier = Modifier.width(84.dp)
+            shape = containerShape,
+            modifier = Modifier.width(railWidth)
         ) {
             Box(
                 modifier = Modifier
-                    .padding(4.dp)
+                    .padding(innerPadding)
                     .fillMaxWidth()
                     .height(innerHeight)
             ) {
@@ -179,11 +186,12 @@ fun FloatingCapsuleNavigationRail(
 @Composable
 private fun CapsuleContainer(
     modifier: Modifier = Modifier,
+    shape: Shape = CircleShape,
     content: @Composable () -> Unit
 ) {
     Surface(
         modifier = modifier,
-        shape = CircleShape,
+        shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
         contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 4.dp,

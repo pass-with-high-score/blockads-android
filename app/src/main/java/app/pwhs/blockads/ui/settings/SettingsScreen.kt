@@ -73,6 +73,7 @@ import app.pwhs.blockads.ui.settings.component.SettingsOptionPane
 import app.pwhs.blockads.ui.settings.geoip.GeoIpScreen
 import app.pwhs.blockads.ui.tailscale.TailscaleScreen
 import app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen
+import app.pwhs.blockads.update.UpdateChannel
 import org.koin.androidx.compose.koinViewModel
 
 enum class SettingsDetailPane {
@@ -82,6 +83,7 @@ enum class SettingsDetailPane {
     UPDATE_NOTIFICATION,
     BUILD_MODE,
     LOG_RETENTION,
+    UPDATE_CHANNEL,
     HTTPS_FILTERING,
     APP_MANAGEMENT,
     TRUSTED_NETWORKS,
@@ -135,6 +137,7 @@ fun SettingsScreen(
     val homeTipsEnabled by viewModel.homeTipsEnabled.collectAsStateWithLifecycle()
     val upstreamDNS by viewModel.upstreamDns.collectAsStateWithLifecycle()
     val logRetentionDays by viewModel.logRetentionDays.collectAsStateWithLifecycle()
+    val updateChannel by viewModel.updateChannel.collectAsStateWithLifecycle()
 
     var showDnsResponseTypeDialog by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -292,7 +295,10 @@ fun SettingsScreen(
                         onNavigateToAbout = {
                             if (isListDetail) activeDetailPane = SettingsDetailPane.ABOUT
                             else onNavigateToAbout()
-                        }
+                        },
+                        onOpenUpdateChannel = if (isListDetail) {
+                            { activeDetailPane = SettingsDetailPane.UPDATE_CHANNEL }
+                        } else null
                     )
 
                     CommunitySection()
@@ -418,6 +424,16 @@ fun SettingsScreen(
                                 ),
                                 selectedValue = logRetentionDays,
                                 onSelect = { viewModel.setLogRetentionDays(it) }
+                            )
+                            SettingsDetailPane.UPDATE_CHANNEL -> SettingsOptionPane(
+                                title = stringResource(R.string.update_channel_title),
+                                options = listOf(
+                                    SettingsOptionItem(UpdateChannel.STABLE, R.string.update_channel_stable),
+                                    SettingsOptionItem(UpdateChannel.BETA, R.string.update_channel_beta),
+                                    SettingsOptionItem(UpdateChannel.NIGHTLY, R.string.update_channel_nightly)
+                                ),
+                                selectedValue = updateChannel,
+                                onSelect = { viewModel.setUpdateChannel(it) }
                             )
                             SettingsDetailPane.APP_MANAGEMENT -> AppManagementScreen(onNavigateBack = {})
                             SettingsDetailPane.TRUSTED_NETWORKS -> TrustedNetworksScreen(onNavigateBack = {})

@@ -38,7 +38,8 @@ import org.koin.compose.koinInject
 @Composable
 fun InformationSection(
     onNavigateToAbout: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenUpdateChannel: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val dividerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
@@ -96,7 +97,13 @@ fun InformationSection(
                     iconTint = Color(0xFF8B5CF6),
                     title = stringResource(R.string.update_channel_title),
                     desc = channelLabel,
-                    onClick = { showChannelDialog = true }
+                    onClick = {
+                        if (onOpenUpdateChannel != null) {
+                            onOpenUpdateChannel()
+                        } else {
+                            showChannelDialog = true
+                        }
+                    }
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
