@@ -37,6 +37,9 @@ class FirewallPromptManager(
     private val _pendingPrompts = MutableStateFlow<List<PendingFirewallPrompt>>(emptyList())
     val pendingPrompts: StateFlow<List<PendingFirewallPrompt>> = _pendingPrompts.asStateFlow()
 
+    private val _snoozedPackages = MutableStateFlow<Set<String>>(emptySet())
+    val snoozedPackages: StateFlow<Set<String>> = _snoozedPackages.asStateFlow()
+
     private val pendingKeys = ConcurrentHashMap.newKeySet<String>()
     private val sessionAllowed = ConcurrentHashMap.newKeySet<String>()
     private val promptableCache = ConcurrentHashMap<String, Boolean>()
@@ -75,11 +78,21 @@ class FirewallPromptManager(
         }
     }
 
+    fun snooze(packageNames: Collection<String>) {
+        if (packageNames.isEmpty()) return
+        _snoozedPackages.update { it + packageNames }
+    }
+
+    fun clearSnoozed() {
+        _snoozedPackages.value = emptySet()
+    }
+
     /** Drops all pending prompts and one-time allowances (e.g. when prompt mode is turned off). */
     fun clearAll() {
         _pendingPrompts.value.forEach { notifier.cancel(it.packageName) }
         pendingKeys.clear()
         sessionAllowed.clear()
+        _snoozedPackages.value = emptySet()
         _pendingPrompts.value = emptyList()
     }
 
@@ -105,6 +118,7 @@ class FirewallPromptManager(
 
     private fun resolve(packageName: String) {
         pendingKeys.remove(packageName)
+        _snoozedPackages.update { it - packageName }
         _pendingPrompts.update { current -> current.filterNot { it.packageName == packageName } }
         notifier.cancel(packageName)
     }

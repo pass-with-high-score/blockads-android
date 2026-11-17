@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,6 +39,10 @@ class FirewallViewModel(
 
     val promptEnabled: StateFlow<Boolean> = appPrefs.firewallPromptEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val pendingPromptCount: StateFlow<Int> = promptManager.pendingPrompts
+        .map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val firewallRules: StateFlow<List<FirewallRule>> = firewallRuleDao.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -200,6 +205,7 @@ class FirewallViewModel(
                 if (allEnabled) disableAllSystemApps() else enableAllSystemApps()
             }
             is FirewallUiIntent.RefreshApps -> refreshApps()
+            is FirewallUiIntent.ReopenPrompts -> promptManager.clearSnoozed()
         }
     }
 

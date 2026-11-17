@@ -5,12 +5,12 @@ import android.graphics.drawable.Drawable
 data class FirewallPromptItem(
     val packageName: String,
     val appLabel: String,
-    val icon: Drawable?
+    val icon: Drawable?,
+    val timestamp: Long = 0L
 )
 
 data class FirewallPromptUiState(
-    val current: FirewallPromptItem? = null,
-    val pendingCount: Int = 0
+    val pendingItems: List<FirewallPromptItem> = emptyList()
 )
 
 sealed interface FirewallPromptUiIntent {
@@ -18,4 +18,5 @@ sealed interface FirewallPromptUiIntent {
     data class AllowOnce(val packageName: String) : FirewallPromptUiIntent
     data class Block(val packageName: String) : FirewallPromptUiIntent
     data class Later(val packageName: String) : FirewallPromptUiIntent
+    data object LaterAll : FirewallPromptUiIntent
 }

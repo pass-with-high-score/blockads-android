@@ -18,16 +18,12 @@ fun FirewallPromptContent(
     uiState: FirewallPromptUiState,
     onIntent: (FirewallPromptUiIntent) -> Unit
 ) {
-    val prompt = uiState.current ?: return
-    val pkg = prompt.packageName
+    if (uiState.pendingItems.isEmpty()) return
     FirewallPermissionDialog(
-        appLabel = prompt.appLabel,
-        packageName = pkg,
-        appIcon = prompt.icon,
-        pendingCount = uiState.pendingCount,
-        onAlwaysAllow = { onIntent(FirewallPromptUiIntent.AlwaysAllow(pkg)) },
-        onAllowOnce = { onIntent(FirewallPromptUiIntent.AllowOnce(pkg)) },
-        onBlock = { onIntent(FirewallPromptUiIntent.Block(pkg)) },
-        onDismiss = { onIntent(FirewallPromptUiIntent.Later(pkg)) }
+        pendingItems = uiState.pendingItems,
+        onAlwaysAllow = { onIntent(FirewallPromptUiIntent.AlwaysAllow(it)) },
+        onAllowOnce = { onIntent(FirewallPromptUiIntent.AllowOnce(it)) },
+        onBlock = { onIntent(FirewallPromptUiIntent.Block(it)) },
+        onDismiss = { onIntent(FirewallPromptUiIntent.LaterAll) }
     )
 }

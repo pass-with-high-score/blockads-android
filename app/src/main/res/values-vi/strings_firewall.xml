@@ -9,8 +9,12 @@
     <string name="firewall_prompt_action_allow">Cho phép</string>
     <string name="firewall_prompt_action_block">Chặn</string>
     <string name="firewall_prompt_dialog_title">%1$s muốn truy cập mạng</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d ứng dụng muốn truy cập mạng</string>
     <string name="firewall_prompt_dialog_message">Truy cập mạng của ứng dụng này đang tạm dừng cho đến khi bạn chọn.</string>
     <string name="firewall_prompt_dialog_pending">Còn %1$d ứng dụng đang chờ</string>
     <string name="firewall_prompt_always_allow">Luôn cho phép</string>
     <string name="firewall_prompt_allow_once">Chỉ lần này</string>
+    <string name="firewall_prompt_later">Để sau</string>
+    <string name="firewall_prompt_pending_banner">Có %1$d ứng dụng đang chờ cấp quyền</string>
+    <string name="firewall_prompt_reopen">Xem</string>
 </resources>

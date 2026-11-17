@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +52,7 @@ fun FirewallScreen(
     viewModel: FirewallViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pendingPromptCount by viewModel.pendingPromptCount.collectAsStateWithLifecycle()
     var isSearchVisible by rememberSaveable { mutableStateOf(false) }
 
     val allUserEnabled = uiState.userApps.isNotEmpty() &&
@@ -97,6 +101,35 @@ fun FirewallScreen(
                     enabled = uiState.isPromptEnabled,
                     onToggle = { viewModel.processIntent(FirewallUiIntent.SetPromptEnabled(it)) }
                 )
+
+                AnimatedVisibility(visible = pendingPromptCount > 0) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.firewall_prompt_pending_banner, pendingPromptCount),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(
+                                onClick = { viewModel.processIntent(FirewallUiIntent.ReopenPrompts) }
+                            ) {
+                                Text(stringResource(R.string.firewall_prompt_reopen))
+                            }
+                        }
+                    }
+                }
 
                 FirewallControlBar(
                     selectedTab = uiState.selectedTab,

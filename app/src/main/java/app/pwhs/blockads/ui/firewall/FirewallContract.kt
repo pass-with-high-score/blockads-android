@@ -64,6 +64,7 @@ sealed interface FirewallUiIntent {
     data object ToggleAllUserApps : FirewallUiIntent
     data object ToggleAllSystemApps : FirewallUiIntent
     data object RefreshApps : FirewallUiIntent
+    data object ReopenPrompts : FirewallUiIntent
 }
 
 sealed interface FirewallUiEffect {

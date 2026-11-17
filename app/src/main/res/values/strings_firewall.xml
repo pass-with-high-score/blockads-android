@@ -9,8 +9,12 @@
     <string name="firewall_prompt_action_allow">Allow</string>
     <string name="firewall_prompt_action_block">Block</string>
     <string name="firewall_prompt_dialog_title">%1$s wants to access the internet</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d apps want internet access</string>
     <string name="firewall_prompt_dialog_message">Network access is paused for this app until you choose.</string>
     <string name="firewall_prompt_dialog_pending">%1$d more app(s) waiting</string>
     <string name="firewall_prompt_always_allow">Always allow</string>
     <string name="firewall_prompt_allow_once">Allow once</string>
+    <string name="firewall_prompt_later">Later</string>
+    <string name="firewall_prompt_pending_banner">%1$d app(s) waiting for permission</string>
+    <string name="firewall_prompt_reopen">Review</string>
 </resources>

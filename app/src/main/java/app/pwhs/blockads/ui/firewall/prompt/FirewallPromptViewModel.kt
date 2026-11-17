@@ -7,30 +7,26 @@ import app.pwhs.blockads.service.FirewallPromptDecision
 import app.pwhs.blockads.service.FirewallPromptManager
 import app.pwhs.blockads.service.PendingFirewallPrompt
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 
 class FirewallPromptViewModel(
     private val promptManager: FirewallPromptManager,
     application: Application
 ) : AndroidViewModel(application) {
 
-    // Prompts the user postponed by dismissing the dialog; they stay blocked and in the notification shade.
-    private val snoozed = MutableStateFlow<Set<String>>(emptySet())
-
     val uiState: StateFlow<FirewallPromptUiState> = combine(
         promptManager.pendingPrompts,
-        snoozed
+        promptManager.snoozedPackages
     ) { pending, later ->
-        val visible = pending.filterNot { it.packageName in later }
+        val visible = pending
+            .filterNot { it.packageName in later }
+            .sortedByDescending { it.timestamp }
         FirewallPromptUiState(
-            current = visible.firstOrNull()?.toItem(),
-            pendingCount = visible.size
+            pendingItems = visible.map { it.toItem() }
         )
     }
         .flowOn(Dispatchers.IO)
@@ -44,13 +40,20 @@ class FirewallPromptViewModel(
                 promptManager.decide(intent.packageName, FirewallPromptDecision.ALLOW_ONCE)
             is FirewallPromptUiIntent.Block ->
                 promptManager.decide(intent.packageName, FirewallPromptDecision.BLOCK)
-            is FirewallPromptUiIntent.Later -> snoozed.update { it + intent.packageName }
+            is FirewallPromptUiIntent.Later -> promptManager.snooze(listOf(intent.packageName))
+            FirewallPromptUiIntent.LaterAll ->
+                promptManager.snooze(uiState.value.pendingItems.map { it.packageName })
         }
     }
 
     private fun PendingFirewallPrompt.toItem(): FirewallPromptItem {
         val pm = getApplication<Application>().packageManager
         val icon = runCatching { pm.getApplicationIcon(packageName) }.getOrNull()
-        return FirewallPromptItem(packageName = packageName, appLabel = appLabel, icon = icon)
+        return FirewallPromptItem(
+            packageName = packageName,
+            appLabel = appLabel,
+            icon = icon,
+            timestamp = timestamp
+        )
     }
 }
