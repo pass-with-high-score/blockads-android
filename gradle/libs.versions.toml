@@ -39,7 +39,7 @@ playAppUpdate = "2.1.0"
 # Prebuilt Go tunnel. Published as a GitHub Release asset by
 # .github/workflows/update_tunnel.yml; the checksum is pinned in gradle/tunnel.aar.sha256.
 # Format: <release date>.<short git tree hash of tunnel/>
-tunnel = "2026.11.15.b61c9349"
+tunnel = "2026.11.17.35069308"
 
 [libraries]
 tunnel = { module = "app.pwhs:tunnel", version.ref = "tunnel" }
