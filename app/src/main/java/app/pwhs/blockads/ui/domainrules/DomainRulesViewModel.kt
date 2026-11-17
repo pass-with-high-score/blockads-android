@@ -297,7 +297,7 @@ class DomainRulesViewModel(
             }
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
-            val cleanPackage = packageName.trim()
+            val cleanPackage = normalizePackageNames(packageName)
             val isDirect = policy.equals("DIRECT", ignoreCase = true)
             if (isDirect && type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty()) {
                 if (whitelistDomainDao.exists(paramClean) == 0) {
@@ -352,7 +352,7 @@ class DomainRulesViewModel(
             }
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
-            val cleanPackage = packageName.trim()
+            val cleanPackage = normalizePackageNames(packageName)
             val isDirect = policy.equals("DIRECT", ignoreCase = true)
             val newIsWhitelist = isDirect && type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty()
 
@@ -445,7 +445,7 @@ class DomainRulesViewModel(
     fun restoreProfileRule(rule: ParsedFilterRule) {
         viewModelScope.launch(Dispatchers.IO) {
             val isDirect = rule.policy.equals("DIRECT", ignoreCase = true)
-            val cleanPackage = rule.packageName.trim()
+            val cleanPackage = normalizePackageNames(rule.packageName)
             if (rule.rawLine.startsWith("whitelist:") || (isDirect && rule.type.equals("HOST", ignoreCase = true) && cleanPackage.isEmpty())) {
                 val clean = sanitizeDomain(rule.param)
                 if (clean.isNotBlank() && whitelistDomainDao.exists(clean) == 0) {
@@ -497,6 +497,16 @@ class DomainRulesViewModel(
             sniProxyDelegate.deleteRule(ruleId)
             _events.toast(R.string.sni_proxy_deleted)
         }
+    }
+
+    private fun normalizePackageNames(raw: String): String {
+        if (raw.isBlank()) return ""
+        return raw.split(',')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .sorted()
+            .joinToString(",")
     }
 
     private fun requestVpnRestart() {

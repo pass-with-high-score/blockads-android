@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,20 +23,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import app.pwhs.blockads.ui.domainrules.InstalledAppOption
 import android.app.Activity
 import android.graphics.Color as AndroidColor
@@ -339,12 +331,11 @@ fun FilterRuleDialog(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 // Field 4: Target App (Optional — empty = Global)
-                val targetAppLabel = if (packageName.isEmpty()) {
-                    stringResource(R.string.rule_target_app_all)
-                } else {
-                    installedApps.firstOrNull { it.packageName == packageName }?.label
-                        ?: packageName
+                val appLabelMap = remember(installedApps) {
+                    installedApps.associate { it.packageName to it.label }
                 }
+                val targetAppLabel = formatPackageNamesLabel(packageName, appLabelMap)
+                    ?: stringResource(R.string.rule_target_app_all)
                 FormFieldLabel(label = stringResource(R.string.rule_field_target_app), isRequired = false)
                 UnderlineInputField(
                     value = targetAppLabel,
@@ -358,11 +349,13 @@ fun FilterRuleDialog(
         }
 
         if (showAppPickerDialog) {
-            TargetAppPickerDialog(
+            AppMultiPickerBottomSheet(
+                title = stringResource(R.string.rule_pick_app_title),
                 installedApps = installedApps,
-                selectedPackage = packageName,
-                onSelect = {
-                    packageName = it
+                selected = parsePackageNameSet(packageName),
+                allAppsLabel = stringResource(R.string.rule_target_app_all),
+                onConfirm = { selected ->
+                    packageName = selected.sorted().joinToString(",")
                     showAppPickerDialog = false
                 },
                 onDismiss = { showAppPickerDialog = false }
@@ -373,96 +366,6 @@ fun FilterRuleDialog(
             RuleTypesDocSheet(onDismiss = { showDocSheet = false })
         }
     }
-}
-
-@Composable
-private fun TargetAppPickerDialog(
-    installedApps: List<InstalledAppOption>,
-    selectedPackage: String,
-    onSelect: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var query by remember { mutableStateOf("") }
-    val filtered = remember(installedApps, query) {
-        if (query.isBlank()) installedApps
-        else installedApps.filter {
-            it.label.contains(query, ignoreCase = true) ||
-                it.packageName.contains(query, ignoreCase = true)
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.rule_pick_app_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    placeholder = { Text(stringResource(R.string.rule_pick_app_search)) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
-                    item(key = "__all__") {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect("") }
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedPackage.isEmpty(),
-                                onClick = { onSelect("") }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.rule_target_app_all),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                    items(filtered, key = { it.packageName }) { app ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onSelect(app.packageName) }
-                                .padding(vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = selectedPackage == app.packageName,
-                                onClick = { onSelect(app.packageName) }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = app.label,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 1
-                                )
-                                Text(
-                                    text = app.packageName,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
-            }
-        }
-    )
 }
 
 @Composable

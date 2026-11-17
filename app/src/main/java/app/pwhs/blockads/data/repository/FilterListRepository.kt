@@ -163,15 +163,19 @@ class FilterListRepository(
         appBlockRules.clear()
         appAllowRules.clear()
         for (rule in perAppRules) {
-            val pkg = rule.packageName.trim()
+            val pkgs = rule.packageName.split(',')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
             val domain = rule.domain.lowercase().trim()
-            if (pkg.isEmpty() || domain.isEmpty()) continue
+            if (pkgs.isEmpty() || domain.isEmpty()) continue
             val targetMap = when (rule.ruleType) {
                 app.pwhs.blockads.data.entities.RuleType.BLOCK -> appBlockRules
                 app.pwhs.blockads.data.entities.RuleType.ALLOW -> appAllowRules
                 else -> continue
             }
-            targetMap.getOrPut(pkg) { ConcurrentHashMap.newKeySet() }.add(domain)
+            for (pkg in pkgs) {
+                targetMap.getOrPut(pkg) { ConcurrentHashMap.newKeySet() }.add(domain)
+            }
         }
         Timber.d(
             "Loaded ${customBlockDomains.size} block + ${customAllowDomains.size} allow custom rules, " +

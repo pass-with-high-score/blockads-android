@@ -57,9 +57,10 @@ fun WhitelistTab(
                             icon = Icons.Default.CheckCircle,
                             isEnabled = rule.isEnabled,
                             ruleType = rule.type,
-                            appLabel = if (rule.packageName.isNotEmpty()) {
-                                appLabelMap[rule.packageName] ?: rule.packageName.substringAfterLast('.')
-                            } else null,
+                            appLabel = app.pwhs.blockads.ui.domainrules.dialog.formatPackageNamesLabel(
+                                rule.packageName,
+                                appLabelMap
+                            ),
                             onToggle = { onToggle(rule) },
                             onDelete = { onRemove(rule) },
                             onEdit = { onEdit(rule) }

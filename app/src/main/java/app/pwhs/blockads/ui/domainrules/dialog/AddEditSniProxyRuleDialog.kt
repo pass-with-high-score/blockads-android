@@ -362,115 +362,16 @@ fun AddEditSniProxyRuleDialog(
 
     if (showAppPicker) {
         AppMultiPickerBottomSheet(
+            title = stringResource(R.string.sni_proxy_apps_label),
             installedApps = installedApps,
             selected = selectedPackages,
+            allAppsLabel = stringResource(R.string.rule_target_app_all),
             onDismiss = { showAppPicker = false },
             onConfirm = {
                 selectedPackages = it
                 showAppPicker = false
             }
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AppMultiPickerBottomSheet(
-    installedApps: List<InstalledAppOption>,
-    selected: Set<String>,
-    onDismiss: () -> Unit,
-    onConfirm: (Set<String>) -> Unit
-) {
-    var query by remember { mutableStateOf("") }
-    var draft by remember { mutableStateOf(selected) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val filtered = remember(installedApps, query) {
-        if (query.isBlank()) installedApps
-        else installedApps.filter {
-            it.label.contains(query, ignoreCase = true) ||
-                it.packageName.contains(query, ignoreCase = true)
-        }
-    }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .imePadding()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.sni_proxy_apps_label),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = { Text("Search apps…") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-            LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
-                items(filtered, key = { it.packageName }) { app ->
-                    val checked = app.packageName in draft
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                draft = if (checked) draft - app.packageName else draft + app.packageName
-                            }
-                            .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = checked,
-                            onCheckedChange = {
-                                draft = if (checked) draft - app.packageName else draft + app.packageName
-                            }
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(app.label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                            Text(
-                                app.packageName,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-                Button(
-                    onClick = { onConfirm(draft) },
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(android.R.string.ok))
-                }
-            }
-        }
     }
 }
 

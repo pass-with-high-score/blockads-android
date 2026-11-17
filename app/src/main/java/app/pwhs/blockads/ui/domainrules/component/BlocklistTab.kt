@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.domainrules.dialog.formatPackageNamesLabel
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.utils.ParsedFilterRule
@@ -58,9 +59,7 @@ fun BlocklistTab(
                             icon = Icons.Default.Block,
                             isEnabled = rule.isEnabled,
                             ruleType = rule.type,
-                            appLabel = if (rule.packageName.isNotEmpty()) {
-                                appLabelMap[rule.packageName] ?: rule.packageName.substringAfterLast('.')
-                            } else null,
+                            appLabel = formatPackageNamesLabel(rule.packageName, appLabelMap),
                             onToggle = { onToggle(rule) },
                             onDelete = { onRemove(rule) },
                             onEdit = { onEdit(rule) }
