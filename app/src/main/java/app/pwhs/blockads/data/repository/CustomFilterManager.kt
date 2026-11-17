@@ -40,7 +40,8 @@ class CustomFilterManager(
         urls: List<String>,
         displayName: String? = null,
         category: String = FilterList.CATEGORY_AD,
-        onProgress: ((Int) -> Unit)? = null
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ): Result<FilterList> = withContext(Dispatchers.IO) {
         val cleanUrls = urls.map { it.trim() }.filter { it.isNotBlank() }
         if (cleanUrls.isEmpty()) {
@@ -69,7 +70,8 @@ class CustomFilterManager(
                 client = client,
                 downloadUrl = buildResponse.downloadUrl,
                 destDir = extractDir,
-                onProgress = { dl -> onProgress?.invoke(40 + (dl * 45) / 100) }
+                onProgress = { dl -> onProgress?.invoke(40 + (dl * 45) / 100) },
+                onBytesProgress = onBytesProgress
             )
             onProgress?.invoke(90)
 
@@ -121,7 +123,7 @@ class CustomFilterManager(
             Result.success(updatedEntity)
         } catch (e: Exception) {
             Timber.e(e, "Failed to add custom filter via API, trying local compile")
-            addCustomFilterLocally(cleanUrls, displayName, category)
+            addCustomFilterLocally(cleanUrls, displayName, category, onProgress, onBytesProgress)
         }
     }
 
@@ -146,7 +148,8 @@ class CustomFilterManager(
         newName: String,
         newUrl: String,
         newCategory: String? = null,
-        onProgress: ((Int) -> Unit)? = null
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ): Result<FilterList> = withContext(Dispatchers.IO) {
         try {
             val trimmedUrl = newUrl.trim()
@@ -189,7 +192,8 @@ class CustomFilterManager(
                 client = client,
                 downloadUrl = buildResponse.downloadUrl,
                 destDir = extractDir,
-                onProgress = { dl -> onProgress?.invoke(40 + (dl * 45) / 100) }
+                onProgress = { dl -> onProgress?.invoke(40 + (dl * 45) / 100) },
+                onBytesProgress = onBytesProgress
             )
             onProgress?.invoke(90)
 
@@ -284,9 +288,11 @@ class CustomFilterManager(
     suspend fun addCustomFilterLocally(
         urls: List<String>,
         displayName: String?,
-        category: String = FilterList.CATEGORY_AD
+        category: String = FilterList.CATEGORY_AD,
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ): Result<FilterList> =
-        localCompiler.addCustomFilterLocally(urls, displayName, category)
+        localCompiler.addCustomFilterLocally(urls, displayName, category, onProgress, onBytesProgress)
 
     suspend fun addCustomFilterLocally(
         url: String,

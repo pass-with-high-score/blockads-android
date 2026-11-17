@@ -92,6 +92,7 @@ fun AddFilterBottomSheet(
     existingUrls: List<String> = emptyList(),
     isValidating: Boolean = false,
     progress: Int? = null,
+    progressDetail: String? = null,
     defaultBuildLocally: Boolean = false
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -352,8 +353,13 @@ fun AddFilterBottomSheet(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val statusText = if (!progressDetail.isNullOrBlank()) {
+                            "${stringResource(R.string.settings_updating)} ($progressDetail)"
+                        } else {
+                            stringResource(R.string.settings_updating)
+                        }
                         Text(
-                            text = stringResource(R.string.settings_updating),
+                            text = statusText,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium

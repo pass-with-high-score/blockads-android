@@ -2,12 +2,14 @@ package app.pwhs.blockads.data.repository
 
 import android.content.Context
 import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.entities.FilterList
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -20,7 +22,8 @@ import java.io.ByteArrayOutputStream
 class FilterListSeeder(
     private val context: Context,
     private val filterListDao: FilterListDao,
-    private val client: HttpClient
+    private val client: HttpClient,
+    private val appPreferences: AppPreferences? = null
 ) {
     companion object {
         private const val FILTER_LIST_JSON_URL = "https://complier.pwhs.app/api/filters/default"
@@ -33,8 +36,14 @@ class FilterListSeeder(
         coerceInputValues = true
     }
 
-    suspend fun seedDefaultsIfNeeded() = withContext(Dispatchers.IO) {
-        if (app.pwhs.blockads.BuildConfig.IS_STORE) {
+    private suspend fun isStoreRestricted(allowInStore: Boolean): Boolean {
+        if (!app.pwhs.blockads.BuildConfig.IS_STORE) return false
+        if (allowInStore) return false
+        return appPreferences?.filter?.storeUseDefaultFilters?.first() != true
+    }
+
+    suspend fun seedDefaultsIfNeeded(allowInStore: Boolean = false) = withContext(Dispatchers.IO) {
+        if (isStoreRestricted(allowInStore)) {
             val builtIns = filterListDao.getAllSync().filter { it.isBuiltIn }
             if (builtIns.isNotEmpty()) {
                 builtIns.forEach { filterListDao.delete(it) }
@@ -44,13 +53,13 @@ class FilterListSeeder(
         }
         val existingBuiltIns = filterListDao.getAllSync().count { it.isBuiltIn }
         if (existingBuiltIns < 50) {
-            seedFromBundledAsset()
-            fetchAndSyncRemoteFilterLists()
+            seedFromBundledAsset(allowInStore)
+            fetchAndSyncRemoteFilterLists(allowInStore)
         }
     }
 
-    suspend fun seedFromBundledAsset() = withContext(Dispatchers.IO) {
-        if (app.pwhs.blockads.BuildConfig.IS_STORE) {
+    suspend fun seedFromBundledAsset(allowInStore: Boolean = false) = withContext(Dispatchers.IO) {
+        if (isStoreRestricted(allowInStore)) {
             return@withContext
         }
         try {
@@ -65,8 +74,8 @@ class FilterListSeeder(
         }
     }
 
-    suspend fun fetchAndSyncRemoteFilterLists() = withContext(Dispatchers.IO) {
-        if (app.pwhs.blockads.BuildConfig.IS_STORE) {
+    suspend fun fetchAndSyncRemoteFilterLists(allowInStore: Boolean = false) = withContext(Dispatchers.IO) {
+        if (isStoreRestricted(allowInStore)) {
             return@withContext
         }
         try {

@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -35,15 +36,20 @@ class FilterSetupViewModel(
     private val appPreferences: AppPreferences? = null
 ) : ViewModel() {
 
-    val filterLists: StateFlow<List<FilterList>> = filterListDao.getAll()
-        .map { lists ->
-            if (BuildConfig.IS_STORE) {
-                lists.filter { !it.isBuiltIn }
-            } else {
-                lists
-            }
+    val useDefaultFiltersInStore: StateFlow<Boolean> = appPreferences?.filter?.storeUseDefaultFilters
+        ?.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        ?: MutableStateFlow(false).asStateFlow()
+
+    val filterLists: StateFlow<List<FilterList>> = combine(
+        filterListDao.getAll(),
+        useDefaultFiltersInStore
+    ) { lists, useDefault ->
+        if (BuildConfig.IS_STORE && !useDefault) {
+            lists.filter { !it.isBuiltIn }
+        } else {
+            lists
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -113,6 +119,9 @@ class FilterSetupViewModel(
     private val _addFilterProgress = MutableStateFlow<Int?>(null)
     val addFilterProgress: StateFlow<Int?> = _addFilterProgress.asStateFlow()
 
+    private val _addFilterProgressDetail = MutableStateFlow<String?>(null)
+    val addFilterProgressDetail: StateFlow<String?> = _addFilterProgressDetail.asStateFlow()
+
     private val _filterAddedEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val filterAddedEvent: SharedFlow<Unit> = _filterAddedEvent.asSharedFlow()
 
@@ -132,7 +141,17 @@ class FilterSetupViewModel(
 
     init {
         viewModelScope.launch {
-            filterRepo.seedDefaultsIfNeeded()
+            val allowInStore = appPreferences?.filter?.storeUseDefaultFilters?.first() == true
+            filterRepo.seedDefaultsIfNeeded(allowInStore = allowInStore)
+        }
+    }
+
+    fun setStoreUseDefaultFilters(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferences?.filter?.setStoreUseDefaultFilters(enabled)
+            filterRepo.seedDefaultsIfNeeded(allowInStore = enabled)
+            filterRepo.loadAllEnabledFilters()
+            ServiceController.requestRestart(application.applicationContext)
         }
     }
 
@@ -184,14 +203,19 @@ class FilterSetupViewModel(
             } else {
                 _isAddingCustomFilter.value = true
                 _addFilterProgress.value = 10
+                _addFilterProgressDetail.value = null
                 val result = customFilterManager.addCustomFilter(
                     urls = rawUrls,
                     displayName = name.trim(),
                     category = category,
-                    onProgress = { p -> _addFilterProgress.value = p }
+                    onProgress = { p -> _addFilterProgress.value = p },
+                    onBytesProgress = { dl, total ->
+                        _addFilterProgressDetail.value = app.pwhs.blockads.utils.ZipUtils.formatDownloadProgress(dl, total)
+                    }
                 )
                 _isAddingCustomFilter.value = false
                 _addFilterProgress.value = null
+                _addFilterProgressDetail.value = null
 
                 result.fold(
                     onSuccess = { _ ->

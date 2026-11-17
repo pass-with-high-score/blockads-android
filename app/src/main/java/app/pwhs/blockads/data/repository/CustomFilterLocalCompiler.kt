@@ -5,8 +5,10 @@ import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.remote.api.CustomFilterException
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,7 +27,9 @@ internal class CustomFilterLocalCompiler(
     suspend fun addCustomFilterLocally(
         urls: List<String>,
         displayName: String?,
-        category: String = FilterList.CATEGORY_AD
+        category: String = FilterList.CATEGORY_AD,
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ): Result<FilterList> = withContext(Dispatchers.IO) {
         val cleanUrls = urls.map { it.trim() }.filter { it.isNotBlank() }
         if (cleanUrls.isEmpty()) {
@@ -42,11 +46,13 @@ internal class CustomFilterLocalCompiler(
         val tempModulesFile = File("${tempBase.absolutePath}.modules.json")
 
         try {
-            downloadRawFilterUrls(cleanUrls, tempFile)
+            downloadRawFilterUrls(cleanUrls, tempFile, onProgress, onBytesProgress)
+            onProgress?.invoke(85)
 
             val ruleCount = tunnel.Tunnel.compileFilterList(
                 tempFile.absolutePath, tempTrieFile.absolutePath, tempBloomFile.absolutePath
             ).toInt()
+            onProgress?.invoke(95)
 
             Timber.d("Local compile: $ruleCount rules")
 
@@ -148,16 +154,44 @@ internal class CustomFilterLocalCompiler(
         }
     }
 
-    private suspend fun downloadRawFilterUrls(urls: List<String>, destFile: File) {
+    private suspend fun downloadRawFilterUrls(
+        urls: List<String>,
+        destFile: File,
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
+    ) {
         destFile.outputStream().use { output ->
-            for (u in urls) {
+            for ((index, u) in urls.withIndex()) {
                 Timber.d("Downloading raw filter: $u")
-                val response = client.get(u)
-                val channel = response.bodyAsChannel()
-                val buffer = ByteArray(8 * 1024)
-                while (!channel.isClosedForRead) {
-                    val read = channel.readAvailable(buffer)
-                    if (read > 0) output.write(buffer, 0, read)
+                client.prepareGet(u) {
+                    timeout {
+                        requestTimeoutMillis = 5 * 60 * 1000L
+                        socketTimeoutMillis = 60_000L
+                    }
+                }.execute { response ->
+                    val contentLength = response.contentLength() ?: -1L
+                    val channel = response.bodyAsChannel()
+                    val buffer = ByteArray(64 * 1024)
+                    var bytesDownloaded = 0L
+                    var lastEmitMs = 0L
+                    while (!channel.isClosedForRead) {
+                        val read = channel.readAvailable(buffer)
+                        if (read > 0) {
+                            output.write(buffer, 0, read)
+                            bytesDownloaded += read
+                            val now = System.currentTimeMillis()
+                            if (now - lastEmitMs >= 100L) {
+                                lastEmitMs = now
+                                onBytesProgress?.invoke(bytesDownloaded, contentLength)
+                                if (contentLength > 0) {
+                                    val filePct = ((bytesDownloaded * 100) / contentLength).toInt().coerceIn(0, 100)
+                                    val overallPct = 10 + (((index * 100 + filePct) * 70) / (urls.size * 100))
+                                    onProgress?.invoke(overallPct)
+                                }
+                            }
+                        }
+                    }
+                    onBytesProgress?.invoke(bytesDownloaded, contentLength)
                 }
                 output.write("\n".toByteArray())
             }

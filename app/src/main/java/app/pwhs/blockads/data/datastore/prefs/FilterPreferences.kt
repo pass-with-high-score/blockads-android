@@ -27,6 +27,7 @@ class FilterPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_GEOIP_AUTO_UPDATE = booleanPreferencesKey("geoip_auto_update")
         val KEY_FILTER_BUILD_MODE = stringPreferencesKey("filter_build_mode")
         val KEY_CUSTOM_FILTER_TAGS = stringSetPreferencesKey("custom_filter_tags")
+        val KEY_STORE_USE_DEFAULT_FILTERS = booleanPreferencesKey("store_use_default_filters")
 
         val DEFAULT_CUSTOM_TAGS = emptySet<String>()
 
@@ -64,6 +65,7 @@ class FilterPreferences(private val dataStore: DataStore<Preferences>) {
             prefs.remove(KEY_GEOIP_AUTO_UPDATE)
             prefs.remove(KEY_FILTER_BUILD_MODE)
             prefs.remove(KEY_CUSTOM_FILTER_TAGS)
+            prefs.remove(KEY_STORE_USE_DEFAULT_FILTERS)
         }
     }
 
@@ -197,6 +199,14 @@ class FilterPreferences(private val dataStore: DataStore<Preferences>) {
 
     val customFilterTags: Flow<Set<String>> = dataStore.data.map { prefs ->
         prefs[KEY_CUSTOM_FILTER_TAGS] ?: DEFAULT_CUSTOM_TAGS
+    }
+
+    val storeUseDefaultFilters: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_STORE_USE_DEFAULT_FILTERS] ?: false
+    }
+
+    suspend fun setStoreUseDefaultFilters(enabled: Boolean) {
+        dataStore.edit { it[KEY_STORE_USE_DEFAULT_FILTERS] = enabled }
     }
 
     suspend fun addCustomFilterTag(tag: String) {

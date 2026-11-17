@@ -28,7 +28,8 @@ class FilterListRepository(
     private val customDnsRuleDao: CustomDnsRuleDao,
     private val client: HttpClient,
     private val downloadManager: FilterDownloadManager,
-    private val seeder: FilterListSeeder = FilterListSeeder(context, filterListDao, client)
+    private val appPreferences: app.pwhs.blockads.data.datastore.AppPreferences? = null,
+    private val seeder: FilterListSeeder = FilterListSeeder(context, filterListDao, client, appPreferences)
 ) {
 
     companion object {
@@ -190,7 +191,7 @@ class FilterListRepository(
         Timber.d("Loaded ${whitelistedDomains.size} whitelisted domains")
     }
 
-    suspend fun seedDefaultsIfNeeded() = seeder.seedDefaultsIfNeeded()
+    suspend fun seedDefaultsIfNeeded(allowInStore: Boolean = false) = seeder.seedDefaultsIfNeeded(allowInStore)
 
     suspend fun fetchAndSyncRemoteFilterLists() = seeder.fetchAndSyncRemoteFilterLists()
 

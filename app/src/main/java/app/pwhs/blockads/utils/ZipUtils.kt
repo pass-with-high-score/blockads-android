@@ -1,8 +1,10 @@
 package app.pwhs.blockads.utils
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,11 +33,34 @@ object ZipUtils {
      * @return List of extracted [File]s on success
      * @throws ZipExtractionException on any failure
      */
+    private const val DOWNLOAD_REQUEST_TIMEOUT_MS = 5 * 60 * 1000L
+    private const val DOWNLOAD_SOCKET_TIMEOUT_MS = 60_000L
+    private const val PROGRESS_EMIT_INTERVAL_MS = 100L
+
+    fun formatDownloadProgress(downloadedBytes: Long, totalBytes: Long): String {
+        val downloadedStr = formatMegabytes(downloadedBytes)
+        return if (totalBytes > 0L) {
+            "$downloadedStr / ${formatMegabytes(totalBytes)}"
+        } else {
+            downloadedStr
+        }
+    }
+
+    private fun formatMegabytes(bytes: Long): String {
+        val mb = bytes / (1024.0 * 1024.0)
+        return if (mb >= 100) {
+            String.format(java.util.Locale.US, "%.0f MB", mb)
+        } else {
+            String.format(java.util.Locale.US, "%.1f MB", mb)
+        }
+    }
+
     suspend fun downloadAndExtractZip(
         client: HttpClient,
         downloadUrl: String,
         destDir: File,
-        onProgress: ((Int) -> Unit)? = null
+        onProgress: ((Int) -> Unit)? = null,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ): List<File> = withContext(Dispatchers.IO) {
         val extractedFiles = mutableListOf<File>()
         // Everything this call creates, in creation order, so a failed run can be
@@ -51,30 +76,46 @@ object ZipUtils {
 
             Timber.d("Downloading ZIP from: $downloadUrl")
 
-            // Download to a temp file first to handle large ZIPs safely
+            // Stream to temp file with extended timeout so large filter ZIPs don't buffer in RAM or hit 60s timeout
             val tempZipFile = File(destDir, ".download.zip.tmp")
             try {
-                val response = client.get(downloadUrl)
-                if (response.status.value !in 200..299) {
-                    throw ZipExtractionException(
-                        "Unexpected HTTP ${response.status.value} downloading $downloadUrl"
-                    )
-                }
-                val contentLength = response.headers["Content-Length"]?.toLongOrNull() ?: -1L
-                val channel = response.bodyAsChannel()
+                client.prepareGet(downloadUrl) {
+                    timeout {
+                        requestTimeoutMillis = DOWNLOAD_REQUEST_TIMEOUT_MS
+                        socketTimeoutMillis = DOWNLOAD_SOCKET_TIMEOUT_MS
+                    }
+                }.execute { response ->
+                    if (response.status.value !in 200..299) {
+                        throw ZipExtractionException(
+                            "Unexpected HTTP ${response.status.value} downloading $downloadUrl"
+                        )
+                    }
+                    val contentLength = response.contentLength() ?: -1L
+                    val channel = response.bodyAsChannel()
+                    var lastEmitMs = 0L
 
-                FileOutputStream(tempZipFile).use { fos ->
-                    val buffer = ByteArray(8 * 1024)
-                    var bytesDownloaded = 0L
-                    while (!channel.isClosedForRead) {
-                        val bytesRead = channel.readAvailable(buffer)
-                        if (bytesRead > 0) {
-                            fos.write(buffer, 0, bytesRead)
-                            bytesDownloaded += bytesRead
-                            if (contentLength > 0) {
-                                val percent = ((bytesDownloaded * 100) / contentLength).toInt().coerceIn(0, 100)
-                                onProgress?.invoke(percent)
+                    FileOutputStream(tempZipFile).use { fos ->
+                        val buffer = ByteArray(64 * 1024)
+                        var bytesDownloaded = 0L
+                        while (!channel.isClosedForRead) {
+                            val bytesRead = channel.readAvailable(buffer)
+                            if (bytesRead > 0) {
+                                fos.write(buffer, 0, bytesRead)
+                                bytesDownloaded += bytesRead
+                                val now = System.currentTimeMillis()
+                                if (now - lastEmitMs >= PROGRESS_EMIT_INTERVAL_MS) {
+                                    lastEmitMs = now
+                                    onBytesProgress?.invoke(bytesDownloaded, contentLength)
+                                    if (contentLength > 0) {
+                                        val percent = ((bytesDownloaded * 100) / contentLength).toInt().coerceIn(0, 100)
+                                        onProgress?.invoke(percent)
+                                    }
+                                }
                             }
+                        }
+                        onBytesProgress?.invoke(bytesDownloaded, contentLength)
+                        if (contentLength > 0) {
+                            onProgress?.invoke(100)
                         }
                     }
                 }

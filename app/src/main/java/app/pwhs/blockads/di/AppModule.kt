@@ -99,7 +99,8 @@ val appModule = module {
             whitelistDomainDao = get(),
             customDnsRuleDao = get(),
             client = get(),
-            downloadManager = get()
+            downloadManager = get(),
+            appPreferences = get()
         )
     }
     single { CustomFilterApi(get()) }

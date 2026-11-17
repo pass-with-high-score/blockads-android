@@ -240,6 +240,7 @@
     <string name="filter_list_removed_named">Đã xóa \"%s\"</string>
     <string name="filter_overlap_title">Trùng lặp bộ lọc</string>
     <string name="filter_overlap_action">Kiểm tra trùng lặp</string>
+    <string name="filter_use_default">Dùng bộ lọc mặc định</string>
     <string name="filter_overlap_tab_overview">Tổng quan</string>
     <string name="filter_overlap_tab_duplicates">Trùng lặp</string>
     <string name="filter_overlap_export_combined">Xuất danh sách kết hợp</string>

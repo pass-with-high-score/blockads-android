@@ -225,6 +225,7 @@
     <!-- Filter Overlap & Combined List -->
     <string name="filter_overlap_title">Filter Overlap</string>
     <string name="filter_overlap_action">Check overlap</string>
+    <string name="filter_use_default">Use default filters</string>
     <string name="filter_overlap_tab_overview">Overview</string>
     <string name="filter_overlap_tab_duplicates">Duplicates</string>
     <string name="filter_overlap_export_combined">Export Combined List</string>

@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -49,7 +51,10 @@ fun FilterTopBar(
     canNavigateBack: Boolean = false,
     onNavigateBack: () -> Unit = {},
     onOpenOverlap: (() -> Unit)? = null,
-    updateProgress: Int? = null
+    updateProgress: Int? = null,
+    showUseDefaultOption: Boolean = false,
+    useDefaultFilters: Boolean = false,
+    onToggleUseDefaultFilters: () -> Unit = {}
 ) {
     TopAppBar(
         modifier = modifier,
@@ -144,6 +149,30 @@ fun FilterTopBar(
                             onClick = {
                                 menuExpanded = false
                                 onOpenOverlap()
+                            }
+                        )
+                    }
+                    if (showUseDefaultOption) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.filter_use_default)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.FilterList,
+                                    contentDescription = null
+                                )
+                            },
+                            trailingIcon = if (useDefaultFilters) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            } else null,
+                            onClick = {
+                                menuExpanded = false
+                                onToggleUseDefaultFilters()
                             }
                         )
                     }
