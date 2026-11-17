@@ -21,11 +21,14 @@ interface CustomDnsRuleDao {
     @Query("SELECT * FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType != 'COMMENT' ORDER BY addedTimestamp DESC")
     suspend fun getEnabledRules(): List<CustomDnsRule>
     
-    @Query("SELECT domain FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType = 'BLOCK'")
+    @Query("SELECT domain FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType = 'BLOCK' AND packageName = ''")
     suspend fun getBlockDomains(): List<String>
     
-    @Query("SELECT domain FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType = 'ALLOW'")
+    @Query("SELECT domain FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType = 'ALLOW' AND packageName = ''")
     suspend fun getAllowDomains(): List<String>
+
+    @Query("SELECT * FROM custom_dns_rules WHERE isEnabled = 1 AND ruleType != 'COMMENT' AND packageName != ''")
+    suspend fun getPerAppRules(): List<CustomDnsRule>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(rule: CustomDnsRule): Long
@@ -51,6 +54,9 @@ interface CustomDnsRuleDao {
     @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE rule = :ruleText")
     suspend fun exists(ruleText: String): Int
 
-    @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE domain = :domain AND ruleType = 'BLOCK'")
+    @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE domain = :domain AND ruleType = 'BLOCK' AND packageName = ''")
     suspend fun existsBlockDomain(domain: String): Int
+
+    @Query("SELECT COUNT(*) FROM custom_dns_rules WHERE domain = :domain AND ruleType = :ruleType AND packageName = :packageName")
+    suspend fun existsForApp(domain: String, ruleType: String, packageName: String): Int
 }

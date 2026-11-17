@@ -1,5 +1,7 @@
 const ActionNone internal/safesearch.SafeSearchAction = 0
 const ActionRedirect internal/safesearch.SafeSearchAction = 1
+type AppDomainChecker interface
+	method AppDomainChecker.CheckAppRule(domain string, appName string) int
 type AppResolver interface
 	method AppResolver.ResolveApp(sourcePort int, sourceIP []byte, destIP []byte, destPort int) string
 type AppUidResolver interface
@@ -94,6 +96,7 @@ type Engine struct
 	method Engine.SendTailscaleFile(target string, fileName string, filePath string) error
 	method Engine.ServeDNS(w github.com/miekg/dns.ResponseWriter, r *github.com/miekg/dns.Msg)
 	method Engine.SetAdPathPatterns(patternsCsv string)
+	method Engine.SetAppDomainChecker(checker AppDomainChecker)
 	method Engine.SetAppResolver(resolver AppResolver)
 	method Engine.SetAppUidResolver(resolver AppUidResolver)
 	method Engine.SetBlockResponseType(responseType string)

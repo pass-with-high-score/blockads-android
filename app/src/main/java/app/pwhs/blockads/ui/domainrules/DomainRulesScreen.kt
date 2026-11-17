@@ -331,6 +331,15 @@ fun DomainRulesScreen(
                 singleLine = true
             )
 
+            val appLabelMap = remember(installedApps) {
+                installedApps.associate { it.packageName to it.label }
+            }
+            LaunchedEffect(profileFilterRules) {
+                if (profileFilterRules.any { it.packageName.isNotEmpty() }) {
+                    viewModel.loadInstalledAppsIfNeeded()
+                }
+            }
+
             // Pager content
             HorizontalPager(
                 state = pagerState,
@@ -339,15 +348,23 @@ fun DomainRulesScreen(
                 when (page) {
                     0 -> WhitelistTab(
                         rules = whitelistRules,
+                        appLabelMap = appLabelMap,
                         onToggle = { viewModel.toggleProfileRule(it) },
                         onRemove = { viewModel.removeProfileRule(it) },
-                        onEdit = { editingRule = it }
+                        onEdit = {
+                            viewModel.loadInstalledAppsIfNeeded()
+                            editingRule = it
+                        }
                     )
                     1 -> BlocklistTab(
                         rules = blocklistRules,
+                        appLabelMap = appLabelMap,
                         onToggle = { viewModel.toggleProfileRule(it) },
                         onRemove = { viewModel.removeProfileRule(it) },
-                        onEdit = { editingRule = it }
+                        onEdit = {
+                            viewModel.loadInstalledAppsIfNeeded()
+                            editingRule = it
+                        }
                     )
                     2 -> {
                         val filteredSniRules = remember(sniProxyRules, searchQuery) {
@@ -401,14 +418,17 @@ fun DomainRulesScreen(
     }
 
     if (showAddDialog) {
+        LaunchedEffect(Unit) { viewModel.loadInstalledAppsIfNeeded() }
         AddFilterRuleDialog(
             initialPolicy = if (pagerState.currentPage == 0) "DIRECT" else "REJECT",
+            installedApps = installedApps,
             onDismiss = { showAddDialog = false },
-            onSave = { type, param, policy ->
+            onSave = { type, param, policy, packageName ->
                 viewModel.addProfileRule(
                     type = type,
                     param = param,
-                    policy = policy
+                    policy = policy,
+                    packageName = packageName
                 )
                 showAddDialog = false
             }
@@ -416,18 +436,22 @@ fun DomainRulesScreen(
     }
 
     editingRule?.let { rule ->
+        LaunchedEffect(rule) { viewModel.loadInstalledAppsIfNeeded() }
         EditFilterRuleDialog(
             initialDomain = rule.param,
             initialType = rule.type,
             initialPolicy = rule.policy,
+            initialPackageName = rule.packageName,
+            installedApps = installedApps,
             onDismiss = { editingRule = null },
-            onSave = { type, param, policy ->
+            onSave = { type, param, policy, packageName ->
                 viewModel.updateProfileRule(
                     oldRawLine = rule.rawLine,
                     oldDomain = rule.param,
                     type = type,
                     param = param,
-                    policy = policy
+                    policy = policy,
+                    packageName = packageName
                 )
                 editingRule = null
             }

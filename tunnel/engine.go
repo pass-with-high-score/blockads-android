@@ -43,6 +43,12 @@ type DomainChecker interface {
 	HasCustomRule(domain string) int
 }
 
+// AppDomainChecker checks per-app custom allow or block domain rules.
+// Returns 1 to block the domain for appName, 0 to allow, or -1 if no per-app rule applies.
+type AppDomainChecker interface {
+	CheckAppRule(domain string, appName string) int
+}
+
 // FirewallChecker checks if a DNS query from a specific app should be blocked.
 // The implementation lives in Kotlin and uses UID resolution + FirewallManager.
 type FirewallChecker interface {
@@ -86,9 +92,10 @@ type Engine struct {
 	responseType    ResponseType
 	logCallback     LogCallback
 	resolver        *Resolver
-	safeSearch      *SafeSearch
-	domainChecker   DomainChecker
-	firewallChecker FirewallChecker
+	safeSearch       *SafeSearch
+	domainChecker    DomainChecker
+	appDomainChecker AppDomainChecker
+	firewallChecker  FirewallChecker
 	appResolver     AppResolver
 	appUidResolver  AppUidResolver
 
@@ -238,6 +245,11 @@ func (e *Engine) SetOutboundAdapter(adapter OutboundAdapter) {
 // This is called before Start() to provide the blocking logic for rules not in the trie (like Custom Rules).
 func (e *Engine) SetDomainChecker(checker DomainChecker) {
 	e.domainChecker = checker
+}
+
+// SetAppDomainChecker sets the Kotlin-side per-app domain rule checker.
+func (e *Engine) SetAppDomainChecker(checker AppDomainChecker) {
+	e.appDomainChecker = checker
 }
 
 // SetTries loads the native memory-mapped domain tries and bloom filters for blazing-fast lookups in Go.

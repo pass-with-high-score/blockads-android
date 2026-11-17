@@ -63,6 +63,8 @@ class FilterListRepository(
     private val whitelistedDomains = ConcurrentHashMap.newKeySet<String>()
     private val customBlockDomains = ConcurrentHashMap.newKeySet<String>()
     private val customAllowDomains = ConcurrentHashMap.newKeySet<String>()
+    private val appBlockRules = ConcurrentHashMap<String, MutableSet<String>>()
+    private val appAllowRules = ConcurrentHashMap<String, MutableSet<String>>()
 
     private val _domainCountFlow = MutableStateFlow(0)
     val domainCountFlow: StateFlow<Int> = _domainCountFlow.asStateFlow()
@@ -133,6 +135,15 @@ class FilterListRepository(
         return -1L
     }
 
+    fun checkAppRule(domain: String, packageName: String): Long {
+        if (packageName.isEmpty()) return -1L
+        val allowSet = appAllowRules[packageName]
+        if (allowSet != null && checkDomainAndParents(domain) { allowSet.contains(it) }) return 0L
+        val blockSet = appBlockRules[packageName]
+        if (blockSet != null && checkDomainAndParents(domain) { blockSet.contains(it) }) return 1L
+        return -1L
+    }
+
     fun getBlockReason(domain: String): String {
         if (checkDomainAndParents(domain) { customAllowDomains.contains(it) }) return ""
         if (checkDomainAndParents(domain) { customBlockDomains.contains(it) }) return BLOCK_REASON_CUSTOM_RULE
@@ -143,11 +154,29 @@ class FilterListRepository(
     suspend fun loadCustomRules() {
         val blockDomains = customDnsRuleDao.getBlockDomains()
         val allowDomains = customDnsRuleDao.getAllowDomains()
+        val perAppRules = customDnsRuleDao.getPerAppRules()
         customBlockDomains.clear()
         customBlockDomains.addAll(blockDomains.map { it.lowercase() })
         customAllowDomains.clear()
         customAllowDomains.addAll(allowDomains.map { it.lowercase() })
-        Timber.d("Loaded ${customBlockDomains.size} block + ${customAllowDomains.size} allow custom rules")
+
+        appBlockRules.clear()
+        appAllowRules.clear()
+        for (rule in perAppRules) {
+            val pkg = rule.packageName.trim()
+            val domain = rule.domain.lowercase().trim()
+            if (pkg.isEmpty() || domain.isEmpty()) continue
+            val targetMap = when (rule.ruleType) {
+                app.pwhs.blockads.data.entities.RuleType.BLOCK -> appBlockRules
+                app.pwhs.blockads.data.entities.RuleType.ALLOW -> appAllowRules
+                else -> continue
+            }
+            targetMap.getOrPut(pkg) { ConcurrentHashMap.newKeySet() }.add(domain)
+        }
+        Timber.d(
+            "Loaded ${customBlockDomains.size} block + ${customAllowDomains.size} allow custom rules, " +
+                "${appBlockRules.size} app block + ${appAllowRules.size} app allow rule sets"
+        )
     }
 
     suspend fun loadWhitelist() {

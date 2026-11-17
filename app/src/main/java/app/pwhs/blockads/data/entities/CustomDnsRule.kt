@@ -9,6 +9,7 @@ data class CustomDnsRule(
     val rule: String, // Raw rule text (e.g., "||example.com^", "@@||example.com^", "! comment")
     val ruleType: RuleType, // BLOCK, ALLOW, COMMENT
     val domain: String, // Parsed domain (empty for comments)
+    val packageName: String = "", // Empty = global rule; non-empty = per-app rule
     val isEnabled: Boolean = true,
     val addedTimestamp: Long = System.currentTimeMillis()
 )

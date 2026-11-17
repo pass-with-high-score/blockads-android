@@ -49,6 +49,7 @@ fun DomainItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     isEnabled: Boolean = true,
     ruleType: String? = null,
+    appLabel: String? = null,
     onToggle: () -> Unit = {},
     onDelete: () -> Unit,
     onEdit: () -> Unit = {},
@@ -108,6 +109,21 @@ fun DomainItem(
                                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+                    if (!appLabel.isNullOrBlank()) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = appLabel,
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                             )
                         }
                     }
