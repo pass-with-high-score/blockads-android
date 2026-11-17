@@ -40,6 +40,7 @@
     <string name="vpn_phase_stopping_engine">Stopping filter engine…</string>
     <string name="vpn_phase_clearing_network">Releasing network…</string>
     <string name="vpn_notification_stats_today">%1$d ads blocked today | Uptime %2$s</string>
+    <string name="vpn_notification_blocked_today">%1$d ads blocked today</string>
     <string name="vpn_notification_action_pause">Pause 1h</string>
     <string name="vpn_notification_action_stop">Stop</string>
     <string name="vpn_paused_title">BlockAds paused</string>

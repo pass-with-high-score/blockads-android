@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.os.PowerManager
 import timber.log.Timber
 
 /**
@@ -85,6 +86,13 @@ class BatteryMonitor(private val context: Context) {
     fun getBatteryVoltage(): Int {
         val batteryStatus = getBatteryStatus()
         return batteryStatus?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1
+    }
+
+    fun isLowBatteryOrPowerSave(thresholdPercent: Int = 15): Boolean {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        if (powerManager?.isPowerSaveMode == true) return true
+        val level = getBatteryLevel()
+        return !isCharging() && level in 0..thresholdPercent
     }
 
     /**

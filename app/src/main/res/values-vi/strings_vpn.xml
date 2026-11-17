@@ -30,6 +30,7 @@
     <string name="shortcut_toggle_vpn">Bật/Tắt chặn quảng cáo</string>
     <string name="shortcut_toggle_vpn_short">Bật/Tắt VPN</string>
     <string name="vpn_notification_stats_today">Đã chặn %1$d quảng cáo hôm nay | Uptime %2$s</string>
+    <string name="vpn_notification_blocked_today">Đã chặn %1$d quảng cáo hôm nay</string>
     <string name="vpn_notification_action_pause">Tạm dừng 1h</string>
     <string name="vpn_notification_action_stop">Dừng</string>
     <string name="vpn_phase_loading_filters">Đang tải bộ lọc…</string>

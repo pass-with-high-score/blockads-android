@@ -141,18 +141,33 @@ class VpnNotificationManager(private val context: Context) {
             )
             isConnecting && connectingPhase.isNotEmpty() -> connectingPhase
             isRunning -> {
-                val uptimeStr = formatUptime(System.currentTimeMillis() - vpnStartTime)
-                context.getString(R.string.vpn_notification_stats_today, todayBlockedCount, uptimeStr)
+                context.getString(R.string.vpn_notification_blocked_today, todayBlockedCount)
             }
             else -> context.getString(R.string.vpn_notification_text)
         }
+
+        val showChronometer = isRunning &&
+            !isStopping &&
+            !isPhysicalNetworkLost &&
+            !isReconnecting &&
+            retryCount == 0 &&
+            !(isConnecting && connectingPhase.isNotEmpty()) &&
+            vpnStartTime > 0L
 
         builder
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
+
+        if (showChronometer) {
+            builder
+                .setWhen(vpnStartTime)
+                .setShowWhen(true)
+                .setUsesChronometer(true)
+        }
 
         if (isStopping) {
             // No action buttons while stopping

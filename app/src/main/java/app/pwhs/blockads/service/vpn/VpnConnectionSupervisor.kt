@@ -13,7 +13,10 @@ import app.pwhs.blockads.utils.BatteryMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,21 +38,24 @@ class VpnConnectionSupervisor(
     private val onLinkPropertiesChanged: (LinkProperties?) -> Unit,
     private val onPhysicalNetworkLostChanged: (Boolean) -> Unit,
     private val onNetworkActiveChanged: (Network?) -> Unit,
-    private val onRequestRestart: () -> Unit
+    private val onRequestRestart: () -> Unit,
+    private val blockedCountFlowProvider: (() -> Flow<Int>)? = null,
+    private val onBlockedCountUpdated: ((Int) -> Unit)? = null
 ) : VpnNetworkWatch {
 
     companion object {
         private const val NETWORK_STABILIZATION_DELAY_MS = 2000L
-        private const val BATTERY_CHECK_INTERVAL_MS = 5 * 60 * 1000L
         private const val NOTIFICATION_UPDATE_INTERVAL_MS = 30_000L
+        private const val NOTIFICATION_THROTTLE_MS = 1_500L
+        private const val LOW_BATTERY_NOTIFICATION_THROTTLE_MS = 15_000L
         private const val CONNECTION_PROBE_INTERVAL_MS = 60_000L
+        private const val LOW_BATTERY_PROBE_INTERVAL_MS = 3 * 60 * 1000L
     }
 
     override val networkAvailableFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private var networkMonitor: NetworkMonitor? = null
     private var networkSwitchJob: Job? = null
-    private var batteryMonitoringJob: Job? = null
     private var notificationUpdateJob: Job? = null
     private var connectionQualityProbe: ConnectionQualityProbe? = null
     private var connectionProbeJob: Job? = null
@@ -107,13 +113,11 @@ class VpnConnectionSupervisor(
     }
 
     override fun startPeriodicMonitoring() {
-        startBatteryMonitoring()
         startNotificationUpdates()
         startConnectionProbing()
     }
 
     override fun stopPeriodicMonitoring() {
-        stopBatteryMonitoring()
         stopNotificationUpdates()
         stopConnectionProbing()
     }
@@ -125,7 +129,12 @@ class VpnConnectionSupervisor(
         connectionProbeJob = scope.launch {
             var consecutiveVpnStalls = 0
             while (isRunningProvider()) {
-                delay(CONNECTION_PROBE_INTERVAL_MS)
+                val intervalMs = if (batteryMonitor.isLowBatteryOrPowerSave()) {
+                    LOW_BATTERY_PROBE_INTERVAL_MS
+                } else {
+                    CONNECTION_PROBE_INTERVAL_MS
+                }
+                delay(intervalMs)
                 if (!isRunningProvider()) break
 
                 val probe = connectionQualityProbe ?: break
@@ -162,32 +171,37 @@ class VpnConnectionSupervisor(
         connectionQualityProbe = null
     }
 
-    private fun startBatteryMonitoring() {
-        batteryMonitoringJob?.cancel()
-        batteryMonitoringJob = scope.launch {
-            while (isRunningProvider()) {
-                try {
-                    delay(BATTERY_CHECK_INTERVAL_MS)
-                    if (isRunningProvider()) {
-                        batteryMonitor.logBatteryStatus()
-                    }
-                } catch (e: Exception) {
-                    Timber.e("Error monitoring battery: $e")
-                    break
-                }
-            }
-        }
-    }
-
-    private fun stopBatteryMonitoring() {
-        batteryMonitoringJob?.cancel()
-        batteryMonitoringJob = null
-    }
-
     private fun startNotificationUpdates() {
         notificationUpdateJob?.cancel()
         notificationUpdateJob = scope.launch {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+            val flowProvider = blockedCountFlowProvider
+            val onCount = onBlockedCountUpdated
+            if (flowProvider != null && onCount != null) {
+                try {
+                    flowProvider()
+                        .distinctUntilChanged()
+                        .conflate()
+                        .collect { count ->
+                            if (!isRunningProvider()) return@collect
+                            onCount(count)
+                            if (powerManager?.isInteractive == true) {
+                                onUpdateNotification()
+                                val throttleMs = if (batteryMonitor.isLowBatteryOrPowerSave()) {
+                                    LOW_BATTERY_NOTIFICATION_THROTTLE_MS
+                                } else {
+                                    NOTIFICATION_THROTTLE_MS
+                                }
+                                delay(throttleMs)
+                            }
+                        }
+                } catch (e: Exception) {
+                    if (e !is kotlinx.coroutines.CancellationException) {
+                        Timber.e(e, "Error observing blocked count for notification")
+                    }
+                }
+                return@launch
+            }
             while (isRunningProvider()) {
                 try {
                     onRefreshStats()

@@ -28,6 +28,8 @@ import app.pwhs.blockads.utils.startOfDayMillis
 import app.pwhs.blockads.worker.RootProxyResumeWorker
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
@@ -456,17 +458,26 @@ class RootProxyService : Service() {
         }
 
         val text = if (isRunning) {
-            val uptimeStr = formatUptime(System.currentTimeMillis() - startTimestamp)
-            getString(R.string.vpn_notification_stats_today, todayBlockedCount, uptimeStr)
+            getString(R.string.vpn_notification_blocked_today, todayBlockedCount)
         } else {
             getString(R.string.root_proxy_notification_text)
         }
 
-        return builder
+        builder
             .setContentTitle(getString(R.string.vpn_notification_title))
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
+
+        if (isRunning && startTimestamp > 0L) {
+            builder
+                .setWhen(startTimestamp)
+                .setShowWhen(true)
+                .setUsesChronometer(true)
+        }
+
+        return builder
             .addAction(
                 Notification.Action.Builder(
                     null, getString(R.string.vpn_notification_action_pause), pausePendingIntent
@@ -587,16 +598,21 @@ class RootProxyService : Service() {
 
         notificationUpdateJob = serviceScope.launch {
             val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
-            while (isActive && isRunning) {
-                try {
-                    todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
-                    delay(30_000L)
-                    if (isRunning && powerManager.isInteractive) {
-                        updateNotification()
+            try {
+                dnsLogDao.getBlockedCountSince(startOfDayMillis())
+                    .distinctUntilChanged()
+                    .conflate()
+                    .collect { count ->
+                        if (!isRunning) return@collect
+                        todayBlockedCount = count
+                        if (powerManager.isInteractive) {
+                            updateNotification()
+                            delay(1_500L)
+                        }
                     }
-                } catch (e: Exception) {
+            } catch (e: Exception) {
+                if (e !is kotlinx.coroutines.CancellationException) {
                     Timber.e(e, "Error updating notification in RootProxyService")
-                    break
                 }
             }
         }

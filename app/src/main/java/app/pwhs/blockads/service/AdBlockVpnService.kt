@@ -177,6 +177,8 @@ class AdBlockVpnService : VpnService() {
                 session.todayBlockedCount = dnsLogDao.getBlockedCountSinceSync(startOfDayMillis())
             },
             onUpdateNotification = { updateNotification() },
+            blockedCountFlowProvider = { dnsLogDao.getBlockedCountSince(startOfDayMillis()) },
+            onBlockedCountUpdated = { count -> session.todayBlockedCount = count },
             onLinkPropertiesChanged = { linkProperties ->
                 updatePrivateDnsState(linkProperties)
                 serviceScope.launch {
