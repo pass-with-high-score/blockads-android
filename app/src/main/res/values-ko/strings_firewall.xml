@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">%1$d개의 앱이 더 대기 중</string>
     <string name="firewall_prompt_always_allow">항상 허용</string>
     <string name="firewall_prompt_allow_once">한 번만 허용</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d개 앱이 인터넷 접근을 요청합니다</string>
+    <string name="firewall_prompt_later">나중에</string>
+    <string name="firewall_prompt_pending_banner">%1$d개 앱이 권한을 기다리는 중</string>
+    <string name="firewall_prompt_reopen">검토</string>
 </resources>

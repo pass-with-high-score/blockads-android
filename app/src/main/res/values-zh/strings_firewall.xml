@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">还有 %1$d 个应用在等待</string>
     <string name="firewall_prompt_always_allow">始终允许</string>
     <string name="firewall_prompt_allow_once">仅允许这一次</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d 个应用请求联网权限</string>
+    <string name="firewall_prompt_later">稍后</string>
+    <string name="firewall_prompt_pending_banner">%1$d 个应用等待授权</string>
+    <string name="firewall_prompt_reopen">查看</string>
 </resources>

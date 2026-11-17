@@ -32,4 +32,22 @@
     <string name="home_uploaded">Subido</string>
     <string name="nav_proxy">Proxy</string>
     <string name="action_undo">Deshacer</string>
+    <string name="update_check_title">Buscar actualizaciones</string>
+    <string name="update_check_desc">Comprobar si hay una versión más reciente disponible</string>
+    <string name="update_checking">Buscando actualizaciones…</string>
+    <string name="update_up_to_date">Tienes la última versión</string>
+    <string name="update_channel_title">Canal de actualizaciones</string>
+    <string name="update_channel_stable">Estable</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Actualización disponible (%1$s)</string>
+    <string name="update_available_default_notes">Hay una nueva versión de BlockAds lista para instalar.</string>
+    <string name="update_action_now">Actualizar ahora</string>
+    <string name="update_action_later">Más tarde</string>
+    <string name="update_action_skip">Omitir esta versión</string>
+    <string name="update_downloading">Descargando actualización… %1$d%%</string>
+    <string name="update_ready_install">Actualización lista para instalar</string>
+    <string name="update_action_install">Instalar</string>
+    <string name="update_action_restart">Reiniciar para actualizar</string>
+    <string name="update_error_prefix">Error de actualización: %1$s</string>
 </resources>

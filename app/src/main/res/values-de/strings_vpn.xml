@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Anderen Geräten in Ihrem Tailnet erlauben, den Internetverkehr über dieses Gerät weiterzuleiten. Auch in der Tailscale-Admin-Konsole aktivieren.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Werbung und Tracker für Geräte filtern, die diesen Exit-Node verwenden. Verwendet in jedem Fall das in BlockAds konfigurierte DNS.</string>
+    <string name="vpn_notification_blocked_today">%1$d Anzeigen heute blockiert</string>
 </resources>

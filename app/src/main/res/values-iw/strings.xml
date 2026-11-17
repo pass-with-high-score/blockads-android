@@ -32,4 +32,22 @@
     <string name="home_uploaded">הועלו</string>
     <string name="nav_proxy">פרוקסי</string>
     <string name="action_undo">ביטול</string>
+    <string name="update_check_title">בדוק עדכונים</string>
+    <string name="update_check_desc">בדוק אם קיימת גרסה חדשה יותר</string>
+    <string name="update_checking">בודק עדכונים…</string>
+    <string name="update_up_to_date">הגרסה שברשותך מעודכנת</string>
+    <string name="update_channel_title">ערוץ עדכונים</string>
+    <string name="update_channel_stable">יציב</string>
+    <string name="update_channel_beta">בטא</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">עדכון זמין (%1$s)</string>
+    <string name="update_available_default_notes">גרסה חדשה של BlockAds מוכנה להתקנה.</string>
+    <string name="update_action_now">עדכן עכשיו</string>
+    <string name="update_action_later">מאוחר יותר</string>
+    <string name="update_action_skip">דלג על גרסה זו</string>
+    <string name="update_downloading">מוריד עדכון… %1$d%%</string>
+    <string name="update_ready_install">העדכון מוכן להתקנה</string>
+    <string name="update_action_install">התקן</string>
+    <string name="update_action_restart">הפעל מחדש לעדכון</string>
+    <string name="update_error_prefix">שגיאת עדכון: %1$s</string>
 </resources>

@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">%1$d autre(s) application(s) en attente</string>
     <string name="firewall_prompt_always_allow">Toujours autoriser</string>
     <string name="firewall_prompt_allow_once">Autoriser une fois</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d applications demandent l\'accès à Internet</string>
+    <string name="firewall_prompt_later">Plus tard</string>
+    <string name="firewall_prompt_pending_banner">%1$d application(s) en attente d\'autorisation</string>
+    <string name="firewall_prompt_reopen">Examiner</string>
 </resources>

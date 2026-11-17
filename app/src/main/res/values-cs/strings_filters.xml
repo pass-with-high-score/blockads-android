@@ -267,4 +267,11 @@
         <item quantity="many">%d pravidla</item>
         <item quantity="other">%d pravidel</item>
     </plurals>
+    <string name="filter_use_default">Použít výchozí filtry</string>
+    <string name="rule_field_target_app">Cílová aplikace</string>
+    <string name="rule_target_app_all">Všechny aplikace (Globální)</string>
+    <string name="rule_pick_app_title">Vybrat cílovou aplikaci</string>
+    <string name="rule_pick_app_search">Hledat aplikace…</string>
+    <string name="log_action_block_for_app">Blokovat pro %1$s</string>
+    <string name="log_action_allow_for_app">Povolit pro %1$s</string>
 </resources>

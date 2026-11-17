@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">允许您的 Tailnet 上的其他设备通过此设备路由互联网流量。还需在 Tailscale 管理控制台中启用。</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">为使用此出口节点的设备过滤广告和跟踪器。无论如何都使用 BlockAds 配置的 DNS。</string>
+    <string name="vpn_notification_blocked_today">今日已拦截 %1$d 条广告</string>
 </resources>

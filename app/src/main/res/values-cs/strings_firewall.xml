@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Další čekající aplikace: %1$d</string>
     <string name="firewall_prompt_always_allow">Vždy povolit</string>
     <string name="firewall_prompt_allow_once">Povolit jednou</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d aplikací žádá o přístup k internetu</string>
+    <string name="firewall_prompt_later">Později</string>
+    <string name="firewall_prompt_pending_banner">%1$d aplikací čeká na povolení</string>
+    <string name="firewall_prompt_reopen">Zkontrolovat</string>
 </resources>

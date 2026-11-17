@@ -32,4 +32,22 @@
     <string name="home_disconnecting_desc_root">Đang dừng Root Proxy…</string>
     <string name="home_paused_trusted_short">Tạm dừng trên mạng tin cậy</string>
     <string name="action_undo">Hoàn tác</string>
+    <string name="update_check_title">Kiểm tra cập nhật</string>
+    <string name="update_check_desc">Kiểm tra xem có phiên bản mới hơn không</string>
+    <string name="update_checking">Đang kiểm tra cập nhật…</string>
+    <string name="update_up_to_date">Bạn đang dùng phiên bản mới nhất</string>
+    <string name="update_channel_title">Kênh cập nhật</string>
+    <string name="update_channel_stable">Ổn định</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Có bản cập nhật (%1$s)</string>
+    <string name="update_available_default_notes">Phiên bản BlockAds mới đã sẵn sàng để cài đặt.</string>
+    <string name="update_action_now">Cập nhật ngay</string>
+    <string name="update_action_later">Để sau</string>
+    <string name="update_action_skip">Bỏ qua phiên bản này</string>
+    <string name="update_downloading">Đang tải bản cập nhật… %1$d%%</string>
+    <string name="update_ready_install">Bản cập nhật đã sẵn sàng cài đặt</string>
+    <string name="update_action_install">Cài đặt</string>
+    <string name="update_action_restart">Khởi động lại để cập nhật</string>
+    <string name="update_error_prefix">Lỗi cập nhật: %1$s</string>
 </resources>

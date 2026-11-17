@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Permita que outros dispositivos na sua Tailnet roteiem o tráfego de internet por meio deste dispositivo. Ative também no Console de Administração do Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Filtre anúncios e rastreadores para dispositivos usando este Exit Node. Usa o DNS configurado do BlockAds de qualquer forma.</string>
+    <string name="vpn_notification_blocked_today">%1$d anúncios bloqueados hoje</string>
 </resources>

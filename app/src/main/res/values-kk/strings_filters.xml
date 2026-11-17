@@ -265,4 +265,11 @@
         <item quantity="one">%d ереже</item>
         <item quantity="other">%d ереже</item>
     </plurals>
+    <string name="filter_use_default">Әдепкі сүзгілерді қолдану</string>
+    <string name="rule_field_target_app">Мақсатты қолданба</string>
+    <string name="rule_target_app_all">Барлық қолданбалар (Жалпы)</string>
+    <string name="rule_pick_app_title">Мақсатты қолданбаны таңдау</string>
+    <string name="rule_pick_app_search">Қолданбаларды іздеу…</string>
+    <string name="log_action_block_for_app">%1$s үшін бұғаттау</string>
+    <string name="log_action_allow_for_app">%1$s үшін рұқсат ету</string>
 </resources>

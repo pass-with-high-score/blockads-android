@@ -266,4 +266,11 @@
         <item quantity="many">%d reglas</item>
         <item quantity="other">%d reglas</item>
     </plurals>
+    <string name="filter_use_default">Usar filtros predeterminados</string>
+    <string name="rule_field_target_app">Aplicación objetivo</string>
+    <string name="rule_target_app_all">Todas las aplicaciones (Global)</string>
+    <string name="rule_pick_app_title">Seleccionar aplicación objetivo</string>
+    <string name="rule_pick_app_search">Buscar aplicaciones…</string>
+    <string name="log_action_block_for_app">Bloquear para %1$s</string>
+    <string name="log_action_allow_for_app">Permitir para %1$s</string>
 </resources>

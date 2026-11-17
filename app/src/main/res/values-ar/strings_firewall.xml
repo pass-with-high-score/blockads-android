@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">%1$d تطبيق(ات) أخرى في الانتظار</string>
     <string name="firewall_prompt_always_allow">السماح دائمًا</string>
     <string name="firewall_prompt_allow_once">السماح مرة واحدة</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d تطبيقات تطلب الوصول إلى الإنترنت</string>
+    <string name="firewall_prompt_later">لاحقًا</string>
+    <string name="firewall_prompt_pending_banner">%1$d تطبيق(ات) بانتظار الإذن</string>
+    <string name="firewall_prompt_reopen">مراجعة</string>
 </resources>

@@ -32,4 +32,22 @@
     <string name="home_uploaded">Відвантажено</string>
     <string name="nav_proxy">Проксі</string>
     <string name="action_undo">Скасувати</string>
+    <string name="update_check_title">Перевірити оновлення</string>
+    <string name="update_check_desc">Перевірити наявність новішої версії</string>
+    <string name="update_checking">Перевірка оновлень…</string>
+    <string name="update_up_to_date">У вас остання версія</string>
+    <string name="update_channel_title">Канал оновлень</string>
+    <string name="update_channel_stable">Стабільний</string>
+    <string name="update_channel_beta">Бета</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">Доступне оновлення (%1$s)</string>
+    <string name="update_available_default_notes">Нова версія BlockAds готова до встановлення.</string>
+    <string name="update_action_now">Оновити зараз</string>
+    <string name="update_action_later">Пізніше</string>
+    <string name="update_action_skip">Пропустити цю версію</string>
+    <string name="update_downloading">Завантаження оновлення… %1$d%%</string>
+    <string name="update_ready_install">Оновлення готове до встановлення</string>
+    <string name="update_action_install">Встановити</string>
+    <string name="update_action_restart">Перезапустити для оновлення</string>
+    <string name="update_error_prefix">Помилка оновлення: %1$s</string>
 </resources>

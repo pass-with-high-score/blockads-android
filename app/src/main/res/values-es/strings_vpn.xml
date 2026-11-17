@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Permite que otros dispositivos de tu Tailnet enruten el tráfico de Internet a través de este dispositivo. Actívalo también en la consola de administración de Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Filtra anuncios y rastreadores para los dispositivos que usan este nodo de salida. En cualquier caso, usa el DNS configurado en BlockAds.</string>
+    <string name="vpn_notification_blocked_today">%1$d anuncios bloqueados hoy</string>
 </resources>

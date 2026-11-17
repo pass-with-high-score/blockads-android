@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Ожидает ещё %1$d прилож.</string>
     <string name="firewall_prompt_always_allow">Всегда разрешать</string>
     <string name="firewall_prompt_allow_once">Разрешить один раз</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d приложений запрашивают доступ в интернет</string>
+    <string name="firewall_prompt_later">Позже</string>
+    <string name="firewall_prompt_pending_banner">%1$d прилож. ожидает разрешения</string>
+    <string name="firewall_prompt_reopen">Проверить</string>
 </resources>

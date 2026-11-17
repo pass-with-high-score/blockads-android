@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Тағы %1$d қолданба күтуде</string>
     <string name="firewall_prompt_always_allow">Әрқашан рұқсат ету</string>
     <string name="firewall_prompt_allow_once">Бір рет рұқсат ету</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d қолданба интернетке кіруді сұрайды</string>
+    <string name="firewall_prompt_later">Кейінірек</string>
+    <string name="firewall_prompt_pending_banner">%1$d қолданба рұқсат күтіп тұр</string>
+    <string name="firewall_prompt_reopen">Қарау</string>
 </resources>

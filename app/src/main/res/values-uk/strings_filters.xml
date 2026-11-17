@@ -267,4 +267,11 @@
         <item quantity="many">%d правил</item>
         <item quantity="other">%d правил</item>
     </plurals>
+    <string name="filter_use_default">Використовувати фільтри за замовчуванням</string>
+    <string name="rule_field_target_app">Цільовий додаток</string>
+    <string name="rule_target_app_all">Усі додатки (Глобально)</string>
+    <string name="rule_pick_app_title">Вибрати цільовий додаток</string>
+    <string name="rule_pick_app_search">Пошук додатків…</string>
+    <string name="log_action_block_for_app">Блокувати для %1$s</string>
+    <string name="log_action_allow_for_app">Дозволити для %1$s</string>
 </resources>

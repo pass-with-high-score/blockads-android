@@ -32,4 +32,22 @@
     <string name="home_uploaded">อัปโหลดแล้ว</string>
     <string name="nav_proxy">พร็อกซี</string>
     <string name="action_undo">เลิกทำ</string>
+    <string name="update_check_title">ตรวจสอบการอัปเดต</string>
+    <string name="update_check_desc">ตรวจสอบว่ามีเวอร์ชันใหม่กว่าหรือไม่</string>
+    <string name="update_checking">กำลังตรวจสอบการอัปเดต…</string>
+    <string name="update_up_to_date">คุณใช้เวอร์ชันล่าสุดอยู่แล้ว</string>
+    <string name="update_channel_title">ช่องทางการอัปเดต</string>
+    <string name="update_channel_stable">เสถียร</string>
+    <string name="update_channel_beta">เบต้า</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">มีอัปเดตใหม่ (%1$s)</string>
+    <string name="update_available_default_notes">BlockAds เวอร์ชันใหม่พร้อมติดตั้งแล้ว</string>
+    <string name="update_action_now">อัปเดตตอนนี้</string>
+    <string name="update_action_later">ภายหลัง</string>
+    <string name="update_action_skip">ข้ามเวอร์ชันนี้</string>
+    <string name="update_downloading">กำลังดาวน์โหลดอัปเดต… %1$d%%</string>
+    <string name="update_ready_install">อัปเดตพร้อมติดตั้งแล้ว</string>
+    <string name="update_action_install">ติดตั้ง</string>
+    <string name="update_action_restart">รีสตาร์ตเพื่ออัปเดต</string>
+    <string name="update_error_prefix">ข้อผิดพลาดในการอัปเดต: %1$s</string>
 </resources>

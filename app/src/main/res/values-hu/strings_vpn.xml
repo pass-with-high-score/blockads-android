@@ -188,4 +188,5 @@
     <string name="tailscale_advertise_exit_node_desc">Engedélyezi a Tailnet más eszközeinek az internetes forgalom átirányítását ezen az eszközön keresztül. Engedélyezze a Tailscale felügyeleti konzolján is.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Hirdetések és nyomkövetők szűrése a kilépési csomópontot használó eszközök számára. Mindenképpen a BlockAds beállított DNS-ét használja.</string>
+    <string name="vpn_notification_blocked_today">Ma %1$d reklám blokkolva</string>
 </resources>

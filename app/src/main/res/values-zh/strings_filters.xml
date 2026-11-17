@@ -264,4 +264,11 @@
     <plurals name="domain_rules_count">
         <item quantity="other">%d 条规则</item>
     </plurals>
+    <string name="filter_use_default">使用默认过滤列表</string>
+    <string name="rule_field_target_app">目标应用</string>
+    <string name="rule_target_app_all">所有应用 (全局)</string>
+    <string name="rule_pick_app_title">选择目标应用</string>
+    <string name="rule_pick_app_search">搜索应用…</string>
+    <string name="log_action_block_for_app">为 %1$s 拦截</string>
+    <string name="log_action_allow_for_app">为 %1$s 放行</string>
 </resources>

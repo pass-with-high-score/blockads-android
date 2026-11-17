@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Tailnet 上の他のデバイスがこのデバイスを経由してインターネットトラフィックをルーティングすることを許可します。Tailscale 管理コンソールでも有効にしてください。</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">この Exit Node を使用するデバイスの広告とトラッカーをフィルタリングします。いずれの場合も BlockAds で設定された DNS が使用されます。</string>
+    <string name="vpn_notification_blocked_today">本日ブロックした広告: %1$d件</string>
 </resources>

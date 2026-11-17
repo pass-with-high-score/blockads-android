@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Oczekuje jeszcze %1$d aplikacja/e</string>
     <string name="firewall_prompt_always_allow">Zawsze zezwalaj</string>
     <string name="firewall_prompt_allow_once">Zezwól raz</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d aplikacji żąda dostępu do internetu</string>
+    <string name="firewall_prompt_later">Później</string>
+    <string name="firewall_prompt_pending_banner">%1$d aplikacji oczekuje na zgodę</string>
+    <string name="firewall_prompt_reopen">Sprawdź</string>
 </resources>

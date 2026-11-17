@@ -264,4 +264,11 @@
     <plurals name="domain_rules_count">
         <item quantity="other">%d개의 규칙</item>
     </plurals>
+    <string name="filter_use_default">기본 필터 사용</string>
+    <string name="rule_field_target_app">대상 앱</string>
+    <string name="rule_target_app_all">모든 앱 (전체)</string>
+    <string name="rule_pick_app_title">대상 앱 선택</string>
+    <string name="rule_pick_app_search">앱 검색…</string>
+    <string name="log_action_block_for_app">%1$s에서 차단</string>
+    <string name="log_action_allow_for_app">%1$s에서 허용</string>
 </resources>

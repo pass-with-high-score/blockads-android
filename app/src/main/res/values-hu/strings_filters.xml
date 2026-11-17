@@ -269,4 +269,11 @@
         <item quantity="one">%d szabály</item>
         <item quantity="other">%d szabály</item>
     </plurals>
+    <string name="filter_use_default">Alapértelmezett szűrők használata</string>
+    <string name="rule_field_target_app">Célalkalmazás</string>
+    <string name="rule_target_app_all">Minden alkalmazás (Globális)</string>
+    <string name="rule_pick_app_title">Célalkalmazás kiválasztása</string>
+    <string name="rule_pick_app_search">Alkalmazások keresése…</string>
+    <string name="log_action_block_for_app">Tiltás ehhez: %1$s</string>
+    <string name="log_action_allow_for_app">Engedélyezés ehhez: %1$s</string>
 </resources>

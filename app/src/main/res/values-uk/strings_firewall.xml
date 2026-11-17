@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Очікує ще %1$d прогр.</string>
     <string name="firewall_prompt_always_allow">Завжди дозволяти</string>
     <string name="firewall_prompt_allow_once">Дозволити один раз</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d додатків просять доступ до інтернету</string>
+    <string name="firewall_prompt_later">Пізніше</string>
+    <string name="firewall_prompt_pending_banner">%1$d додатків очікують дозволу</string>
+    <string name="firewall_prompt_reopen">Переглянути</string>
 </resources>

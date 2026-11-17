@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Izinkan perangkat lain di Tailnet Anda merutekan lalu lintas internet melalui perangkat ini. Aktifkan juga di Konsol Admin Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Filter iklan dan pelacak untuk perangkat yang menggunakan Exit Node ini. Bagaimanapun tetap menggunakan DNS yang dikonfigurasi di BlockAds.</string>
+    <string name="vpn_notification_blocked_today">%1$d iklan diblokir hari ini</string>
 </resources>

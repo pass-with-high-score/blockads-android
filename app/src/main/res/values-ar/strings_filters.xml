@@ -269,4 +269,11 @@
         <item quantity="many">%d قاعدة</item>
         <item quantity="other">%d قاعدة</item>
     </plurals>
+    <string name="filter_use_default">استخدام الفلاتر الافتراضية</string>
+    <string name="rule_field_target_app">التطبيق المستهدف</string>
+    <string name="rule_target_app_all">جميع التطبيقات (عام)</string>
+    <string name="rule_pick_app_title">اختر التطبيق المستهدف</string>
+    <string name="rule_pick_app_search">ابحث عن التطبيقات…</string>
+    <string name="log_action_block_for_app">حظر لـ %1$s</string>
+    <string name="log_action_allow_for_app">السماح لـ %1$s</string>
 </resources>

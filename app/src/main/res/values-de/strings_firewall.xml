@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">%1$d weitere App(s) warten</string>
     <string name="firewall_prompt_always_allow">Immer zulassen</string>
     <string name="firewall_prompt_allow_once">Einmal zulassen</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d Apps möchten Internetzugriff</string>
+    <string name="firewall_prompt_later">Später</string>
+    <string name="firewall_prompt_pending_banner">%1$d App(s) warten auf Erlaubnis</string>
+    <string name="firewall_prompt_reopen">Prüfen</string>
 </resources>

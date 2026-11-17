@@ -266,4 +266,11 @@
         <item quantity="two">%d כללים</item>
         <item quantity="other">%d כללים</item>
     </plurals>
+    <string name="filter_use_default">השתמש במסנני ברירת המחדל</string>
+    <string name="rule_field_target_app">אפליקציית יעד</string>
+    <string name="rule_target_app_all">כל האפליקציות (כללי)</string>
+    <string name="rule_pick_app_title">בחר אפליקציית יעד</string>
+    <string name="rule_pick_app_search">חפש אפליקציות…</string>
+    <string name="log_action_block_for_app">חסום עבור %1$s</string>
+    <string name="log_action_allow_for_app">אפשר עבור %1$s</string>
 </resources>

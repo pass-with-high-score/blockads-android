@@ -264,4 +264,11 @@
     <plurals name="domain_rules_count">
         <item quantity="other">%d件のルール</item>
     </plurals>
+    <string name="filter_use_default">デフォルトフィルターを使用</string>
+    <string name="rule_field_target_app">対象アプリ</string>
+    <string name="rule_target_app_all">すべてのアプリ (全体)</string>
+    <string name="rule_pick_app_title">対象アプリを選択</string>
+    <string name="rule_pick_app_search">アプリを検索…</string>
+    <string name="log_action_block_for_app">%1$s でブロック</string>
+    <string name="log_action_allow_for_app">%1$s で許可</string>
 </resources>

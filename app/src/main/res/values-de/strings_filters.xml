@@ -265,4 +265,11 @@
         <item quantity="one">%d Regel</item>
         <item quantity="other">%d Regeln</item>
     </plurals>
+    <string name="filter_use_default">Standardfilter verwenden</string>
+    <string name="rule_field_target_app">Ziel-App</string>
+    <string name="rule_target_app_all">Alle Apps (Global)</string>
+    <string name="rule_pick_app_title">Ziel-App auswählen</string>
+    <string name="rule_pick_app_search">Apps suchen…</string>
+    <string name="log_action_block_for_app">Für %1$s blockieren</string>
+    <string name="log_action_allow_for_app">Für %1$s erlauben</string>
 </resources>

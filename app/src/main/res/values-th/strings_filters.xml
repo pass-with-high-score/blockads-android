@@ -264,4 +264,11 @@
     <plurals name="domain_rules_count">
         <item quantity="other">%d กฎ</item>
     </plurals>
+    <string name="filter_use_default">ใช้ตัวกรองเริ่มต้น</string>
+    <string name="rule_field_target_app">แอปเป้าหมาย</string>
+    <string name="rule_target_app_all">ทุกแอป (ทั้งหมด)</string>
+    <string name="rule_pick_app_title">เลือกแอปเป้าหมาย</string>
+    <string name="rule_pick_app_search">ค้นหาแอป…</string>
+    <string name="log_action_block_for_app">บล็อกสำหรับ %1$s</string>
+    <string name="log_action_allow_for_app">อนุญาตสำหรับ %1$s</string>
 </resources>

@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">%1$d aplikasi lain menunggu</string>
     <string name="firewall_prompt_always_allow">Selalu izinkan</string>
     <string name="firewall_prompt_allow_once">Izinkan sekali</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d aplikasi meminta akses internet</string>
+    <string name="firewall_prompt_later">Nanti</string>
+    <string name="firewall_prompt_pending_banner">%1$d aplikasi menunggu izin</string>
+    <string name="firewall_prompt_reopen">Tinjau</string>
 </resources>

@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">אפשר למכשירים אחרים ב-Tailnet שלך לנתב תעבורת אינטרנט דרך מכشיר זה. יש להפעיל גם בלוח הניהול של Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">סנן מודעות וכלי מעקב עבור מכשירים המשתמשים בצומת יציאה זו. משתמש ב-DNS שהוגדר ב-BlockAds בכל מקרה.</string>
+    <string name="vpn_notification_blocked_today">%1$d פרסומות נחסמו היום</string>
 </resources>

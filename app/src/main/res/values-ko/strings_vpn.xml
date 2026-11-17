@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Tailnet의 다른 기기가 이 기기를 통해 인터넷 트래픽을 라우팅하도록 허용합니다. Tailscale 관리 콘솔에서도 활성화해야 합니다.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">이 Exit Node를 사용하는 기기의 광고 및 트래커를 필터링합니다. 어느 쪽이든 BlockAds에 구성된 DNS를 사용합니다.</string>
+    <string name="vpn_notification_blocked_today">오늘 차단된 광고 %1$d개</string>
 </resources>

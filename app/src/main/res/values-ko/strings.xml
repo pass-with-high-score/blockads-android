@@ -32,4 +32,22 @@
     <string name="home_uploaded">업로드됨</string>
     <string name="nav_proxy">프록시</string>
     <string name="action_undo">실행취소</string>
+    <string name="update_check_title">업데이트 확인</string>
+    <string name="update_check_desc">새 버전이 있는지 확인합니다</string>
+    <string name="update_checking">업데이트 확인 중…</string>
+    <string name="update_up_to_date">최신 버전을 사용 중입니다</string>
+    <string name="update_channel_title">업데이트 채널</string>
+    <string name="update_channel_stable">안정 버전</string>
+    <string name="update_channel_beta">베타</string>
+    <string name="update_channel_nightly">Nightly</string>
+    <string name="update_available_title">업데이트 사용 가능 (%1$s)</string>
+    <string name="update_available_default_notes">새 BlockAds 버전을 설치할 수 있습니다.</string>
+    <string name="update_action_now">지금 업데이트</string>
+    <string name="update_action_later">나중에</string>
+    <string name="update_action_skip">이 버전 건너뛰기</string>
+    <string name="update_downloading">업데이트 다운로드 중… %1$d%%</string>
+    <string name="update_ready_install">설치 준비 완료</string>
+    <string name="update_action_install">설치</string>
+    <string name="update_action_restart">다시 시작하여 업데이트</string>
+    <string name="update_error_prefix">업데이트 오류: %1$s</string>
 </resources>

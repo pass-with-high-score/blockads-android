@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">มีอีก %1$d แอปที่รออยู่</string>
     <string name="firewall_prompt_always_allow">อนุญาตเสมอ</string>
     <string name="firewall_prompt_allow_once">อนุญาตครั้งเดียว</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d แอปต้องการเข้าถึงอินเทอร์เน็ต</string>
+    <string name="firewall_prompt_later">ภายหลัง</string>
+    <string name="firewall_prompt_pending_banner">%1$d แอปกำลังรอการอนุญาต</string>
+    <string name="firewall_prompt_reopen">ตรวจสอบ</string>
 </resources>

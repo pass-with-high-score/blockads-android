@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Разрешить другим устройствам в вашем Tailnet маршрутизировать интернет-трафик через это устройство. Также включите в панели администратора Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Фильтровать рекламу и трекеры для устройств, использующих этот Exit Node. В любом случае используется настроенный в BlockAds DNS.</string>
+    <string name="vpn_notification_blocked_today">Сегодня заблокировано %1$d реклам</string>
 </resources>

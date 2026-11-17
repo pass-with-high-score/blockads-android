@@ -184,4 +184,5 @@
     <string name="tailscale_advertise_exit_node_desc">Umožňuje ostatním zařízením v síti Tailnet směrovat internetový provoz přes toto zařízení. Povolte také v administrační konzoli Tailscale.</string>
     <string name="tailscale_adblock_title">BlockAds Tailscale</string>
     <string name="tailscale_adblock_desc">Filtruje reklamy a sledovače pro zařízení používající tento výstupní uzel. V obou případech používá nakonfigurovaný DNS aplikace BlockAds.</string>
+    <string name="vpn_notification_blocked_today">Dnes zablokováno %1$d reklam</string>
 </resources>

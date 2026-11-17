@@ -13,4 +13,8 @@
     <string name="firewall_prompt_dialog_pending">Még %1$d alkalmazás várakozik</string>
     <string name="firewall_prompt_always_allow">Mindig engedélyez</string>
     <string name="firewall_prompt_allow_once">Engedélyezés egyszer</string>
+    <string name="firewall_prompt_dialog_multi_title">%1$d alkalmazás internet-hozzáférést kér</string>
+    <string name="firewall_prompt_later">Később</string>
+    <string name="firewall_prompt_pending_banner">%1$d alkalmazás vár engedélyre</string>
+    <string name="firewall_prompt_reopen">Áttekintés</string>
 </resources>
