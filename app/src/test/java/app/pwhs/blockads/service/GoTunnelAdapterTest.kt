@@ -1,5 +1,6 @@
 package app.pwhs.blockads.service
 
+import app.pwhs.blockads.R
 import app.pwhs.blockads.testutil.ShadowGoSeq
 import app.pwhs.blockads.testutil.awaitTrue
 import app.pwhs.blockads.utils.AppNameResolver
@@ -220,6 +221,22 @@ class GoTunnelAdapterTest {
         cb.onDNSQuery("quiet.test", false, 99, 1, "", "", "")
         Thread.sleep(100)
         assertEquals(3, f.logs.size)
+    }
+
+    @Test
+    fun `log callback maps RootProxy to localized unknown app`() {
+        f.adapter.start(f.tunFd)
+        val cb = f.logCallback.captured
+
+        cb.onDNSQuery("rootproxy.test", false, 1, 5, "RootProxy", "1.1.1.1", "")
+        cb.onDNSQuery("empty.test", false, 1, 5, "", "1.1.1.1", "")
+        cb.onDNSQuery("unknown.test", false, 1, 5, "unknown", "1.1.1.1", "")
+        awaitTrue { f.logs.size == 3 }
+
+        val byDomain = f.logs.associateBy { it.domain }
+        assertEquals(f.app.getString(R.string.log_unknown_app), byDomain.getValue("rootproxy.test").appName)
+        assertEquals(f.app.getString(R.string.log_unknown_app), byDomain.getValue("empty.test").appName)
+        assertEquals(f.app.getString(R.string.log_unknown_app), byDomain.getValue("unknown.test").appName)
     }
 
     @Test
