@@ -104,7 +104,8 @@
         'cleverwebserver', 'adsboosters', '92mim', 'tzegilo', 'vr-gc', 'dd133', 'becorsolaom', 'apps2app', 'vignette',
         'roastoup', 'sandburstf2b9n', 'tokyo77', 'tokyo88', 'masuksini', 'playstake', 'akseslink', 'bumibola', 'tinig22', 'dwagg',
         'rancemalars', 'dwinnow', 'daleelerah', 'pinusrimbase', 'outsayremixed', 'aratireposed', 'geodistpterian', 'ukankingwithea', 'enaightdecipie', 'unlockr', 'mcw88vi',
-        '484r.com', 'llvpn.com', 'aichouphaugn', 'jnbhi', 'ay267', 'jomtingi', 'orbitsummit', 'highperformanceformat'
+        '484r.com', 'llvpn.com', 'aichouphaugn', 'jnbhi', 'ay267', 'jomtingi', 'orbitsummit', 'highperformanceformat',
+        'untimely-hello', 'sayyidvanglo', 'asiafilm.org', 's.click.aliexpress.com'
     ];
 
     function isAdOrMaliciousUrl(url) {
@@ -362,6 +363,14 @@
             if (sn) { sn.remove(); if (document.body) document.body.style.overflow = ''; }
             var ap = document.getElementById('ad-popup');
             if (ap) ap.remove();
+            var chpTitle = document.querySelector('.adblock_title');
+            if (chpTitle) {
+                var chpRoot = chpTitle.closest('body > div') || chpTitle.parentElement;
+                if (chpRoot && chpRoot !== document.body) chpRoot.remove();
+                document.querySelectorAll('.blur-content').forEach(function(b) { b.classList.remove('blur-content'); });
+                if (document.documentElement) document.documentElement.style.overflow = 'auto';
+                if (document.body) document.body.style.overflow = 'auto';
+            }
             document.querySelectorAll('html > iframe, body > iframe[style*="fixed"], iframe[style*="2147483647"], div[style*="2147483647"]').forEach(function(ti) { ti.remove(); });
         } catch(e) {}
     }
@@ -435,7 +444,7 @@
             window.getComputedStyle = function(el, pseudo) {
                 var s = origGetComputedStyle.apply(this, arguments);
                 var cn = el && el.className && typeof el.className === 'string' ? el.className : '';
-                if (cn && (cn.indexOf('adsbox') !== -1 || cn.indexOf('pub_300x250') !== -1 || cn.indexOf('ad-placement') !== -1 || cn.indexOf('banner_ad') !== -1 || cn.indexOf('czlll-') !== -1 || cn.indexOf('da-tep') !== -1)) {
+                if (cn && (cn.indexOf('adsbox') !== -1 || cn.indexOf('pub_300x250') !== -1 || cn.indexOf('ad-placement') !== -1 || cn.indexOf('banner_ad') !== -1 || cn.indexOf('Ad-Container') !== -1 || cn.indexOf('czlll-') !== -1 || cn.indexOf('da-tep') !== -1)) {
                     return new Proxy(s, {
                         get: function(t, p) {
                             if (p === 'display') return 'block';
@@ -454,7 +463,7 @@
                 Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
                     get: function() {
                         var cn = this.className && typeof this.className === 'string' ? this.className : '';
-                        if (cn && (cn.indexOf('adsbox') !== -1 || cn.indexOf('pub_300x250') !== -1 || cn.indexOf('banner_ad') !== -1 || cn.indexOf('czlll-') !== -1 || cn.indexOf('da-tep') !== -1)) {
+                        if (cn && (cn.indexOf('adsbox') !== -1 || cn.indexOf('pub_300x250') !== -1 || cn.indexOf('banner_ad') !== -1 || cn.indexOf('Ad-Container') !== -1 || cn.indexOf('czlll-') !== -1 || cn.indexOf('da-tep') !== -1)) {
                             return 250;
                         }
                         return origOffsetHeight.get.apply(this);
@@ -467,7 +476,7 @@
         // Anti-Adblock Bait Unhide
         try {
             var baitStyle = document.createElement('style');
-            baitStyle.textContent = '#banner_ad, div#banner_ad, .pub_300x250, .adsbox, .adunit, .ad-zone, .ad-space { display: block !important; visibility: visible !important; width: 300px !important; min-width: 300px !important; max-width: 300px !important; height: 250px !important; min-height: 250px !important; max-height: 250px !important; left: -9999px !important; position: absolute !important; }';
+            baitStyle.textContent = '#banner_ad, div#banner_ad, .pub_300x250, .adsbox, .Ad-Container, .adunit, .ad-zone, .ad-space { display: block !important; visibility: visible !important; width: 300px !important; min-width: 300px !important; max-width: 300px !important; height: 250px !important; min-height: 250px !important; max-height: 250px !important; left: -9999px !important; position: absolute !important; }';
             (document.head || document.documentElement).appendChild(baitStyle);
         } catch(e) {}
 

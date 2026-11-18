@@ -484,3 +484,17 @@ a[href*="orbitsummit.info"],
     pointer-events: auto !important;
     opacity: 1 !important;
 }
+
+/* Code Help Pro (CHP) Anti-Adblock Modal */
+body > div:has(.adblock_title):has(.refresh-btn-styled) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+body:has(.adblock_title) {
+    overflow: auto !important;
+    position: static !important;
+}
+.blur-content {
+    filter: none !important;
+}

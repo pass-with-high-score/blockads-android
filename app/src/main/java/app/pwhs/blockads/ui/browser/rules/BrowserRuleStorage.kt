@@ -140,13 +140,13 @@ class BrowserRuleStorage(private val context: Context) {
             basePkg.modules
         }
 
-        val cosmeticCss = if (basePkg.cosmeticCss.isNullOrBlank()) {
+        val cosmeticCss = if (basePkg.cosmeticCss.isNullOrBlank() || basePkg.cosmeticCss.trim().startsWith("http")) {
             loadAssetString("browser/adblock_cosmetic.css")
         } else {
             basePkg.cosmeticCss
         }
 
-        val scriptletsJs = if (basePkg.scriptletsJs.isNullOrBlank()) {
+        val scriptletsJs = if (basePkg.scriptletsJs.isNullOrBlank() || basePkg.scriptletsJs.trim().startsWith("http")) {
             loadAssetString("browser/adguard_scriptlets.js")
         } else {
             basePkg.scriptletsJs
