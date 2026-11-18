@@ -1,0 +1,7 @@
+- Support SOCKS5/4/4a, HTTP/HTTPS CONNECT, and SSH proxy tunnels
+- Per-app domain block & allow rules with app picker
+- HTTPS filtering: HTTP & scriptlet debug logger, sub-settings, and skipped domains manager
+- Two-pane layout for HTTPS sub-screens on foldables
+- Firewall: unified pending prompts sheet with timestamps
+- Block source filters in blocked requests list
+- In-app update support for Mobile and Android TV
