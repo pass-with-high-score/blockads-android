@@ -1,0 +1,3 @@
+- Fix updater accidentally picking non-app releases (tunnel/geoip) and failing update check
+- Fix missing default filter lists (Annoyances) in GitHub release builds
+- Stability and performance improvements
