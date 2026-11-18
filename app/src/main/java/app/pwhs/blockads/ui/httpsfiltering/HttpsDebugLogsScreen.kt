@@ -22,20 +22,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Terminal
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,7 +41,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,19 +52,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
-import app.pwhs.blockads.data.logging.HttpDebugLogEntry
 import app.pwhs.blockads.data.logging.HttpDebugLogStore
 import app.pwhs.blockads.data.logging.HttpLogAction
+import app.pwhs.blockads.ui.httpsfiltering.component.DebugLogCard
 import app.pwhs.blockads.ui.httpsfiltering.component.HttpsDebugLogActions
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -90,6 +84,13 @@ fun HttpsDebugLogsScreen(
     var selectedAction by remember { mutableStateOf<HttpLogAction?>(null) }
     var selectedSource by remember { mutableStateOf<String?>(null) }
     var expandedId by remember { mutableStateOf<Long?>(null) }
+
+    val blockedCount = remember(entries) { entries.count { it.action == HttpLogAction.BLOCKED } }
+    val scriptletCount = remember(entries) { entries.count { it.action == HttpLogAction.SCRIPTLET } }
+    val surrogateCount = remember(entries) { entries.count { it.action == HttpLogAction.SURROGATE } }
+    val allowedCount = remember(entries) { entries.count { it.action == HttpLogAction.ALLOWED } }
+    val httpsSourceCount = remember(entries) { entries.count { it.source.equals("HTTPS", ignoreCase = true) } }
+    val browserSourceCount = remember(entries) { entries.count { it.source.equals("Browser", ignoreCase = true) } }
 
     val filtered = remember(entries, searchQuery, selectedAction, selectedSource) {
         entries.filter { e ->
@@ -213,42 +214,79 @@ fun HttpsDebugLogsScreen(
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                FilterChip(
-                    selected = selectedAction == null,
-                    onClick = { selectedAction = null },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_all)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_all),
+                    count = entries.size,
+                    isSelected = selectedAction == null && selectedSource == null,
+                    onClick = {
+                        selectedAction = null
+                        selectedSource = null
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                    selectedLabelColor = MaterialTheme.colorScheme.primary
                 )
-                FilterChip(
-                    selected = selectedAction == HttpLogAction.BLOCKED,
-                    onClick = { selectedAction = HttpLogAction.BLOCKED },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_blocked)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_blocked),
+                    count = blockedCount,
+                    isSelected = selectedAction == HttpLogAction.BLOCKED,
+                    onClick = {
+                        selectedAction = if (selectedAction == HttpLogAction.BLOCKED) null else HttpLogAction.BLOCKED
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer
                 )
-                FilterChip(
-                    selected = selectedAction == HttpLogAction.SCRIPTLET,
-                    onClick = { selectedAction = HttpLogAction.SCRIPTLET },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_scriptlet)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_scriptlet),
+                    count = scriptletCount,
+                    isSelected = selectedAction == HttpLogAction.SCRIPTLET,
+                    onClick = {
+                        selectedAction = if (selectedAction == HttpLogAction.SCRIPTLET) null else HttpLogAction.SCRIPTLET
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
                 )
-                FilterChip(
-                    selected = selectedAction == HttpLogAction.SURROGATE,
-                    onClick = { selectedAction = HttpLogAction.SURROGATE },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_surrogate)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_surrogate),
+                    count = surrogateCount,
+                    isSelected = selectedAction == HttpLogAction.SURROGATE,
+                    onClick = {
+                        selectedAction = if (selectedAction == HttpLogAction.SURROGATE) null else HttpLogAction.SURROGATE
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                FilterChip(
-                    selected = selectedAction == HttpLogAction.ALLOWED,
-                    onClick = { selectedAction = HttpLogAction.ALLOWED },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_allowed)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_allowed),
+                    count = allowedCount,
+                    isSelected = selectedAction == HttpLogAction.ALLOWED,
+                    onClick = {
+                        selectedAction = if (selectedAction == HttpLogAction.ALLOWED) null else HttpLogAction.ALLOWED
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-                FilterChip(
-                    selected = selectedSource == "HTTPS",
-                    onClick = { selectedSource = if (selectedSource == "HTTPS") null else "HTTPS" },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_https_only)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_https_only),
+                    count = httpsSourceCount,
+                    isSelected = selectedSource == "HTTPS",
+                    onClick = {
+                        selectedSource = if (selectedSource == "HTTPS") null else "HTTPS"
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                FilterChip(
-                    selected = selectedSource == "Browser",
-                    onClick = { selectedSource = if (selectedSource == "Browser") null else "Browser" },
-                    label = { Text(stringResource(R.string.https_debug_logs_filter_browser)) }
+                LogFilterChipItem(
+                    label = stringResource(R.string.https_debug_logs_filter_browser),
+                    count = browserSourceCount,
+                    isSelected = selectedSource == "Browser",
+                    onClick = {
+                        selectedSource = if (selectedSource == "Browser") null else "Browser"
+                    },
+                    selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -319,160 +357,50 @@ fun HttpsDebugLogsScreen(
 }
 
 @Composable
-private fun DebugLogCard(
-    entry: HttpDebugLogEntry,
-    isExpanded: Boolean,
+private fun LogFilterChipItem(
+    label: String,
+    count: Int,
+    isSelected: Boolean,
     onClick: () -> Unit,
-    onCopyUrl: () -> Unit,
-    onCopyRule: () -> Unit,
-    onSkipHttps: () -> Unit
+    modifier: Modifier = Modifier,
+    selectedContainerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    selectedLabelColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
-    val (badgeContainer, badgeContent, cardContainer) = when (entry.action) {
-        HttpLogAction.BLOCKED -> Triple(
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.onErrorContainer,
-            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.28f)
-        )
-        HttpLogAction.SCRIPTLET -> Triple(
-            MaterialTheme.colorScheme.tertiaryContainer,
-            MaterialTheme.colorScheme.onTertiaryContainer,
-            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.32f)
-        )
-        HttpLogAction.SURROGATE -> Triple(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.onPrimaryContainer,
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)
-        )
-        HttpLogAction.ALLOWED -> Triple(
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            MaterialTheme.colorScheme.surfaceContainerLow
-        )
-    }
-    val timeStr = remember(entry.timestamp) {
-        SimpleDateFormat("HH:mm:ss", Locale.US).format(Date(entry.timestamp))
-    }
-
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = cardContainer),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Surface(
-                        color = badgeContainer,
-                        shape = RoundedCornerShape(6.dp)
-                    ) {
-                        Text(
-                            text = entry.action.name,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = badgeContent,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                    Text(
-                        text = entry.rule.ifBlank { entry.source },
-                        style = MaterialTheme.typography.labelMedium,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
                 Text(
-                    text = "$timeStr · ${entry.source}",
+                    text = label,
+                    modifier = Modifier.alpha(if (!isSelected && count == 0) 0.5f else 1f)
+                )
+                Text(
+                    text = count.toString(),
                     style = MaterialTheme.typography.labelSmall,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.alpha(if (!isSelected && count == 0) 0.4f else 0.85f)
                 )
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "${entry.method} · ${entry.resourceType} · ${entry.initiator.ifBlank { "-" }}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = entry.url,
-                style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            AnimatedVisibility(visible = isExpanded) {
-                Column(modifier = Modifier.padding(top = 8.dp)) {
-                    if (entry.detail != null) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(10.dp)
-                        ) {
-                            Text(
-                                text = entry.detail,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 11.sp,
-                                lineHeight = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AssistChip(
-                            onClick = onCopyUrl,
-                            leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                            label = { Text(stringResource(R.string.https_debug_logs_copy_url), fontSize = 11.sp) }
-                        )
-                        if (entry.rule.isNotBlank()) {
-                            AssistChip(
-                                onClick = onCopyRule,
-                                leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                                label = { Text(stringResource(R.string.https_debug_logs_copy_rule), fontSize = 11.sp) }
-                            )
-                        }
-                        AssistChip(
-                            onClick = onSkipHttps,
-                            leadingIcon = { Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                            label = { Text(stringResource(R.string.https_debug_logs_skip_https), fontSize = 11.sp) }
-                        )
-                    }
-                }
+        },
+        leadingIcon = if (isSelected) {
+            {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
             }
-        }
-    }
+        } else null,
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = selectedContainerColor,
+            selectedLabelColor = selectedLabelColor,
+            selectedLeadingIconColor = selectedLabelColor
+        ),
+        modifier = modifier
+    )
 }
+

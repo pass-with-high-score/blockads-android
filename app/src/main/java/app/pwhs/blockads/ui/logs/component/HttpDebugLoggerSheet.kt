@@ -139,17 +139,38 @@ fun HttpDebugLoggerSheet(
                     .padding(vertical = 6.dp)
             )
 
+            val blockedCount = remember(entries, initialSourceFilter) {
+                entries.count { (initialSourceFilter == null || it.source.equals(initialSourceFilter, ignoreCase = true)) && it.action == HttpLogAction.BLOCKED }
+            }
+            val scriptletCount = remember(entries, initialSourceFilter) {
+                entries.count { (initialSourceFilter == null || it.source.equals(initialSourceFilter, ignoreCase = true)) && it.action == HttpLogAction.SCRIPTLET }
+            }
+            val surrogateCount = remember(entries, initialSourceFilter) {
+                entries.count { (initialSourceFilter == null || it.source.equals(initialSourceFilter, ignoreCase = true)) && it.action == HttpLogAction.SURROGATE }
+            }
+            val allowedCount = remember(entries, initialSourceFilter) {
+                entries.count { (initialSourceFilter == null || it.source.equals(initialSourceFilter, ignoreCase = true)) && it.action == HttpLogAction.ALLOWED }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                LoggerFilterChip("All", selectedAction == null) { selectedAction = null }
-                LoggerFilterChip("Blocked", selectedAction == HttpLogAction.BLOCKED) { selectedAction = HttpLogAction.BLOCKED }
-                LoggerFilterChip("Scriptlet", selectedAction == HttpLogAction.SCRIPTLET) { selectedAction = HttpLogAction.SCRIPTLET }
-                LoggerFilterChip("Surrogate", selectedAction == HttpLogAction.SURROGATE) { selectedAction = HttpLogAction.SURROGATE }
-                LoggerFilterChip("Allowed", selectedAction == HttpLogAction.ALLOWED) { selectedAction = HttpLogAction.ALLOWED }
+                LoggerFilterChip("All (${entries.size})", selectedAction == null) { selectedAction = null }
+                LoggerFilterChip("Blocked ($blockedCount)", selectedAction == HttpLogAction.BLOCKED) {
+                    selectedAction = if (selectedAction == HttpLogAction.BLOCKED) null else HttpLogAction.BLOCKED
+                }
+                LoggerFilterChip("Scriptlet ($scriptletCount)", selectedAction == HttpLogAction.SCRIPTLET) {
+                    selectedAction = if (selectedAction == HttpLogAction.SCRIPTLET) null else HttpLogAction.SCRIPTLET
+                }
+                LoggerFilterChip("Surrogate ($surrogateCount)", selectedAction == HttpLogAction.SURROGATE) {
+                    selectedAction = if (selectedAction == HttpLogAction.SURROGATE) null else HttpLogAction.SURROGATE
+                }
+                LoggerFilterChip("Allowed ($allowedCount)", selectedAction == HttpLogAction.ALLOWED) {
+                    selectedAction = if (selectedAction == HttpLogAction.ALLOWED) null else HttpLogAction.ALLOWED
+                }
             }
 
             Spacer(modifier = Modifier.height(6.dp))
