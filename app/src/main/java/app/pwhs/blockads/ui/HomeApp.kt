@@ -194,7 +194,10 @@ fun HomeApp(
                     is AppManagementKey -> SettingsDetailPane.APP_MANAGEMENT
                     is TrustedNetworksKey -> SettingsDetailPane.TRUSTED_NETWORKS
                     is TailscaleKey -> SettingsDetailPane.TAILSCALE
-                    is HttpsFilteringKey, is HttpsDebugLogsKey, is HttpsSettingsKey, is HttpsSkippedDomainsKey -> SettingsDetailPane.HTTPS_FILTERING
+                    is HttpsFilteringKey -> SettingsDetailPane.HTTPS_FILTERING
+                    is HttpsDebugLogsKey -> SettingsDetailPane.HTTPS_DEBUG_LOGS
+                    is HttpsSettingsKey -> SettingsDetailPane.HTTPS_SETTINGS
+                    is HttpsSkippedDomainsKey -> SettingsDetailPane.HTTPS_SKIPPED_DOMAINS
                     is DnsProviderKey -> SettingsDetailPane.DNS_PROVIDER
                     is GeoIpKey -> SettingsDetailPane.GEO_IP
                     else -> null
