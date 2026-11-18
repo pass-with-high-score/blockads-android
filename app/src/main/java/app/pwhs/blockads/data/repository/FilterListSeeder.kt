@@ -52,7 +52,7 @@ class FilterListSeeder(
             return@withContext
         }
         val existingBuiltIns = filterListDao.getAllSync().count { it.isBuiltIn }
-        if (existingBuiltIns < 50) {
+        if (existingBuiltIns < 90) {
             seedFromBundledAsset(allowInStore)
             fetchAndSyncRemoteFilterLists(allowInStore)
         }
@@ -167,7 +167,7 @@ class FilterListSeeder(
             }
         }
 
-        if (allowDelete) {
+        if (allowDelete && protectedNames.isNotEmpty()) {
             val incomingNames = incoming.map { it.name }.toSet()
             val obsolete = existingLists.filter {
                 it.isBuiltIn && it.name !in incomingNames && it.name !in protectedNames

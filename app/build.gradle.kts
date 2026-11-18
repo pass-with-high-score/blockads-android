@@ -141,6 +141,7 @@ android {
     sourceSets {
         // MigrationTestHelper reads exported schemas as assets.
         getByName("androidTest").assets.directories += "$projectDir/schemas"
+        getByName("github").assets.directories += "$projectDir/src/fdroid/assets"
     }
 
     testOptions {
