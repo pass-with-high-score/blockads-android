@@ -223,8 +223,8 @@ fun BrowserBentoMenuSheet(
 
             // Row 7: HTTP & Scriptlet Debug Logger
             BentoCtaButton(
-                title = "HTTP & Scriptlet Logger",
-                subtitle = "Inspect blocked requests, surrogates & scriptlets",
+                title = stringResource(R.string.https_debug_logs_title),
+                subtitle = stringResource(R.string.https_debug_logs_subtitle),
                 icon = Icons.Default.BugReport,
                 onClick = {
                     onDismiss()

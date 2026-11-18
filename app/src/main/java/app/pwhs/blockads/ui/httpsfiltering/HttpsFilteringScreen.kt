@@ -181,7 +181,7 @@ fun HttpsFilteringScreen(
                     IconButton(onClick = onNavigateToDebugLogs) {
                         Icon(
                             imageVector = Icons.Outlined.Terminal,
-                            contentDescription = "HTTP & Scriptlet Logs",
+                            contentDescription = stringResource(R.string.https_debug_logs_title),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -189,7 +189,7 @@ fun HttpsFilteringScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Outlined.Settings,
-                            contentDescription = "HTTPS Filtering Settings",
+                            contentDescription = stringResource(R.string.https_settings_title),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )

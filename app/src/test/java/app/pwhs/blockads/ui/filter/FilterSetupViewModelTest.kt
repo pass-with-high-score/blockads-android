@@ -106,7 +106,7 @@ class FilterSetupViewModelTest {
     @Test
     fun `adding a remote filter saves the profile, reloads and signals success`() = runTest {
         coEvery { dao.getByUrl(any()) } returns null
-        coEvery { customFilters.addCustomFilter(listOf("https://new"), "New", any(), any()) } returns Result.success(FilterList(name = "New", url = "https://new"))
+        coEvery { customFilters.addCustomFilter(listOf("https://new"), "New", any(), any(), any()) } returns Result.success(FilterList(name = "New", url = "https://new"))
         vm.filterAddedEvent.test {
             vm.events.test {
                 vm.addFilterList(" New ", " https://new ")
@@ -122,7 +122,7 @@ class FilterSetupViewModelTest {
     @Test
     fun `a failed remote add reports failure and changes nothing`() = runTest {
         coEvery { dao.getByUrl(any()) } returns null
-        coEvery { customFilters.addCustomFilter(any<List<String>>(), any(), any(), any()) } returns Result.failure(RuntimeException("404"))
+        coEvery { customFilters.addCustomFilter(any<List<String>>(), any(), any(), any(), any()) } returns Result.failure(RuntimeException("404"))
         vm.events.test {
             vm.addFilterList("n", "https://bad")
             assertEquals(UiEvent.ToastRes(R.string.filter_update_failed), awaitItem())

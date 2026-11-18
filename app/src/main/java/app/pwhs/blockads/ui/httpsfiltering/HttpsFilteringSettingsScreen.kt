@@ -77,12 +77,12 @@ fun HttpsFilteringSettingsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("HTTPS Filtering Settings") },
+                title = { Text(stringResource(R.string.https_settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.common_back)
                         )
                     }
                 },
@@ -123,12 +123,12 @@ fun HttpsFilteringSettingsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Use Built-in Rules",
+                                    text = stringResource(R.string.https_settings_builtin_title),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = "Combine app CSS, scriptlets & anti-adblock modules with your filter lists",
+                                    text = stringResource(R.string.https_settings_builtin_desc),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -166,16 +166,16 @@ fun HttpsFilteringSettingsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Update Built-in Rules",
+                                    text = stringResource(R.string.https_settings_update_title),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 val statusText = when (val st = updateStatus) {
-                                    is BrowserRuleUpdateStatus.Checking -> "Checking for updates..."
-                                    is BrowserRuleUpdateStatus.Updated -> "Updated to v${st.version} (${st.domainsCount} domains)"
-                                    is BrowserRuleUpdateStatus.UpToDate -> "Up to date (v${st.version})"
-                                    is BrowserRuleUpdateStatus.Error -> "Error: ${st.message}"
-                                    is BrowserRuleUpdateStatus.Idle -> "v${currentRules.version} · ${currentRules.adDomains.size} domains"
+                                    is BrowserRuleUpdateStatus.Checking -> stringResource(R.string.https_settings_update_checking)
+                                    is BrowserRuleUpdateStatus.Updated -> stringResource(R.string.https_settings_update_updated, st.version, st.domainsCount)
+                                    is BrowserRuleUpdateStatus.UpToDate -> stringResource(R.string.https_settings_update_uptodate, st.version)
+                                    is BrowserRuleUpdateStatus.Error -> stringResource(R.string.https_settings_update_error, st.message)
+                                    is BrowserRuleUpdateStatus.Idle -> stringResource(R.string.https_settings_update_idle, currentRules.version, currentRules.adDomains.size)
                                 }
                                 Text(
                                     text = statusText,
@@ -200,7 +200,7 @@ fun HttpsFilteringSettingsScreen(
                                         strokeWidth = 2.dp
                                     )
                                 } else {
-                                    Text("Update")
+                                    Text(stringResource(R.string.https_settings_update_action))
                                 }
                             }
                         }
@@ -232,12 +232,12 @@ fun HttpsFilteringSettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Skipped Domains (Passthrough)",
+                                text = stringResource(R.string.https_settings_skipped_title),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "View or edit domains bypassed from HTTPS inspection",
+                                text = stringResource(R.string.https_settings_skipped_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

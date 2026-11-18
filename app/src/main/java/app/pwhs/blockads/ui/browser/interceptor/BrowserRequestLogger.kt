@@ -80,6 +80,7 @@ object BrowserRequestLogger {
     }
 
     class JsLoggerBridge {
+        @android.annotation.SuppressLint("JavascriptInterface")
         @JavascriptInterface
         fun log(rule: String, url: String, detail: String) {
             val host = runCatching { Uri.parse(url).host }.getOrNull().orEmpty().lowercase(Locale.US)

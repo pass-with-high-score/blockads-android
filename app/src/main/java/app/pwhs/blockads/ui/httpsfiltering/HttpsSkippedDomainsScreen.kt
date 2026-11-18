@@ -49,10 +49,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.pwhs.blockads.R
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.TunnelRuleLoader
 import kotlinx.coroutines.Dispatchers
@@ -106,9 +108,9 @@ fun HttpsSkippedDomainsScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Skipped Domains", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.https_skipped_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(
-                            text = "${filtered.size} domains bypassed",
+                            text = stringResource(R.string.https_skipped_count, filtered.size),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -116,14 +118,14 @@ fun HttpsSkippedDomainsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add skipped domain",
+                            contentDescription = stringResource(R.string.https_skipped_add_desc),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -144,12 +146,12 @@ fun HttpsSkippedDomainsScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search skipped domains...") },
+                placeholder = { Text(stringResource(R.string.https_skipped_search_hint)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.common_clear))
                         }
                     }
                 },
@@ -166,9 +168,9 @@ fun HttpsSkippedDomainsScreen(
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(selected = filter == SkippedFilter.ALL, onClick = { filter = SkippedFilter.ALL }, label = { Text("All") })
-                FilterChip(selected = filter == SkippedFilter.AUTO_CUSTOM, onClick = { filter = SkippedFilter.AUTO_CUSTOM }, label = { Text("Auto / Custom") })
-                FilterChip(selected = filter == SkippedFilter.BUILT_IN, onClick = { filter = SkippedFilter.BUILT_IN }, label = { Text("Built-in") })
+                FilterChip(selected = filter == SkippedFilter.ALL, onClick = { filter = SkippedFilter.ALL }, label = { Text(stringResource(R.string.https_debug_logs_filter_all)) })
+                FilterChip(selected = filter == SkippedFilter.AUTO_CUSTOM, onClick = { filter = SkippedFilter.AUTO_CUSTOM }, label = { Text(stringResource(R.string.https_skipped_filter_auto)) })
+                FilterChip(selected = filter == SkippedFilter.BUILT_IN, onClick = { filter = SkippedFilter.BUILT_IN }, label = { Text(stringResource(R.string.https_skipped_filter_builtin)) })
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -183,7 +185,7 @@ fun HttpsSkippedDomainsScreen(
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text("No skipped domains match", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.https_skipped_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             } else {
@@ -219,7 +221,7 @@ fun HttpsSkippedDomainsScreen(
                                         shape = RoundedCornerShape(6.dp)
                                     ) {
                                         Text(
-                                            text = if (item.isBuiltIn) "Built-in passthrough" else "Auto-blacklisted / Custom",
+                                            text = if (item.isBuiltIn) stringResource(R.string.https_skipped_badge_builtin) else stringResource(R.string.https_skipped_badge_auto),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = if (item.isBuiltIn) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimaryContainer,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -233,7 +235,7 @@ fun HttpsSkippedDomainsScreen(
                                     }) {
                                         Icon(
                                             imageVector = Icons.Outlined.Delete,
-                                            contentDescription = "Remove",
+                                            contentDescription = stringResource(R.string.https_skipped_remove),
                                             tint = MaterialTheme.colorScheme.error
                                         )
                                     }
@@ -262,12 +264,12 @@ fun HttpsSkippedDomainsScreen(
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            title = { Text("Skip HTTPS Filtering") },
+            title = { Text(stringResource(R.string.https_skipped_dialog_title)) },
             text = {
                 OutlinedTextField(
                     value = newDomainInput,
                     onValueChange = { newDomainInput = it },
-                    placeholder = { Text("example.com") },
+                    placeholder = { Text(stringResource(R.string.https_skipped_dialog_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -284,12 +286,12 @@ fun HttpsSkippedDomainsScreen(
                     newDomainInput = ""
                     showAddDialog = false
                 }) {
-                    Text("Add")
+                    Text(stringResource(R.string.common_add))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )

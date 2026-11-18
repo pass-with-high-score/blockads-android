@@ -57,12 +57,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.logging.HttpDebugLogEntry
 import app.pwhs.blockads.data.logging.HttpDebugLogStore
 import app.pwhs.blockads.data.logging.HttpLogAction
@@ -109,12 +111,12 @@ fun HttpsDebugLogsScreen(
                 title = {
                     Column {
                         Text(
-                            text = "HTTP & Scriptlet Logs",
+                            text = stringResource(R.string.https_debug_logs_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "${filtered.size} / ${entries.size} events",
+                            text = stringResource(R.string.https_debug_logs_count, filtered.size, entries.size),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -124,7 +126,7 @@ fun HttpsDebugLogsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.common_back)
                         )
                     }
                 },
@@ -132,22 +134,23 @@ fun HttpsDebugLogsScreen(
                     IconButton(onClick = { HttpDebugLogStore.setRecordingEnabled(!isRecording) }) {
                         Icon(
                             imageVector = if (isRecording) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isRecording) "Pause logging" else "Resume logging",
+                            contentDescription = stringResource(if (isRecording) R.string.https_debug_logs_pause else R.string.https_debug_logs_resume),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
+                    val exportFailedPrefix = stringResource(R.string.https_debug_logs_export_failed, "")
                     IconButton(
                         enabled = filtered.isNotEmpty(),
                         onClick = {
                             HttpsDebugLogActions.exportAndShare(context, filtered).onFailure { err ->
-                                scope.launch { snackbarHostState.showSnackbar("Export failed: ${err.message}") }
+                                scope.launch { snackbarHostState.showSnackbar("$exportFailedPrefix${err.message}") }
                             }
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Share,
-                            contentDescription = "Export logs",
+                            contentDescription = stringResource(R.string.https_debug_logs_export),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(22.dp)
                         )
@@ -155,7 +158,7 @@ fun HttpsDebugLogsScreen(
                     IconButton(onClick = { HttpDebugLogStore.clear() }) {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "Clear logs",
+                            contentDescription = stringResource(R.string.https_debug_logs_clear),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -176,7 +179,7 @@ fun HttpsDebugLogsScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Filter URL, rule, initiator...") },
+                placeholder = { Text(stringResource(R.string.https_debug_logs_search_hint)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -187,7 +190,7 @@ fun HttpsDebugLogsScreen(
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.common_clear))
                         }
                     }
                 },
@@ -208,37 +211,37 @@ fun HttpsDebugLogsScreen(
                 FilterChip(
                     selected = selectedAction == null,
                     onClick = { selectedAction = null },
-                    label = { Text("All") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_all)) }
                 )
                 FilterChip(
                     selected = selectedAction == HttpLogAction.BLOCKED,
                     onClick = { selectedAction = HttpLogAction.BLOCKED },
-                    label = { Text("Blocked") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_blocked)) }
                 )
                 FilterChip(
                     selected = selectedAction == HttpLogAction.SCRIPTLET,
                     onClick = { selectedAction = HttpLogAction.SCRIPTLET },
-                    label = { Text("Scriptlet") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_scriptlet)) }
                 )
                 FilterChip(
                     selected = selectedAction == HttpLogAction.SURROGATE,
                     onClick = { selectedAction = HttpLogAction.SURROGATE },
-                    label = { Text("Surrogate") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_surrogate)) }
                 )
                 FilterChip(
                     selected = selectedAction == HttpLogAction.ALLOWED,
                     onClick = { selectedAction = HttpLogAction.ALLOWED },
-                    label = { Text("Allowed") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_allowed)) }
                 )
                 FilterChip(
                     selected = selectedSource == "HTTPS",
                     onClick = { selectedSource = if (selectedSource == "HTTPS") null else "HTTPS" },
-                    label = { Text("HTTPS Only") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_https_only)) }
                 )
                 FilterChip(
                     selected = selectedSource == "Browser",
                     onClick = { selectedSource = if (selectedSource == "Browser") null else "Browser" },
-                    label = { Text("In-App Browser") }
+                    label = { Text(stringResource(R.string.https_debug_logs_filter_browser)) }
                 )
             }
 
@@ -258,24 +261,29 @@ fun HttpsDebugLogsScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "No HTTP or scriptlet events yet",
+                            text = stringResource(R.string.https_debug_logs_empty_title),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Browse with HTTPS Filtering or In-App Browser to inspect",
+                            text = stringResource(R.string.https_debug_logs_empty_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
                 }
             } else {
+                val copiedUrlMsg = stringResource(R.string.https_debug_logs_copied_url)
+                val copiedRuleMsg = stringResource(R.string.https_debug_logs_copied_rule)
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(filtered, key = { it.id }) { entry ->
+                        val host = HttpsDebugLogActions.extractHost(entry)
+                        val addedMsg = stringResource(R.string.https_debug_logs_skipped_added, host)
+                        val existsMsg = stringResource(R.string.https_debug_logs_skipped_exists, host)
                         DebugLogCard(
                             entry = entry,
                             isExpanded = expandedId == entry.id,
@@ -284,17 +292,15 @@ fun HttpsDebugLogsScreen(
                             },
                             onCopyUrl = {
                                 HttpsDebugLogActions.copyToClipboard(context, "URL", entry.url)
-                                scope.launch { snackbarHostState.showSnackbar("Copied URL") }
+                                scope.launch { snackbarHostState.showSnackbar(copiedUrlMsg) }
                             },
                             onCopyRule = {
                                 HttpsDebugLogActions.copyToClipboard(context, "Rule", entry.rule)
-                                scope.launch { snackbarHostState.showSnackbar("Copied rule") }
+                                scope.launch { snackbarHostState.showSnackbar(copiedRuleMsg) }
                             },
                             onSkipHttps = {
-                                val host = HttpsDebugLogActions.extractHost(entry)
                                 val added = HttpsDebugLogActions.addHostToMitmBlacklist(context, host)
-                                val msg = if (added) "Added $host to Skipped Domains" else "$host is already skipped"
-                                scope.launch { snackbarHostState.showSnackbar(msg) }
+                                scope.launch { snackbarHostState.showSnackbar(if (added) addedMsg else existsMsg) }
                             }
                         )
                     }
@@ -442,19 +448,19 @@ private fun DebugLogCard(
                         AssistChip(
                             onClick = onCopyUrl,
                             leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                            label = { Text("Copy URL", fontSize = 11.sp) }
+                            label = { Text(stringResource(R.string.https_debug_logs_copy_url), fontSize = 11.sp) }
                         )
                         if (entry.rule.isNotBlank()) {
                             AssistChip(
                                 onClick = onCopyRule,
                                 leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                                label = { Text("Copy Rule", fontSize = 11.sp) }
+                                label = { Text(stringResource(R.string.https_debug_logs_copy_rule), fontSize = 11.sp) }
                             )
                         }
                         AssistChip(
                             onClick = onSkipHttps,
                             leadingIcon = { Icon(Icons.Outlined.Shield, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                            label = { Text("Skip HTTPS", fontSize = 11.sp) }
+                            label = { Text(stringResource(R.string.https_debug_logs_skip_https), fontSize = 11.sp) }
                         )
                     }
                 }

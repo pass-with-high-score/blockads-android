@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -141,7 +141,7 @@ class FilterSetupViewModel(
 
     init {
         viewModelScope.launch {
-            val allowInStore = appPreferences?.filter?.storeUseDefaultFilters?.first() == true
+            val allowInStore = appPreferences?.filter?.storeUseDefaultFilters?.firstOrNull() == true
             filterRepo.seedDefaultsIfNeeded(allowInStore = allowInStore)
         }
     }
