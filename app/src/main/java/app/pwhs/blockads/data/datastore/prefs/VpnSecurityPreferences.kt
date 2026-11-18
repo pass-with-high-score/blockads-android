@@ -34,6 +34,7 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_FIREWALL_PROMPT_ENABLED = booleanPreferencesKey("firewall_prompt_enabled")
         val KEY_HTTPS_FILTERING_ENABLED = booleanPreferencesKey("https_filtering_enabled")
         val KEY_FILTER_HTTP3 = booleanPreferencesKey("filter_http3")
+        val KEY_USE_BUILTIN_HTTPS_RULES = booleanPreferencesKey("use_builtin_https_rules")
         val KEY_SELECTED_BROWSERS = stringSetPreferencesKey("selected_browsers")
         val KEY_CRASH_REPORTING_ENABLED = booleanPreferencesKey("crash_reporting_enabled")
         val KEY_HIDE_FROM_RECENTS = booleanPreferencesKey("hide_from_recents")
@@ -170,6 +171,10 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
         prefs[KEY_FILTER_HTTP3] ?: true
     }
 
+    val useBuiltInHttpsRules: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[KEY_USE_BUILTIN_HTTPS_RULES] ?: true
+    }
+
     val crashReportingEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_CRASH_REPORTING_ENABLED] ?: false
     }
@@ -291,6 +296,13 @@ class VpnSecurityPreferences(private val dataStore: DataStore<Preferences>) {
 
     suspend fun getFilterHttp3Snapshot(): Boolean =
         dataStore.data.first()[KEY_FILTER_HTTP3] ?: true
+
+    suspend fun setUseBuiltInHttpsRules(enabled: Boolean) {
+        dataStore.edit { prefs -> prefs[KEY_USE_BUILTIN_HTTPS_RULES] = enabled }
+    }
+
+    suspend fun getUseBuiltInHttpsRulesSnapshot(): Boolean =
+        dataStore.data.first()[KEY_USE_BUILTIN_HTTPS_RULES] ?: true
 
     suspend fun setSelectedBrowsers(packages: Set<String>) {
         dataStore.edit { prefs -> prefs[KEY_SELECTED_BROWSERS] = packages }

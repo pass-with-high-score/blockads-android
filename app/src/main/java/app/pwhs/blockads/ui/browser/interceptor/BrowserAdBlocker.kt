@@ -56,16 +56,20 @@ object BrowserAdBlocker {
         scriptCache.remove("adguard_scriptlets.js")
     }
 
-    fun shouldBlock(request: WebResourceRequest): Boolean {
-        val url = request.url ?: return false
-        val host = url.host?.lowercase(Locale.US) ?: return false
+    data class BlockMatchResult(val blocked: Boolean, val rule: String = "")
+
+    fun shouldBlock(request: WebResourceRequest): Boolean = matchBlockRule(request).blocked
+
+    fun matchBlockRule(request: WebResourceRequest): BlockMatchResult {
+        val url = request.url ?: return BlockMatchResult(false)
+        val host = url.host?.lowercase(Locale.US) ?: return BlockMatchResult(false)
         val fullUrl = url.toString().lowercase(Locale.US)
 
         // 1. Fast host suffix match (O(depth) lookup instead of O(N) loop)
         var checkHost: String? = host
         while (checkHost != null) {
             if (activeHostSuffixes.contains(checkHost)) {
-                return true
+                return BlockMatchResult(true, "||$checkHost^")
             }
             val dot = checkHost.indexOf('.')
             checkHost = if (dot != -1) checkHost.substring(dot + 1) else null
@@ -74,18 +78,18 @@ object BrowserAdBlocker {
         // 2. Gambling popunder domain keyword match
         for (keyword in activeGamblingKeywords) {
             if (host.contains(keyword)) {
-                return true
+                return BlockMatchResult(true, "keyword:$keyword")
             }
         }
 
         // 3. Specific ad path patterns match
         for (pattern in activeAdPathPatterns) {
             if (fullUrl.contains(pattern)) {
-                return true
+                return BlockMatchResult(true, "path:$pattern")
             }
         }
 
-        return false
+        return BlockMatchResult(false)
     }
 
     /**

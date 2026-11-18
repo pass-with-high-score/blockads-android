@@ -57,7 +57,10 @@ import app.pwhs.blockads.ui.data.FilterOverlapKey
 import app.pwhs.blockads.ui.data.FilterKey
 import app.pwhs.blockads.ui.data.FireWallKey
 import app.pwhs.blockads.ui.data.HomeKey
+import app.pwhs.blockads.ui.data.HttpsDebugLogsKey
 import app.pwhs.blockads.ui.data.HttpsFilteringKey
+import app.pwhs.blockads.ui.data.HttpsSettingsKey
+import app.pwhs.blockads.ui.data.HttpsSkippedDomainsKey
 import app.pwhs.blockads.ui.data.CertInstallationWizardKey
 import app.pwhs.blockads.ui.data.GeoIpKey
 import app.pwhs.blockads.ui.httpsfiltering.wizard.CertInstallationWizardScreen
@@ -87,7 +90,10 @@ import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.home.HomeScreen
 import app.pwhs.blockads.ui.home.component.FeatureBadgeKind
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
+import app.pwhs.blockads.ui.httpsfiltering.HttpsDebugLogsScreen
 import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringScreen
+import app.pwhs.blockads.ui.httpsfiltering.HttpsFilteringSettingsScreen
+import app.pwhs.blockads.ui.httpsfiltering.HttpsSkippedDomainsScreen
 import app.pwhs.blockads.ui.logs.LogsScreen
 import app.pwhs.blockads.ui.settings.SettingsDetailPane
 import app.pwhs.blockads.ui.settings.SettingsScreen
@@ -188,7 +194,7 @@ fun HomeApp(
                     is AppManagementKey -> SettingsDetailPane.APP_MANAGEMENT
                     is TrustedNetworksKey -> SettingsDetailPane.TRUSTED_NETWORKS
                     is TailscaleKey -> SettingsDetailPane.TAILSCALE
-                    is HttpsFilteringKey -> SettingsDetailPane.HTTPS_FILTERING
+                    is HttpsFilteringKey, is HttpsDebugLogsKey, is HttpsSettingsKey, is HttpsSkippedDomainsKey -> SettingsDetailPane.HTTPS_FILTERING
                     is DnsProviderKey -> SettingsDetailPane.DNS_PROVIDER
                     is GeoIpKey -> SettingsDetailPane.GEO_IP
                     else -> null
@@ -354,6 +360,14 @@ fun HomeApp(
                         onNavigateToCertWizard = {
                             showBottomBar = false
                             settingsStack.add(CertInstallationWizardKey)
+                        },
+                        onNavigateToHttpsDebugLogs = {
+                            showBottomBar = false
+                            settingsStack.add(HttpsDebugLogsKey)
+                        },
+                        onNavigateToHttpsSettings = {
+                            showBottomBar = false
+                            settingsStack.add(HttpsSettingsKey)
                         },
                         onNavigateToDNSProvider = {
                             showBottomBar = false
@@ -524,6 +538,36 @@ fun HomeApp(
                         },
                         onNavigateToWizard = {
                             currentBackStack.add(CertInstallationWizardKey)
+                        },
+                        onNavigateToDebugLogs = {
+                            currentBackStack.add(HttpsDebugLogsKey)
+                        },
+                        onNavigateToSettings = {
+                            currentBackStack.add(HttpsSettingsKey)
+                        }
+                    )
+                }
+                entry<HttpsDebugLogsKey> {
+                    HttpsDebugLogsScreen(
+                        onNavigateBack = {
+                            safePop(currentBackStack)
+                        }
+                    )
+                }
+                entry<HttpsSettingsKey> {
+                    HttpsFilteringSettingsScreen(
+                        onNavigateBack = {
+                            safePop(currentBackStack)
+                        },
+                        onNavigateToSkippedDomains = {
+                            currentBackStack.add(HttpsSkippedDomainsKey)
+                        }
+                    )
+                }
+                entry<HttpsSkippedDomainsKey> {
+                    HttpsSkippedDomainsScreen(
+                        onNavigateBack = {
+                            safePop(currentBackStack)
                         }
                     )
                 }

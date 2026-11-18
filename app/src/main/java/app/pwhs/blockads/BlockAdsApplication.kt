@@ -38,6 +38,7 @@ class BlockAdsApplication : Application() {
         
         // Plant File logging tree for all builds to allow log export
         Timber.plant(FileLoggingTree(this))
+        app.pwhs.blockads.data.logging.HttpDebugLogStore.init(this)
 
         // Schedule auto-update for filter lists after Koin is initialized
         val appPreferences: AppPreferences by inject()

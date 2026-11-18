@@ -80,6 +80,15 @@ data class ProxyEditKey(val profileId: String? = null) : NavKey
 data object HttpsFilteringKey : NavKey
 
 @Serializable
+data object HttpsDebugLogsKey : NavKey
+
+@Serializable
+data object HttpsSettingsKey : NavKey
+
+@Serializable
+data object HttpsSkippedDomainsKey : NavKey
+
+@Serializable
 data class BrowserKey(val initialUrl: String = "https://m.youtube.com") : NavKey
 
 @Serializable

@@ -18,9 +18,15 @@ import (
 	"sync/atomic"
 
 	"github.com/miekg/dns"
+	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
 	"github.com/nqmgaming/blockads-tunnel/internal/proxy"
 	"github.com/nqmgaming/blockads-tunnel/internal/tailscale"
 )
+
+// MitmLogCallback receives uBlock-style HTTP request and scriptlet debug events from MITM mode.
+type MitmLogCallback interface {
+	OnMitmHttpEvent(action string, rule string, method string, resourceType string, initiator string, url string, detail string)
+}
 
 // LogCallback is the interface for receiving DNS query events in Kotlin.
 // gomobile will generate the corresponding Java/Kotlin interface.
@@ -383,6 +389,17 @@ func (e *Engine) SetAppUidResolver(resolver AppUidResolver) {
 // SetLogCallback sets the callback for DNS query events.
 func (e *Engine) SetLogCallback(cb LogCallback) {
 	e.logCallback = cb
+}
+
+// SetMitmLogCallback sets the callback for MITM HTTP and scriptlet debug events.
+func (e *Engine) SetMitmLogCallback(cb MitmLogCallback) {
+	if cb == nil {
+		mitm.SetDebugLogger(nil)
+		return
+	}
+	mitm.SetDebugLogger(func(ev mitm.MitmDebugEvent) {
+		cb.OnMitmHttpEvent(ev.Action, ev.Rule, ev.Method, ev.ResourceType, ev.Initiator, ev.URL, ev.Detail)
+	})
 }
 
 // SetConnLogEnabled mirrors the app's "record logs" preference into the

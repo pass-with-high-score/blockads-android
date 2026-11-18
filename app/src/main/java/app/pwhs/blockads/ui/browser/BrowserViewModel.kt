@@ -187,6 +187,9 @@ class BrowserViewModel(
             is BrowserUiIntent.ToggleBentoMenu -> {
                 _uiState.update { it.copy(isBentoMenuVisible = intent.visible) }
             }
+            is BrowserUiIntent.ToggleDebugLogger -> {
+                _uiState.update { it.copy(isDebugLoggerVisible = intent.visible) }
+            }
             is BrowserUiIntent.UpdateBottomBarVisibility -> {
                 _uiState.update { it.copy(isBottomBarVisible = intent.visible) }
             }

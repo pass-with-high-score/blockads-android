@@ -462,7 +462,15 @@ fun BrowserScreen(
         },
         onNavigateToElementRules = {
             viewModel.processIntent(BrowserUiIntent.NavigateToElementRules)
+        },
+        onOpenDebugLogger = {
+            viewModel.processIntent(BrowserUiIntent.ToggleDebugLogger(true))
         }
+    )
+
+    app.pwhs.blockads.ui.logs.component.HttpDebugLoggerSheet(
+        isVisible = uiState.isDebugLoggerVisible,
+        onDismiss = { viewModel.processIntent(BrowserUiIntent.ToggleDebugLogger(false)) }
     )
 
     SearchSuggestionSheet(

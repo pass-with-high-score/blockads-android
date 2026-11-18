@@ -117,6 +117,7 @@ type Engine struct
 	method Engine.SetGeoIPDatabaseFromFd(fd int, offset int64, length int64) error
 	method Engine.SetLogCallback(cb LogCallback)
 	method Engine.SetMitmAllowedUIDs(uidsCsv string)
+	method Engine.SetMitmLogCallback(cb MitmLogCallback)
 	method Engine.SetModulesConfig(jsonStr string) error
 	method Engine.SetODoHRelay(relayURL string)
 	method Engine.SetOutboundAdapter(adapter OutboundAdapter)
@@ -173,6 +174,8 @@ type MitmFilter = internal/mitm.MitmFilter
 	method MitmFilter.SetAdPathPatterns(patterns []string)
 	method MitmFilter.SetAllowedUIDs(uids []int)
 	method MitmFilter.SetExtraPassthroughSuffixes(suffixes []string)
+type MitmLogCallback interface
+	method MitmLogCallback.OnMitmHttpEvent(action string, rule string, method string, resourceType string, initiator string, url string, detail string)
 type MmapTrie = internal/trie.MmapTrie
 	method MmapTrie.Close()
 	method MmapTrie.ContainsOrParent(domain string) bool

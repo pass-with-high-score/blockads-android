@@ -109,6 +109,8 @@ fun SettingsScreen(
     onNavigateToWireGuardImport: () -> Unit = { },
     onNavigateToTailscale: () -> Unit = { },
     onNavigateToHttpsFiltering: () -> Unit = { },
+    onNavigateToHttpsDebugLogs: () -> Unit = { },
+    onNavigateToHttpsSettings: () -> Unit = { },
     onNavigateToCertWizard: () -> Unit = { },
     onNavigateToDNSProvider: () -> Unit = { },
     onNavigateToGeoIp: () -> Unit = { },
@@ -444,7 +446,9 @@ fun SettingsScreen(
                             SettingsDetailPane.HTTPS_FILTERING -> HttpsFilteringScreen(
                                 showBackButton = false,
                                 onNavigateBack = {},
-                                onNavigateToWizard = onNavigateToCertWizard
+                                onNavigateToWizard = onNavigateToCertWizard,
+                                onNavigateToDebugLogs = onNavigateToHttpsDebugLogs,
+                                onNavigateToSettings = onNavigateToHttpsSettings
                             )
                             SettingsDetailPane.GEO_IP -> GeoIpScreen(onNavigateBack = {})
                             SettingsDetailPane.APPEARANCE_THEME -> AppearanceThemeScreen(

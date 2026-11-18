@@ -25,7 +25,8 @@ data class BrowserUiState(
     val isSearchSheetVisible: Boolean = false,
     val isBottomBarVisible: Boolean = true,
     val isBentoMenuVisible: Boolean = false,
-    val isElementPickerActive: Boolean = false
+    val isElementPickerActive: Boolean = false,
+    val isDebugLoggerVisible: Boolean = false
 )
 
 sealed interface BrowserUiIntent {
@@ -47,6 +48,7 @@ sealed interface BrowserUiIntent {
     data class SelectSearchEngine(val engine: SearchEngine) : BrowserUiIntent
     data class ToggleSearchSheet(val visible: Boolean) : BrowserUiIntent
     data class ToggleBentoMenu(val visible: Boolean) : BrowserUiIntent
+    data class ToggleDebugLogger(val visible: Boolean) : BrowserUiIntent
     data class SubmitSearch(val query: String) : BrowserUiIntent
     data class UpdateBottomBarVisibility(val visible: Boolean) : BrowserUiIntent
     data object ActivateElementPicker : BrowserUiIntent

@@ -180,7 +180,35 @@ func relayHTTPFlowWithFlow(clientConn, serverConn net.Conn, hostname string, fil
 
 		reqHost := normalizeHost(req.Host)
 
+		if req.URL != nil && req.URL.Path == "/__blockads_log__" {
+			resp := handleBlockAdsLogBeacon(req, hostname)
+			writeErr := resp.Write(clientConn)
+			if resp.Body != nil {
+				resp.Body.Close()
+			}
+			if writeErr != nil || req.Close {
+				return
+			}
+			continue
+		}
+
+		reqURL := fullRequestURL(reqHost, req)
+		resType := inferResourceType(req)
+		initiator := extractInitiator(req, hostname)
+
 		if handled, resp := pipeline.ExecuteRequest(reqHost, req); handled && resp != nil {
+			action := "BLOCKED"
+			if resp.StatusCode == http.StatusOK {
+				action = "SURROGATE"
+			}
+			emitDebugEvent(MitmDebugEvent{
+				Action:       action,
+				Rule:         "mitm:" + reqHost,
+				Method:       req.Method,
+				ResourceType: resType,
+				Initiator:    initiator,
+				URL:          reqURL,
+			})
 			if req.Body != nil {
 				_, _ = io.Copy(io.Discard, req.Body)
 				req.Body.Close()
@@ -200,6 +228,14 @@ func relayHTTPFlowWithFlow(clientConn, serverConn net.Conn, hostname string, fil
 
 		if reqHost != "" && !IsLocalAssetHost(reqHost) {
 			logMitmQuery(blocker, flow, reqHost, false, "", 65)
+			emitDebugEvent(MitmDebugEvent{
+				Action:       "ALLOWED",
+				Rule:         "",
+				Method:       req.Method,
+				ResourceType: resType,
+				Initiator:    initiator,
+				URL:          reqURL,
+			})
 		}
 
 		if requestAcceptsHTML(req) {

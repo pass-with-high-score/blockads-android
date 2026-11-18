@@ -157,6 +157,7 @@ class AppPreferences internal constructor(
     val pausedTrustedSsid: Flow<String> get() = vpnSecurity.pausedTrustedSsid
     val httpsFilteringEnabled: Flow<Boolean> get() = vpnSecurity.httpsFilteringEnabled
     val filterHttp3: Flow<Boolean> get() = vpnSecurity.filterHttp3
+    val useBuiltInHttpsRules: Flow<Boolean> get() = vpnSecurity.useBuiltInHttpsRules
     val vpnRevokedByAnotherApp: Flow<Boolean> get() = vpnSecurity.vpnRevokedByAnotherApp
     val stabilityTipDismissed: Flow<Boolean> get() = vpnSecurity.stabilityTipDismissed
     val stabilityTipDismissedAt: Flow<Long> get() = vpnSecurity.stabilityTipDismissedAt
@@ -240,6 +241,8 @@ class AppPreferences internal constructor(
     suspend fun getHttpsFilteringEnabledSnapshot(): Boolean = vpnSecurity.getHttpsFilteringEnabledSnapshot()
     suspend fun setFilterHttp3(enabled: Boolean) = vpnSecurity.setFilterHttp3(enabled)
     suspend fun getFilterHttp3Snapshot(): Boolean = vpnSecurity.getFilterHttp3Snapshot()
+    suspend fun setUseBuiltInHttpsRules(enabled: Boolean) = vpnSecurity.setUseBuiltInHttpsRules(enabled)
+    suspend fun getUseBuiltInHttpsRulesSnapshot(): Boolean = vpnSecurity.getUseBuiltInHttpsRulesSnapshot()
     suspend fun setSelectedBrowsers(packages: Set<String>) = vpnSecurity.setSelectedBrowsers(packages)
     fun getSelectedBrowsersSnapshot(): Set<String> = vpnSecurity.getSelectedBrowsersSnapshot()
     fun getSelectedBrowsersOrNullSnapshot(): Set<String>? = vpnSecurity.getSelectedBrowsersOrNullSnapshot()

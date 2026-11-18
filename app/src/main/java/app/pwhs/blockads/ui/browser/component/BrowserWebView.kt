@@ -183,25 +183,18 @@ fun BrowserWebView(
                     },
                     "__blockads_video_bridge"
                 )
+                addJavascriptInterface(app.pwhs.blockads.ui.browser.interceptor.BrowserRequestLogger.JsLoggerBridge(), "__blockadsLogger")
 
                 webViewClient = object : WebViewClient() {
                     override fun shouldInterceptRequest(
                         view: WebView?,
                         request: WebResourceRequest?
                     ): WebResourceResponse? {
-                        if (request != null && uiState.adBlockEnabled) {
-                            val fullUrl = request.url?.toString()?.lowercase(Locale.US) ?: ""
-                            val surrogate = BrowserAdBlocker.getSurrogateResponse(fullUrl)
-                            if (surrogate != null) {
-                                onIntent(BrowserUiIntent.AdBlocked)
-                                return surrogate
-                            }
-                            if (BrowserAdBlocker.shouldBlock(request)) {
-                                onIntent(BrowserUiIntent.AdBlocked)
-                                return BrowserAdBlocker.createBlockedResponse()
-                            }
-                        }
-                        return super.shouldInterceptRequest(view, request)
+                        return app.pwhs.blockads.ui.browser.interceptor.BrowserRequestLogger.interceptAndLog(
+                            request = request,
+                            adBlockEnabled = uiState.adBlockEnabled,
+                            onAdBlocked = { onIntent(BrowserUiIntent.AdBlocked) }
+                        ) ?: super.shouldInterceptRequest(view, request)
                     }
 
                     override fun shouldOverrideUrlLoading(

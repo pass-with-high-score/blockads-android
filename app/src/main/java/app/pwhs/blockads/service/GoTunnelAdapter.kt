@@ -290,6 +290,19 @@ class GoTunnelAdapter(
                 }
             }
         }
+
+        engine.setMitmLogCallback { action, rule, method, resourceType, initiator, url, detail ->
+            val logAction = when (action) {
+                "BLOCKED" -> app.pwhs.blockads.data.logging.HttpLogAction.BLOCKED
+                "SURROGATE" -> app.pwhs.blockads.data.logging.HttpLogAction.SURROGATE
+                "SCRIPTLET" -> app.pwhs.blockads.data.logging.HttpLogAction.SCRIPTLET
+                else -> app.pwhs.blockads.data.logging.HttpLogAction.ALLOWED
+            }
+            app.pwhs.blockads.data.logging.HttpDebugLogStore.record(
+                source = "HTTPS", action = logAction, rule = rule, method = method,
+                resourceType = resourceType, initiator = initiator, url = url, detail = detail
+            )
+        }
     }
 
     fun start(
@@ -456,6 +469,10 @@ class GoTunnelAdapter(
 
     fun updateCosmeticRules() {
         TunnelRuleLoader.updateCosmeticRules(context, engine, filterRepo)
+    }
+
+    fun reloadExtraPassthrough() {
+        TunnelRuleLoader.loadExtraPassthrough(context, engine)
     }
 
     fun getStats(): String = engine.stats

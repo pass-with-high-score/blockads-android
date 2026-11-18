@@ -233,16 +233,43 @@ object TunnelRuleLoader {
         }
     }
 
+    private const val KEY_DISABLED_PASSTHROUGH = "disabled_builtin_passthrough"
+
+    fun getDisabledBuiltInPassthrough(context: Context): Set<String> =
+        context.getSharedPreferences(HTTPS_RULE_PREFS, Context.MODE_PRIVATE)
+            .getStringSet(KEY_DISABLED_PASSTHROUGH, emptySet()).orEmpty()
+
+    fun setBuiltInPassthroughEnabled(context: Context, domain: String, enabled: Boolean) {
+        val prefs = context.getSharedPreferences(HTTPS_RULE_PREFS, Context.MODE_PRIVATE)
+        val current = prefs.getStringSet(KEY_DISABLED_PASSTHROUGH, emptySet()).orEmpty().toMutableSet()
+        val key = domain.trim().lowercase(java.util.Locale.US)
+        if (enabled) current.remove(key) else current.add(key)
+        prefs.edit().putStringSet(KEY_DISABLED_PASSTHROUGH, current).apply()
+    }
+
     fun loadExtraPassthrough(context: Context, engine: tunnel.Engine) {
         try {
-            val loaded = BlocklistInfo.fromAsset(context, "https_passthrough.txt")?.use { info ->
-                engine.setExtraPassthroughSuffixesFromFd(info.fd, info.startOffset, info.length)
-                true
-            } ?: false
-            if (!loaded) {
-                val passthrough = context.assets.open("https_passthrough.txt")
-                    .bufferedReader().use { it.readText() }
-                engine.setExtraPassthroughSuffixes(passthrough)
+            val disabled = getDisabledBuiltInPassthrough(context)
+            if (disabled.isEmpty()) {
+                val loaded = BlocklistInfo.fromAsset(context, "https_passthrough.txt")?.use { info ->
+                    engine.setExtraPassthroughSuffixesFromFd(info.fd, info.startOffset, info.length)
+                    true
+                } ?: false
+                if (!loaded) {
+                    val passthrough = context.assets.open("https_passthrough.txt")
+                        .bufferedReader().use { it.readText() }
+                    engine.setExtraPassthroughSuffixes(passthrough)
+                }
+            } else {
+                val filtered = context.assets.open("https_passthrough.txt")
+                    .bufferedReader()
+                    .useLines { lines ->
+                        lines.filter { line ->
+                            val t = line.trim().lowercase(java.util.Locale.US)
+                            t.isEmpty() || t.startsWith("#") || t.startsWith("//") || !disabled.contains(t)
+                        }.joinToString("\n")
+                    }
+                engine.setExtraPassthroughSuffixes(filtered)
             }
         } catch (e: Exception) {
             Timber.w(e, "Failed to load https_passthrough.txt asset")
@@ -307,34 +334,59 @@ object TunnelRuleLoader {
         }
     }
 
+    private const val HTTPS_RULE_PREFS = "https_rule_prefs"
+    private const val KEY_USE_BUILTIN = "use_builtin_https_rules"
+
+    fun isBuiltInRulesEnabled(context: Context): Boolean =
+        context.getSharedPreferences(HTTPS_RULE_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_USE_BUILTIN, true)
+
+    fun setBuiltInRulesEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(HTTPS_RULE_PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_USE_BUILTIN, enabled).apply()
+    }
+
     fun updateCosmeticRules(
         context: Context,
         engine: tunnel.Engine,
         filterRepo: app.pwhs.blockads.data.repository.FilterListRepository
     ) {
+        val useBuiltIn = isBuiltInRulesEnabled(context)
+
         runCatching {
-            val css = loadCosmeticCss(context, filterRepo.getCosmeticCssPath())
+            val css = if (useBuiltIn) {
+                loadCosmeticCss(context, filterRepo.getCosmeticCssPath())
+            } else {
+                val p = filterRepo.getCosmeticCssPath()
+                if (!p.isNullOrBlank()) java.io.File(p).takeIf { it.exists() }?.readText().orEmpty() else ""
+            }
             engine.setCosmeticCSS(css)
-            Timber.d("Cosmetic CSS updated for engine: %d bytes", css.length)
+            Timber.d("Cosmetic CSS updated for engine (builtIn=%b): %d bytes", useBuiltIn, css.length)
         }.onFailure {
             Timber.e(it, "Failed to load cosmetic CSS for engine")
             engine.setCosmeticCSS("")
         }
 
         runCatching {
-            val js = loadScriptletsJs(context)
+            val js = if (useBuiltIn) loadScriptletsJs(context) else ""
             engine.setScriptletsRuntime(js)
             Timber.d("Scriptlets runtime updated for engine: %d bytes", js.length)
         }.onFailure { Timber.e(it, "Failed to load scriptlets JS for engine") }
 
         runCatching {
-            val manifest = loadRuleManifest(context)
+            val manifest = if (useBuiltIn) loadRuleManifest(context) else ""
             engine.setRuleManifestJSON(manifest)
             Timber.d("Rule manifest updated for engine: %d bytes", manifest.length)
         }.onFailure { Timber.e(it, "Failed to load rule manifest for engine") }
 
         runCatching {
-            loadModules(context, engine, filterRepo.getFilterModulesPath())
+            if (useBuiltIn) {
+                loadModules(context, engine, filterRepo.getFilterModulesPath())
+            } else {
+                val fp = filterRepo.getFilterModulesPath()
+                val modJson = if (!fp.isNullOrBlank()) java.io.File(fp).takeIf { it.exists() }?.readText().orEmpty() else ""
+                engine.setModulesConfig(modJson.ifBlank { """{"modules":[]}""" })
+            }
         }.onFailure { Timber.e(it, "Failed to load modular rules for engine") }
 
         runCatching {
@@ -346,7 +398,7 @@ object TunnelRuleLoader {
         }
 
         runCatching {
-            val patterns = loadAdPathPatterns(context)
+            val patterns = if (useBuiltIn) loadAdPathPatterns(context) else ""
             engine.setAdPathPatterns(patterns)
             if (patterns.isNotEmpty()) Timber.d("Ad path patterns loaded: ${patterns.lines().size} patterns")
         }.onFailure {

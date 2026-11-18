@@ -7,6 +7,26 @@
     'use strict';
     if (window.__blockads_scriptlets_injected) return;
     window.__blockads_scriptlets_injected = true;
+    var __loggedEvents = {};
+    function logScriptlet(rule, detail) {
+        try {
+            var key = rule + '|' + (detail || '').slice(0, 60);
+            if (__loggedEvents[key]) return;
+            __loggedEvents[key] = 1;
+            if (window.__blockadsLogger && window.__blockadsLogger.log) window.__blockadsLogger.log(rule, location.href, detail || '');
+            else if (navigator.sendBeacon) navigator.sendBeacon('/__blockads_log__', JSON.stringify({ rule: rule, url: location.href, detail: detail || '' }));
+        } catch(e) {}
+    }
+    try {
+        var origEval = window.eval;
+        window.eval = function(code) {
+            if (typeof code === 'string' && /chp_ads_blocker_detector|adblock_detected|checkMultiple\(/i.test(code)) {
+                logScriptlet('+js(noeval-if, /chp_?ad/)', 'Prevented:\n' + code.slice(0, 600));
+                return undefined;
+            }
+            return origEval.apply(this, arguments);
+        };
+    } catch(e) {}
 
     // Immediate unblur & scroll unlock
     try {
@@ -137,24 +157,9 @@
         return parts[parts.length - 1].trim();
     }
 
-    // Dummy Window proxy to satisfy callers expecting a Window object
     function createDummyWindow() {
-        var dummyLocation = {
-            _href: 'about:blank',
-            get href() { return this._href; },
-            set href(val) { console.info('[BlockAds] Blocked popup redirect to:', val); },
-            replace: function() {},
-            assign: function() {}
-        };
-        return {
-            closed: false,
-            focus: function() {},
-            blur: function() {},
-            close: function() {},
-            postMessage: function() {},
-            location: dummyLocation,
-            document: { write: function() {}, close: function() {} }
-        };
+        var dl = { _href: 'about:blank', get href() { return this._href; }, set href(v) {}, replace: function() {}, assign: function() {} };
+        return { closed: false, focus: function() {}, blur: function() {}, close: function() {}, postMessage: function() {}, location: dl, document: { write: function() {}, close: function() {} } };
     }
 
     window.open = function(url, target, features) {
@@ -162,7 +167,7 @@
 
         // Block if not explicit recent human tap OR points to ad/gambling URL
         if (!isRecentUserAction || isAdOrMaliciousUrl(url)) {
-            console.info('[BlockAds] Prevented suspicious popup:', url);
+            logScriptlet('+js(prevent-popup)', String(url || ''));
             return createDummyWindow();
         }
 
@@ -367,6 +372,7 @@
             if (chpTitle) {
                 var chpRoot = chpTitle.closest('body > div') || chpTitle.parentElement;
                 if (chpRoot && chpRoot !== document.body) chpRoot.remove();
+                logScriptlet('+js(remove-anti-adblock)', 'Removed CHP anti-adblock modal');
                 document.querySelectorAll('.blur-content').forEach(function(b) { b.classList.remove('blur-content'); });
                 if (document.documentElement) document.documentElement.style.overflow = 'auto';
                 if (document.body) document.body.style.overflow = 'auto';

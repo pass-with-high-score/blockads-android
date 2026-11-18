@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PictureInPictureAlt
@@ -69,6 +70,7 @@ fun BrowserBentoMenuSheet(
     onCheckRuleUpdates: () -> Unit,
     onActivateElementPicker: () -> Unit = {},
     onNavigateToElementRules: () -> Unit = {},
+    onOpenDebugLogger: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (!isVisible) return
@@ -216,6 +218,17 @@ fun BrowserBentoMenuSheet(
                 onClick = {
                     onDismiss()
                     onNavigateToElementRules()
+                }
+            )
+
+            // Row 7: HTTP & Scriptlet Debug Logger
+            BentoCtaButton(
+                title = "HTTP & Scriptlet Logger",
+                subtitle = "Inspect blocked requests, surrogates & scriptlets",
+                icon = Icons.Default.BugReport,
+                onClick = {
+                    onDismiss()
+                    onOpenDebugLogger()
                 }
             )
 
