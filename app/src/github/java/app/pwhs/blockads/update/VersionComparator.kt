@@ -6,19 +6,39 @@ import java.util.TimeZone
 
 internal object VersionComparator {
 
-    private val SEMVER_REGEX = Regex("""(\d+)\.(\d+)(?:\.(\d+))?(?:[._-]?(alpha|beta|pre|rc)[._-]?(\d+)?|[._-](\d+))?""", RegexOption.IGNORE_CASE)
+    private val NON_APP_TAG_PREFIXES = listOf("tunnel-", "geoip-")
+    private val SEMVER_REGEX = Regex("""^(\d+)\.(\d+)(?:\.(\d+))?(?:[._-]?(alpha|beta|pre|rc)[._-]?(\d+)?|[._-](\d+))?""", RegexOption.IGNORE_CASE)
     private val DATE_REGEX = Regex("""(\d{8})""")
     private const val NIGHTLY_BUILD_SKEW_MS = 5 * 60 * 1000L
 
     fun matchesChannel(release: GitHubRelease, channel: UpdateChannel): Boolean {
         if (release.draft) return false
-        val tag = release.tagName.lowercase()
+        val tag = release.tagName.lowercase().trim()
+        if (NON_APP_TAG_PREFIXES.any { tag.startsWith(it) }) return false
+
         return when (channel) {
-            UpdateChannel.STABLE -> !release.prerelease && tag.startsWith("v")
-            UpdateChannel.BETA -> tag.startsWith("beta-") || tag.startsWith("pre-") ||
-                (release.prerelease && !tag.startsWith("nightly"))
-            UpdateChannel.NIGHTLY -> tag.startsWith("nightly")
+            UpdateChannel.STABLE -> !release.prerelease && isStableTag(tag)
+            UpdateChannel.BETA -> isBetaTag(tag, release.prerelease)
+            UpdateChannel.NIGHTLY -> isNightlyTag(tag)
         }
+    }
+
+    private fun isStableTag(tag: String): Boolean {
+        return tag.startsWith("v") && tag.drop(1).firstOrNull()?.isDigit() == true &&
+            !tag.contains("alpha") && !tag.contains("beta") && !tag.contains("rc") && !tag.contains("pre")
+    }
+
+    private fun isBetaTag(tag: String, isPrerelease: Boolean): Boolean {
+        if (tag.startsWith("nightly")) return false
+        if (tag.startsWith("beta-") || tag.startsWith("pre-")) return true
+        val hasVersionPrefix = tag.startsWith("v") && tag.drop(1).firstOrNull()?.isDigit() == true
+        val startsWithDigit = tag.firstOrNull()?.isDigit() == true
+        val hasPreMarker = tag.contains("beta") || tag.contains("pre") || tag.contains("alpha") || tag.contains("rc")
+        return (hasVersionPrefix || startsWithDigit) && (hasPreMarker || isPrerelease)
+    }
+
+    private fun isNightlyTag(tag: String): Boolean {
+        return tag.startsWith("nightly")
     }
 
     fun isNewerRelease(

@@ -58,6 +58,26 @@ class VersionComparatorTest {
     }
 
     @Test
+    fun `matchesChannel excludes non-app releases such as tunnel and geoip across all channels`() {
+        val tunnelPrerelease = GitHubRelease(tagName = "tunnel-2026.11.18.f1cb796d", prerelease = true)
+        val tunnelStable = GitHubRelease(tagName = "tunnel-2026.11.18.f1cb796d", prerelease = false)
+        val geoip = GitHubRelease(tagName = "geoip-database", prerelease = false)
+
+        for (channel in UpdateChannel.entries) {
+            assertFalse("tunnel prerelease should not match $channel", VersionComparator.matchesChannel(tunnelPrerelease, channel))
+            assertFalse("tunnel stable should not match $channel", VersionComparator.matchesChannel(tunnelStable, channel))
+            assertFalse("geoip should not match $channel", VersionComparator.matchesChannel(geoip, channel))
+        }
+    }
+
+    @Test
+    fun `isNewerRelease rejects non-semver releases like tunnel`() {
+        val tunnel = GitHubRelease(tagName = "tunnel-2026.11.18.f1cb796d", prerelease = true)
+        assertFalse(VersionComparator.isNewerRelease(tunnel, UpdateChannel.BETA, "7.2.0-beta7", 0L))
+        assertFalse(VersionComparator.isNewerRelease(tunnel, UpdateChannel.STABLE, "7.2.0", 0L))
+    }
+
+    @Test
     fun `selectApkAsset picks matching ABI and falls back to universal`() {
         val assets = listOf(
             GitHubAsset("app-github-armeabi-v7a-release.apk", 100L, "https://example.com/v7a.apk"),

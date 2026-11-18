@@ -76,6 +76,13 @@ class GitHubUpdateController(
 
         val candidate = releases
             .filter { VersionComparator.matchesChannel(it, channel) }
+            .filter { release ->
+                VersionComparator.selectApkAsset(
+                    assets = release.assets,
+                    modulePrefix = modulePrefix,
+                    supportedAbis = Build.SUPPORTED_ABIS,
+                ) != null
+            }
             .firstOrNull { release ->
                 VersionComparator.isNewerRelease(
                     release = release,
