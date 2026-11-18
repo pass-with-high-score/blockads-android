@@ -105,4 +105,9 @@
     <string name="common_cancel">取消</string>
     <string name="common_back">返回</string>
     <string name="common_clear">清除</string>
+    <string name="filter_tag_preset_ads">广告</string>
+    <string name="filter_tag_preset_security">安全</string>
+    <string name="filter_tag_preset_privacy">隐私</string>
+    <string name="filter_tag_preset_social">社交</string>
+    <string name="filter_tag_preset_annoyances">烦人元素</string>
 </resources>

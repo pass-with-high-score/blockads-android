@@ -105,4 +105,9 @@
     <string name="common_cancel">ยกเลิก</string>
     <string name="common_back">กลับ</string>
     <string name="common_clear">ล้าง</string>
+    <string name="filter_tag_preset_ads">โฆษณา</string>
+    <string name="filter_tag_preset_security">ความปลอดภัย</string>
+    <string name="filter_tag_preset_privacy">ความเป็นส่วนตัว</string>
+    <string name="filter_tag_preset_social">โซเชียล</string>
+    <string name="filter_tag_preset_annoyances">สิ่งรบกวน</string>
 </resources>

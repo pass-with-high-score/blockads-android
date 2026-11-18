@@ -105,4 +105,9 @@
     <string name="common_cancel">Annulla</string>
     <string name="common_back">Indietro</string>
     <string name="common_clear">Cancella</string>
+    <string name="filter_tag_preset_ads">Annunci</string>
+    <string name="filter_tag_preset_security">Sicurezza</string>
+    <string name="filter_tag_preset_privacy">Privacy</string>
+    <string name="filter_tag_preset_social">Social</string>
+    <string name="filter_tag_preset_annoyances">Fastidi</string>
 </resources>

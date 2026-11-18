@@ -110,4 +110,9 @@
     <string name="common_cancel">Annuler</string>
     <string name="common_back">Retour</string>
     <string name="common_clear">Effacer</string>
+    <string name="filter_tag_preset_ads">Publicités</string>
+    <string name="filter_tag_preset_security">Sécurité</string>
+    <string name="filter_tag_preset_privacy">Confidentialité</string>
+    <string name="filter_tag_preset_social">Réseaux sociaux</string>
+    <string name="filter_tag_preset_annoyances">Nuisances</string>
 </resources>

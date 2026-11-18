@@ -105,4 +105,9 @@
     <string name="common_cancel">Batal</string>
     <string name="common_back">Kembali</string>
     <string name="common_clear">Hapus</string>
+    <string name="filter_tag_preset_ads">Iklan</string>
+    <string name="filter_tag_preset_security">Keamanan</string>
+    <string name="filter_tag_preset_privacy">Privasi</string>
+    <string name="filter_tag_preset_social">Sosial</string>
+    <string name="filter_tag_preset_annoyances">Gangguan</string>
 </resources>

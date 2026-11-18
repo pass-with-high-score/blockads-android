@@ -36,9 +36,17 @@ fun CreateFilterTagDialog(
     existingTags: Set<String> = emptySet()
 ) {
     var tagName by remember { mutableStateOf("") }
-    val suggestions = remember {
-        listOf("Quảng cáo", "Bảo mật", "Quyền riêng tư", "Mạng xã hội", "Phiền toái", "YouTube", "Tracking")
-            .filter { it !in existingTags }
+    val presetLabels = listOf(
+        stringResource(R.string.filter_tag_preset_ads),
+        stringResource(R.string.filter_tag_preset_security),
+        stringResource(R.string.filter_tag_preset_privacy),
+        stringResource(R.string.filter_tag_preset_social),
+        stringResource(R.string.filter_tag_preset_annoyances),
+        "YouTube",
+        "Tracking"
+    )
+    val suggestions = remember(presetLabels, existingTags) {
+        presetLabels.filter { it !in existingTags }
     }
 
     AlertDialog(

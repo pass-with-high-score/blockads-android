@@ -105,4 +105,9 @@
     <string name="common_cancel">Cancelar</string>
     <string name="common_back">Atrás</string>
     <string name="common_clear">Limpiar</string>
+    <string name="filter_tag_preset_ads">Anuncios</string>
+    <string name="filter_tag_preset_security">Seguridad</string>
+    <string name="filter_tag_preset_privacy">Privacidad</string>
+    <string name="filter_tag_preset_social">Redes sociales</string>
+    <string name="filter_tag_preset_annoyances">Molestias</string>
 </resources>

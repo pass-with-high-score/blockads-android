@@ -105,4 +105,9 @@
     <string name="common_cancel">Zrušit</string>
     <string name="common_back">Zpět</string>
     <string name="common_clear">Vymazat</string>
+    <string name="filter_tag_preset_ads">Reklamy</string>
+    <string name="filter_tag_preset_security">Zabezpečení</string>
+    <string name="filter_tag_preset_privacy">Soukromí</string>
+    <string name="filter_tag_preset_social">Sociální sítě</string>
+    <string name="filter_tag_preset_annoyances">Obtěžování</string>
 </resources>

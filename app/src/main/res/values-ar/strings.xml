@@ -105,4 +105,9 @@
     <string name="common_cancel">إلغاء</string>
     <string name="common_back">رجوع</string>
     <string name="common_clear">مسح</string>
+    <string name="filter_tag_preset_ads">إعلانات</string>
+    <string name="filter_tag_preset_security">الأمان</string>
+    <string name="filter_tag_preset_privacy">الخصوصية</string>
+    <string name="filter_tag_preset_social">اجتماعي</string>
+    <string name="filter_tag_preset_annoyances">إزعاج</string>
 </resources>

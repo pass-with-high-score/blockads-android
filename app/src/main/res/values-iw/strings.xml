@@ -105,4 +105,9 @@
     <string name="common_cancel">ביטול</string>
     <string name="common_back">חזור</string>
     <string name="common_clear">נקה</string>
+    <string name="filter_tag_preset_ads">פרסומות</string>
+    <string name="filter_tag_preset_security">אבטחה</string>
+    <string name="filter_tag_preset_privacy">פרטיות</string>
+    <string name="filter_tag_preset_social">רשתות חברתיות</string>
+    <string name="filter_tag_preset_annoyances">מטרדים</string>
 </resources>

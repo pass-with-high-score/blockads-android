@@ -105,4 +105,9 @@
     <string name="common_cancel">İptal</string>
     <string name="common_back">Geri</string>
     <string name="common_clear">Temizle</string>
+    <string name="filter_tag_preset_ads">Reklamlar</string>
+    <string name="filter_tag_preset_security">Güvenlik</string>
+    <string name="filter_tag_preset_privacy">Gizlilik</string>
+    <string name="filter_tag_preset_social">Sosyal</string>
+    <string name="filter_tag_preset_annoyances">Rahatsız ediciler</string>
 </resources>

@@ -112,4 +112,9 @@
     <string name="common_cancel">Cancel</string>
     <string name="common_back">Back</string>
     <string name="common_clear">Clear</string>
+    <string name="filter_tag_preset_ads">Ads</string>
+    <string name="filter_tag_preset_security">Security</string>
+    <string name="filter_tag_preset_privacy">Privacy</string>
+    <string name="filter_tag_preset_social">Social</string>
+    <string name="filter_tag_preset_annoyances">Annoyances</string>
 </resources>

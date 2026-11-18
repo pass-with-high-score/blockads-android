@@ -105,4 +105,9 @@
     <string name="common_cancel">Отмена</string>
     <string name="common_back">Назад</string>
     <string name="common_clear">Очистить</string>
+    <string name="filter_tag_preset_ads">Реклама</string>
+    <string name="filter_tag_preset_security">Безопасность</string>
+    <string name="filter_tag_preset_privacy">Приватность</string>
+    <string name="filter_tag_preset_social">Соцсети</string>
+    <string name="filter_tag_preset_annoyances">Раздражители</string>
 </resources>

@@ -105,4 +105,9 @@
     <string name="common_cancel">취소</string>
     <string name="common_back">뒤로</string>
     <string name="common_clear">지우기</string>
+    <string name="filter_tag_preset_ads">광고</string>
+    <string name="filter_tag_preset_security">보안</string>
+    <string name="filter_tag_preset_privacy">개인정보</string>
+    <string name="filter_tag_preset_social">소셜</string>
+    <string name="filter_tag_preset_annoyances">성가신 요소</string>
 </resources>

@@ -105,4 +105,9 @@
     <string name="common_cancel">キャンセル</string>
     <string name="common_back">戻る</string>
     <string name="common_clear">消去</string>
+    <string name="filter_tag_preset_ads">広告</string>
+    <string name="filter_tag_preset_security">セキュリティ</string>
+    <string name="filter_tag_preset_privacy">プライバシー</string>
+    <string name="filter_tag_preset_social">ソーシャル</string>
+    <string name="filter_tag_preset_annoyances">迷惑要素</string>
 </resources>
