@@ -1,5 +1,8 @@
 package app.pwhs.blockads.ui.home.component
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,6 +37,11 @@ fun HomeBlockRateCard(
     modifier: Modifier = Modifier
 ) {
     val blockRate = if (totalCount > 0) (blockedCount * 100f / totalCount) else 0f
+    val animatedBlockRate by animateFloatAsState(
+        targetValue = blockRate,
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        label = "block_rate"
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -61,8 +70,10 @@ fun HomeBlockRateCard(
                     color = TextSecondary
                 )
                 Text(
-                    text = "${String.format(androidx.compose.ui.text.intl.Locale.current.platformLocale, "%.1f", blockRate)}%",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "${String.format(androidx.compose.ui.text.intl.Locale.current.platformLocale, "%.1f", animatedBlockRate)}%",
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFeatureSettings = "tnum"
+                    ),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -75,7 +86,9 @@ fun HomeBlockRateCard(
                 )
                 Text(
                     text = formatCount(domainCount),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFeatureSettings = "tnum"
+                    ),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )

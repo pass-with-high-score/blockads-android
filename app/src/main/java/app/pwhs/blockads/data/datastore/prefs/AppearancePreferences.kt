@@ -19,6 +19,7 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
         val KEY_BOTTOM_NAV_SECONDARY_TAB = stringPreferencesKey("bottom_nav_secondary_tab")
         val KEY_NAV_RAIL_POSITION = stringPreferencesKey("nav_rail_position")
         val KEY_FLOATING_CAPSULE_NAV = booleanPreferencesKey("floating_capsule_nav")
+        val KEY_HOME_WIDGETS = stringPreferencesKey("home_widgets")
 
         const val BOTTOM_NAV_TAB_AUTO = "auto"
         const val BOTTOM_NAV_TAB_FILTER = "filter"
@@ -73,6 +74,7 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
             prefs.remove(KEY_BOTTOM_NAV_SECONDARY_TAB)
             prefs.remove(KEY_NAV_RAIL_POSITION)
             prefs.remove(KEY_FLOATING_CAPSULE_NAV)
+            prefs.remove(KEY_HOME_WIDGETS)
         }
     }
 
@@ -102,6 +104,10 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
 
     val floatingCapsuleNav: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_FLOATING_CAPSULE_NAV] ?: false
+    }
+
+    val homeWidgets: Flow<String?> = dataStore.data.map { prefs ->
+        prefs[KEY_HOME_WIDGETS]
     }
 
     suspend fun setThemeMode(mode: String) {
@@ -143,6 +149,12 @@ class AppearancePreferences(private val dataStore: DataStore<Preferences>) {
     suspend fun setFloatingCapsuleNav(enabled: Boolean) {
         dataStore.edit { prefs ->
             prefs[KEY_FLOATING_CAPSULE_NAV] = enabled
+        }
+    }
+
+    suspend fun setHomeWidgets(serialized: String) {
+        dataStore.edit { prefs ->
+            prefs[KEY_HOME_WIDGETS] = serialized
         }
     }
 

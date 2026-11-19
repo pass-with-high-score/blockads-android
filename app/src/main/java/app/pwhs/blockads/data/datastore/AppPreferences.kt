@@ -189,6 +189,8 @@ class AppPreferences internal constructor(
     suspend fun setNavRailPosition(position: String) = appearance.setNavRailPosition(position)
     val floatingCapsuleNav: Flow<Boolean> get() = appearance.floatingCapsuleNav
     suspend fun setFloatingCapsuleNav(enabled: Boolean) = appearance.setFloatingCapsuleNav(enabled)
+    val homeWidgets: Flow<String?> get() = appearance.homeWidgets
+    suspend fun setHomeWidgets(serialized: String) = appearance.setHomeWidgets(serialized)
 
     // ── Filter Flows ─────────────────────────────────────────────────────
     val filterUrl: Flow<String> get() = filter.filterUrl

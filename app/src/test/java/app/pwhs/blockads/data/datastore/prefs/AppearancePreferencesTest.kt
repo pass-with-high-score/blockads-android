@@ -1,9 +1,11 @@
 package app.pwhs.blockads.data.datastore.prefs
 
+import app.pwhs.blockads.ui.home.data.HomeWidgetId
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -44,5 +46,26 @@ class AppearancePreferencesTest {
     fun `unknown values are stored verbatim for the UI to interpret`() = runTest {
         prefs.setThemeMode("sepia")
         assertEquals("sepia", prefs.themeMode.first())
+    }
+
+    @Test
+    fun `home widgets default to null, round trip serialized lists, and clear on reset`() = runTest {
+        assertNull(prefs.homeWidgets.first())
+        assertEquals(HomeWidgetId.DEFAULT_ORDER, HomeWidgetId.fromSerialized(prefs.homeWidgets.first()))
+
+        val customOrder = listOf(HomeWidgetId.BLOCK_RATE, HomeWidgetId.QUERY_STATS, HomeWidgetId.ACTIVITY_CHART)
+        val serialized = HomeWidgetId.serialize(customOrder)
+        prefs.setHomeWidgets(serialized)
+
+        assertEquals(serialized, prefs.homeWidgets.first())
+        assertEquals(customOrder, HomeWidgetId.fromSerialized(prefs.homeWidgets.first()))
+
+        prefs.setHomeWidgets("")
+        assertEquals("", prefs.homeWidgets.first())
+        assertEquals(emptyList<HomeWidgetId>(), HomeWidgetId.fromSerialized(prefs.homeWidgets.first()))
+        assertEquals(HomeWidgetId.DEFAULT_ORDER, HomeWidgetId.fromSerialized("invalid_id,garbage"))
+
+        prefs.reset()
+        assertNull(prefs.homeWidgets.first())
     }
 }

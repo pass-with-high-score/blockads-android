@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.network.NetworkSpeed
 import app.pwhs.blockads.utils.formatDataSize
+import app.pwhs.blockads.utils.formatSpeed
 
 private val DownloadCyan = Color(0xFF00BCD4)
 private val UploadPurple = Color(0xFFA855F7)
@@ -26,6 +27,9 @@ fun NetworkSpeedSection(
     networkSpeed: NetworkSpeed,
     modifier: Modifier = Modifier
 ) {
+    val (downVal, downUnit) = splitSpeedParts(formatSpeed(networkSpeed.downloadBps))
+    val (upVal, upUnit) = splitSpeedParts(formatSpeed(networkSpeed.uploadBps))
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -38,7 +42,9 @@ fun NetworkSpeedSection(
                 .fillMaxHeight(),
             icon = Icons.Default.ArrowDownward,
             label = stringResource(R.string.home_downloaded),
-            value = formatDataSize(networkSpeed.totalDownloadedBytes / 1024),
+            speedValue = downVal,
+            speedUnit = downUnit,
+            totalText = "Total ${formatDataSize(networkSpeed.totalDownloadedBytes / 1024)}",
             color = DownloadCyan,
             chartPoints = networkSpeed.downloadHistory,
             bobDirection = 1
@@ -49,10 +55,21 @@ fun NetworkSpeedSection(
                 .fillMaxHeight(),
             icon = Icons.Default.ArrowUpward,
             label = stringResource(R.string.home_uploaded),
-            value = formatDataSize(networkSpeed.totalUploadedBytes / 1024),
+            speedValue = upVal,
+            speedUnit = upUnit,
+            totalText = "Total ${formatDataSize(networkSpeed.totalUploadedBytes / 1024)}",
             color = UploadPurple,
             chartPoints = networkSpeed.uploadHistory,
             bobDirection = -1
         )
+    }
+}
+
+private fun splitSpeedParts(formatted: String): Pair<String, String> {
+    val idx = formatted.indexOf(' ')
+    return if (idx > 0) {
+        formatted.substring(0, idx) to formatted.substring(idx + 1)
+    } else {
+        formatted to ""
     }
 }

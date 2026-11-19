@@ -82,7 +82,9 @@ fun StatCard(
                 ) {
                     Text(
                         text = value,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontFeatureSettings = "tnum"
+                        ),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )

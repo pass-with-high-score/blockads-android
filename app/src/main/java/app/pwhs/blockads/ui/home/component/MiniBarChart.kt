@@ -1,7 +1,11 @@
 package app.pwhs.blockads.ui.home.component
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -61,16 +65,27 @@ fun MiniBarChart(
 ) {
     if (data.isEmpty()) return
 
+    val animatedFractions = data.mapIndexed { index, fraction ->
+        key(index) {
+            animateFloatAsState(
+                targetValue = fraction.coerceIn(0.15f, 1f),
+                animationSpec = tween(300, easing = FastOutSlowInEasing),
+                label = "mini_bar_$index"
+            )
+        }
+    }
+
     Canvas(modifier = modifier) {
-        val count = data.size
+        if (size.width <= 0f || size.height <= 0f) return@Canvas
+        val count = animatedFractions.size
         val widthPx = barWidth.toPx()
         val spacingPx = barSpacing.toPx()
         val totalWidth = count * widthPx + (count - 1) * spacingPx
         val startX = (size.width - totalWidth).coerceAtLeast(0f)
         val cornerRadius = CornerRadius(widthPx / 2f, widthPx / 2f)
 
-        data.forEachIndexed { index, fraction ->
-            val barHeight = (size.height * fraction.coerceIn(0.15f, 1f))
+        animatedFractions.forEachIndexed { index, fractionState ->
+            val barHeight = size.height * fractionState.value.coerceIn(0.15f, 1f)
             val left = startX + index * (widthPx + spacingPx)
             val top = size.height - barHeight
             drawRoundRect(

@@ -1,10 +1,12 @@
 package app.pwhs.blockads.ui.component
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,22 +38,111 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.ui.data.BottomBarScreen
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.sin
 
 val LocalFloatingBottomBarPadding = compositionLocalOf { 0.dp }
 
-private val CapsuleSpringSpec = spring<androidx.compose.ui.unit.Dp>(
+private val CapsuleSpringSpec = spring<Dp>(
     dampingRatio = 0.78f,
     stiffness = Spring.StiffnessMediumLow
 )
+
+private class CapsuleTouchState {
+    var touchPos by mutableStateOf(Offset.Unspecified)
+    var isPressed by mutableStateOf(false)
+}
+
+@Composable
+private fun rememberCapsuleTouchGlow(state: CapsuleTouchState): Float {
+    val touchGlow by animateFloatAsState(
+        targetValue = if (state.isPressed) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = if (state.isPressed) 120 else 360,
+            easing = FastOutSlowInEasing
+        ),
+        label = "capsuleTouchGlow"
+    )
+    return touchGlow
+}
+
+private fun Modifier.trackCapsuleTouch(state: CapsuleTouchState): Modifier =
+    pointerInput(state) {
+        awaitPointerEventScope {
+            while (true) {
+                // Observe on Initial pass without consuming so child tab clickables continue working.
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val activePointer = event.changes.firstOrNull { it.pressed }
+                if (activePointer != null) {
+                    state.touchPos = activePointer.position
+                    state.isPressed = true
+                } else {
+                    state.isPressed = false
+                }
+            }
+        }
+    }
+
+private data class JellyDeformation(val scaleX: Float, val scaleY: Float)
+
+private fun computeJellyDeformation(
+    targetOffset: Dp,
+    indicatorOffset: Dp,
+    stepSize: Dp,
+    touchGlow: Float,
+    horizontal: Boolean,
+): JellyDeformation {
+    val velocityFactor = if (stepSize > 0.dp) {
+        (abs((targetOffset - indicatorOffset).value) / stepSize.value).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+    val jellyWave = sin(PI * velocityFactor).toFloat()
+    val liftScale = 1f + 0.04f * jellyWave + 0.025f * touchGlow
+    val stretch = (1f + 0.16f * jellyWave) * liftScale
+    val squash = (1f - 0.08f * jellyWave) * liftScale
+    return if (horizontal) {
+        JellyDeformation(scaleX = stretch, scaleY = squash)
+    } else {
+        JellyDeformation(scaleX = squash, scaleY = stretch)
+    }
+}
+
+@Composable
+private fun rememberLensTouchPos(
+    touchPos: Offset,
+    innerPadding: Dp,
+    indicatorOffset: Dp,
+    horizontal: Boolean,
+): Offset {
+    if (!touchPos.isSpecified) return Offset.Unspecified
+    val density = LocalDensity.current
+    val paddingPx = with(density) { innerPadding.toPx() }
+    val offsetPx = with(density) { indicatorOffset.toPx() }
+    return if (horizontal) {
+        touchPos - Offset(paddingPx + offsetPx, paddingPx)
+    } else {
+        touchPos - Offset(paddingPx, paddingPx + offsetPx)
+    }
+}
 
 @Composable
 fun FloatingCapsuleBottomBar(
@@ -64,6 +155,9 @@ fun FloatingCapsuleBottomBar(
 ) {
     val selectedIndex = screens.indexOf(currentTab).coerceAtLeast(0)
     val barHeight = if (showLabels) 64.dp else 56.dp
+    val innerPadding = 4.dp
+    val touchState = remember { CapsuleTouchState() }
+    val touchGlow = rememberCapsuleTouchGlow(touchState)
 
     Box(
         modifier = modifier
@@ -73,6 +167,8 @@ fun FloatingCapsuleBottomBar(
         contentAlignment = Alignment.Center
     ) {
         CapsuleContainer(
+            touchState = touchState,
+            touchGlow = touchGlow,
             modifier = Modifier
                 .widthIn(max = 520.dp)
                 .fillMaxWidth()
@@ -81,16 +177,34 @@ fun FloatingCapsuleBottomBar(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp)
+                    .padding(innerPadding)
             ) {
                 val tabWidth = maxWidth / screens.size.coerceAtLeast(1)
+                val targetOffset = tabWidth * selectedIndex
                 val indicatorOffset by animateDpAsState(
-                    targetValue = tabWidth * selectedIndex,
+                    targetValue = targetOffset,
                     animationSpec = CapsuleSpringSpec,
                     label = "bottomCapsuleIndicatorOffset"
                 )
+                val jelly = computeJellyDeformation(
+                    targetOffset = targetOffset,
+                    indicatorOffset = indicatorOffset,
+                    stepSize = tabWidth,
+                    touchGlow = touchGlow,
+                    horizontal = true,
+                )
+                val lensTouchPos = rememberLensTouchPos(
+                    touchPos = touchState.touchPos,
+                    innerPadding = innerPadding,
+                    indicatorOffset = indicatorOffset,
+                    horizontal = true,
+                )
 
                 CapsuleIndicator(
+                    jellyScaleX = jelly.scaleX,
+                    jellyScaleY = jelly.scaleY,
+                    touchPos = lensTouchPos,
+                    touchGlow = touchGlow,
                     modifier = Modifier
                         .offset(x = indicatorOffset)
                         .width(tabWidth)
@@ -131,7 +245,10 @@ fun FloatingCapsuleNavigationRail(
     val innerPadding = 4.dp
     val innerHeight = itemHeight * screens.size.coerceAtLeast(1)
     // Match outer corner radius to (indicatorRadius + innerPadding) so top/bottom indicators never clip.
-    val containerShape = RoundedCornerShape(itemHeight / 2 + innerPadding)
+    val cornerRadius = itemHeight / 2 + innerPadding
+    val containerShape = RoundedCornerShape(cornerRadius)
+    val touchState = remember { CapsuleTouchState() }
+    val touchGlow = rememberCapsuleTouchGlow(touchState)
 
     Box(
         modifier = modifier
@@ -142,7 +259,10 @@ fun FloatingCapsuleNavigationRail(
         contentAlignment = Alignment.Center
     ) {
         CapsuleContainer(
+            touchState = touchState,
+            touchGlow = touchGlow,
             shape = containerShape,
+            cornerRadius = cornerRadius,
             modifier = Modifier.width(railWidth)
         ) {
             Box(
@@ -151,13 +271,31 @@ fun FloatingCapsuleNavigationRail(
                     .fillMaxWidth()
                     .height(innerHeight)
             ) {
+                val targetOffset = itemHeight * selectedIndex
                 val indicatorOffset by animateDpAsState(
-                    targetValue = itemHeight * selectedIndex,
+                    targetValue = targetOffset,
                     animationSpec = CapsuleSpringSpec,
                     label = "railCapsuleIndicatorOffset"
                 )
+                val jelly = computeJellyDeformation(
+                    targetOffset = targetOffset,
+                    indicatorOffset = indicatorOffset,
+                    stepSize = itemHeight,
+                    touchGlow = touchGlow,
+                    horizontal = false,
+                )
+                val lensTouchPos = rememberLensTouchPos(
+                    touchPos = touchState.touchPos,
+                    innerPadding = innerPadding,
+                    indicatorOffset = indicatorOffset,
+                    horizontal = false,
+                )
 
                 CapsuleIndicator(
+                    jellyScaleX = jelly.scaleX,
+                    jellyScaleY = jelly.scaleY,
+                    touchPos = lensTouchPos,
+                    touchGlow = touchGlow,
                     modifier = Modifier
                         .offset(y = indicatorOffset)
                         .fillMaxWidth()
@@ -185,12 +323,15 @@ fun FloatingCapsuleNavigationRail(
 
 @Composable
 private fun CapsuleContainer(
+    touchState: CapsuleTouchState,
+    touchGlow: Float,
     modifier: Modifier = Modifier,
     shape: Shape = CircleShape,
+    cornerRadius: Dp? = null,
     content: @Composable () -> Unit
 ) {
     Surface(
-        modifier = modifier,
+        modifier = modifier.trackCapsuleTouch(touchState),
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -199,16 +340,39 @@ private fun CapsuleContainer(
         border = BorderStroke(
             width = 0.75.dp,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
-        content = content
-    )
+        )
+    ) {
+        Box(
+            modifier = Modifier.liquidGlassBar(
+                touchPos = touchState.touchPos,
+                touchGlow = touchGlow,
+                cornerRadius = cornerRadius
+            )
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
-private fun CapsuleIndicator(modifier: Modifier = Modifier) {
+private fun CapsuleIndicator(
+    jellyScaleX: Float,
+    jellyScaleY: Float,
+    touchPos: Offset,
+    touchGlow: Float,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
+            .graphicsLayer {
+                scaleX = jellyScaleX
+                scaleY = jellyScaleY
+            }
             .clip(CircleShape)
+            .liquidGlassLens(
+                touchPos = touchPos,
+                touchGlow = touchGlow
+            )
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
             .border(
                 width = 0.75.dp,
