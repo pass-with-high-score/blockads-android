@@ -1,0 +1,3 @@
+- Improved HTTPS debug logs with real-time count badges and selected check indicators
+- Fixed query logs mistakenly showing "RootProxy" on non-rooted devices
+- General stability and performance improvements
