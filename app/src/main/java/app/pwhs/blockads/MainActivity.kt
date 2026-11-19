@@ -34,6 +34,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.java.KoinJavaComponent.getKoin
 
 class MainActivity : ComponentActivity() {
@@ -63,20 +64,26 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
-        // Apply saved locale for pre-API 33 devices
+        // Apply saved locale for pre-API 33 devices without stalling the main thread indefinitely.
         val appPrefs = AppPreferences(newBase)
-        val savedLang = runBlocking { appPrefs.appLanguage.first() }
+        val savedLang = runBlocking(Dispatchers.IO) {
+            withTimeoutOrNull(500L) { appPrefs.appLanguage.first() } ?: AppPreferences.LANGUAGE_SYSTEM
+        }
         super.attachBaseContext(LocaleHelper.wrapContext(newBase, savedLang))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Apply hide-from-recents preference
-        val appPrefsInit = AppPreferences(this)
-        val hideFromRecents = runBlocking { appPrefsInit.hideFromRecents.first() }
-        val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-        am.appTasks.firstOrNull()?.setExcludeFromRecents(hideFromRecents)
+        // Apply hide-from-recents preference off the critical startup path.
+        val appPrefsInit: AppPreferences = getKoin().get()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val hideFromRecents = appPrefsInit.hideFromRecents.first()
+            withContext(Dispatchers.Main) {
+                val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                am.appTasks.firstOrNull()?.setExcludeFromRecents(hideFromRecents)
+            }
+        }
 
         enableEdgeToEdge()
         setContent {

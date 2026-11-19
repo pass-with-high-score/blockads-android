@@ -25,8 +25,10 @@ import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.ui.browser.elementrules.ElementRulesScreen
 import app.pwhs.blockads.ui.theme.BlockadsTheme
 import app.pwhs.blockads.utils.LocaleHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,7 +54,9 @@ class BrowserActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context) {
         val appPrefs = AppPreferences(newBase)
-        val savedLang = runBlocking { appPrefs.appLanguage.first() }
+        val savedLang = runBlocking(Dispatchers.IO) {
+            withTimeoutOrNull(500L) { appPrefs.appLanguage.first() } ?: AppPreferences.LANGUAGE_SYSTEM
+        }
         super.attachBaseContext(LocaleHelper.wrapContext(newBase, savedLang))
     }
 

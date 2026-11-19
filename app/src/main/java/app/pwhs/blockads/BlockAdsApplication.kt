@@ -22,7 +22,9 @@ import app.pwhs.blockads.utils.FileLoggingTree
 
 
 class BlockAdsApplication : Application() {
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    // Run startup DataStore migrations and scheduling off the main looper so Activity
+    // attachBaseContext never deadlocks waiting on a Main-bound DataStore edit transform.
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
