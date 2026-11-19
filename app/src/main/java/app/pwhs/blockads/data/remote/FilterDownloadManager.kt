@@ -210,6 +210,45 @@ class FilterDownloadManager(
         }
     }
 
+    companion object {
+        /**
+         * Streams normalized AdBlock cosmetic lines from [file] directly to [writer]
+         * without buffering the whole file in heap memory.
+         */
+        fun writeInjectableCss(file: File, writer: java.io.Writer): Int {
+            if (!file.exists() || file.length() == 0L) {
+                return 0
+            }
+
+            var linesWritten = 0
+            try {
+                file.forEachLine { line ->
+                    val trimmed = line.trim()
+                    if (trimmed.isEmpty() || trimmed.startsWith("!") || (trimmed.startsWith("#") && !trimmed.startsWith("##"))) {
+                        return@forEachLine
+                    }
+                    if (trimmed.contains("#@#") || trimmed.contains("##+js") || trimmed.contains("##^")) {
+                        return@forEachLine
+                    }
+                    when {
+                        trimmed.contains("##") -> writer.write(trimmed)
+                        trimmed.contains("{") -> writer.write(trimmed)
+                        else -> {
+                            writer.write("##")
+                            writer.write(trimmed)
+                        }
+                    }
+                    writer.write("\n")
+                    linesWritten++
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error reading CSS file ${file.absolutePath}")
+                return 0
+            }
+            return linesWritten
+        }
+    }
+
     /**
      * Reads a downloaded CSS file containing cosmetic rules (`##selector`, `domain##selector`,
      * or bare selectors) and returns normalized AdBlock cosmetic lines for the Go CosmeticStore.
@@ -218,29 +257,8 @@ class FilterDownloadManager(
         if (!file.exists() || file.length() == 0L) {
             return ""
         }
-
-        val cssBuilder = StringBuilder()
-        try {
-            file.forEachLine { line ->
-                val trimmed = line.trim()
-                if (trimmed.isEmpty() || trimmed.startsWith("!") || (trimmed.startsWith("#") && !trimmed.startsWith("##"))) {
-                    return@forEachLine
-                }
-                if (trimmed.contains("#@#") || trimmed.contains("##+js") || trimmed.contains("##^")) {
-                    return@forEachLine
-                }
-                if (trimmed.contains("##")) {
-                    cssBuilder.append(trimmed).append("\n")
-                } else if (trimmed.contains("{")) {
-                    cssBuilder.append(trimmed).append("\n")
-                } else {
-                    cssBuilder.append("##").append(trimmed).append("\n")
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Error reading CSS file ${file.absolutePath}")
-            return ""
-        }
-        return cssBuilder.toString()
+        val writer = java.io.StringWriter()
+        writeInjectableCss(file, writer)
+        return writer.toString()
     }
 }
