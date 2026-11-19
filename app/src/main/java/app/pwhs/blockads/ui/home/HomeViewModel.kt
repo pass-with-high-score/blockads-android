@@ -9,9 +9,13 @@ import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.AppStat
+import app.pwhs.blockads.data.entities.BlockReasonStat
+import app.pwhs.blockads.data.entities.CountryStat
 import app.pwhs.blockads.data.entities.DailyStat
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.entities.DnsProviders
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.entities.HourlyStat
 import app.pwhs.blockads.data.entities.ProxyProfile
@@ -28,8 +32,11 @@ import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.service.VpnState
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.home.component.ActiveFeatureBadge
+import app.pwhs.blockads.ui.home.data.ActiveDnsInfo
 import app.pwhs.blockads.ui.home.data.HomeWidgetId
+import app.pwhs.blockads.ui.home.data.ProxyTunnelInfo
 import app.pwhs.blockads.ui.home.data.RecentLogFilter
+import app.pwhs.blockads.ui.home.data.SecurityShieldInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -241,20 +248,39 @@ class HomeViewModel(
         viewModelScope.launch { appPrefs.setLastSeenMilestoneDialog(milestone) }
     }
 
-    val securityFilterIds: StateFlow<Set<String>> = filterListDao.getAll()
+    private val allFiltersFlow = filterListDao.getAll()
+
+    val securityFilterIds: StateFlow<Set<String>> = allFiltersFlow
         .map { list -> list.filter { it.category == FilterList.CATEGORY_SECURITY }.map { it.id.toString() }.toSet() }
         .homeState(emptySet())
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val activeDnsInfo: StateFlow<ActiveDnsInfo> = combine(
+        appPrefs.dnsProviderId,
+        appPrefs.upstreamDns,
+        appPrefs.dnsProtocol,
+        appPrefs.dohUrl,
+    ) { providerId, upstream, protocol, doh ->
+        val isCustom = providerId == AppPreferences.CUSTOM_DNS_PROVIDER_ID ||
+            (providerId == null && DnsProviders.getByIp(upstream) == null)
+        val activeProvider = if (isCustom) null else DnsProviders.getById(providerId ?: "") ?: DnsProviders.getByIp(upstream)
+        val endpoint = when (protocol) {
+            DnsProtocol.DOH, DnsProtocol.ODOH -> doh
+            DnsProtocol.DOH3 -> if (doh.startsWith("h3://", ignoreCase = true)) doh else "h3://${doh.removePrefix("https://")}"
+            DnsProtocol.DOT -> "tls://$upstream"
+            DnsProtocol.DOQ -> if (doh.startsWith("quic://", ignoreCase = true)) doh else "quic://${doh.removePrefix("https://")}"
+            DnsProtocol.PLAIN -> upstream
+        }
+        ActiveDnsInfo(
+            providerName = activeProvider?.name.orEmpty(),
+            protocol = protocol,
+            endpoint = endpoint,
+            isEncrypted = protocol != DnsProtocol.PLAIN,
+            isCustom = isCustom,
+            iconRes = activeProvider?.iconRes,
+        )
+    }.homeState(ActiveDnsInfo())
 
-    private val _filterLoadFailed = MutableStateFlow(false)
-    val filterLoadFailed: StateFlow<Boolean> = _filterLoadFailed.asStateFlow()
-
-    private val _protectionUptimeMs = MutableStateFlow(0L)
-    val protectionUptimeMs: StateFlow<Long> = _protectionUptimeMs.asStateFlow()
-
-    val domainCount: StateFlow<Int> = filterRepo.domainCountFlow.homeState(filterRepo.domainCount)
+    val topApps: StateFlow<List<AppStat>> = dnsLogDao.getTopApps(4).homeState(emptyList())
 
     // Warn when protection is on in VPN mode but Android Private DNS (Strict
     // DoT) is active — it bypasses BlockAds' DNS interception, so filtering
@@ -267,6 +293,131 @@ class HomeViewModel(
     ) { enabled, mode, strict ->
         enabled && mode != AppPreferences.ROUTING_MODE_ROOT && strict
     }.homeState(false)
+
+    val securityShieldInfo: StateFlow<SecurityShieldInfo> = combine(
+        allFiltersFlow,
+        appPrefs.httpsFilteringEnabled,
+        appPrefs.firewallEnabled,
+        privateDnsWarning,
+    ) { filters, httpsEnabled, firewallEnabled, dnsWarning ->
+        SecurityShieldInfo(
+            enabledSecurityFilters = filters.count { it.isEnabled && it.category == FilterList.CATEGORY_SECURITY },
+            httpsFilteringEnabled = httpsEnabled,
+            firewallEnabled = firewallEnabled,
+            privateDnsWarning = dnsWarning,
+        )
+    }.homeState(SecurityShieldInfo())
+
+    val proxyTunnelInfo: StateFlow<ProxyTunnelInfo> = combine(
+        combine(routingMode, activeProxyType, activeWgProfile, activeSsProfile, activeProxyProfile) { mode, proxyType, wg, ss, node ->
+            listOf(mode, proxyType, wg, ss, node)
+        },
+        appPrefs.tailscale.enabled,
+        vpnEnabled,
+    ) { core, tailscaleOn, connected ->
+        val mode = core[0] as String
+        val proxyType = core[1] as String
+        val wg = core[2] as WireGuardProfile?
+        val ss = core[3] as ShadowsocksProfile?
+        val node = core[4] as ProxyProfile?
+
+        val (profileName, endpoint, protocolLabel) = when {
+            mode == AppPreferences.ROUTING_MODE_ROOT -> Triple(null, null, "iptables")
+            mode == AppPreferences.ROUTING_MODE_WIREGUARD ||
+                (mode == AppPreferences.ROUTING_MODE_PROXY_VPN && proxyType == AppPreferences.PROXY_TYPE_WIREGUARD) -> {
+                Triple(
+                    wg?.name,
+                    wg?.config?.peers?.firstOrNull()?.endpoint,
+                    if (wg?.isAmnezia == true) "AmneziaWG" else "WireGuard",
+                )
+            }
+            mode == AppPreferences.ROUTING_MODE_SHADOWSOCKS ||
+                (mode == AppPreferences.ROUTING_MODE_PROXY_VPN && proxyType == AppPreferences.PROXY_TYPE_SHADOWSOCKS) -> {
+                Triple(
+                    ss?.displayName,
+                    ss?.let { "${it.server}:${it.port}" },
+                    "Shadowsocks",
+                )
+            }
+            mode == AppPreferences.ROUTING_MODE_PROXY_VPN && proxyType == AppPreferences.PROXY_TYPE_NODE -> {
+                Triple(
+                    node?.name?.ifBlank { node.server },
+                    node?.let { "${it.server}:${it.port}" },
+                    node?.protocol?.displayName,
+                )
+            }
+            else -> Triple(null, null, "VPN")
+        }
+
+        ProxyTunnelInfo(
+            routingMode = mode,
+            activeProxyType = proxyType,
+            profileName = profileName,
+            endpoint = endpoint,
+            protocolLabel = protocolLabel,
+            tailscaleEnabled = tailscaleOn,
+            isConnected = connected,
+        )
+    }.homeState(ProxyTunnelInfo())
+
+    val blockReasons24h: StateFlow<List<BlockReasonStat>> = combine(
+        dnsLogDao.getBlockReasonStatsSince(System.currentTimeMillis() - 86_400_000L),
+        allFiltersFlow,
+    ) { rawStats, filterLists ->
+        val filterMap = filterLists.associateBy { it.id.toString() }
+        val aggregated = mutableMapOf<String, Int>()
+        for (raw in rawStats) {
+            val parts = raw.blockedBy.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            if (parts.isEmpty()) continue
+            for (part in parts) {
+                aggregated[part] = (aggregated[part] ?: 0) + raw.count
+            }
+        }
+        aggregated.map { (key, count) ->
+            val filter = filterMap[key]
+            if (filter != null) {
+                BlockReasonStat(
+                    reasonKey = key,
+                    displayName = filter.name,
+                    count = count,
+                    filterId = filter.id,
+                    category = filter.category,
+                )
+            } else {
+                val (name, cat) = when (key.lowercase()) {
+                    "custom", "custom_rule" -> "Custom Rules" to "CUSTOM"
+                    "security" -> "Security Protection" to "SECURITY"
+                    "firewall", "connection" -> "App Firewall" to "FIREWALL"
+                    "upstream_dns" -> "Upstream DNS" to "DNS"
+                    "filter_list", "ad" -> "Ad & Tracker Filter" to "AD"
+                    else -> key to ""
+                }
+                BlockReasonStat(
+                    reasonKey = key,
+                    displayName = name,
+                    count = count,
+                    filterId = null,
+                    category = cat,
+                )
+            }
+        }.sortedByDescending { it.count }.take(4)
+    }.homeState(emptyList())
+
+    val topCountries24h: StateFlow<List<CountryStat>> = dnsLogDao
+        .getCountryStatsSince(System.currentTimeMillis() - 86_400_000L)
+        .map { it.take(4) }
+        .homeState(emptyList())
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _filterLoadFailed = MutableStateFlow(false)
+    val filterLoadFailed: StateFlow<Boolean> = _filterLoadFailed.asStateFlow()
+
+    private val _protectionUptimeMs = MutableStateFlow(0L)
+    val protectionUptimeMs: StateFlow<Long> = _protectionUptimeMs.asStateFlow()
+
+    val domainCount: StateFlow<Int> = filterRepo.domainCountFlow.homeState(filterRepo.domainCount)
 
     init {
         // Uptime ticker — only ticks while VPN or Root Proxy is RUNNING
@@ -335,6 +486,20 @@ class HomeViewModel(
         if (AdBlockVpnService.isRunning) {
             val intent = Intent(context, AdBlockVpnService::class.java).apply {
                 action = AdBlockVpnService.ACTION_STOP
+            }
+            context.startService(intent)
+        }
+    }
+
+    fun pauseVpn(context: Context) {
+        if (RootProxyService.isRunning) {
+            val intent = Intent(context, RootProxyService::class.java).apply {
+                action = RootProxyService.ACTION_PAUSE_1H
+            }
+            context.startService(intent)
+        } else if (AdBlockVpnService.isRunning) {
+            val intent = Intent(context, AdBlockVpnService::class.java).apply {
+                action = AdBlockVpnService.ACTION_PAUSE_1H
             }
             context.startService(intent)
         }

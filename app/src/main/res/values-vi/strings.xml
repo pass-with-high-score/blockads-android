@@ -112,4 +112,63 @@
     <string name="filter_tag_preset_privacy">Quyền riêng tư</string>
     <string name="filter_tag_preset_social">Mạng xã hội</string>
     <string name="filter_tag_preset_annoyances">Phiền toái</string>
+
+    <!-- Home Widgets & Extensions -->
+    <string name="home_available_widgets">Tiện ích có sẵn</string>
+    <string name="home_widget_query_stats_desc">Tổng số truy vấn DNS và đã chặn kèm biểu đồ 24h</string>
+    <string name="home_widget_block_rate_desc">Tỷ lệ chặn tổng thể và số lượng quy tắc đang hoạt động</string>
+    <string name="home_widget_network_speed_desc">Tốc độ tải xuống và tải lên theo thời gian thực</string>
+    <string name="home_widget_data_and_uptime_desc">Lưu lượng tiết kiệm ước tính và thời gian bảo vệ</string>
+    <string name="home_widget_activity_chart_desc">Biểu đồ hoạt động truy vấn DNS 24 giờ và 7 ngày</string>
+    <string name="home_widget_top_blocked_desc">Các tên miền bị chặn nhiều nhất trên thiết bị</string>
+    <string name="home_widget_recent_activity_desc">Danh sách trực tiếp các truy vấn DNS gần đây</string>
+
+    <string name="home_widget_quick_actions">Thao tác nhanh</string>
+    <string name="home_widget_quick_actions_desc">Kiểm tra chặn QC, rò rỉ DNS, quy tắc tên miền &amp; tạm dừng</string>
+    <string name="home_action_test_adblock">Kiểm tra chặn QC</string>
+    <string name="home_action_dns_leak">Kiểm tra rò rỉ DNS</string>
+    <string name="home_action_domain_rules">Quy tắc tên miền</string>
+    <string name="home_action_pause_1h">Tạm dừng 1h</string>
+    <string name="home_action_resume">Tiếp tục</string>
+
+    <string name="home_widget_active_dns">Máy chủ DNS</string>
+    <string name="home_widget_active_dns_desc">Nhà cung cấp DNS hiện tại, giao thức và trạng thái mã hoá</string>
+    <string name="home_dns_encrypted">Mã hoá &amp; Riêng tư</string>
+    <string name="home_dns_unencrypted">Chưa mã hoá (Tiêu chuẩn)</string>
+    <string name="home_dns_change">Đổi</string>
+    <string name="home_dns_custom">DNS Tuỳ chỉnh</string>
+    <string name="home_dns_system">Mặc định hệ thống</string>
+
+    <string name="home_widget_top_apps">Ứng dụng hàng đầu</string>
+    <string name="home_widget_top_apps_desc">Các ứng dụng phát sinh nhiều truy vấn DNS và quảng cáo nhất</string>
+    <string name="home_top_apps_subtitle">%1$s truy vấn • %2$s đã chặn</string>
+    <string name="home_widget_view_all">Xem tất cả</string>
+
+    <string name="home_widget_security_shield">Khiên bảo mật</string>
+    <string name="home_widget_security_shield_desc">Tổng quan bộ lọc bảo mật, lọc HTTPS &amp; tường lửa</string>
+    <string name="home_security_active">Đang bảo vệ</string>
+    <string name="home_security_attention">Cần chú ý</string>
+    <string name="home_security_filters_label">Bảo mật</string>
+    <string name="home_security_filters_count">%1$d đang bật</string>
+    <string name="home_security_https_label">Lọc HTTPS</string>
+    <string name="home_security_firewall_label">Tường lửa</string>
+    <string name="home_security_on">Đang bật</string>
+    <string name="home_security_off">Đang tắt</string>
+    <string name="home_security_private_dns_warn">Private DNS đang bỏ qua bộ lọc</string>
+
+    <string name="home_widget_proxy_vpn">Proxy &amp; Đường hầm</string>
+    <string name="home_widget_proxy_vpn_desc">Chế độ định tuyến, hồ sơ đường hầm và chuyển đổi nhanh</string>
+    <string name="home_proxy_connected">Đã kết nối</string>
+    <string name="home_proxy_idle">Chờ</string>
+    <string name="home_proxy_direct_desc">Lọc DNS cục bộ trực tiếp trên thiết bị</string>
+    <string name="home_proxy_configure">Cấu hình</string>
+    <string name="home_proxy_switch_mode">Đổi chế độ</string>
+    <string name="home_proxy_tailscale_badge">Tailscale</string>
+
+    <string name="home_widget_block_reasons">Phân bổ chặn</string>
+    <string name="home_widget_block_reasons_desc">Phân bổ nguồn đã chặn truy cập trong 24 giờ qua</string>
+    <string name="home_widget_top_countries">Quốc gia kết nối</string>
+    <string name="home_widget_top_countries_desc">Top quốc gia đích kết nối trong 24 giờ qua</string>
+    <string name="home_widget_24h_badge">24h</string>
+    <string name="home_widget_stats_link">Thống kê</string>
 </resources>

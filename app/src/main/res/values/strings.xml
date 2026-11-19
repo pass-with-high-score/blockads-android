@@ -117,4 +117,63 @@
     <string name="filter_tag_preset_privacy">Privacy</string>
     <string name="filter_tag_preset_social">Social</string>
     <string name="filter_tag_preset_annoyances">Annoyances</string>
+
+    <!-- Home Widgets & Extensions -->
+    <string name="home_available_widgets">Available Widgets</string>
+    <string name="home_widget_query_stats_desc">Total and blocked DNS queries with 24h sparklines</string>
+    <string name="home_widget_block_rate_desc">Overall percentage of blocked queries and rule count</string>
+    <string name="home_widget_network_speed_desc">Live download and upload throughput</string>
+    <string name="home_widget_data_and_uptime_desc">Estimated data saved and active protection duration</string>
+    <string name="home_widget_activity_chart_desc">24-hour and 7-day DNS query activity chart</string>
+    <string name="home_widget_top_blocked_desc">Most frequently blocked domains on your device</string>
+    <string name="home_widget_recent_activity_desc">Live feed of recent blocked and allowed DNS queries</string>
+
+    <string name="home_widget_quick_actions">Quick Actions</string>
+    <string name="home_widget_quick_actions_desc">One-tap ad test, DNS leak check, domain rules &amp; pause</string>
+    <string name="home_action_test_adblock">Test Ad Block</string>
+    <string name="home_action_dns_leak">DNS Leak Test</string>
+    <string name="home_action_domain_rules">Domain Rules</string>
+    <string name="home_action_pause_1h">Pause 1h</string>
+    <string name="home_action_resume">Resume</string>
+
+    <string name="home_widget_active_dns">Active DNS</string>
+    <string name="home_widget_active_dns_desc">Current DNS resolver, protocol and encryption status</string>
+    <string name="home_dns_encrypted">Encrypted &amp; Private</string>
+    <string name="home_dns_unencrypted">Unencrypted (Standard)</string>
+    <string name="home_dns_change">Change</string>
+    <string name="home_dns_custom">Custom DNS</string>
+    <string name="home_dns_system">System Default</string>
+
+    <string name="home_widget_top_apps">Top Apps</string>
+    <string name="home_widget_top_apps_desc">Apps generating the most DNS requests and blocked ads</string>
+    <string name="home_top_apps_subtitle">%1$s queries • %2$s blocked</string>
+    <string name="home_widget_view_all">View all</string>
+
+    <string name="home_widget_security_shield">Security Shield</string>
+    <string name="home_widget_security_shield_desc">Overview of security filters, HTTPS filtering &amp; firewall</string>
+    <string name="home_security_active">Protected</string>
+    <string name="home_security_attention">Needs Attention</string>
+    <string name="home_security_filters_label">Security</string>
+    <string name="home_security_filters_count">%1$d active</string>
+    <string name="home_security_https_label">HTTPS Filter</string>
+    <string name="home_security_firewall_label">Firewall</string>
+    <string name="home_security_on">On</string>
+    <string name="home_security_off">Off</string>
+    <string name="home_security_private_dns_warn">Private DNS bypasses filtering</string>
+
+    <string name="home_widget_proxy_vpn">Proxy &amp; Tunnel</string>
+    <string name="home_widget_proxy_vpn_desc">Active routing mode, tunnel profile and quick switcher</string>
+    <string name="home_proxy_connected">Connected</string>
+    <string name="home_proxy_idle">Standby</string>
+    <string name="home_proxy_direct_desc">On-device local loopback DNS filtering</string>
+    <string name="home_proxy_configure">Configure</string>
+    <string name="home_proxy_switch_mode">Switch Mode</string>
+    <string name="home_proxy_tailscale_badge">Tailscale</string>
+
+    <string name="home_widget_block_reasons">Block Breakdown</string>
+    <string name="home_widget_block_reasons_desc">24-hour distribution of what blocked your traffic</string>
+    <string name="home_widget_top_countries">Top Countries</string>
+    <string name="home_widget_top_countries_desc">Top 24-hour server destination countries</string>
+    <string name="home_widget_24h_badge">24h</string>
+    <string name="home_widget_stats_link">Stats</string>
 </resources>

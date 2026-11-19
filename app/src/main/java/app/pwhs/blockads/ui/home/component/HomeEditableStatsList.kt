@@ -33,13 +33,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.pwhs.blockads.R
+import app.pwhs.blockads.data.entities.AppStat
+import app.pwhs.blockads.data.entities.BlockReasonStat
+import app.pwhs.blockads.data.entities.CountryStat
 import app.pwhs.blockads.data.entities.DailyStat
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.data.entities.HourlyStat
 import app.pwhs.blockads.data.entities.TopBlockedDomain
 import app.pwhs.blockads.data.network.NetworkSpeed
+import app.pwhs.blockads.ui.home.data.ActiveDnsInfo
 import app.pwhs.blockads.ui.home.data.HomeWidgetId
+import app.pwhs.blockads.ui.home.data.ProxyTunnelInfo
 import app.pwhs.blockads.ui.home.data.RecentLogFilter
+import app.pwhs.blockads.ui.home.data.SecurityShieldInfo
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
@@ -78,6 +84,25 @@ fun HomeEditableStatsList(
     onMoveWidget: (Int, Int) -> Unit,
     onRemoveWidget: (HomeWidgetId) -> Unit,
     onAddWidget: (HomeWidgetId) -> Unit,
+    vpnEnabled: Boolean = false,
+    activeDnsInfo: ActiveDnsInfo = ActiveDnsInfo(),
+    topApps: List<AppStat> = emptyList(),
+    securityShieldInfo: SecurityShieldInfo = SecurityShieldInfo(),
+    proxyTunnelInfo: ProxyTunnelInfo = ProxyTunnelInfo(),
+    blockReasons24h: List<BlockReasonStat> = emptyList(),
+    topCountries24h: List<CountryStat> = emptyList(),
+    onTestAdBlock: () -> Unit = {},
+    onDnsLeakTest: () -> Unit = {},
+    onNavigateToDomainRules: () -> Unit = {},
+    onTogglePauseProtection: () -> Unit = {},
+    onNavigateToDnsProvider: () -> Unit = {},
+    onNavigateToHttpsFiltering: () -> Unit = {},
+    onNavigateToFirewall: () -> Unit = {},
+    onNavigateToFilters: () -> Unit = {},
+    onNavigateToProxyVpn: () -> Unit = {},
+    onOpenRoutingModeSheet: () -> Unit = {},
+    onNavigateToAppLogs: (String) -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -162,6 +187,9 @@ fun HomeEditableStatsList(
                 val hasVisibleBody = isEditing || when (widgetId) {
                     HomeWidgetId.ACTIVITY_CHART -> hourlyStats.isNotEmpty() || dailyStats.isNotEmpty()
                     HomeWidgetId.TOP_BLOCKED -> topBlockedDomains.isNotEmpty()
+                    HomeWidgetId.TOP_APPS -> topApps.isNotEmpty()
+                    HomeWidgetId.BLOCK_REASONS -> blockReasons24h.isNotEmpty()
+                    HomeWidgetId.TOP_COUNTRIES -> topCountries24h.isNotEmpty()
                     else -> true
                 }
 
@@ -276,6 +304,57 @@ fun HomeEditableStatsList(
                                         )
                                     }
                                 )
+
+                                HomeWidgetId.QUICK_ACTIONS -> HomeQuickActionsCard(
+                                    vpnEnabled = vpnEnabled,
+                                    onTestAdBlock = onTestAdBlock,
+                                    onDnsLeakTest = onDnsLeakTest,
+                                    onDomainRules = onNavigateToDomainRules,
+                                    onTogglePauseProtection = onTogglePauseProtection,
+                                )
+
+                                HomeWidgetId.ACTIVE_DNS -> HomeActiveDnsCard(
+                                    info = activeDnsInfo,
+                                    onClick = onNavigateToDnsProvider,
+                                )
+
+                                HomeWidgetId.TOP_APPS -> {
+                                    if (isEditing && topApps.isEmpty()) EmptyWidgetEditPlaceholder(widgetId)
+                                    else HomeTopAppsCard(
+                                        topApps = topApps,
+                                        onAppClick = { onNavigateToAppLogs(it.appName) },
+                                        onViewAllClick = onNavigateToStatistics,
+                                    )
+                                }
+
+                                HomeWidgetId.SECURITY_SHIELD -> HomeSecurityShieldCard(
+                                    info = securityShieldInfo,
+                                    onFiltersClick = onNavigateToFilters,
+                                    onHttpsClick = onNavigateToHttpsFiltering,
+                                    onFirewallClick = onNavigateToFirewall,
+                                )
+
+                                HomeWidgetId.PROXY_VPN_STATUS -> HomeProxyVpnCard(
+                                    info = proxyTunnelInfo,
+                                    onConfigureClick = onNavigateToProxyVpn,
+                                    onSwitchModeClick = onOpenRoutingModeSheet,
+                                )
+
+                                HomeWidgetId.BLOCK_REASONS -> {
+                                    if (isEditing && blockReasons24h.isEmpty()) EmptyWidgetEditPlaceholder(widgetId)
+                                    else HomeBlockReasonsCard(
+                                        reasons = blockReasons24h,
+                                        onViewStatsClick = onNavigateToStatistics,
+                                    )
+                                }
+
+                                HomeWidgetId.TOP_COUNTRIES -> {
+                                    if (isEditing && topCountries24h.isEmpty()) EmptyWidgetEditPlaceholder(widgetId)
+                                    else HomeTopCountriesCard(
+                                        countries = topCountries24h,
+                                        onViewStatsClick = onNavigateToStatistics,
+                                    )
+                                }
                             }
 
                             if (isEditing) {
@@ -332,7 +411,7 @@ fun HomeEditableStatsList(
         ) {
             Column(Modifier.fillMaxWidth().padding(top = 8.dp), Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Available Widgets",
+                    text = stringResource(R.string.home_available_widgets),
                     style = MaterialTheme.typography.labelMedium,
                     color = TextSecondary,
                     fontWeight = FontWeight.SemiBold,
@@ -396,11 +475,14 @@ private fun RemoveWidgetBadge(
 private fun AvailableWidgetRow(widget: HomeWidgetId, onAdd: () -> Unit) {
     Card(
         onClick = onAdd,
-        modifier = Modifier.fillMaxWidth().height(64.dp),
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 68.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Row(Modifier.fillMaxSize().padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
@@ -408,11 +490,23 @@ private fun AvailableWidgetRow(widget: HomeWidgetId, onAdd: () -> Unit) {
                 Icon(widget.icon, null, Modifier.size(20.dp), MaterialTheme.colorScheme.primary)
             }
             Spacer(Modifier.width(12.dp))
-            Text(
-                text = stringResource(widget.titleRes), style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(widget.titleRes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = stringResource(widget.descriptionRes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Spacer(Modifier.width(12.dp))
             Box(
                 contentAlignment = Alignment.Center,

@@ -260,6 +260,14 @@ fun HomeApp(
                         onNavigateToBrowser = { url ->
                             context.startActivity(BrowserActivity.createIntent(context, url))
                         },
+                        onNavigateToDomainRules = {
+                            showBottomBar = false
+                            homeStack.add(DomainRulesKey)
+                        },
+                        onNavigateToProxyVpn = {
+                            showBottomBar = false
+                            homeStack.add(ProxyVpnKey)
+                        },
                         onNavigateToFeature = { featureType ->
                             showBottomBar = false
                             when (featureType) {

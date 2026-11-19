@@ -2,11 +2,14 @@ package app.pwhs.blockads.ui.home
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.CustomDnsRuleDao
 import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.data.dao.WhitelistDomainDao
 import app.pwhs.blockads.data.datastore.AppPreferences
+import app.pwhs.blockads.data.entities.DnsProtocol
+import app.pwhs.blockads.data.entities.DnsProviders
 import app.pwhs.blockads.data.entities.FilterList
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.AdBlockVpnService
@@ -14,6 +17,7 @@ import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.service.VpnState
 import app.pwhs.blockads.ui.MainDispatcherRule
 import app.pwhs.blockads.ui.close
+import app.pwhs.blockads.ui.home.data.HomeWidgetId
 import app.pwhs.blockads.ui.keepHot
 import kotlinx.coroutines.flow.Flow
 import io.mockk.Runs
@@ -58,6 +62,12 @@ class HomeViewModelTest {
     private val milestonesOn = MutableStateFlow(true)
     private val domainCount = MutableStateFlow(0)
     private val vpnRevokedByAnotherApp = MutableStateFlow(false)
+    private val dnsProviderId = MutableStateFlow<String?>("system")
+    private val upstreamDns = MutableStateFlow("1.1.1.1")
+    private val dnsProtocol = MutableStateFlow(DnsProtocol.PLAIN)
+    private val dohUrl = MutableStateFlow("")
+    private val httpsFilteringEnabled = MutableStateFlow(false)
+    private val firewallEnabled = MutableStateFlow(false)
 
     private val appPrefs: AppPreferences = mockk(relaxed = true) {
         every { routingMode } returns this@HomeViewModelTest.routingMode
@@ -66,6 +76,12 @@ class HomeViewModelTest {
         every { lastSeenMilestoneDialog } returns lastSeen
         every { milestoneNotificationsEnabled } returns milestonesOn
         every { vpnRevokedByAnotherApp } returns this@HomeViewModelTest.vpnRevokedByAnotherApp
+        every { dnsProviderId } returns this@HomeViewModelTest.dnsProviderId
+        every { upstreamDns } returns this@HomeViewModelTest.upstreamDns
+        every { dnsProtocol } returns this@HomeViewModelTest.dnsProtocol
+        every { dohUrl } returns this@HomeViewModelTest.dohUrl
+        every { httpsFilteringEnabled } returns this@HomeViewModelTest.httpsFilteringEnabled
+        every { firewallEnabled } returns this@HomeViewModelTest.firewallEnabled
     }
     private val dnsLogDao: DnsLogDao = mockk(relaxed = true) {
         every { getBlockedCount() } returns blocked
@@ -274,5 +290,79 @@ class HomeViewModelTest {
     fun `dismissVpnRevokedWarning clears flag in app preferences`() {
         vm.dismissVpnRevokedWarning()
         coVerify { appPrefs.setVpnRevokedByAnotherApp(false) }
+    }
+
+    @Test
+    fun `HomeWidgetId keeps original 7 defaults and round-trips extensions`() {
+        assertEquals(
+            listOf(
+                HomeWidgetId.QUERY_STATS,
+                HomeWidgetId.BLOCK_RATE,
+                HomeWidgetId.NETWORK_SPEED,
+                HomeWidgetId.DATA_AND_UPTIME,
+                HomeWidgetId.ACTIVITY_CHART,
+                HomeWidgetId.TOP_BLOCKED,
+                HomeWidgetId.RECENT_ACTIVITY,
+            ),
+            HomeWidgetId.DEFAULT_ORDER
+        )
+
+        val customized = listOf(
+            HomeWidgetId.QUICK_ACTIONS,
+            HomeWidgetId.ACTIVE_DNS,
+            HomeWidgetId.TOP_APPS,
+            HomeWidgetId.SECURITY_SHIELD,
+            HomeWidgetId.PROXY_VPN_STATUS,
+            HomeWidgetId.BLOCK_REASONS,
+            HomeWidgetId.TOP_COUNTRIES,
+        )
+        val serialized = HomeWidgetId.serialize(customized)
+        assertEquals(customized, HomeWidgetId.fromSerialized("$serialized,unknown_token"))
+    }
+
+    @Test
+    fun `pauseVpn sends 1h pause action to running service`() {
+        vpnState.value = VpnState.RUNNING
+        vm.pauseVpn(app)
+        assertEquals(AdBlockVpnService.ACTION_PAUSE_1H, shadowOf(app).nextStartedService.action)
+
+        vpnState.value = VpnState.STOPPED
+        rootState.value = VpnState.RUNNING
+        vm.pauseVpn(app)
+        assertEquals(RootProxyService.ACTION_PAUSE_1H, shadowOf(app).nextStartedService.action)
+    }
+
+    @Test
+    fun `securityShieldInfo reflects enabled security filters and protections`() {
+        keepHot(vm.securityShieldInfo)
+        assertEquals(1, vm.securityShieldInfo.value.enabledSecurityFilters)
+        assertFalse(vm.securityShieldInfo.value.httpsFilteringEnabled)
+        assertFalse(vm.securityShieldInfo.value.firewallEnabled)
+        assertFalse(vm.securityShieldInfo.value.privateDnsWarning)
+
+        httpsFilteringEnabled.value = true
+        firewallEnabled.value = true
+        vpnState.value = VpnState.RUNNING
+        privateDnsStrict.value = true
+
+        assertTrue(vm.securityShieldInfo.value.httpsFilteringEnabled)
+        assertTrue(vm.securityShieldInfo.value.firewallEnabled)
+        assertTrue(vm.securityShieldInfo.value.privateDnsWarning)
+    }
+
+    @Test
+    fun `activeDnsInfo resolves built-in provider and encryption state`() {
+        keepHot(vm.activeDnsInfo)
+        dnsProviderId.value = DnsProviders.CLOUDFLARE.id
+        dnsProtocol.value = DnsProtocol.DOH
+        dohUrl.value = "https://cloudflare-dns.com/dns-query"
+
+        val info = vm.activeDnsInfo.value
+        assertEquals(DnsProviders.CLOUDFLARE.name, info.providerName)
+        assertEquals(DnsProtocol.DOH, info.protocol)
+        assertEquals("https://cloudflare-dns.com/dns-query", info.endpoint)
+        assertTrue(info.isEncrypted)
+        assertFalse(info.isCustom)
+        assertEquals(R.drawable.ic_dns_cloudflare, info.iconRes)
     }
 }

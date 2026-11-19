@@ -1,6 +1,13 @@
 package app.pwhs.blockads.ui.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.activity.compose.BackHandler
+import androidx.core.net.toUri
+import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.dnsprovider.leak.DnsLeakTestBottomSheet
+import app.pwhs.blockads.ui.dnsprovider.leak.DnsLeakTestUiIntent
+import app.pwhs.blockads.ui.dnsprovider.leak.DnsLeakTestViewModel
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -77,6 +84,8 @@ fun HomeScreen(
     onNavigateToLogScreen: (LogFilterStatus) -> Unit = {},
     onNavigateToLogsWithQuery: (String) -> Unit = {},
     onNavigateToBrowser: (String) -> Unit = {},
+    onNavigateToDomainRules: () -> Unit = {},
+    onNavigateToProxyVpn: () -> Unit = {},
     onNavigateToFeature: (HomeFeatureTipType) -> Unit = {},
     onFeatureBadgeClick: (FeatureBadgeKind) -> Unit = {},
 ) {
@@ -107,6 +116,12 @@ fun HomeScreen(
     val vpnRevokedByAnotherApp by viewModel.vpnRevokedByAnotherApp.collectAsStateWithLifecycle()
     val isEditingHome by viewModel.isEditingHome.collectAsStateWithLifecycle()
     val activeHomeWidgets by viewModel.activeHomeWidgets.collectAsStateWithLifecycle()
+    val activeDnsInfo by viewModel.activeDnsInfo.collectAsStateWithLifecycle()
+    val topApps by viewModel.topApps.collectAsStateWithLifecycle()
+    val securityShieldInfo by viewModel.securityShieldInfo.collectAsStateWithLifecycle()
+    val proxyTunnelInfo by viewModel.proxyTunnelInfo.collectAsStateWithLifecycle()
+    val blockReasons24h by viewModel.blockReasons24h.collectAsStateWithLifecycle()
+    val topCountries24h by viewModel.topCountries24h.collectAsStateWithLifecycle()
 
     // Show the trusted-network paused state only while actually off.
     val showTrustedPause = pausedByTrusted && !vpnEnabled && !vpnConnecting && !vpnStopping
@@ -114,6 +129,7 @@ fun HomeScreen(
     val context = LocalContext.current
     var selectedBlockedDomain by remember { mutableStateOf<SelectedBlockedDomain?>(null) }
     var showRoutingModeSheet by rememberSaveable { mutableStateOf(false) }
+    var showLeakTestSheet by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = isEditingHome) {
         viewModel.setEditingHome(false)
@@ -261,7 +277,42 @@ fun HomeScreen(
                     onSelectBlockedDomain = { selectedBlockedDomain = it },
                     onMoveWidget = { from, to -> viewModel.moveHomeWidget(from, to) },
                     onRemoveWidget = { viewModel.removeHomeWidget(it) },
-                    onAddWidget = { viewModel.addHomeWidget(it) }
+                    onAddWidget = { viewModel.addHomeWidget(it) },
+                    vpnEnabled = vpnEnabled,
+                    activeDnsInfo = activeDnsInfo,
+                    topApps = topApps,
+                    securityShieldInfo = securityShieldInfo,
+                    proxyTunnelInfo = proxyTunnelInfo,
+                    blockReasons24h = blockReasons24h,
+                    topCountries24h = topCountries24h,
+                    onTestAdBlock = {
+                        val url = context.getString(R.string.test_block_link)
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                        } catch (_: ActivityNotFoundException) {
+                            onNavigateToBrowser(url)
+                        }
+                    },
+                    onDnsLeakTest = { showLeakTestSheet = true },
+                    onNavigateToDomainRules = onNavigateToDomainRules,
+                    onTogglePauseProtection = {
+                        if (!vpnConnecting && !vpnStopping) {
+                            if (vpnEnabled) {
+                                viewModel.pauseVpn(context)
+                            } else {
+                                viewModel.dismissVpnRevokedWarning()
+                                onRequestVpnPermission()
+                            }
+                        }
+                    },
+                    onNavigateToDnsProvider = { onFeatureBadgeClick(FeatureBadgeKind.DNS_PROTOCOL) },
+                    onNavigateToHttpsFiltering = { onFeatureBadgeClick(FeatureBadgeKind.HTTPS_FILTER) },
+                    onNavigateToFirewall = { onFeatureBadgeClick(FeatureBadgeKind.FIREWALL) },
+                    onNavigateToFilters = { onFeatureBadgeClick(FeatureBadgeKind.FILTER_RULES) },
+                    onNavigateToProxyVpn = onNavigateToProxyVpn,
+                    onOpenRoutingModeSheet = { showRoutingModeSheet = true },
+                    onNavigateToAppLogs = onNavigateToLogsWithQuery,
+                    onNavigateToStatistics = onNavigateToStatisticsScreen,
                 )
             }
 
@@ -400,6 +451,16 @@ fun HomeScreen(
                         onNavigateToFeature(HomeFeatureTipType.WIREGUARD)
                     },
                     onDismiss = { showRoutingModeSheet = false }
+                )
+            }
+
+            if (showLeakTestSheet) {
+                val leakViewModel: DnsLeakTestViewModel = koinViewModel()
+                val leakState by leakViewModel.uiState.collectAsStateWithLifecycle()
+                DnsLeakTestBottomSheet(
+                    uiState = leakState,
+                    onStartTest = { leakViewModel.onIntent(DnsLeakTestUiIntent.StartTest) },
+                    onDismiss = { showLeakTestSheet = false }
                 )
             }
 
