@@ -39,10 +39,26 @@ import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsLogEntry
 import app.pwhs.blockads.ui.logs.data.BlockSource
+import app.pwhs.blockads.ui.logs.data.LogGroup
 import app.pwhs.blockads.ui.logs.data.LogGrouping
 import app.pwhs.blockads.ui.logs.data.groupLogs
 import app.pwhs.blockads.utils.formatTimestamp
 import kotlinx.coroutines.launch
+
+private sealed interface GroupedFeedRow {
+    val key: String
+    val timestamp: Long
+
+    data class Header(val group: LogGroup, val isExpanded: Boolean) : GroupedFeedRow {
+        override val key: String get() = "header:${group.key}"
+        override val timestamp: Long get() = group.latestTimestamp
+    }
+
+    data class Entry(val groupKey: String, val entry: DnsLogEntry) : GroupedFeedRow {
+        override val key: String get() = "entry:$groupKey:${entry.id}"
+        override val timestamp: Long get() = entry.timestamp
+    }
+}
 
 @Composable
 fun LogsFeedList(
@@ -101,14 +117,29 @@ fun LogsFeedList(
         else groupLogs(displayedLogs, grouping, unknownAppLabel)
     }
 
-    val scrollTimeHint by remember(displayedLogs, groupedLogs, grouping) {
+    val flatGroupedRows = remember(groupedLogs, expandedGroups, grouping) {
+        if (grouping == LogGrouping.NONE) emptyList()
+        else buildList {
+            groupedLogs.forEach { group ->
+                val isExpanded = group.key in expandedGroups
+                add(GroupedFeedRow.Header(group, isExpanded))
+                if (isExpanded) {
+                    group.entries.forEach { entry ->
+                        add(GroupedFeedRow.Entry(group.key, entry))
+                    }
+                }
+            }
+        }
+    }
+
+    val scrollTimeHint by remember(displayedLogs, flatGroupedRows, grouping) {
         derivedStateOf {
             if (!listState.isScrollInProgress) return@derivedStateOf null
             val idx = (listState.firstVisibleItemIndex - 1).coerceAtLeast(0)
             val ts = if (grouping == LogGrouping.NONE) {
                 displayedLogs.getOrNull(idx)?.timestamp
             } else {
-                groupedLogs.getOrNull(idx)?.latestTimestamp
+                flatGroupedRows.getOrNull(idx)?.timestamp
             }
             ts?.let { formatTimestamp(it) }
         }
@@ -125,7 +156,11 @@ fun LogsFeedList(
             item(key = "header_spacer") { Spacer(modifier = Modifier.height(4.dp)) }
 
             if (grouping == LogGrouping.NONE) {
-                items(displayedLogs, key = { it.id }) { entry ->
+                items(
+                    items = displayedLogs,
+                    key = { it.id },
+                    contentType = { "log_entry" }
+                ) { entry ->
                     LogEntryItem(
                         entry = entry,
                         isWhitelisted = whitelistedDomains.contains(entry.domain.lowercase()),
@@ -143,31 +178,49 @@ fun LogsFeedList(
                     )
                 }
             } else {
-                items(groupedLogs, key = { "${grouping.name}:${it.key}" }) { group ->
-                    val isExpanded = group.key in expandedGroups
-                    LogGroupCard(
-                        group = group,
-                        grouping = grouping,
-                        isExpanded = isExpanded,
-                        whitelistedDomains = whitelistedDomains,
-                        selectionMode = selectionMode,
-                        selectedIds = selectedIds,
-                        filterNames = filterNames,
-                        onToggleExpand = {
-                            expandedGroups = if (isExpanded) {
-                                expandedGroups - group.key
-                            } else {
-                                expandedGroups + group.key
-                            }
-                        },
-                        onSelectEntry = onSelectEntry,
-                        onToggleSelection = onToggleSelection,
-                        onQuickBlock = onQuickBlock,
-                        onQuickWhitelist = onQuickWhitelist,
-                        onFilterApp = onFilterApp,
-                        onFilterQueryType = onFilterQueryType,
-                        onFilterBlockSource = onFilterBlockSource
-                    )
+                items(
+                    items = flatGroupedRows,
+                    key = { "${grouping.name}:${it.key}" },
+                    contentType = { row ->
+                        when (row) {
+                            is GroupedFeedRow.Header -> "group_header"
+                            is GroupedFeedRow.Entry -> "group_entry"
+                        }
+                    }
+                ) { row ->
+                    when (row) {
+                        is GroupedFeedRow.Header -> LogGroupCard(
+                            group = row.group,
+                            grouping = grouping,
+                            isExpanded = row.isExpanded,
+                            onToggleExpand = {
+                                expandedGroups = if (row.isExpanded) {
+                                    expandedGroups - row.group.key
+                                } else {
+                                    expandedGroups + row.group.key
+                                }
+                            },
+                            modifier = Modifier.animateItem()
+                        )
+                        is GroupedFeedRow.Entry -> LogEntryItem(
+                            entry = row.entry,
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .animateItem(),
+                            isWhitelisted = whitelistedDomains.contains(row.entry.domain.lowercase()),
+                            isSelectionMode = selectionMode,
+                            isSelected = selectedIds.contains(row.entry.id),
+                            filterNames = filterNames,
+                            onTap = { onSelectEntry(row.entry) },
+                            onLongPress = { onToggleSelection(row.entry.id) },
+                            onToggleSelection = { onToggleSelection(row.entry.id) },
+                            onQuickBlock = { onQuickBlock(row.entry.domain) },
+                            onQuickWhitelist = { onQuickWhitelist(row.entry.domain) },
+                            onFilterApp = onFilterApp,
+                            onFilterQueryType = onFilterQueryType,
+                            onFilterBlockSource = onFilterBlockSource
+                        )
+                    }
                 }
             }
 

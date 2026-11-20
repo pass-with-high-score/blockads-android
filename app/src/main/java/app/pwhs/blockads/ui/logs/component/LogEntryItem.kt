@@ -134,14 +134,7 @@ fun LogEntryItem(
             // App icon with status badge, or plain status indicator
             val context = LocalContext.current
             val appIcon: Drawable? = remember(entry.packageName) {
-                if (entry.packageName.isNotEmpty() && entry.packageName.contains(".")) {
-                    try {
-                        val icon = context.packageManager.getApplicationIcon(entry.packageName)
-                        if (icon.intrinsicWidth > 0 && icon.intrinsicHeight > 0) icon else null
-                    } catch (e: Exception) {
-                        null
-                    }
-                } else null
+                LogAppIconCache.get(context, entry.packageName)
             }
 
             if (appIcon != null) {
