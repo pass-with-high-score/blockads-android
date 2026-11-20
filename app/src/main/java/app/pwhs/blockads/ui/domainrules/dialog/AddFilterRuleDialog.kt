@@ -64,13 +64,42 @@ private val FILTER_TYPES = listOf(
     "HOST-SUFFIX",
     "HOST",
     "HOST-KEYWORD",
+    "DOMAIN-WILDCARD",
+    "DOMAIN-REGEX",
+    "GEOSITE",
     "IP-CIDR",
     "IP-CIDR6",
+    "IP-SUFFIX",
+    "IP-ASN",
     "GEOIP",
+    "SRC-IP-CIDR",
+    "SRC-IP-SUFFIX",
+    "SRC-IP-ASN",
+    "SRC-GEOIP",
+    "DST-PORT",
+    "SRC-PORT",
+    "IN-PORT",
+    "NETWORK",
+    "DSCP",
+    "PROCESS-NAME",
+    "PROCESS-NAME-REGEX",
+    "PROCESS-NAME-WILDCARD",
+    "PROCESS-PATH",
+    "PROCESS-PATH-REGEX",
+    "PROCESS-PATH-WILDCARD",
+    "UID",
+    "IN-TYPE",
+    "IN-USER",
+    "IN-NAME",
     "USER-AGENT",
+    "RULE-SET",
+    "AND",
+    "OR",
+    "NOT",
+    "SUB-RULE",
     "FINAL"
 )
-private val FILTER_POLICIES = listOf("REJECT", "DIRECT", "PROXY")
+private val FILTER_POLICIES = listOf("REJECT", "REJECT-DROP", "DIRECT", "PASS", "PASS-RULE", "PROXY")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,11 +125,22 @@ fun FilterRuleDialog(
     var showAppPickerDialog by remember { mutableStateOf(false) }
     var showDocSheet by remember { mutableStateOf(false) }
 
-    val isConfirmEnabled = remember(type, param, policy) {
+    val isRegexInvalid = remember(type, param) {
+        val upper = type.uppercase()
+        val isRegexType = upper == "HOST-REGEX" || upper == "DOMAIN-REGEX" ||
+            upper == "PROCESS-NAME-REGEX" || upper == "PROCESS-PATH-REGEX"
+        if (!isRegexType || param.isBlank()) {
+            false
+        } else {
+            runCatching { Regex(param.trim()) }.isFailure
+        }
+    }
+
+    val isConfirmEnabled = remember(type, param, policy, isRegexInvalid) {
         if (type.equals("FINAL", ignoreCase = true)) {
             policy.isNotBlank()
         } else {
-            type.isNotBlank() && param.isNotBlank() && policy.isNotBlank()
+            type.isNotBlank() && param.isNotBlank() && policy.isNotBlank() && !isRegexInvalid
         }
     }
 
@@ -266,19 +306,53 @@ fun FilterRuleDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                val typeDescriptionRes = when (type.uppercase()) {
+                    "HOST-SUFFIX", "DOMAIN-SUFFIX" -> R.string.rule_type_desc_host_suffix
+                    "HOST", "DOMAIN" -> R.string.rule_type_desc_host
+                    "HOST-KEYWORD", "DOMAIN-KEYWORD" -> R.string.rule_type_desc_host_keyword
+                    "HOST-WILDCARD", "DOMAIN-WILDCARD", "PROCESS-NAME-WILDCARD", "PROCESS-PATH-WILDCARD" ->
+                        R.string.rule_type_desc_host_wildcard
+                    "HOST-REGEX", "DOMAIN-REGEX", "PROCESS-NAME-REGEX", "PROCESS-PATH-REGEX" ->
+                        R.string.rule_type_desc_host_regex
+                    "IP-CIDR", "SRC-IP-CIDR" -> R.string.rule_type_desc_ip_cidr
+                    "IP-CIDR6" -> R.string.rule_type_desc_ip_cidr6
+                    "GEOIP", "SRC-GEOIP" -> R.string.rule_type_desc_geoip
+                    "USER-AGENT" -> R.string.rule_type_desc_user_agent
+                    "FINAL", "MATCH" -> R.string.rule_type_desc_final
+                    else -> null
+                }
+                if (typeDescriptionRes != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(typeDescriptionRes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Field 2: Param *
                 val isParamRequired = !type.equals("FINAL", ignoreCase = true)
                 val paramPlaceholder = when (type.uppercase()) {
-                    "HOST-SUFFIX" -> stringResource(R.string.rule_param_hint_host_suffix)
-                    "HOST" -> stringResource(R.string.rule_param_hint_host)
-                    "HOST-KEYWORD" -> stringResource(R.string.rule_param_hint_host_keyword)
-                    "IP-CIDR" -> stringResource(R.string.rule_param_hint_ip_cidr)
+                    "HOST-SUFFIX", "DOMAIN-SUFFIX" -> stringResource(R.string.rule_param_hint_host_suffix)
+                    "HOST", "DOMAIN" -> stringResource(R.string.rule_param_hint_host)
+                    "HOST-KEYWORD", "DOMAIN-KEYWORD" -> stringResource(R.string.rule_param_hint_host_keyword)
+                    "HOST-WILDCARD", "DOMAIN-WILDCARD" -> stringResource(R.string.rule_param_hint_host_wildcard)
+                    "HOST-REGEX", "DOMAIN-REGEX", "PROCESS-NAME-REGEX", "PROCESS-PATH-REGEX" ->
+                        stringResource(R.string.rule_param_hint_host_regex)
+                    "GEOSITE" -> "e.g. private, apple, category-ads"
+                    "IP-CIDR", "SRC-IP-CIDR" -> stringResource(R.string.rule_param_hint_ip_cidr)
                     "IP-CIDR6" -> stringResource(R.string.rule_param_hint_ip_cidr6)
-                    "GEOIP" -> stringResource(R.string.rule_param_hint_geoip)
+                    "IP-SUFFIX", "SRC-IP-SUFFIX" -> "e.g. 0.0.0.1/8"
+                    "GEOIP", "SRC-GEOIP" -> stringResource(R.string.rule_param_hint_geoip)
+                    "DST-PORT", "SRC-PORT", "IN-PORT" -> "e.g. 443, 853, 3478/19302-19309"
+                    "NETWORK" -> "TCP or UDP"
+                    "UID" -> "e.g. 10123"
+                    "IN-TYPE" -> "e.g. TUN, DNS, HTTP"
+                    "AND", "OR", "NOT" -> "e.g. ((NETWORK,UDP),(DST-PORT,443))"
                     "USER-AGENT" -> stringResource(R.string.rule_param_hint_user_agent)
-                    "FINAL" -> stringResource(R.string.rule_param_hint_final)
+                    "FINAL", "MATCH" -> stringResource(R.string.rule_param_hint_final)
                     else -> stringResource(R.string.rule_field_param_hint)
                 }
 
@@ -289,6 +363,14 @@ fun FilterRuleDialog(
                     placeholder = paramPlaceholder,
                     enabled = isParamRequired
                 )
+                if (isRegexInvalid) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.rule_regex_invalid),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(28.dp))
 
@@ -298,6 +380,7 @@ fun FilterRuleDialog(
                     val displayPolicy = when (policy.uppercase()) {
                         "DIRECT" -> "DIRECT (Whitelist)"
                         "REJECT" -> "REJECT (Blocklist)"
+                        "REJECT-DROP" -> "REJECT-DROP (Silent Drop)"
                         else -> policy
                     }
                     UnderlineInputField(
@@ -315,6 +398,7 @@ fun FilterRuleDialog(
                             val label = when (pol) {
                                 "DIRECT" -> "DIRECT (Whitelist)"
                                 "REJECT" -> "REJECT (Blocklist)"
+                                "REJECT-DROP" -> "REJECT-DROP (Silent Drop)"
                                 else -> pol
                             }
                             DropdownMenuItem(

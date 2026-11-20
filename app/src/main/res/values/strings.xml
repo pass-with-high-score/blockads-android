@@ -176,4 +176,45 @@
     <string name="home_widget_top_countries_desc">Top 24-hour server destination countries</string>
     <string name="home_widget_24h_badge">24h</string>
     <string name="home_widget_stats_link">Stats</string>
+
+    <string name="log_group_none">Recent (Flat)</string>
+    <string name="log_group_by_domain">Group by Domain</string>
+    <string name="log_group_by_app">Group by App</string>
+    <string name="log_group_blocked_badge">%1$d blocked</string>
+    <string name="log_jump_to_latest">Latest</string>
+    <string name="log_jump_to_latest_count">%1$d new</string>
+    <string name="log_filter_query_type">Type: %1$s</string>
+
+    <string name="rule_presets_title">Quick Rule Presets</string>
+    <string name="rule_presets_subtitle">Select one or more preset packs to add at once</string>
+    <string name="rule_presets_apply">Add %1$d rules</string>
+    <string name="rule_presets_added">Added %1$d preset rules</string>
+    <string name="rule_preset_block_doh">Block DoH / DNS Bypass</string>
+    <string name="rule_preset_block_quic">Block QUIC (UDP 443)</string>
+    <string name="rule_preset_block_stun">Block STUN / WebRTC</string>
+    <string name="rule_preset_block_dot">Block DoT (Port 853)</string>
+    <string name="rule_preset_block_loopback">Block Loopback Access</string>
+    <string name="rule_preset_block_telemetry">Block Telemetry &amp; Analytics</string>
+    <string name="rule_preset_block_social_trackers">Block Social Trackers</string>
+    <string name="rule_preset_block_oem_telemetry">Block Device / OEM Telemetry</string>
+    <string name="rule_preset_block_crypto_miners">Block Crypto Miners</string>
+    <string name="rule_preset_allow_lan">Allow LAN &amp; Local Network</string>
+    <string name="rule_preset_allow_system_push">Allow System &amp; Push Services</string>
+    <string name="rule_preset_allow_bittorrent">Allow BitTorrent Direct</string>
+    <string name="rule_param_hint_host_wildcard">e.g. *.ads.*.example.com</string>
+    <string name="rule_param_hint_host_regex">e.g. ^ad[0-9]+\\..+\\.com$</string>
+    <string name="rule_type_desc_host_suffix">Matches the domain and all of its subdomains.</string>
+    <string name="rule_type_desc_host">Matches only the exact domain name (no subdomains).</string>
+    <string name="rule_type_desc_host_keyword">Matches any domain containing this keyword anywhere.</string>
+    <string name="rule_type_desc_host_wildcard">Matches domains using * (any chars) and ? (single char) wildcards.</string>
+    <string name="rule_type_desc_host_regex">Matches domains using a regular expression (case-insensitive).</string>
+    <string name="rule_type_desc_ip_cidr">Matches IPv4 addresses within the CIDR subnet.</string>
+    <string name="rule_type_desc_ip_cidr6">Matches IPv6 addresses within the CIDR subnet.</string>
+    <string name="rule_type_desc_geoip">Matches server country code (e.g. VN, US).</string>
+    <string name="rule_type_desc_user_agent">Matches HTTP User-Agent header with wildcards.</string>
+    <string name="rule_type_desc_final">Fallback rule when no earlier rules match.</string>
+    <string name="rule_regex_invalid">Invalid regular expression syntax</string>
+    <string name="rule_reorder_mode">Reorder priority</string>
+    <string name="rule_bulk_selected">%1$d selected</string>
+    <string name="rule_bulk_deleted">Removed %1$d rules</string>
 </resources>

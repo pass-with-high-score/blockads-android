@@ -97,6 +97,24 @@ private val RULE_DOCS = listOf(
         usage = "Broadly catching domains containing obvious ad or telemetry keywords."
     ),
     RuleDoc(
+        name = "HOST-WILDCARD",
+        category = RuleCategory.DOMAIN,
+        description = "Matches domains using * (any sequence) and ? (single character) glob wildcards.",
+        syntax = "HOST-WILDCARD, *.ads.*.example.com, REJECT",
+        matches = listOf("cdn.ads.v2.example.com", "img.ads.us.example.com"),
+        notMatches = listOf("example.com", "ads.example.com"),
+        usage = "Flexible multi-segment subdomain patterns without writing full regular expressions."
+    ),
+    RuleDoc(
+        name = "HOST-REGEX",
+        category = RuleCategory.DOMAIN,
+        description = "Matches domains using a case-insensitive regular expression.",
+        syntax = "HOST-REGEX, ^ad[0-9]+\\..+\\.com$, REJECT",
+        matches = listOf("ad1.tracker.com", "ad42.cdn.com"),
+        notMatches = listOf("ads.tracker.com", "cdn.example.net"),
+        usage = "Precision matching for rotating numbered ad hosts or complex naming schemes."
+    ),
+    RuleDoc(
         name = "IP-CIDR",
         category = RuleCategory.IP_GEO,
         description = "Matches IPv4 addresses belonging to the specified CIDR subnet block.",

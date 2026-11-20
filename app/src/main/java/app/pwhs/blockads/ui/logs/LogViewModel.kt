@@ -17,6 +17,7 @@ import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
+import app.pwhs.blockads.ui.logs.data.LogGrouping
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.utils.CustomRuleParser
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +77,12 @@ class LogViewModel(
 
     private val _appFilter = MutableStateFlow("")
     val appFilter: StateFlow<String> = _appFilter.asStateFlow()
+
+    private val _queryTypeFilter = MutableStateFlow("")
+    val queryTypeFilter: StateFlow<String> = _queryTypeFilter.asStateFlow()
+
+    private val _grouping = MutableStateFlow(LogGrouping.NONE)
+    val grouping: StateFlow<LogGrouping> = _grouping.asStateFlow()
 
     val recordDnsLogs: StateFlow<Boolean> = appPrefs.recordDnsLogs
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -193,6 +200,10 @@ class LogViewModel(
             if (app.isBlank()) logs
             else logs.filter { it.appName.equals(app, ignoreCase = true) }
         }
+        .combine(_queryTypeFilter) { logs, queryType ->
+            if (queryType.isBlank()) logs
+            else logs.filter { it.queryType.equals(queryType.trim(), ignoreCase = true) }
+        }
         .combine(_selectedBlockSources) { logs, sources ->
             Pair(logs, sources)
         }
@@ -229,6 +240,37 @@ class LogViewModel(
 
     fun setAppFilter(app: String) {
         _appFilter.value = app
+    }
+
+    fun setQueryTypeFilter(queryType: String) {
+        val normalized = queryType.trim()
+        _queryTypeFilter.value = if (_queryTypeFilter.value.equals(normalized, ignoreCase = true)) {
+            ""
+        } else {
+            normalized
+        }
+    }
+
+    fun setGrouping(grouping: LogGrouping) {
+        _grouping.value = grouping
+    }
+
+    fun filterByBlockSourceOnly(source: BlockSource) {
+        if (_filterStatus.value == LogFilterStatus.BLOCKED && _selectedBlockSources.value == setOf(source)) {
+            _selectedBlockSources.value = BlockSource.entries.toSet()
+        } else {
+            _filterStatus.value = LogFilterStatus.BLOCKED
+            _selectedBlockSources.value = setOf(source)
+        }
+    }
+
+    fun resetAllFilters() {
+        _appFilter.value = ""
+        _queryTypeFilter.value = ""
+        _timeRange.value = TimeRange.ALL
+        _searchQuery.value = ""
+        _filterStatus.value = LogFilterStatus.ALL
+        _selectedBlockSources.value = BlockSource.entries.toSet()
     }
 
     fun toggleSelection(id: Long) {

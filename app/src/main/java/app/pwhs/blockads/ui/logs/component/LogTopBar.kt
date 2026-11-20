@@ -4,15 +4,25 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.AutoDelete
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,10 +31,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.logs.data.LogGrouping
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 
@@ -43,7 +61,11 @@ fun LogTopBar(
     modifier: Modifier = Modifier,
     logRetentionDays: Int = 0,
     onOpenRetentionSettings: () -> Unit = {},
+    grouping: LogGrouping = LogGrouping.NONE,
+    onGroupingChange: (LogGrouping) -> Unit = {},
 ) {
+    var showGroupingMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         modifier = modifier,
         navigationIcon = {
@@ -67,11 +89,74 @@ fun LogTopBar(
                         style = MaterialTheme.typography.titleLarge
                     )
                 } else {
-                    Text(
-                        text = stringResource(R.string.nav_logs),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    Box {
+                        Column(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { showGroupingMenu = true }
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = stringResource(R.string.nav_logs),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            if (grouping != LogGrouping.NONE) {
+                                val groupLabelRes = when (grouping) {
+                                    LogGrouping.BY_DOMAIN -> R.string.log_group_by_domain
+                                    LogGrouping.BY_APP -> R.string.log_group_by_app
+                                    LogGrouping.NONE -> R.string.log_group_none
+                                }
+                                Text(
+                                    text = stringResource(groupLabelRes),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = showGroupingMenu,
+                            onDismissRequest = { showGroupingMenu = false }
+                        ) {
+                            val options = listOf(
+                                LogGrouping.NONE to R.string.log_group_none,
+                                LogGrouping.BY_DOMAIN to R.string.log_group_by_domain,
+                                LogGrouping.BY_APP to R.string.log_group_by_app
+                            )
+                            options.forEach { (mode, labelRes) ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(labelRes),
+                                            fontWeight = if (grouping == mode) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    trailingIcon = if (grouping == mode) {
+                                        {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    } else null,
+                                    onClick = {
+                                        onGroupingChange(mode)
+                                        showGroupingMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         },

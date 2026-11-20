@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +53,14 @@ fun DomainItem(
     isEnabled: Boolean = true,
     ruleType: String? = null,
     appLabel: String? = null,
+    isSelectionMode: Boolean = false,
+    isSelected: Boolean = false,
+    isReorderMode: Boolean = false,
+    canMoveUp: Boolean = false,
+    canMoveDown: Boolean = false,
+    onToggleSelect: () -> Unit = {},
+    onMoveUp: () -> Unit = {},
+    onMoveDown: () -> Unit = {},
     onToggle: () -> Unit = {},
     onDelete: () -> Unit,
     onEdit: () -> Unit = {},
@@ -57,18 +68,30 @@ fun DomainItem(
 ) {
     val context = LocalContext.current
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        ),
         shape = RoundedCornerShape(12.dp),
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .combinedClickable(
-                onClick = onEdit,
+                onClick = {
+                    if (isSelectionMode) onToggleSelect() else if (!isReorderMode) onEdit()
+                },
                 onLongClick = {
-                    val clipboard =
-                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("domain", domain))
-                    Toast.makeText(context, "Copied: $domain", Toast.LENGTH_SHORT).show()
+                    if (!isReorderMode) {
+                        onToggleSelect()
+                    } else {
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("domain", domain))
+                        Toast.makeText(context, "Copied: $domain", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
     ) {
@@ -78,6 +101,14 @@ fun DomainItem(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onToggleSelect() },
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
             Icon(
                 icon,
                 contentDescription = null,
@@ -137,33 +168,60 @@ fun DomainItem(
                     )
                 }
             }
-            IconButton(
-                onClick = onEdit,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = "Edit",
-                    tint = TextSecondary.copy(alpha = 0.6f),
-                    modifier = Modifier.size(18.dp)
+            if (isReorderMode) {
+                IconButton(
+                    onClick = onMoveUp,
+                    enabled = canMoveUp,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ArrowUpward,
+                        contentDescription = "Move up",
+                        tint = if (canMoveUp) MaterialTheme.colorScheme.primary else TextSecondary.copy(alpha = 0.25f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onMoveDown,
+                    enabled = canMoveDown,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ArrowDownward,
+                        contentDescription = "Move down",
+                        tint = if (canMoveDown) MaterialTheme.colorScheme.primary else TextSecondary.copy(alpha = 0.25f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            } else if (!isSelectionMode) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = TextSecondary.copy(alpha = 0.6f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Remove",
+                        tint = TextSecondary.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Switch(
+                    checked = isEnabled,
+                    onCheckedChange = { onToggle() }
                 )
             }
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Remove",
-                    tint = TextSecondary.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { onToggle() }
-            )
         }
     }
 }

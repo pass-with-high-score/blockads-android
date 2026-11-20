@@ -91,6 +91,38 @@ func (e *Engine) ClearRulesetConfig() {
 	e.activeRulesetCfg.Store(nil)
 }
 
+// evaluateFlowRuleset evaluates L3/L4/UID/Logic ruleset rules against a live TUN TCP/UDP flow.
+func (e *Engine) evaluateFlowRuleset(flow flowID, proto uint8, uidr UIDResolver) (string, string) {
+	matcher := e.rulesetMatcher.Load()
+	if matcher == nil || matcher.RulesCount() == 0 {
+		return "", ""
+	}
+	netName := "TCP"
+	if proto == ProtocolUDP {
+		netName = "UDP"
+	}
+	uid := -1
+	if uidr != nil {
+		if resolved := resolveFlowUID(uidr, int(proto), flow); resolved != UIDUnknown {
+			uid = resolved
+		}
+	}
+	policy, matched := config.MatchRuleContext(matcher, config.MatchContext{
+		DstIP:   flow.serverIP,
+		SrcIP:   flow.appIP,
+		DstPort: flow.serverPort,
+		SrcPort: flow.appPort,
+		Network: netName,
+		UID:     uid,
+		DSCP:    -1,
+		InType:  "TUN",
+	})
+	if matched == "FINAL" {
+		return "", ""
+	}
+	return policy, matched
+}
+
 // GetRulesetDNSServersCSV returns comma-separated upstream DNS servers from active profile ruleset.
 func (e *Engine) GetRulesetDNSServersCSV() string {
 	matcher := e.rulesetMatcher.Load()

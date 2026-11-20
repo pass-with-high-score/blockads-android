@@ -137,42 +137,130 @@ func parseDNSLine(cfg *Config, line string) {
 }
 
 func parseRuleLine(line string, order int) (Rule, bool) {
-	parts := strings.Split(line, ",")
-	if len(parts) < 2 {
+	firstComma := strings.IndexByte(line, ',')
+	if firstComma <= 0 {
 		return Rule{}, false
 	}
 
-	ruleTypeStr := strings.ToUpper(strings.TrimSpace(parts[0]))
-	val := strings.TrimSpace(parts[1])
-	policy := PolicyDirect
-	if len(parts) >= 3 {
-		policy = strings.ToUpper(strings.TrimSpace(parts[2]))
+	ruleTypeStr := strings.ToUpper(strings.TrimSpace(line[:firstComma]))
+	rest := strings.TrimSpace(line[firstComma+1:])
+
+	// Logic rules use balanced parentheses and nested commas: AND,((...),(...)),POLICY
+	switch ruleTypeStr {
+	case "AND":
+		return parseLogicRuleLine(RuleAnd, rest, order)
+	case "OR":
+		return parseLogicRuleLine(RuleOr, rest, order)
+	case "NOT":
+		return parseLogicRuleLine(RuleNot, rest, order)
+	case "SUB-RULE":
+		return parseLogicRuleLine(RuleSubRule, rest, order)
+	}
+
+	// Regex rules may contain commas inside the pattern (e.g. {1,3}); split from the right.
+	var val, policy string
+	var opts []string
+	if isCommaPayloadType(ruleTypeStr) {
+		lastComma := strings.LastIndexByte(rest, ',')
+		if lastComma <= 0 {
+			return Rule{}, false
+		}
+		val = strings.TrimSpace(rest[:lastComma])
+		policy = strings.ToUpper(strings.TrimSpace(rest[lastComma+1:]))
+	} else {
+		parts := strings.Split(rest, ",")
+		if len(parts) < 1 {
+			return Rule{}, false
+		}
+		val = strings.TrimSpace(parts[0])
+		policy = PolicyDirect
+		if len(parts) >= 2 {
+			policy = strings.ToUpper(strings.TrimSpace(parts[1]))
+		}
+		if len(parts) >= 3 {
+			opts = parts[2:]
+		}
 	}
 
 	var rType RuleType
 	switch ruleTypeStr {
-	case "HOST":
+	case "HOST", "DOMAIN":
 		rType = RuleHost
 		val = NormalizeDomain(val)
-	case "HOST-SUFFIX":
+	case "HOST-SUFFIX", "DOMAIN-SUFFIX":
 		rType = RuleHostSuffix
 		val = NormalizeDomain(val)
-	case "HOST-KEYWORD":
+	case "HOST-KEYWORD", "DOMAIN-KEYWORD":
 		rType = RuleHostKeyword
+		val = strings.ToLower(val)
+	case "HOST-WILDCARD", "DOMAIN-WILDCARD":
+		rType = RuleDomainWildcard
+		val = strings.ToLower(val)
+	case "HOST-REGEX", "DOMAIN-REGEX":
+		rType = RuleDomainRegex
+	case "GEOSITE":
+		rType = RuleGeoSite
 		val = strings.ToLower(val)
 	case "IP-CIDR":
 		rType = RuleIPCidr
 	case "IP-CIDR6":
 		rType = RuleIPCidr6
+	case "IP-SUFFIX":
+		rType = RuleIPSuffix
+	case "IP-ASN":
+		rType = RuleIPASN
 	case "GEOIP":
 		rType = RuleGeoIP
 		val = strings.ToUpper(val)
+	case "SRC-IP-CIDR":
+		rType = RuleSrcIPCidr
+	case "SRC-IP-SUFFIX":
+		rType = RuleSrcIPSuffix
+	case "SRC-IP-ASN":
+		rType = RuleSrcIPASN
+	case "SRC-GEOIP":
+		rType = RuleSrcGeoIP
+		val = strings.ToUpper(val)
+	case "DST-PORT":
+		rType = RuleDstPort
+	case "SRC-PORT":
+		rType = RuleSrcPort
+	case "IN-PORT":
+		rType = RuleInPort
+	case "NETWORK":
+		rType = RuleNetwork
+		val = strings.ToUpper(val)
+	case "DSCP":
+		rType = RuleDSCP
+	case "PROCESS-NAME":
+		rType = RuleProcessName
+	case "PROCESS-NAME-REGEX":
+		rType = RuleProcessNameRegex
+	case "PROCESS-NAME-WILDCARD":
+		rType = RuleProcessNameWildcard
+	case "PROCESS-PATH":
+		rType = RuleProcessPath
+	case "PROCESS-PATH-REGEX":
+		rType = RuleProcessPathRegex
+	case "PROCESS-PATH-WILDCARD":
+		rType = RuleProcessPathWildcard
+	case "UID":
+		rType = RuleUID
+	case "IN-TYPE":
+		rType = RuleInType
+		val = strings.ToUpper(val)
+	case "IN-USER":
+		rType = RuleInUser
+	case "IN-NAME":
+		rType = RuleInName
 	case "USER-AGENT":
 		rType = RuleUserAgent
-	case "FINAL":
+	case "RULE-SET":
+		rType = RuleRuleSet
+	case "FINAL", "MATCH":
 		return Rule{
 			Type:   RuleFinal,
-			Policy: strings.ToUpper(val), // For FINAL, the value field is the policy (FINAL, DIRECT)
+			Policy: strings.ToUpper(val),
 			Value:  "FINAL",
 			Order:  order,
 		}, true
@@ -181,39 +269,59 @@ func parseRuleLine(line string, order int) (Rule, bool) {
 	}
 
 	rule := Rule{
-		Type:   rType,
-		Value:  val,
-		Policy: policy,
-		Order:  order,
+		Type:    rType,
+		Value:   val,
+		Policy:  policy,
+		Order:   order,
+		UIDVal:  -1,
+		DSCPVal: -1,
 	}
 
-	// Parse options (e.g., no-resolve)
-	for i := 3; i < len(parts); i++ {
-		opt := strings.ToLower(strings.TrimSpace(parts[i]))
-		if opt == "no-resolve" {
+	for _, rawOpt := range opts {
+		if strings.EqualFold(strings.TrimSpace(rawOpt), "no-resolve") {
 			rule.NoResolve = true
 		}
 	}
 
-	// Parse IPNet if CIDR
-	if rType == RuleIPCidr || rType == RuleIPCidr6 {
-		_, ipNet, err := net.ParseCIDR(val)
-		if err == nil {
+	switch rType {
+	case RuleIPCidr, RuleIPCidr6, RuleSrcIPCidr:
+		if _, ipNet, err := net.ParseCIDR(val); err == nil {
 			rule.IPNet = ipNet
-		} else {
-			// Try parsing as single IP
-			ip := net.ParseIP(val)
-			if ip != nil {
-				mask := net.CIDRMask(32, 32)
-				if ip.To4() == nil {
-					mask = net.CIDRMask(128, 128)
-				}
-				rule.IPNet = &net.IPNet{IP: ip, Mask: mask}
+		} else if ip := net.ParseIP(val); ip != nil {
+			mask := net.CIDRMask(32, 32)
+			if ip.To4() == nil {
+				mask = net.CIDRMask(128, 128)
 			}
+			rule.IPNet = &net.IPNet{IP: ip, Mask: mask}
+		}
+	case RuleIPSuffix, RuleSrcIPSuffix:
+		rule.IPSuffix = parseIPSuffix(val)
+	case RuleDstPort, RuleSrcPort, RuleInPort:
+		rule.PortRanges = parsePortRanges(val)
+	case RuleDomainWildcard, RuleProcessNameWildcard, RuleProcessPathWildcard:
+		rule.Regex = compileGlobRegex(val)
+	case RuleDomainRegex, RuleProcessNameRegex, RuleProcessPathRegex:
+		rule.Regex = compileCaseInsensitiveRegex(val)
+	case RuleUID:
+		if uid, err := strconv.Atoi(val); err == nil && uid >= 0 {
+			rule.UIDVal = uid
+		}
+	case RuleDSCP:
+		if dscp, err := strconv.Atoi(val); err == nil && dscp >= 0 {
+			rule.DSCPVal = dscp
 		}
 	}
 
 	return rule, true
+}
+
+func isCommaPayloadType(ruleType string) bool {
+	switch ruleType {
+	case "HOST-REGEX", "DOMAIN-REGEX", "PROCESS-NAME-REGEX", "PROCESS-PATH-REGEX":
+		return true
+	default:
+		return false
+	}
 }
 
 func parseRemoteFilterLine(line string) (RemoteFilter, bool) {

@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -59,12 +57,11 @@ import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.logs.component.AppFilterBottomSheet
 import app.pwhs.blockads.ui.logs.component.DomainDetailBottomSheet
 import app.pwhs.blockads.ui.logs.component.DomainDetailContent
-import app.pwhs.blockads.ui.logs.component.LogEntryItem
 import app.pwhs.blockads.ui.logs.component.LogFilterControlBar
 import app.pwhs.blockads.ui.logs.component.LogSearchBar
 import app.pwhs.blockads.ui.logs.component.LogTopBar
+import app.pwhs.blockads.ui.logs.component.LogsFeedList
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
-import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.logs.dialog.ConfirmClearLogDialog
 import app.pwhs.blockads.ui.theme.SecurityOrange
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -86,6 +83,8 @@ fun LogsScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val timeRange by viewModel.timeRange.collectAsStateWithLifecycle()
     val appFilter by viewModel.appFilter.collectAsStateWithLifecycle()
+    val queryTypeFilter by viewModel.queryTypeFilter.collectAsStateWithLifecycle()
+    val grouping by viewModel.grouping.collectAsStateWithLifecycle()
     val appNames by viewModel.appNames.collectAsStateWithLifecycle()
     val appPackages by viewModel.appPackages.collectAsStateWithLifecycle()
     val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle()
@@ -166,7 +165,9 @@ fun LogsScreen(
                 onExportLogs = { viewModel.exportLogs() },
                 onClearLogs = { showClearConfirm = true },
                 logRetentionDays = logRetentionDays,
-                onOpenRetentionSettings = { showRetentionDialog = true }
+                onOpenRetentionSettings = { showRetentionDialog = true },
+                grouping = grouping,
+                onGroupingChange = { viewModel.setGrouping(it) }
             )
         }
     ) { innerPadding ->
@@ -229,15 +230,11 @@ fun LogsScreen(
                 appFilter = appFilter,
                 onOpenAppFilter = { showAppFilterSheet = true },
                 onClearAppFilter = { viewModel.setAppFilter("") },
+                queryTypeFilter = queryTypeFilter,
+                onClearQueryTypeFilter = { viewModel.setQueryTypeFilter("") },
                 selectedBlockSources = selectedBlockSources,
                 onToggleBlockSource = { viewModel.toggleBlockSource(it) },
-                onResetFilters = {
-                    viewModel.setAppFilter("")
-                    viewModel.setTimeRange(TimeRange.ALL)
-                    viewModel.setSearchQuery("")
-                    viewModel.setFilterStatus(LogFilterStatus.ALL)
-                    viewModel.resetBlockSources()
-                }
+                onResetFilters = { viewModel.resetAllFilters() }
             )
 
             // Main log list or empty state
@@ -265,32 +262,29 @@ fun LogsScreen(
                     }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    item { Spacer(modifier = Modifier.height(4.dp)) }
-                    items(logs, key = { it.id }) { entry ->
-                        val isDomainWhitelisted = whitelistedDomains.contains(
-                            entry.domain.lowercase()
-                        )
-                        LogEntryItem(
-                            entry = entry,
-                            isWhitelisted = isDomainWhitelisted,
-                            isSelectionMode = selectionMode,
-                            isSelected = selectedIds.contains(entry.id),
-                            filterNames = filterNames,
-                            onTap = { selectedEntry = entry },
-                            onLongPress = { viewModel.toggleSelection(entry.id) },
-                            onToggleSelection = { viewModel.toggleSelection(entry.id) },
-                            onQuickBlock = { viewModel.addToCustomBlockRules(entry.domain) },
-                            onQuickWhitelist = { viewModel.addToWhitelist(entry.domain) }
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(16.dp)) }
-                }
+                LogsFeedList(
+                    logs = logs,
+                    grouping = grouping,
+                    filterSignature = listOf(
+                        filterStatus,
+                        timeRange,
+                        appFilter,
+                        queryTypeFilter,
+                        searchQuery,
+                        selectedBlockSources
+                    ),
+                    whitelistedDomains = whitelistedDomains,
+                    selectionMode = selectionMode,
+                    selectedIds = selectedIds,
+                    filterNames = filterNames,
+                    onSelectEntry = { selectedEntry = it },
+                    onToggleSelection = { viewModel.toggleSelection(it) },
+                    onQuickBlock = { viewModel.addToCustomBlockRules(it) },
+                    onQuickWhitelist = { viewModel.addToWhitelist(it) },
+                    onFilterApp = { viewModel.setAppFilter(it) },
+                    onFilterQueryType = { viewModel.setQueryTypeFilter(it) },
+                    onFilterBlockSource = { viewModel.filterByBlockSourceOnly(it) }
+                )
             }
         }
         }

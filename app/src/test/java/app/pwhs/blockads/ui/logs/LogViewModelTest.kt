@@ -20,6 +20,7 @@ import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.keepHot
 import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
+import app.pwhs.blockads.ui.logs.data.LogGrouping
 import app.pwhs.blockads.ui.logs.data.TimeRange
 import app.pwhs.blockads.ui.settle
 import io.mockk.coEvery
@@ -356,5 +357,65 @@ class LogViewModelTest {
         vm.resetBlockSources()
         assertEquals(BlockSource.entries.toSet(), vm.selectedBlockSources.value)
         assertEquals(listOf(1L, 2L, 3L, 4L), vm.logs.value.map { it.id })
+    }
+
+    @Test
+    fun `query type filter toggles and filters matching entries`() = runTest {
+        table.value = listOf(
+            DnsLogEntry(id = 1, domain = "a.com", isBlocked = false, queryType = "A"),
+            DnsLogEntry(id = 2, domain = "b.com", isBlocked = true, queryType = "AAAA"),
+            DnsLogEntry(id = 3, domain = "c.com", isBlocked = false, queryType = "HTTPS")
+        )
+        keepHot(vm.logs, vm.queryTypeFilter)
+
+        vm.setQueryTypeFilter("AAAA")
+        assertEquals("AAAA", vm.queryTypeFilter.value)
+        assertEquals(listOf(2L), vm.logs.value.map { it.id })
+
+        // Tapping same query type again clears it
+        vm.setQueryTypeFilter("aaaa")
+        assertEquals("", vm.queryTypeFilter.value)
+        assertEquals(listOf(1L, 2L, 3L), vm.logs.value.map { it.id })
+    }
+
+    @Test
+    fun `filterByBlockSourceOnly switches to blocked and toggles back cleanly`() = runTest {
+        table.value = listOf(
+            entry(1, "fw.com", true, by = FilterListRepository.BLOCK_REASON_FIREWALL),
+            entry(2, "ad.com", true, by = "7"),
+            entry(3, "ok.com", false, by = "")
+        )
+        keepHot(vm.logs, vm.filterStatus, vm.selectedBlockSources)
+
+        vm.filterByBlockSourceOnly(BlockSource.FIREWALL)
+        assertEquals(LogFilterStatus.BLOCKED, vm.filterStatus.value)
+        assertEquals(setOf(BlockSource.FIREWALL), vm.selectedBlockSources.value)
+        assertEquals(listOf(1L), vm.logs.value.map { it.id })
+
+        // Calling again with same sole source restores all block sources
+        vm.filterByBlockSourceOnly(BlockSource.FIREWALL)
+        assertEquals(BlockSource.entries.toSet(), vm.selectedBlockSources.value)
+        assertEquals(listOf(1L, 2L), vm.logs.value.map { it.id })
+    }
+
+    @Test
+    fun `setGrouping updates grouping mode and resetAllFilters clears all filters`() = runTest {
+        vm.setGrouping(LogGrouping.BY_DOMAIN)
+        assertEquals(LogGrouping.BY_DOMAIN, vm.grouping.value)
+
+        vm.setAppFilter("Chrome")
+        vm.setQueryTypeFilter("HTTPS")
+        vm.setFilterStatus(LogFilterStatus.BLOCKED)
+        vm.setTimeRange(TimeRange.HOUR_1)
+        vm.setSearchQuery("ads")
+        vm.toggleBlockSource(BlockSource.FIREWALL)
+
+        vm.resetAllFilters()
+        assertEquals("", vm.appFilter.value)
+        assertEquals("", vm.queryTypeFilter.value)
+        assertEquals(LogFilterStatus.ALL, vm.filterStatus.value)
+        assertEquals(TimeRange.ALL, vm.timeRange.value)
+        assertEquals("", vm.searchQuery.value)
+        assertEquals(BlockSource.entries.toSet(), vm.selectedBlockSources.value)
     }
 }

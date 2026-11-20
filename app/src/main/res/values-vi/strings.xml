@@ -171,4 +171,45 @@
     <string name="home_widget_top_countries_desc">Top quốc gia đích kết nối trong 24 giờ qua</string>
     <string name="home_widget_24h_badge">24h</string>
     <string name="home_widget_stats_link">Thống kê</string>
+
+    <string name="log_group_none">Mới nhất (Phẳng)</string>
+    <string name="log_group_by_domain">Nhóm theo tên miền</string>
+    <string name="log_group_by_app">Nhóm theo ứng dụng</string>
+    <string name="log_group_blocked_badge">%1$d bị chặn</string>
+    <string name="log_jump_to_latest">Mới nhất</string>
+    <string name="log_jump_to_latest_count">%1$d mới</string>
+    <string name="log_filter_query_type">Loại: %1$s</string>
+
+    <string name="rule_presets_title">Kho Rule mẫu nhanh</string>
+    <string name="rule_presets_subtitle">Chọn một hoặc nhiều gói rule để thêm nhanh</string>
+    <string name="rule_presets_apply">Thêm %1$d rule</string>
+    <string name="rule_presets_added">Đã thêm %1$d rule mẫu</string>
+    <string name="rule_preset_block_doh">Chặn DoH / Vượt mặt DNS</string>
+    <string name="rule_preset_block_quic">Chặn QUIC (UDP 443)</string>
+    <string name="rule_preset_block_stun">Chặn STUN / Rò rỉ WebRTC</string>
+    <string name="rule_preset_block_dot">Chặn DoT (Cổng 853)</string>
+    <string name="rule_preset_block_loopback">Chặn truy cập Loopback</string>
+    <string name="rule_preset_block_telemetry">Chặn Telemetry &amp; Phân tích</string>
+    <string name="rule_preset_block_social_trackers">Chặn Tracker mạng xã hội</string>
+    <string name="rule_preset_block_oem_telemetry">Chặn Telemetry hãng thiết bị</string>
+    <string name="rule_preset_block_crypto_miners">Chặn đào tiền ảo (Crypto Miners)</string>
+    <string name="rule_preset_allow_lan">Cho phép mạng LAN &amp; nội bộ</string>
+    <string name="rule_preset_allow_system_push">Cho phép dịch vụ hệ thống &amp; Push</string>
+    <string name="rule_preset_allow_bittorrent">Cho phép BitTorrent đi thẳng</string>
+    <string name="rule_param_hint_host_wildcard">VD: *.ads.*.example.com</string>
+    <string name="rule_param_hint_host_regex">VD: ^ad[0-9]+\\..+\\.com$</string>
+    <string name="rule_type_desc_host_suffix">Khớp tên miền và toàn bộ tên miền phụ (subdomain).</string>
+    <string name="rule_type_desc_host">Chỉ khớp chính xác tên miền đã nhập.</string>
+    <string name="rule_type_desc_host_keyword">Khớp mọi tên miền có chứa từ khóa này.</string>
+    <string name="rule_type_desc_host_wildcard">Khớp theo ký tự đại diện * (nhiều ký tự) và ? (1 ký tự).</string>
+    <string name="rule_type_desc_host_regex">Khớp tên miền bằng biểu thức chính quy (không phân biệt hoa thường).</string>
+    <string name="rule_type_desc_ip_cidr">Khớp dải địa chỉ IPv4 theo định dạng CIDR.</string>
+    <string name="rule_type_desc_ip_cidr6">Khớp dải địa chỉ IPv6 theo định dạng CIDR.</string>
+    <string name="rule_type_desc_geoip">Khớp mã quốc gia máy chủ (VD: VN, US).</string>
+    <string name="rule_type_desc_user_agent">Khớp chuỗi User-Agent của trình duyệt/ứng dụng.</string>
+    <string name="rule_type_desc_final">Quy tắc mặc định khi không khớp quy tắc nào phía trên.</string>
+    <string name="rule_regex_invalid">Biểu thức chính quy không hợp lệ</string>
+    <string name="rule_reorder_mode">Sắp xếp độ ưu tiên</string>
+    <string name="rule_bulk_selected">Đã chọn %1$d</string>
+    <string name="rule_bulk_deleted">Đã xoá %1$d rule</string>
 </resources>

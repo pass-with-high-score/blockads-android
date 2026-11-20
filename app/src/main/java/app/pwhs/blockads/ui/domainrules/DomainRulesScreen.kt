@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.domainrules
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,13 +16,10 @@ import androidx.compose.material.icons.automirrored.filled.AltRoute
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
@@ -32,8 +30,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -56,12 +51,14 @@ import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
 import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
+import app.pwhs.blockads.ui.domainrules.component.DomainRulesTopBar
 import app.pwhs.blockads.ui.domainrules.component.SniProxyTab
 import app.pwhs.blockads.ui.domainrules.component.WhitelistTab
 import app.pwhs.blockads.ui.domainrules.dialog.AddEditSniProxyRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.AddFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.EditFilterRuleDialog
 import app.pwhs.blockads.ui.domainrules.dialog.ImportDomainsBottomSheet
+import app.pwhs.blockads.ui.domainrules.dialog.RulePresetSheet
 import app.pwhs.blockads.ui.domainrules.dialog.RuleTypesDocSheet
 import app.pwhs.blockads.ui.event.UiEventEffect
 import app.pwhs.blockads.ui.theme.TextSecondary
@@ -86,12 +83,30 @@ fun DomainRulesScreen(
     var editingSniProxyRule by remember { mutableStateOf<SniProxyRule?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showRuleDocSheet by remember { mutableStateOf(false) }
+    var showPresetSheet by remember { mutableStateOf(false) }
     var editingRule by remember { mutableStateOf<ParsedFilterRule?>(null) }
+    var selectedRuleIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var isReorderMode by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(initialPage = 0) { 3 }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalContext.current.resources
+
+    BackHandler(enabled = selectedRuleIds.isNotEmpty() || isReorderMode) {
+        if (selectedRuleIds.isNotEmpty()) {
+            selectedRuleIds = emptySet()
+        } else {
+            isReorderMode = false
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        selectedRuleIds = emptySet()
+        if (pagerState.currentPage == 2) {
+            isReorderMode = false
+        }
+    }
 
     val displayableRules = remember(profileFilterRules) {
         profileFilterRules.filter { it.type != "FINAL" }
@@ -99,7 +114,7 @@ fun DomainRulesScreen(
 
     val whitelistRules = remember(displayableRules, searchQuery) {
         displayableRules.filter {
-            it.policy.equals("DIRECT", ignoreCase = true) &&
+            (it.policy.equals("DIRECT", ignoreCase = true) || it.policy.startsWith("PASS", ignoreCase = true)) &&
                 (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
         }
     }
@@ -143,57 +158,49 @@ fun DomainRulesScreen(
         modifier = modifier,
         snackbarHost = { UndoSnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.domain_rules_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        val totalRules = displayableRules.size + sniProxyRules.size
-                        Text(
-                            text = pluralStringResource(R.plurals.domain_rules_count, totalRules, totalRules),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+            val activeTabRules = when (pagerState.currentPage) {
+                0 -> whitelistRules
+                1 -> blocklistRules
+                else -> emptyList()
+            }
+            DomainRulesTopBar(
+                totalRules = displayableRules.size + sniProxyRules.size,
+                selectedCount = selectedRuleIds.size,
+                isReorderMode = isReorderMode,
+                showRuleActions = pagerState.currentPage != 2,
+                onClearSelection = { selectedRuleIds = emptySet() },
+                onSelectAll = {
+                    val allIds = activeTabRules.map { it.id.ifEmpty { it.rawLine } }.toSet()
+                    selectedRuleIds = if (selectedRuleIds.containsAll(allIds) && allIds.isNotEmpty()) {
+                        emptySet()
+                    } else {
+                        allIds
                     }
                 },
-                actions = {
-                    IconButton(
-                        onClick = { showRuleDocSheet = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(R.string.rule_docs_action_tooltip)
-                        )
+                onBulkDelete = {
+                    val targets = activeTabRules.filter {
+                        it.id.ifEmpty { it.rawLine } in selectedRuleIds
                     }
-                    IconButton(
-                        onClick = { showImportDialog = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FileUpload,
-                            contentDescription = stringResource(R.string.settings_import)
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            if (pagerState.currentPage == 2) {
-                                viewModel.loadInstalledAppsIfNeeded()
-                                editingSniProxyRule = null
-                                sniProxyPresetYouTube = false
-                                showSniProxyDialog = true
-                            } else {
-                                showAddDialog = true
-                            }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                    }
+                    viewModel.bulkDeleteRules(targets)
+                    selectedRuleIds = emptySet()
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                onToggleReorderMode = {
+                    selectedRuleIds = emptySet()
+                    isReorderMode = !isReorderMode
+                },
+                onOpenPresets = { showPresetSheet = true },
+                onOpenDocs = { showRuleDocSheet = true },
+                onOpenImport = { showImportDialog = true },
+                onAddClick = {
+                    if (pagerState.currentPage == 2) {
+                        viewModel.loadInstalledAppsIfNeeded()
+                        editingSniProxyRule = null
+                        sniProxyPresetYouTube = false
+                        showSniProxyDialog = true
+                    } else {
+                        showAddDialog = true
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -349,6 +356,12 @@ fun DomainRulesScreen(
                     0 -> WhitelistTab(
                         rules = whitelistRules,
                         appLabelMap = appLabelMap,
+                        selectedIds = selectedRuleIds,
+                        isReorderMode = isReorderMode,
+                        onToggleSelect = { id ->
+                            selectedRuleIds = if (id in selectedRuleIds) selectedRuleIds - id else selectedRuleIds + id
+                        },
+                        onSwapPriority = { a, b -> viewModel.swapRulePriority(a, b) },
                         onToggle = { viewModel.toggleProfileRule(it) },
                         onRemove = { viewModel.removeProfileRule(it) },
                         onEdit = {
@@ -359,6 +372,12 @@ fun DomainRulesScreen(
                     1 -> BlocklistTab(
                         rules = blocklistRules,
                         appLabelMap = appLabelMap,
+                        selectedIds = selectedRuleIds,
+                        isReorderMode = isReorderMode,
+                        onToggleSelect = { id ->
+                            selectedRuleIds = if (id in selectedRuleIds) selectedRuleIds - id else selectedRuleIds + id
+                        },
+                        onSwapPriority = { a, b -> viewModel.swapRulePriority(a, b) },
                         onToggle = { viewModel.toggleProfileRule(it) },
                         onRemove = { viewModel.removeProfileRule(it) },
                         onEdit = {
@@ -472,6 +491,13 @@ fun DomainRulesScreen(
     if (showRuleDocSheet) {
         RuleTypesDocSheet(
             onDismiss = { showRuleDocSheet = false }
+        )
+    }
+
+    if (showPresetSheet) {
+        RulePresetSheet(
+            onDismiss = { showPresetSheet = false },
+            onApply = { presets -> viewModel.addPresetRules(presets) }
         )
     }
 }

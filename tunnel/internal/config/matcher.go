@@ -82,14 +82,45 @@ func (m *Matcher) Match(domain string, ipStr string) (string, string) {
 	return m.MatchNetIP(domain, ip)
 }
 
-// MatchNetIP evaluates domain and client net.IP directly without string allocation.
+// MatchNetIP evaluates domain and destination net.IP directly without string allocation.
 func (m *Matcher) MatchNetIP(domain string, ip net.IP) (string, string) {
-	normDomain := NormalizeDomain(domain)
+	return MatchRuleContext(m, MatchContext{
+		Domain: domain,
+		DstIP:  ip,
+		UID:    -1,
+		DSCP:   -1,
+	})
+}
 
-	// Check dns_exclusion_list first for domains
-	if normDomain != "" {
+// MatchWithUA evaluates domain, IP, and user-agent against rules.
+func (m *Matcher) MatchWithUA(domain string, ipStr string, userAgent string) (string, string) {
+	var ip net.IP
+	if ipStr != "" {
+		ip = net.ParseIP(strings.TrimSpace(ipStr))
+	}
+	return MatchRuleContext(m, MatchContext{
+		Domain:    domain,
+		DstIP:     ip,
+		UserAgent: userAgent,
+		UID:       -1,
+		DSCP:      -1,
+	})
+}
+
+// MatchRuleContext evaluates full L3/L4/L7 metadata against all rules in order.
+// Kept as a package function so gomobile-exported Matcher aliases stay unchanged.
+func MatchRuleContext(m *Matcher, ctx MatchContext) (string, string) {
+	if m == nil {
+		return PolicyDirect, "FINAL"
+	}
+	ctx.Domain = NormalizeDomain(ctx.Domain)
+	ctx.Network = strings.ToUpper(strings.TrimSpace(ctx.Network))
+	ctx.InType = strings.ToUpper(strings.TrimSpace(ctx.InType))
+	ctx.UserAgent = strings.ToLower(strings.TrimSpace(ctx.UserAgent))
+
+	if ctx.Domain != "" {
 		for _, excl := range m.dnsExclusionList {
-			if matchDomainExclusion(excl, normDomain) {
+			if matchDomainExclusion(excl, ctx.Domain) {
 				return PolicyDirect, "dns_exclusion_list:" + excl
 			}
 		}
@@ -98,66 +129,125 @@ func (m *Matcher) MatchNetIP(domain string, ip net.IP) (string, string) {
 	for i := range m.rules {
 		r := &m.rules[i]
 		if r.Type == RuleFinal {
-			continue // FINAL is a fallback, specific rules always take precedence
-		}
-		if m.matches(r, normDomain, ip) {
-			return r.Policy, r.Value
-		}
-	}
-	return m.finalPolicy, "FINAL"
-}
-
-// MatchWithUA evaluates domain, IP, and user-agent against rules.
-func (m *Matcher) MatchWithUA(domain string, ipStr string, userAgent string) (string, string) {
-	normDomain := NormalizeDomain(domain)
-	var ip net.IP
-	if ipStr != "" {
-		ip = net.ParseIP(strings.TrimSpace(ipStr))
-	}
-	normUA := strings.ToLower(strings.TrimSpace(userAgent))
-
-	for i := range m.rules {
-		r := &m.rules[i]
-		if r.Type == RuleFinal {
-			continue // FINAL is a fallback, specific rules always take precedence
-		}
-		if r.Type == RuleUserAgent {
-			if normUA != "" && matchWildcard(r.Value, normUA) {
-				return r.Policy, r.Value
-			}
 			continue
 		}
-		if m.matches(r, normDomain, ip) {
+		if m.matchesRule(r, &ctx) {
+			if r.Policy == PolicyPass || r.Policy == PolicyPassRule {
+				return r.Policy, r.Value
+			}
 			return r.Policy, r.Value
 		}
 	}
-
 	return m.finalPolicy, "FINAL"
 }
 
-func (m *Matcher) matches(r *Rule, domain string, ip net.IP) bool {
+func (m *Matcher) matchesRule(r *Rule, ctx *MatchContext) bool {
 	switch r.Type {
 	case RuleHost:
-		return domain == r.Value
+		return ctx.Domain != "" && ctx.Domain == r.Value
 
 	case RuleHostSuffix:
-		return domain == r.Value || strings.HasSuffix(domain, "."+r.Value)
+		return ctx.Domain != "" && (ctx.Domain == r.Value || strings.HasSuffix(ctx.Domain, "."+r.Value))
 
 	case RuleHostKeyword:
-		return strings.Contains(domain, r.Value)
+		return ctx.Domain != "" && strings.Contains(ctx.Domain, r.Value)
+
+	case RuleDomainWildcard, RuleDomainRegex:
+		return ctx.Domain != "" && r.Regex != nil && r.Regex.MatchString(ctx.Domain)
+
+	case RuleGeoSite:
+		return matchGeoSite(r.Value, ctx.Domain)
 
 	case RuleIPCidr, RuleIPCidr6:
-		if ip != nil && r.IPNet != nil {
-			return r.IPNet.Contains(ip)
+		return ctx.DstIP != nil && r.IPNet != nil && r.IPNet.Contains(ctx.DstIP)
+
+	case RuleIPSuffix:
+		return matchIPSuffix(r.IPSuffix, ctx.DstIP)
+
+	case RuleIPASN:
+		return ctx.DstASN != "" && strings.EqualFold(ctx.DstASN, r.Value)
+
+	case RuleGeoIP:
+		return m.matchGeoIP(r.Value, ctx.DstIP)
+
+	case RuleSrcIPCidr:
+		return ctx.SrcIP != nil && r.IPNet != nil && r.IPNet.Contains(ctx.SrcIP)
+
+	case RuleSrcIPSuffix:
+		return matchIPSuffix(r.IPSuffix, ctx.SrcIP)
+
+	case RuleSrcIPASN:
+		return ctx.SrcASN != "" && strings.EqualFold(ctx.SrcASN, r.Value)
+
+	case RuleSrcGeoIP:
+		return m.matchGeoIP(r.Value, ctx.SrcIP)
+
+	case RuleDstPort:
+		return matchPortRanges(r.PortRanges, ctx.DstPort)
+
+	case RuleSrcPort:
+		return matchPortRanges(r.PortRanges, ctx.SrcPort)
+
+	case RuleInPort:
+		return matchPortRanges(r.PortRanges, ctx.InPort)
+
+	case RuleNetwork:
+		return ctx.Network != "" && ctx.Network == r.Value
+
+	case RuleDSCP:
+		return ctx.DSCP >= 0 && r.DSCPVal >= 0 && ctx.DSCP == r.DSCPVal
+
+	case RuleProcessName:
+		return ctx.ProcessName != "" && strings.EqualFold(ctx.ProcessName, r.Value)
+
+	case RuleProcessNameRegex, RuleProcessNameWildcard:
+		return ctx.ProcessName != "" && r.Regex != nil && r.Regex.MatchString(ctx.ProcessName)
+
+	case RuleProcessPath:
+		return ctx.ProcessPath != "" && strings.EqualFold(ctx.ProcessPath, r.Value)
+
+	case RuleProcessPathRegex, RuleProcessPathWildcard:
+		return ctx.ProcessPath != "" && r.Regex != nil && r.Regex.MatchString(ctx.ProcessPath)
+
+	case RuleUID:
+		return ctx.UID >= 0 && r.UIDVal >= 0 && ctx.UID == r.UIDVal
+
+	case RuleInType:
+		return ctx.InType != "" && ctx.InType == r.Value
+
+	case RuleInUser:
+		return ctx.InUser != "" && strings.EqualFold(ctx.InUser, r.Value)
+
+	case RuleInName:
+		return ctx.InName != "" && strings.EqualFold(ctx.InName, r.Value)
+
+	case RuleUserAgent:
+		return ctx.UserAgent != "" && matchWildcard(r.Value, ctx.UserAgent)
+
+	case RuleAnd:
+		if len(r.SubRules) == 0 {
+			return false
+		}
+		for i := range r.SubRules {
+			if !m.matchesRule(&r.SubRules[i], ctx) {
+				return false
+			}
+		}
+		return true
+
+	case RuleOr:
+		for i := range r.SubRules {
+			if m.matchesRule(&r.SubRules[i], ctx) {
+				return true
+			}
 		}
 		return false
 
-	case RuleGeoIP:
-		if ip != nil && m.geoIPLookup != nil {
-			cc := m.geoIPLookup(ip)
-			return cc != "" && strings.EqualFold(cc, r.Value)
+	case RuleNot:
+		if len(r.SubRules) == 0 {
+			return false
 		}
-		return false
+		return !m.matchesRule(&r.SubRules[0], ctx)
 
 	case RuleFinal:
 		return true
@@ -165,6 +255,20 @@ func (m *Matcher) matches(r *Rule, domain string, ip net.IP) bool {
 	default:
 		return false
 	}
+}
+
+func (m *Matcher) matchGeoIP(countryCode string, ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	if strings.EqualFold(countryCode, "LAN") || strings.EqualFold(countryCode, "PRIVATE") {
+		return isPrivateOrLANIP(ip)
+	}
+	if m.geoIPLookup != nil {
+		cc := m.geoIPLookup(ip)
+		return cc != "" && strings.EqualFold(cc, countryCode)
+	}
+	return false
 }
 
 // RulesCount returns the total number of rules configured.
@@ -215,4 +319,3 @@ func matchDomainExclusion(pattern, domain string) bool {
 	}
 	return false
 }
-

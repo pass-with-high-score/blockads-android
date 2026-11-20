@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.DnsLogEntry
+import app.pwhs.blockads.ui.logs.data.BlockSource
 import app.pwhs.blockads.ui.theme.DangerRed
 import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.ui.theme.WhitelistAmber
@@ -62,7 +64,10 @@ fun LogEntryItem(
     onLongPress: () -> Unit = {},
     onToggleSelection: () -> Unit = {},
     onQuickBlock: () -> Unit = {},
-    onQuickWhitelist: () -> Unit = {}
+    onQuickWhitelist: () -> Unit = {},
+    onFilterApp: ((String) -> Unit)? = null,
+    onFilterQueryType: ((String) -> Unit)? = null,
+    onFilterBlockSource: ((BlockSource) -> Unit)? = null
 ) {
     val unknownLabel = stringResource(R.string.log_unknown_app)
     val displayInfo = remember(entry, unknownLabel) {
@@ -208,13 +213,21 @@ fun LogEntryItem(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 if (displayInfo.displayAppName.isNotEmpty()) {
+                    val canFilterApp = !isSelectionMode && onFilterApp != null && entry.appName.isNotBlank()
                     Text(
                         text = displayInfo.displayAppName,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        modifier = if (canFilterApp) {
+                            Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable { onFilterApp(entry.appName) }
+                        } else {
+                            Modifier
+                        }
                     )
                 }
                 Row(
@@ -230,11 +243,26 @@ fun LogEntryItem(
                         text = "·",
                         color = TextSecondary
                     )
-                    Text(
-                        text = displayInfo.protocolOrType,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary
-                    )
+                    val canFilterQueryType = !isSelectionMode && onFilterQueryType != null && entry.queryType.isNotBlank()
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                            .then(
+                                if (canFilterQueryType) {
+                                    Modifier.clickable { onFilterQueryType(entry.queryType) }
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .padding(horizontal = 5.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = displayInfo.protocolOrType,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     if (entry.responseTimeMs > 0) {
                         Text(
                             text = "·",
@@ -251,27 +279,39 @@ fun LogEntryItem(
                 // Block source tag
                 if (entry.isBlocked && entry.blockedBy.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp))
-                    val (sourceText, sourceColor) = when (entry.blockedBy.uppercase()) {
+                    val (sourceText, sourceColor, resolvedSource) = when (entry.blockedBy.uppercase()) {
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_FILTER_LIST -> 
-                            stringResource(R.string.block_reason_filter_list) to DangerRed
+                            Triple(stringResource(R.string.block_reason_filter_list), DangerRed, BlockSource.FILTER_LIST)
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_SECURITY -> 
-                            stringResource(R.string.block_reason_security) to app.pwhs.blockads.ui.theme.SecurityOrange
+                            Triple(stringResource(R.string.block_reason_security), app.pwhs.blockads.ui.theme.SecurityOrange, BlockSource.SECURITY)
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_CUSTOM_RULE -> 
-                            stringResource(R.string.block_reason_custom_rule) to WhitelistAmber
+                            Triple(stringResource(R.string.block_reason_custom_rule), WhitelistAmber, BlockSource.CUSTOM_RULE)
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_FIREWALL -> 
-                            stringResource(R.string.block_reason_firewall) to MaterialTheme.colorScheme.primary
+                            Triple(stringResource(R.string.block_reason_firewall), MaterialTheme.colorScheme.primary, BlockSource.FIREWALL)
                         app.pwhs.blockads.data.repository.FilterListRepository.BLOCK_REASON_UPSTREAM_DNS, "UPSTREAM_DNS" -> 
-                            stringResource(R.string.block_reason_upstream_dns) to app.pwhs.blockads.ui.theme.UpstreamDnsPurple
+                            Triple(stringResource(R.string.block_reason_upstream_dns), app.pwhs.blockads.ui.theme.UpstreamDnsPurple, BlockSource.UPSTREAM_DNS)
                         else -> {
                             val firstId = entry.blockedBy.split(",").first()
-                            (filterNames[firstId] ?: entry.blockedBy) to TextSecondary
+                            Triple(
+                                filterNames[firstId] ?: entry.blockedBy,
+                                TextSecondary,
+                                BlockSource.resolveSources(entry.blockedBy).first()
+                            )
                         }
                     }
-                    
+
+                    val canFilterSource = !isSelectionMode && onFilterBlockSource != null
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .background(sourceColor.copy(alpha = 0.15f))
+                            .then(
+                                if (canFilterSource) {
+                                    Modifier.clickable { onFilterBlockSource(resolvedSource) }
+                                } else {
+                                    Modifier
+                                }
+                            )
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(

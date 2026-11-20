@@ -231,7 +231,19 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 			_ = conn.Close()
 			return
 		}
-		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
+		// Gate -1.6: Full Ruleset L3/L4/Logic evaluation (IP-CIDR, DST-PORT, NETWORK, UID, AND/OR/NOT, REJECT-DROP)
+		if policy, matched := engine.evaluateFlowRuleset(flow, ProtocolUDP, uidr); policy != "" {
+			if policy == "REJECT" || policy == "REJECT-DROP" {
+				engine.reportBlockedFlow(flow, ProtocolUDP, "custom_rule:"+matched)
+				_ = conn.Close()
+				return
+			}
+			if policy == "DIRECT" {
+				engine.logConnection(flow, ProtocolUDP)
+				relay(conn)
+				return
+			}
+		}
 		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
 			engine.reportBlockedFlow(flow, ProtocolUDP, reason)
 			_ = conn.Close()
@@ -307,25 +319,37 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 			engine.reportBlockedFlow(flow, ProtocolTCP, "doh")
 			return
 		}
-		// Gate -1.6: Ruleset IP rules (e.g. IP-CIDR, REJECT)
-		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
-			engine.reportBlockedFlow(flow, ProtocolTCP, reason)
-			return
+		// Gate -1.6: Full Ruleset L3/L4/Logic evaluation (IP-CIDR, DST-PORT, NETWORK, UID, AND/OR/NOT, REJECT-DROP)
+		forceDirect := false
+		if policy, matched := engine.evaluateFlowRuleset(flow, ProtocolTCP, uidr); policy != "" {
+			if policy == "REJECT" || policy == "REJECT-DROP" {
+				engine.reportBlockedFlow(flow, ProtocolTCP, "custom_rule:"+matched)
+				return
+			}
+			if policy == "DIRECT" {
+				forceDirect = true
+			}
+		}
+		if !forceDirect {
+			if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
+				engine.reportBlockedFlow(flow, ProtocolTCP, reason)
+				return
+			}
 		}
 		// Gate -1.7: WebRTC STUN/TURN over TCP (ports 3478, 5349)
 		if engine.blockWebRTC.Load() && (flow.serverPort == 3478 || flow.serverPort == 5349) {
 			return
 		}
 		engine.logConnection(flow, ProtocolTCP)
-		if flow.serverPort == 443 {
+		if !forceDirect && flow.serverPort == 443 {
 			if handled, nextConn := trySniProxyRedirect(conn, flow, engine, uidr, protectFn); handled {
 				return
 			} else if nextConn != nil {
-				relayDirectFromFlow(nextConn, flow, engine, protectFn)
+				relayDirectFromFlow(nextConn, flow, engine, protectFn, false)
 				return
 			}
 		}
-		relayDirectFromFlow(conn, flow, engine, protectFn)
+		relayDirectFromFlow(conn, flow, engine, protectFn, forceDirect)
 	}
 }
 
@@ -335,15 +359,17 @@ func isStunPort(port int) bool {
 	return port == 3478 || port == 5349 || (port >= 19302 && port <= 19309)
 }
 
-func relayDirectFromFlow(clientConn net.Conn, flow flowID, engine *Engine, protectFn func(fd int) bool) {
-	if remote, used, err := engine.DialProxy(flow.serverIP, flow.serverPort); used {
-		if err != nil {
-			logf("[FullTunnel] proxy dial %s:%d failed: %v", flow.serverIP, flow.serverPort, err)
+func relayDirectFromFlow(clientConn net.Conn, flow flowID, engine *Engine, protectFn func(fd int) bool, forceDirect bool) {
+	if !forceDirect {
+		if remote, used, err := engine.DialProxy(flow.serverIP, flow.serverPort); used {
+			if err != nil {
+				logf("[FullTunnel] proxy dial %s:%d failed: %v", flow.serverIP, flow.serverPort, err)
+				return
+			}
+			defer remote.Close()
+			bidiCopyFlow(clientConn, remote)
 			return
 		}
-		defer remote.Close()
-		bidiCopyFlow(clientConn, remote)
-		return
 	}
 
 	dialer := &net.Dialer{

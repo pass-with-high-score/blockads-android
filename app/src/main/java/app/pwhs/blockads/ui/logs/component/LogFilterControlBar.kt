@@ -61,6 +61,8 @@ fun LogFilterControlBar(
     appFilter: String,
     onOpenAppFilter: () -> Unit,
     onClearAppFilter: () -> Unit,
+    queryTypeFilter: String = "",
+    onClearQueryTypeFilter: () -> Unit = {},
     selectedBlockSources: Set<BlockSource> = BlockSource.entries.toSet(),
     onToggleBlockSource: (BlockSource) -> Unit = {},
     onResetFilters: () -> Unit,
@@ -258,9 +260,39 @@ fun LogFilterControlBar(
                 modifier = Modifier.weight(1f, fill = false)
             )
 
+            // Active Query Type Chip (added via one-tap on log tag)
+            if (queryTypeFilter.isNotEmpty()) {
+                FilterChip(
+                    selected = true,
+                    onClick = onClearQueryTypeFilter,
+                    label = {
+                        Text(
+                            text = stringResource(R.string.log_filter_query_type, queryTypeFilter),
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear",
+                            modifier = Modifier.size(14.dp)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                )
+            }
+
             // Reset Filter Button (visible if any custom filter is active)
             val isBlockSourceFiltered = selectedBlockSources.size < BlockSource.entries.size
-            val hasActiveFilter = isAppFiltered || timeRange != TimeRange.ALL || filterStatus != LogFilterStatus.ALL || isBlockSourceFiltered
+            val hasActiveFilter = isAppFiltered ||
+                queryTypeFilter.isNotEmpty() ||
+                timeRange != TimeRange.ALL ||
+                filterStatus != LogFilterStatus.ALL ||
+                isBlockSourceFiltered
             AnimatedVisibility(
                 visible = hasActiveFilter,
                 enter = fadeIn(),

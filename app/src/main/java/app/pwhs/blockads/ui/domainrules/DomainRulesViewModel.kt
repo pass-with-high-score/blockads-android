@@ -13,6 +13,12 @@ import app.pwhs.blockads.data.entities.WhitelistDomain
 import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.data.repository.FilterListRepository
 import app.pwhs.blockads.service.ServiceController
+import app.pwhs.blockads.ui.domainrules.DomainRuleFormatters.formatRuleLine
+import app.pwhs.blockads.ui.domainrules.DomainRuleFormatters.normalizePackageNames
+import app.pwhs.blockads.ui.domainrules.DomainRuleFormatters.sanitizeDomain
+import app.pwhs.blockads.ui.domainrules.DomainRuleFormatters.sanitizeParam
+import app.pwhs.blockads.ui.domainrules.DomainRuleFormatters.toParsedFilterRule
+import app.pwhs.blockads.ui.domainrules.data.RulePreset
 import app.pwhs.blockads.ui.event.UiEvent
 import app.pwhs.blockads.ui.event.toast
 import app.pwhs.blockads.utils.ParsedFilterRule
@@ -72,49 +78,6 @@ class DomainRulesViewModel(
 
     private val _undoRemovedRule = MutableSharedFlow<ParsedFilterRule>(extraBufferCapacity = 1)
     val undoRemovedRule: SharedFlow<ParsedFilterRule> = _undoRemovedRule.asSharedFlow()
-
-    private fun sanitizeDomain(input: String): String {
-        var d = input.trim().lowercase()
-        if (d.startsWith("http://")) d = d.removePrefix("http://")
-        if (d.startsWith("https://")) d = d.removePrefix("https://")
-        val slash = d.indexOf('/')
-        if (slash != -1) d = d.substring(0, slash)
-        val colon = d.indexOf(':')
-        if (colon != -1) d = d.substring(0, colon)
-        return d.trim()
-    }
-
-    private fun toParsedFilterRule(rule: CustomDnsRule): ParsedFilterRule {
-        val parts = rule.rule.split(",").map { it.trim() }
-        val defaultPolicy = if (rule.ruleType == RuleType.ALLOW) "DIRECT" else "REJECT"
-        val (type, param, policy) = when {
-            parts.size >= 3 -> Triple(parts[0].uppercase(), parts[1], parts[2].uppercase())
-            parts.size == 2 && parts[0].equals("FINAL", ignoreCase = true) ->
-                Triple("FINAL", "", parts[1].uppercase())
-            rule.rule.startsWith("||") && rule.rule.endsWith("^") ->
-                Triple("HOST-SUFFIX", rule.domain, defaultPolicy)
-            rule.rule.startsWith("@@||") && rule.rule.endsWith("^") ->
-                Triple("HOST-SUFFIX", rule.domain, "DIRECT")
-            else -> Triple("HOST", rule.domain, defaultPolicy)
-        }
-        return ParsedFilterRule(
-            id = "custom:${rule.id}",
-            type = type,
-            param = param,
-            policy = policy,
-            isEnabled = rule.isEnabled,
-            rawLine = "custom:${rule.id}",
-            packageName = rule.packageName
-        )
-    }
-
-    private fun formatRuleLine(type: String, param: String, policy: String): String {
-        return if (type.equals("FINAL", ignoreCase = true)) {
-            "final, ${policy.lowercase()}"
-        } else {
-            "${type.lowercase()}, $param, ${policy.lowercase()}"
-        }
-    }
 
     // ── Whitelist ────────────────────────────────────────────
 
@@ -290,11 +253,7 @@ class DomainRulesViewModel(
         packageName: String = ""
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) {
-                sanitizeDomain(param)
-            } else {
-                param.trim()
-            }
+            val paramClean = sanitizeParam(type, param)
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
             val cleanPackage = normalizePackageNames(packageName)
@@ -345,11 +304,7 @@ class DomainRulesViewModel(
         packageName: String = ""
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val paramClean = if (type.startsWith("HOST", ignoreCase = true)) {
-                sanitizeDomain(param)
-            } else {
-                param.trim()
-            }
+            val paramClean = sanitizeParam(type, param)
             if (paramClean.isBlank() && !type.equals("FINAL", ignoreCase = true)) return@launch
 
             val cleanPackage = normalizePackageNames(packageName)
@@ -477,6 +432,95 @@ class DomainRulesViewModel(
         }
     }
 
+    fun addPresetRules(presets: List<RulePreset>) {
+        if (presets.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val toInsert = mutableListOf<CustomDnsRule>()
+            var baseTs = System.currentTimeMillis()
+            for (preset in presets) {
+                for (spec in preset.rules) {
+                    val paramClean = sanitizeParam(spec.type, spec.param)
+                    val ruleLine = formatRuleLine(spec.type, paramClean, spec.policy, spec.option)
+                    if (customDnsRuleDao.exists(ruleLine) == 0) {
+                        val ruleType = if (
+                            spec.policy.equals("DIRECT", ignoreCase = true) ||
+                            spec.policy.startsWith("PASS", ignoreCase = true)
+                        ) {
+                            RuleType.ALLOW
+                        } else {
+                            RuleType.BLOCK
+                        }
+                        toInsert.add(
+                            CustomDnsRule(
+                                rule = ruleLine,
+                                ruleType = ruleType,
+                                domain = paramClean,
+                                addedTimestamp = baseTs--
+                            )
+                        )
+                    }
+                }
+            }
+            if (toInsert.isNotEmpty()) {
+                customDnsRuleDao.insertAll(toInsert)
+                filterRepo.loadCustomRules()
+                _events.toast(R.string.rule_presets_added, listOf(toInsert.size))
+                requestVpnRestart()
+            }
+        }
+    }
+
+    fun bulkDeleteRules(rules: List<ParsedFilterRule>) {
+        if (rules.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val allWhitelists = whitelistDomainDao.getAll().first().associateBy { it.id }
+            val allCustoms = customDnsRuleDao.getAll().associateBy { it.id }
+            var removedWhitelist = false
+            var removedCustom = false
+            var removedCount = 0
+
+            for (rule in rules) {
+                if (rule.rawLine.startsWith("whitelist:")) {
+                    val id = rule.rawLine.removePrefix("whitelist:").toIntOrNull() ?: continue
+                    val target = allWhitelists[id] ?: continue
+                    whitelistDomainDao.delete(target)
+                    removedWhitelist = true
+                    removedCount++
+                } else if (rule.rawLine.startsWith("custom:")) {
+                    val id = rule.rawLine.removePrefix("custom:").toIntOrNull() ?: continue
+                    val target = allCustoms[id] ?: continue
+                    customDnsRuleDao.delete(target)
+                    removedCustom = true
+                    removedCount++
+                }
+            }
+            if (removedWhitelist) filterRepo.loadWhitelist()
+            if (removedCustom) filterRepo.loadCustomRules()
+            if (removedCount > 0) {
+                _events.toast(R.string.rule_bulk_deleted, listOf(removedCount))
+                requestVpnRestart()
+            }
+        }
+    }
+
+    fun swapRulePriority(first: ParsedFilterRule, second: ParsedFilterRule) {
+        if (!first.rawLine.startsWith("custom:") || !second.rawLine.startsWith("custom:")) return
+        viewModelScope.launch(Dispatchers.IO) {
+            val firstId = first.rawLine.removePrefix("custom:").toIntOrNull() ?: return@launch
+            val secondId = second.rawLine.removePrefix("custom:").toIntOrNull() ?: return@launch
+            val all = customDnsRuleDao.getAll()
+            val firstRule = all.firstOrNull { it.id == firstId } ?: return@launch
+            val secondRule = all.firstOrNull { it.id == secondId } ?: return@launch
+
+            val firstTs = firstRule.addedTimestamp
+            val secondTs = if (secondRule.addedTimestamp == firstTs) firstTs - 1L else secondRule.addedTimestamp
+            customDnsRuleDao.update(firstRule.copy(addedTimestamp = secondTs))
+            customDnsRuleDao.update(secondRule.copy(addedTimestamp = firstTs))
+            filterRepo.loadCustomRules()
+            requestVpnRestart()
+        }
+    }
+
     fun loadInstalledAppsIfNeeded() = sniProxyDelegate.loadInstalledAppsIfNeeded()
 
     fun saveSniProxyRule(rule: SniProxyRule) {
@@ -497,16 +541,6 @@ class DomainRulesViewModel(
             sniProxyDelegate.deleteRule(ruleId)
             _events.toast(R.string.sni_proxy_deleted)
         }
-    }
-
-    private fun normalizePackageNames(raw: String): String {
-        if (raw.isBlank()) return ""
-        return raw.split(',')
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
-            .sorted()
-            .joinToString(",")
     }
 
     private fun requestVpnRestart() {
