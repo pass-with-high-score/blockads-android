@@ -1,10 +1,13 @@
 package app.pwhs.blockads.ui.domainrules.dialog
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +27,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,49 +63,10 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.theme.DangerRed
+import app.pwhs.blockads.ui.theme.NeonGreen
 
-private val FILTER_TYPES = listOf(
-    "HOST-SUFFIX",
-    "HOST",
-    "HOST-KEYWORD",
-    "DOMAIN-WILDCARD",
-    "DOMAIN-REGEX",
-    "GEOSITE",
-    "IP-CIDR",
-    "IP-CIDR6",
-    "IP-SUFFIX",
-    "IP-ASN",
-    "GEOIP",
-    "SRC-IP-CIDR",
-    "SRC-IP-SUFFIX",
-    "SRC-IP-ASN",
-    "SRC-GEOIP",
-    "DST-PORT",
-    "SRC-PORT",
-    "IN-PORT",
-    "NETWORK",
-    "DSCP",
-    "PROCESS-NAME",
-    "PROCESS-NAME-REGEX",
-    "PROCESS-NAME-WILDCARD",
-    "PROCESS-PATH",
-    "PROCESS-PATH-REGEX",
-    "PROCESS-PATH-WILDCARD",
-    "UID",
-    "IN-TYPE",
-    "IN-USER",
-    "IN-NAME",
-    "USER-AGENT",
-    "RULE-SET",
-    "AND",
-    "OR",
-    "NOT",
-    "SUB-RULE",
-    "FINAL"
-)
-private val FILTER_POLICIES = listOf("REJECT", "REJECT-DROP", "DIRECT", "PASS", "PASS-RULE", "PROXY")
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FilterRuleDialog(
     onDismiss: () -> Unit,
@@ -120,27 +85,18 @@ fun FilterRuleDialog(
     var policy by remember(initialPolicy) { mutableStateOf(initialPolicy) }
     var packageName by remember(initialPackageName) { mutableStateOf(initialPackageName) }
 
-    var showTypeDropdown by remember { mutableStateOf(false) }
-    var showPolicyDropdown by remember { mutableStateOf(false) }
+    var showTypePickerSheet by remember { mutableStateOf(false) }
     var showAppPickerDialog by remember { mutableStateOf(false) }
+    var showParamAppPicker by remember { mutableStateOf(false) }
     var showDocSheet by remember { mutableStateOf(false) }
 
-    val isRegexInvalid = remember(type, param) {
-        val upper = type.uppercase()
-        val isRegexType = upper == "HOST-REGEX" || upper == "DOMAIN-REGEX" ||
-            upper == "PROCESS-NAME-REGEX" || upper == "PROCESS-PATH-REGEX"
-        if (!isRegexType || param.isBlank()) {
-            false
-        } else {
-            runCatching { Regex(param.trim()) }.isFailure
-        }
-    }
+    val paramError = remember(type, param) { validateRuleParam(type, param) }
 
-    val isConfirmEnabled = remember(type, param, policy, isRegexInvalid) {
+    val isConfirmEnabled = remember(type, param, policy, paramError) {
         if (type.equals("FINAL", ignoreCase = true)) {
             policy.isNotBlank()
         } else {
-            type.isNotBlank() && param.isNotBlank() && policy.isNotBlank() && !isRegexInvalid
+            type.isNotBlank() && param.isNotBlank() && policy.isNotBlank() && paramError == null
         }
     }
 
@@ -260,51 +216,12 @@ fun FilterRuleDialog(
                         )
                     }
                 }
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    UnderlineInputField(
-                        value = type,
-                        onValueChange = { type = it },
-                        placeholder = stringResource(R.string.rule_field_type),
-                        onClick = { showTypeDropdown = true }
-                    )
-
-                    DropdownMenu(
-                        expanded = showTypeDropdown,
-                        onDismissRequest = { showTypeDropdown = false }
-                    ) {
-                        FILTER_TYPES.forEach { opt ->
-                            DropdownMenuItem(
-                                text = { Text(opt) },
-                                onClick = {
-                                    type = opt
-                                    showTypeDropdown = false
-                                }
-                            )
-                        }
-                        HorizontalDivider()
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Outlined.Info,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.rule_docs_title),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            },
-                            onClick = {
-                                showTypeDropdown = false
-                                showDocSheet = true
-                            }
-                        )
-                    }
-                }
+                UnderlineInputField(
+                    value = type,
+                    onValueChange = { type = it },
+                    placeholder = stringResource(R.string.rule_field_type),
+                    onClick = { showTypePickerSheet = true }
+                )
 
                 val typeDescriptionRes = when (type.uppercase()) {
                     "HOST-SUFFIX", "DOMAIN-SUFFIX" -> R.string.rule_type_desc_host_suffix
@@ -321,10 +238,12 @@ fun FilterRuleDialog(
                     "FINAL", "MATCH" -> R.string.rule_type_desc_final
                     else -> null
                 }
-                if (typeDescriptionRes != null) {
+                val typeDescriptionText = typeDescriptionRes?.let { stringResource(it) }
+                    ?: RuleTypeCatalog.find(type)?.summary
+                if (!typeDescriptionText.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = stringResource(typeDescriptionRes),
+                        text = typeDescriptionText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
                     )
@@ -333,8 +252,9 @@ fun FilterRuleDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Field 2: Param *
+                val upperType = type.uppercase()
                 val isParamRequired = !type.equals("FINAL", ignoreCase = true)
-                val paramPlaceholder = when (type.uppercase()) {
+                val paramPlaceholder = when (upperType) {
                     "HOST-SUFFIX", "DOMAIN-SUFFIX" -> stringResource(R.string.rule_param_hint_host_suffix)
                     "HOST", "DOMAIN" -> stringResource(R.string.rule_param_hint_host)
                     "HOST-KEYWORD", "DOMAIN-KEYWORD" -> stringResource(R.string.rule_param_hint_host_keyword)
@@ -357,62 +277,100 @@ fun FilterRuleDialog(
                 }
 
                 FormFieldLabel(label = stringResource(R.string.rule_field_param), isRequired = isParamRequired)
-                UnderlineInputField(
-                    value = if (type.equals("FINAL", ignoreCase = true)) "" else param,
-                    onValueChange = { param = it },
-                    placeholder = paramPlaceholder,
-                    enabled = isParamRequired
-                )
-                if (isRegexInvalid) {
+                if (upperType == "NETWORK") {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(top = 6.dp)
+                    ) {
+                        QUICK_NETWORKS.forEach { net ->
+                            FilterChip(
+                                selected = param.equals(net, ignoreCase = true),
+                                onClick = { param = net },
+                                label = { Text(net) }
+                            )
+                        }
+                    }
+                } else {
+                    UnderlineInputField(
+                        value = if (!isParamRequired) "" else param,
+                        onValueChange = { param = it },
+                        placeholder = paramPlaceholder,
+                        enabled = isParamRequired
+                    )
+                    if (upperType == "GEOIP" || upperType == "SRC-GEOIP") {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            QUICK_COUNTRIES.forEach { code ->
+                                FilterChip(
+                                    selected = param.equals(code, ignoreCase = true),
+                                    onClick = { param = code },
+                                    label = { Text(code) }
+                                )
+                            }
+                        }
+                    } else if (upperType == "PROCESS-NAME" && installedApps.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        FilterChip(
+                            selected = false,
+                            onClick = { showParamAppPicker = true },
+                            label = { Text(stringResource(R.string.rule_pick_app_title)) }
+                        )
+                    }
+                }
+                if (paramError != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = stringResource(R.string.rule_regex_invalid),
+                        text = paramError,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Field 3: Policy *
                 FormFieldLabel(label = stringResource(R.string.rule_field_policy), isRequired = true)
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    val displayPolicy = when (policy.uppercase()) {
-                        "DIRECT" -> "DIRECT (Whitelist)"
-                        "REJECT" -> "REJECT (Blocklist)"
-                        "REJECT-DROP" -> "REJECT-DROP (Silent Drop)"
-                        else -> policy
-                    }
-                    UnderlineInputField(
-                        value = displayPolicy,
-                        onValueChange = { policy = it },
-                        placeholder = stringResource(R.string.rule_field_policy_hint),
-                        onClick = { showPolicyDropdown = true }
-                    )
-
-                    DropdownMenu(
-                        expanded = showPolicyDropdown,
-                        onDismissRequest = { showPolicyDropdown = false }
-                    ) {
-                        FILTER_POLICIES.forEach { pol ->
-                            val label = when (pol) {
-                                "DIRECT" -> "DIRECT (Whitelist)"
-                                "REJECT" -> "REJECT (Blocklist)"
-                                "REJECT-DROP" -> "REJECT-DROP (Silent Drop)"
-                                else -> pol
-                            }
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    policy = pol
-                                    showPolicyDropdown = false
-                                }
-                            )
+                Spacer(modifier = Modifier.height(6.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    FILTER_POLICIES.forEach { pol ->
+                        val isSelected = policy.equals(pol, ignoreCase = true)
+                        val accent = when (pol) {
+                            "REJECT", "REJECT-DROP" -> DangerRed
+                            "DIRECT", "PASS", "PASS-RULE" -> NeonGreen
+                            else -> MaterialTheme.colorScheme.primary
                         }
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { policy = pol },
+                            label = {
+                                Text(
+                                    text = pol,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = accent.copy(alpha = 0.16f),
+                                selectedLabelColor = accent
+                            )
+                        )
                     }
                 }
+                val polDesc = policyDescription(policy)
+                if (polDesc.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = polDesc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Field 4: Target App (Optional — empty = Global)
                 val appLabelMap = remember(installedApps) {
@@ -428,8 +386,62 @@ fun FilterRuleDialog(
                     onClick = { showAppPickerDialog = true }
                 )
 
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Live Rule Preview
+                val previewRule = remember(type, param, policy) {
+                    val cleanType = type.trim().uppercase()
+                    val cleanPolicy = policy.trim().uppercase()
+                    if (cleanType == "FINAL") "$cleanType,$cleanPolicy"
+                    else "$cleanType,${param.trim().ifEmpty { "<param>" }},$cleanPolicy"
+                }
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "RULE PREVIEW",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = previewRule,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (packageName.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Apps: $targetAppLabel",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+
+        if (showTypePickerSheet) {
+            RuleTypePickerSheet(
+                selectedType = type,
+                onSelectType = { selected ->
+                    type = selected
+                    if (selected.equals("NETWORK", ignoreCase = true) && param.isBlank()) {
+                        param = "UDP"
+                    }
+                },
+                onOpenDocs = { showDocSheet = true },
+                onDismiss = { showTypePickerSheet = false }
+            )
         }
 
         if (showAppPickerDialog) {
@@ -443,6 +455,20 @@ fun FilterRuleDialog(
                     showAppPickerDialog = false
                 },
                 onDismiss = { showAppPickerDialog = false }
+            )
+        }
+
+        if (showParamAppPicker) {
+            AppMultiPickerBottomSheet(
+                title = stringResource(R.string.rule_pick_app_title),
+                installedApps = installedApps,
+                selected = if (param.isNotBlank()) setOf(param.trim()) else emptySet(),
+                allAppsLabel = stringResource(R.string.rule_target_app_all),
+                onConfirm = { selected ->
+                    selected.firstOrNull()?.let { param = it }
+                    showParamAppPicker = false
+                },
+                onDismiss = { showParamAppPicker = false }
             )
         }
 
