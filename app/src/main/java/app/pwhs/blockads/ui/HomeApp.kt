@@ -628,11 +628,7 @@ fun HomeApp(
         val isRightRail = navRailPosition == AppPreferences.NAV_POSITION_RIGHT
         val showFloatingBottomOverlay = !useNavRail && floatingCapsuleNav && showBottomBar
         val showDockedBottomBar = !useNavRail && !floatingCapsuleNav && showBottomBar
-        val floatingBottomPadding = if (showFloatingBottomOverlay) {
-            if (showBottomNavLabels) 88.dp else 80.dp
-        } else {
-            0.dp
-        }
+        val floatingBottomPadding = if (showFloatingBottomOverlay) 80.dp else 0.dp
 
         CompositionLocalProvider(LocalFloatingBottomBarPadding provides floatingBottomPadding) {
             Scaffold(

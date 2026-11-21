@@ -82,7 +82,7 @@ fun BlockAdsNavigationBar(
                 screens = screens,
                 currentTab = currentTab,
                 firewallEnabled = firewallEnabled,
-                showLabels = showLabels,
+                showLabels = false,
                 onSelectTab = onSelectTab
             )
         } else {
@@ -133,7 +133,7 @@ fun BlockAdsNavigationRail(
                 screens = screens,
                 currentTab = currentTab,
                 firewallEnabled = firewallEnabled,
-                showLabels = showLabels,
+                showLabels = false,
                 onSelectTab = onSelectTab,
                 modifier = modifier
             )

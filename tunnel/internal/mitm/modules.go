@@ -28,15 +28,16 @@ type ModulesConfig struct {
 
 // WebModule represents a domain-specific ad blocking and feature rule set.
 type WebModule struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Enabled     bool           `json:"enabled"`
-	Domains     []string       `json:"domains"`
-	MockPaths   []MockPathRule `json:"mock_paths"`
-	BlockPaths  []string       `json:"block_paths"`
-	CosmeticCSS []string       `json:"cosmetic_css"`
-	Scriptlets  []string       `json:"scriptlets"`
-	Scripts     []string       `json:"scripts"`
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	Enabled        bool           `json:"enabled"`
+	Domains        []string       `json:"domains"`
+	MockPaths      []MockPathRule `json:"mock_paths"`
+	BlockPaths     []string       `json:"block_paths"`
+	CosmeticCSS    []string       `json:"cosmetic_css"`
+	ProceduralCSS  []string       `json:"procedural_css,omitempty"`
+	Scriptlets     []string       `json:"scriptlets"`
+	Scripts        []string       `json:"scripts"`
 }
 
 // MockPathRule specifies a path pattern and mock response details.
@@ -81,6 +82,18 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 	for i := range cfg.Modules {
 		m := cfg.Modules[i]
 		if m.Enabled {
+			if len(m.CosmeticCSS) > 0 {
+				var cleanCSS []string
+				for _, c := range m.CosmeticCSS {
+					cssRule, procRule := classifyCosmeticSelector(c)
+					if procRule != "" {
+						m.ProceduralCSS = append(m.ProceduralCSS, procRule)
+					} else if cssRule != "" {
+						cleanCSS = append(cleanCSS, cssRule)
+					}
+				}
+				m.CosmeticCSS = cleanCSS
+			}
 			modulesMap[m.ID] = &m
 		}
 	}
@@ -114,15 +127,14 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 			continue
 		}
 		var formattedCSS []string
+		var proceduralRules []string
 		for _, c := range extRules.CSS {
-			c = strings.TrimSpace(c)
-			if c == "" {
-				continue
+			cssRule, procRule := classifyCosmeticSelector(c)
+			if procRule != "" {
+				proceduralRules = append(proceduralRules, procRule)
+			} else if cssRule != "" {
+				formattedCSS = append(formattedCSS, cssRule)
 			}
-			if !strings.Contains(c, "{") {
-				c = c + " { display: none !important; }"
-			}
-			formattedCSS = append(formattedCSS, c)
 		}
 
 		safeExtBlockPaths := sanitizeModulePaths(extRules.BlockPaths, 4)
@@ -130,14 +142,16 @@ func (s *ModuleStore) UpdateFromJSON(raw string) error {
 		if existing, exists := domainIdx[d]; exists {
 			existing.BlockPaths = append(existing.BlockPaths, safeExtBlockPaths...)
 			existing.CosmeticCSS = append(existing.CosmeticCSS, formattedCSS...)
+			existing.ProceduralCSS = append(existing.ProceduralCSS, proceduralRules...)
 		} else {
 			mod := &WebModule{
-				ID:          "ext_" + d,
-				Name:        d,
-				Enabled:     true,
-				Domains:     []string{d},
-				BlockPaths:  safeExtBlockPaths,
-				CosmeticCSS: formattedCSS,
+				ID:            "ext_" + d,
+				Name:          d,
+				Enabled:       true,
+				Domains:       []string{d},
+				BlockPaths:    safeExtBlockPaths,
+				CosmeticCSS:   formattedCSS,
+				ProceduralCSS: proceduralRules,
 			}
 			modulesMap[mod.ID] = mod
 			domainIdx[d] = mod
@@ -311,6 +325,20 @@ func (s *ModuleStore) GetCosmeticCSS(host string) []string {
 	}
 	out := make([]string, len(mod.CosmeticCSS))
 	copy(out, mod.CosmeticCSS)
+	return out
+}
+
+// GetProceduralCSS returns procedural cosmetic rules for a given host.
+func (s *ModuleStore) GetProceduralCSS(host string) []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	mod := s.findModuleForHost(host)
+	if mod == nil || len(mod.ProceduralCSS) == 0 {
+		return nil
+	}
+	out := make([]string, len(mod.ProceduralCSS))
+	copy(out, mod.ProceduralCSS)
 	return out
 }
 

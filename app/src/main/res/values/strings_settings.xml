@@ -297,8 +297,9 @@
     <string name="rule_docs_action_tooltip">Rule Guide</string>
     <string name="rule_docs_category_all">All</string>
     <string name="rule_docs_category_domain">Domain</string>
-    <string name="rule_docs_category_ip">IP &amp; Geo</string>
-    <string name="rule_docs_category_other">Other</string>
+    <string name="rule_docs_category_ip">IP &amp; Network</string>
+    <string name="rule_docs_category_app">App &amp; Process</string>
+    <string name="rule_docs_category_other">Advanced</string>
     <string name="rule_docs_category_policy">Policy</string>
     <string name="rule_docs_example_label">Example:</string>
     <string name="rule_docs_matches_label">Matches:</string>

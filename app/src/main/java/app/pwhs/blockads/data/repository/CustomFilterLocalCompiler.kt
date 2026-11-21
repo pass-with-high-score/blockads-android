@@ -13,7 +13,11 @@ import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.BufferedOutputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.OutputStream
+import java.net.URI
 
 internal class CustomFilterLocalCompiler(
     private val context: Context,
@@ -22,6 +26,9 @@ internal class CustomFilterLocalCompiler(
 ) {
     companion object {
         private const val REMOTE_FILTERS_DIR = "remote_filters"
+        private const val INCLUDE_PREFIX = "!#include "
+        private const val MAX_INCLUDE_DEPTH = 5
+        private const val MAX_INCLUDES_PER_LIST = 32
     }
 
     suspend fun addCustomFilterLocally(
@@ -160,41 +167,207 @@ internal class CustomFilterLocalCompiler(
         onProgress: ((Int) -> Unit)? = null,
         onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)? = null
     ) {
-        destFile.outputStream().use { output ->
+        BufferedOutputStream(destFile.outputStream(), 64 * 1024).use { output ->
             for ((index, u) in urls.withIndex()) {
-                Timber.d("Downloading raw filter: $u")
-                client.prepareGet(u) {
-                    timeout {
-                        requestTimeoutMillis = 5 * 60 * 1000L
-                        socketTimeoutMillis = 60_000L
-                    }
-                }.execute { response ->
-                    val contentLength = response.contentLength() ?: -1L
-                    val channel = response.bodyAsChannel()
-                    val buffer = ByteArray(64 * 1024)
-                    var bytesDownloaded = 0L
-                    var lastEmitMs = 0L
-                    while (!channel.isClosedForRead) {
-                        val read = channel.readAvailable(buffer)
-                        if (read > 0) {
-                            output.write(buffer, 0, read)
-                            bytesDownloaded += read
-                            val now = System.currentTimeMillis()
-                            if (now - lastEmitMs >= 100L) {
-                                lastEmitMs = now
-                                onBytesProgress?.invoke(bytesDownloaded, contentLength)
-                                if (contentLength > 0) {
-                                    val filePct = ((bytesDownloaded * 100) / contentLength).toInt().coerceIn(0, 100)
-                                    val overallPct = 10 + (((index * 100 + filePct) * 70) / (urls.size * 100))
-                                    onProgress?.invoke(overallPct)
+                val visited = mutableSetOf<String>()
+                val includeBudget = intArrayOf(MAX_INCLUDES_PER_LIST)
+                downloadUrlWithIncludes(
+                    url = u,
+                    rootOrigin = extractOrigin(u),
+                    depth = 0,
+                    visited = visited,
+                    includeBudget = includeBudget,
+                    output = output,
+                    urlIndex = index,
+                    totalUrls = urls.size,
+                    onProgress = onProgress,
+                    onBytesProgress = onBytesProgress
+                )
+            }
+        }
+    }
+
+    private suspend fun downloadUrlWithIncludes(
+        url: String,
+        rootOrigin: String?,
+        depth: Int,
+        visited: MutableSet<String>,
+        includeBudget: IntArray,
+        output: OutputStream,
+        urlIndex: Int,
+        totalUrls: Int,
+        onProgress: ((Int) -> Unit)?,
+        onBytesProgress: ((downloadedBytes: Long, totalBytes: Long) -> Unit)?
+    ) {
+        val normalizedUrl = normalizeUrl(url)
+        if (!visited.add(normalizedUrl)) {
+            Timber.w("Skipping cyclic/duplicate !#include URL: $url")
+            return
+        }
+
+        Timber.d("Downloading raw filter (depth=$depth): $url")
+        val pendingIncludes = mutableListOf<String>()
+        val lineBuffer = ByteArrayOutputStream(256)
+
+        client.prepareGet(url) {
+            timeout {
+                requestTimeoutMillis = 5 * 60 * 1000L
+                socketTimeoutMillis = 60_000L
+            }
+        }.execute { response ->
+            val contentLength = response.contentLength() ?: -1L
+            val channel = response.bodyAsChannel()
+            val buffer = ByteArray(64 * 1024)
+            var bytesDownloaded = 0L
+            var lastEmitMs = 0L
+
+            while (!channel.isClosedForRead) {
+                val read = channel.readAvailable(buffer)
+                if (read > 0) {
+                    var segmentStart = 0
+                    for (i in 0 until read) {
+                        val b = buffer[i]
+                        if (b == '\n'.code.toByte()) {
+                            if (lineBuffer.size() < 2048) {
+                                lineBuffer.write(buffer, segmentStart, i - segmentStart)
+                            }
+                            val lineStr = lineBuffer.toString(Charsets.UTF_8.name()).trim()
+                            lineBuffer.reset()
+
+                            val includeTarget = parseIncludeDirective(lineStr)
+                            if (includeTarget != null) {
+                                resolveSameOriginInclude(url, rootOrigin, includeTarget)?.let {
+                                    pendingIncludes.add(it)
                                 }
+                            } else {
+                                output.write(lineStr.toByteArray(Charsets.UTF_8))
+                                output.write('\n'.code)
+                            }
+                            segmentStart = i + 1
+                        }
+                    }
+                    if (segmentStart < read) {
+                        val remaining = read - segmentStart
+                        if (lineBuffer.size() + remaining < 2048) {
+                            lineBuffer.write(buffer, segmentStart, remaining)
+                        } else {
+                            // Flush oversized lines directly without buffering
+                            if (lineBuffer.size() > 0) {
+                                output.write(lineBuffer.toByteArray())
+                                lineBuffer.reset()
+                            }
+                            output.write(buffer, segmentStart, remaining)
+                        }
+                    }
+
+                    bytesDownloaded += read
+                    if (depth == 0) {
+                        val now = System.currentTimeMillis()
+                        if (now - lastEmitMs >= 100L) {
+                            lastEmitMs = now
+                            onBytesProgress?.invoke(bytesDownloaded, contentLength)
+                            if (contentLength > 0) {
+                                val filePct = ((bytesDownloaded * 100) / contentLength).toInt().coerceIn(0, 100)
+                                val overallPct = 10 + (((urlIndex * 100 + filePct) * 70) / (totalUrls * 100))
+                                onProgress?.invoke(overallPct)
                             }
                         }
                     }
-                    onBytesProgress?.invoke(bytesDownloaded, contentLength)
                 }
-                output.write("\n".toByteArray())
             }
+
+            if (lineBuffer.size() > 0) {
+                val tailLine = lineBuffer.toString(Charsets.UTF_8.name()).trim()
+                lineBuffer.reset()
+                val includeTarget = parseIncludeDirective(tailLine)
+                if (includeTarget != null) {
+                    resolveSameOriginInclude(url, rootOrigin, includeTarget)?.let {
+                        pendingIncludes.add(it)
+                    }
+                } else if (tailLine.isNotEmpty()) {
+                    output.write(tailLine.toByteArray(Charsets.UTF_8))
+                    output.write('\n'.code)
+                }
+            }
+
+            if (depth == 0) {
+                onBytesProgress?.invoke(bytesDownloaded, contentLength)
+            }
+        }
+
+        if (depth >= MAX_INCLUDE_DEPTH || pendingIncludes.isEmpty()) return
+
+        for (incUrl in pendingIncludes) {
+            if (includeBudget[0] <= 0) {
+                Timber.w("Reached max !#include limit ($MAX_INCLUDES_PER_LIST), skipping: $incUrl")
+                break
+            }
+            includeBudget[0]--
+            try {
+                downloadUrlWithIncludes(
+                    url = incUrl,
+                    rootOrigin = rootOrigin,
+                    depth = depth + 1,
+                    visited = visited,
+                    includeBudget = includeBudget,
+                    output = output,
+                    urlIndex = urlIndex,
+                    totalUrls = totalUrls,
+                    onProgress = null,
+                    onBytesProgress = null
+                )
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to resolve !#include: $incUrl")
+            }
+        }
+    }
+
+    internal fun parseIncludeDirective(trimmedLine: String): String? {
+        if (!trimmedLine.startsWith(INCLUDE_PREFIX, ignoreCase = true)) return null
+        val target = trimmedLine.substring(INCLUDE_PREFIX.length).trim()
+        return target.takeIf { it.isNotEmpty() && !it.contains(' ') }
+    }
+
+    internal fun resolveSameOriginInclude(baseUrl: String, rootOrigin: String?, target: String): String? {
+        return try {
+            val baseUri = URI(baseUrl)
+            val resolved = baseUri.resolve(target).normalize()
+            val scheme = resolved.scheme?.lowercase()
+            if (scheme != "http" && scheme != "https") return null
+            val resolvedOrigin = extractOrigin(resolved.toString())
+            if (rootOrigin == null || resolvedOrigin != rootOrigin) {
+                Timber.w("Blocked cross-origin !#include: $resolved (root origin: $rootOrigin)")
+                return null
+            }
+            resolved.toString()
+        } catch (e: Exception) {
+            Timber.w(e, "Invalid !#include target: $target")
+            null
+        }
+    }
+
+    private fun extractOrigin(url: String): String? {
+        return try {
+            val uri = URI(url)
+            val scheme = uri.scheme?.lowercase() ?: return null
+            val host = uri.host?.lowercase() ?: return null
+            val port = when {
+                uri.port != -1 -> uri.port
+                scheme == "https" -> 443
+                scheme == "http" -> 80
+                else -> -1
+            }
+            "$scheme://$host:$port"
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun normalizeUrl(url: String): String {
+        return try {
+            URI(url).normalize().toString()
+        } catch (_: Exception) {
+            url
         }
     }
 

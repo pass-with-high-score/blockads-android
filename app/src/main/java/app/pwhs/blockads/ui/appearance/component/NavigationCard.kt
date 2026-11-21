@@ -66,20 +66,22 @@ fun NavigationCard(
 
     SettingsCard(modifier = modifier) {
         Column {
-            // Row 1: Labels
-            NavigationToggleRow(
-                icon = Icons.Default.Menu,
-                iconTint = Color(0xFF059669),
-                title = stringResource(R.string.settings_show_bottom_nav_labels),
-                description = stringResource(R.string.settings_show_bottom_nav_labels_desc),
-                checked = showBottomNavLabels,
-                onCheckedChange = onToggleShowBottomNavLabels
-            )
+            // Row 1: Labels (hidden/disabled when floating capsule pill is active)
+            if (!floatingCapsuleNav) {
+                NavigationToggleRow(
+                    icon = Icons.Default.Menu,
+                    iconTint = Color(0xFF059669),
+                    title = stringResource(R.string.settings_show_bottom_nav_labels),
+                    description = stringResource(R.string.settings_show_bottom_nav_labels_desc),
+                    checked = showBottomNavLabels,
+                    onCheckedChange = onToggleShowBottomNavLabels
+                )
 
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-                thickness = 0.5.dp
-            )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    thickness = 0.5.dp
+                )
+            }
 
             // Row 2: Capsule Navigation Style (Both phone & tablet/fold)
             NavigationToggleRow(

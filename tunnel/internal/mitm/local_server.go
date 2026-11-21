@@ -205,6 +205,14 @@ func servePerHostScriptlets(req *http.Request) *http.Response {
 		}
 	}
 
+	// Append procedural cosmetic rules (:has-text, :upward, :remove) from CosmeticStore + ModuleStore
+	var proceduralRules []string
+	proceduralRules = append(proceduralRules, defaultCosmeticStore.GetProceduralForHost(host)...)
+	proceduralRules = append(proceduralRules, ActiveModuleStore.GetProceduralCSS(host)...)
+	if len(proceduralRules) > 0 {
+		jsBuilder.WriteString(buildProceduralCosmeticJS(proceduralRules))
+	}
+
 	js := jsBuilder.String()
 	if js == "" {
 		js = "/* BlockAds: no scriptlets for " + host + " */"
