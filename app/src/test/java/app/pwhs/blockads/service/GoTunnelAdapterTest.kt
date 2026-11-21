@@ -154,7 +154,7 @@ class GoTunnelAdapterTest {
         verify { f.engine.setModulesConfig(match { it.isNotEmpty() }) }
         verify { f.engine.setScriptletRules("") }
         verify { f.engine.setAdPathPatterns(match { it.isNotEmpty() }) }
-        verify { f.engine.setDoHBlocklist(match { it.isNotEmpty() }) }
+        verify { f.engine.setDoHBlocklistFromFd(match { it >= 0L }, any(), match { it > 0L }) }
     }
 
     @Test
@@ -166,6 +166,26 @@ class GoTunnelAdapterTest {
 
         f.adapter.setBlockDohBypass(false)
         verify { f.engine.setDoHBlocklist("") }
+    }
+
+    @Test
+    fun `cosmetic css loads from prepared file when filter css exists on disk`() {
+        val filterCss = File.createTempFile("cosmetic_rules", ".css").apply {
+            writeText("##.banner-ad\nexample.com##.ad-box\n")
+            deleteOnExit()
+        }
+        every { f.filterRepo.getCosmeticCssPath() } returns filterCss.absolutePath
+        every { f.filterRepo.getScriptletsPath() } returns null
+
+        f.adapter.updateCosmeticRules()
+
+        verify {
+            f.engine.setCosmeticCSSFromFile(match { path ->
+                val out = File(path)
+                out.exists() && out.readText().contains("example.com##.ad-box")
+            })
+        }
+        verify(exactly = 0) { f.engine.setCosmeticCSS(any()) }
     }
 
     @Test

@@ -35,6 +35,7 @@ class FilterListRepository(
     companion object {
         private const val CACHE_DIR = "filter_cache"
         private const val FILTER_CACHE_SCHEMA_MARKER = ".filter_cache_v713"
+        private const val COMPILED_SIGNATURE_FILE = ".compiled_signature_v1"
         const val BLOCK_REASON_CUSTOM_RULE = "CUSTOM_RULE"
         const val BLOCK_REASON_FILTER_LIST = "FILTER_LIST"
         const val BLOCK_REASON_SECURITY = "SECURITY"
@@ -54,6 +55,9 @@ class FilterListRepository(
 
     @Volatile
     private var securityBloomPaths: String = ""
+
+    @Volatile
+    private var lastCompiledSignature: String = ""
 
     private val loadMutex = Mutex()
 
@@ -185,6 +189,7 @@ class FilterListRepository(
         if (marker.exists()) return
         try {
             File(context.filesDir, CACHE_DIR).deleteRecursively()
+            lastCompiledSignature = ""
             val remoteDir = File(context.filesDir, "remote_filters").apply { mkdirs() }
             val allFilters = filterListDao.getAllSync()
             val localFilters = allFilters.filter { it.trieUrl.startsWith("local://") }
@@ -222,9 +227,12 @@ class FilterListRepository(
                     securityTriePaths = ""
                     adBloomPaths = ""
                     securityBloomPaths = ""
+                    lastCompiledSignature = ""
                     File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").delete()
+                    File(context.filesDir, "$CACHE_DIR/cosmetic_engine_merged.css").delete()
                     File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt").delete()
                     File(context.filesDir, "$CACHE_DIR/filter_modules.json").delete()
+                    File(context.filesDir, "$CACHE_DIR/$COMPILED_SIGNATURE_FILE").delete()
                     _domainCountFlow.value = 0
                     return@withContext Result.success(0)
                 }
@@ -270,9 +278,24 @@ class FilterListRepository(
                 adBloomPaths = adBloomSb.toString().trimEnd(',')
                 securityBloomPaths = secBloomSb.toString().trimEnd(',')
 
-                compileCosmeticRules(enabledLists)
-                compileScriptletRules(enabledLists)
-                compileModuleRules(enabledLists)
+                val signature = buildSidecarSignature(enabledLists)
+                if (isSidecarCacheValid(signature, enabledLists)) {
+                    lastCompiledSignature = signature
+                    Timber.d("Compiled filter sidecars up-to-date, skipping recompilation")
+                } else {
+                    compileCosmeticRules(enabledLists)
+                    compileScriptletRules(enabledLists)
+                    compileModuleRules(enabledLists)
+                    if (signature.isNotEmpty()) {
+                        val sigFile = File(context.filesDir, "$CACHE_DIR/$COMPILED_SIGNATURE_FILE")
+                        sigFile.parentFile?.mkdirs()
+                        sigFile.writeText(signature)
+                        lastCompiledSignature = signature
+                    } else {
+                        lastCompiledSignature = ""
+                        File(context.filesDir, "$CACHE_DIR/$COMPILED_SIGNATURE_FILE").delete()
+                    }
+                }
 
                 _domainCountFlow.value = totalCount
                 val elapsed = System.currentTimeMillis() - startTime
@@ -285,82 +308,135 @@ class FilterListRepository(
         }
     }
 
+    private fun buildSidecarSignature(enabledLists: List<FilterList>): String {
+        val sb = StringBuilder()
+        for (filter in enabledLists) {
+            if (filter.category == FilterList.CATEGORY_SECURITY) continue
+            val css = File(context.filesDir, "remote_filters/${filter.id}.css")
+            val scr = File(context.filesDir, "remote_filters/${filter.id}.scriptlets")
+            val mod = File(context.filesDir, "remote_filters/${filter.id}.modules.json")
+            sb.append(filter.id).append(':')
+                .append(if (css.exists()) "${css.length()}@${css.lastModified()}" else "0").append(':')
+                .append(if (scr.exists()) "${scr.length()}@${scr.lastModified()}" else "0").append(':')
+                .append(if (mod.exists()) "${mod.length()}@${mod.lastModified()}" else "0").append(';')
+        }
+        return sb.toString()
+    }
+
+    private fun isSidecarCacheValid(signature: String, enabledLists: List<FilterList>): Boolean {
+        if (signature.isEmpty()) return false
+        val sigFile = File(context.filesDir, "$CACHE_DIR/$COMPILED_SIGNATURE_FILE")
+        if (!sigFile.exists()) {
+            lastCompiledSignature = ""
+            return false
+        }
+        val cachedSig = lastCompiledSignature.ifEmpty {
+            runCatching { sigFile.readText() }.getOrDefault("")
+        }
+        if (cachedSig != signature) return false
+
+        val nonSecurity = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
+        val expectsCss = nonSecurity.any { filter ->
+            File(context.filesDir, "remote_filters/${filter.id}.css").let { it.exists() && it.length() > 0L }
+        }
+        if (expectsCss && !File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").exists()) return false
+
+        val expectsScriptlets = nonSecurity.any { filter ->
+            File(context.filesDir, "remote_filters/${filter.id}.scriptlets").let { it.exists() && it.length() > 0L }
+        }
+        if (expectsScriptlets && !File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt").exists()) return false
+
+        return true
+    }
+
     private suspend fun compileScriptletRules(enabledLists: List<FilterList>) =
         withContext(Dispatchers.IO) {
+            val outFile = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
+            val tmpFile = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt.tmp")
             try {
                 val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
                 if (validLists.isEmpty()) {
-                    File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt").delete()
+                    outFile.delete()
+                    tmpFile.delete()
                     return@withContext
                 }
 
-                val sb = StringBuilder()
+                outFile.parentFile?.mkdirs()
                 var added = 0
-                for (filter in validLists) {
-                    val f = File(context.filesDir, "remote_filters/${filter.id}.scriptlets")
-                    if (f.exists() && f.length() > 0) {
-                        sb.append(f.readText())
-                        if (!sb.endsWith("\n")) sb.append("\n")
-                        added++
+                tmpFile.bufferedWriter().use { writer ->
+                    for (filter in validLists) {
+                        val f = File(context.filesDir, "remote_filters/${filter.id}.scriptlets")
+                        if (f.exists() && f.length() > 0) {
+                            f.forEachLine { line ->
+                                writer.write(line)
+                                writer.write("\n")
+                            }
+                            added++
+                        }
                     }
                 }
 
-                val outFile = File(context.filesDir, "$CACHE_DIR/scriptlets_combined.txt")
                 if (added > 0) {
-                    outFile.parentFile?.mkdirs()
-                    outFile.writeText(sb.toString())
-                    Timber.d("Wrote scriptlets ($added lists, ${sb.length} bytes)")
+                    replaceFileAtomically(tmpFile, outFile)
+                    Timber.d("Wrote scriptlets ($added lists, ${outFile.length()} bytes)")
                 } else {
+                    tmpFile.delete()
                     outFile.delete()
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to compile scriptlet rules")
+            } catch (t: Throwable) {
+                tmpFile.delete()
+                Timber.e(t, "Failed to compile scriptlet rules")
             }
         }
 
     private suspend fun compileCosmeticRules(enabledLists: List<FilterList>) =
         withContext(Dispatchers.IO) {
+            val finalCssFile = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
+            val tmpCssFile = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css.tmp")
             try {
                 val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
                 if (validLists.isEmpty()) {
-                    File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").delete()
+                    finalCssFile.delete()
+                    tmpCssFile.delete()
                     return@withContext
                 }
 
-                val cssBuilder = StringBuilder()
+                finalCssFile.parentFile?.mkdirs()
                 var rulesAdded = 0
-
-                for (filter in validLists) {
-                    val cssFile = File(context.filesDir, "remote_filters/${filter.id}.css")
-                    if (cssFile.exists() && cssFile.length() > 0) {
-                        val cssSnippet = downloadManager.getInjectableCss(cssFile)
-                        if (cssSnippet.isNotEmpty()) {
-                            cssBuilder.append(cssSnippet)
-                            rulesAdded++
+                tmpCssFile.bufferedWriter().use { writer ->
+                    for (filter in validLists) {
+                        val cssFile = File(context.filesDir, "remote_filters/${filter.id}.css")
+                        if (cssFile.exists() && cssFile.length() > 0) {
+                            val linesWritten = FilterDownloadManager.writeInjectableCss(cssFile, writer)
+                            if (linesWritten > 0) {
+                                rulesAdded++
+                            }
                         }
                     }
                 }
 
                 if (rulesAdded > 0) {
-                    val finalCssFile = File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css")
-                    finalCssFile.parentFile?.mkdirs()
-                    finalCssFile.writeText(cssBuilder.toString())
-                    Timber.d("Wrote cosmetic CSS (${cssBuilder.length} bytes)")
+                    replaceFileAtomically(tmpCssFile, finalCssFile)
+                    Timber.d("Wrote cosmetic CSS (${finalCssFile.length()} bytes)")
                 } else {
-                    File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").delete()
+                    tmpCssFile.delete()
+                    finalCssFile.delete()
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to compile cosmetic rules")
+            } catch (t: Throwable) {
+                tmpCssFile.delete()
+                Timber.e(t, "Failed to compile cosmetic rules")
             }
         }
 
     private suspend fun compileModuleRules(enabledLists: List<FilterList>) =
         withContext(Dispatchers.IO) {
+            val outFile = File(context.filesDir, "$CACHE_DIR/filter_modules.json")
+            val tmpFile = File(context.filesDir, "$CACHE_DIR/filter_modules.json.tmp")
             try {
-                val outFile = File(context.filesDir, "$CACHE_DIR/filter_modules.json")
                 val validLists = enabledLists.filter { it.category != FilterList.CATEGORY_SECURITY }
                 if (validLists.isEmpty()) {
                     outFile.delete()
+                    tmpFile.delete()
                     return@withContext
                 }
 
@@ -375,11 +451,22 @@ class FilterListRepository(
                         json.decodeFromString<app.pwhs.blockads.data.models.ModuleRulesPackage>(modFile.readText())
                     }.getOrNull() ?: continue
 
+                    // When a .css sidecar exists, domain##selector rules are already compiled into
+                    // cosmetic_rules.css and indexed per-host by Go's CosmeticStore.
+                    val hasCssSidecar = File(context.filesDir, "remote_filters/${filter.id}.css")
+                        .let { it.exists() && it.length() > 0L }
+
                     mergedGlobalPaths.addAll(pkg.globalBlockPaths)
                     for ((domain, rules) in pkg.domains) {
+                        val effectiveCss = if (hasCssSidecar) emptyList() else rules.css
+                        if (effectiveCss.isEmpty() && rules.blockPaths.isEmpty()) continue
                         val pair = mergedDomains.getOrPut(domain.lowercase()) { mutableSetOf<String>() to mutableSetOf<String>() }
-                        pair.first.addAll(rules.css)
-                        pair.second.addAll(rules.blockPaths)
+                        if (effectiveCss.isNotEmpty()) {
+                            pair.first.addAll(effectiveCss)
+                        }
+                        if (rules.blockPaths.isNotEmpty()) {
+                            pair.second.addAll(rules.blockPaths)
+                        }
                     }
                 }
 
@@ -396,17 +483,28 @@ class FilterListRepository(
                         globalBlockPaths = mergedGlobalPaths.toList()
                     )
                     outFile.parentFile?.mkdirs()
-                    outFile.writeText(
+                    tmpFile.writeText(
                         json.encodeToString(app.pwhs.blockads.data.models.ModuleRulesPackage.serializer(), outPkg)
                     )
+                    replaceFileAtomically(tmpFile, outFile)
                     Timber.d("Wrote filter modules (${mergedDomains.size} domains, ${mergedGlobalPaths.size} global paths)")
                 } else {
+                    tmpFile.delete()
                     outFile.delete()
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to compile filter module rules")
+            } catch (t: Throwable) {
+                tmpFile.delete()
+                outFile.delete()
+                Timber.e(t, "Failed to compile filter module rules")
             }
         }
+
+    private fun replaceFileAtomically(tmpFile: File, targetFile: File) {
+        if (!tmpFile.renameTo(targetFile)) {
+            tmpFile.copyTo(targetFile, overwrite = true)
+            tmpFile.delete()
+        }
+    }
 
     suspend fun forceUpdateAllEnabledFilters(
         onProgress: ((completed: Int, total: Int) -> Unit)? = null
@@ -440,12 +538,18 @@ class FilterListRepository(
             }
 
             // Reload into the Go engine
+            invalidateCompiledSidecarCache()
             loadAllEnabledFilters()
             Result.success(totalCount)
         } catch (e: Exception) {
             Timber.e(e, "Failed to force update all enabled filters")
             Result.failure(e)
         }
+    }
+
+    private fun invalidateCompiledSidecarCache() {
+        lastCompiledSignature = ""
+        File(context.filesDir, "$CACHE_DIR/$COMPILED_SIGNATURE_FILE").delete()
     }
 
     suspend fun updateSingleFilter(filter: FilterList): Result<Int> = withContext(Dispatchers.IO) {
@@ -464,6 +568,7 @@ class FilterListRepository(
                         count = updatedFilter.ruleCount,
                         timestamp = System.currentTimeMillis()
                     )
+                    invalidateCompiledSidecarCache()
                     loadAllEnabledFilters()
                     Result.success(updatedFilter.ruleCount)
                 } else {
@@ -477,6 +582,7 @@ class FilterListRepository(
                         count = filter.ruleCount,
                         timestamp = System.currentTimeMillis()
                     )
+                    invalidateCompiledSidecarCache()
                     loadAllEnabledFilters()
                     Result.success(filter.ruleCount)
                 } else {

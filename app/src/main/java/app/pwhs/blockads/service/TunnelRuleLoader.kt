@@ -12,11 +12,10 @@ import timber.log.Timber
 object TunnelRuleLoader {
 
     /**
-     * Loads cosmetic CSS from the active browser rule package (adblock_cosmetic.css / remote updates)
-     * combined with compiled filter-list cosmetic rules (cosmetic_rules.css).
+     * Loads the built-in browser cosmetic CSS (adblock_cosmetic.css / remote updates).
      */
-    fun loadCosmeticCss(context: Context, filterCosmeticCssPath: String? = null): String {
-        val baseCss = try {
+    private fun loadBaseCosmeticCss(context: Context): String {
+        return try {
             val storage = BrowserRuleStorage(context)
             val pkg = storage.getActivePackage()
             val raw = pkg.cosmeticCss?.trim()
@@ -31,6 +30,56 @@ object TunnelRuleLoader {
                 context.assets.open("browser/adblock_cosmetic.css").bufferedReader().use { it.readText() }
             }.getOrDefault("")
         }
+    }
+
+    /**
+     * Prepares a single cosmetic CSS file on disk for the Go engine so large filter-list CSS
+     * files can be loaded via [tunnel.Engine.setCosmeticCSSFromFile] without allocating on the JVM heap.
+     */
+    internal fun prepareEngineCosmeticCssFile(
+        context: Context,
+        filterCosmeticCssPath: String,
+        useBuiltIn: Boolean
+    ): java.io.File? {
+        val filterFile = java.io.File(filterCosmeticCssPath)
+        if (!filterFile.exists() || filterFile.length() == 0L) return null
+        if (!useBuiltIn) return filterFile
+
+        val baseCss = loadBaseCosmeticCss(context)
+        if (baseCss.isBlank()) return filterFile
+
+        val outDir = filterFile.parentFile ?: java.io.File(context.filesDir, "filter_cache").apply { mkdirs() }
+        val mergedFile = java.io.File(outDir, "cosmetic_engine_merged.css")
+        val tmpFile = java.io.File(outDir, "cosmetic_engine_merged.css.tmp")
+        return try {
+            tmpFile.outputStream().use { out ->
+                out.write(baseCss.toByteArray(Charsets.UTF_8))
+                out.write('\n'.code)
+                filterFile.inputStream().use { input ->
+                    val buffer = ByteArray(16 * 1024)
+                    var read: Int
+                    while (input.read(buffer).also { read = it } >= 0) {
+                        if (read > 0) out.write(buffer, 0, read)
+                    }
+                }
+            }
+            if (!tmpFile.renameTo(mergedFile)) {
+                tmpFile.copyTo(mergedFile, overwrite = true)
+                tmpFile.delete()
+            }
+            mergedFile
+        } catch (t: Throwable) {
+            tmpFile.delete()
+            throw t
+        }
+    }
+
+    /**
+     * Loads cosmetic CSS from the active browser rule package (adblock_cosmetic.css / remote updates)
+     * combined with compiled filter-list cosmetic rules (cosmetic_rules.css).
+     */
+    fun loadCosmeticCss(context: Context, filterCosmeticCssPath: String? = null): String {
+        val baseCss = loadBaseCosmeticCss(context)
 
         val filterCss = if (!filterCosmeticCssPath.isNullOrBlank()) {
             runCatching {
@@ -354,14 +403,20 @@ object TunnelRuleLoader {
         val useBuiltIn = isBuiltInRulesEnabled(context)
 
         runCatching {
-            val css = if (useBuiltIn) {
-                loadCosmeticCss(context, filterRepo.getCosmeticCssPath())
+            val filterCssPath = filterRepo.getCosmeticCssPath()
+            val cssFile = if (!filterCssPath.isNullOrBlank()) {
+                prepareEngineCosmeticCssFile(context, filterCssPath, useBuiltIn)
             } else {
-                val p = filterRepo.getCosmeticCssPath()
-                if (!p.isNullOrBlank()) java.io.File(p).takeIf { it.exists() }?.readText().orEmpty() else ""
+                null
             }
-            engine.setCosmeticCSS(css)
-            Timber.d("Cosmetic CSS updated for engine (builtIn=%b): %d bytes", useBuiltIn, css.length)
+            if (cssFile != null) {
+                engine.setCosmeticCSSFromFile(cssFile.absolutePath)
+                Timber.d("Cosmetic CSS loaded from file for engine (builtIn=%b): %d bytes", useBuiltIn, cssFile.length())
+            } else {
+                val css = if (useBuiltIn) loadBaseCosmeticCss(context) else ""
+                engine.setCosmeticCSS(css)
+                Timber.d("Cosmetic CSS updated for engine (builtIn=%b): %d bytes", useBuiltIn, css.length)
+            }
         }.onFailure {
             Timber.e(it, "Failed to load cosmetic CSS for engine")
             engine.setCosmeticCSS("")
