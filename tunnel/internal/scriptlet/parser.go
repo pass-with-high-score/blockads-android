@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// Rule is a single parsed +js() rule.
+// Rule is a single parsed +js() or exception (#@#+js) rule.
 type Rule struct {
 	// Domains the rule applies to. Empty = all domains. Entries
 	// starting with "~" are NEGATED (exclude).
@@ -15,17 +15,26 @@ type Rule struct {
 
 	// Positional args.
 	Args []string
+
+	// IsException is true for unbreak rules (#@#+js or #@%#//scriptlet).
+	IsException bool
 }
 
 // ParseRules takes the raw text of a filter list and extracts
-// every +js() rule it can parse. Lines that aren't +js() rules are
-// ignored.
+// every +js() rule (and #@#+js exception rule) it can parse.
 func ParseRules(content string) []Rule {
 	var out []Rule
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "!") || strings.HasPrefix(line, "#") {
+		if line == "" || strings.HasPrefix(line, "!") {
+			continue
+		}
+		if strings.HasPrefix(line, "#") &&
+			!strings.HasPrefix(line, "##+js(") &&
+			!strings.HasPrefix(line, "#%#//scriptlet(") &&
+			!strings.HasPrefix(line, "#@#+js(") &&
+			!strings.HasPrefix(line, "#@%#//scriptlet(") {
 			continue
 		}
 		rule, ok := parseOneScriptletRule(line)
@@ -39,12 +48,34 @@ func ParseRules(content string) []Rule {
 
 // parseOneScriptletRule parses a single line. Returns (rule, true) on
 // success or zero value + false otherwise. Recognises both uBlock
-// (##+js) and AdGuard (#%#//scriptlet) syntaxes; exception variants
-// (#@#+js, #@%#//scriptlet) are deliberately ignored.
+// (##+js / #@#+js) and AdGuard (#%#//scriptlet / #@%#//scriptlet) syntaxes.
 func parseOneScriptletRule(line string) (Rule, bool) {
 	var domainsStr, body string
+	isException := false
 
-	if idx := strings.Index(line, "##+js("); idx >= 0 {
+	switch {
+	case strings.Contains(line, "#@#+js("):
+		idx := strings.Index(line, "#@#+js(")
+		domainsStr = line[:idx]
+		rest := line[idx+len("#@#+js("):]
+		closeIdx := strings.LastIndex(rest, ")")
+		if closeIdx < 0 {
+			return Rule{}, false
+		}
+		body = rest[:closeIdx]
+		isException = true
+	case strings.Contains(line, "#@%#//scriptlet("):
+		idx := strings.Index(line, "#@%#//scriptlet(")
+		domainsStr = line[:idx]
+		rest := line[idx+len("#@%#//scriptlet("):]
+		closeIdx := strings.LastIndex(rest, ")")
+		if closeIdx < 0 {
+			return Rule{}, false
+		}
+		body = rest[:closeIdx]
+		isException = true
+	case strings.Contains(line, "##+js("):
+		idx := strings.Index(line, "##+js(")
 		domainsStr = line[:idx]
 		rest := line[idx+len("##+js("):]
 		closeIdx := strings.LastIndex(rest, ")")
@@ -52,7 +83,8 @@ func parseOneScriptletRule(line string) (Rule, bool) {
 			return Rule{}, false
 		}
 		body = rest[:closeIdx]
-	} else if idx := strings.Index(line, "#%#//scriptlet("); idx >= 0 {
+	case strings.Contains(line, "#%#//scriptlet("):
+		idx := strings.Index(line, "#%#//scriptlet(")
 		domainsStr = line[:idx]
 		rest := line[idx+len("#%#//scriptlet("):]
 		closeIdx := strings.LastIndex(rest, ")")
@@ -60,7 +92,7 @@ func parseOneScriptletRule(line string) (Rule, bool) {
 			return Rule{}, false
 		}
 		body = rest[:closeIdx]
-	} else {
+	default:
 		return Rule{}, false
 	}
 
@@ -69,7 +101,7 @@ func parseOneScriptletRule(line string) (Rule, bool) {
 		return Rule{}, false
 	}
 	name := strings.TrimSpace(parts[0])
-	if name == "" {
+	if name == "" && !isException {
 		return Rule{}, false
 	}
 
@@ -89,9 +121,10 @@ func parseOneScriptletRule(line string) (Rule, bool) {
 	}
 
 	return Rule{
-		Domains: domains,
-		Name:    name,
-		Args:    args,
+		Domains:     domains,
+		Name:        name,
+		Args:        args,
+		IsException: isException,
 	}, true
 }
 
@@ -127,10 +160,21 @@ func splitArgs(s string) []string {
 // used by the per-host invocation builder.
 func BuildStore(rules []Rule) *Store {
 	s := &Store{
-		ByHost: make(map[string][]Rule),
+		ByHost:           make(map[string][]Rule),
+		ExceptionsByHost: make(map[string][]Rule),
 	}
 	for _, r := range rules {
 		positive := positiveDomains(r)
+		if r.IsException {
+			if len(positive) == 0 {
+				s.Exceptions = append(s.Exceptions, r)
+			} else {
+				for _, d := range positive {
+					s.ExceptionsByHost[d] = append(s.ExceptionsByHost[d], r)
+				}
+			}
+			continue
+		}
 		if len(positive) == 0 {
 			s.All = append(s.All, r)
 			continue

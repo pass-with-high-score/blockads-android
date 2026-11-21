@@ -84,25 +84,78 @@ window.__ba={
 // Store holds parsed rules. Built once per filter-list update
 // from Kotlin; consulted on every per-host scriptlet request.
 type Store struct {
-	All    []Rule
-	ByHost map[string][]Rule
+	All              []Rule
+	ByHost           map[string][]Rule
+	Exceptions       []Rule
+	ExceptionsByHost map[string][]Rule
 }
 
-// Matches returns the rules that apply to the given hostname.
+// Matches returns the rules that apply to the given hostname,
+// filtering out any rules suppressed by #@#+js / #@%#//scriptlet exceptions.
 func (s *Store) Matches(host string) []Rule {
 	host = strings.ToLower(host)
+
+	var activeExceptions []Rule
+	for _, ex := range s.Exceptions {
+		if !ruleNegatedFor(ex, host) {
+			activeExceptions = append(activeExceptions, ex)
+		}
+	}
+	for d, exList := range s.ExceptionsByHost {
+		if host == d || strings.HasSuffix(host, "."+d) {
+			for _, ex := range exList {
+				if !ruleNegatedFor(ex, host) {
+					activeExceptions = append(activeExceptions, ex)
+				}
+			}
+		}
+	}
+
 	var out []Rule
-	out = append(out, s.All...)
+	for _, r := range s.All {
+		if !ruleNegatedFor(r, host) && !isSuppressedByException(r, activeExceptions) {
+			out = append(out, r)
+		}
+	}
 	for d, rules := range s.ByHost {
 		if host == d || strings.HasSuffix(host, "."+d) {
 			for _, r := range rules {
-				if !ruleNegatedFor(r, host) {
+				if !ruleNegatedFor(r, host) && !isSuppressedByException(r, activeExceptions) {
 					out = append(out, r)
 				}
 			}
 		}
 	}
 	return out
+}
+
+func isSuppressedByException(r Rule, exceptions []Rule) bool {
+	for _, ex := range exceptions {
+		// Empty exception name (`example.com#@#+js()`) disables all scriptlets on the domain.
+		if ex.Name == "" {
+			return true
+		}
+		if !strings.EqualFold(ex.Name, r.Name) {
+			continue
+		}
+		// Exception with no args suppresses all invocations of that scriptlet name.
+		if len(ex.Args) == 0 {
+			return true
+		}
+		if len(ex.Args) == len(r.Args) {
+			allMatch := true
+			for i := range ex.Args {
+				if ex.Args[i] != r.Args[i] {
+					allMatch = false
+					break
+				}
+			}
+			if allMatch {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (s *Store) buildHostInvocations(host string) string {

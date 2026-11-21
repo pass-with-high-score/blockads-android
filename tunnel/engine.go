@@ -167,6 +167,9 @@ type Engine struct {
 	rulesetMatcher   atomic.Pointer[RulesetMatcher]
 	activeRulesetCfg atomic.Pointer[RulesetConfig]
 
+	// Compiled IP/CIDR blocklist from `.ips` filter sidecars
+	ipBlocklist atomic.Pointer[ipBlocklist]
+
 	// SNI Proxy routing rules (per-app / per-SNI TCP 443 redirect)
 	sniProxyRules atomic.Pointer[[]compiledSniProxyRule]
 

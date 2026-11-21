@@ -17,7 +17,8 @@ data class DownloadedFilterPaths(
     val triePath: String?,
     val cssPath: String?,
     val scriptletPath: String?,
-    val modulesPath: String? = null
+    val modulesPath: String? = null,
+    val ipsPath: String? = null
 )
 
 class FilterDownloadManager(
@@ -42,6 +43,7 @@ class FilterDownloadManager(
             val cssFile = File(filterDir, "${filter.id}.css")
             val scriptletFile = File(filterDir, "${filter.id}.scriptlets")
             val modulesFile = File(filterDir, "${filter.id}.modules.json")
+            val ipsFile = File(filterDir, "${filter.id}.ips")
 
             if (!forceUpdate && bloomFile.exists() && bloomFile.length() > 0 && trieFile.exists() && trieFile.length() > 0) {
                 Timber.d("Filter ${filter.id} already cached locally")
@@ -51,7 +53,8 @@ class FilterDownloadManager(
                         triePath = trieFile.absolutePath,
                         cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
                         scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
-                        modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+                        modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                        ipsPath = ipsFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
                     )
                 )
             }
@@ -64,7 +67,7 @@ class FilterDownloadManager(
             }
 
             if (zipUrl.isNotEmpty()) {
-                val zipSuccess = downloadAndExtractZip(zipUrl, bloomFile, trieFile, cssFile, scriptletFile, modulesFile)
+                val zipSuccess = downloadAndExtractZip(zipUrl, bloomFile, trieFile, cssFile, scriptletFile, modulesFile, ipsFile)
                 if (zipSuccess && bloomFile.exists() && trieFile.exists()) {
                     return@withContext Result.success(
                         DownloadedFilterPaths(
@@ -72,7 +75,8 @@ class FilterDownloadManager(
                             triePath = trieFile.absolutePath,
                             cssPath = cssFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
                             scriptletPath = scriptletFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
-                            modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+                            modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                            ipsPath = ipsFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
                         )
                     )
                 }
@@ -92,7 +96,16 @@ class FilterDownloadManager(
             }
 
             if (bloomPath != null && triePath != null) {
-                Result.success(DownloadedFilterPaths(bloomPath, triePath, cssPath, scriptletPath))
+                Result.success(
+                    DownloadedFilterPaths(
+                        bloomPath = bloomPath,
+                        triePath = triePath,
+                        cssPath = cssPath,
+                        scriptletPath = scriptletPath,
+                        modulesPath = modulesFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath,
+                        ipsPath = ipsFile.takeIf { it.exists() && it.length() > 0 }?.absolutePath
+                    )
+                )
             } else {
                 Result.failure(Exception("Failed to download core filter files (.bloom or .trie) for ${filter.id}"))
             }
@@ -108,7 +121,8 @@ class FilterDownloadManager(
         trieFile: File,
         cssFile: File,
         scriptletFile: File,
-        modulesFile: File
+        modulesFile: File,
+        ipsFile: File
     ): Boolean = withContext(Dispatchers.IO) {
         val tempZip = File(filterDir, "temp_${System.currentTimeMillis()}.zip")
         try {
@@ -138,6 +152,7 @@ class FilterDownloadManager(
                         entry.name.endsWith(".css") -> cssFile
                         entry.name.endsWith(".scriptlets") -> scriptletFile
                         entry.name.endsWith(".modules.json") -> modulesFile
+                        entry.name.endsWith(".ips") -> ipsFile
                         else -> null
                     }
                     targetFile?.let { out ->
@@ -224,14 +239,21 @@ class FilterDownloadManager(
             try {
                 file.forEachLine { line ->
                     val trimmed = line.trim()
-                    if (trimmed.isEmpty() || trimmed.startsWith("!") || (trimmed.startsWith("#") && !trimmed.startsWith("##"))) {
+                    if (trimmed.isEmpty() || trimmed.startsWith("!") ||
+                        (trimmed.startsWith("#") &&
+                            !trimmed.startsWith("##") &&
+                            !trimmed.startsWith("#@#") &&
+                            !trimmed.startsWith("#$#") &&
+                            !trimmed.startsWith("#?#"))
+                    ) {
                         return@forEachLine
                     }
-                    if (trimmed.contains("#@#") || trimmed.contains("##+js") || trimmed.contains("##^")) {
+                    if (trimmed.contains("##+js") || trimmed.contains("#@#+js") || trimmed.contains("##^")) {
                         return@forEachLine
                     }
                     when {
-                        trimmed.contains("##") -> writer.write(trimmed)
+                        trimmed.contains("##") || trimmed.contains("#@#") ||
+                            trimmed.contains("#$#") || trimmed.contains("#?#") -> writer.write(trimmed)
                         trimmed.contains("{") -> writer.write(trimmed)
                         else -> {
                             writer.write("##")

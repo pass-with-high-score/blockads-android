@@ -179,6 +179,11 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 			_ = conn.Close()
 			return
 		}
+		if e.isIPBlocked(flow.serverIP) {
+			e.reportBlockedFlow(flow, ProtocolTCP, "ip_blocklist")
+			_ = conn.Close()
+			return
+		}
 		tcpHandler(conn)
 	})
 	stack.SetUdpHandler(newFullTunnelUdpHandler(e, filter, uidr, protectFn))
@@ -246,6 +251,11 @@ func newFullTunnelUdpHandler(engine *Engine, filter *MitmFilter, uidr UIDResolve
 		}
 		if blocked, reason := engine.checkDomainBlockedWithReason(flow.serverIP.String()); blocked {
 			engine.reportBlockedFlow(flow, ProtocolUDP, reason)
+			_ = conn.Close()
+			return
+		}
+		if engine.isIPBlocked(flow.serverIP) {
+			engine.reportBlockedFlow(flow, ProtocolUDP, "ip_blocklist")
 			_ = conn.Close()
 			return
 		}

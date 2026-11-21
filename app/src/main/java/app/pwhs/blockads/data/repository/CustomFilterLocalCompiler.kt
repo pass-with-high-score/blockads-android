@@ -51,6 +51,7 @@ internal class CustomFilterLocalCompiler(
         val tempCssFile = File("${tempBase.absolutePath}.css")
         val tempScriptletsFile = File("${tempBase.absolutePath}.scriptlets")
         val tempModulesFile = File("${tempBase.absolutePath}.modules.json")
+        val tempIpsFile = File("${tempBase.absolutePath}.ips")
 
         try {
             downloadRawFilterUrls(cleanUrls, tempFile, onProgress, onBytesProgress)
@@ -98,6 +99,9 @@ internal class CustomFilterLocalCompiler(
             if (tempModulesFile.exists() && tempModulesFile.length() > 0) {
                 tempModulesFile.copyTo(File(remoteFilterDir, "$insertedId.modules.json"), overwrite = true)
             }
+            if (tempIpsFile.exists() && tempIpsFile.length() > 0) {
+                tempIpsFile.copyTo(File(remoteFilterDir, "$insertedId.ips"), overwrite = true)
+            }
 
             val updatedEntity = filterEntity.copy(
                 id = insertedId,
@@ -119,6 +123,7 @@ internal class CustomFilterLocalCompiler(
             tempCssFile.delete()
             tempScriptletsFile.delete()
             tempModulesFile.delete()
+            tempIpsFile.delete()
         }
     }
 

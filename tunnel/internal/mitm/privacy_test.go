@@ -108,7 +108,7 @@ func TestSanitizeRequestEdgeCases(t *testing.T) {
 func TestCleanQueryPreservesOrder(t *testing.T) {
 	t.Skip("known bug: cleanQuery sorts the remaining params (url.Values.Encode)")
 	req := httptest.NewRequest("GET", "https://example.com/p?z=1&utm_source=x&a=2&m=%7E", nil)
-	cleanQuery(req)
+	cleanQuery(req, req.Host)
 	if req.URL.RawQuery != "z=1&a=2&m=%7E" {
 		t.Fatalf("RawQuery = %q, want z=1&a=2&m=%%7E", req.URL.RawQuery)
 	}

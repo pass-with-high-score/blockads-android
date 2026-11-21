@@ -135,6 +135,8 @@ class CustomFilterManager(
             File(remoteFilterDir, "${filter.id}.css").delete()
             File(remoteFilterDir, "${filter.id}.scriptlets").delete()
             File(remoteFilterDir, "${filter.id}.modules.json").delete()
+            File(remoteFilterDir, "${filter.id}.ips").delete()
+            File(remoteFilterDir, "${filter.id}.modules.json").delete()
 
             filterListDao.delete(filter)
             Timber.d("Deleted custom filter: ${filter.name}")
@@ -357,12 +359,14 @@ class CustomFilterManager(
         val cssFile = extractedFiles.find { it.extension == "css" }
         val scriptletsFile = extractedFiles.find { it.extension == "scriptlets" }
         val modulesFile = extractedFiles.find { it.name.endsWith(".modules.json") }
+        val ipsFile = extractedFiles.find { it.extension == "ips" }
 
         trieFile?.copyTo(File(remoteFilterDir, "$filterId.trie"), overwrite = true)
         bloomFile?.copyTo(File(remoteFilterDir, "$filterId.bloom"), overwrite = true)
         cssFile?.copyTo(File(remoteFilterDir, "$filterId.css"), overwrite = true)
         scriptletsFile?.copyTo(File(remoteFilterDir, "$filterId.scriptlets"), overwrite = true)
         modulesFile?.copyTo(File(remoteFilterDir, "$filterId.modules.json"), overwrite = true)
+        ipsFile?.copyTo(File(remoteFilterDir, "$filterId.ips"), overwrite = true)
 
         return CopiedArtifacts(
             hasTrie = trieFile != null,

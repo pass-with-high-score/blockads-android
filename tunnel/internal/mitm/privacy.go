@@ -54,19 +54,31 @@ func SanitizeRequest(req *http.Request, targetHost string) {
 		}
 	}
 
-	// 4. Strip tracking parameters from query
+	// 4. Strip tracking parameters + filter-defined $removeparam rules from query
 	if req.URL != nil && req.URL.RawQuery != "" {
-		cleanQuery(req)
+		cleanQuery(req, targetHost)
 	}
 }
 
-func cleanQuery(req *http.Request) {
+func cleanQuery(req *http.Request, targetHost string) {
 	values := req.URL.Query()
 	modified := false
 	for param := range trackingParams {
 		if _, exists := values[param]; exists {
 			values.Del(param)
 			modified = true
+		}
+	}
+	if extraParams := ActiveModuleStore.GetRemoveParams(normalizeHost(targetHost)); len(extraParams) > 0 {
+		for _, param := range extraParams {
+			param = strings.TrimSpace(param)
+			if param == "" {
+				continue
+			}
+			if _, exists := values[param]; exists {
+				values.Del(param)
+				modified = true
+			}
 		}
 	}
 	if modified {

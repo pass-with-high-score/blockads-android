@@ -152,5 +152,12 @@ func (e *Engine) classifyPacketFirewall(packet []byte, length int) packetAction 
 		}
 		return packetActionDrop
 	}
+	if e.isIPBlocked(dstIP) {
+		e.reportBlockedFlow(flow, int(proto), "ip_blocklist")
+		if proto == ProtocolTCP {
+			return packetActionReset
+		}
+		return packetActionDrop
+	}
 	return packetActionForward
 }

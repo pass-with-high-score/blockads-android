@@ -136,3 +136,57 @@ func TestModuleStore_StyleAndProceduralServedViaLocalServer(t *testing.T) {
 		t.Fatalf("expected procedural runtime and rules in /sl-news.example.com.js, got: %s", body)
 	}
 }
+
+func TestV5Schema_ExceptionsInjectCSSAndRemoveParams(t *testing.T) {
+	rawJSON := `{
+		"domains": {
+			"complier.pwhs.app": {
+				"css": [".ba-test-domain-ad", ".ba-test-exception-safe"],
+				"css_exceptions": [".ba-test-exception-safe"],
+				"inject_css": [
+					".ba-test-style-ubo { opacity: 0.25 !important; }",
+					".ba-test-style-ag { opacity: 0.25 !important; }"
+				],
+				"block_paths": ["/api/test-suite/ad-probe"],
+				"remove_params": ["ba_domain_param"]
+			}
+		},
+		"global_css_exceptions": [],
+		"global_inject_css": [".ba-global-style { border: 0 !important; }"],
+		"global_block_paths": ["/api/test-suite/ads/banner.js"],
+		"global_remove_params": ["ba_utm_test"]
+	}`
+	if err := ActiveModuleStore.UpdateFromJSON(rawJSON); err != nil {
+		t.Fatalf("UpdateFromJSON failed: %v", err)
+	}
+	defer ActiveModuleStore.UpdateFromJSON("")
+
+	css := strings.Join(ActiveModuleStore.GetCosmeticCSS("complier.pwhs.app"), "\n")
+	if !strings.Contains(css, ".ba-test-domain-ad { display: none !important; }") {
+		t.Fatalf("missing domain cosmetic css: %s", css)
+	}
+	if strings.Contains(css, ".ba-test-exception-safe { display: none !important; }") {
+		t.Fatalf("expected excepted selector to be omitted from hide rules: %s", css)
+	}
+	if !strings.Contains(css, ".ba-test-exception-safe { display: revert !important; }") {
+		t.Fatalf("expected revert override for excepted selector: %s", css)
+	}
+	if !strings.Contains(css, ".ba-test-style-ubo { opacity: 0.25 !important; }") ||
+		!strings.Contains(css, ".ba-global-style { border: 0 !important; }") {
+		t.Fatalf("missing inject_css rules: %s", css)
+	}
+
+	// Test $removeparam stripping via SanitizeRequest
+	u, _ := url.Parse("https://complier.pwhs.app/api/test-suite/probe?keep=1&ba_utm_test=abc&ba_domain_param=xyz")
+	req := &http.Request{
+		Method: http.MethodGet,
+		URL:    u,
+		Host:   "complier.pwhs.app",
+		Header: make(http.Header),
+	}
+	SanitizeRequest(req, "complier.pwhs.app")
+	gotQuery := req.URL.RawQuery
+	if gotQuery != "keep=1" {
+		t.Fatalf("expected query 'keep=1' after removeparam, got %q", gotQuery)
+	}
+}

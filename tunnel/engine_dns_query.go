@@ -359,6 +359,14 @@ func (e *Engine) handleForward(queryInfo *DNSQueryInfo, appName string, startTim
 		}
 	}
 
+	// Detect `.ips` IP/CIDR blocklist hits on resolved A/AAAA answers
+	if ipBL := e.ipBlocklist.Load(); ipBL != nil {
+		if blocked, _ := checkDNSResponseIPBlocklist(resp, ipBL); blocked {
+			e.handleBlockedDomain(queryInfo, "ip_blocklist", appName, startTime)
+			return
+		}
+	}
+
 	response := BuildForwardedResponse(queryInfo, resp)
 	e.writeToTUN(response)
 	e.totalQueries.Add(1)

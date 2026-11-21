@@ -14,13 +14,19 @@ data class ModulesPackage(
     val domainIndex: Map<String, String> = emptyMap(),
     val globalBlockPaths: List<String> = emptyList(),
     val domains: Map<String, DomainModuleRules> = emptyMap(),
-    @SerialName("global_block_paths") val globalPathsSnake: List<String> = emptyList()
+    @SerialName("global_block_paths") val globalPathsSnake: List<String> = emptyList(),
+    @SerialName("global_css_exceptions") val globalCssExceptions: List<String> = emptyList(),
+    @SerialName("global_inject_css") val globalInjectCss: List<String> = emptyList(),
+    @SerialName("global_remove_params") val globalRemoveParams: List<String> = emptyList()
 )
 
 @Serializable
 data class DomainModuleRules(
     val css: List<String> = emptyList(),
-    @SerialName("block_paths") val blockPaths: List<String> = emptyList()
+    @SerialName("css_exceptions") val cssExceptions: List<String> = emptyList(),
+    @SerialName("inject_css") val injectCss: List<String> = emptyList(),
+    @SerialName("block_paths") val blockPaths: List<String> = emptyList(),
+    @SerialName("remove_params") val removeParams: List<String> = emptyList()
 )
 
 @Serializable
@@ -29,7 +35,10 @@ data class ModuleRulesPackage(
     @SerialName("rule_count") val ruleCount: Int = 0,
     val domains: Map<String, DomainModuleRules> = emptyMap(),
     @SerialName("global_css") val globalCss: List<String> = emptyList(),
-    @SerialName("global_block_paths") val globalBlockPaths: List<String> = emptyList()
+    @SerialName("global_css_exceptions") val globalCssExceptions: List<String> = emptyList(),
+    @SerialName("global_inject_css") val globalInjectCss: List<String> = emptyList(),
+    @SerialName("global_block_paths") val globalBlockPaths: List<String> = emptyList(),
+    @SerialName("global_remove_params") val globalRemoveParams: List<String> = emptyList()
 )
 
 @Serializable

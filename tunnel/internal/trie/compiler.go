@@ -24,6 +24,7 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 	defer f.Close()
 
 	domains := make(map[string]struct{})
+	ips := make(map[string]struct{})
 	seenCSS := make(map[string]struct{})
 	seenScriptlets := make(map[string]struct{})
 	var cssRules []string
@@ -102,8 +103,12 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 			}
 		}
 
-		// 4. Extract Domains (for DNS Trie & Bloom)
+		// 4. Extract Domains (for DNS Trie & Bloom) or Public IP/CIDR (for .ips)
 		if strings.HasPrefix(rawLine, "@@") {
+			continue
+		}
+		if ipRule, ok := parseIPOrCIDR(rawLine); ok {
+			ips[ipRule] = struct{}{}
 			continue
 		}
 		d := parseDomainLine(rawLine)
@@ -116,7 +121,7 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 	}
 
 	hasModules := len(domainModules) > 0 || len(globalCSS) > 0 || len(globalBlockPaths) > 0
-	if len(domains) == 0 && len(cssRules) == 0 && len(scriptlets) == 0 && !hasModules {
+	if len(domains) == 0 && len(ips) == 0 && len(cssRules) == 0 && len(scriptlets) == 0 && !hasModules {
 		return 0, fmt.Errorf("no valid rules found in filter list")
 	}
 
@@ -138,7 +143,7 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 		return 0, fmt.Errorf("write bloom: %w", err)
 	}
 
-	// Write optional sidecar files (.css, .scriptlets, .modules.json) next to triePath
+	// Write optional sidecar files (.css, .scriptlets, .ips, .modules.json) next to triePath
 	basePath := strings.TrimSuffix(triePath, ".trie")
 	if len(cssRules) > 0 {
 		_ = os.WriteFile(basePath+".css", []byte(strings.Join(cssRules, "\n")+"\n"), 0644)
@@ -147,10 +152,18 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 		sort.Strings(scriptlets)
 		_ = os.WriteFile(basePath+".scriptlets", []byte(strings.Join(scriptlets, "\n")+"\n"), 0644)
 	}
+	if len(ips) > 0 {
+		ipList := make([]string, 0, len(ips))
+		for ip := range ips {
+			ipList = append(ipList, ip)
+		}
+		sort.Strings(ipList)
+		_ = os.WriteFile(basePath+".ips", []byte(strings.Join(ipList, "\n")+"\n"), 0644)
+	}
 	if hasModules {
 		pkg := &moduleRulesPackage{
 			Name:             filepath.Base(basePath),
-			RuleCount:        len(domains) + len(cssRules) + len(scriptlets),
+			RuleCount:        len(domains) + len(ips) + len(cssRules) + len(scriptlets),
 			Domains:          domainModules,
 			GlobalCSS:        globalCSS,
 			GlobalBlockPaths: globalBlockPaths,
@@ -160,7 +173,7 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 		}
 	}
 
-	effectiveCount := len(domains)
+	effectiveCount := len(domains) + len(ips)
 	if effectiveCount == 0 {
 		effectiveCount = len(cssRules) + len(scriptlets)
 		if effectiveCount == 0 {
@@ -168,8 +181,8 @@ func CompileFilterList(inputPath, triePath, bloomPath string) (int, error) {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "[BlockAds/Go] Compiled %d domains, %d CSS, %d scriptlets → %s\n",
-		len(domains), len(cssRules), len(scriptlets), triePath)
+	fmt.Fprintf(os.Stderr, "[BlockAds/Go] Compiled %d domains, %d IPs, %d CSS, %d scriptlets → %s\n",
+		len(domains), len(ips), len(cssRules), len(scriptlets), triePath)
 	return effectiveCount, nil
 }
 

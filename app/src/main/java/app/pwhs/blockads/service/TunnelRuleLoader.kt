@@ -200,7 +200,7 @@ object TunnelRuleLoader {
      * Reads modules.json, resolves any bundled script names,
      * and returns the JSON string.
      */
-    fun loadModulesJson(context: Context, @Suppress("UNUSED_PARAMETER") filterModulesPath: String? = null): String {
+    fun loadModulesJson(context: Context, filterModulesPath: String? = null): String {
         return try {
             val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
             val assetRaw = runCatching {
@@ -220,14 +220,23 @@ object TunnelRuleLoader {
                 runCatching { json.decodeFromString<app.pwhs.blockads.data.models.ModulesPackage>(cachedRaw) }.getOrNull()
             } else null
 
-            val pkg = when {
+            val basePkg = when {
                 cachedPkg != null && assetPkg != null -> if (assetPkg.version >= cachedPkg.version) assetPkg else cachedPkg
                 assetPkg != null -> assetPkg
                 cachedPkg != null -> cachedPkg
-                else -> return ""
+                else -> app.pwhs.blockads.data.models.ModulesPackage()
             }
 
-            val resolvedModules = pkg.modules.map { mod ->
+            val filterModPkg = if (!filterModulesPath.isNullOrBlank()) {
+                val f = java.io.File(filterModulesPath)
+                if (f.exists() && f.length() > 0L) {
+                    runCatching {
+                        json.decodeFromString<app.pwhs.blockads.data.models.ModuleRulesPackage>(f.readText())
+                    }.getOrNull()
+                } else null
+            } else null
+
+            val resolvedModules = basePkg.modules.map { mod ->
                 val resolvedScripts = mod.scripts.map { scriptRef ->
                     if (scriptRef.endsWith(".js")) {
                         runCatching {
@@ -240,9 +249,37 @@ object TunnelRuleLoader {
                 mod.copy(scripts = resolvedScripts)
             }
 
+            val mergedPkg = if (filterModPkg != null) {
+                val mergedDomains = basePkg.domains.toMutableMap()
+                for ((domain, rules) in filterModPkg.domains) {
+                    val existing = mergedDomains[domain]
+                    mergedDomains[domain] = if (existing == null) {
+                        rules
+                    } else {
+                        app.pwhs.blockads.data.models.DomainModuleRules(
+                            css = (existing.css + rules.css).distinct(),
+                            cssExceptions = (existing.cssExceptions + rules.cssExceptions).distinct(),
+                            injectCss = (existing.injectCss + rules.injectCss).distinct(),
+                            blockPaths = (existing.blockPaths + rules.blockPaths).distinct(),
+                            removeParams = (existing.removeParams + rules.removeParams).distinct()
+                        )
+                    }
+                }
+                basePkg.copy(
+                    modules = resolvedModules,
+                    domains = mergedDomains,
+                    globalPathsSnake = (basePkg.globalPathsSnake + filterModPkg.globalBlockPaths).distinct(),
+                    globalCssExceptions = (basePkg.globalCssExceptions + filterModPkg.globalCssExceptions).distinct(),
+                    globalInjectCss = (basePkg.globalInjectCss + filterModPkg.globalInjectCss).distinct(),
+                    globalRemoveParams = (basePkg.globalRemoveParams + filterModPkg.globalRemoveParams).distinct()
+                )
+            } else {
+                basePkg.copy(modules = resolvedModules)
+            }
+
             json.encodeToString(
                 app.pwhs.blockads.data.models.ModulesPackage.serializer(),
-                pkg.copy(modules = resolvedModules)
+                mergedPkg
             )
         } catch (e: Exception) {
             Timber.w(e, "Failed to load and resolve modules.json")
@@ -459,6 +496,33 @@ object TunnelRuleLoader {
         }.onFailure {
             Timber.e(it, "Failed to load ad path patterns for engine")
             engine.setAdPathPatterns("")
+        }
+
+        loadIpBlocklists(engine, filterRepo)
+    }
+
+    /**
+     * Loads `.ips` sidecar blocklists from enabled filters into the Go engine.
+     * Uses reflective lookup so the app continues compiling against older prebuilt tunnel.aar
+     * releases until the next tunnel AAR containing SetIPBlocklistFromFiles is published.
+     */
+    fun loadIpBlocklists(
+        engine: tunnel.Engine,
+        filterRepo: app.pwhs.blockads.data.repository.FilterListRepository
+    ) {
+        val paths = filterRepo.getIpBlocklistPaths()
+        runCatching {
+            val method = engine.javaClass.getMethod("setIPBlocklistFromFiles", String::class.java)
+            method.invoke(engine, paths)
+            if (paths.isNotEmpty()) {
+                Timber.d("Loaded IP blocklist files into engine: ${paths.lines().size} file(s)")
+            }
+        }.onFailure { err ->
+            if (err is NoSuchMethodException) {
+                Timber.d("Go engine AAR does not yet expose setIPBlocklistFromFiles; skipping .ips load")
+            } else {
+                Timber.w(err, "Failed to load IP blocklist files into engine")
+            }
         }
     }
 }

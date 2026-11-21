@@ -61,8 +61,8 @@ func TestParseOneScriptletRule(t *testing.T) {
 			ok:   true,
 			want: Rule{Domains: []string{"example.com"}, Name: "set-constant", Args: []string{"a.b()", "1"}},
 		},
-		{name: "ublock exception ignored", line: "example.com#@#+js(noeval)"},
-		{name: "adguard exception ignored", line: "example.com#@%#//scriptlet('noeval')"},
+		{name: "ublock exception parsed", line: "example.com#@#+js(noeval)", ok: true, want: Rule{Domains: []string{"example.com"}, Name: "noeval", Args: []string{}, IsException: true}},
+		{name: "adguard exception parsed", line: "example.com#@%#//scriptlet('noeval')", ok: true, want: Rule{Domains: []string{"example.com"}, Name: "noeval", Args: []string{}, IsException: true}},
 		{name: "missing close paren", line: "example.com##+js(noeval"},
 		{name: "adguard missing close paren", line: "example.com#%#//scriptlet('noeval'"},
 		{name: "empty body", line: "example.com##+js()"},
@@ -114,14 +114,28 @@ func TestParseRules(t *testing.T) {
 	}, "\n")
 
 	rules := ParseRules(content)
-	if len(rules) != 2 {
-		t.Fatalf("parsed %d rules, want 2: %+v", len(rules), rules)
+	if len(rules) != 4 {
+		t.Fatalf("parsed %d rules, want 4: %+v", len(rules), rules)
 	}
-	if rules[0].Name != "noeval" || rules[0].Domains[0] != "example.com" {
+	if rules[0].Name != "noeval" || rules[0].Domains[0] != "example.com" || rules[0].IsException {
 		t.Errorf("rule 0 = %+v", rules[0])
 	}
-	if rules[1].Name != "set-constant" || rules[1].Domains[0] != "other.org" {
+	if rules[1].Name != "set-constant" || rules[1].Domains[0] != "other.org" || rules[1].IsException {
 		t.Errorf("rule 1 = %+v", rules[1])
+	}
+	if rules[2].Name != "noeval" || rules[2].Domains[0] != "example.com" || !rules[2].IsException {
+		t.Errorf("rule 2 = %+v", rules[2])
+	}
+	if rules[3].Name != "set-constant" || len(rules[3].Domains) != 0 || rules[3].IsException {
+		t.Errorf("rule 3 = %+v", rules[3])
+	}
+	// Verify Store suppresses example.com's noeval via #@#+js(noeval)
+	store := BuildStore(rules)
+	matched := store.Matches("example.com")
+	for _, m := range matched {
+		if m.Name == "noeval" {
+			t.Errorf("expected noeval to be suppressed by #@#+js(noeval), got %+v", matched)
+		}
 	}
 	if got := ParseRules(""); got != nil {
 		t.Errorf("ParseRules(\"\") = %v, want nil", got)

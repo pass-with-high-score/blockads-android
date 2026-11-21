@@ -75,6 +75,7 @@ class FilterCompileWorker(
         val tempCss = File("${tempBase.absolutePath}.css")
         val tempScriptlets = File("${tempBase.absolutePath}.scriptlets")
         val tempModules = File("${tempBase.absolutePath}.modules.json")
+        val tempIps = File("${tempBase.absolutePath}.ips")
 
         try {
             showProgressNotification(name)
@@ -171,6 +172,9 @@ class FilterCompileWorker(
             }
             if (tempModules.exists() && tempModules.length() > 0) {
                 tempModules.copyTo(File(remoteFilterDir, "$filterId.modules.json"), overwrite = true)
+            }
+            if (tempIps.exists() && tempIps.length() > 0) {
+                tempIps.copyTo(File(remoteFilterDir, "$filterId.ips"), overwrite = true)
             }
 
             // Reload engine

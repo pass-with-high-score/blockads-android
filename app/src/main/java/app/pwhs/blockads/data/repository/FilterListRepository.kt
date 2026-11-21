@@ -57,6 +57,11 @@ class FilterListRepository(
     private var securityBloomPaths: String = ""
 
     @Volatile
+    private var ipBlocklistPaths: String = ""
+
+    fun getIpBlocklistPaths(): String = ipBlocklistPaths
+
+    @Volatile
     private var lastCompiledSignature: String = ""
 
     private val loadMutex = Mutex()
@@ -227,6 +232,7 @@ class FilterListRepository(
                     securityTriePaths = ""
                     adBloomPaths = ""
                     securityBloomPaths = ""
+                    ipBlocklistPaths = ""
                     lastCompiledSignature = ""
                     File(context.filesDir, "$CACHE_DIR/cosmetic_rules.css").delete()
                     File(context.filesDir, "$CACHE_DIR/cosmetic_engine_merged.css").delete()
@@ -242,6 +248,7 @@ class FilterListRepository(
                 val secTrieSb = StringBuilder()
                 val adBloomSb = StringBuilder()
                 val secBloomSb = StringBuilder()
+                val ipsSb = StringBuilder()
                 var totalCount = 0
 
                 for (filter in enabledLists) {
@@ -259,6 +266,7 @@ class FilterListRepository(
                             paths.triePath?.let { adTrieSb.append(it).append(",") }
                             paths.bloomPath?.let { adBloomSb.append(it).append(",") }
                         }
+                        paths.ipsPath?.let { ipsSb.append(it).append("\n") }
                         // Update per-filter domainCount so UI shows the correct value
                         if (filter.domainCount != filter.ruleCount) {
                             filterListDao.updateStats(
@@ -277,6 +285,7 @@ class FilterListRepository(
                 securityTriePaths = secTrieSb.toString().trimEnd(',')
                 adBloomPaths = adBloomSb.toString().trimEnd(',')
                 securityBloomPaths = secBloomSb.toString().trimEnd(',')
+                ipBlocklistPaths = ipsSb.toString().trim()
 
                 val signature = buildSidecarSignature(enabledLists)
                 if (isSidecarCacheValid(signature, enabledLists)) {
@@ -441,8 +450,18 @@ class FilterListRepository(
                 }
 
                 val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
-                val mergedDomains = mutableMapOf<String, Pair<MutableSet<String>, MutableSet<String>>>()
-                val mergedGlobalPaths = mutableSetOf<String>()
+                class DomainAccumulator(
+                    val css: MutableSet<String> = linkedSetOf(),
+                    val cssExceptions: MutableSet<String> = linkedSetOf(),
+                    val injectCss: MutableSet<String> = linkedSetOf(),
+                    val blockPaths: MutableSet<String> = linkedSetOf(),
+                    val removeParams: MutableSet<String> = linkedSetOf()
+                )
+                val mergedDomains = mutableMapOf<String, DomainAccumulator>()
+                val mergedGlobalPaths = linkedSetOf<String>()
+                val mergedGlobalCssExceptions = linkedSetOf<String>()
+                val mergedGlobalInjectCss = linkedSetOf<String>()
+                val mergedGlobalRemoveParams = linkedSetOf<String>()
 
                 for (filter in validLists) {
                     val modFile = File(context.filesDir, "remote_filters/${filter.id}.modules.json")
@@ -457,37 +476,57 @@ class FilterListRepository(
                         .let { it.exists() && it.length() > 0L }
 
                     mergedGlobalPaths.addAll(pkg.globalBlockPaths)
+                    mergedGlobalCssExceptions.addAll(pkg.globalCssExceptions)
+                    mergedGlobalInjectCss.addAll(pkg.globalInjectCss)
+                    mergedGlobalRemoveParams.addAll(pkg.globalRemoveParams)
+
                     for ((domain, rules) in pkg.domains) {
                         val effectiveCss = if (hasCssSidecar) emptyList() else rules.css
-                        if (effectiveCss.isEmpty() && rules.blockPaths.isEmpty()) continue
-                        val pair = mergedDomains.getOrPut(domain.lowercase()) { mutableSetOf<String>() to mutableSetOf<String>() }
-                        if (effectiveCss.isNotEmpty()) {
-                            pair.first.addAll(effectiveCss)
-                        }
-                        if (rules.blockPaths.isNotEmpty()) {
-                            pair.second.addAll(rules.blockPaths)
-                        }
+                        if (effectiveCss.isEmpty() &&
+                            rules.cssExceptions.isEmpty() &&
+                            rules.injectCss.isEmpty() &&
+                            rules.blockPaths.isEmpty() &&
+                            rules.removeParams.isEmpty()
+                        ) continue
+                        val acc = mergedDomains.getOrPut(domain.lowercase()) { DomainAccumulator() }
+                        if (effectiveCss.isNotEmpty()) acc.css.addAll(effectiveCss)
+                        if (rules.cssExceptions.isNotEmpty()) acc.cssExceptions.addAll(rules.cssExceptions)
+                        if (rules.injectCss.isNotEmpty()) acc.injectCss.addAll(rules.injectCss)
+                        if (rules.blockPaths.isNotEmpty()) acc.blockPaths.addAll(rules.blockPaths)
+                        if (rules.removeParams.isNotEmpty()) acc.removeParams.addAll(rules.removeParams)
                     }
                 }
 
-                if (mergedDomains.isNotEmpty() || mergedGlobalPaths.isNotEmpty()) {
+                val hasAnyRules = mergedDomains.isNotEmpty() ||
+                    mergedGlobalPaths.isNotEmpty() ||
+                    mergedGlobalCssExceptions.isNotEmpty() ||
+                    mergedGlobalInjectCss.isNotEmpty() ||
+                    mergedGlobalRemoveParams.isNotEmpty()
+
+                if (hasAnyRules) {
                     val outPkg = app.pwhs.blockads.data.models.ModuleRulesPackage(
                         name = "merged_filters",
-                        ruleCount = mergedDomains.size + mergedGlobalPaths.size,
-                        domains = mergedDomains.mapValues { (_, pair) ->
+                        ruleCount = mergedDomains.size + mergedGlobalPaths.size + mergedGlobalRemoveParams.size,
+                        domains = mergedDomains.mapValues { (_, acc) ->
                             app.pwhs.blockads.data.models.DomainModuleRules(
-                                css = pair.first.toList(),
-                                blockPaths = pair.second.toList()
+                                css = acc.css.toList(),
+                                cssExceptions = acc.cssExceptions.toList(),
+                                injectCss = acc.injectCss.toList(),
+                                blockPaths = acc.blockPaths.toList(),
+                                removeParams = acc.removeParams.toList()
                             )
                         },
-                        globalBlockPaths = mergedGlobalPaths.toList()
+                        globalCssExceptions = mergedGlobalCssExceptions.toList(),
+                        globalInjectCss = mergedGlobalInjectCss.toList(),
+                        globalBlockPaths = mergedGlobalPaths.toList(),
+                        globalRemoveParams = mergedGlobalRemoveParams.toList()
                     )
                     outFile.parentFile?.mkdirs()
                     tmpFile.writeText(
                         json.encodeToString(app.pwhs.blockads.data.models.ModuleRulesPackage.serializer(), outPkg)
                     )
                     replaceFileAtomically(tmpFile, outFile)
-                    Timber.d("Wrote filter modules (${mergedDomains.size} domains, ${mergedGlobalPaths.size} global paths)")
+                    Timber.d("Wrote filter modules (${mergedDomains.size} domains, ${mergedGlobalPaths.size} global paths, ${mergedGlobalRemoveParams.size} global remove_params)")
                 } else {
                     tmpFile.delete()
                     outFile.delete()
