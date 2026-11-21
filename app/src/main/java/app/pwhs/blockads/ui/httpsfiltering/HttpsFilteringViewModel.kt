@@ -86,7 +86,16 @@ class HttpsFilteringViewModel(
         loadState()
         appPrefs.httpsFilteringEnabled.onEach { enabled ->
             _isEnabled.value = enabled
-            if (!enabled) _isProxyRunning.value = false
+            if (!enabled) {
+                _isProxyRunning.value = false
+            } else if (!_isProxyRunning.value) {
+                val caPem = withContext(Dispatchers.IO) { ensureCaCertPem() }
+                if (!caPem.isNullOrEmpty()) {
+                    _caCertPem.value = caPem
+                    _isProxyRunning.value = true
+                }
+                verifyCert(showLoading = false)
+            }
         }.launchIn(viewModelScope)
     }
 
