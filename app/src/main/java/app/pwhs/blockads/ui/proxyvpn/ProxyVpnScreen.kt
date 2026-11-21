@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -119,6 +121,12 @@ fun ProxyVpnScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var supportError by remember { mutableStateOf<app.pwhs.blockads.ui.common.SupportErrorInfo?>(null) }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importWireGuardFromUri(it) }
+    }
 
     BackHandler(enabled = isSearchActive) {
         isSearchActive = false
@@ -416,6 +424,7 @@ fun ProxyVpnScreen(
         app.pwhs.blockads.ui.proxyvpn.component.AddProxyChoiceBottomSheet(
             onDismiss = { showAddChoiceSheet = false },
             onImportLink = { showAddProxyDialog = true },
+            onImportFile = { filePickerLauncher.launch(arrayOf("*/*")) },
             onAddCustom = onAddCustomProxy,
             onOpenSubscriptions = { showSubscriptionsSheet = true }
         )

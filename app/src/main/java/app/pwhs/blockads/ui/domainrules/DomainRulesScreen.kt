@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.ui.component.LocalFloatingBottomBarPadding
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.data.model.SniProxyRule
 import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.domainrules.component.BlocklistTab
@@ -94,17 +96,14 @@ fun DomainRulesScreen(
     val resources = LocalContext.current.resources
 
     BackHandler(enabled = selectedRuleIds.isNotEmpty() || isReorderMode) {
-        if (selectedRuleIds.isNotEmpty()) {
-            selectedRuleIds = emptySet()
-        } else {
-            isReorderMode = false
-        }
+        if (selectedRuleIds.isNotEmpty()) selectedRuleIds = emptySet() else isReorderMode = false
     }
 
     LaunchedEffect(pagerState.currentPage) {
         selectedRuleIds = emptySet()
         if (pagerState.currentPage == 2) {
             isReorderMode = false
+            viewModel.loadInstalledAppsIfNeeded()
         }
     }
 
@@ -123,12 +122,6 @@ fun DomainRulesScreen(
         displayableRules.filter {
             it.policy.startsWith("REJECT", ignoreCase = true) &&
                 (searchQuery.isBlank() || it.param.contains(searchQuery, ignoreCase = true) || it.type.contains(searchQuery, ignoreCase = true))
-        }
-    }
-
-    LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage == 2) {
-            viewModel.loadInstalledAppsIfNeeded()
         }
     }
 
@@ -154,9 +147,12 @@ fun DomainRulesScreen(
         }
     }
 
+    val isExpandedLayout = rememberIsExpandedLayout()
+
     Scaffold(
         modifier = modifier,
         snackbarHost = { UndoSnackbarHost(snackbarHostState) },
+        floatingActionButtonPosition = if (isExpandedLayout) FabPosition.Start else FabPosition.End,
         topBar = {
             val activeTabRules = when (pagerState.currentPage) {
                 0 -> whitelistRules
@@ -489,9 +485,7 @@ fun DomainRulesScreen(
     }
 
     if (showRuleDocSheet) {
-        RuleTypesDocSheet(
-            onDismiss = { showRuleDocSheet = false }
-        )
+        RuleTypesDocSheet(onDismiss = { showRuleDocSheet = false })
     }
 
     if (showPresetSheet) {

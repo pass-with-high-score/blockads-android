@@ -56,6 +56,7 @@ import app.pwhs.blockads.data.entities.ProxyProfile
 import app.pwhs.blockads.data.entities.ProxyProtocol
 import app.pwhs.blockads.data.entities.ProxySortOption
 import app.pwhs.blockads.data.entities.WireGuardProfile
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.wireguard.component.ProfileRow
 import app.pwhs.blockads.utils.NodePingResult
 
@@ -387,7 +388,8 @@ fun UnifiedProxyNodesContent(
                                 isUpdatingSubscription = isUpdatingSubscription,
                                 onUpdateSubscription = onUpdateSubscription,
                                 onOpenSubscriptions = onOpenSubscriptions,
-                                onRemoveDuplicates = onRemoveDuplicates
+                                onRemoveDuplicates = onRemoveDuplicates,
+                                onImportFile = { filePickerLauncher.launch(arrayOf("*/*")) }
                             )
                         }
                     }
@@ -435,12 +437,13 @@ fun UnifiedProxyNodesContent(
         }
 
         // Add Node FAB
+        val isExpandedLayout = rememberIsExpandedLayout()
         ExtendedFloatingActionButton(
             text = { Text(stringResource(R.string.proxy_node_add_node)) },
             icon = { Icon(Icons.Default.Add, contentDescription = null) },
             onClick = onAddClick,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(if (isExpandedLayout) Alignment.BottomStart else Alignment.BottomEnd)
                 .padding(16.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary

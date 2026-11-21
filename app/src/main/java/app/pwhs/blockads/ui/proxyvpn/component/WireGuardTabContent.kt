@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.WireGuardProfile
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.wireguard.component.EmptyState
 import app.pwhs.blockads.ui.wireguard.component.ProfileRow
 import app.pwhs.blockads.utils.NodePingResult
@@ -168,6 +169,7 @@ fun WireGuardTabContent(
             }
         }
 
+        val isExpandedLayout = rememberIsExpandedLayout()
         ExtendedFloatingActionButton(
             onClick = { filePickerLauncher.launch(arrayOf("*/*")) },
             icon = { Icon(Icons.Filled.FileOpen, contentDescription = null) },
@@ -175,7 +177,7 @@ fun WireGuardTabContent(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(if (isExpandedLayout) Alignment.BottomStart else Alignment.BottomEnd)
                 .padding(16.dp)
         )
     }

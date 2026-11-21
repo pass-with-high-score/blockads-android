@@ -73,7 +73,7 @@
 
 Join our community:  
 [![Reddit](https://img.shields.io/badge/Reddit-Join%20Community-orange?logo=reddit)](https://www.reddit.com/r/BlockAds/)
-[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/blockads_android)
+[![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/blockads_android_chat)
 
 ## Sponsor
 

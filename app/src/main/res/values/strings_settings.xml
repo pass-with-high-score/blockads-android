@@ -406,6 +406,8 @@
     <string name="proxy_add_choice_import_desc">Paste vless://, vmess://, ss://, trojan://, or subscription URL</string>
     <string name="proxy_add_choice_custom">Manual Custom Configuration</string>
     <string name="proxy_add_choice_custom_desc">Configure VLESS, VMess, Shadowsocks, Trojan, Hysteria 2, TUIC</string>
+    <string name="proxy_add_choice_wireguard_file">Import WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Import a WireGuard or AmneziaWG configuration file</string>
     <string name="proxy_field_remark">Remarks / Profile Name</string>
     <string name="proxy_field_protocol">Protocol</string>
     <string name="proxy_field_server">Server Address</string>

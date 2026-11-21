@@ -33,6 +33,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.entities.WireGuardProfile
 import app.pwhs.blockads.data.geoip.GeoIpLookup
+import app.pwhs.blockads.ui.component.rememberIsExpandedLayout
 import app.pwhs.blockads.ui.wireguard.component.EmptyState
 import app.pwhs.blockads.ui.wireguard.component.ProfileRow
 import app.pwhs.blockads.ui.wireguard.component.SettingToggleCard
@@ -129,8 +131,11 @@ fun WireGuardImportScreen(
         }
     }
 
+    val isExpandedLayout = rememberIsExpandedLayout()
+
     Scaffold(
         modifier = modifier,
+        floatingActionButtonPosition = if (isExpandedLayout) FabPosition.Start else FabPosition.End,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.wireguard_import_title)) },

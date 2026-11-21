@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +37,7 @@ import app.pwhs.blockads.R
 fun AddProxyChoiceBottomSheet(
     onDismiss: () -> Unit,
     onImportLink: () -> Unit,
+    onImportFile: () -> Unit,
     onAddCustom: () -> Unit,
     onOpenSubscriptions: () -> Unit,
     modifier: Modifier = Modifier
@@ -70,6 +72,18 @@ fun AddProxyChoiceBottomSheet(
                 onClick = {
                     onDismiss()
                     onImportLink()
+                }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            ChoiceOptionCard(
+                icon = Icons.Default.FileOpen,
+                title = stringResource(R.string.proxy_add_choice_wireguard_file),
+                desc = stringResource(R.string.proxy_add_choice_wireguard_file_desc),
+                onClick = {
+                    onDismiss()
+                    onImportFile()
                 }
             )
 

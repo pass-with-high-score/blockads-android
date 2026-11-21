@@ -40,6 +40,11 @@ import androidx.compose.ui.unit.sp
 import app.pwhs.blockads.ui.data.BottomBarScreen
 
 @Composable
+fun rememberIsExpandedLayout(): Boolean {
+    return LocalConfiguration.current.smallestScreenWidthDp >= 600
+}
+
+@Composable
 fun rememberIsExpandedLayout(maxWidth: Dp): Boolean {
     val configuration = LocalConfiguration.current
     return maxWidth >= 600.dp && configuration.smallestScreenWidthDp >= 600

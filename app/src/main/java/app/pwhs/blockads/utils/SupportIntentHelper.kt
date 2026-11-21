@@ -14,7 +14,7 @@ import app.pwhs.blockads.ui.common.SupportErrorInfo
 import timber.log.Timber
 
 object SupportIntentHelper {
-    const val TELEGRAM_URL = "https://t.me/blockads_android"
+    const val TELEGRAM_URL = "https://t.me/blockads_android_chat"
     const val GITHUB_ISSUES_URL = "https://github.com/pass-with-high-score/blockads-android/issues/new"
     const val SUPPORT_EMAIL = "support@pwhs.app"
 

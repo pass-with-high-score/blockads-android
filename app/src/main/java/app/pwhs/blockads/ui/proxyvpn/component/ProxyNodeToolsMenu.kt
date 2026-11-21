@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +33,7 @@ fun ProxyNodeToolsMenu(
     onUpdateSubscription: () -> Unit,
     onOpenSubscriptions: () -> Unit,
     onRemoveDuplicates: () -> Unit,
+    onImportFile: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     DropdownMenu(
@@ -120,6 +122,19 @@ fun ProxyNodeToolsMenu(
                 onClick = {
                     onDismissRequest()
                     onUpdateSubscription()
+                }
+            )
+        }
+
+        if (onImportFile != null) {
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                },
+                text = { Text(stringResource(R.string.wireguard_import_button)) },
+                onClick = {
+                    onDismissRequest()
+                    onImportFile()
                 }
             )
         }
