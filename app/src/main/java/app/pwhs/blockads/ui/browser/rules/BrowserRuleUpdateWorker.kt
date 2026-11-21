@@ -8,6 +8,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import app.pwhs.blockads.service.AdBlockVpnService
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import timber.log.Timber
@@ -22,7 +23,6 @@ class BrowserRuleUpdateWorker(
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val repository: BrowserRuleRepository by inject()
-    private val goTunnelAdapter: app.pwhs.blockads.service.GoTunnelAdapter by inject()
 
     companion object {
         const val WORK_NAME = "browser_rule_update_work"
@@ -54,8 +54,9 @@ class BrowserRuleUpdateWorker(
             val rulesResult = repository.checkAndUpdate()
             val modulesResult = repository.checkAndUpdateModules()
             if (rulesResult.getOrDefault(false) || modulesResult.getOrDefault(false)) {
-                if (goTunnelAdapter.isEngineRunning()) {
-                    goTunnelAdapter.updateCosmeticRules()
+                val adapter = AdBlockVpnService.activeTunnelAdapter
+                if (adapter != null && adapter.isEngineRunning()) {
+                    adapter.updateCosmeticRules()
                 }
             }
             if (rulesResult.isSuccess) {

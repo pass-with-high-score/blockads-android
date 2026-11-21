@@ -24,23 +24,23 @@ interface DnsLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: DnsLogEntry)
 
-    @Query("SELECT * FROM dns_logs ORDER BY timestamp DESC")
-    fun getAll(): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs ORDER BY timestamp DESC LIMIT :limit")
+    fun getAll(limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
-    @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 ORDER BY timestamp DESC")
-    fun getBlockedOnly(): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 ORDER BY timestamp DESC LIMIT :limit")
+    fun getBlockedOnly(limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
-    @Query("SELECT * FROM dns_logs WHERE isBlocked = 0 ORDER BY timestamp DESC")
-    fun getAllowedOnly(): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs WHERE isBlocked = 0 ORDER BY timestamp DESC LIMIT :limit")
+    fun getAllowedOnly(limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
-    @Query("SELECT * FROM dns_logs WHERE timestamp > :since ORDER BY timestamp DESC")
-    fun getAllSince(since: Long): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs WHERE timestamp > :since ORDER BY timestamp DESC LIMIT :limit")
+    fun getAllSince(since: Long, limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
-    @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since ORDER BY timestamp DESC")
-    fun getBlockedOnlySince(since: Long): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs WHERE isBlocked = 1 AND timestamp > :since ORDER BY timestamp DESC LIMIT :limit")
+    fun getBlockedOnlySince(since: Long, limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
-    @Query("SELECT * FROM dns_logs WHERE isBlocked = 0 AND timestamp > :since ORDER BY timestamp DESC")
-    fun getAllowedOnlySince(since: Long): Flow<List<DnsLogEntry>>
+    @Query("SELECT * FROM dns_logs WHERE isBlocked = 0 AND timestamp > :since ORDER BY timestamp DESC LIMIT :limit")
+    fun getAllowedOnlySince(since: Long, limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
     @Query("SELECT DISTINCT appName FROM dns_logs WHERE appName != '' ORDER BY appName ASC")
     fun getDistinctAppNames(): Flow<List<String>>
@@ -226,9 +226,10 @@ interface DnsLogDao {
         AND (INSTR(',' || blockedBy || ',', ',' || :reason || ',') > 0
              OR blockedBy IN (SELECT CAST(id AS TEXT) FROM filter_lists WHERE category = :reason))
         ORDER BY timestamp DESC
+        LIMIT :limit
         """
     )
-    fun getBlockedByReason(reason: String): Flow<List<DnsLogEntry>>
+    fun getBlockedByReason(reason: String, limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
     @Query(
         """
@@ -236,9 +237,10 @@ interface DnsLogDao {
         AND (INSTR(',' || blockedBy || ',', ',' || :reason || ',') > 0
              OR blockedBy IN (SELECT CAST(id AS TEXT) FROM filter_lists WHERE category = :reason))
         ORDER BY timestamp DESC
+        LIMIT :limit
         """
     )
-    fun getBlockedByReasonSince(reason: String, since: Long): Flow<List<DnsLogEntry>>
+    fun getBlockedByReasonSince(reason: String, since: Long, limit: Int = DEFAULT_LOG_LIMIT): Flow<List<DnsLogEntry>>
 
     @Query(
         """
@@ -331,4 +333,9 @@ interface DnsLogDao {
         packageName: String,
         limit: Int = 20
     ): Flow<List<CountryTopDomain>>
+
+    companion object {
+        // Caps single-query result size safely below Android's 2MB CursorWindow limit.
+        const val DEFAULT_LOG_LIMIT = 1500
+    }
 }
