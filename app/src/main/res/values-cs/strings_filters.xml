@@ -274,4 +274,23 @@
     <string name="rule_pick_app_search">Hledat aplikace…</string>
     <string name="log_action_block_for_app">Blokovat pro %1$s</string>
     <string name="log_action_allow_for_app">Povolit pro %1$s</string>
+    <string name="filter_detail_rule_breakdown">Rozpis pravidel</string>
+    <string name="filter_rule_kind_domains">DNS domény</string>
+    <string name="filter_rule_kind_domains_desc">Blokovat vyhledávání domén na vrstvě DNS</string>
+    <string name="filter_rule_kind_ips">IP a CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Blokovat přímá připojení k IP adresám a podsítím</string>
+    <string name="filter_rule_kind_cosmetic">Kosmetické skrývání</string>
+    <string name="filter_rule_kind_cosmetic_desc">Skrýt reklamní bannery, vyskakovací okna a prvky stránky</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Kosmetické výjimky</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Ponechat legitimní prvky viditelné, aby se stránka nerozbila</string>
+    <string name="filter_rule_kind_inject_css">Vkládání CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Použít vlastní pravidla stylů na webové stránky</string>
+    <string name="filter_rule_kind_scriptlets">Skriptlety</string>
+    <string name="filter_rule_kind_scriptlets_desc">Potlačit skripty proti blokování reklam a reklamní skripty</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Výjimky skriptletů</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Zakázat konkrétní skriptlety na kompatibilních webech</string>
+    <string name="filter_rule_kind_block_paths">Blokování URL cest</string>
+    <string name="filter_rule_kind_block_paths_desc">Blokovat reklamní zdroje podle cesty HTTPS požadavku</string>
+    <string name="filter_rule_kind_remove_params">Odstranění sledovacích parametrů</string>
+    <string name="filter_rule_kind_remove_params_desc">Odstranit sledovací parametry z URL adres</string>
 </resources>

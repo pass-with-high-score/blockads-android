@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Қараңғы режим, OLED және екпін түсі</string>
     <string name="settings_navigation_desc">Белгілер, қойындылар және шарлау жолағының орналасуы</string>
     <string name="settings_language_desc">Қолданбаның көрсету тілін таңдаңыз</string>
+    <string name="rule_docs_category_app">Қолданба және процесс</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard (.conf) импорттау</string>
+    <string name="proxy_add_choice_wireguard_file_desc">WireGuard немесе AmneziaWG конфигурация файлын импорттау</string>
 </resources>

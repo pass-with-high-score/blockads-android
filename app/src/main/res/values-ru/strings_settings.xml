@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Тёмная тема, OLED и акцентный цвет</string>
     <string name="settings_navigation_desc">Подписи, вкладки и макет панели навигации</string>
     <string name="settings_language_desc">Выберите язык отображения приложения</string>
+    <string name="rule_docs_category_app">Приложение и процесс</string>
+    <string name="proxy_add_choice_wireguard_file">Импорт WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Импортировать файл конфигурации WireGuard или AmneziaWG</string>
 </resources>

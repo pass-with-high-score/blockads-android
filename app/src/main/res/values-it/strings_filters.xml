@@ -273,4 +273,23 @@
     <string name="rule_pick_app_search">Cerca app…</string>
     <string name="log_action_block_for_app">Blocca per %1$s</string>
     <string name="log_action_allow_for_app">Consenti per %1$s</string>
+    <string name="filter_detail_rule_breakdown">Dettaglio regole</string>
+    <string name="filter_rule_kind_domains">Domini DNS</string>
+    <string name="filter_rule_kind_domains_desc">Blocca la risoluzione dei domini a livello DNS</string>
+    <string name="filter_rule_kind_ips">IP e CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Blocca le connessioni dirette a IP e sottoreti</string>
+    <string name="filter_rule_kind_cosmetic">Occultamento cosmetico</string>
+    <string name="filter_rule_kind_cosmetic_desc">Nasconde banner pubblicitari, popup ed elementi della pagina</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Eccezioni cosmetiche</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Mantiene visibili gli elementi legittimi per evitare malfunzionamenti</string>
+    <string name="filter_rule_kind_inject_css">Iniezione CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Applica regole di stile personalizzate alle pagine web</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlet</string>
+    <string name="filter_rule_kind_scriptlets_desc">Neutralizza script anti-adblock e pubblicitari</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Eccezioni scriptlet</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Disattiva scriptlet specifici sui siti compatibili</string>
+    <string name="filter_rule_kind_block_paths">Blocchi percorsi URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Blocca risorse pubblicitarie tramite percorso di richiesta HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Rimozione parametri di tracciamento</string>
+    <string name="filter_rule_kind_remove_params_desc">Rimuove i parametri di tracciamento dagli URL</string>
 </resources>

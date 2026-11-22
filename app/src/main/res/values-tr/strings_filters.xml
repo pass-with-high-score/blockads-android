@@ -272,4 +272,23 @@
     <string name="rule_pick_app_search">Uygulama ara…</string>
     <string name="log_action_block_for_app">%1$s için engelle</string>
     <string name="log_action_allow_for_app">%1$s için izin ver</string>
+    <string name="filter_detail_rule_breakdown">Kural Dağılımı</string>
+    <string name="filter_rule_kind_domains">DNS Alan Adları</string>
+    <string name="filter_rule_kind_domains_desc">Alan adı sorgularını DNS katmanında engelle</string>
+    <string name="filter_rule_kind_ips">IP ve CIDR</string>
+    <string name="filter_rule_kind_ips_desc">IP adreslerine ve alt ağlara doğrudan bağlantıları engelle</string>
+    <string name="filter_rule_kind_cosmetic">Kozmetik Gizleme</string>
+    <string name="filter_rule_kind_cosmetic_desc">Reklam afişlerini, açılır pencereleri ve sayfa öğelerini gizle</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Kozmetik İstisnalar</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Sayfa bozulmasını önlemek için meşru öğeleri görünür tut</string>
+    <string name="filter_rule_kind_inject_css">CSS Enjeksiyonu</string>
+    <string name="filter_rule_kind_inject_css_desc">Web sayfalarına özel stil kuralları uygula</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlet\'ler</string>
+    <string name="filter_rule_kind_scriptlets_desc">Reklam engelleyici karşıtı ve reklam betiklerini etkisiz hale getir</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Scriptlet İstisnaları</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Uyumlu sitelerde belirli scriptlet\'leri devre dışı bırak</string>
+    <string name="filter_rule_kind_block_paths">URL Yolu Engellemeleri</string>
+    <string name="filter_rule_kind_block_paths_desc">Reklam kaynaklarını HTTPS istek yoluna göre engelle</string>
+    <string name="filter_rule_kind_remove_params">İzleme Parametresi Temizleme</string>
+    <string name="filter_rule_kind_remove_params_desc">URL\'lerden izleme parametrelerini kaldır</string>
 </resources>

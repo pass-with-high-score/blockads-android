@@ -274,4 +274,23 @@
     <string name="rule_pick_app_search">Szukaj aplikacji…</string>
     <string name="log_action_block_for_app">Blokuj dla %1$s</string>
     <string name="log_action_allow_for_app">Zezwól dla %1$s</string>
+    <string name="filter_detail_rule_breakdown">Podział reguł</string>
+    <string name="filter_rule_kind_domains">Domeny DNS</string>
+    <string name="filter_rule_kind_domains_desc">Blokuj zapytania o domeny w warstwie DNS</string>
+    <string name="filter_rule_kind_ips">IP i CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Blokuj bezpośrednie połączenia z adresami IP i podsieciami</string>
+    <string name="filter_rule_kind_cosmetic">Ukrywanie kosmetyczne</string>
+    <string name="filter_rule_kind_cosmetic_desc">Ukrywaj banery reklamowe, wyskakujące okna i elementy strony</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Wyjątki kosmetyczne</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Zachowuj prawidłowe elementy widoczne, aby uniknąć błędów strony</string>
+    <string name="filter_rule_kind_inject_css">Wstrzykiwanie CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Stosuj niestandardowe reguły stylów na stronach internetowych</string>
+    <string name="filter_rule_kind_scriptlets">Skryptlety</string>
+    <string name="filter_rule_kind_scriptlets_desc">Zwalczaj skrypty anty-adblock i reklamowe</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Wyjątki skryptletów</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Wyłączaj wybrane skryptlety na zgodnych stronach</string>
+    <string name="filter_rule_kind_block_paths">Blokady ścieżek URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Blokuj zasoby reklamowe według ścieżki żądania HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Usuwanie parametrów śledzących</string>
+    <string name="filter_rule_kind_remove_params_desc">Usuwaj parametry śledzące z adresów URL</string>
 </resources>

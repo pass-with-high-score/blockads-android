@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">深色模式、OLED 与强调色</string>
     <string name="settings_navigation_desc">标签、选项卡与导航栏布局</string>
     <string name="settings_language_desc">选择应用显示语言</string>
+    <string name="rule_docs_category_app">应用与进程</string>
+    <string name="proxy_add_choice_wireguard_file">导入 WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">导入 WireGuard 或 AmneziaWG 配置文件</string>
 </resources>

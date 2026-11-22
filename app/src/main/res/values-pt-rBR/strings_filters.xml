@@ -273,4 +273,23 @@
     <string name="rule_pick_app_search">Pesquisar aplicativos…</string>
     <string name="log_action_block_for_app">Bloquear para %1$s</string>
     <string name="log_action_allow_for_app">Permitir para %1$s</string>
+    <string name="filter_detail_rule_breakdown">Detalhamento das regras</string>
+    <string name="filter_rule_kind_domains">Domínios DNS</string>
+    <string name="filter_rule_kind_domains_desc">Bloquear consultas de domínio na camada DNS</string>
+    <string name="filter_rule_kind_ips">IP e CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Bloquear conexões diretas a IPs e sub-redes</string>
+    <string name="filter_rule_kind_cosmetic">Ocultação cosmética</string>
+    <string name="filter_rule_kind_cosmetic_desc">Ocultar banners de anúncios, pop-ups e elementos da página</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Exceções cosméticas</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Manter elementos legítimos visíveis para evitar falhas na página</string>
+    <string name="filter_rule_kind_inject_css">Injeção de CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Aplicar regras de estilo personalizadas às páginas da web</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlets</string>
+    <string name="filter_rule_kind_scriptlets_desc">Neutralizar scripts de anúncios e anti-adblock</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Exceções de scriptlets</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Desativar scriptlets específicos em sites compatíveis</string>
+    <string name="filter_rule_kind_block_paths">Bloqueios de caminho de URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Bloquear recursos de anúncios pelo caminho da requisição HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Remoção de parâmetros de rastreamento</string>
+    <string name="filter_rule_kind_remove_params_desc">Remover parâmetros de rastreamento das URLs</string>
 </resources>

@@ -469,4 +469,7 @@
     <string name="settings_theme_and_colors_desc">Mode sombre, OLED et couleur d\'accentuation</string>
     <string name="settings_navigation_desc">Étiquettes, onglets et disposition de la barre de navigation</string>
     <string name="settings_language_desc">Choisir la langue d\'affichage de l\'application</string>
+    <string name="rule_docs_category_app">Application et processus</string>
+    <string name="proxy_add_choice_wireguard_file">Importer WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Importer un fichier de configuration WireGuard ou AmneziaWG</string>
 </resources>

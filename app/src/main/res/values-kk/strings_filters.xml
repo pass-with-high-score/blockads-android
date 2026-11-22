@@ -272,4 +272,23 @@
     <string name="rule_pick_app_search">Қолданбаларды іздеу…</string>
     <string name="log_action_block_for_app">%1$s үшін бұғаттау</string>
     <string name="log_action_allow_for_app">%1$s үшін рұқсат ету</string>
+    <string name="filter_detail_rule_breakdown">Ережелер жіктемесі</string>
+    <string name="filter_rule_kind_domains">DNS домендері</string>
+    <string name="filter_rule_kind_domains_desc">Домен сұрауларын DNS деңгейінде бұғаттау</string>
+    <string name="filter_rule_kind_ips">IP және CIDR</string>
+    <string name="filter_rule_kind_ips_desc">IP мекенжайлары мен ішкі желілерге тікелей қосылымдарды бұғаттау</string>
+    <string name="filter_rule_kind_cosmetic">Косметикалық жасыру</string>
+    <string name="filter_rule_kind_cosmetic_desc">Жарнама баннерлерін, қалқымалы терезелерді және бет элементтерін жасыру</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Косметикалық ерекшеліктер</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Беттің бұзылуын болдырмау үшін қажетті элементтерді көрінетін күйде қалдыру</string>
+    <string name="filter_rule_kind_inject_css">CSS енгізу</string>
+    <string name="filter_rule_kind_inject_css_desc">Веб-беттерге теңшелген стиль ережелерін қолдану</string>
+    <string name="filter_rule_kind_scriptlets">Скриптлеттер</string>
+    <string name="filter_rule_kind_scriptlets_desc">Бұғаттауға қарсы және жарнама скрипттерін бейтараптандыру</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Скриптлет ерекшеліктері</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Үйлесімді сайттарда белгілі бір скриптлеттерді өшіру</string>
+    <string name="filter_rule_kind_block_paths">URL жолдарын бұғаттау</string>
+    <string name="filter_rule_kind_block_paths_desc">HTTPS сұрау жолы бойынша жарнама ресурстарын бұғаттау</string>
+    <string name="filter_rule_kind_remove_params">Қадағалау параметрлерін тазалау</string>
+    <string name="filter_rule_kind_remove_params_desc">URL мекенжайларынан қадағалау параметрлерін өшіру</string>
 </resources>

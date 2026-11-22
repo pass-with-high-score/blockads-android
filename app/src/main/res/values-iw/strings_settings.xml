@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">מצב כהה, OLED וצבע הדגשה</string>
     <string name="settings_navigation_desc">תוויות, כרטיסיות ופריסת סרגל הניווט</string>
     <string name="settings_language_desc">בחר את שפת התצוגה של האפליקציה</string>
+    <string name="rule_docs_category_app">אפליקציה ותהליך</string>
+    <string name="proxy_add_choice_wireguard_file">ייבוא WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">ייבוא קובץ תצורה של WireGuard או AmneziaWG</string>
 </resources>

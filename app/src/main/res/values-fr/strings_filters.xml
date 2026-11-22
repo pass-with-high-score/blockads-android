@@ -278,4 +278,23 @@
     <string name="rule_pick_app_search">Rechercher des applications…</string>
     <string name="log_action_block_for_app">Bloquer pour %1$s</string>
     <string name="log_action_allow_for_app">Autoriser pour %1$s</string>
+    <string name="filter_detail_rule_breakdown">Répartition des règles</string>
+    <string name="filter_rule_kind_domains">Domaines DNS</string>
+    <string name="filter_rule_kind_domains_desc">Bloque les résolutions de domaine au niveau DNS</string>
+    <string name="filter_rule_kind_ips">IP et CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Bloque les connexions directes vers des IP et sous-réseaux</string>
+    <string name="filter_rule_kind_cosmetic">Masquage cosmétique</string>
+    <string name="filter_rule_kind_cosmetic_desc">Masque les bannières pub, pop-up et éléments de page</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Exceptions cosmétiques</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Garde les éléments légitimes visibles pour éviter tout dysfonctionnement</string>
+    <string name="filter_rule_kind_inject_css">Injection CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Applique des règles de style personnalisées aux pages web</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlets</string>
+    <string name="filter_rule_kind_scriptlets_desc">Contourne les scripts anti-bloqueur et publicitaires</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Exceptions de scriptlet</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Désactive certains scriptlets sur les sites compatibles</string>
+    <string name="filter_rule_kind_block_paths">Blocages de chemin URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Bloque les ressources publicitaires selon le chemin de requête HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Suppression des paramètres de suivi</string>
+    <string name="filter_rule_kind_remove_params_desc">Supprime les paramètres de suivi des URL</string>
 </resources>

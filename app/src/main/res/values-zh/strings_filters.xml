@@ -271,4 +271,23 @@
     <string name="rule_pick_app_search">搜索应用…</string>
     <string name="log_action_block_for_app">为 %1$s 拦截</string>
     <string name="log_action_allow_for_app">为 %1$s 放行</string>
+    <string name="filter_detail_rule_breakdown">规则分类统计</string>
+    <string name="filter_rule_kind_domains">DNS 域名</string>
+    <string name="filter_rule_kind_domains_desc">在 DNS 层拦截域名解析</string>
+    <string name="filter_rule_kind_ips">IP 与 CIDR</string>
+    <string name="filter_rule_kind_ips_desc">拦截对 IP 与子网的直连</string>
+    <string name="filter_rule_kind_cosmetic">元素隐藏</string>
+    <string name="filter_rule_kind_cosmetic_desc">隐藏广告横幅、弹窗和页面元素</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">元素隐藏例外</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">保留正常元素可见，避免页面显示异常</string>
+    <string name="filter_rule_kind_inject_css">CSS 注入</string>
+    <string name="filter_rule_kind_inject_css_desc">向网页应用自定义样式规则</string>
+    <string name="filter_rule_kind_scriptlets">脚本注入</string>
+    <string name="filter_rule_kind_scriptlets_desc">绕过反广告拦截检测并屏蔽广告脚本</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">脚本注入例外</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">在兼容站点禁用特定脚本注入</string>
+    <string name="filter_rule_kind_block_paths">URL 路径拦截</string>
+    <string name="filter_rule_kind_block_paths_desc">按 HTTPS 请求路径拦截广告资源</string>
+    <string name="filter_rule_kind_remove_params">追踪参数清理</string>
+    <string name="filter_rule_kind_remove_params_desc">移除 URL 中的追踪参数</string>
 </resources>

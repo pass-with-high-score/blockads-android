@@ -440,5 +440,8 @@
     <string name="rate_app_action_feedback">Góp ý &amp; Báo lỗi</string>
     <string name="rate_app_action_later">Để sau</string>
     <string name="about_rate_app">Đánh giá trên Google Play</string>
+    <string name="rule_docs_category_app">Ứng dụng &amp; Tiến trình</string>
+    <string name="proxy_add_choice_wireguard_file">Nhập WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Nhập tệp cấu hình WireGuard hoặc AmneziaWG</string>
 </resources>
 

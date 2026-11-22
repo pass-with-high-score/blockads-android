@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Dunkelmodus, OLED und Akzentfarbe</string>
     <string name="settings_navigation_desc">Beschriftungen, Tabs und Layout der Navigationsleiste</string>
     <string name="settings_language_desc">Anzeigesprache der App wählen</string>
+    <string name="rule_docs_category_app">App &amp; Prozess</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard (.conf) importieren</string>
+    <string name="proxy_add_choice_wireguard_file_desc">WireGuard- oder AmneziaWG-Konfigurationsdatei importieren</string>
 </resources>

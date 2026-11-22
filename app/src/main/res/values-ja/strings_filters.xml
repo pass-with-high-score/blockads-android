@@ -271,4 +271,23 @@
     <string name="rule_pick_app_search">アプリを検索…</string>
     <string name="log_action_block_for_app">%1$s でブロック</string>
     <string name="log_action_allow_for_app">%1$s で許可</string>
+    <string name="filter_detail_rule_breakdown">ルールの内訳</string>
+    <string name="filter_rule_kind_domains">DNSドメイン</string>
+    <string name="filter_rule_kind_domains_desc">DNSレイヤーでドメイン参照をブロック</string>
+    <string name="filter_rule_kind_ips">IPとCIDR</string>
+    <string name="filter_rule_kind_ips_desc">IPおよびサブネットへの直接接続をブロック</string>
+    <string name="filter_rule_kind_cosmetic">要素非表示（コスメティック）</string>
+    <string name="filter_rule_kind_cosmetic_desc">広告バナー、ポップアップ、ページ要素を非表示</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">非表示の例外</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">表示崩れを防ぐため正当な要素を表示したままにする</string>
+    <string name="filter_rule_kind_inject_css">CSSインジェクション</string>
+    <string name="filter_rule_kind_inject_css_desc">Webページにカスタムスタイルルールを適用</string>
+    <string name="filter_rule_kind_scriptlets">スクリプトレット</string>
+    <string name="filter_rule_kind_scriptlets_desc">広告ブロッカー対策や広告スクリプトを無効化</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">スクリプトレットの例外</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">対応サイトで特定のスクリプトレットを無効化</string>
+    <string name="filter_rule_kind_block_paths">URLパスブロック</string>
+    <string name="filter_rule_kind_block_paths_desc">HTTPSリクエストパスで広告リソースをブロック</string>
+    <string name="filter_rule_kind_remove_params">トラッキングパラメータ除去</string>
+    <string name="filter_rule_kind_remove_params_desc">URLからトラッキングパラメータを削除</string>
 </resources>

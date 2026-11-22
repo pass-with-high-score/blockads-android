@@ -273,4 +273,23 @@
     <string name="rule_pick_app_search">חפש אפליקציות…</string>
     <string name="log_action_block_for_app">חסום עבור %1$s</string>
     <string name="log_action_allow_for_app">אפשר עבור %1$s</string>
+    <string name="filter_detail_rule_breakdown">פירוט כללים</string>
+    <string name="filter_rule_kind_domains">דומייני DNS</string>
+    <string name="filter_rule_kind_domains_desc">חסימת איתור דומיינים בשכבת ה-DNS</string>
+    <string name="filter_rule_kind_ips">IP ו-CIDR</string>
+    <string name="filter_rule_kind_ips_desc">חסימת חיבורים ישירים לכתובות IP ותתי-רשתות</string>
+    <string name="filter_rule_kind_cosmetic">הסתרה קוסמטית</string>
+    <string name="filter_rule_kind_cosmetic_desc">הסתרת באנרים, חלונות קופצים ורכיבי דף</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">חריגים קוסמטיים</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">השארת רכיבים תקינים גלויים כדי למנוע שיבוש בדף</string>
+    <string name="filter_rule_kind_inject_css">הזרקת CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">החלת כללי עיצוב מותאמים אישית על דפי אינטרנט</string>
+    <string name="filter_rule_kind_scriptlets">סקריפטלטים</string>
+    <string name="filter_rule_kind_scriptlets_desc">נטרול סקריפטים של פרסומות ואנטי-חוסם פרסומות</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">חריגי סקריפטלטים</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">השבתת סקריפטלטים מסוימים באתרים תואמים</string>
+    <string name="filter_rule_kind_block_paths">חסימת נתיבי URL</string>
+    <string name="filter_rule_kind_block_paths_desc">חסימת משאבי פרסום לפי נתיב בקשת HTTPS</string>
+    <string name="filter_rule_kind_remove_params">הסרת פרמטרי מעקב</string>
+    <string name="filter_rule_kind_remove_params_desc">הסרת פרמטרי מעקב מכתובות URL</string>
 </resources>

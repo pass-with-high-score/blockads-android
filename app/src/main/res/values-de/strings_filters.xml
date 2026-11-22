@@ -272,4 +272,23 @@
     <string name="rule_pick_app_search">Apps suchen…</string>
     <string name="log_action_block_for_app">Für %1$s blockieren</string>
     <string name="log_action_allow_for_app">Für %1$s erlauben</string>
+    <string name="filter_detail_rule_breakdown">Regelaufschlüsselung</string>
+    <string name="filter_rule_kind_domains">DNS-Domains</string>
+    <string name="filter_rule_kind_domains_desc">Domain-Abfragen auf der DNS-Ebene blockieren</string>
+    <string name="filter_rule_kind_ips">IP &amp; CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Direkte Verbindungen zu IPs und Subnetzen blockieren</string>
+    <string name="filter_rule_kind_cosmetic">Kosmetisches Ausblenden</string>
+    <string name="filter_rule_kind_cosmetic_desc">Werbebanner, Pop-ups und Seitenelemente ausblenden</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Kosmetische Ausnahmen</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Legitime Elemente sichtbar lassen, um Darstellungsfehler zu vermeiden</string>
+    <string name="filter_rule_kind_inject_css">CSS-Injektion</string>
+    <string name="filter_rule_kind_inject_css_desc">Benutzerdefinierte Stilregeln auf Webseiten anwenden</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlets</string>
+    <string name="filter_rule_kind_scriptlets_desc">Anti-Adblock- und Werbeskripte abwehren</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Scriptlet-Ausnahmen</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Bestimmte Scriptlets auf kompatiblen Websites deaktivieren</string>
+    <string name="filter_rule_kind_block_paths">URL-Pfad-Blockierungen</string>
+    <string name="filter_rule_kind_block_paths_desc">Werberessourcen anhand des HTTPS-Anfragepfads blockieren</string>
+    <string name="filter_rule_kind_remove_params">Tracking-Parameter entfernen</string>
+    <string name="filter_rule_kind_remove_params_desc">Tracking-Parameter aus URLs entfernen</string>
 </resources>

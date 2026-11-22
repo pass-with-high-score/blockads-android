@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Tryb ciemny, OLED i kolor akcentu</string>
     <string name="settings_navigation_desc">Etykiety, karty i układ paska nawigacji</string>
     <string name="settings_language_desc">Wybierz język wyświetlania aplikacji</string>
+    <string name="rule_docs_category_app">Aplikacje i procesy</string>
+    <string name="proxy_add_choice_wireguard_file">Importuj WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Zaimportuj plik konfiguracyjny WireGuard lub AmneziaWG</string>
 </resources>

@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">ダークモード、OLED、アクセントカラー</string>
     <string name="settings_navigation_desc">ラベル、タブ、ナビゲーションバーのレイアウト</string>
     <string name="settings_language_desc">アプリの表示言語を選択</string>
+    <string name="rule_docs_category_app">アプリとプロセス</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard (.conf) をインポート</string>
+    <string name="proxy_add_choice_wireguard_file_desc">WireGuardまたはAmneziaWGの設定ファイルをインポート</string>
 </resources>

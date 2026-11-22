@@ -276,4 +276,23 @@
     <string name="rule_pick_app_search">ابحث عن التطبيقات…</string>
     <string name="log_action_block_for_app">حظر لـ %1$s</string>
     <string name="log_action_allow_for_app">السماح لـ %1$s</string>
+    <string name="filter_detail_rule_breakdown">تفصيل القواعد</string>
+    <string name="filter_rule_kind_domains">نطاقات DNS</string>
+    <string name="filter_rule_kind_domains_desc">حجب استعلامات النطاقات على مستوى DNS</string>
+    <string name="filter_rule_kind_ips">IP وCIDR</string>
+    <string name="filter_rule_kind_ips_desc">حجب الاتصالات المباشرة بعناوين IP والشبكات الفرعية</string>
+    <string name="filter_rule_kind_cosmetic">الإخفاء التجميلي</string>
+    <string name="filter_rule_kind_cosmetic_desc">إخفاء لافتات الإعلانات والنوافذ المنبثقة وعناصر الصفحة</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">الاستثناءات التجميلية</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">إبقاء العناصر المشروعة مرئية لتجنب تعطل الصفحات</string>
+    <string name="filter_rule_kind_inject_css">حقن CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">تطبيق قواعد تنسيق مخصّصة على صفحات الويب</string>
+    <string name="filter_rule_kind_scriptlets">السكربتات المصغّرة</string>
+    <string name="filter_rule_kind_scriptlets_desc">تجاوز مانع الإعلانات المضاد وسكربتات الإعلانات</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">استثناءات السكربتات المصغّرة</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">تعطيل سكربتات مصغّرة محددة على المواقع المتوافقة</string>
+    <string name="filter_rule_kind_block_paths">حجب مسارات URL</string>
+    <string name="filter_rule_kind_block_paths_desc">حجب موارد الإعلانات حسب مسار طلب HTTPS</string>
+    <string name="filter_rule_kind_remove_params">إزالة معاملات التتبع</string>
+    <string name="filter_rule_kind_remove_params_desc">إزالة معاملات التتبع من روابط URL</string>
 </resources>

@@ -273,4 +273,23 @@
     <string name="rule_pick_app_search">Buscar aplicaciones…</string>
     <string name="log_action_block_for_app">Bloquear para %1$s</string>
     <string name="log_action_allow_for_app">Permitir para %1$s</string>
+    <string name="filter_detail_rule_breakdown">Desglose de reglas</string>
+    <string name="filter_rule_kind_domains">Dominios DNS</string>
+    <string name="filter_rule_kind_domains_desc">Bloquea consultas de dominio en la capa DNS</string>
+    <string name="filter_rule_kind_ips">IP y CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Bloquea conexiones directas a IP y subredes</string>
+    <string name="filter_rule_kind_cosmetic">Ocultación cosmética</string>
+    <string name="filter_rule_kind_cosmetic_desc">Oculta banners, ventanas emergentes y elementos de página</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Excepciones cosméticas</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Mantiene visibles los elementos legítimos para evitar fallos</string>
+    <string name="filter_rule_kind_inject_css">Inyección de CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Aplica reglas de estilo personalizadas a las páginas web</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlets</string>
+    <string name="filter_rule_kind_scriptlets_desc">Neutraliza scripts antibloqueo y de anuncios</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Excepciones de scriptlets</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Desactiva scriptlets específicos en sitios compatibles</string>
+    <string name="filter_rule_kind_block_paths">Bloqueos de ruta URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Bloquea recursos publicitarios según la ruta de solicitud HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Eliminación de parámetros de rastreo</string>
+    <string name="filter_rule_kind_remove_params_desc">Elimina parámetros de rastreo de las URL</string>
 </resources>

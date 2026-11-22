@@ -420,4 +420,7 @@ Veri toplama yok. İzleme yok.&quot;</string>
     <string name="settings_theme_and_colors_desc">Karanlık mod, OLED ve vurgu rengi</string>
     <string name="settings_navigation_desc">Etiketler, sekmeler ve gezinme çubuğu düzeni</string>
     <string name="settings_language_desc">Uygulama görüntüleme dilini seçin</string>
+    <string name="rule_docs_category_app">Uygulama ve İşlem</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard İçe Aktar (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Bir WireGuard veya AmneziaWG yapılandırma dosyası içe aktar</string>
 </resources>

@@ -420,4 +420,7 @@
     <string name="settings_theme_and_colors_desc">الوضع الداكن وOLED ولون التمييز</string>
     <string name="settings_navigation_desc">التسميات وعلامات التبويب وتخطيط شريط التنقل</string>
     <string name="settings_language_desc">اختر لغة عرض التطبيق</string>
+    <string name="rule_docs_category_app">التطبيق والعملية</string>
+    <string name="proxy_add_choice_wireguard_file">استيراد WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">استيراد ملف إعداد WireGuard أو AmneziaWG</string>
 </resources>

@@ -276,4 +276,23 @@
     <string name="rule_pick_app_search">Alkalmazások keresése…</string>
     <string name="log_action_block_for_app">Tiltás ehhez: %1$s</string>
     <string name="log_action_allow_for_app">Engedélyezés ehhez: %1$s</string>
+    <string name="filter_detail_rule_breakdown">Szabályok részletezése</string>
+    <string name="filter_rule_kind_domains">DNS-domainek</string>
+    <string name="filter_rule_kind_domains_desc">Domainkeresések blokkolása DNS-szinten</string>
+    <string name="filter_rule_kind_ips">IP és CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Közvetlen kapcsolatok blokkolása IP-címekhez és alhálózatokhoz</string>
+    <string name="filter_rule_kind_cosmetic">Vizuális elrejtés</string>
+    <string name="filter_rule_kind_cosmetic_desc">Hirdetési bannerek, felugró ablakok és oldalelemek elrejtése</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Vizuális kivételek</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Valódi elemek láthatóan tartása a hibás megjelenés elkerülésére</string>
+    <string name="filter_rule_kind_inject_css">CSS-befecskendezés</string>
+    <string name="filter_rule_kind_inject_css_desc">Egyéni stílusszabályok alkalmazása weboldalakra</string>
+    <string name="filter_rule_kind_scriptlets">Szkriptletek</string>
+    <string name="filter_rule_kind_scriptlets_desc">Hirdetésblokkolás-ellenes és hirdetési szkriptek hatástalanítása</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Szkriptlet-kivételek</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Adott szkriptletek letiltása a kompatibilis oldalakon</string>
+    <string name="filter_rule_kind_block_paths">URL-útvonal blokkolások</string>
+    <string name="filter_rule_kind_block_paths_desc">Hirdetési erőforrások blokkolása HTTPS-kérési útvonal alapján</string>
+    <string name="filter_rule_kind_remove_params">Követési paraméterek eltávolítása</string>
+    <string name="filter_rule_kind_remove_params_desc">Követési paraméterek eltávolítása az URL-ekből</string>
 </resources>

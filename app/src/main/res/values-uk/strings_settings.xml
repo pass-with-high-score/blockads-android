@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Темний режим, OLED і акцентний колір</string>
     <string name="settings_navigation_desc">Підписи, вкладки та макет панелі навігації</string>
     <string name="settings_language_desc">Виберіть мову інтерфейсу додатка</string>
+    <string name="rule_docs_category_app">Застосунок і процес</string>
+    <string name="proxy_add_choice_wireguard_file">Імпорт WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Імпортувати файл конфігурації WireGuard або AmneziaWG</string>
 </resources>

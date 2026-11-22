@@ -271,4 +271,23 @@
     <string name="rule_pick_app_search">앱 검색…</string>
     <string name="log_action_block_for_app">%1$s에서 차단</string>
     <string name="log_action_allow_for_app">%1$s에서 허용</string>
+    <string name="filter_detail_rule_breakdown">규칙 세부 내역</string>
+    <string name="filter_rule_kind_domains">DNS 도메인</string>
+    <string name="filter_rule_kind_domains_desc">DNS 계층에서 도메인 조회 차단</string>
+    <string name="filter_rule_kind_ips">IP 및 CIDR</string>
+    <string name="filter_rule_kind_ips_desc">IP 및 서브넷으로의 직접 연결 차단</string>
+    <string name="filter_rule_kind_cosmetic">요소 숨기기</string>
+    <string name="filter_rule_kind_cosmetic_desc">광고 배너, 팝업 및 페이지 요소 숨기기</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">요소 숨기기 예외</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">페이지 손상을 방지하기 위해 정상 요소 표시 유지</string>
+    <string name="filter_rule_kind_inject_css">CSS 삽입</string>
+    <string name="filter_rule_kind_inject_css_desc">웹 페이지에 사용자 지정 스타일 규칙 적용</string>
+    <string name="filter_rule_kind_scriptlets">스크립틀릿</string>
+    <string name="filter_rule_kind_scriptlets_desc">광고 차단 감지 및 광고 스크립트 무력화</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">스크립틀릿 예외</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">호환되는 사이트에서 특정 스크립틀릿 비활성화</string>
+    <string name="filter_rule_kind_block_paths">URL 경로 차단</string>
+    <string name="filter_rule_kind_block_paths_desc">HTTPS 요청 경로 기준으로 광고 리소스 차단</string>
+    <string name="filter_rule_kind_remove_params">추적 매개변수 제거</string>
+    <string name="filter_rule_kind_remove_params_desc">URL에서 추적 매개변수 제거</string>
 </resources>

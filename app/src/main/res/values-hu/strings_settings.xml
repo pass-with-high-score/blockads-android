@@ -441,4 +441,7 @@
     <string name="settings_theme_and_colors_desc">Sötét mód, OLED és kiemelőszín</string>
     <string name="settings_navigation_desc">Címkék, lapok és a navigációs sáv elrendezése</string>
     <string name="settings_language_desc">Válassza ki az alkalmazás megjelenítési nyelvét</string>
+    <string name="rule_docs_category_app">Alkalmazás és folyamat</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard importálása (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">WireGuard vagy AmneziaWG konfigurációs fájl importálása</string>
 </resources>

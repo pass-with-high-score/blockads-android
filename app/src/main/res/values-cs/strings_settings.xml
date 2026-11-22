@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Tmavý režim, OLED a barva zvýraznění</string>
     <string name="settings_navigation_desc">Popisky, karty a rozvržení navigační lišty</string>
     <string name="settings_language_desc">Vyberte jazyk zobrazení aplikace</string>
+    <string name="rule_docs_category_app">Aplikace a proces</string>
+    <string name="proxy_add_choice_wireguard_file">Importovat WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Importovat konfigurační soubor WireGuard nebo AmneziaWG</string>
 </resources>

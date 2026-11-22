@@ -271,4 +271,23 @@
     <string name="rule_pick_app_search">ค้นหาแอป…</string>
     <string name="log_action_block_for_app">บล็อกสำหรับ %1$s</string>
     <string name="log_action_allow_for_app">อนุญาตสำหรับ %1$s</string>
+    <string name="filter_detail_rule_breakdown">รายละเอียดกฎ</string>
+    <string name="filter_rule_kind_domains">โดเมน DNS</string>
+    <string name="filter_rule_kind_domains_desc">บล็อกการค้นหาโดเมนที่ระดับ DNS</string>
+    <string name="filter_rule_kind_ips">IP และ CIDR</string>
+    <string name="filter_rule_kind_ips_desc">บล็อกการเชื่อมต่อโดยตรงไปยัง IP และซับเน็ต</string>
+    <string name="filter_rule_kind_cosmetic">การซ่อนองค์ประกอบหน้าเว็บ</string>
+    <string name="filter_rule_kind_cosmetic_desc">ซ่อนแบนเนอร์โฆษณา ป๊อปอัป และองค์ประกอบหน้าเว็บ</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">ข้อยกเว้นการซ่อนองค์ประกอบ</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">คงองค์ประกอบที่ถูกต้องไว้เพื่อไม่ให้หน้าเว็บแสดงผลผิดพลาด</string>
+    <string name="filter_rule_kind_inject_css">การแทรก CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">ใช้กฎสไตล์แบบกำหนดเองกับหน้าเว็บ</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlets</string>
+    <string name="filter_rule_kind_scriptlets_desc">จัดการสคริปต์ป้องกันตัวบล็อกโฆษณาและสคริปต์โฆษณา</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">ข้อยกเว้น Scriptlet</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">ปิดใช้งาน Scriptlet เฉพาะบนเว็บไซต์ที่เข้ากันได้</string>
+    <string name="filter_rule_kind_block_paths">การบล็อกเส้นทาง URL</string>
+    <string name="filter_rule_kind_block_paths_desc">บล็อกทรัพยากรโฆษณาตามเส้นทางคำขอ HTTPS</string>
+    <string name="filter_rule_kind_remove_params">การลบพารามิเตอร์ติดตาม</string>
+    <string name="filter_rule_kind_remove_params_desc">ลบพารามิเตอร์ติดตามออกจาก URL</string>
 </resources>

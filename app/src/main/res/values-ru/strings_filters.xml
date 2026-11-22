@@ -274,4 +274,23 @@
     <string name="rule_pick_app_search">Поиск приложений…</string>
     <string name="log_action_block_for_app">Блокировать для %1$s</string>
     <string name="log_action_allow_for_app">Разрешить для %1$s</string>
+    <string name="filter_detail_rule_breakdown">Состав правил</string>
+    <string name="filter_rule_kind_domains">DNS-домены</string>
+    <string name="filter_rule_kind_domains_desc">Блокировать запросы доменов на уровне DNS</string>
+    <string name="filter_rule_kind_ips">IP и CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Блокировать прямые подключения к IP и подсетям</string>
+    <string name="filter_rule_kind_cosmetic">Косметическое скрытие</string>
+    <string name="filter_rule_kind_cosmetic_desc">Скрывать рекламные баннеры, окна и элементы страниц</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Косметические исключения</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Оставлять нужные элементы видимыми во избежание поломок</string>
+    <string name="filter_rule_kind_inject_css">Внедрение CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Применять пользовательские правила стилей к страницам</string>
+    <string name="filter_rule_kind_scriptlets">Скриптлеты</string>
+    <string name="filter_rule_kind_scriptlets_desc">Обходить антиблокировщики и рекламные скрипты</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Исключения скриптлетов</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Отключать отдельные скриптлеты на совместимых сайтах</string>
+    <string name="filter_rule_kind_block_paths">Блокировка URL-путей</string>
+    <string name="filter_rule_kind_block_paths_desc">Блокировать рекламные ресурсы по пути HTTPS-запроса</string>
+    <string name="filter_rule_kind_remove_params">Очистка параметров отслеживания</string>
+    <string name="filter_rule_kind_remove_params_desc">Удалять параметры отслеживания из URL</string>
 </resources>

@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">다크 모드, OLED 및 강조 색상</string>
     <string name="settings_navigation_desc">레이블, 탭 및 탐색 모음 레이아웃</string>
     <string name="settings_language_desc">앱 표시 언어 선택</string>
+    <string name="rule_docs_category_app">앱 및 프로세스</string>
+    <string name="proxy_add_choice_wireguard_file">WireGuard 가져오기 (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">WireGuard 또는 AmneziaWG 구성 파일 가져오기</string>
 </resources>

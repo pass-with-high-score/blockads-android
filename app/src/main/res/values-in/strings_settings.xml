@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">Mode gelap, OLED, dan warna aksen</string>
     <string name="settings_navigation_desc">Label, tab, dan tata letak bilah navigasi</string>
     <string name="settings_language_desc">Pilih bahasa tampilan aplikasi</string>
+    <string name="rule_docs_category_app">Aplikasi &amp; Proses</string>
+    <string name="proxy_add_choice_wireguard_file">Impor WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">Impor file konfigurasi WireGuard atau AmneziaWG</string>
 </resources>

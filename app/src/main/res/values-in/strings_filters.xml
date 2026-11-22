@@ -271,4 +271,23 @@
     <string name="rule_pick_app_search">Cari aplikasi…</string>
     <string name="log_action_block_for_app">Blokir untuk %1$s</string>
     <string name="log_action_allow_for_app">Izinkan untuk %1$s</string>
+    <string name="filter_detail_rule_breakdown">Rincian Aturan</string>
+    <string name="filter_rule_kind_domains">Domain DNS</string>
+    <string name="filter_rule_kind_domains_desc">Blokir pencarian domain di lapisan DNS</string>
+    <string name="filter_rule_kind_ips">IP &amp; CIDR</string>
+    <string name="filter_rule_kind_ips_desc">Blokir koneksi langsung ke IP dan subnet</string>
+    <string name="filter_rule_kind_cosmetic">Penyembunyian Kosmetik</string>
+    <string name="filter_rule_kind_cosmetic_desc">Sembunyikan spanduk iklan, pop-up, dan elemen halaman</string>
+    <string name="filter_rule_kind_cosmetic_exceptions">Pengecualian Kosmetik</string>
+    <string name="filter_rule_kind_cosmetic_exceptions_desc">Biarkan elemen sah tetap terlihat agar halaman tidak rusak</string>
+    <string name="filter_rule_kind_inject_css">Injeksi CSS</string>
+    <string name="filter_rule_kind_inject_css_desc">Terapkan aturan gaya kustom pada halaman web</string>
+    <string name="filter_rule_kind_scriptlets">Scriptlet</string>
+    <string name="filter_rule_kind_scriptlets_desc">Atasi anti-adblock dan skrip iklan</string>
+    <string name="filter_rule_kind_scriptlet_exceptions">Pengecualian Scriptlet</string>
+    <string name="filter_rule_kind_scriptlet_exceptions_desc">Nonaktifkan scriptlet tertentu di situs yang kompatibel</string>
+    <string name="filter_rule_kind_block_paths">Blokir Jalur URL</string>
+    <string name="filter_rule_kind_block_paths_desc">Blokir sumber daya iklan menurut jalur permintaan HTTPS</string>
+    <string name="filter_rule_kind_remove_params">Penghapusan Parameter Pelacakan</string>
+    <string name="filter_rule_kind_remove_params_desc">Hapus parameter pelacakan dari URL</string>
 </resources>

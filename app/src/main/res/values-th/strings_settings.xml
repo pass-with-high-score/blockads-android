@@ -419,4 +419,7 @@
     <string name="settings_theme_and_colors_desc">โหมดมืด OLED และสีเน้น</string>
     <string name="settings_navigation_desc">ป้ายกำกับ แท็บ และเค้าโครงแถบนำทาง</string>
     <string name="settings_language_desc">เลือกภาษาที่แสดงในแอป</string>
+    <string name="rule_docs_category_app">แอปและโปรเซส</string>
+    <string name="proxy_add_choice_wireguard_file">นำเข้า WireGuard (.conf)</string>
+    <string name="proxy_add_choice_wireguard_file_desc">นำเข้าไฟล์การตั้งค่า WireGuard หรือ AmneziaWG</string>
 </resources>
