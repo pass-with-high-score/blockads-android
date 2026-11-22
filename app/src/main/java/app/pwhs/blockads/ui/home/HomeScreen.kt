@@ -378,7 +378,7 @@ fun HomeScreen(
                 }
 
                 AnimatedVisibility(
-                    visible = tipState.isVisible,
+                    visible = tipState.isVisible && !isEditingHome,
                     enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
                     modifier = Modifier

@@ -3,33 +3,28 @@ package app.pwhs.blockads.ui.home.component
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.pwhs.blockads.R
@@ -49,7 +44,6 @@ import app.pwhs.blockads.ui.home.data.SecurityShieldInfo
 import app.pwhs.blockads.ui.logs.data.LogFilterStatus
 import app.pwhs.blockads.ui.theme.AccentBlue
 import app.pwhs.blockads.ui.theme.DangerRed
-import app.pwhs.blockads.ui.theme.TextSecondary
 import app.pwhs.blockads.utils.AppConstants.AVG_AD_SIZE_KB
 import app.pwhs.blockads.utils.formatCount
 import app.pwhs.blockads.utils.formatDataSize
@@ -106,6 +100,8 @@ fun HomeEditableStatsList(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
+    val density = LocalDensity.current
+    val view = LocalView.current
     val totalChartData = remember(hourlyStats) { MiniBarChartDefaults.createSparklineData(hourlyStats, isBlocked = false) }
     val blockedChartData = remember(hourlyStats) { MiniBarChartDefaults.createSparklineData(hourlyStats, isBlocked = true) }
     val dataSavedKb = blockedCount * AVG_AD_SIZE_KB
@@ -122,6 +118,7 @@ fun HomeEditableStatsList(
 
     var draggedWidget by remember { mutableStateOf<HomeWidgetId?>(null) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
+    var pointerWindowY by remember { mutableFloatStateOf(Float.NaN) }
     val itemHeights = remember { mutableStateMapOf<HomeWidgetId, Int>() }
     val latestActiveWidgets by rememberUpdatedState(activeWidgets)
     val latestOnMove by rememberUpdatedState(onMoveWidget)
@@ -130,6 +127,7 @@ fun HomeEditableStatsList(
         if (!isEditing) {
             draggedWidget = null
             dragOffsetY = 0f
+            pointerWindowY = Float.NaN
         }
     }
 
@@ -180,6 +178,49 @@ fun HomeEditableStatsList(
         }
     }
 
+    // Auto-scroll the parent container when dragging near the top or bottom viewport edge.
+    LaunchedEffect(draggedWidget) {
+        val activeId = draggedWidget ?: return@LaunchedEffect
+        val edgeThresholdPx = with(density) { 148.dp.toPx() }
+        val edgeRampPx = with(density) { 96.dp.toPx() }
+        val minSpeedPxPerSec = with(density) { 260.dp.toPx() }
+        val maxSpeedPxPerSec = with(density) { 920.dp.toPx() }
+        var lastFrameMs = 0L
+
+        while (draggedWidget == activeId) {
+            val frameMs = withFrameMillis { it }
+            val deltaSec = if (lastFrameMs == 0L) 0f else ((frameMs - lastFrameMs).coerceIn(0L, 50L)) / 1000f
+            lastFrameMs = frameMs
+
+            val y = pointerWindowY
+            val viewportHeight = view.height.toFloat()
+            if (y.isNaN() || deltaSec <= 0f || viewportHeight <= 0f) continue
+
+            val widgets = latestActiveWidgets
+            val idx = widgets.indexOf(activeId)
+            if (idx == -1) continue
+
+            val scrollStep = when {
+                y > viewportHeight - edgeThresholdPx && idx < widgets.lastIndex && scrollState.value < scrollState.maxValue -> {
+                    val fraction = ((y - (viewportHeight - edgeThresholdPx)) / edgeRampPx).coerceIn(0f, 1f)
+                    (minSpeedPxPerSec + (maxSpeedPxPerSec - minSpeedPxPerSec) * fraction) * deltaSec
+                }
+                y < edgeThresholdPx && idx > 0 && scrollState.value > 0 -> {
+                    val fraction = ((edgeThresholdPx - y) / edgeRampPx).coerceIn(0f, 1f)
+                    -(minSpeedPxPerSec + (maxSpeedPxPerSec - minSpeedPxPerSec) * fraction) * deltaSec
+                }
+                else -> 0f
+            }
+
+            if (scrollStep != 0f) {
+                val scrolled = scrollState.scrollBy(scrollStep)
+                if (scrolled != 0f) {
+                    handleDragDelta(activeId, scrolled)
+                }
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         for (widgetId in displayOrder) {
             key(widgetId) {
@@ -201,7 +242,6 @@ fun HomeEditableStatsList(
                         .graphicsLayer {
                             if (isDragging) {
                                 scaleX = 1.03f; scaleY = 1.03f
-                                shadowElevation = 14.dp.toPx()
                                 translationY = dragOffsetY
                             } else if (isEditing) {
                                 val seed = widgetId.ordinal
@@ -226,7 +266,22 @@ fun HomeEditableStatsList(
                             fadeOut(tween(160, easing = FastOutSlowInEasing)) +
                             shrinkVertically(tween(240, delayMillis = 80, easing = FastOutSlowInEasing))
                     ) {
-                        Box(Modifier.fillMaxWidth().padding(bottom = if (hasVisibleBody) 12.dp else 0.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = if (hasVisibleBody) 12.dp else 0.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .graphicsLayer {
+                                        if (isDragging) {
+                                            shadowElevation = 12.dp.toPx()
+                                            shape = RoundedCornerShape(16.dp)
+                                            clip = false
+                                        }
+                                    }
+                            ) {
                             when (widgetId) {
                                 HomeWidgetId.QUERY_STATS -> Row(
                                     Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -358,10 +413,12 @@ fun HomeEditableStatsList(
                             }
 
                             if (isEditing) {
+                                var overlayCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
                                 // Sibling input blocker disables inner card clicks and enables long-press drag.
                                 Box(
                                     modifier = Modifier
                                         .matchParentSize()
+                                        .onGloballyPositioned { overlayCoords = it }
                                         .clip(RoundedCornerShape(16.dp))
                                         .then(
                                             if (isDragging) {
@@ -374,13 +431,34 @@ fun HomeEditableStatsList(
                                         )
                                         .pointerInput(widgetId) {
                                             detectDragGesturesAfterLongPress(
-                                                onDragStart = {
-                                                    draggedWidget = widgetId; dragOffsetY = 0f
+                                                onDragStart = { startOffset ->
+                                                    draggedWidget = widgetId
+                                                    dragOffsetY = 0f
+                                                    pointerWindowY = overlayCoords
+                                                        ?.takeIf { it.isAttached }
+                                                        ?.localToWindow(startOffset)
+                                                        ?.y ?: Float.NaN
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 },
-                                                onDrag = { change, dragAmount -> change.consume(); handleDragDelta(widgetId, dragAmount.y) },
-                                                onDragEnd = { draggedWidget = null; dragOffsetY = 0f },
-                                                onDragCancel = { draggedWidget = null; dragOffsetY = 0f }
+                                                onDrag = { change, dragAmount ->
+                                                    change.consume()
+                                                    overlayCoords
+                                                        ?.takeIf { it.isAttached }
+                                                        ?.localToWindow(change.position)
+                                                        ?.y
+                                                        ?.let { pointerWindowY = it }
+                                                    handleDragDelta(widgetId, dragAmount.y)
+                                                },
+                                                onDragEnd = {
+                                                    draggedWidget = null
+                                                    dragOffsetY = 0f
+                                                    pointerWindowY = Float.NaN
+                                                },
+                                                onDragCancel = {
+                                                    draggedWidget = null
+                                                    dragOffsetY = 0f
+                                                    pointerWindowY = Float.NaN
+                                                }
                                             )
                                         }
                                 )
@@ -392,11 +470,12 @@ fun HomeEditableStatsList(
                                             onRemoveWidget(widgetId)
                                         },
                                         modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .offset(x = 4.dp, y = (-4).dp)
+                                            .align(Alignment.TopStart)
+                                            .offset(x = (-6).dp, y = (-6).dp)
                                     )
                                 }
                             }
+                        }
                         }
                     }
                 }
@@ -404,116 +483,10 @@ fun HomeEditableStatsList(
         }
 
         val availableWidgets = remember(activeWidgets) { HomeWidgetId.entries.filterNot { it in activeWidgets } }
-        AnimatedVisibility(
-            visible = isEditing && availableWidgets.isNotEmpty(),
-            enter = expandVertically(tween(240)) + fadeIn(tween(200)),
-            exit = fadeOut(tween(150)) + shrinkVertically(tween(200)),
-        ) {
-            Column(Modifier.fillMaxWidth().padding(top = 8.dp), Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(R.string.home_available_widgets),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 2.dp)
-                )
-                availableWidgets.forEach { widget ->
-                    key(widget) {
-                        AvailableWidgetRow(widget) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onAddWidget(widget)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyWidgetEditPlaceholder(widgetId: HomeWidgetId) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(widgetId.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(stringResource(widgetId.titleRes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-                Text(stringResource(R.string.home_chart_no_data), style = MaterialTheme.typography.bodySmall, color = TextSecondary)
-            }
-        }
-    }
-}
-
-@Composable
-private fun RemoveWidgetBadge(
-    onRemove: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        onClick = onRemove,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        shadowElevation = 2.dp,
-        modifier = modifier.size(30.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.Default.Remove,
-                contentDescription = stringResource(R.string.https_skipped_remove),
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun AvailableWidgetRow(widget: HomeWidgetId, onAdd: () -> Unit) {
-    Card(
-        onClick = onAdd,
-        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 68.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-            ) {
-                Icon(widget.icon, null, Modifier.size(20.dp), MaterialTheme.colorScheme.primary)
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(widget.titleRes),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = stringResource(widget.descriptionRes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)
-            ) {
-                Icon(Icons.Default.Add, stringResource(R.string.common_add), Modifier.size(18.dp), MaterialTheme.colorScheme.onPrimary)
-            }
-        }
+        AvailableWidgetsSection(
+            visible = isEditing,
+            availableWidgets = availableWidgets,
+            onAddWidget = onAddWidget,
+        )
     }
 }
