@@ -44,6 +44,7 @@ class FilterDownloadManager(
             val scriptletFile = File(filterDir, "${filter.id}.scriptlets")
             val modulesFile = File(filterDir, "${filter.id}.modules.json")
             val ipsFile = File(filterDir, "${filter.id}.ips")
+            val infoFile = File(filterDir, "${filter.id}.info.json")
 
             if (!forceUpdate && bloomFile.exists() && bloomFile.length() > 0 && trieFile.exists() && trieFile.length() > 0) {
                 Timber.d("Filter ${filter.id} already cached locally")
@@ -67,7 +68,7 @@ class FilterDownloadManager(
             }
 
             if (zipUrl.isNotEmpty()) {
-                val zipSuccess = downloadAndExtractZip(zipUrl, bloomFile, trieFile, cssFile, scriptletFile, modulesFile, ipsFile)
+                val zipSuccess = downloadAndExtractZip(zipUrl, bloomFile, trieFile, cssFile, scriptletFile, modulesFile, ipsFile, infoFile)
                 if (zipSuccess && bloomFile.exists() && trieFile.exists()) {
                     return@withContext Result.success(
                         DownloadedFilterPaths(
@@ -122,7 +123,8 @@ class FilterDownloadManager(
         cssFile: File,
         scriptletFile: File,
         modulesFile: File,
-        ipsFile: File
+        ipsFile: File,
+        infoFile: File
     ): Boolean = withContext(Dispatchers.IO) {
         val tempZip = File(filterDir, "temp_${System.currentTimeMillis()}.zip")
         try {
@@ -153,6 +155,7 @@ class FilterDownloadManager(
                         entry.name.endsWith(".scriptlets") -> scriptletFile
                         entry.name.endsWith(".modules.json") -> modulesFile
                         entry.name.endsWith(".ips") -> ipsFile
+                        entry.name == "info.json" || entry.name.endsWith("/info.json") -> infoFile
                         else -> null
                     }
                     targetFile?.let { out ->

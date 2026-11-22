@@ -68,6 +68,42 @@ class FilterDetailViewModel(
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
+    private val _ruleBreakdown = MutableStateFlow(FilterRuleBreakdown())
+    val ruleBreakdown: StateFlow<FilterRuleBreakdown> = _ruleBreakdown.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            filter.collect { current ->
+                if (current != null) {
+                    val breakdown = FilterRuleBreakdownLoader.load(application, current)
+                    _ruleBreakdown.value = breakdown
+                    if (breakdown.hasAuthoritativeStats && breakdown.totalRules > 0 && breakdown.totalRules != current.domainCount) {
+                        filterListDao.updateStats(
+                            id = current.id,
+                            count = breakdown.totalRules,
+                            timestamp = current.lastUpdated
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshRuleBreakdown() {
+        val current = filter.value ?: return
+        viewModelScope.launch {
+            val breakdown = FilterRuleBreakdownLoader.load(application, current)
+            _ruleBreakdown.value = breakdown
+            if (breakdown.hasAuthoritativeStats && breakdown.totalRules > 0 && breakdown.totalRules != current.domainCount) {
+                filterListDao.updateStats(
+                    id = current.id,
+                    count = breakdown.totalRules,
+                    timestamp = current.lastUpdated
+                )
+            }
+        }
+    }
+
     fun setTestDomainQuery(query: String) {
         _testDomainQuery.value = query
         _testDomainResult.value = null
@@ -113,6 +149,7 @@ class FilterDetailViewModel(
                     
                     // Reload the filter engine if the binary files were re-downloaded
                     filterRepo.loadAllEnabledFilters()
+                    refreshRuleBreakdown()
                 },
                 onFailure = {
                     _events.toast(R.string.filter_update_failed)

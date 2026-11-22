@@ -89,6 +89,7 @@ fun FilterDetailScreen(
 ) {
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val blockedCount by viewModel.blockedCount.collectAsStateWithLifecycle()
+    val ruleBreakdown by viewModel.ruleBreakdown.collectAsStateWithLifecycle()
     val testDomainQuery by viewModel.testDomainQuery.collectAsStateWithLifecycle()
     val testDomainResult by viewModel.testDomainResult.collectAsStateWithLifecycle()
     val isTestingDomain by viewModel.isTestingDomain.collectAsStateWithLifecycle()
@@ -263,14 +264,15 @@ fun FilterDetailScreen(
                         }
 
                         // Stats
+                        val displayRuleCount = if (ruleBreakdown.totalRules > 0) ruleBreakdown.totalRules else f.domainCount
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(24.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
-                            if (f.domainCount > 0) {
+                            if (displayRuleCount > 0) {
                                 Column {
                                     Text(
-                                        formatCount(f.domainCount),
+                                        formatCount(displayRuleCount),
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
@@ -437,6 +439,13 @@ fun FilterDetailScreen(
                             }
                         }
                     }
+                }
+            }
+
+            // Rule Breakdown section
+            if (ruleBreakdown.items.isNotEmpty()) {
+                item {
+                    FilterRuleBreakdownCard(breakdown = ruleBreakdown)
                 }
             }
 

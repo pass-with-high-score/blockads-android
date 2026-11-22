@@ -136,6 +136,7 @@ class CustomFilterManager(
             File(remoteFilterDir, "${filter.id}.scriptlets").delete()
             File(remoteFilterDir, "${filter.id}.modules.json").delete()
             File(remoteFilterDir, "${filter.id}.ips").delete()
+            File(remoteFilterDir, "${filter.id}.info.json").delete()
             File(remoteFilterDir, "${filter.id}.modules.json").delete()
 
             filterListDao.delete(filter)
@@ -360,6 +361,7 @@ class CustomFilterManager(
         val scriptletsFile = extractedFiles.find { it.extension == "scriptlets" }
         val modulesFile = extractedFiles.find { it.name.endsWith(".modules.json") }
         val ipsFile = extractedFiles.find { it.extension == "ips" }
+        val infoFile = extractedFiles.find { it.name == "info.json" }
 
         trieFile?.copyTo(File(remoteFilterDir, "$filterId.trie"), overwrite = true)
         bloomFile?.copyTo(File(remoteFilterDir, "$filterId.bloom"), overwrite = true)
@@ -367,6 +369,7 @@ class CustomFilterManager(
         scriptletsFile?.copyTo(File(remoteFilterDir, "$filterId.scriptlets"), overwrite = true)
         modulesFile?.copyTo(File(remoteFilterDir, "$filterId.modules.json"), overwrite = true)
         ipsFile?.copyTo(File(remoteFilterDir, "$filterId.ips"), overwrite = true)
+        infoFile?.copyTo(File(remoteFilterDir, "$filterId.info.json"), overwrite = true)
 
         return CopiedArtifacts(
             hasTrie = trieFile != null,
@@ -384,17 +387,39 @@ class CustomFilterManager(
     )
 
     internal fun parseInfoJson(json: String): FilterInfo {
-        fun extractString(key: String): String? =
-            "\"$key\"\\s*:\\s*\"(.*?)\"".toRegex().find(json)?.groupValues?.get(1)
+        return runCatching {
+            val obj = org.json.JSONObject(json)
+            val baseRuleCount = obj.optInt("ruleCount", 0)
+            val statsTotal = obj.optJSONObject("stats")?.let { s ->
+                s.optInt("domains", 0) +
+                    s.optInt("ips", 0) +
+                    s.optInt("cosmetic", 0) +
+                    s.optInt("cosmeticExceptions", 0) +
+                    s.optInt("injectCss", 0) +
+                    s.optInt("scriptlets", 0) +
+                    s.optInt("scriptletExceptions", 0) +
+                    s.optInt("blockPaths", 0) +
+                    s.optInt("removeParams", 0)
+            } ?: 0
+            FilterInfo(
+                name = obj.optString("name", "Custom Filter").ifBlank { "Custom Filter" },
+                url = obj.optString("url", ""),
+                ruleCount = maxOf(baseRuleCount, statsTotal),
+                updatedAt = obj.optString("updatedAt", "")
+            )
+        }.getOrElse {
+            fun extractString(key: String): String? =
+                "\"$key\"\\s*:\\s*\"(.*?)\"".toRegex().find(json)?.groupValues?.get(1)
 
-        fun extractInt(key: String): Int =
-            "\"$key\"\\s*:\\s*(\\d+)".toRegex().find(json)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            fun extractInt(key: String): Int =
+                "\"$key\"\\s*:\\s*(\\d+)".toRegex().find(json)?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
-        return FilterInfo(
-            name = extractString("name") ?: "Custom Filter",
-            url = extractString("url") ?: "",
-            ruleCount = extractInt("ruleCount"),
-            updatedAt = extractString("updatedAt") ?: ""
-        )
+            FilterInfo(
+                name = extractString("name") ?: "Custom Filter",
+                url = extractString("url") ?: "",
+                ruleCount = extractInt("ruleCount"),
+                updatedAt = extractString("updatedAt") ?: ""
+            )
+        }
     }
 }
