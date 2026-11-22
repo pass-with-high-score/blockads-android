@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/nqmgaming/blockads-tunnel/internal/mitm"
+	"github.com/xjasonlyu/tun2socks/v2/core/adapter"
 )
 
 type sniProxyRuleInput struct {
@@ -165,6 +166,76 @@ type prefixConn struct {
 
 func (c *prefixConn) Read(p []byte) (int, error) {
 	return c.reader.Read(p)
+}
+
+// prefixTCPConn wraps an adapter.TCPConn to replay already-peeked TLS ClientHello
+// bytes when handing a non-matching connection down to the MITM/passthrough handler.
+type prefixTCPConn struct {
+	adapter.TCPConn
+	reader io.Reader
+}
+
+func (c *prefixTCPConn) Read(p []byte) (int, error) {
+	return c.reader.Read(p)
+}
+
+// trySniProxyRedirectTCP checks SNI proxy rules for an adapter.TCPConn so it works
+// identically in both HTTPS MITM mode and passthrough mode.
+func trySniProxyRedirectTCP(
+	conn adapter.TCPConn,
+	flow flowID,
+	engine *Engine,
+	uidr UIDResolver,
+	protectFn func(fd int) bool,
+) (bool, adapter.TCPConn) {
+	candidates := engine.sniProxyCandidatesForFlow(uidr, flow)
+	if len(candidates) == 0 {
+		return false, nil
+	}
+	peeked, err := peekTLSClientHello(conn)
+	if len(peeked) == 0 {
+		return true, nil
+	}
+	if err == nil || len(peeked) >= 5 {
+		sni := mitm.ParseClientHelloSNI(peeked)
+		for _, rule := range candidates {
+			if matchSniDomain(sni, rule.domains) {
+				if redirectSniFlow(conn, peeked, sni, rule, protectFn) {
+					return true, nil
+				}
+				return true, nil
+			}
+		}
+	}
+	return false, &prefixTCPConn{
+		TCPConn: conn,
+		reader:  io.MultiReader(bytes.NewReader(peeked), conn),
+	}
+}
+
+func redirectSniFlow(
+	conn net.Conn,
+	peeked []byte,
+	sni string,
+	rule compiledSniProxyRule,
+	protectFn func(fd int) bool,
+) bool {
+	dialer := &net.Dialer{
+		Timeout: flowDialTimeout,
+		Control: protectedControl(protectFn),
+	}
+	remote, derr := dialer.Dial("tcp", rule.targetAddr)
+	if derr != nil {
+		logf("[SniProxy] dial %s for %s failed: %v", rule.targetAddr, sni, derr)
+		return false
+	}
+	defer remote.Close()
+	if _, werr := remote.Write(peeked); werr != nil {
+		logf("[SniProxy] write ClientHello to %s failed: %v", rule.targetAddr, werr)
+		return false
+	}
+	bidiCopyFlow(conn, remote)
+	return true
 }
 
 func peekTLSClientHello(conn net.Conn) ([]byte, error) {

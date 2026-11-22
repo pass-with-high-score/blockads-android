@@ -23,6 +23,8 @@ object SniProxyRuleCodec {
     val YOUTUBE_PRESET_DOMAINS = listOf(
         "youtubei.googleapis.com",
         "googlevideo.com",
+        "www.youtube.com",
+        "m.youtube.com",
         "youtube.com"
     )
     const val REDDIT_PACKAGE = "com.reddit.frontpage"

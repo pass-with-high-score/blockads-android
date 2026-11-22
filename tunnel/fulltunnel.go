@@ -184,6 +184,15 @@ func (e *Engine) StartFull(fd int, protector SocketProtector) {
 			_ = conn.Close()
 			return
 		}
+		if flow.serverPort == 443 {
+			if handled, nextConn := trySniProxyRedirectTCP(conn, flow, e, uidr, protectFn); handled {
+				_ = conn.Close()
+				return
+			} else if nextConn != nil {
+				tcpHandler(nextConn)
+				return
+			}
+		}
 		tcpHandler(conn)
 	})
 	stack.SetUdpHandler(newFullTunnelUdpHandler(e, filter, uidr, protectFn))
@@ -351,14 +360,6 @@ func newFullPassthroughTcpHandler(engine *Engine, uidr UIDResolver, protectFn fu
 			return
 		}
 		engine.logConnection(flow, ProtocolTCP)
-		if !forceDirect && flow.serverPort == 443 {
-			if handled, nextConn := trySniProxyRedirect(conn, flow, engine, uidr, protectFn); handled {
-				return
-			} else if nextConn != nil {
-				relayDirectFromFlow(nextConn, flow, engine, protectFn, false)
-				return
-			}
-		}
 		relayDirectFromFlow(conn, flow, engine, protectFn, forceDirect)
 	}
 }
