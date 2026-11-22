@@ -42,10 +42,11 @@ internal object FilterRuleBreakdownLoader {
     private const val MAX_SAMPLES = 4
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    suspend fun load(context: Context, filter: FilterList): FilterRuleBreakdown =
-        withContext(Dispatchers.IO) {
-            val baseDir = runCatching { context.filesDir?.takeIf { it.path.isNotEmpty() } }.getOrNull()
-                ?: return@withContext FilterRuleBreakdown()
+    suspend fun load(context: Context, filter: FilterList): FilterRuleBreakdown {
+        val baseDir = runCatching {
+            context.filesDir?.takeIf { it.path.isNotEmpty() && it.exists() }
+        }.getOrNull() ?: return FilterRuleBreakdown()
+        return withContext(Dispatchers.IO) {
             val dir = File(baseDir, REMOTE_FILTERS_DIR)
             val id = filter.id
             val trieFile = File(dir, "$id.trie")
@@ -234,4 +235,5 @@ internal object FilterRuleBreakdownLoader {
                 hasAuthoritativeStats = statsObj != null || (nonDomainTotal > 0 && filter.ruleCount > 0)
             )
         }
+    }
 }
