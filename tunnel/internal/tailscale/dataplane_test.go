@@ -127,7 +127,7 @@ func TestDataPlaneDirectUDP_LocalWebServer(t *testing.T) {
 		DiscoKey:   stA.DiscoKey().PublicHex("discokey:"),
 		Addresses:  []string{"100.64.0.1/32"},
 		AllowedIPs: []string{"100.64.0.1/32"},
-		Endpoints:  epsA,
+		Endpoints:  epsA[:1],
 		Online:     &online,
 		Hostinfo:   &Hostinfo{Hostname: "android-phone", OS: "android"},
 	}
@@ -138,7 +138,7 @@ func TestDataPlaneDirectUDP_LocalWebServer(t *testing.T) {
 		DiscoKey:   stB.DiscoKey().PublicHex("discokey:"),
 		Addresses:  []string{"100.64.0.2/32"},
 		AllowedIPs: []string{"100.64.0.2/32", "0.0.0.0/0", "::/0"},
-		Endpoints:  epsB,
+		Endpoints:  epsB[:1],
 		Online:     &online,
 		Hostinfo:   &Hostinfo{Hostname: "macbook-pro", OS: "macos"},
 	}

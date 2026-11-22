@@ -284,14 +284,13 @@ func (b *MagicBind) Send(bufs [][]byte, ep conn.Endpoint) error {
 			_, _ = udpConn.WriteToUDPAddrPort(pkt, activeUDP)
 			continue
 		}
-		if !forceDERP && udpConn != nil {
-			for _, cand := range candidates {
-				_, _ = udpConn.WriteToUDPAddrPort(pkt, cand)
-			}
-		}
 		if homeDERP > 0 {
 			dataCopy := append([]byte(nil), pkt...)
 			go b.sendViaDERP(homeDERP, nodeKey, dataCopy)
+			continue
+		}
+		if !forceDERP && udpConn != nil && len(candidates) > 0 {
+			_, _ = udpConn.WriteToUDPAddrPort(pkt, candidates[0])
 		}
 	}
 	return nil
