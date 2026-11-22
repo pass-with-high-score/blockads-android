@@ -75,6 +75,7 @@ class FirewallPromptManager(
                 Timber.e(e, "Failed to apply firewall decision for $packageName")
             }
             resolve(packageName)
+            ServiceController.requestRestart(context)
         }
     }
 
