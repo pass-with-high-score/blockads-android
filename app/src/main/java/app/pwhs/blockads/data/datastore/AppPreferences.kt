@@ -343,6 +343,7 @@ class AppPreferences internal constructor(
     suspend fun getProxyProfile(id: String): ProxyProfile? = shadowsocks.getProxyProfile(id)
     suspend fun addProxyProfiles(profiles: List<ProxyProfile>) = shadowsocks.addProxyProfiles(profiles)
     suspend fun deleteProxyProfile(id: String) = shadowsocks.deleteProxyProfile(id)
+    suspend fun getProxyProfilesSnapshot(): List<ProxyProfile> = proxyProfiles.first()
     suspend fun renameProxyProfile(id: String, newName: String) = shadowsocks.renameProxyProfile(id, newName)
 
     val ssProfiles: Flow<List<ShadowsocksProfile>> get() = shadowsocks.ssProfiles
