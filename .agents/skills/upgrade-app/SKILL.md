@@ -8,8 +8,8 @@ description: Automates the process of upgrading the app version. Bumps versionCo
 This skill automates the end-to-end process of releasing a new version of the application.
 
 ## Release Channels
-- **Pre-release (`beta-*` / `pre-*`)**: No leading `v` (e.g. `beta-7.2.0-1`, `pre-7.2.0-rc1`). F-Droid ignores non-`v` tags, and `.github/workflows/deploy.yml` marks the GitHub Release as `prerelease: true` so `/releases/latest` and Obtainium (default) stay on Stable.
-- **Stable (`v*`)**: Leading `v` (e.g. `v7.2.0`). F-Droid picks up `v*` tags, and `deploy.yml` marks the GitHub Release as `prerelease: false` (`Latest`).
+- **Pre-release (`beta-*` / `pre-*`)**: No leading `v` (e.g. tag `beta-7.2.0-1`, `versionName = "7.2.0-beta.1"`). F-Droid ignores non-`v` tags, `.github/workflows/deploy.yml` marks the GitHub Release as `prerelease: true`, and `UpdateChannel.fromVersionName` / `VersionComparator` recognizes `<version>-beta.<n>` as the Beta channel.
+- **Stable (`v*`)**: Leading `v` (e.g. tag `v7.2.0`, `versionName = "7.2.0"`). F-Droid picks up `v*` tags, and `deploy.yml` marks the GitHub Release as `prerelease: false` (`Latest`).
 
 ## Workflow Steps
 
