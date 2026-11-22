@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"testing"
+	"time"
 )
 
 func buildTestClientHello(t *testing.T, serverName string) []byte {
@@ -112,5 +113,62 @@ func TestSniProxyRedirectAndFallback(t *testing.T) {
 	_ = nextConn2.Close()
 	if !bytes.Equal(replayed, otherHello) {
 		t.Fatalf("expected replayed ClientHello to match original")
+	}
+}
+
+type staticUIDResolver int
+
+func (s staticUIDResolver) ResolveUID(protocol int, srcIP string, srcPort int, dstIP string, dstPort int) int {
+	return int(s)
+}
+
+func TestSniProxyClosesStaleFlowsOnRuleUpdate(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	defer ln.Close()
+
+	accepted := make(chan net.Conn, 2)
+	go func() {
+		for {
+			c, aerr := ln.Accept()
+			if aerr != nil {
+				return
+			}
+			accepted <- c
+		}
+	}()
+
+	e := NewEngine()
+	e.SetSniProxyRules(fmt.Sprintf(`[{"targetAddr":%q,"uids":[10100,10200],"domains":["www.reddit.com"],"enabled":true}]`, ln.Addr().String()))
+
+	hello := buildTestClientHello(t, "www.reddit.com")
+	c1, s1 := net.Pipe()
+	defer c1.Close()
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		trySniProxyRedirect(s1, flowID{serverPort: 443}, e, staticUIDResolver(10200), nil)
+	}()
+
+	if _, err := c1.Write(hello); err != nil {
+		t.Fatalf("write hello: %v", err)
+	}
+	remote := <-accepted
+	defer remote.Close()
+	buf := make([]byte, 4096)
+	if _, err := remote.Read(buf); err != nil {
+		t.Fatalf("remote read hello: %v", err)
+	}
+
+	// Remove UID 10200 from the SNI rule; the active flow must close immediately.
+	e.SetSniProxyRules(fmt.Sprintf(`[{"targetAddr":%q,"uids":[10100],"domains":["www.reddit.com"],"enabled":true}]`, ln.Addr().String()))
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("expected stale SNI proxy flow to be closed after removing app UID")
 	}
 }

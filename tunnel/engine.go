@@ -171,7 +171,9 @@ type Engine struct {
 	ipBlocklist atomic.Pointer[ipBlocklist]
 
 	// SNI Proxy routing rules (per-app / per-SNI TCP 443 redirect)
-	sniProxyRules atomic.Pointer[[]compiledSniProxyRule]
+	sniProxyRules   atomic.Pointer[[]compiledSniProxyRule]
+	sniProxyFlowsMu sync.Mutex
+	sniProxyFlows   map[*activeSniFlow]struct{}
 
 	// GeoIP database
 	geoIPDB atomic.Pointer[GeoIPDatabase]
