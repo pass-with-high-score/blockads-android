@@ -201,7 +201,7 @@ func FuzzParseRules(f *testing.F) {
 	}
 	f.Fuzz(func(t *testing.T, content string) {
 		for _, r := range ParseRules(content) {
-			if strings.TrimSpace(r.Name) == "" || r.Name != strings.TrimSpace(r.Name) {
+			if (!r.IsException && strings.TrimSpace(r.Name) == "") || r.Name != strings.TrimSpace(r.Name) {
 				t.Fatalf("rule with blank or untrimmed name: %+v", r)
 			}
 			for _, d := range r.Domains {

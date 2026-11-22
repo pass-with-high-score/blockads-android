@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
@@ -257,6 +258,7 @@ fun HomeScreen(
             }
 
             val statsContent: @Composable (ScrollState) -> Unit = { targetScrollState ->
+                val testBlockUrl = stringResource(R.string.test_block_link)
                 HomeEditableStatsList(
                     activeWidgets = activeHomeWidgets,
                     isEditing = isEditingHome,
@@ -286,11 +288,10 @@ fun HomeScreen(
                     blockReasons24h = blockReasons24h,
                     topCountries24h = topCountries24h,
                     onTestAdBlock = {
-                        val url = context.getString(R.string.test_block_link)
                         try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, testBlockUrl.toUri()))
                         } catch (_: ActivityNotFoundException) {
-                            onNavigateToBrowser(url)
+                            onNavigateToBrowser(testBlockUrl)
                         }
                     },
                     onDnsLeakTest = { showLeakTestSheet = true },

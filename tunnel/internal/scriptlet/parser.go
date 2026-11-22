@@ -101,7 +101,7 @@ func parseOneScriptletRule(line string) (Rule, bool) {
 		return Rule{}, false
 	}
 	name := strings.TrimSpace(parts[0])
-	if name == "" && !isException {
+	if name == "" && (!isException || len(parts) > 1) {
 		return Rule{}, false
 	}
 
