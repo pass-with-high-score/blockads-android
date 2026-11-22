@@ -1,5 +1,14 @@
 default_platform(:android)
 
+# :app and :blockadstv share one applicationId (app.pwhs.blockads).
+# Google Play routes them by uses-feature: leanback to TV, and touch/phone to everything else.
+# TV uses the form factor track prefix "tv:", e.g. "tv:internal", "tv:beta", "tv:production".
+#
+# Smart deploy: checks if a module's versionCode was bumped since the last release git tag.
+# If not bumped, its upload is skipped so Play Console does not reject duplicate versionCodes.
+PHONE_AAB = "app/build/outputs/bundle/storeRelease/app-store-release.aab"
+TV_AAB    = "blockadstv/build/outputs/bundle/storeRelease/blockadstv-store-release.aab"
+
 platform :android do
 
   desc "Run tests"
@@ -24,48 +33,28 @@ platform :android do
   desc "Build store release AAB"
   lane :build_store_bundle do
     gradle(
-      task: ":app:bundleStoreRelease",
+      task: ":app:bundleStoreRelease :blockadstv:bundleStoreRelease",
       properties: { "tunnel.source" => "local" }
     )
   end
 
-  desc "Deploy store release AAB to internal testing track (skips title, des, screenshots, images)"
-  lane :internal do
-    upload_to_play_store(
-      track: "internal",
-      aab: "app/build/outputs/bundle/storeRelease/app-store-release.aab",
-      json_key: "fastlane/play-store-key.json",
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      skip_upload_changelogs: false,
-      skip_upload_apk: true
-    )
+  # ---------------------------------------------------------------------------
+  # Deploy lanes — all use smart_deploy with phone track and tv:<track>
+  # ---------------------------------------------------------------------------
+
+  desc "Deploy to internal testing track (skips modules with no version bump)"
+  lane :internal do |options|
+    smart_deploy(track: "internal", release_status: options[:release_status] || "completed")
   end
 
-  desc "Promote internal to closed beta (skips title, des, screenshots, images)"
-  lane :beta do
-    upload_to_play_store(
-      track: "internal",
-      track_promote_to: "beta",
-      json_key: "fastlane/play-store-key.json",
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
-    )
+  desc "Deploy to closed testing (beta) track (skips modules with no version bump)"
+  lane :beta do |options|
+    smart_deploy(track: "beta", release_status: options[:release_status] || "completed")
   end
 
-  desc "Deploy store release AAB to production (skips title, des, screenshots, images)"
-  lane :production do
-    upload_to_play_store(
-      track: "production",
-      aab: "app/build/outputs/bundle/storeRelease/app-store-release.aab",
-      json_key: "fastlane/play-store-key.json",
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      release_status: "draft"
-    )
+  desc "Deploy to production track (skips modules with no version bump)"
+  lane :production do |options|
+    smart_deploy(track: "production", release_status: options[:release_status] || "completed")
   end
 
   desc "Upload store listing text (title, descriptions) for all locales in fastlane/metadata/android"
@@ -86,28 +75,16 @@ platform :android do
     
     # Files to update
     files = ["../app/build.gradle.kts", "../blockadstv/build.gradle.kts"]
-    
-    # Get current versionCode from app module as source of truth
-    app_gradle = File.read(files[0])
-    current_code = app_gradle.match(/versionCode = (\d+)/)[1].to_i
-    new_code = current_code + 1
 
     files.each do |file_path|
       content = File.read(file_path)
-      # Update versionCode
-      content = content.gsub(
-        /versionCode = \d+/,
-        "versionCode = #{new_code}"
-      )
-      # Update versionName
-      content = content.gsub(
-        /versionName = ".*"/,
-        "versionName = \"#{version_name}\""
-      )
+      current_code = content.match(/versionCode = (\d+)/)[1].to_i
+      new_code = current_code + 1
+      content = content.gsub(/versionCode = \d+/, "versionCode = #{new_code}")
+      content = content.gsub(/versionName = ".*"/, "versionName = \"#{version_name}\"")
       File.write(file_path, content)
+      UI.success("✅ Bumped #{file_path} to versionCode=#{new_code}, versionName=#{version_name}")
     end
-
-    UI.success("✅ Bumped to versionCode=#{new_code}, versionName=#{version_name} for all modules")
   end
 
   desc "Trigger GitHub Action to auto-build Go Tunnel"
@@ -115,5 +92,111 @@ platform :android do
     UI.message("Triggering GitHub Action: update_tunnel.yml...")
     sh("gh workflow run update_tunnel.yml --ref main")
     UI.success("✅ Workflow triggered! Vui lòng chờ 2-3 phút cho Bot build xong, sau đó chạy 'git pull' nhé!")
+  end
+
+  # ---------------------------------------------------------------------------
+  # Private helpers
+  # ---------------------------------------------------------------------------
+
+  # Read versionCode directly from a module's build.gradle.kts on disk.
+  private_lane :read_version_code do |options|
+    file = File.read("../#{options[:module]}/build.gradle.kts")
+    match = file.match(/versionCode = (\d+)/)
+    match ? match[1].to_i : 0
+  end
+
+  # Find the previous release git tag before the current commit/tag.
+  private_lane :previous_tag do
+    tag = sh("git describe --tags --match 'v*' --match 'beta*' --match 'pre*' --abbrev=0 HEAD^ 2>/dev/null || echo ''").strip
+    if tag.empty?
+      current = sh("git describe --tags --match 'v*' --match 'beta*' --match 'pre*' --abbrev=0 2>/dev/null || echo ''").strip
+      tags = sh("git tag -l --sort=-v:refname 'v*' 'beta*' 'pre*' 2>/dev/null || echo ''").split("\n").map(&:strip)
+      tag = tags.find { |t| t != current && !t.empty? } || ""
+    end
+    tag
+  end
+
+  # Read versionCode as it was at the previous git tag.
+  private_lane :tagged_version_code do |options|
+    prev_tag = previous_tag
+    if prev_tag.empty?
+      UI.important("⚠️ Could not determine previous git tag, defaulting to 0 for #{options[:module]}")
+      0
+    else
+      content = sh("git show #{prev_tag}:#{options[:module]}/build.gradle.kts 2>/dev/null || echo ''").strip
+      match = content.match(/versionCode = (\d+)/)
+      match ? match[1].to_i : 0
+    end
+  end
+
+  # Smart deploy: upload only modules whose versionCode changed since the previous release tag.
+  # TV is uploaded to track "tv:<track>" while Mobile is uploaded to track "<track>".
+  private_lane :smart_deploy do |options|
+    track = options[:track] || "internal"
+    phone_track = track.sub(/^tv:/, "")
+    tv_track = track.start_with?("tv:") ? track : "tv:#{track}"
+    release_status = options[:release_status] || "completed"
+    uploaded_any = false
+
+    # --- Phone ---
+    phone_now     = read_version_code(module: "app")
+    phone_last    = tagged_version_code(module: "app")
+    phone_changed = phone_now != phone_last
+    UI.message("📱 Phone versionCode: last=#{phone_last} now=#{phone_now} → #{phone_changed ? 'BUILDING & UPLOADING' : 'SKIPPING (no change)'}")
+    if phone_changed
+      gradle(task: ":app:bundleStoreRelease") unless File.exist?(File.expand_path("../" + PHONE_AAB, __dir__))
+      upload_to_play_store(
+        track:                   phone_track,
+        package_name:            "app.pwhs.blockads",
+        aab:                     PHONE_AAB,
+        json_key:                "fastlane/play-store-key.json",
+        skip_upload_metadata:    true,
+        skip_upload_images:      true,
+        skip_upload_screenshots: true,
+        skip_upload_changelogs:  false,
+        skip_upload_apk:          true,
+        release_status:          release_status,
+      )
+      uploaded_any = true
+    end
+
+    # --- TV ---
+    tv_now     = read_version_code(module: "blockadstv")
+    tv_last    = tagged_version_code(module: "blockadstv")
+    tv_changed = tv_now != tv_last
+    UI.message("📺 TV versionCode: last=#{tv_last} now=#{tv_now} → #{tv_changed ? 'BUILDING & UPLOADING' : 'SKIPPING (no change)'}")
+    if tv_changed
+      gradle(task: ":blockadstv:bundleStoreRelease") unless File.exist?(File.expand_path("../" + TV_AAB, __dir__))
+      upload_to_play_store(
+        track:                   tv_track,
+        package_name:            "app.pwhs.blockads",
+        aab:                     TV_AAB,
+        json_key:                "fastlane/play-store-key.json",
+        skip_upload_metadata:    true,
+        skip_upload_images:      true,
+        skip_upload_screenshots: true,
+        skip_upload_changelogs:  false,
+        skip_upload_apk:          true,
+        release_status:          release_status,
+      )
+      uploaded_any = true
+    end
+
+    if !uploaded_any
+      UI.important("⚠️ No AABs had version code bumps! Fallback: uploading phone AAB.")
+      gradle(task: ":app:bundleStoreRelease") unless File.exist?(File.expand_path("../" + PHONE_AAB, __dir__))
+      upload_to_play_store(
+        track:                   phone_track,
+        package_name:            "app.pwhs.blockads",
+        aab:                     PHONE_AAB,
+        json_key:                "fastlane/play-store-key.json",
+        skip_upload_metadata:    true,
+        skip_upload_images:      true,
+        skip_upload_screenshots: true,
+        skip_upload_changelogs:  false,
+        skip_upload_apk:          true,
+        release_status:          release_status,
+      )
+    end
   end
 end

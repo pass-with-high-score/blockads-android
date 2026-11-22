@@ -1,0 +1,6 @@
+- Add full ruleset engine with presets, searchable rule types, and live preview
+- Add filter detail rule breakdown with sample previews
+- Support IP/CIDR blocklists, CSS injection, procedural cosmetics, removeparam, and !#include
+- Improve SNI Proxy hot-reload and HTTPS filtering compatibility
+- Fix Headscale 0.27+/0.29+ connection compatibility
+- Fix large filter list OOM and DNS log crashes
