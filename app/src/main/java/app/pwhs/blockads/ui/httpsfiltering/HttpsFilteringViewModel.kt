@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -84,19 +86,22 @@ class HttpsFilteringViewModel(
 
     init {
         loadState()
-        appPrefs.httpsFilteringEnabled.onEach { enabled ->
-            _isEnabled.value = enabled
-            if (!enabled) {
-                _isProxyRunning.value = false
-            } else if (!_isProxyRunning.value) {
-                val caPem = withContext(Dispatchers.IO) { ensureCaCertPem() }
-                if (!caPem.isNullOrEmpty()) {
-                    _caCertPem.value = caPem
-                    _isProxyRunning.value = true
+        appPrefs.httpsFilteringEnabled
+            .drop(1)
+            .distinctUntilChanged()
+            .onEach { enabled ->
+                _isEnabled.value = enabled
+                if (!enabled) {
+                    _isProxyRunning.value = false
+                } else if (!_isProxyRunning.value) {
+                    val caPem = withContext(Dispatchers.IO) { ensureCaCertPem() }
+                    if (_isEnabled.value && !caPem.isNullOrEmpty()) {
+                        _caCertPem.value = caPem
+                        _isProxyRunning.value = true
+                    }
+                    verifyCert(showLoading = false)
                 }
-                verifyCert(showLoading = false)
-            }
-        }.launchIn(viewModelScope)
+            }.launchIn(viewModelScope)
     }
 
     private fun isProxyVpnRoutingMode(mode: String): Boolean =

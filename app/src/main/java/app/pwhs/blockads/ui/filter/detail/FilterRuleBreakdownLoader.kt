@@ -44,7 +44,9 @@ internal object FilterRuleBreakdownLoader {
 
     suspend fun load(context: Context, filter: FilterList): FilterRuleBreakdown =
         withContext(Dispatchers.IO) {
-            val dir = File(context.filesDir, REMOTE_FILTERS_DIR)
+            val baseDir = runCatching { context.filesDir?.takeIf { it.path.isNotEmpty() } }.getOrNull()
+                ?: return@withContext FilterRuleBreakdown()
+            val dir = File(baseDir, REMOTE_FILTERS_DIR)
             val id = filter.id
             val trieFile = File(dir, "$id.trie")
             val bloomFile = File(dir, "$id.bloom")
