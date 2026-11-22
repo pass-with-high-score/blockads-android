@@ -264,21 +264,22 @@ func (s *NoiseIKSession) ReadMsg(r io.Reader) ([]byte, error) {
 
 // NoiseConn wraps NoiseIKSession and underlying net.Conn into a secure net.Conn.
 type NoiseConn struct {
-	sess *NoiseIKSession
-	conn net.Conn
-	rBuf []byte
-	rMu  sync.Mutex
+	sess              *NoiseIKSession
+	conn              net.Conn
+	rBuf              []byte
+	rMu               sync.Mutex
+	earlyNoiseChecked bool
 }
+
+var earlyNoiseMagic = []byte("\xff\xff\xffTS")
 
 // NewNoiseConn creates a NoiseConn net.Conn.
 func NewNoiseConn(sess *NoiseIKSession, conn net.Conn) *NoiseConn {
 	return &NoiseConn{sess: sess, conn: conn}
 }
 
-func (c *NoiseConn) Read(p []byte) (int, error) {
-	c.rMu.Lock()
-	defer c.rMu.Unlock()
-
+// readRaw fills rBuf if empty and returns up to len(p) decrypted bytes.
+func (c *NoiseConn) readRaw(p []byte) (int, error) {
 	for len(c.rBuf) == 0 {
 		dec, err := c.sess.ReadMsg(c.conn)
 		if err != nil {
@@ -286,10 +287,60 @@ func (c *NoiseConn) Read(p []byte) (int, error) {
 		}
 		c.rBuf = dec
 	}
-
 	n := copy(p, c.rBuf)
 	c.rBuf = c.rBuf[n:]
 	return n, nil
+}
+
+// readFullRaw reads exactly len(p) decrypted bytes from the Noise stream.
+func (c *NoiseConn) readFullRaw(p []byte) error {
+	total := 0
+	for total < len(p) {
+		n, err := c.readRaw(p[total:])
+		total += n
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *NoiseConn) Read(p []byte) (int, error) {
+	c.rMu.Lock()
+	defer c.rMu.Unlock()
+
+	// Tailscale control servers (capVer >= 49) prepend an EarlyNoise frame
+	// ("\xff\xff\xffTS" + uint32be len + JSON) before the HTTP/2 stream.
+	// Consume it transparently on the first Read so http2.Transport sees clean H2 frames.
+	if !c.earlyNoiseChecked {
+		c.earlyNoiseChecked = true
+		for len(c.rBuf) == 0 {
+			dec, err := c.sess.ReadMsg(c.conn)
+			if err != nil {
+				return 0, err
+			}
+			c.rBuf = dec
+		}
+		if len(c.rBuf) >= len(earlyNoiseMagic) && string(c.rBuf[:len(earlyNoiseMagic)]) == string(earlyNoiseMagic) {
+			c.rBuf = c.rBuf[len(earlyNoiseMagic):]
+			var lenBuf [4]byte
+			if err := c.readFullRaw(lenBuf[:]); err != nil {
+				return 0, fmt.Errorf("read EarlyNoise length: %w", err)
+			}
+			payloadLen := int(binary.BigEndian.Uint32(lenBuf[:]))
+			if payloadLen < 0 || payloadLen > 1<<20 {
+				return 0, fmt.Errorf("invalid EarlyNoise payload length: %d", payloadLen)
+			}
+			if payloadLen > 0 {
+				discard := make([]byte, payloadLen)
+				if err := c.readFullRaw(discard); err != nil {
+					return 0, fmt.Errorf("read EarlyNoise payload: %w", err)
+				}
+			}
+		}
+	}
+
+	return c.readRaw(p)
 }
 
 func (c *NoiseConn) Write(p []byte) (int, error) {

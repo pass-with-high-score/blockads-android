@@ -62,7 +62,7 @@ func (c *ControlClient) StartMapSession(ctx context.Context, hostname string, up
 	}
 
 	mapReq := MapRequest{
-		Version:   105,
+		Version:   tailscaleCapabilityVersion,
 		KeepAlive: true,
 		NodeKey:   c.state.NodeKey().PublicHex("nodekey:"),
 		DiscoKey:  c.state.DiscoKey().PublicHex("discokey:"),
@@ -176,7 +176,7 @@ func (c *ControlClient) UpdateEndpoints(ctx context.Context, hostname string, en
 	}
 
 	mapReq := MapRequest{
-		Version:   105,
+		Version:   tailscaleCapabilityVersion,
 		KeepAlive: false,
 		NodeKey:   c.state.NodeKey().PublicHex("nodekey:"),
 		DiscoKey:  c.state.DiscoKey().PublicHex("discokey:"),

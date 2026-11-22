@@ -14,6 +14,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -21,6 +22,11 @@ import (
 
 	"golang.org/x/net/http2"
 )
+
+// tailscaleCapabilityVersion advertises Tailscale v1.84+ protocol capability across
+// /key, /ts2021 Noise handshake, /machine/register, and /machine/map so modern
+// Headscale (0.27+/0.29+) and Tailscale control planes accept the client.
+const tailscaleCapabilityVersion = 116
 
 // ControlClient connects to the Tailscale / Headscale control server.
 type ControlClient struct {
@@ -83,7 +89,7 @@ func (c *ControlClient) SetProtectFn(fn func(fd int) bool) {
 	c.protectFn = fn
 }
 
-// FetchServerPublicKey queries GET /key?v=105 to obtain the control server's static Curve25519 public key.
+// FetchServerPublicKey queries GET /key?v=<capVer> to obtain the control server's static Curve25519 public key.
 func (c *ControlClient) FetchServerPublicKey(ctx context.Context) error {
 	u, err := url.Parse(c.controlURL)
 	if err != nil {
@@ -91,7 +97,7 @@ func (c *ControlClient) FetchServerPublicKey(ctx context.Context) error {
 	}
 	u.Path = "/key"
 	q := u.Query()
-	q.Set("v", "105")
+	q.Set("v", strconv.Itoa(tailscaleCapabilityVersion))
 	u.RawQuery = q.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
@@ -230,13 +236,13 @@ func (c *ControlClient) dialNoiseTLS(ctx context.Context) (*NoiseConn, error) {
 		streamConn = tlsConn
 	}
 
-	noiseSess, err := NewNoiseIKClient(1, c.state.MachineKey(), c.serverKey)
+	noiseSess, err := NewNoiseIKClient(tailscaleCapabilityVersion, c.state.MachineKey(), c.serverKey)
 	if err != nil {
 		streamConn.Close()
 		return nil, err
 	}
 
-	msg1, err := noiseSess.CreateHandshakeMessage(1)
+	msg1, err := noiseSess.CreateHandshakeMessage(tailscaleCapabilityVersion)
 	if err != nil {
 		streamConn.Close()
 		return nil, err
@@ -314,7 +320,7 @@ func (c *ControlClient) Register(ctx context.Context, hostname string, followup 
 	}
 
 	req := RegisterRequest{
-		Version:  105,
+		Version:  tailscaleCapabilityVersion,
 		NodeKey:  c.state.NodeKey().PublicHex("nodekey:"),
 		Auth:     AuthBlock{AuthKey: c.state.AuthKey},
 		Followup: followup,
