@@ -1,6 +1,6 @@
 module github.com/nqmgaming/blockads-tunnel
 
-go 1.26.1
+go 1.26.11
 
 require (
 	github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260828
