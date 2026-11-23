@@ -1,5 +1,6 @@
 package app.pwhs.blockads.utils
 
+import app.pwhs.blockads.data.models.FilterRuleKind
 import java.io.BufferedWriter
 import java.io.File
 import java.io.OutputStream
@@ -9,58 +10,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
 
-data class FilterTrieSource(
-    val id: Long,
-    val name: String,
-    val trieFile: File
-)
-
-data class FilterOverlapStat(
-    val filterId: Long,
-    val filterName: String,
-    val totalDomains: Int,
-    val overlappingDomains: Int,
-    val uniqueOnlyDomains: Int
-) {
-    val overlapPercent: Float
-        get() = if (totalDomains > 0) (overlappingDomains * 100f) / totalDomains else 0f
-}
-
-data class PairwiseFilterOverlap(
-    val filterAId: Long,
-    val filterAName: String,
-    val filterBId: Long,
-    val filterBName: String,
-    val sharedDomains: Int
-)
-
-data class OverlappingDomainEntry(
-    val domain: String,
-    val filterNames: List<String>,
-    val filterIds: List<Long>
-)
-
-data class FilterOverlapReport(
-    val analyzedFilters: List<FilterTrieSource>,
-    val totalRawEntries: Int,
-    val totalUniqueDomains: Int,
-    val overlappingDomainCount: Int,
-    val perFilterStats: List<FilterOverlapStat>,
-    val pairwiseOverlaps: List<PairwiseFilterOverlap>,
-    val duplicateEntries: List<OverlappingDomainEntry>,
-    val hasMoreDuplicates: Boolean
-) {
-    val redundantEntries: Int
-        get() = (totalRawEntries - totalUniqueDomains).coerceAtLeast(0)
-
-    val redundancyPercent: Float
-        get() = if (totalRawEntries > 0) (redundantEntries * 100f) / totalRawEntries else 0f
-}
-
 /**
- * Memory-efficient multi-trie DFS analyzer for `.trie` v2 binary filter files.
- * Walks all enabled tries simultaneously by reversed DNS label without loading
- * all domain strings into memory.
+ * Multi-rule overlap analyzer supporting DNS binary tries (.trie),
+ * cosmetic CSS (.css), scriptlets (.scriptlets), IPs (.ips), and URL rules (.modules.json).
  */
 object FilterOverlapAnalyzer {
 
@@ -115,8 +67,8 @@ object FilterOverlapAnalyzer {
         }
 
         companion object {
-            fun open(file: File): MappedTrieReader? {
-                if (!file.exists() || file.length() < HEADER_SIZE) return null
+            fun open(file: File?): MappedTrieReader? {
+                if (file == null || !file.exists() || file.length() < HEADER_SIZE) return null
                 return runCatching {
                     val raf = RandomAccessFile(file, "r")
                     val channel = raf.channel
@@ -142,215 +94,275 @@ object FilterOverlapAnalyzer {
     )
 
     fun analyze(
-        sources: List<FilterTrieSource>,
+        sources: List<FilterRuleSource>,
+        category: OverlapRuleCategory = OverlapRuleCategory.ALL,
         searchQuery: String = "",
         filterId: Long? = null,
         maxDisplayEntries: Int = DEFAULT_MAX_DISPLAY_ENTRIES
     ): FilterOverlapReport {
-        val validSources = mutableListOf<FilterTrieSource>()
-        val readers = mutableListOf<MappedTrieReader>()
+        if (sources.isEmpty()) {
+            return FilterOverlapReport(
+                analyzedFilters = emptyList(),
+                totalRawEntries = 0,
+                totalUniqueDomains = 0,
+                overlappingDomainCount = 0,
+                perFilterStats = emptyList(),
+                pairwiseOverlaps = emptyList(),
+                duplicateEntries = emptyList(),
+                hasMoreDuplicates = false
+            )
+        }
 
-        try {
-            for (src in sources) {
-                val reader = MappedTrieReader.open(src.trieFile) ?: continue
-                validSources.add(src)
-                readers.add(reader)
+        val k = sources.size
+        val perFilterTotal = IntArray(k)
+        val perFilterOverlap = IntArray(k)
+        val pairwiseCounts = Array(k) { IntArray(k) }
+        var totalRawEntries = 0
+        var totalUniqueRules = 0
+        var overlappingRuleCount = 0
+        val duplicates = ArrayList<OverlappingRuleEntry>(maxDisplayEntries.coerceAtMost(1000))
+        var hasMoreDuplicates = false
+        val ruleKindCounts = mutableMapOf<FilterRuleKind, Int>()
+
+        // 1. Scan non-domain rules if applicable
+        if (category != OverlapRuleCategory.DOMAINS) {
+            val nonDomain = NonDomainRuleScanner.scan(
+                sources = sources,
+                category = category,
+                searchQuery = searchQuery,
+                filterId = filterId,
+                maxDisplayEntries = maxDisplayEntries
+            )
+            for (i in 0 until k) {
+                perFilterTotal[i] += nonDomain.perFilterTotal[i]
+                perFilterOverlap[i] += nonDomain.perFilterOverlap[i]
+                for (j in 0 until k) {
+                    pairwiseCounts[i][j] += nonDomain.pairwiseCounts[i][j]
+                }
             }
-
-            if (validSources.isEmpty()) {
-                return FilterOverlapReport(
-                    analyzedFilters = emptyList(),
-                    totalRawEntries = 0,
-                    totalUniqueDomains = 0,
-                    overlappingDomainCount = 0,
-                    perFilterStats = emptyList(),
-                    pairwiseOverlaps = emptyList(),
-                    duplicateEntries = emptyList(),
-                    hasMoreDuplicates = false
-                )
+            totalRawEntries += nonDomain.totalRawEntries
+            totalUniqueRules += nonDomain.totalUniqueRules
+            overlappingRuleCount += nonDomain.overlappingRuleCount
+            duplicates.addAll(nonDomain.duplicateEntries)
+            hasMoreDuplicates = hasMoreDuplicates || nonDomain.hasMoreDuplicates
+            nonDomain.ruleKindCounts.forEach { (kind, count) ->
+                ruleKindCounts[kind] = (ruleKindCounts[kind] ?: 0) + count
             }
+        }
 
-            val k = readers.size
-            val perFilterTotal = IntArray(k)
-            val perFilterOverlap = IntArray(k)
-            val pairwiseCounts = Array(k) { IntArray(k) }
-            var totalRawEntries = 0
-            var totalUniqueDomains = 0
-            var overlappingDomainCount = 0
+        // 2. Scan domains via Trie DFS if category includes DOMAINS
+        if (category.matches(FilterRuleKind.DOMAINS)) {
+            val readers = sources.map { MappedTrieReader.open(it.trieFile) }
+            try {
+                val activeTrieIndices = readers.mapIndexedNotNull { idx, r -> if (r != null) idx else null }
+                if (activeTrieIndices.isNotEmpty()) {
+                    val queryLower = searchQuery.trim().lowercase()
+                    val labelStack = ArrayList<String>(16)
 
-            val duplicates = ArrayList<OverlappingDomainEntry>(maxDisplayEntries.coerceAtMost(1000))
-            var hasMoreDuplicates = false
-            val queryLower = searchQuery.trim().lowercase()
-            val labelStack = ArrayList<String>(16)
+                    fun dfs(cursors: List<Cursor>, depth: Int) {
+                        if (depth > MAX_DEPTH || cursors.isEmpty()) return
 
-            fun dfs(cursors: List<Cursor>, depth: Int) {
-                if (depth > MAX_DEPTH || cursors.isEmpty()) return
-
-                // Check terminals at current domain node
-                if (depth > 0) {
-                    var terminalCount = 0
-                    val terminalIndices = IntArray(cursors.size)
-                    for (c in cursors) {
-                        if (readers[c.filterIndex].isTerminal(c.nodeOffset)) {
-                            terminalIndices[terminalCount++] = c.filterIndex
-                        }
-                    }
-
-                    if (terminalCount > 0) {
-                        totalRawEntries += terminalCount
-                        totalUniqueDomains += 1
-                        for (t in 0 until terminalCount) {
-                            perFilterTotal[terminalIndices[t]]++
-                        }
-
-                        if (terminalCount >= 2) {
-                            overlappingDomainCount += 1
-                            for (t in 0 until terminalCount) {
-                                perFilterOverlap[terminalIndices[t]]++
-                                for (u in t + 1 until terminalCount) {
-                                    val a = terminalIndices[t]
-                                    val b = terminalIndices[u]
-                                    pairwiseCounts[a][b]++
-                                    pairwiseCounts[b][a]++
+                        if (depth > 0) {
+                            var terminalCount = 0
+                            val terminalIndices = IntArray(cursors.size)
+                            for (c in cursors) {
+                                val reader = readers[c.filterIndex]
+                                if (reader != null && reader.isTerminal(c.nodeOffset)) {
+                                    terminalIndices[terminalCount++] = c.filterIndex
                                 }
                             }
 
-                            val matchesSelectedFilter = filterId == null ||
-                                (0 until terminalCount).any { validSources[terminalIndices[it]].id == filterId }
-                            if (matchesSelectedFilter) {
-                                val domain = buildDomainFromStack(labelStack)
-                                if (queryLower.isEmpty() || domain.contains(queryLower)) {
-                                    if (duplicates.size < maxDisplayEntries) {
-                                        val names = (0 until terminalCount).map { validSources[terminalIndices[it]].name }
-                                        val ids = (0 until terminalCount).map { validSources[terminalIndices[it]].id }
-                                        duplicates.add(OverlappingDomainEntry(domain, names, ids))
-                                    } else {
-                                        hasMoreDuplicates = true
+                            if (terminalCount > 0) {
+                                totalRawEntries += terminalCount
+                                totalUniqueRules += 1
+                                ruleKindCounts[FilterRuleKind.DOMAINS] =
+                                    (ruleKindCounts[FilterRuleKind.DOMAINS] ?: 0) + 1
+                                for (t in 0 until terminalCount) {
+                                    perFilterTotal[terminalIndices[t]]++
+                                }
+
+                                if (terminalCount >= 2) {
+                                    overlappingRuleCount += 1
+                                    for (t in 0 until terminalCount) {
+                                        perFilterOverlap[terminalIndices[t]]++
+                                        for (u in t + 1 until terminalCount) {
+                                            val a = terminalIndices[t]
+                                            val b = terminalIndices[u]
+                                            pairwiseCounts[a][b]++
+                                            pairwiseCounts[b][a]++
+                                        }
+                                    }
+
+                                    val matchesSelectedFilter = filterId == null ||
+                                        (0 until terminalCount).any { sources[terminalIndices[it]].id == filterId }
+                                    if (matchesSelectedFilter) {
+                                        val domain = buildDomainFromStack(labelStack)
+                                        if (queryLower.isEmpty() || domain.contains(queryLower)) {
+                                            if (duplicates.size < maxDisplayEntries) {
+                                                val names = (0 until terminalCount).map { sources[terminalIndices[it]].name }
+                                                val ids = (0 until terminalCount).map { sources[terminalIndices[it]].id }
+                                                duplicates.add(
+                                                    OverlappingRuleEntry(
+                                                        rule = domain,
+                                                        kind = FilterRuleKind.DOMAINS,
+                                                        filterNames = names,
+                                                        filterIds = ids
+                                                    )
+                                                )
+                                            } else {
+                                                hasMoreDuplicates = true
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }
 
-                // Group children by label across all active cursors
-                val childGroups = HashMap<String, MutableList<Cursor>>()
-                for (c in cursors) {
-                    val children = readers[c.filterIndex].readChildren(c.nodeOffset)
-                    for ((label, childOffset) in children) {
-                        childGroups.getOrPut(label) { ArrayList(2) }.add(Cursor(c.filterIndex, childOffset))
-                    }
-                }
+                        val childGroups = HashMap<String, MutableList<Cursor>>()
+                        for (c in cursors) {
+                            val reader = readers[c.filterIndex] ?: continue
+                            val children = reader.readChildren(c.nodeOffset)
+                            for ((label, childOffset) in children) {
+                                childGroups.getOrPut(label) { ArrayList(2) }.add(Cursor(c.filterIndex, childOffset))
+                            }
+                        }
 
-                for ((label, nextCursors) in childGroups) {
-                    labelStack.add(label)
-                    dfs(nextCursors, depth + 1)
-                    labelStack.removeAt(labelStack.lastIndex)
-                }
-            }
-
-            val rootCursors = readers.indices.map { Cursor(it, HEADER_SIZE) }
-            dfs(rootCursors, 0)
-
-            val perFilterStats = validSources.indices.map { idx ->
-                val src = validSources[idx]
-                val total = perFilterTotal[idx]
-                val overlap = perFilterOverlap[idx]
-                FilterOverlapStat(
-                    filterId = src.id,
-                    filterName = src.name,
-                    totalDomains = total,
-                    overlappingDomains = overlap,
-                    uniqueOnlyDomains = (total - overlap).coerceAtLeast(0)
-                )
-            }.sortedByDescending { it.overlappingDomains }
-
-            val pairwiseOverlaps = mutableListOf<PairwiseFilterOverlap>()
-            for (i in 0 until k) {
-                for (j in i + 1 until k) {
-                    val shared = pairwiseCounts[i][j]
-                    if (shared > 0) {
-                        pairwiseOverlaps.add(
-                            PairwiseFilterOverlap(
-                                filterAId = validSources[i].id,
-                                filterAName = validSources[i].name,
-                                filterBId = validSources[j].id,
-                                filterBName = validSources[j].name,
-                                sharedDomains = shared
-                            )
-                        )
-                    }
-                }
-            }
-            pairwiseOverlaps.sortByDescending { it.sharedDomains }
-
-            return FilterOverlapReport(
-                analyzedFilters = validSources,
-                totalRawEntries = totalRawEntries,
-                totalUniqueDomains = totalUniqueDomains,
-                overlappingDomainCount = overlappingDomainCount,
-                perFilterStats = perFilterStats,
-                pairwiseOverlaps = pairwiseOverlaps,
-                duplicateEntries = duplicates,
-                hasMoreDuplicates = hasMoreDuplicates
-            )
-        } finally {
-            readers.forEach { it.close() }
-        }
-    }
-
-    /**
-     * Streams the deduplicated unified domain list across all valid filter tries to [outputStream].
-     * Returns the number of unique domains written.
-     */
-    fun exportCombinedDomains(
-        sources: List<FilterTrieSource>,
-        outputStream: OutputStream
-    ): Int {
-        val readers = mutableListOf<MappedTrieReader>()
-        try {
-            for (src in sources) {
-                val reader = MappedTrieReader.open(src.trieFile) ?: continue
-                readers.add(reader)
-            }
-            if (readers.isEmpty()) return 0
-
-            var count = 0
-            val labelStack = ArrayList<String>(16)
-            BufferedWriter(OutputStreamWriter(outputStream, Charsets.UTF_8)).use { writer ->
-                writer.write("# BlockAds Combined Deduplicated Filter List\n")
-                writer.write("# Sources: ${sources.joinToString(", ") { it.name }}\n\n")
-
-                fun dfs(cursors: List<Cursor>, depth: Int) {
-                    if (depth > MAX_DEPTH || cursors.isEmpty()) return
-                    if (depth > 0 && cursors.any { readers[it.filterIndex].isTerminal(it.nodeOffset) }) {
-                        writer.write(buildDomainFromStack(labelStack))
-                        writer.newLine()
-                        count++
-                    }
-
-                    val childGroups = HashMap<String, MutableList<Cursor>>()
-                    for (c in cursors) {
-                        val children = readers[c.filterIndex].readChildren(c.nodeOffset)
-                        for ((label, childOffset) in children) {
-                            childGroups.getOrPut(label) { ArrayList(2) }.add(Cursor(c.filterIndex, childOffset))
+                        for ((label, nextCursors) in childGroups) {
+                            labelStack.add(label)
+                            dfs(nextCursors, depth + 1)
+                            labelStack.removeAt(labelStack.lastIndex)
                         }
                     }
 
-                    for ((label, nextCursors) in childGroups) {
-                        labelStack.add(label)
-                        dfs(nextCursors, depth + 1)
-                        labelStack.removeAt(labelStack.lastIndex)
+                    val rootCursors = activeTrieIndices.map { Cursor(it, HEADER_SIZE) }
+                    dfs(rootCursors, 0)
+                }
+            } finally {
+                readers.forEach { it?.close() }
+            }
+        }
+
+        val perFilterStats = sources.indices.map { idx ->
+            val src = sources[idx]
+            val total = perFilterTotal[idx]
+            val overlap = perFilterOverlap[idx]
+            FilterOverlapStat(
+                filterId = src.id,
+                filterName = src.name,
+                totalDomains = total,
+                overlappingDomains = overlap,
+                uniqueOnlyDomains = (total - overlap).coerceAtLeast(0)
+            )
+        }.sortedByDescending { it.overlappingDomains }
+
+        val pairwiseOverlaps = mutableListOf<PairwiseFilterOverlap>()
+        for (i in 0 until k) {
+            for (j in i + 1 until k) {
+                val shared = pairwiseCounts[i][j]
+                if (shared > 0) {
+                    pairwiseOverlaps.add(
+                        PairwiseFilterOverlap(
+                            filterAId = sources[i].id,
+                            filterAName = sources[i].name,
+                            filterBId = sources[j].id,
+                            filterBName = sources[j].name,
+                            sharedDomains = shared
+                        )
+                    )
+                }
+            }
+        }
+        pairwiseOverlaps.sortByDescending { it.sharedDomains }
+
+        return FilterOverlapReport(
+            analyzedFilters = sources,
+            totalRawEntries = totalRawEntries,
+            totalUniqueDomains = totalUniqueRules,
+            overlappingDomainCount = overlappingRuleCount,
+            perFilterStats = perFilterStats,
+            pairwiseOverlaps = pairwiseOverlaps,
+            duplicateEntries = duplicates,
+            hasMoreDuplicates = hasMoreDuplicates,
+            ruleKindCounts = ruleKindCounts
+        )
+    }
+
+    /**
+     * Streams deduplicated unified rules across all valid filters to [outputStream].
+     * Returns total unique rules written.
+     */
+    fun exportCombinedRules(
+        sources: List<FilterRuleSource>,
+        category: OverlapRuleCategory = OverlapRuleCategory.ALL,
+        outputStream: OutputStream
+    ): Int {
+        var count = 0
+        BufferedWriter(OutputStreamWriter(outputStream, Charsets.UTF_8)).use { writer ->
+            writer.write("# BlockAds Combined Deduplicated Rules\n")
+            writer.write("# Category: ${category.name}\n")
+            writer.write("# Sources: ${sources.joinToString(", ") { it.name }}\n\n")
+
+            // 1. Export domains if applicable
+            if (category.matches(FilterRuleKind.DOMAINS)) {
+                val readers = sources.map { MappedTrieReader.open(it.trieFile) }
+                try {
+                    val activeTrieIndices = readers.mapIndexedNotNull { idx, r -> if (r != null) idx else null }
+                    if (activeTrieIndices.isNotEmpty()) {
+                        writer.write("# === DNS Domains ===\n")
+                        val labelStack = ArrayList<String>(16)
+                        fun dfs(cursors: List<Cursor>, depth: Int) {
+                            if (depth > MAX_DEPTH || cursors.isEmpty()) return
+                            if (depth > 0 && cursors.any { readers[it.filterIndex]?.isTerminal(it.nodeOffset) == true }) {
+                                writer.write(buildDomainFromStack(labelStack))
+                                writer.newLine()
+                                count++
+                            }
+
+                            val childGroups = HashMap<String, MutableList<Cursor>>()
+                            for (c in cursors) {
+                                val reader = readers[c.filterIndex] ?: continue
+                                val children = reader.readChildren(c.nodeOffset)
+                                for ((label, childOffset) in children) {
+                                    childGroups.getOrPut(label) { ArrayList(2) }.add(Cursor(c.filterIndex, childOffset))
+                                }
+                            }
+
+                            for ((label, nextCursors) in childGroups) {
+                                labelStack.add(label)
+                                dfs(nextCursors, depth + 1)
+                                labelStack.removeAt(labelStack.lastIndex)
+                            }
+                        }
+
+                        val rootCursors = activeTrieIndices.map { Cursor(it, HEADER_SIZE) }
+                        dfs(rootCursors, 0)
+                        writer.newLine()
+                    }
+                } finally {
+                    readers.forEach { it?.close() }
+                }
+            }
+
+            // 2. Export non-domain rules if applicable
+            if (category != OverlapRuleCategory.DOMAINS) {
+                val uniqueRules = NonDomainRuleScanner.collectUniqueRules(sources, category)
+                if (uniqueRules.isNotEmpty()) {
+                    writer.write("# === Content & Cosmetic Rules ===\n")
+                    for ((rule, _) in uniqueRules) {
+                        writer.write(rule)
+                        writer.newLine()
+                        count++
                     }
                 }
-
-                dfs(readers.indices.map { Cursor(it, HEADER_SIZE) }, 0)
             }
-            return count
-        } finally {
-            readers.forEach { it.close() }
         }
+        return count
     }
+
+    fun exportCombinedDomains(
+        sources: List<FilterRuleSource>,
+        outputStream: OutputStream
+    ): Int = exportCombinedRules(sources, OverlapRuleCategory.DOMAINS, outputStream)
 
     private fun buildDomainFromStack(stack: List<String>): String {
         val sb = StringBuilder(stack.size * 8)

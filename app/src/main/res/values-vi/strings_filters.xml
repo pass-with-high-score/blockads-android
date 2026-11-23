@@ -263,6 +263,8 @@
     <string name="filter_overlap_tab_overview">Tổng quan</string>
     <string name="filter_overlap_tab_duplicates">Trùng lặp</string>
     <string name="filter_overlap_export_combined">Xuất danh sách kết hợp</string>
+    <string name="filter_overlap_share_combined">Chia sẻ danh sách kết hợp</string>
+    <string name="filter_overlap_share_title">Chia sẻ danh sách bộ lọc kết hợp</string>
     <string name="filter_overlap_export_desc">Lưu tất cả tên miền duy nhất từ các danh sách đã bật vào một tệp đã lọc trùng.</string>
     <string name="filter_overlap_headline_redundant">%1$.0f%% quy tắc bộ lọc của bạn là trùng lặp</string>
     <string name="filter_overlap_headline_clean">Không tìm thấy quy tắc trùng lặp nào</string>
@@ -286,8 +288,16 @@
     <string name="filter_overlap_need_two">Bật ít nhất 2 danh sách bộ lọc đã tải xuống để phát hiện quy tắc trùng lặp, xác định danh sách dư thừa có thể tắt và xuất một danh sách kết hợp gọn gàng.</string>
     <string name="filter_overlap_no_duplicates">Không tìm thấy tên miền trùng lặp nào giữa các bộ lọc đã chọn.</string>
     <string name="filter_overlap_showing_capped">Hiển thị %1$d mục trùng lặp đầu tiên phù hợp</string>
-    <string name="filter_overlap_exported">Đã xuất %1$s tên miền duy nhất</string>
+    <string name="filter_overlap_exported">Đã xuất %1$s quy tắc duy nhất</string>
     <string name="filter_overlap_export_failed">Không thể xuất danh sách bộ lọc kết hợp</string>
+    <string name="filter_overlap_category_all">Tất cả</string>
+    <string name="filter_overlap_category_domains">Tên miền</string>
+    <string name="filter_overlap_category_cosmetic">Ẩn phần tử</string>
+    <string name="filter_overlap_category_scriptlets">Mã kịch bản</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">Quy tắc URL</string>
+    <string name="filter_overlap_search_hint_rules">Tìm kiếm quy tắc trùng lặp…</string>
+    <string name="filter_overlap_no_duplicates_rules">Không tìm thấy quy tắc trùng lặp nào giữa các bộ lọc đã chọn.</string>
     <string name="rule_field_target_app">Ứng dụng áp dụng</string>
     <string name="rule_target_app_all">Tất cả ứng dụng (Toàn hệ thống)</string>
     <string name="rule_pick_app_title">Chọn ứng dụng áp dụng</string>

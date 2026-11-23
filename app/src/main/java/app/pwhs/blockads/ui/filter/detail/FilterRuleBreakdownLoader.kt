@@ -2,6 +2,7 @@ package app.pwhs.blockads.ui.filter.detail
 
 import android.content.Context
 import app.pwhs.blockads.data.entities.FilterList
+import app.pwhs.blockads.data.models.FilterRuleKind
 import app.pwhs.blockads.data.models.ModuleRulesPackage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,17 +10,7 @@ import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.io.File
 
-enum class FilterRuleKind {
-    DOMAINS,
-    IPS,
-    COSMETIC,
-    COSMETIC_EXCEPTIONS,
-    INJECT_CSS,
-    SCRIPTLETS,
-    SCRIPTLET_EXCEPTIONS,
-    BLOCK_PATHS,
-    REMOVE_PARAMS
-}
+typealias FilterRuleKind = app.pwhs.blockads.data.models.FilterRuleKind
 
 data class FilterRuleTypeItem(
     val kind: FilterRuleKind,
@@ -39,8 +30,30 @@ data class FilterRuleBreakdown(
 
 internal object FilterRuleBreakdownLoader {
     private const val REMOTE_FILTERS_DIR = "remote_filters"
+    private const val BUNDLED_ASSET_PATH = "preset/default_filters.json"
     private const val MAX_SAMPLES = 4
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+    private var bundledStatsCache: Map<String, JSONObject>? = null
+
+    private fun getBundledStats(context: Context, filterName: String): JSONObject? {
+        if (bundledStatsCache == null) {
+            bundledStatsCache = runCatching {
+                val assetJson = context.assets.open(BUNDLED_ASSET_PATH).bufferedReader().use { it.readText() }
+                val arr = org.json.JSONArray(assetJson)
+                val map = mutableMapOf<String, JSONObject>()
+                for (i in 0 until arr.length()) {
+                    val obj = arr.getJSONObject(i)
+                    val name = obj.optString("name")
+                    val stats = obj.optJSONObject("stats")
+                    if (name.isNotEmpty() && stats != null) {
+                        map[name] = stats
+                    }
+                }
+                map
+            }.getOrNull() ?: emptyMap()
+        }
+        return bundledStatsCache?.get(filterName)
+    }
 
     suspend fun load(context: Context, filter: FilterList): FilterRuleBreakdown {
         val baseDir = runCatching {
@@ -62,12 +75,21 @@ internal object FilterRuleBreakdownLoader {
             val isDownloaded = trieFile.exists() || ipsFile.exists() || cssFile.exists() ||
                 scriptletsFile.exists() || modulesFile.exists()
 
-            // 1. Optional server-provided stats from info.json (preferred when present)
+            // 1. Server-provided stats from info.json, or fallback to bundled default_filters.json
             val statsObj = runCatching {
                 if (infoFile.exists() && infoFile.length() > 0L) {
                     JSONObject(infoFile.readText()).optJSONObject("stats")
                 } else null
-            }.getOrNull()
+            }.getOrNull() ?: if (filter.isBuiltIn) {
+                getBundledStats(context, filter.name)?.also { bundled ->
+                    runCatching {
+                        if (!infoFile.exists() || infoFile.length() == 0L) {
+                            if (!dir.exists()) dir.mkdirs()
+                            infoFile.writeText(JSONObject().put("stats", bundled).toString())
+                        }
+                    }
+                }
+            } else null
 
             // 2. Scan sidecars for exact counts (fallback) & real samples
             val ipsSamples = mutableListOf<String>()

@@ -2,12 +2,13 @@ package app.pwhs.blockads.ui.filter.overlap
 
 import android.app.Application
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.FilterListDao
 import app.pwhs.blockads.utils.FilterOverlapAnalyzer
-import app.pwhs.blockads.utils.FilterTrieSource
+import app.pwhs.blockads.utils.FilterRuleSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -45,6 +46,12 @@ class FilterOverlapViewModel(
     fun onIntent(intent: FilterOverlapIntent) {
         when (intent) {
             is FilterOverlapIntent.Analyze -> runAnalysis()
+            is FilterOverlapIntent.SelectCategory -> {
+                if (_uiState.value.selectedCategory != intent.category) {
+                    _uiState.update { it.copy(selectedCategory = intent.category) }
+                    runAnalysis()
+                }
+            }
             is FilterOverlapIntent.UpdateSearchQuery -> {
                 _uiState.update { it.copy(searchQuery = intent.query) }
                 searchDebounceJob?.cancel()
@@ -63,18 +70,32 @@ class FilterOverlapViewModel(
             }
             is FilterOverlapIntent.DisableFilter -> disableFilter(intent.filterId, intent.filterName)
             is FilterOverlapIntent.ExportCombinedList -> exportCombined(intent.uri)
+            is FilterOverlapIntent.ShareCombinedList -> shareCombined()
             is FilterOverlapIntent.NavigateBack -> {
                 _effects.tryEmit(FilterOverlapEffect.NavigateBack)
             }
         }
     }
 
-    private suspend fun getEnabledTrieSources(): List<FilterTrieSource> {
+    private suspend fun getEnabledRuleSources(): List<FilterRuleSource> {
         val filterDir = File(application.filesDir, "remote_filters")
         return filterListDao.getEnabled().mapNotNull { filter ->
-            val trieFile = File(filterDir, "${filter.id}.trie")
-            if (trieFile.exists() && trieFile.length() > 0L) {
-                FilterTrieSource(id = filter.id, name = filter.name, trieFile = trieFile)
+            val trieFile = File(filterDir, "${filter.id}.trie").takeIf { it.exists() && it.length() > 0L }
+            val cssFile = File(filterDir, "${filter.id}.css").takeIf { it.exists() && it.length() > 0L }
+            val scriptletsFile = File(filterDir, "${filter.id}.scriptlets").takeIf { it.exists() && it.length() > 0L }
+            val ipsFile = File(filterDir, "${filter.id}.ips").takeIf { it.exists() && it.length() > 0L }
+            val modulesFile = File(filterDir, "${filter.id}.modules.json").takeIf { it.exists() && it.length() > 0L }
+
+            if (trieFile != null || cssFile != null || scriptletsFile != null || ipsFile != null || modulesFile != null) {
+                FilterRuleSource(
+                    id = filter.id,
+                    name = filter.name,
+                    trieFile = trieFile,
+                    cssFile = cssFile,
+                    scriptletsFile = scriptletsFile,
+                    ipsFile = ipsFile,
+                    modulesFile = modulesFile
+                )
             } else {
                 null
             }
@@ -88,9 +109,10 @@ class FilterOverlapViewModel(
             try {
                 val current = _uiState.value
                 val report = withContext(Dispatchers.IO) {
-                    val sources = getEnabledTrieSources()
+                    val sources = getEnabledRuleSources()
                     FilterOverlapAnalyzer.analyze(
                         sources = sources,
+                        category = current.selectedCategory,
                         searchQuery = current.searchQuery,
                         filterId = current.selectedFilterId
                     )
@@ -141,9 +163,13 @@ class FilterOverlapViewModel(
             _uiState.update { it.copy(isExporting = true) }
             try {
                 val count = withContext(Dispatchers.IO) {
-                    val sources = getEnabledTrieSources()
+                    val sources = getEnabledRuleSources()
                     application.contentResolver.openOutputStream(uri)?.use { out ->
-                        FilterOverlapAnalyzer.exportCombinedDomains(sources, out)
+                        FilterOverlapAnalyzer.exportCombinedRules(
+                            sources = sources,
+                            category = _uiState.value.selectedCategory,
+                            outputStream = out
+                        )
                     } ?: 0
                 }
                 val formatted = NumberFormat.getIntegerInstance().format(count)
@@ -154,6 +180,39 @@ class FilterOverlapViewModel(
                 )
             } catch (e: Exception) {
                 Timber.e(e, "Failed to export combined filter list")
+                _effects.tryEmit(
+                    FilterOverlapEffect.ShowMessage(
+                        application.getString(R.string.filter_overlap_export_failed)
+                    )
+                )
+            } finally {
+                _uiState.update { it.copy(isExporting = false) }
+            }
+        }
+    }
+
+    private fun shareCombined() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isExporting = true) }
+            try {
+                val file = withContext(Dispatchers.IO) {
+                    val exportDir = File(application.cacheDir, "exports").apply { if (!exists()) mkdirs() }
+                    val exportFile = File(exportDir, "blockads-combined-filters.txt")
+                    val sources = getEnabledRuleSources()
+                    exportFile.outputStream().use { out ->
+                        FilterOverlapAnalyzer.exportCombinedRules(
+                            sources = sources,
+                            category = _uiState.value.selectedCategory,
+                            outputStream = out
+                        )
+                    }
+                    exportFile
+                }
+                val authority = "${application.packageName}.fileprovider"
+                val uri = FileProvider.getUriForFile(application, authority, file)
+                _effects.tryEmit(FilterOverlapEffect.ShareFile(uri, "text/plain"))
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to share combined filter list")
                 _effects.tryEmit(
                     FilterOverlapEffect.ShowMessage(
                         application.getString(R.string.filter_overlap_export_failed)

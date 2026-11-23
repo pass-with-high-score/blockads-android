@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.httpsfiltering.wizard
 
+import android.content.ActivityNotFoundException
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,6 +66,7 @@ import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardSecurityPage
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardStepIndicator
 import app.pwhs.blockads.ui.httpsfiltering.wizard.component.WizardVerifyPage
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +97,11 @@ fun CertInstallationWizardScreen(
         if (granted) {
             viewModel.processIntent(CertInstallationWizardUiIntent.ExportCert)
         } else {
-            safExportLauncher.launch(uiState.fileName)
+            try {
+                safExportLauncher.launch(uiState.fileName)
+            } catch (e: ActivityNotFoundException) {
+                Timber.w(e, "ActivityNotFoundException on CreateDocument for cert export")
+            }
         }
     }
 

@@ -121,7 +121,7 @@ class FilterListSeeder(
             val originalUrl = item.originalUrl ?: existing?.originalUrl ?: ""
             val zipUrl = item.downloadUrl ?: existing?.url ?: ""
 
-            if (existing != null) {
+            val filterId = if (existing != null) {
                 val needsUpdate = existing.category != cat ||
                     (originalUrl.isNotEmpty() && existing.originalUrl != originalUrl) ||
                     (item.bloomUrl.isNotEmpty() && existing.bloomUrl != item.bloomUrl) ||
@@ -146,6 +146,7 @@ class FilterListSeeder(
                         )
                     )
                 }
+                existing.id
             } else {
                 filterListDao.insert(
                     FilterList(
@@ -164,6 +165,10 @@ class FilterListSeeder(
                         originalUrl = originalUrl
                     )
                 )
+            }
+
+            item.stats?.let { stats ->
+                saveFilterStats(filterId, stats)
             }
         }
 
@@ -236,5 +241,30 @@ class FilterListSeeder(
             )
         }
         return results
+    }
+
+    private fun saveFilterStats(filterId: Long, stats: app.pwhs.blockads.data.remote.models.FilterStats) {
+        runCatching {
+            val dir = java.io.File(context.filesDir, "remote_filters")
+            val isDownloaded = java.io.File(dir, "$filterId.trie").exists() || java.io.File(dir, "$filterId.bloom").exists()
+            val infoFile = java.io.File(dir, "$filterId.info.json")
+            if (!isDownloaded || !infoFile.exists() || infoFile.length() == 0L) {
+                if (!dir.exists()) dir.mkdirs()
+                val statsJson = org.json.JSONObject().apply {
+                    put("stats", org.json.JSONObject().apply {
+                        put("domains", stats.domains)
+                        put("ips", stats.ips)
+                        put("cosmetic", stats.cosmetic)
+                        put("cosmeticExceptions", stats.cosmeticExceptions)
+                        put("injectCss", stats.injectCss)
+                        put("scriptlets", stats.scriptlets)
+                        put("scriptletExceptions", stats.scriptletExceptions)
+                        put("blockPaths", stats.blockPaths)
+                        put("removeParams", stats.removeParams)
+                    })
+                }
+                infoFile.writeText(statsJson.toString())
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package app.pwhs.blockads.ui.filter.overlap
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,6 +56,7 @@ import app.pwhs.blockads.ui.component.UndoSnackbarHost
 import app.pwhs.blockads.ui.theme.BlockadsTheme
 import app.pwhs.blockads.utils.FilterOverlapAnalyzer
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @Composable
 fun FilterOverlapScreen(
@@ -62,6 +66,7 @@ fun FilterOverlapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/plain")
@@ -76,6 +81,26 @@ fun FilterOverlapScreen(
             when (effect) {
                 is FilterOverlapEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
                 is FilterOverlapEffect.NavigateBack -> onNavigateBack()
+                is FilterOverlapEffect.ShareFile -> {
+                    try {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = effect.mimeType
+                            putExtra(Intent.EXTRA_STREAM, effect.uri)
+                            putExtra(Intent.EXTRA_SUBJECT, "blockads-combined-filters.txt")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        val chooser = Intent.createChooser(
+                            shareIntent,
+                            context.getString(R.string.filter_overlap_share_title)
+                        ).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(chooser)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to share combined filter list")
+                        snackbarHostState.showSnackbar(context.getString(R.string.filter_overlap_export_failed))
+                    }
+                }
             }
         }
     }
@@ -84,7 +109,15 @@ fun FilterOverlapScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::onIntent,
-        onExportClick = { exportLauncher.launch("blockads-combined-filters.txt") },
+        onExportClick = {
+            try {
+                exportLauncher.launch("blockads-combined-filters.txt")
+            } catch (e: ActivityNotFoundException) {
+                Timber.w(e, "ActivityNotFoundException on CreateDocument, falling back to Share")
+                viewModel.onIntent(FilterOverlapIntent.ShareCombinedList)
+            }
+        },
+        onShareClick = { viewModel.onIntent(FilterOverlapIntent.ShareCombinedList) },
         modifier = modifier
     )
 }
@@ -96,6 +129,7 @@ fun FilterOverlapContent(
     snackbarHostState: SnackbarHostState,
     onIntent: (FilterOverlapIntent) -> Unit,
     onExportClick: () -> Unit,
+    onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -207,11 +241,17 @@ fun FilterOverlapContent(
                         )
                     }
 
+                    OverlapCategoryChips(
+                        selectedCategory = uiState.selectedCategory,
+                        onSelectCategory = { onIntent(FilterOverlapIntent.SelectCategory(it)) }
+                    )
+
                     if (uiState.selectedTab == 0) {
                         OverlapOverviewTab(
                             uiState = uiState,
                             onIntent = onIntent,
-                            onExportClick = onExportClick
+                            onExportClick = onExportClick,
+                            onShareClick = onShareClick
                         )
                     } else {
                         OverlapDuplicatesTab(
@@ -229,7 +269,8 @@ fun FilterOverlapContent(
 private fun OverlapOverviewTab(
     uiState: FilterOverlapUiState,
     onIntent: (FilterOverlapIntent) -> Unit,
-    onExportClick: () -> Unit
+    onExportClick: () -> Unit,
+    onShareClick: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -239,7 +280,8 @@ private fun OverlapOverviewTab(
         item(key = "summary") {
             OverlapSummaryCard(
                 uiState = uiState,
-                onExportClick = onExportClick
+                onExportClick = onExportClick,
+                onShareClick = onShareClick
             )
         }
 
@@ -295,7 +337,15 @@ private fun OverlapDuplicatesTab(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { onIntent(FilterOverlapIntent.UpdateSearchQuery(it)) },
-                placeholder = { Text(stringResource(R.string.filter_overlap_search_hint)) },
+                placeholder = {
+                    Text(
+                        if (uiState.selectedCategory == app.pwhs.blockads.utils.OverlapRuleCategory.DOMAINS) {
+                            stringResource(R.string.filter_overlap_search_hint)
+                        } else {
+                            stringResource(R.string.filter_overlap_search_hint_rules)
+                        }
+                    )
+                },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
@@ -330,7 +380,11 @@ private fun OverlapDuplicatesTab(
         if (uiState.duplicateEntries.isEmpty()) {
             item(key = "no_duplicates") {
                 Text(
-                    text = stringResource(R.string.filter_overlap_no_duplicates),
+                    text = if (uiState.selectedCategory == app.pwhs.blockads.utils.OverlapRuleCategory.DOMAINS) {
+                        stringResource(R.string.filter_overlap_no_duplicates)
+                    } else {
+                        stringResource(R.string.filter_overlap_no_duplicates_rules)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
@@ -339,7 +393,7 @@ private fun OverlapDuplicatesTab(
         } else {
             items(
                 items = uiState.duplicateEntries,
-                key = { "dup_${it.domain}" }
+                key = { "dup_${it.kind.name}_${it.rule}" }
             ) { entry ->
                 DuplicateDomainCard(
                     entry = entry,
@@ -375,7 +429,8 @@ private fun FilterOverlapLightPreview() {
             uiState = FilterOverlapUiState(isLoading = false, filterCount = 1),
             snackbarHostState = SnackbarHostState(),
             onIntent = {},
-            onExportClick = {}
+            onExportClick = {},
+            onShareClick = {}
         )
     }
 }
@@ -388,7 +443,8 @@ private fun FilterOverlapDarkPreview() {
             uiState = FilterOverlapUiState(isLoading = false, filterCount = 1),
             snackbarHostState = SnackbarHostState(),
             onIntent = {},
-            onExportClick = {}
+            onExportClick = {},
+            onShareClick = {}
         )
     }
 }

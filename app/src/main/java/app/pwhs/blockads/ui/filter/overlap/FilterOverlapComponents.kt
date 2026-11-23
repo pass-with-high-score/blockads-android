@@ -16,10 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,6 +51,7 @@ import java.text.NumberFormat
 fun OverlapSummaryCard(
     uiState: FilterOverlapUiState,
     onExportClick: () -> Unit,
+    onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val formatter = NumberFormat.getIntegerInstance()
@@ -111,30 +114,47 @@ fun OverlapSummaryCard(
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))
-            Button(
-                onClick = onExportClick,
-                enabled = !uiState.isLoading && !uiState.isExporting && uiState.totalUniqueDomains > 0,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (uiState.isExporting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                Button(
+                    onClick = onExportClick,
+                    enabled = !uiState.isLoading && !uiState.isExporting && uiState.totalUniqueDomains > 0,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (uiState.isExporting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.filter_overlap_export_combined),
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.filter_overlap_export_combined),
-                    fontWeight = FontWeight.SemiBold
-                )
+
+                FilledTonalIconButton(
+                    onClick = onShareClick,
+                    enabled = !uiState.isLoading && !uiState.isExporting && uiState.totalUniqueDomains > 0,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = stringResource(R.string.filter_overlap_share_combined)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
@@ -295,16 +315,24 @@ fun DuplicateDomainCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = entry.domain,
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                RuleKindBadge(kind = entry.kind)
+                Text(
+                    text = entry.rule,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -344,6 +372,7 @@ private fun OverlapSummaryLightPreview() {
                 redundancyPercent = 22.4f
             ),
             onExportClick = {},
+            onShareClick = {},
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -364,6 +393,7 @@ private fun OverlapSummaryDarkPreview() {
                 redundancyPercent = 22.4f
             ),
             onExportClick = {},
+            onShareClick = {},
             modifier = Modifier.padding(16.dp)
         )
     }

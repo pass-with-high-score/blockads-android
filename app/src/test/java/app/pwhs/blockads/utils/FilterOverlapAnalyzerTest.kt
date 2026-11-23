@@ -51,6 +51,72 @@ class FilterOverlapAnalyzerTest {
         assertTrue(exportedText.contains("unique-b.io"))
     }
 
+    @Test
+    fun `analyzes cosmetic css, scriptlets, ips, and modules overlap across categories`() {
+        val cssA = tempFolder.newFile("a.css").apply {
+            writeText("##.ad-banner\n! comment\nexample.com##.sponsor\n")
+        }
+        val cssB = tempFolder.newFile("b.css").apply {
+            writeText("##.ad-banner\nother.com##.popup\n")
+        }
+        val scriptA = tempFolder.newFile("a.scriptlets").apply {
+            writeText("##+js(set, foo, false)\n")
+        }
+        val scriptB = tempFolder.newFile("b.scriptlets").apply {
+            writeText("##+js(set, foo, false)\n##+js(abort-current-script)\n")
+        }
+        val ipsA = tempFolder.newFile("a.ips").apply {
+            writeText("1.2.3.4\n")
+        }
+        val ipsB = tempFolder.newFile("b.ips").apply {
+            writeText("1.2.3.4\n8.8.8.8\n")
+        }
+
+        val sources = listOf(
+            FilterRuleSource(
+                id = 1L,
+                name = "List A",
+                cssFile = cssA,
+                scriptletsFile = scriptA,
+                ipsFile = ipsA
+            ),
+            FilterRuleSource(
+                id = 2L,
+                name = "List B",
+                cssFile = cssB,
+                scriptletsFile = scriptB,
+                ipsFile = ipsB
+            )
+        )
+
+        val cosmeticReport = FilterOverlapAnalyzer.analyze(sources, category = OverlapRuleCategory.COSMETIC)
+        assertEquals(3, cosmeticReport.totalUniqueDomains)
+        assertEquals(1, cosmeticReport.overlappingDomainCount)
+        assertEquals("##.ad-banner", cosmeticReport.duplicateEntries[0].rule)
+        assertEquals(app.pwhs.blockads.data.models.FilterRuleKind.COSMETIC, cosmeticReport.duplicateEntries[0].kind)
+
+        val scriptReport = FilterOverlapAnalyzer.analyze(sources, category = OverlapRuleCategory.SCRIPTLETS)
+        assertEquals(2, scriptReport.totalUniqueDomains)
+        assertEquals(1, scriptReport.overlappingDomainCount)
+        assertEquals("##+js(set, foo, false)", scriptReport.duplicateEntries[0].rule)
+        assertEquals(app.pwhs.blockads.data.models.FilterRuleKind.SCRIPTLETS, scriptReport.duplicateEntries[0].kind)
+
+        val allReport = FilterOverlapAnalyzer.analyze(sources, category = OverlapRuleCategory.ALL)
+        assertEquals(7, allReport.totalUniqueDomains)
+        assertEquals(3, allReport.overlappingDomainCount)
+        val duplicateRules = allReport.duplicateEntries.map { it.rule }.toSet()
+        assertTrue(duplicateRules.contains("##.ad-banner"))
+        assertTrue(duplicateRules.contains("##+js(set, foo, false)"))
+        assertTrue(duplicateRules.contains("1.2.3.4"))
+
+        val out = ByteArrayOutputStream()
+        val exportedCount = FilterOverlapAnalyzer.exportCombinedRules(sources, OverlapRuleCategory.ALL, out)
+        assertEquals(7, exportedCount)
+        val text = out.toString(Charsets.UTF_8.name())
+        assertTrue(text.contains("##.ad-banner"))
+        assertTrue(text.contains("1.2.3.4"))
+    }
+
     private class TrieNode {
         var isTerminal = false
         val children = linkedMapOf<String, TrieNode>()

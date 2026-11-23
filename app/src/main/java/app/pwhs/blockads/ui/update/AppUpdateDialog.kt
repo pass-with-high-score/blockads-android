@@ -22,9 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pwhs.blockads.R
+import app.pwhs.blockads.ui.theme.BlockadsTheme
 import app.pwhs.blockads.update.UpdateChannel
+import app.pwhs.blockads.update.UpdateInfo
 import app.pwhs.blockads.update.UpdateState
 import kotlin.math.roundToInt
 
@@ -191,3 +194,69 @@ tailrec fun Context.findActivity(): Activity? = when (this) {
     is ContextWrapper -> baseContext.findActivity()
     else -> null
 }
+
+@Preview(name = "Update Available", showBackground = true)
+@Composable
+private fun AppUpdateDialogAvailablePreview() {
+    BlockadsTheme {
+        AppUpdateDialog(
+            state = UpdateState.Available(
+                info = UpdateInfo(
+                    versionName = "7.2.0-beta.9",
+                    tagName = "beta-7.2.0-9",
+                    changelog = "• Thêm widget Dashboard tùy chỉnh\n• Sửa lỗi tương thích Headscale\n• Cải thiện hiệu năng bộ lọc",
+                    downloadUrl = "",
+                    assetName = "app-release.apk",
+                    assetSizeBytes = 26_000_000L,
+                    publishedAtMillis = 0L,
+                )
+            ),
+            onStartUpdate = {},
+            onCompleteUpdate = {},
+            onDismiss = {},
+        )
+    }
+}
+
+@Preview(name = "Update Downloading", showBackground = true)
+@Composable
+private fun AppUpdateDialogDownloadingPreview() {
+    BlockadsTheme {
+        AppUpdateDialog(
+            state = UpdateState.Downloading(
+                progress = 0.65f,
+                downloadedBytes = 17_000_000L,
+                totalBytes = 26_000_000L,
+            ),
+            onStartUpdate = {},
+            onCompleteUpdate = {},
+            onDismiss = {},
+        )
+    }
+}
+
+@Preview(name = "Update Downloaded", showBackground = true)
+@Composable
+private fun AppUpdateDialogDownloadedPreview() {
+    BlockadsTheme {
+        AppUpdateDialog(
+            state = UpdateState.Downloaded(filePath = ""),
+            onStartUpdate = {},
+            onCompleteUpdate = {},
+            onDismiss = {},
+        )
+    }
+}
+
+@Preview(name = "Update Channel Selection", showBackground = true)
+@Composable
+private fun UpdateChannelDialogPreview() {
+    BlockadsTheme {
+        UpdateChannelDialog(
+            selectedChannel = UpdateChannel.BETA,
+            onSelect = {},
+            onDismiss = {},
+        )
+    }
+}
+

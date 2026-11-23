@@ -1,5 +1,6 @@
 package app.pwhs.blockads.ui.settings
 
+import android.content.ActivityNotFoundException
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -77,6 +78,7 @@ import app.pwhs.blockads.ui.tailscale.TailscaleScreen
 import app.pwhs.blockads.ui.trustednetworks.TrustedNetworksScreen
 import app.pwhs.blockads.update.UpdateChannel
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 enum class SettingsDetailPane {
     DNS_PROVIDER,
@@ -301,8 +303,20 @@ fun SettingsScreen(
                     )
 
                     DataSection(
-                        onExport = { exportLauncher.launch("blockads_settings.json") },
-                        onImport = { importLauncher.launch(arrayOf("application/json")) },
+                        onExport = {
+                            try {
+                                exportLauncher.launch("blockads_settings.json")
+                            } catch (e: ActivityNotFoundException) {
+                                Timber.w(e, "ActivityNotFoundException on CreateDocument for settings export")
+                            }
+                        },
+                        onImport = {
+                            try {
+                                importLauncher.launch(arrayOf("application/json"))
+                            } catch (e: ActivityNotFoundException) {
+                                Timber.w(e, "ActivityNotFoundException on OpenDocument for settings import")
+                            }
+                        },
                         onClearLogs = { showClearConfirm = true },
                         onResetSettings = { showResetConfirm = true },
                         logRetentionDays = logRetentionDays,

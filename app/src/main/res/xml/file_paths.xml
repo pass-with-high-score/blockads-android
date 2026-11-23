@@ -2,6 +2,7 @@
 <paths>
     <cache-path name="logs" path="logs/" />
     <cache-path name="configs" path="configs/" />
+    <cache-path name="exports" path="exports/" />
     <cache-path name="taildrop" path="taildrop/" />
     <cache-path name="updates" path="updates/" />
     <external-path name="external_files" path="." />
