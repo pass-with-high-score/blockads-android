@@ -67,6 +67,8 @@ fun FilterOverlapScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val shareTitle = stringResource(R.string.filter_overlap_share_title)
+    val exportFailedMessage = stringResource(R.string.filter_overlap_export_failed)
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/plain")
@@ -91,14 +93,14 @@ fun FilterOverlapScreen(
                         }
                         val chooser = Intent.createChooser(
                             shareIntent,
-                            context.getString(R.string.filter_overlap_share_title)
+                            shareTitle
                         ).apply {
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         context.startActivity(chooser)
                     } catch (e: Exception) {
                         Timber.e(e, "Failed to share combined filter list")
-                        snackbarHostState.showSnackbar(context.getString(R.string.filter_overlap_export_failed))
+                        snackbarHostState.showSnackbar(exportFailedMessage)
                     }
                 }
             }

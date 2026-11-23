@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="filter_updated">Filter list updated: %d domains</string>
     <string name="filter_update_failed">Failed to update filter list</string>
     <string name="filter_detail_enabled">Enabled</string>
@@ -248,8 +248,8 @@
     <string name="filter_overlap_tab_overview">Overview</string>
     <string name="filter_overlap_tab_duplicates">Duplicates</string>
     <string name="filter_overlap_export_combined">Export Combined List</string>
-    <string name="filter_overlap_share_combined">Share Combined List</string>
-    <string name="filter_overlap_share_title">Share Combined Filter List</string>
+    <string name="filter_overlap_share_combined" tools:ignore="MissingTranslation">Share Combined List</string>
+    <string name="filter_overlap_share_title" tools:ignore="MissingTranslation">Share Combined Filter List</string>
     <string name="filter_overlap_export_desc">Save all unique domains from your enabled lists into a single deduplicated file.</string>
     <string name="filter_overlap_headline_redundant">%1$.0f%% of your filter rules are duplicates</string>
     <string name="filter_overlap_headline_clean">No duplicate rules found</string>
@@ -275,14 +275,14 @@
     <string name="filter_overlap_showing_capped">Showing first %1$d matching duplicates</string>
     <string name="filter_overlap_exported">Exported %1$s unique rules</string>
     <string name="filter_overlap_export_failed">Failed to export combined filter list</string>
-    <string name="filter_overlap_category_all">All</string>
-    <string name="filter_overlap_category_domains">Domains</string>
-    <string name="filter_overlap_category_cosmetic">Cosmetic</string>
-    <string name="filter_overlap_category_scriptlets">Scriptlets</string>
-    <string name="filter_overlap_category_ips">IPs</string>
-    <string name="filter_overlap_category_url_rules">URL Rules</string>
-    <string name="filter_overlap_search_hint_rules">Search duplicate rules…</string>
-    <string name="filter_overlap_no_duplicates_rules">No overlapping rules found between the selected filters.</string>
+    <string name="filter_overlap_category_all" tools:ignore="MissingTranslation">All</string>
+    <string name="filter_overlap_category_domains" tools:ignore="MissingTranslation">Domains</string>
+    <string name="filter_overlap_category_cosmetic" tools:ignore="MissingTranslation">Cosmetic</string>
+    <string name="filter_overlap_category_scriptlets" tools:ignore="MissingTranslation">Scriptlets</string>
+    <string name="filter_overlap_category_ips" tools:ignore="MissingTranslation">IPs</string>
+    <string name="filter_overlap_category_url_rules" tools:ignore="MissingTranslation">URL Rules</string>
+    <string name="filter_overlap_search_hint_rules" tools:ignore="MissingTranslation">Search duplicate rules…</string>
+    <string name="filter_overlap_no_duplicates_rules" tools:ignore="MissingTranslation">No overlapping rules found between the selected filters.</string>
     <string name="domain_rules_tab_sni_proxy">SNI Proxy</string>
     <string name="sni_proxy_empty_title">SNI Proxy Routing</string>
     <string name="sni_proxy_empty_desc">Route TLS 443 traffic of specific apps (e.g. YouTube) and domains directly to a custom SNI Proxy IP without changing system DNS.</string>
