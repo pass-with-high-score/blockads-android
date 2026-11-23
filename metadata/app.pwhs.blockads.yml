@@ -15,7 +15,7 @@ AutoName: BlockAds
 
 RepoType: git
 Repo: https://github.com/pass-with-high-score/blockads-android.git
-Binaries:
+Binaries: 
   https://github.com/pass-with-high-score/blockads-android/releases/download/v%v/app-universal-release.apk
 
 Builds:
@@ -296,6 +296,7 @@ Builds:
       - export goVersion=$(grep go\  ../tunnel/go.mod | head -n1 | cut -d " " -f2)
       - '[[ $goVersion ]]'
       - git -C $$go$$ checkout -f go$goVersion
+      - sdkmanager 'platforms;android-24'
     scanignore:
       - settings.gradle.kts
     build:
@@ -304,7 +305,6 @@ Builds:
       - ./make.bash
       - popd
       - export PATH="$$go$$/bin:$PATH"
-      - sdkmanager 'platforms;android-24'
       - export GOPATH="$PWD/.gopath"
       - export PATH="$GOPATH/bin:$PATH"
       - export GOFLAGS="-buildvcs=false"
