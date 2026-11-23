@@ -293,4 +293,14 @@
     <string name="filter_rule_kind_block_paths_desc">Blokovat reklamní zdroje podle cesty HTTPS požadavku</string>
     <string name="filter_rule_kind_remove_params">Odstranění sledovacích parametrů</string>
     <string name="filter_rule_kind_remove_params_desc">Odstranit sledovací parametry z URL adres</string>
+    <string name="filter_overlap_share_combined">Sdílet kombinovaný seznam</string>
+    <string name="filter_overlap_share_title">Sdílet kombinovaný seznam filtrů</string>
+    <string name="filter_overlap_category_all">Vše</string>
+    <string name="filter_overlap_category_domains">Domény</string>
+    <string name="filter_overlap_category_cosmetic">Kosmetické</string>
+    <string name="filter_overlap_category_scriptlets">Skriptlety</string>
+    <string name="filter_overlap_category_ips">IP adresy</string>
+    <string name="filter_overlap_category_url_rules">Pravidla URL</string>
+    <string name="filter_overlap_search_hint_rules">Hledat duplicitní pravidla…</string>
+    <string name="filter_overlap_no_duplicates_rules">Mezi vybranými filtry nebyla nalezena žádná překrývající se pravidla.</string>
 </resources>

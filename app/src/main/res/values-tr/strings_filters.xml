@@ -291,4 +291,14 @@
     <string name="filter_rule_kind_block_paths_desc">Reklam kaynaklarını HTTPS istek yoluna göre engelle</string>
     <string name="filter_rule_kind_remove_params">İzleme Parametresi Temizleme</string>
     <string name="filter_rule_kind_remove_params_desc">URL\'lerden izleme parametrelerini kaldır</string>
+    <string name="filter_overlap_share_combined">Birleştirilmiş Listeyi Paylaş</string>
+    <string name="filter_overlap_share_title">Birleştirilmiş Filtre Listesini Paylaş</string>
+    <string name="filter_overlap_category_all">Tümü</string>
+    <string name="filter_overlap_category_domains">Alan Adları</string>
+    <string name="filter_overlap_category_cosmetic">Kozmetik</string>
+    <string name="filter_overlap_category_scriptlets">Betikçikler</string>
+    <string name="filter_overlap_category_ips">IP\'ler</string>
+    <string name="filter_overlap_category_url_rules">URL Kuralları</string>
+    <string name="filter_overlap_search_hint_rules">Yinelenen kuralları ara…</string>
+    <string name="filter_overlap_no_duplicates_rules">Seçilen filtreler arasında çakışan kural bulunamadı.</string>
 </resources>

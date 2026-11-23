@@ -290,4 +290,14 @@
     <string name="filter_rule_kind_block_paths_desc">Blokir sumber daya iklan menurut jalur permintaan HTTPS</string>
     <string name="filter_rule_kind_remove_params">Penghapusan Parameter Pelacakan</string>
     <string name="filter_rule_kind_remove_params_desc">Hapus parameter pelacakan dari URL</string>
+    <string name="filter_overlap_share_combined">Bagikan Daftar Gabungan</string>
+    <string name="filter_overlap_share_title">Bagikan Daftar Filter Gabungan</string>
+    <string name="filter_overlap_category_all">Semua</string>
+    <string name="filter_overlap_category_domains">Domain</string>
+    <string name="filter_overlap_category_cosmetic">Kosmetik</string>
+    <string name="filter_overlap_category_scriptlets">Scriptlet</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">Aturan URL</string>
+    <string name="filter_overlap_search_hint_rules">Cari aturan duplikat…</string>
+    <string name="filter_overlap_no_duplicates_rules">Tidak ada aturan yang tumpang tindih antara filter yang dipilih.</string>
 </resources>

@@ -291,4 +291,14 @@
     <string name="filter_rule_kind_block_paths_desc">HTTPS сұрау жолы бойынша жарнама ресурстарын бұғаттау</string>
     <string name="filter_rule_kind_remove_params">Қадағалау параметрлерін тазалау</string>
     <string name="filter_rule_kind_remove_params_desc">URL мекенжайларынан қадағалау параметрлерін өшіру</string>
+    <string name="filter_overlap_share_combined">Біріктірілген тізімді бөлісу</string>
+    <string name="filter_overlap_share_title">Біріктірілген сүзгі тізімін бөлісу</string>
+    <string name="filter_overlap_category_all">Барлығы</string>
+    <string name="filter_overlap_category_domains">Домендер</string>
+    <string name="filter_overlap_category_cosmetic">Косметикалық</string>
+    <string name="filter_overlap_category_scriptlets">Скриптлеттер</string>
+    <string name="filter_overlap_category_ips">IP мекенжайлары</string>
+    <string name="filter_overlap_category_url_rules">URL ережелері</string>
+    <string name="filter_overlap_search_hint_rules">Қайталанатын ережелерді іздеу…</string>
+    <string name="filter_overlap_no_duplicates_rules">Таңдалған сүзгілер арасында сәйкес келетін ережелер табылмады.</string>
 </resources>

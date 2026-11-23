@@ -297,4 +297,14 @@
     <string name="filter_rule_kind_block_paths_desc">Bloque les ressources publicitaires selon le chemin de requête HTTPS</string>
     <string name="filter_rule_kind_remove_params">Suppression des paramètres de suivi</string>
     <string name="filter_rule_kind_remove_params_desc">Supprime les paramètres de suivi des URL</string>
+    <string name="filter_overlap_share_combined">Partager la liste combinée</string>
+    <string name="filter_overlap_share_title">Partager la liste de filtres combinée</string>
+    <string name="filter_overlap_category_all">Tous</string>
+    <string name="filter_overlap_category_domains">Domaines</string>
+    <string name="filter_overlap_category_cosmetic">Cosmétique</string>
+    <string name="filter_overlap_category_scriptlets">Scriptlets</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">Règles d\'URL</string>
+    <string name="filter_overlap_search_hint_rules">Rechercher des règles en double…</string>
+    <string name="filter_overlap_no_duplicates_rules">Aucune règle en double trouvée entre les filtres sélectionnés.</string>
 </resources>

@@ -292,4 +292,14 @@
     <string name="filter_rule_kind_block_paths_desc">חסימת משאבי פרסום לפי נתיב בקשת HTTPS</string>
     <string name="filter_rule_kind_remove_params">הסרת פרמטרי מעקב</string>
     <string name="filter_rule_kind_remove_params_desc">הסרת פרמטרי מעקב מכתובות URL</string>
+    <string name="filter_overlap_share_combined">שתף רשימה משולבת</string>
+    <string name="filter_overlap_share_title">שתף רשימת מסננים משולבת</string>
+    <string name="filter_overlap_category_all">הכל</string>
+    <string name="filter_overlap_category_domains">דומיינים</string>
+    <string name="filter_overlap_category_cosmetic">קוסמטי</string>
+    <string name="filter_overlap_category_scriptlets">סקריפטים</string>
+    <string name="filter_overlap_category_ips">כתובות IP</string>
+    <string name="filter_overlap_category_url_rules">כללי URL</string>
+    <string name="filter_overlap_search_hint_rules">חפש כללים כפולים…</string>
+    <string name="filter_overlap_no_duplicates_rules">לא נמצאו כללים חופפים בין המסננים שנבחרו.</string>
 </resources>

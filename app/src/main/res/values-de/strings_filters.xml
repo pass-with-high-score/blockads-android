@@ -291,4 +291,14 @@
     <string name="filter_rule_kind_block_paths_desc">Werberessourcen anhand des HTTPS-Anfragepfads blockieren</string>
     <string name="filter_rule_kind_remove_params">Tracking-Parameter entfernen</string>
     <string name="filter_rule_kind_remove_params_desc">Tracking-Parameter aus URLs entfernen</string>
+    <string name="filter_overlap_share_combined">Kombinierte Liste teilen</string>
+    <string name="filter_overlap_share_title">Kombinierte Filterliste teilen</string>
+    <string name="filter_overlap_category_all">Alle</string>
+    <string name="filter_overlap_category_domains">Domains</string>
+    <string name="filter_overlap_category_cosmetic">Kosmetisch</string>
+    <string name="filter_overlap_category_scriptlets">Scriptlets</string>
+    <string name="filter_overlap_category_ips">IPs</string>
+    <string name="filter_overlap_category_url_rules">URL-Regeln</string>
+    <string name="filter_overlap_search_hint_rules">Doppelte Regeln suchen…</string>
+    <string name="filter_overlap_no_duplicates_rules">Keine überlappenden Regeln zwischen den ausgewählten Filtern gefunden.</string>
 </resources>

@@ -295,4 +295,14 @@
     <string name="filter_rule_kind_block_paths_desc">حجب موارد الإعلانات حسب مسار طلب HTTPS</string>
     <string name="filter_rule_kind_remove_params">إزالة معاملات التتبع</string>
     <string name="filter_rule_kind_remove_params_desc">إزالة معاملات التتبع من روابط URL</string>
+    <string name="filter_overlap_share_combined">مشاركة القائمة المدمجة</string>
+    <string name="filter_overlap_share_title">مشاركة قائمة التصفية المدمجة</string>
+    <string name="filter_overlap_category_all">الكل</string>
+    <string name="filter_overlap_category_domains">النطاقات</string>
+    <string name="filter_overlap_category_cosmetic">تجميلي</string>
+    <string name="filter_overlap_category_scriptlets">بريمجات</string>
+    <string name="filter_overlap_category_ips">عناوين IP</string>
+    <string name="filter_overlap_category_url_rules">قواعد URL</string>
+    <string name="filter_overlap_search_hint_rules">البحث عن القواعد المكررة…</string>
+    <string name="filter_overlap_no_duplicates_rules">لم يتم العثور على قواعد متداخلة بين الفلاتر المحددة.</string>
 </resources>

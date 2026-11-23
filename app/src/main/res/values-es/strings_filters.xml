@@ -292,4 +292,14 @@
     <string name="filter_rule_kind_block_paths_desc">Bloquea recursos publicitarios según la ruta de solicitud HTTPS</string>
     <string name="filter_rule_kind_remove_params">Eliminación de parámetros de rastreo</string>
     <string name="filter_rule_kind_remove_params_desc">Elimina parámetros de rastreo de las URL</string>
+    <string name="filter_overlap_share_combined">Compartir lista combinada</string>
+    <string name="filter_overlap_share_title">Compartir lista de filtros combinada</string>
+    <string name="filter_overlap_category_all">Todo</string>
+    <string name="filter_overlap_category_domains">Dominios</string>
+    <string name="filter_overlap_category_cosmetic">Cosmético</string>
+    <string name="filter_overlap_category_scriptlets">Scriptlets</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">Reglas de URL</string>
+    <string name="filter_overlap_search_hint_rules">Buscar reglas duplicadas…</string>
+    <string name="filter_overlap_no_duplicates_rules">No se encontraron reglas superpuestas entre los filtros seleccionados.</string>
 </resources>

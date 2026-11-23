@@ -293,4 +293,14 @@
     <string name="filter_rule_kind_block_paths_desc">Blokuj zasoby reklamowe według ścieżki żądania HTTPS</string>
     <string name="filter_rule_kind_remove_params">Usuwanie parametrów śledzących</string>
     <string name="filter_rule_kind_remove_params_desc">Usuwaj parametry śledzące z adresów URL</string>
+    <string name="filter_overlap_share_combined">Udostępnij połączoną listę</string>
+    <string name="filter_overlap_share_title">Udostępnij połączoną listę filtrów</string>
+    <string name="filter_overlap_category_all">Wszystkie</string>
+    <string name="filter_overlap_category_domains">Domeny</string>
+    <string name="filter_overlap_category_cosmetic">Kosmetyczne</string>
+    <string name="filter_overlap_category_scriptlets">Skryptlety</string>
+    <string name="filter_overlap_category_ips">Adresy IP</string>
+    <string name="filter_overlap_category_url_rules">Reguły URL</string>
+    <string name="filter_overlap_search_hint_rules">Szukaj zduplikowanych reguł…</string>
+    <string name="filter_overlap_no_duplicates_rules">Nie znaleziono nakładających się reguł między wybranymi filtrami.</string>
 </resources>

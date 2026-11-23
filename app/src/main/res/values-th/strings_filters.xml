@@ -290,4 +290,14 @@
     <string name="filter_rule_kind_block_paths_desc">บล็อกทรัพยากรโฆษณาตามเส้นทางคำขอ HTTPS</string>
     <string name="filter_rule_kind_remove_params">การลบพารามิเตอร์ติดตาม</string>
     <string name="filter_rule_kind_remove_params_desc">ลบพารามิเตอร์ติดตามออกจาก URL</string>
+    <string name="filter_overlap_share_combined">แชร์รายการที่รวมกัน</string>
+    <string name="filter_overlap_share_title">แชร์รายการตัวกรองที่รวมกัน</string>
+    <string name="filter_overlap_category_all">ทั้งหมด</string>
+    <string name="filter_overlap_category_domains">โดเมน</string>
+    <string name="filter_overlap_category_cosmetic">ตกแต่ง</string>
+    <string name="filter_overlap_category_scriptlets">สคริปต์เล็ต</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">กฎ URL</string>
+    <string name="filter_overlap_search_hint_rules">ค้นหากฎที่ซ้ำกัน…</string>
+    <string name="filter_overlap_no_duplicates_rules">ไม่พบกฎที่ซ้อนทับกันระหว่างตัวกรองที่เลือก</string>
 </resources>

@@ -295,4 +295,14 @@
     <string name="filter_rule_kind_block_paths_desc">Hirdetési erőforrások blokkolása HTTPS-kérési útvonal alapján</string>
     <string name="filter_rule_kind_remove_params">Követési paraméterek eltávolítása</string>
     <string name="filter_rule_kind_remove_params_desc">Követési paraméterek eltávolítása az URL-ekből</string>
+    <string name="filter_overlap_share_combined">Egyesített lista megosztása</string>
+    <string name="filter_overlap_share_title">Egyesített szűrőlista megosztása</string>
+    <string name="filter_overlap_category_all">Összes</string>
+    <string name="filter_overlap_category_domains">Domainek</string>
+    <string name="filter_overlap_category_cosmetic">Kozmetikai</string>
+    <string name="filter_overlap_category_scriptlets">Scriptletek</string>
+    <string name="filter_overlap_category_ips">IP-címek</string>
+    <string name="filter_overlap_category_url_rules">URL-szabályok</string>
+    <string name="filter_overlap_search_hint_rules">Ismétlődő szabályok keresése…</string>
+    <string name="filter_overlap_no_duplicates_rules">Nem találhatók átfedő szabályok a kiválasztott szűrők között.</string>
 </resources>

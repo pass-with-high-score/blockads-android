@@ -290,4 +290,14 @@
     <string name="filter_rule_kind_block_paths_desc">HTTPS 요청 경로 기준으로 광고 리소스 차단</string>
     <string name="filter_rule_kind_remove_params">추적 매개변수 제거</string>
     <string name="filter_rule_kind_remove_params_desc">URL에서 추적 매개변수 제거</string>
+    <string name="filter_overlap_share_combined">통합 목록 공유</string>
+    <string name="filter_overlap_share_title">통합 필터 목록 공유</string>
+    <string name="filter_overlap_category_all">전체</string>
+    <string name="filter_overlap_category_domains">도메인</string>
+    <string name="filter_overlap_category_cosmetic">요소 숨김</string>
+    <string name="filter_overlap_category_scriptlets">스크립틀릿</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">URL 규칙</string>
+    <string name="filter_overlap_search_hint_rules">중복 규칙 검색…</string>
+    <string name="filter_overlap_no_duplicates_rules">선택한 필터 간에 중복되는 규칙이 없습니다.</string>
 </resources>

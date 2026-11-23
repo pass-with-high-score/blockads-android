@@ -293,4 +293,14 @@
     <string name="filter_rule_kind_block_paths_desc">Блокировать рекламные ресурсы по пути HTTPS-запроса</string>
     <string name="filter_rule_kind_remove_params">Очистка параметров отслеживания</string>
     <string name="filter_rule_kind_remove_params_desc">Удалять параметры отслеживания из URL</string>
+    <string name="filter_overlap_share_combined">Поделиться объединенным списком</string>
+    <string name="filter_overlap_share_title">Поделиться объединенным списком фильтров</string>
+    <string name="filter_overlap_category_all">Все</string>
+    <string name="filter_overlap_category_domains">Домены</string>
+    <string name="filter_overlap_category_cosmetic">Косметические</string>
+    <string name="filter_overlap_category_scriptlets">Скриптлеты</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">Правила URL</string>
+    <string name="filter_overlap_search_hint_rules">Поиск повторяющихся правил…</string>
+    <string name="filter_overlap_no_duplicates_rules">Пересекающихся правил между выбранными фильтрами не найдено.</string>
 </resources>

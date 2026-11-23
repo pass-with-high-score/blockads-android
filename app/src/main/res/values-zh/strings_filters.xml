@@ -290,4 +290,14 @@
     <string name="filter_rule_kind_block_paths_desc">按 HTTPS 请求路径拦截广告资源</string>
     <string name="filter_rule_kind_remove_params">追踪参数清理</string>
     <string name="filter_rule_kind_remove_params_desc">移除 URL 中的追踪参数</string>
+    <string name="filter_overlap_share_combined">分享合并列表</string>
+    <string name="filter_overlap_share_title">分享合并过滤列表</string>
+    <string name="filter_overlap_category_all">全部</string>
+    <string name="filter_overlap_category_domains">域名</string>
+    <string name="filter_overlap_category_cosmetic">元素隐藏</string>
+    <string name="filter_overlap_category_scriptlets">脚本代码</string>
+    <string name="filter_overlap_category_ips">IP</string>
+    <string name="filter_overlap_category_url_rules">URL规则</string>
+    <string name="filter_overlap_search_hint_rules">搜索重复规则…</string>
+    <string name="filter_overlap_no_duplicates_rules">所选规则列表之间未找到重叠规则。</string>
 </resources>
