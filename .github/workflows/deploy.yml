@@ -22,6 +22,7 @@ jobs:
       # Forks set a repository variable TUNNEL_REPO pointing at their own
       # releases; unset resolves from upstream (see settings.gradle.kts).
       TUNNEL_REPO: ${{ vars.TUNNEL_REPO }}
+      PLAY_STORE_KEY_BASE64: ${{ secrets.PLAY_STORE_KEY_BASE64 }}
 
     steps:
       - name: Checkout
@@ -68,8 +69,8 @@ jobs:
           echo "auth.token=${{ secrets.SENTRY_AUTH_TOKEN }}" > sentry.properties    
 
       - name: Decode Play Store key
-        if: ${{ secrets.PLAY_STORE_KEY_BASE64 != '' }}
-        run: echo "${{ secrets.PLAY_STORE_KEY_BASE64 }}" | base64 --decode > fastlane/play-store-key.json    
+        if: env.PLAY_STORE_KEY_BASE64 != ''
+        run: echo "$PLAY_STORE_KEY_BASE64" | base64 --decode > fastlane/play-store-key.json    
 
       # Build & Deploy
       - name: Grant execute permission
@@ -91,7 +92,7 @@ jobs:
         run: ./gradlew :app:bundleStoreRelease :blockadstv:bundleStoreRelease
 
       - name: Deploy to Play Store
-        if: ${{ secrets.PLAY_STORE_KEY_BASE64 != '' }}
+        if: env.PLAY_STORE_KEY_BASE64 != ''
         id: play_store_deploy
         continue-on-error: true
         run: |
