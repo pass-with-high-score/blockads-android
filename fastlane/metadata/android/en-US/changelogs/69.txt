@@ -1,0 +1,7 @@
+• Customizable Home dashboard widgets and foldable two-pane layouts
+• Advanced rules: IP/CIDR, CSS injection, cosmetic filters, and removeparam
+• Multi-protocol proxy: Tailscale, SOCKS5, HTTP, SSH, and per-app SNI proxy
+• Tasker automation intents to control VPN/proxy
+• Filter detail breakdown and duplicate overlap analyzer
+• HTTPS filtering debug logs and interactive firewall prompts
+• Fixed file export and improved 32-bit legacy Android stability

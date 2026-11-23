@@ -1,0 +1,6 @@
+• Full ruleset engine: IP/CIDR, cosmetic filters, and sample previews
+• Multi-protocol proxy: Tailscale, SOCKS5, HTTP, and per-app SNI proxy
+• Filter detail breakdown and duplicate overlap analyzer
+• Improved D-pad navigation and TV focus indicators
+• Fixed file export and resolved legacy Android 8/9 stability issues
+• Performance and memory optimizations
