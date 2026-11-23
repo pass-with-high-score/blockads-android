@@ -1,3 +1,6 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: Rely on GitHub for rules.
 Categories:
   - Firewall
 License: GPL-3.0-only
@@ -12,26 +15,290 @@ AutoName: BlockAds
 
 RepoType: git
 Repo: https://github.com/pass-with-high-score/blockads-android.git
-Binaries: 
+Binaries:
   https://github.com/pass-with-high-score/blockads-android/releases/download/v%v/app-universal-release.apk
 
 Builds:
-  - versionName: 6.1.4
-    versionCode: 41
-    commit: 08f96600f183392aeac23aa8e1b9d89097813e2f
+  - versionName: 6.1.6
+    versionCode: 43
+    commit: 5f415c54db52f6c7e41c47cf913adc973d622ac6
     subdir: app
     sudo:
       - apt-get update
       - apt-get install -y golang-go gcc libc-dev make
-    srclibs:
-      - go@go1.23.5
     gradle:
       - yes
     output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
     build:
-      # tunnel.aar is not committed; it is normally resolved from a GitHub
-      # Release. F-Droid builds it from tunnel/ below instead, and tells Gradle
-      # to consume that build rather than fetching or rebuilding it.
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.2.1
+    versionCode: 45
+    commit: 640268190348609bbe2bd1a075b78b185ed22390
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.2.2
+    versionCode: 46
+    commit: 3e90132ae908cf6cbf25808f422f8494b723cdf0
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.3.0
+    versionCode: 47
+    commit: 6e31646678e0cf1e8ff545547c8d7068a1691892
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.4.0
+    versionCode: 48
+    commit: a48dc90cc3c98b547823719b8fd5d20441390e77
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.5.1
+    versionCode: 50
+    commit: 8ab05cce79713f37025fa988c9b7a15615b58d4f
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+      - blockadstv/libs/tunnel.aar
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 6.5.2
+    versionCode: 51
+    commit: 2e9ab0d77fb55efd2a7101739c9470069c0aa20c
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    rm:
+      - app/libs
+      - blockadstv/libs/tunnel.aar
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 7.0.0
+    versionCode: 56
+    commit: 55b6b0f25e5ec14a6176dbd92260ee90f4dd297e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y golang-go gcc libc-dev make
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    prebuild:
+      - export goVersion=$(grep go\  ../tunnel/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+    build:
+      - pushd $$go$$/src
+      - ./make.bash
+      - popd
+      - export PATH="$$go$$/bin:$PATH"
+      - sdkmanager 'platforms;android-24'
+      - export GOPATH="$PWD/.gopath"
+      - export PATH="$GOPATH/bin:$PATH"
+      - export GOFLAGS="-buildvcs=false"
+      - go version
+      - go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
+      - gomobile init
+      - mkdir -p libs
+      - cd ../tunnel
+      - gomobile bind -target=android -androidapi 24 -trimpath -ldflags='-s -w -buildid=
+        -extldflags=-Wl,-z,max-page-size=16384' -o ../app/libs/tunnel.aar github.com/nqmgaming/blockads-tunnel
+    ndk: r26b
+
+  - versionName: 7.2.0
+    versionCode: 69
+    commit: 5091eb2e16acd7942a097f78688531725bf9385e
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y gcc libc-dev make
+      - apt-get install -y -t trixie-backports golang-go
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-universal-release-unsigned.apk
+    srclibs:
+      - go@go1.23.5
+    prebuild:
+      - export goVersion=$(grep go\  ../tunnel/go.mod | head -n1 | cut -d " " -f2)
+      - '[[ $goVersion ]]'
+      - git -C $$go$$ checkout -f go$goVersion
+    scanignore:
+      - settings.gradle.kts
+    build:
       - echo "tunnel.source=prebuilt" >> ../gradle.properties
       - pushd $$go$$/src
       - ./make.bash
@@ -55,5 +322,5 @@ AllowedAPKSigningKeys: 229ea49584360b22a8c7e7e530cfb7e1103faa1b6ba5f32837691fb96
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: app/build.gradle.kts|versionCode\s=\s(\d+)|.|versionName\s=\s"([\d.]+)"
-CurrentVersion: 6.1.4
-CurrentVersionCode: 41
+CurrentVersion: 7.2.0
+CurrentVersionCode: 69
