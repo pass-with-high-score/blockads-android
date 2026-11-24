@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -334,23 +335,25 @@ func (b *MagicBind) localEndpointsLocked() []netip.AddrPort {
 		}
 	}
 
-	if addrs, err := net.InterfaceAddrs(); err == nil {
-		for _, a := range addrs {
-			if ipNet, ok := a.(*net.IPNet); ok {
-				addCandidate(ipNet.IP)
+	if runtime.GOOS != "android" {
+		if addrs, err := net.InterfaceAddrs(); err == nil {
+			for _, a := range addrs {
+				if ipNet, ok := a.(*net.IPNet); ok {
+					addCandidate(ipNet.IP)
+				}
 			}
 		}
-	}
 
-	if ifaces, err := net.Interfaces(); err == nil {
-		for _, ifi := range ifaces {
-			if ifi.Flags&net.FlagUp == 0 || ifi.Flags&net.FlagLoopback != 0 {
-				continue
-			}
-			if ias, err := ifi.Addrs(); err == nil {
-				for _, a := range ias {
-					if ipNet, ok := a.(*net.IPNet); ok {
-						addCandidate(ipNet.IP)
+		if ifaces, err := net.Interfaces(); err == nil {
+			for _, ifi := range ifaces {
+				if ifi.Flags&net.FlagUp == 0 || ifi.Flags&net.FlagLoopback != 0 {
+					continue
+				}
+				if ias, err := ifi.Addrs(); err == nil {
+					for _, a := range ias {
+						if ipNet, ok := a.(*net.IPNet); ok {
+							addCandidate(ipNet.IP)
+						}
 					}
 				}
 			}

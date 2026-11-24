@@ -3,15 +3,15 @@ package tailscale
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
-	"os"
 	"strings"
 	"sync"
 	"time"
 )
 
 func logf(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, "[BlockAds/Go] "+format+"\n", args...)
+	log.Printf("[BlockAds/Go] "+format, args...)
 }
 
 // Status represents the current state of the Tailscale connection.
@@ -327,7 +327,7 @@ func (m *Manager) handleMapResponse(resp *MapResponse) {
 		logf("[Tailscale/DERP] Received DERPMap with %d regions", len(resp.DERPMap.Regions))
 	}
 
-	if resp.Node == nil && len(resp.Peers) == 0 && len(resp.PeersChanged) == 0 && len(resp.PeersRemoved) == 0 && resp.DERPMap == nil {
+	if resp.Node == nil && len(resp.Peers) == 0 && len(resp.PeersChanged) == 0 && len(resp.PeersRemoved) == 0 && len(resp.PeersChangedPatch) == 0 && resp.DERPMap == nil {
 		return
 	}
 
@@ -339,7 +339,43 @@ func (m *Manager) handleMapResponse(resp *MapResponse) {
 		}
 	}
 	for _, p := range resp.PeersChanged {
+		if existing, ok := m.peersByID[p.ID]; ok && existing != nil {
+			if len(p.Addresses) == 0 {
+				p.Addresses = existing.Addresses
+			}
+			if len(p.AllowedIPs) == 0 {
+				p.AllowedIPs = existing.AllowedIPs
+			}
+			if len(p.PrimaryRoutes) == 0 {
+				p.PrimaryRoutes = existing.PrimaryRoutes
+			}
+		}
 		m.peersByID[p.ID] = p
+	}
+	for _, patch := range resp.PeersChangedPatch {
+		if patch == nil {
+			continue
+		}
+		if existing, ok := m.peersByID[patch.NodeID]; ok && existing != nil {
+			if patch.DERPRegion > 0 {
+				existing.HomeDERP = patch.DERPRegion
+			}
+			if len(patch.Endpoints) > 0 {
+				existing.Endpoints = patch.Endpoints
+			}
+			if patch.Online != nil {
+				existing.Online = patch.Online
+			}
+			if patch.LastSeen != nil {
+				existing.LastSeen = patch.LastSeen
+			}
+			if patch.Key != "" {
+				existing.Key = patch.Key
+			}
+			if patch.DiscoKey != "" {
+				existing.DiscoKey = patch.DiscoKey
+			}
+		}
 	}
 	for _, id := range resp.PeersRemoved {
 		delete(m.peersByID, id)
@@ -378,7 +414,7 @@ func (m *Manager) handleMapResponse(resp *MapResponse) {
 	}
 
 	for _, p := range allNodes {
-		logf("[Tailscale] peer %s (id=%d) endpoints=%v DERP=%s HomeDERP=%d", p.Name, p.ID, p.Endpoints, p.DERP, p.HomeDERP)
+		logf("[Tailscale] peer %s (id=%d) endpoints=%v allowedIPs=%v primaryRoutes=%v DERP=%s HomeDERP=%d", p.Name, p.ID, p.Endpoints, p.AllowedIPs, p.PrimaryRoutes, p.DERP, p.HomeDERP)
 		var pIPs []string
 		var firstV4 net.IP
 		var firstV6 net.IP

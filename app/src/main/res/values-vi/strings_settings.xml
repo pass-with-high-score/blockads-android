@@ -173,7 +173,7 @@
     <string name="split_dns_title">Vùng DNS phân tách</string>
     <string name="split_dns_description">Các vùng tên miền phân tách bằng dấu phẩy để phân giải qua DNS WireGuard thay vì upstream (ví dụ: internal,local,lan)</string>
     <string name="exclude_lan_title">Loại trừ lưu lượng LAN</string>
-    <string name="exclude_lan_description">Cho phép truy cập thiết bị mạng cục bộ (máy in, NAS, máy chủ nội bộ) khi WireGuard đang hoạt động</string>
+    <string name="exclude_lan_description">Cho phép truy cập thiết bị mạng cục bộ (máy in, NAS, máy chủ nội bộ) trực tiếp mà không qua VPN/Proxy. Tự động định tuyến các dải LAN của Tailscale Subnet Router khi Tailscale đang bật.</string>
     <string name="settings_hide_from_recents_title">Ẩn khỏi ứng dụng gần đây</string>
     <string name="settings_hide_from_recents_subtitle">Ẩn BlockAds khỏi màn hình ứng dụng gần đây</string>
     <string name="trusted_networks_title">Mạng tin cậy</string>

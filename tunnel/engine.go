@@ -9,7 +9,7 @@
 package tunnel
 
 import (
-	"fmt"
+	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -480,10 +480,9 @@ func (e *Engine) isDoHDomain(domain string) bool {
 	return false
 }
 
-// logf logs a message (will appear in Android logcat via stderr).
+// logf logs a message via Go's standard logger (captured by gomobile GoLog in Android logcat).
 func logf(format string, args ...interface{}) {
-	msg := fmt.Sprintf("[BlockAds/Go] "+format, args...)
-	fmt.Fprintln(os.Stderr, msg)
+	log.Printf("[BlockAds/Go] "+format, args...)
 }
 
 // ResolveHostForProtection resolves a hostname to an IP address.

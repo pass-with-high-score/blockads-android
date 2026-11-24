@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/netip"
 	"os"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -240,8 +241,71 @@ func (dp *DataPlane) Sync(selfNode *Node, peers map[int64]*Node, derpMap *DERPMa
 	fmt.Fprintf(&uapi, "private_key=%s\n", dp.state.NodeKey().PrivateHex())
 	fmt.Fprintf(&uapi, "replace_peers=true\n")
 
+	peerIDs := make([]int64, 0, len(peers))
+	for id := range peers {
+		peerIDs = append(peerIDs, id)
+	}
+	slices.Sort(peerIDs)
+
+	normalizeCIDR := func(raw string) (string, bool) {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			return "", false
+		}
+		if !strings.Contains(raw, "/") {
+			if ip := net.ParseIP(raw); ip != nil {
+				if ip.To4() != nil {
+					raw += "/32"
+				} else {
+					raw += "/128"
+				}
+			}
+		}
+		_, ipNet, err := net.ParseCIDR(raw)
+		if err != nil || ipNet == nil {
+			return "", false
+		}
+		return ipNet.String(), true
+	}
+
+	type cidrOwner struct {
+		peerID int64
+		prio   int
+	}
+	owners := make(map[string]cidrOwner)
+	for _, id := range peerIDs {
+		p := peers[id]
+		if p == nil {
+			continue
+		}
+		registerOwner := func(raw string) {
+			trimmed := strings.TrimSpace(raw)
+			if trimmed == "0.0.0.0/0" || trimmed == "::/0" {
+				return
+			}
+			canon, ok := normalizeCIDR(trimmed)
+			if !ok {
+				return
+			}
+			prio := peerRoutePriority(p, trimmed)
+			if cur, exists := owners[canon]; !exists || prio > cur.prio {
+				owners[canon] = cidrOwner{peerID: p.ID, prio: prio}
+			}
+		}
+		for _, a := range peerRoutableCIDRs(p) {
+			registerOwner(a)
+		}
+		for _, a := range p.Addresses {
+			registerOwner(a)
+		}
+	}
+
 	peerCount := 0
-	for _, p := range peers {
+	for _, id := range peerIDs {
+		p := peers[id]
+		if p == nil {
+			continue
+		}
 		peerKey, err := ParseKeyHex(p.Key, "nodekey:")
 		if err != nil {
 			continue
@@ -259,39 +323,33 @@ func (dp *DataPlane) Sync(selfNode *Node, peers map[int64]*Node, derpMap *DERPMa
 		}
 
 		seenCIDR := make(map[string]bool)
-		addCIDR := func(raw string) {
-			raw = strings.TrimSpace(raw)
-			if raw == "" {
+		addCIDR := func(raw string, checkOwner bool) {
+			canon, ok := normalizeCIDR(raw)
+			if !ok || seenCIDR[canon] {
 				return
 			}
-			if !strings.Contains(raw, "/") {
-				if ip := net.ParseIP(raw); ip != nil {
-					if ip.To4() != nil {
-						raw += "/32"
-					} else {
-						raw += "/128"
-					}
+			if checkOwner {
+				if owner, exists := owners[canon]; exists && owner.peerID != p.ID {
+					return
 				}
 			}
-			if _, _, err := net.ParseCIDR(raw); err == nil && !seenCIDR[raw] {
-				seenCIDR[raw] = true
-				fmt.Fprintf(&uapi, "allowed_ip=%s\n", raw)
-			}
+			seenCIDR[canon] = true
+			fmt.Fprintf(&uapi, "allowed_ip=%s\n", canon)
 		}
 
-		for _, a := range p.AllowedIPs {
+		for _, a := range peerRoutableCIDRs(p) {
 			trimmed := strings.TrimSpace(a)
 			if trimmed == "0.0.0.0/0" || trimmed == "::/0" {
 				continue
 			}
-			addCIDR(trimmed)
+			addCIDR(trimmed, true)
 		}
 		for _, a := range p.Addresses {
-			addCIDR(a)
+			addCIDR(a, true)
 		}
 		if activeExitID != 0 && p.ID == activeExitID && peerIsExitNode(p) {
-			addCIDR("0.0.0.0/0")
-			addCIDR("::/0")
+			addCIDR("0.0.0.0/0", false)
+			addCIDR("::/0", false)
 		}
 		peerCount++
 	}

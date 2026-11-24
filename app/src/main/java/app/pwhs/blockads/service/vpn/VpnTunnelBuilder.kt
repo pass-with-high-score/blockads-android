@@ -162,7 +162,12 @@ class VpnTunnelBuilder(
                 b.addRoute("fd00::1", 128)
                 b
             } else {
-                val excludeLan = runBlocking { appPrefs.excludeLan.first() }
+                val tailscaleEnabled = runBlocking { appPrefs.tailscale.isEnabledSnapshot() }
+                val excludeLanPref = runBlocking { appPrefs.excludeLan.first() }
+                // When Tailscale is enabled, RFC1918 LAN packets must enter the Go tunnel so
+                // Subnet Router CIDRs can be matched; non-Tailscale LAN IPs are dialed directly
+                // via protected sockets inside Go's FullTunnel handler.
+                val excludeLan = excludeLanPref && !tailscaleEnabled
                 val preferredIp = runBlocking { appPrefs.preferredIPType.first() }
                 val allowIpv6 = when (preferredIp) {
                     AppPreferences.PREFERRED_IP_IPV4 -> false
@@ -170,7 +175,7 @@ class VpnTunnelBuilder(
                     else -> hasIpv6Provider()
                 }
                 val allowIpv4 = preferredIp != AppPreferences.PREFERRED_IP_IPV6
-                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan, preferredIp=$preferredIp, allowIpv6=$allowIpv6)")
+                Timber.d("Establishing VPN in direct mode (fullTunnel=true, excludeLan=$excludeLan, excludeLanPref=$excludeLanPref, tailscale=$tailscaleEnabled, preferredIp=$preferredIp, allowIpv6=$allowIpv6)")
                 val appName = vpnService.getString(R.string.app_name)
                 val b = vpnService.Builder()
                     .setSession(if (isSs) "$appName Outline" else appName)

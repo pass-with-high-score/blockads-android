@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -35,13 +36,49 @@ func peerIsExitNode(p *Node) bool {
 	if p == nil {
 		return false
 	}
-	for _, allowed := range p.AllowedIPs {
+	for _, allowed := range peerRoutableCIDRs(p) {
 		trimmed := strings.TrimSpace(allowed)
 		if trimmed == "0.0.0.0/0" || trimmed == "::/0" {
 			return true
 		}
 	}
 	return false
+}
+
+// peerRoutableCIDRs returns all advertised/approved CIDRs for a peer node.
+func peerRoutableCIDRs(p *Node) []string {
+	if p == nil {
+		return nil
+	}
+	out := make([]string, 0, len(p.AllowedIPs)+len(p.PrimaryRoutes)+len(p.Addresses))
+	out = append(out, p.AllowedIPs...)
+	out = append(out, p.PrimaryRoutes...)
+	if p.Hostinfo != nil {
+		for _, r := range p.Hostinfo.RoutableIPs {
+			trimmed := strings.TrimSpace(r)
+			if trimmed != "0.0.0.0/0" && trimmed != "::/0" {
+				out = append(out, trimmed)
+			}
+		}
+	}
+	return out
+}
+
+func peerRoutePriority(p *Node, raw string) int {
+	if p == nil {
+		return 0
+	}
+	score := 0
+	if p.Online == nil || *p.Online {
+		score += 2
+	}
+	for _, pr := range p.PrimaryRoutes {
+		if strings.TrimSpace(pr) == raw {
+			score += 4
+			break
+		}
+	}
+	return score
 }
 
 func isNonPublicIP(ip net.IP) bool {
@@ -57,19 +94,29 @@ func (m *Manager) matchPeerLocked(ip net.IP) *Node {
 	}
 	var bestPeer *Node
 	bestMaskLen := -1
+	bestPrio := -1
 	nonPublic := isNonPublicIP(ip)
 
 	checkCIDR := func(p *Node, raw string) {
 		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			return
+		}
 		if raw == "0.0.0.0/0" || raw == "::/0" {
 			if m.activeExitID == 0 || p.ID != m.activeExitID || nonPublic {
 				return
 			}
 		}
+		prio := peerRoutePriority(p, raw)
 		if !strings.Contains(raw, "/") {
 			if parsed := net.ParseIP(raw); parsed != nil {
-				if parsed.Equal(ip) && 32 > bestMaskLen {
-					bestMaskLen = 32
+				maskLen := 128
+				if parsed.To4() != nil {
+					maskLen = 32
+				}
+				if parsed.Equal(ip) && (maskLen > bestMaskLen || (maskLen == bestMaskLen && prio > bestPrio)) {
+					bestMaskLen = maskLen
+					bestPrio = prio
 					bestPeer = p
 				}
 			}
@@ -78,15 +125,26 @@ func (m *Manager) matchPeerLocked(ip net.IP) *Node {
 		_, cidr, err := net.ParseCIDR(raw)
 		if err == nil && cidr.Contains(ip) {
 			ones, _ := cidr.Mask.Size()
-			if ones > bestMaskLen {
+			if ones > bestMaskLen || (ones == bestMaskLen && prio > bestPrio) {
 				bestMaskLen = ones
+				bestPrio = prio
 				bestPeer = p
 			}
 		}
 	}
 
-	for _, p := range m.peersByID {
-		for _, allowed := range p.AllowedIPs {
+	peerIDs := make([]int64, 0, len(m.peersByID))
+	for id := range m.peersByID {
+		peerIDs = append(peerIDs, id)
+	}
+	slices.Sort(peerIDs)
+
+	for _, id := range peerIDs {
+		p := m.peersByID[id]
+		if p == nil {
+			continue
+		}
+		for _, allowed := range peerRoutableCIDRs(p) {
 			checkCIDR(p, allowed)
 		}
 		for _, addr := range p.Addresses {
@@ -138,6 +196,10 @@ func (m *Manager) DialTCP(ctx context.Context, dstIP net.IP, dstPort int) (net.C
 	}
 
 	conn, err := dp.DialTCP(ctx, dstIP, dstPort, peer)
+	if err != nil && !IsTailscaleCGNAT(dstIP) && isNonPublicIP(dstIP) {
+		logf("[Tailscale/Route] Subnet dial to %s:%d via %s failed (%v), falling back to direct LAN dial", dstIP, dstPort, peer.Name, err)
+		return nil, false, nil
+	}
 	return conn, true, err
 }
 

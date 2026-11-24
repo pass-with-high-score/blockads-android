@@ -5,11 +5,10 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"compress/zlib"
-	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"syscall"
@@ -21,7 +20,7 @@ import (
 const flowDialTimeout = 10 * time.Second
 
 func logf(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, "[BlockAds/Go] "+format+"\n", args...)
+	log.Printf("[BlockAds/Go] "+format, args...)
 }
 
 func protectedControl(protectFn func(fd int) bool) func(network, address string, c syscall.RawConn) error {

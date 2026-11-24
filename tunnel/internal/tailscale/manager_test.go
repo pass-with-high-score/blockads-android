@@ -168,3 +168,83 @@ func TestManagerExitNodeSelectionAndLeakGuard(t *testing.T) {
 		t.Fatalf("expected 8.8.8.8 not to match peer 2 after exit route removed, got %+v", p)
 	}
 }
+
+func TestManagerSubnetRouterPrimaryRoutesAndPatches(t *testing.T) {
+	st, err := NewState("")
+	if err != nil {
+		t.Fatalf("NewState: %v", err)
+	}
+	mgr := NewManager(st, nil)
+	defer mgr.Stop()
+
+	peerASt, _ := NewState("")
+	peerBSt, _ := NewState("")
+	peerCSt, _ := NewState("")
+
+	offline := false
+	online := true
+
+	mgr.handleMapResponse(&MapResponse{
+		Node: &Node{
+			ID:        1,
+			Name:      "self.tail.ts.net.",
+			Key:       st.NodeKey().PublicHex("nodekey:"),
+			Addresses: []string{"100.64.0.1/32"},
+		},
+		Peers: []*Node{
+			{
+				ID:         10,
+				Name:       "subnet-offline.tail.ts.net.",
+				Key:        peerASt.NodeKey().PublicHex("nodekey:"),
+				Addresses:  []string{"100.64.0.10/32"},
+				AllowedIPs: []string{"100.64.0.10/32", "192.168.1.0/24"},
+				Online:     &offline,
+			},
+			{
+				ID:            20,
+				Name:          "subnet-primary.tail.ts.net.",
+				Key:           peerBSt.NodeKey().PublicHex("nodekey:"),
+				Addresses:     []string{"100.64.0.20/32"},
+				AllowedIPs:    []string{"100.64.0.20/32", "192.168.1.0/24"},
+				PrimaryRoutes: []string{"192.168.1.0/24"},
+				Online:        &online,
+			},
+			{
+				ID:        30,
+				Name:      "subnet-routable.tail.ts.net.",
+				Key:       peerCSt.NodeKey().PublicHex("nodekey:"),
+				Addresses: []string{"100.64.0.30/32"},
+				Hostinfo: &Hostinfo{
+					RoutableIPs: []string{"192.168.50.0/24"},
+				},
+				Online: &online,
+			},
+		},
+	})
+
+	// 1. Overlapping subnet 192.168.1.0/24 must deterministically pick online PrimaryRoutes holder (ID=20).
+	for i := 0; i < 20; i++ {
+		if p := mgr.MatchPeer(net.ParseIP("192.168.1.100")); p == nil || p.ID != 20 {
+			t.Fatalf("iteration %d: expected 192.168.1.100 to match primary online peer 20, got %+v", i, p)
+		}
+	}
+
+	// 2. Subnet advertised via Hostinfo.RoutableIPs (192.168.50.0/24) must match peer 30.
+	if p := mgr.MatchPeer(net.ParseIP("192.168.50.12")); p == nil || p.ID != 30 {
+		t.Fatalf("expected 192.168.50.12 to match peer 30, got %+v", p)
+	}
+
+	// 3. PeersChangedPatch must update endpoints/DERP without wiping subnet routes.
+	mgr.handleMapResponse(&MapResponse{
+		PeersChangedPatch: []*PeerChange{
+			{
+				NodeID:     20,
+				DERPRegion: 9,
+				Endpoints:  []string{"203.0.113.5:41641"},
+			},
+		},
+	})
+	if p := mgr.MatchPeer(net.ParseIP("192.168.1.100")); p == nil || p.ID != 20 || p.HomeDERP != 9 {
+		t.Fatalf("expected peer 20 to retain subnet route and update HomeDERP=9 after patch, got %+v", p)
+	}
+}

@@ -59,6 +59,8 @@ class VpnEngineCoordinator(
         )
     }
     private var tailscaleMonitorJob: Job? = null
+    private var filterWatcherJob: Job? = null
+    private var langWatcherJob: Job? = null
 
     fun startTailscaleBackgroundMonitor(goTunnelAdapter: GoTunnelAdapter) {
         tailscaleMonitorJob?.cancel()
@@ -266,10 +268,13 @@ class VpnEngineCoordinator(
             if (exitNodeId != 0L) {
                 goTunnelAdapter.setTailscaleExitNode(exitNodeId)
             }
-            if (appPrefs.tailscale.getAdvertiseExitNodeSnapshot()) {
+            val advertiseExit = appPrefs.tailscale.getAdvertiseExitNodeSnapshot()
+            if (advertiseExit) {
                 goTunnelAdapter.setTailscaleAdvertiseExitNode(true)
             }
-            goTunnelAdapter.setTailscaleAdBlockEnabled(appPrefs.tailscale.getAdblockEnabledSnapshot())
+            val tsAdblock = appPrefs.tailscale.getAdblockEnabledSnapshot()
+            goTunnelAdapter.setTailscaleAdBlockEnabled(tsAdblock)
+            Timber.d("Tailscale configured (exitNodeId=$exitNodeId, advertiseExit=$advertiseExit, adblock=$tsAdblock)")
         }
 
         goTunnelAdapter.start(
@@ -288,7 +293,9 @@ class VpnEngineCoordinator(
         )
 
         if (appPrefs.tailscale.isEnabledSnapshot()) {
-            goTunnelAdapter.startTailscaleSession("blockads-android")
+            if (isWg) {
+                goTunnelAdapter.startTailscaleSession("blockads-android")
+            }
             startTailscaleBackgroundMonitor(goTunnelAdapter)
         }
     }
@@ -318,14 +325,16 @@ class VpnEngineCoordinator(
     }
 
     fun startFilterUpdateWatcher(scope: CoroutineScope, goTunnelAdapter: GoTunnelAdapter) {
-        scope.launch {
+        filterWatcherJob?.cancel()
+        filterWatcherJob = scope.launch {
             filterRepo.domainCountFlow.drop(1).collectLatest { count ->
                 Timber.d("Filter count changed to $count. Dynamically updating Native Go Tries & Cosmetic rules.")
                 goTunnelAdapter.updateTries()
                 goTunnelAdapter.updateCosmeticRules()
             }
         }
-        scope.launch {
+        langWatcherJob?.cancel()
+        langWatcherJob = scope.launch {
             appPrefs.appLanguage.collectLatest { lang ->
                 app.pwhs.blockads.utils.LocaleHelper.syncLocalAssetLanguage(context, lang)
             }

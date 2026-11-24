@@ -179,6 +179,9 @@ class TailscaleViewModel(
                 val adapter = AdBlockVpnService.activeTunnelAdapter
                 adapter?.stopTailscale()
                 _uiState.update { it.copy(connectionState = "DISCONNECTED") }
+                if (adapter != null && appPrefs.excludeLan.first()) {
+                    AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
+                }
             }
         }
     }
@@ -571,6 +574,10 @@ class TailscaleViewModel(
     private suspend fun syncActiveSession(stateJson: String? = null) {
         val adapter = AdBlockVpnService.activeTunnelAdapter
         if (adapter != null) {
+            if (appPrefs.excludeLan.first()) {
+                AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
+                return
+            }
             val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
             val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val authKey = appPrefs.tailscale.getAuthKeySnapshot()

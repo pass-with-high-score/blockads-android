@@ -78,23 +78,24 @@ type MapRequest struct {
 
 // Node represents a machine in the Tailscale network.
 type Node struct {
-	ID         int64      `json:"ID"`
-	StableID   string     `json:"StableID"`
-	Name       string     `json:"Name"`
-	User       int64      `json:"User"`
-	Key        string     `json:"Key"`
-	DiscoKey   string     `json:"DiscoKey"`
-	Addresses  []string   `json:"Addresses"`
-	AllowedIPs []string   `json:"AllowedIPs"`
-	Endpoints  []string   `json:"Endpoints"`
-	Addrs      []string   `json:"Addrs,omitempty"`
-	DERP       string     `json:"DERP"`
-	HomeDERP   int        `json:"HomeDERP,omitempty"`
-	Hostinfo   *Hostinfo  `json:"Hostinfo,omitempty"`
-	Online     *bool      `json:"Online,omitempty"`
-	LastSeen   *time.Time `json:"LastSeen,omitempty"`
-	KeyExpiry  *time.Time `json:"KeyExpiry,omitempty"`
-	KeyExpired bool       `json:"KeyExpired,omitempty"`
+	ID            int64      `json:"ID"`
+	StableID      string     `json:"StableID"`
+	Name          string     `json:"Name"`
+	User          int64      `json:"User"`
+	Key           string     `json:"Key"`
+	DiscoKey      string     `json:"DiscoKey"`
+	Addresses     []string   `json:"Addresses"`
+	AllowedIPs    []string   `json:"AllowedIPs"`
+	PrimaryRoutes []string   `json:"PrimaryRoutes,omitempty"`
+	Endpoints     []string   `json:"Endpoints"`
+	Addrs         []string   `json:"Addrs,omitempty"`
+	DERP          string     `json:"DERP"`
+	HomeDERP      int        `json:"HomeDERP,omitempty"`
+	Hostinfo      *Hostinfo  `json:"Hostinfo,omitempty"`
+	Online        *bool      `json:"Online,omitempty"`
+	LastSeen      *time.Time `json:"LastSeen,omitempty"`
+	KeyExpiry     *time.Time `json:"KeyExpiry,omitempty"`
+	KeyExpired    bool       `json:"KeyExpired,omitempty"`
 }
 
 // DERPNode represents a DERP relay server.
@@ -134,14 +135,26 @@ type DNSConfig struct {
 	Proxied   bool                     `json:"Proxied,omitempty"`
 }
 
+// PeerChange represents an incremental patch to an existing peer node in MapResponse.
+type PeerChange struct {
+	NodeID     int64      `json:"NodeID"`
+	DERPRegion int        `json:"DERPRegion,omitempty"`
+	Endpoints  []string   `json:"Endpoints,omitempty"`
+	Online     *bool      `json:"Online,omitempty"`
+	LastSeen   *time.Time `json:"LastSeen,omitempty"`
+	Key        string     `json:"Key,omitempty"`
+	DiscoKey   string     `json:"DiscoKey,omitempty"`
+}
+
 // MapResponse represents an update stream frame from POST /machine/map.
 type MapResponse struct {
-	KeepAlive    bool        `json:"KeepAlive,omitempty"`
-	Node         *Node       `json:"Node,omitempty"`
-	Peers        []*Node     `json:"Peers,omitempty"`
-	PeersChanged []*Node     `json:"PeersChanged,omitempty"`
-	PeersRemoved []int64     `json:"PeersRemoved,omitempty"`
-	DERPMap      *DERPMap    `json:"DERPMap,omitempty"`
-	DNSConfig    *DNSConfig  `json:"DNSConfig,omitempty"`
-	Domain       string      `json:"Domain,omitempty"`
+	KeepAlive         bool          `json:"KeepAlive,omitempty"`
+	Node              *Node         `json:"Node,omitempty"`
+	Peers             []*Node       `json:"Peers,omitempty"`
+	PeersChanged      []*Node       `json:"PeersChanged,omitempty"`
+	PeersRemoved      []int64       `json:"PeersRemoved,omitempty"`
+	PeersChangedPatch []*PeerChange `json:"PeersChangedPatch,omitempty"`
+	DERPMap           *DERPMap      `json:"DERPMap,omitempty"`
+	DNSConfig         *DNSConfig    `json:"DNSConfig,omitempty"`
+	Domain            string        `json:"Domain,omitempty"`
 }
