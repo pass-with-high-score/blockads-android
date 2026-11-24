@@ -80,28 +80,6 @@ import app.pwhs.blockads.update.UpdateChannel
 import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
-enum class SettingsDetailPane {
-    DNS_PROVIDER,
-    DNS_RESPONSE_TYPE,
-    UPDATE_FREQUENCY,
-    UPDATE_NOTIFICATION,
-    BUILD_MODE,
-    LOG_RETENTION,
-    UPDATE_CHANNEL,
-    HTTPS_FILTERING,
-    HTTPS_SETTINGS,
-    HTTPS_DEBUG_LOGS,
-    HTTPS_SKIPPED_DOMAINS,
-    APP_MANAGEMENT,
-    TRUSTED_NETWORKS,
-    TAILSCALE,
-    GEO_IP,
-    APPEARANCE_THEME,
-    APPEARANCE_NAVIGATION,
-    APPEARANCE_LANGUAGE,
-    ABOUT,
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -156,6 +134,14 @@ fun SettingsScreen(
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri -> uri?.let { viewModel.exportSettings(it) } }
+
+    val folderLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { treeUri ->
+        if (treeUri != null) {
+            viewModel.exportSettings(treeUri)
+        }
+    }
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -307,7 +293,13 @@ fun SettingsScreen(
                             try {
                                 exportLauncher.launch("blockads_settings.json")
                             } catch (e: ActivityNotFoundException) {
-                                Timber.w(e, "ActivityNotFoundException on CreateDocument for settings export")
+                                Timber.w(e, "ActivityNotFoundException on CreateDocument, falling back to folder picker")
+                                try {
+                                    folderLauncher.launch(null)
+                                } catch (e2: ActivityNotFoundException) {
+                                    Timber.w(e2, "ActivityNotFoundException on OpenDocumentTree, falling back to Downloads")
+                                    viewModel.exportSettings(null)
+                                }
                             }
                         },
                         onImport = {

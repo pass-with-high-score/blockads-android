@@ -1,17 +1,13 @@
 package app.pwhs.blockads.ui.filter.overlap
 
 import android.app.Application
-import android.content.ContentValues
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.DocumentsContract
-import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.pwhs.blockads.R
 import app.pwhs.blockads.data.dao.FilterListDao
+import app.pwhs.blockads.utils.ExportHelper
 import app.pwhs.blockads.utils.FilterOverlapAnalyzer
 import app.pwhs.blockads.utils.FilterRuleSource
 import kotlinx.coroutines.Dispatchers
@@ -204,53 +200,25 @@ class FilterOverlapViewModel(
     }
 
     private suspend fun resolveExportTargetUri(uri: Uri?): Uri = withContext(Dispatchers.IO) {
-        if (uri == null) {
-            return@withContext resolveDownloadsUri()
-        }
-        if (DocumentsContract.isTreeUri(uri)) {
-            val parentDocUri = DocumentsContract.buildDocumentUriUsingTree(
-                uri,
-                DocumentsContract.getTreeDocumentId(uri)
-            )
-            return@withContext DocumentsContract.createDocument(
-                application.contentResolver,
-                parentDocUri,
-                "text/plain",
-                "blockads-combined-filters.txt"
-            ) ?: resolveDownloadsUri()
-        }
-        uri
+        ExportHelper.resolveTargetUri(
+            context = application,
+            uri = uri,
+            defaultFileName = "blockads-combined-filters.txt",
+            mimeType = "text/plain"
+        )
     }
 
     private fun resolveDownloadsUri(): Uri {
-        val fileName = "blockads-combined-filters.txt"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                put(MediaStore.Downloads.MIME_TYPE, "text/plain")
-                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-            }
-            return application.contentResolver.insert(
-                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                values
-            ) ?: throw IllegalStateException("Failed to insert MediaStore download entry")
-        } else {
-            @Suppress("DEPRECATION")
-            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                .takeIf { it.canWrite() || it.mkdirs() }
-                ?: application.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                ?: File(application.filesDir, "exports").apply { mkdirs() }
-            return Uri.fromFile(File(downloadsDir, fileName))
-        }
+        return ExportHelper.resolveDownloadsUri(
+            context = application,
+            fileName = "blockads-combined-filters.txt",
+            mimeType = "text/plain"
+        )
     }
 
     private suspend fun writeCombinedRulesToUri(uri: Uri): Int = withContext(Dispatchers.IO) {
         val sources = getEnabledRuleSources()
-        val outputStream = if (uri.scheme == "file") {
-            uri.path?.let { File(it).outputStream() }
-        } else {
-            application.contentResolver.openOutputStream(uri)
-        }
+        val outputStream = ExportHelper.openOutputStream(application, uri)
         outputStream?.use { out ->
             FilterOverlapAnalyzer.exportCombinedRules(
                 sources = sources,

@@ -108,7 +108,7 @@ class SettingsBackupManager(
             configProfiles = configProfiles
         )
 
-        context.contentResolver.openOutputStream(uri)?.use { out ->
+        ExportHelper.openOutputStream(context, uri)?.use { out ->
             out.write(jsonPretty.encodeToString(SettingsBackup.serializer(), backup).toByteArray())
         } ?: throw IllegalStateException("Cannot open output stream for URI: $uri")
     }

@@ -34,14 +34,22 @@ fun UiEventEffect(
                 }
                 
                 is UiEvent.ShareFile -> {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                        type = event.mimeType
-                        putExtra(android.content.Intent.EXTRA_STREAM, event.uri)
-                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    val shared = app.pwhs.blockads.utils.ExportHelper.shareUri(
+                        context = context,
+                        uri = event.uri,
+                        mimeType = event.mimeType,
+                        chooserTitle = "Share Logs"
+                    )
+                    if (!shared) {
+                        try {
+                            val ext = if (event.mimeType == "text/csv") "csv" else "txt"
+                            val fileName = "blockads_export_${System.currentTimeMillis()}.$ext"
+                            app.pwhs.blockads.utils.ExportHelper.copyUriToDownloads(context, event.uri, fileName, event.mimeType)
+                            Toast.makeText(context, "Saved to Downloads: $fileName", Toast.LENGTH_LONG).show()
+                        } catch (e2: Exception) {
+                            timber.log.Timber.e(e2, "Failed to copy export to Downloads fallback")
+                        }
                     }
-                    val chooser = android.content.Intent.createChooser(intent, "Share Logs")
-                    chooser.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(chooser)
                 }
             }
         }

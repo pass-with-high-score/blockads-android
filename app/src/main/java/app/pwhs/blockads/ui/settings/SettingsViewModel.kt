@@ -32,7 +32,9 @@ import app.pwhs.blockads.worker.FilterUpdateScheduler
 import app.pwhs.blockads.service.IptablesManager
 import app.pwhs.blockads.service.RootProxyService
 import app.pwhs.blockads.utils.CrashReportingManager
+import app.pwhs.blockads.utils.ExportHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -377,13 +379,39 @@ class SettingsViewModel(
     }
 
     // ── Export Settings ──────────────────────────────────────────────
-    fun exportSettings(uri: Uri) {
+    fun exportSettings(uri: Uri? = null) {
         viewModelScope.launch {
             try {
+                val targetUri = withContext(Dispatchers.IO) {
+                    ExportHelper.resolveTargetUri(
+                        context = getApplication(),
+                        uri = uri,
+                        defaultFileName = "blockads_settings.json",
+                        mimeType = "application/json"
+                    )
+                }
                 val mgr = backupManager ?: createFallbackBackupManager()
-                mgr.exportBackup(uri)
+                mgr.exportBackup(targetUri)
                 _events.toast(R.string.filter_settings_export)
             } catch (e: Exception) {
+                timber.log.Timber.e(e, "Export settings failed, attempting Downloads fallback")
+                if (uri != null) {
+                    try {
+                        val fallbackUri = withContext(Dispatchers.IO) {
+                            ExportHelper.resolveDownloadsUri(
+                                context = getApplication(),
+                                fileName = "blockads_settings.json",
+                                mimeType = "application/json"
+                            )
+                        }
+                        val mgr = backupManager ?: createFallbackBackupManager()
+                        mgr.exportBackup(fallbackUri)
+                        _events.toast(R.string.filter_settings_export)
+                        return@launch
+                    } catch (e2: Exception) {
+                        timber.log.Timber.e(e2, "Fallback to Downloads also failed")
+                    }
+                }
                 _events.toast(R.string.filter_export_failed, listOf("${e.message}"))
             }
         }

@@ -98,7 +98,12 @@ object CaCertHelper {
      * Saves [pem] to a user-selected SAF [uri].
      */
     fun saveCertToUri(context: Context, pem: String, uri: Uri) {
-        context.contentResolver.openOutputStream(uri)?.use { it.write(pem.toByteArray()) }
-            ?: throw IllegalStateException("Failed to open output stream")
+        val targetUri = ExportHelper.resolveTargetUri(
+            context = context,
+            uri = uri,
+            defaultFileName = "BlockAds-RootCA.crt",
+            mimeType = "application/x-x509-ca-cert"
+        )
+        ExportHelper.writeTextToUri(context, targetUri, pem)
     }
 }

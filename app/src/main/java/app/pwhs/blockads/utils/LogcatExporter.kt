@@ -176,20 +176,12 @@ object LogcatExporter {
 
     fun exportAndShare(context: Context, chooserTitle: String) {
         val reportFile = createReportFile(context)
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            reportFile
+        ExportHelper.shareFileWithDownloadsFallback(
+            context = context,
+            file = reportFile,
+            mimeType = "text/plain",
+            subject = "BlockAds Logcat & Diagnostics",
+            chooserTitle = chooserTitle
         )
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_SUBJECT, "BlockAds Logcat & Diagnostics")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        val chooser = Intent.createChooser(shareIntent, chooserTitle).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(chooser)
     }
 }

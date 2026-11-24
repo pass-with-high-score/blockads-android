@@ -3,6 +3,9 @@ package app.pwhs.blockads.ui.httpsfiltering
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +67,12 @@ import app.pwhs.blockads.data.logging.HttpDebugLogStore
 import app.pwhs.blockads.data.logging.HttpLogAction
 import app.pwhs.blockads.ui.httpsfiltering.component.DebugLogCard
 import app.pwhs.blockads.ui.httpsfiltering.component.HttpsDebugLogActions
+import app.pwhs.blockads.utils.ExportHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,6 +86,27 @@ fun HttpsDebugLogsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var pendingLogFile by remember { mutableStateOf<File?>(null) }
+    val folderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { treeUri ->
+        val file = pendingLogFile
+        if (treeUri != null && file != null) {
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val targetUri = ExportHelper.resolveTargetUri(context, treeUri, file.name, "text/plain")
+                    ExportHelper.copyFileToUri(context, file, targetUri)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to copy HTTP log to folder, falling back to Downloads")
+                    try {
+                        ExportHelper.saveFileToDownloads(context, file, "text/plain")
+                    } catch (e2: Exception) {
+                        Timber.e(e2, "Failed to save HTTP log to Downloads")
+                    }
+                }
+            }
+        }
+    }
     val entries by HttpDebugLogStore.entries.collectAsStateWithLifecycle()
     val isRecording by HttpDebugLogStore.isRecording.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
@@ -145,8 +174,33 @@ fun HttpsDebugLogsScreen(
                     IconButton(
                         enabled = filtered.isNotEmpty(),
                         onClick = {
-                            HttpsDebugLogActions.exportAndShare(context, filtered).onFailure { err ->
-                                scope.launch { snackbarHostState.showSnackbar("$exportFailedPrefix${err.message}") }
+                            scope.launch(Dispatchers.IO) {
+                                try {
+                                    val file = HttpsDebugLogActions.createLogFile(context, filtered)
+                                    val shared = ExportHelper.shareFile(
+                                        context = context,
+                                        file = file,
+                                        mimeType = "text/plain",
+                                        chooserTitle = "Export HTTP Logs"
+                                    )
+                                    if (!shared) {
+                                        pendingLogFile = file
+                                        withContext(Dispatchers.Main) {
+                                            try {
+                                                folderLauncher.launch(null)
+                                            } catch (e: ActivityNotFoundException) {
+                                                Timber.w(e, "OpenDocumentTree failed, saving to Downloads")
+                                                withContext(Dispatchers.IO) {
+                                                    ExportHelper.saveFileToDownloads(context, file, "text/plain")
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    scope.launch(Dispatchers.Main) {
+                                        snackbarHostState.showSnackbar("$exportFailedPrefix${e.message}")
+                                    }
+                                }
                             }
                         }
                     ) {

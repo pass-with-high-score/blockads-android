@@ -38,7 +38,7 @@ object HttpsDebugLogActions {
         return true
     }
 
-    fun exportAndShare(context: Context, entries: List<HttpDebugLogEntry>): Result<Unit> = runCatching {
+    fun createLogFile(context: Context, entries: List<HttpDebugLogEntry>): File {
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
         val dir = File(context.cacheDir, "logs").apply { if (!exists()) mkdirs() }
         val file = File(dir, "blockads_http_logs_${System.currentTimeMillis()}.txt")
@@ -52,12 +52,22 @@ object HttpsDebugLogActions {
                 }
             }
         }
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        context.startActivity(Intent.createChooser(shareIntent, "Export HTTP Logs"))
+        return file
+    }
+
+    fun exportAndShare(context: Context, entries: List<HttpDebugLogEntry>): Result<Unit> = runCatching {
+        val file = createLogFile(context, entries)
+        app.pwhs.blockads.utils.ExportHelper.shareFileWithDownloadsFallback(
+            context = context,
+            file = file,
+            mimeType = "text/plain",
+            chooserTitle = "Export HTTP Logs"
+        )
+    }
+
+    fun exportToUri(context: Context, entries: List<HttpDebugLogEntry>, uri: Uri): Result<Unit> = runCatching {
+        val file = createLogFile(context, entries)
+        val targetUri = app.pwhs.blockads.utils.ExportHelper.resolveTargetUri(context, uri, file.name, "text/plain")
+        app.pwhs.blockads.utils.ExportHelper.copyFileToUri(context, file, targetUri)
     }
 }
