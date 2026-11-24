@@ -78,6 +78,14 @@ fun FilterOverlapScreen(
         }
     }
 
+    val folderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { treeUri ->
+        if (treeUri != null) {
+            viewModel.onIntent(FilterOverlapIntent.ExportCombinedList(treeUri))
+        }
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -99,8 +107,13 @@ fun FilterOverlapScreen(
                         }
                         context.startActivity(chooser)
                     } catch (e: Exception) {
-                        Timber.e(e, "Failed to share combined filter list")
-                        snackbarHostState.showSnackbar(exportFailedMessage)
+                        Timber.w(e, "Failed to share combined filter list, falling back to folder picker")
+                        try {
+                            folderLauncher.launch(null)
+                        } catch (e2: Exception) {
+                            Timber.e(e2, "Folder picker also failed, saving directly to Downloads")
+                            viewModel.onIntent(FilterOverlapIntent.ExportCombinedList())
+                        }
                     }
                 }
             }
@@ -115,8 +128,13 @@ fun FilterOverlapScreen(
             try {
                 exportLauncher.launch("blockads-combined-filters.txt")
             } catch (e: ActivityNotFoundException) {
-                Timber.w(e, "ActivityNotFoundException on CreateDocument, falling back to Share")
-                viewModel.onIntent(FilterOverlapIntent.ShareCombinedList)
+                Timber.w(e, "ActivityNotFoundException on CreateDocument, falling back to folder picker")
+                try {
+                    folderLauncher.launch(null)
+                } catch (e2: ActivityNotFoundException) {
+                    Timber.w(e2, "ActivityNotFoundException on OpenDocumentTree, falling back to Share")
+                    viewModel.onIntent(FilterOverlapIntent.ShareCombinedList)
+                }
             }
         },
         onShareClick = { viewModel.onIntent(FilterOverlapIntent.ShareCombinedList) },
@@ -317,108 +335,6 @@ private fun OverlapOverviewTab(
                     onIntent(FilterOverlapIntent.DisableFilter(stat.filterId, stat.filterName))
                 }
             )
-        }
-    }
-}
-
-@Composable
-private fun OverlapDuplicatesTab(
-    uiState: FilterOverlapUiState,
-    onIntent: (FilterOverlapIntent) -> Unit
-) {
-    val selectedName = uiState.perFilterStats
-        .firstOrNull { it.filterId == uiState.selectedFilterId }
-        ?.filterName
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        item(key = "search_bar") {
-            OutlinedTextField(
-                value = uiState.searchQuery,
-                onValueChange = { onIntent(FilterOverlapIntent.UpdateSearchQuery(it)) },
-                placeholder = {
-                    Text(
-                        if (uiState.selectedCategory == app.pwhs.blockads.utils.OverlapRuleCategory.DOMAINS) {
-                            stringResource(R.string.filter_overlap_search_hint)
-                        } else {
-                            stringResource(R.string.filter_overlap_search_hint_rules)
-                        }
-                    )
-                },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onIntent(FilterOverlapIntent.UpdateSearchQuery("")) }) {
-                            Icon(Icons.Default.Close, contentDescription = null)
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        if (selectedName != null) {
-            item(key = "active_filter") {
-                FilterChip(
-                    selected = true,
-                    onClick = { onIntent(FilterOverlapIntent.SelectFilter(uiState.selectedFilterId)) },
-                    label = { Text(stringResource(R.string.filter_overlap_filtering_by, selectedName)) },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                )
-            }
-        }
-
-        if (uiState.duplicateEntries.isEmpty()) {
-            item(key = "no_duplicates") {
-                Text(
-                    text = if (uiState.selectedCategory == app.pwhs.blockads.utils.OverlapRuleCategory.DOMAINS) {
-                        stringResource(R.string.filter_overlap_no_duplicates)
-                    } else {
-                        stringResource(R.string.filter_overlap_no_duplicates_rules)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-        } else {
-            items(
-                items = uiState.duplicateEntries,
-                key = { "dup_${it.kind.name}_${it.rule}" }
-            ) { entry ->
-                DuplicateDomainCard(
-                    entry = entry,
-                    selectedFilterId = uiState.selectedFilterId,
-                    onSelectFilter = { onIntent(FilterOverlapIntent.SelectFilter(it)) }
-                )
-            }
-            if (uiState.hasMoreDuplicates) {
-                item(key = "capped_notice") {
-                    Text(
-                        text = stringResource(
-                            R.string.filter_overlap_showing_capped,
-                            FilterOverlapAnalyzer.DEFAULT_MAX_DISPLAY_ENTRIES
-                        ),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
-                }
-            }
         }
     }
 }

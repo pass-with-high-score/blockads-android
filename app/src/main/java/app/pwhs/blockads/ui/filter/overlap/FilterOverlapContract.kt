@@ -33,7 +33,7 @@ sealed interface FilterOverlapIntent {
     data class SelectFilter(val filterId: Long?) : FilterOverlapIntent
     data class SelectTab(val tabIndex: Int) : FilterOverlapIntent
     data class DisableFilter(val filterId: Long, val filterName: String) : FilterOverlapIntent
-    data class ExportCombinedList(val uri: Uri) : FilterOverlapIntent
+    data class ExportCombinedList(val uri: Uri? = null) : FilterOverlapIntent
     data object ShareCombinedList : FilterOverlapIntent
     data object NavigateBack : FilterOverlapIntent
 }
