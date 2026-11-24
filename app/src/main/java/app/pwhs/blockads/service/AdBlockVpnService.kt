@@ -14,6 +14,7 @@ import app.pwhs.blockads.data.dao.DnsLogDao
 import app.pwhs.blockads.data.dao.FirewallRuleDao
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.data.repository.FilterListRepository
+import app.pwhs.blockads.service.vpn.PrivateDnsMonitor
 import app.pwhs.blockads.service.vpn.StartupConfig
 import app.pwhs.blockads.service.vpn.TunnelResult
 import app.pwhs.blockads.service.vpn.VpnConnectionSupervisor
@@ -111,6 +112,7 @@ class AdBlockVpnService : VpnService() {
     private lateinit var customDnsRuleDao: app.pwhs.blockads.data.dao.CustomDnsRuleDao
     private lateinit var appNameResolver: AppNameResolver
     private lateinit var session: VpnSessionController
+    private lateinit var privateDnsMonitor: PrivateDnsMonitor
     private lateinit var geoIpManager: app.pwhs.blockads.data.geoip.GeoIpManager
 
     val connectingPhase: String get() = if (::session.isInitialized) session.connectingPhase else ""
@@ -182,7 +184,11 @@ class AdBlockVpnService : VpnService() {
             blockedCountFlowProvider = { dnsLogDao.getBlockedCountSince(startOfDayMillis()) },
             onBlockedCountUpdated = { count -> session.todayBlockedCount = count },
             onLinkPropertiesChanged = { linkProperties ->
-                updatePrivateDnsState(linkProperties)
+                if (::privateDnsMonitor.isInitialized) {
+                    privateDnsMonitor.refresh(linkProperties)
+                } else {
+                    updatePrivateDnsState(linkProperties)
+                }
                 serviceScope.launch {
                     engineCoordinator.handleLinkPropertiesChanged(goTunnelAdapter, linkProperties)
                 }
@@ -218,6 +224,13 @@ class AdBlockVpnService : VpnService() {
             nextMilestoneThreshold = notificationHelper::nextMilestoneThreshold,
             establishTunnel = tunnelBuilder::establish,
         )
+        privateDnsMonitor = PrivateDnsMonitor(
+            context = this,
+            status = status,
+            isVpnRunning = { isRunning },
+            onPrivateDnsCleared = { session.restart() },
+        )
+        privateDnsMonitor.start()
         connectionSupervisor.initializeNetworkMonitor()
 
         serviceScope.launch {
@@ -330,6 +343,9 @@ class AdBlockVpnService : VpnService() {
     }
 
     override fun onDestroy() {
+        if (::privateDnsMonitor.isInitialized) {
+            privateDnsMonitor.stop()
+        }
         if (::engineCoordinator.isInitialized) {
             engineCoordinator.stopTailscaleMonitor()
         }
@@ -383,9 +399,13 @@ class AdBlockVpnService : VpnService() {
         override fun stopSelf() = this@AdBlockVpnService.stopSelf()
 
         override fun refreshPrivateDnsState() {
-            runCatching {
-                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) })
+            if (::privateDnsMonitor.isInitialized) {
+                privateDnsMonitor.refresh()
+            } else {
+                runCatching {
+                    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    updatePrivateDnsState(cm.activeNetwork?.let { cm.getLinkProperties(it) })
+                }
             }
         }
 
