@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
@@ -23,6 +24,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.content.ContextCompat
 import app.pwhs.blockads.data.datastore.AppPreferences
 import app.pwhs.blockads.utils.LocaleHelper
+import app.pwhs.blockads.utils.QuickImportHandler
+import app.pwhs.blockads.utils.QuickImportResult
 import app.pwhs.blockads.service.AdBlockVpnService
 import app.pwhs.blockads.service.IptablesManager
 import app.pwhs.blockads.service.RootProxyService
@@ -148,6 +151,7 @@ class MainActivity : ComponentActivity() {
         }
         handleWidgetIntent(intent)
         handleShortcutIntent(intent)
+        handleQuickImportIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -160,6 +164,26 @@ class MainActivity : ComponentActivity() {
         widgetIntentHandled = false
         handleWidgetIntent(intent)
         handleShortcutIntent(intent)
+        handleQuickImportIntent(intent)
+    }
+
+    private fun handleQuickImportIntent(intent: Intent?) {
+        if (!QuickImportHandler.isImportIntent(intent)) return
+        val copy = Intent(intent)
+        intent?.action = null
+        intent?.data = null
+        val appPrefs: AppPreferences = getKoin().get()
+        lifecycleScope.launch {
+            when (val result = QuickImportHandler.handleIntent(this@MainActivity, copy, appPrefs)) {
+                is QuickImportResult.Success -> {
+                    Toast.makeText(this@MainActivity, result.message, Toast.LENGTH_LONG).show()
+                }
+                is QuickImportResult.Error -> {
+                    Toast.makeText(this@MainActivity, result.message, Toast.LENGTH_LONG).show()
+                }
+                QuickImportResult.NotApplicable -> Unit
+            }
+        }
     }
 
     private fun handleWidgetIntent(intent: Intent?) {
