@@ -87,6 +87,7 @@ class PrivateDnsMonitor(
     }
 
     private fun resolveIsPrivateDnsStrict(hintLinkProperties: LinkProperties?): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return false
         val mode = runCatching {
             Settings.Global.getString(context.contentResolver, PRIVATE_DNS_MODE)
         }.getOrNull()?.trim()?.lowercase()

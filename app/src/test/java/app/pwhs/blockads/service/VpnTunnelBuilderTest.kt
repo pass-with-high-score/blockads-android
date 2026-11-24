@@ -35,6 +35,7 @@ class VpnTunnelBuilderTest {
     private var wgJson: String? = null
     private var excludeLan = false
     private var allowAppBypass = false
+    private var tailscaleEnabled = false
     private val prefs: AppPreferences = mockk {
         coEvery { getRoutingModeSnapshot() } answers { this@VpnTunnelBuilderTest.routingMode }
         coEvery { getWgConfigJsonSnapshot() } answers { wgJson }
@@ -43,6 +44,9 @@ class VpnTunnelBuilderTest {
         every { excludeLan } answers { flowOf(this@VpnTunnelBuilderTest.excludeLan) }
         every { allowAppBypass } answers { flowOf(this@VpnTunnelBuilderTest.allowAppBypass) }
         every { preferredIPType } returns flowOf(AppPreferences.PREFERRED_IP_AUTO)
+        every { tailscale } returns mockk {
+            coEvery { isEnabledSnapshot() } answers { this@VpnTunnelBuilderTest.tailscaleEnabled }
+        }
     }
     private val service: VpnService = mockk(relaxed = true) {
         every { packageName } returns "app.pwhs.blockads"
@@ -154,6 +158,14 @@ class VpnTunnelBuilderTest {
         establish()
         assertTrue("0.0.0.0/0" !in routes)
         assertTrue(routes.size > 10)
+    }
+
+    @Test
+    fun `excludeLan keeps full 0_0_0_0 route when Tailscale is enabled so subnet routers work`() {
+        excludeLan = true
+        tailscaleEnabled = true
+        establish()
+        assertTrue("0.0.0.0/0" in routes)
     }
 
     @Test

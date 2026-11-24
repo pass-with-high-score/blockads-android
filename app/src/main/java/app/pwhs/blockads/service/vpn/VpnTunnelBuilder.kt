@@ -162,7 +162,9 @@ class VpnTunnelBuilder(
                 b.addRoute("fd00::1", 128)
                 b
             } else {
-                val tailscaleEnabled = runBlocking { appPrefs.tailscale.isEnabledSnapshot() }
+                val tailscaleEnabled = runBlocking {
+                    runCatching { appPrefs.tailscale.isEnabledSnapshot() }.getOrDefault(false)
+                }
                 val excludeLanPref = runBlocking { appPrefs.excludeLan.first() }
                 // When Tailscale is enabled, RFC1918 LAN packets must enter the Go tunnel so
                 // Subnet Router CIDRs can be matched; non-Tailscale LAN IPs are dialed directly
