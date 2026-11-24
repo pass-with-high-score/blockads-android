@@ -85,7 +85,10 @@ class TailscaleViewModel(
                 )
             }
             if (enabled && hasKeys && isVpnRunning) {
-                syncActiveSession(stateJson)
+                val adapter = AdBlockVpnService.activeTunnelAdapter
+                if (adapter != null && !adapter.isTailscaleActive()) {
+                    syncActiveSession(stateJson)
+                }
                 startStatusPolling()
             } else if (hasKeys && isVpnRunning) {
                 startStatusPolling()
@@ -104,7 +107,6 @@ class TailscaleViewModel(
                         state.copy(isVpnRunning = running, connectionState = connState)
                     }
                     if (running && _uiState.value.isEnabled && _uiState.value.isLoggedIn) {
-                        syncActiveSession()
                         startStatusPolling()
                     }
                 }
@@ -171,7 +173,12 @@ class TailscaleViewModel(
                 if (!hasKeys) {
                     signInWithBrowser()
                 } else {
-                    syncActiveSession(stateJson)
+                    val adapter = AdBlockVpnService.activeTunnelAdapter
+                    if (adapter != null && appPrefs.excludeLan.first()) {
+                        AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
+                    } else {
+                        syncActiveSession(stateJson)
+                    }
                     startStatusPolling()
                 }
             } else {
@@ -568,16 +575,17 @@ class TailscaleViewModel(
         appPrefs.tailscale.setEnabled(true)
         _uiState.update { it.copy(isEnabled = true, isLoggedIn = true, authUrl = "") }
         _uiEffect.emit(TailscaleUiEffect.AuthSuccess)
-        syncActiveSession(activeState)
+        val adapter = AdBlockVpnService.activeTunnelAdapter
+        if (adapter != null && appPrefs.excludeLan.first()) {
+            AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
+        } else {
+            syncActiveSession(activeState)
+        }
     }
 
     private suspend fun syncActiveSession(stateJson: String? = null) {
         val adapter = AdBlockVpnService.activeTunnelAdapter
         if (adapter != null) {
-            if (appPrefs.excludeLan.first()) {
-                AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
-                return
-            }
             val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
             val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
             val authKey = appPrefs.tailscale.getAuthKeySnapshot()
