@@ -1,15 +1,18 @@
 package app.pwhs.blockadstv.data.remote
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RemoteFilterList(
     val name: String,
-    val id: String,
+    val id: String = "",
     val description: String? = null,
     val isEnabled: Boolean = false,
     val isBuiltIn: Boolean = true,
     val category: String? = null,
     val ruleCount: Int = 0,
-    val bloomUrl: String,
-    val trieUrl: String,
+    val bloomUrl: String = "",
+    val trieUrl: String = "",
     val cssUrl: String? = null,
     val originalUrl: String? = null,
 )

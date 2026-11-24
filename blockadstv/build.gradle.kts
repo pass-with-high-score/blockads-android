@@ -104,6 +104,11 @@ android {
         buildConfig = true
     }
 
+    sourceSets {
+        getByName("fdroid").assets.directories += "${rootProject.projectDir}/app/src/fdroid/assets"
+        getByName("github").assets.directories += "${rootProject.projectDir}/app/src/fdroid/assets"
+    }
+
     val isBuildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) }
 
     splits {

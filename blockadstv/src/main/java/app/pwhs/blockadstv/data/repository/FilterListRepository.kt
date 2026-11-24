@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
 
@@ -29,6 +30,13 @@ class FilterListRepository(
     companion object {
         private const val FILTER_LIST_JSON_URL =
             "https://complier.pwhs.app/api/filters/default"
+        private const val BUNDLED_ASSET_PATH = "preset/default_filters.json"
+    }
+
+    private val jsonParser = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
     }
 
     @Volatile
@@ -69,7 +77,24 @@ class FilterListRepository(
             }
             return@withContext
         }
+        val existingBuiltIns = filterListDao.getAllSync().count { it.isBuiltIn }
+        if (existingBuiltIns < 90) {
+            seedFromBundledAsset()
+        }
         fetchAndSyncRemoteFilterLists()
+    }
+
+    private suspend fun seedFromBundledAsset() = withContext(Dispatchers.IO) {
+        try {
+            val assetJson = context.assets.open(BUNDLED_ASSET_PATH).bufferedReader().use { it.readText() }
+            val bundledLists = parseRemoteFilterJson(assetJson)
+            if (bundledLists.isNotEmpty()) {
+                syncFilterLists(bundledLists, allowDelete = false)
+                Timber.d("Seeded ${bundledLists.size} TV filters from bundled asset")
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to seed TV filters from bundled asset")
+        }
     }
 
     suspend fun fetchAndSyncRemoteFilterLists() = withContext(Dispatchers.IO) {
@@ -88,102 +113,64 @@ class FilterListRepository(
             val remoteLists = parseRemoteFilterJson(jsonString)
             if (remoteLists.isEmpty()) return@withContext
 
-            val existingLists = filterListDao.getAllSync()
-            val existingByName = existingLists.associateBy { it.name }
-
-            for (remote in remoteLists) {
-                val existing = existingByName[remote.name]
-                val category = if (remote.category == "security") FilterList.CATEGORY_SECURITY else FilterList.CATEGORY_AD
-                if (existing != null) {
-                    filterListDao.update(
-                        existing.copy(
-                            url = remote.originalUrl ?: "",
-                            description = remote.description ?: "",
-                            category = category,
-                            bloomUrl = remote.bloomUrl,
-                            trieUrl = remote.trieUrl,
-                            domainCount = remote.ruleCount,
-                            ruleCount = remote.ruleCount,
-                            originalUrl = remote.originalUrl ?: existing.originalUrl,
-                            isBuiltIn = true,
-                        )
-                    )
-                } else {
-                    filterListDao.insert(
-                        FilterList(
-                            name = remote.name,
-                            url = remote.originalUrl ?: "",
-                            description = remote.description ?: "",
-                            isEnabled = remote.isEnabled,
-                            isBuiltIn = remote.isBuiltIn,
-                            category = category,
-                            ruleCount = remote.ruleCount,
-                            bloomUrl = remote.bloomUrl,
-                            trieUrl = remote.trieUrl,
-                            originalUrl = remote.originalUrl ?: "",
-                        )
-                    )
-                }
-            }
-
-            val remoteNames = remoteLists.map { it.name }.toSet()
-            val obsolete = existingLists.filter { it.isBuiltIn && it.name !in remoteNames }
-            for (o in obsolete) {
-                filterListDao.delete(o)
-            }
+            syncFilterLists(remoteLists, allowDelete = true)
         } catch (e: Exception) {
             Timber.e(e, "Failed to fetch remote filter list JSON")
         }
     }
 
-    private fun parseRemoteFilterJson(json: String): List<RemoteFilterList> {
-        return try {
-            val results = mutableListOf<RemoteFilterList>()
-            val objects = json.split("},").map {
-                it.trim().removePrefix("[").removeSuffix("]").trim() + "}"
-            }
+    private suspend fun syncFilterLists(remoteLists: List<RemoteFilterList>, allowDelete: Boolean) {
+        val existingLists = filterListDao.getAllSync()
+        val existingByName = existingLists.associateBy { it.name }
 
-            for (obj in objects) {
-                val cleaned = obj.trim().removePrefix("{").removeSuffix("}").removeSuffix("},")
-                if (cleaned.isBlank()) continue
-
-                fun extractString(key: String): String? {
-                    val pattern = "\"$key\"\\s*:\\s*\"(.*?)\"".toRegex()
-                    return pattern.find(cleaned)?.groupValues?.get(1)
-                        ?.replace("\\u0026", "&")
-                }
-
-                fun extractInt(key: String): Int {
-                    val pattern = "\"$key\"\\s*:\\s*(\\d+)".toRegex()
-                    return pattern.find(cleaned)?.groupValues?.get(1)?.toIntOrNull() ?: 0
-                }
-
-                fun extractBoolean(key: String): Boolean {
-                    val pattern = "\"$key\"\\s*:\\s*(true|false)".toRegex()
-                    return pattern.find(cleaned)?.groupValues?.get(1) == "true"
-                }
-
-                val name = extractString("name") ?: continue
-                val bloomUrl = extractString("bloomUrl") ?: continue
-                val trieUrl = extractString("trieUrl") ?: continue
-
-                results.add(
-                    RemoteFilterList(
-                        name = name,
-                        id = extractString("id") ?: name.lowercase().replace(" ", "_"),
-                        description = extractString("description"),
-                        isEnabled = extractBoolean("isEnabled"),
-                        isBuiltIn = extractBoolean("isBuiltIn"),
-                        category = extractString("category"),
-                        ruleCount = extractInt("ruleCount"),
-                        bloomUrl = bloomUrl,
-                        trieUrl = trieUrl,
-                        cssUrl = extractString("cssUrl"),
-                        originalUrl = extractString("originalUrl"),
+        for (remote in remoteLists) {
+            val existing = existingByName[remote.name]
+            val category = if (remote.category == "security") FilterList.CATEGORY_SECURITY else FilterList.CATEGORY_AD
+            if (existing != null) {
+                filterListDao.update(
+                    existing.copy(
+                        url = remote.originalUrl ?: "",
+                        description = remote.description ?: "",
+                        category = category,
+                        bloomUrl = remote.bloomUrl,
+                        trieUrl = remote.trieUrl,
+                        domainCount = remote.ruleCount,
+                        ruleCount = remote.ruleCount,
+                        originalUrl = remote.originalUrl ?: existing.originalUrl,
+                        isBuiltIn = true,
+                    )
+                )
+            } else {
+                filterListDao.insert(
+                    FilterList(
+                        name = remote.name,
+                        url = remote.originalUrl ?: "",
+                        description = remote.description ?: "",
+                        isEnabled = remote.isEnabled,
+                        isBuiltIn = remote.isBuiltIn,
+                        category = category,
+                        ruleCount = remote.ruleCount,
+                        bloomUrl = remote.bloomUrl,
+                        trieUrl = remote.trieUrl,
+                        originalUrl = remote.originalUrl ?: "",
                     )
                 )
             }
-            results
+        }
+
+        if (allowDelete) {
+            val remoteNames = remoteLists.map { it.name }.toSet()
+            val obsolete = existingLists.filter { it.isBuiltIn && it.name !in remoteNames }
+            for (o in obsolete) {
+                filterListDao.delete(o)
+            }
+        }
+    }
+
+    private fun parseRemoteFilterJson(json: String): List<RemoteFilterList> {
+        return try {
+            jsonParser.decodeFromString<List<RemoteFilterList>>(json)
+                .filter { it.name.isNotBlank() && it.bloomUrl.isNotBlank() && it.trieUrl.isNotBlank() }
         } catch (e: Exception) {
             Timber.e(e, "Failed to parse remote filter JSON")
             emptyList()
