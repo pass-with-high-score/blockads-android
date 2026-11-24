@@ -1,0 +1,5 @@
+• Quick import .conf and .txt config files directly from other apps and file managers
+• Auto-restart VPN when system Private DNS switches from custom to off or auto
+• Fixed Tailscale subnet router LAN access on mobile data and prevented VPN restart loop
+• Fixed per-app firewall detection on Android 8 and 9
+• Improved file export and share reliability with folder picker and Downloads fallback

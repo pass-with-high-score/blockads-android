@@ -1,0 +1,4 @@
+• Fixed remote filter list loading and bundled default filters for TV
+• Fixed per-app firewall detection on Android 8 and 9 TV devices
+• Fixed Tailscale subnet router LAN routing and VPN stability
+• Improved file export and share reliability
