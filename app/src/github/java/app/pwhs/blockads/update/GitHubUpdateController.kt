@@ -38,12 +38,18 @@ class GitHubUpdateController(
     private val json = Json { ignoreUnknownKeys = true }
     private val _state = MutableStateFlow<UpdateState>(UpdateState.Idle)
     override val state: StateFlow<UpdateState> = _state.asStateFlow()
+    private val _dialogVisible = MutableStateFlow(false)
+    override val dialogVisible: StateFlow<Boolean> = _dialogVisible.asStateFlow()
+    private val _bannerDismissed = MutableStateFlow(false)
+    override val bannerDismissed: StateFlow<Boolean> = _bannerDismissed.asStateFlow()
     override val supportsInAppUpdate: Boolean = true
     override val supportsChannelSelection: Boolean = true
 
     private var lastReleasePageUrl: String = ""
 
     override suspend fun checkForUpdate(channel: UpdateChannel, manual: Boolean) {
+        if (_state.value is UpdateState.Downloading) return
+
         if (!manual) {
             val now = System.currentTimeMillis()
             val lastCheck = prefs.getLastUpdateCheckMs()
@@ -64,10 +70,11 @@ class GitHubUpdateController(
             }
         }.getOrElse { error ->
             Timber.w(error, "GitHub update check failed")
-            _state.value = if (manual) {
-                UpdateState.Error(error.message ?: "Unable to check for updates")
+            if (manual) {
+                _state.value = UpdateState.Error(error.message ?: "Unable to check for updates")
+                _dialogVisible.value = true
             } else {
-                UpdateState.Idle
+                _state.value = UpdateState.Idle
             }
             return
         }
@@ -115,42 +122,82 @@ class GitHubUpdateController(
         )
 
         if (asset == null) {
-            _state.value = if (manual) {
-                UpdateState.Error("No compatible APK asset found for ${candidate.tagName}")
+            if (manual) {
+                _state.value = UpdateState.Error("No compatible APK asset found for ${candidate.tagName}")
+                _dialogVisible.value = true
             } else {
-                UpdateState.Idle
+                _state.value = UpdateState.Idle
             }
             return
         }
 
         lastReleasePageUrl = candidate.htmlUrl
-        _state.value = UpdateState.Available(
-            UpdateInfo(
-                versionName = candidate.name.ifBlank { candidate.tagName },
-                tagName = skipKey,
-                changelog = candidate.body,
-                downloadUrl = asset.browserDownloadUrl,
-                assetName = asset.name,
-                assetSizeBytes = asset.size,
-                publishedAtMillis = VersionComparator.parseIso8601Millis(candidate.publishedAt),
-                isNightly = channel == UpdateChannel.NIGHTLY,
-                releasePageUrl = candidate.htmlUrl,
-            )
+        val info = UpdateInfo(
+            versionName = candidate.name.ifBlank { candidate.tagName },
+            tagName = skipKey,
+            changelog = candidate.body,
+            downloadUrl = asset.browserDownloadUrl,
+            assetName = asset.name,
+            assetSizeBytes = asset.size,
+            publishedAtMillis = VersionComparator.parseIso8601Millis(candidate.publishedAt),
+            isNightly = channel == UpdateChannel.NIGHTLY,
+            releasePageUrl = candidate.htmlUrl,
         )
+
+        _bannerDismissed.value = false
+        val cachedApk = findValidCachedApk(info)
+        if (cachedApk != null) {
+            cleanupOldApks(updatesDir(), keepFileName = cachedApk.name)
+            _state.value = UpdateState.Downloaded(
+                filePath = cachedApk.absolutePath,
+                info = info,
+            )
+        } else {
+            _state.value = UpdateState.Available(info)
+        }
+        _dialogVisible.value = manual || info.isImmediate
     }
 
     override suspend fun startUpdate(activity: Activity) {
         val current = _state.value
+        if (current is UpdateState.Downloading) return
+
         if (current is UpdateState.Downloaded) {
-            installApk(activity, File(current.filePath))
+            val cached = File(current.filePath)
+            if (isValidApkFile(cached, current.info?.assetSizeBytes ?: 0L)) {
+                installApk(activity, cached)
+                return
+            }
+            val fallbackInfo = current.info ?: run {
+                _state.value = UpdateState.Error("Update file is missing. Please check for updates again.")
+                _dialogVisible.value = true
+                return
+            }
+            downloadAndInstall(activity, fallbackInfo)
             return
         }
-        val info = (current as? UpdateState.Available)?.info ?: return
-        lastReleasePageUrl = info.releasePageUrl
 
-        val updatesDir = File(context.cacheDir, "updates").apply { mkdirs() }
-        cleanupOldApks(updatesDir)
-        val targetFile = File(updatesDir, info.assetName)
+        val info = (current as? UpdateState.Available)?.info ?: return
+        val cachedApk = findValidCachedApk(info)
+        if (cachedApk != null) {
+            lastReleasePageUrl = info.releasePageUrl
+            _state.value = UpdateState.Downloaded(cachedApk.absolutePath, info)
+            installApk(activity, cachedApk)
+            return
+        }
+
+        downloadAndInstall(activity, info)
+    }
+
+    private suspend fun downloadAndInstall(activity: Activity, info: UpdateInfo) {
+        lastReleasePageUrl = info.releasePageUrl
+        _dialogVisible.value = true
+
+        val updatesDir = updatesDir().apply { mkdirs() }
+        val targetFile = cachedApkFile(updatesDir, info)
+        val tempFile = File(updatesDir, "${targetFile.name}.part")
+        cleanupOldApks(updatesDir, keepFileName = targetFile.name)
+        tempFile.delete()
 
         runCatching {
             withContext(Dispatchers.IO) {
@@ -165,7 +212,7 @@ class GitHubUpdateController(
                     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                     var downloaded = 0L
 
-                    targetFile.outputStream().use { output ->
+                    tempFile.outputStream().use { output ->
                         while (!channel.isClosedForRead) {
                             val bytesRead = channel.readAvailable(buffer)
                             if (bytesRead <= 0) break
@@ -184,28 +231,54 @@ class GitHubUpdateController(
                         }
                     }
                 }
+                if (targetFile.exists()) targetFile.delete()
+                if (!tempFile.renameTo(targetFile)) {
+                    tempFile.copyTo(targetFile, overwrite = true)
+                    tempFile.delete()
+                }
             }
         }.onSuccess {
-            _state.value = UpdateState.Downloaded(targetFile.absolutePath)
+            _state.value = UpdateState.Downloaded(targetFile.absolutePath, info)
             installApk(activity, targetFile)
         }.onFailure { error ->
             Timber.e(error, "APK download failed")
-            targetFile.delete()
+            tempFile.delete()
             _state.value = UpdateState.Error(error.message ?: "APK download failed")
+            _dialogVisible.value = true
         }
     }
 
     override fun completeUpdate() = Unit
 
+    override fun openUpdateDialog() {
+        _dialogVisible.value = true
+    }
+
+    override fun dismissBanner() {
+        _bannerDismissed.value = true
+    }
+
     override suspend fun dismissUpdate(skipVersion: Boolean) {
         val current = _state.value
-        if (skipVersion && current is UpdateState.Available) {
-            prefs.setSkippedUpdateVersion(current.info.tagName)
+        _dialogVisible.value = false
+        if (skipVersion) {
+            val tagToSkip = when (current) {
+                is UpdateState.Available -> current.info.tagName
+                is UpdateState.Downloaded -> current.info?.tagName
+                else -> null
+            }
+            if (tagToSkip != null) {
+                prefs.setSkippedUpdateVersion(tagToSkip)
+            }
+            _state.value = UpdateState.Idle
+        } else if (current is UpdateState.Error || current is UpdateState.UpToDate) {
+            _state.value = UpdateState.Idle
         }
-        _state.value = UpdateState.Idle
     }
 
     override fun resetState() {
+        _dialogVisible.value = false
+        _bannerDismissed.value = false
         _state.value = UpdateState.Idle
     }
 
@@ -240,15 +313,38 @@ class GitHubUpdateController(
         }
     }
 
-    private fun cleanupOldApks(dir: File) {
+    private fun updatesDir(): File = File(context.cacheDir, "updates")
+
+    private fun cachedApkFile(dir: File, info: UpdateInfo): File {
+        val safeTag = info.tagName.replace(SAFE_TAG_REGEX, "_")
+        return File(dir, "${safeTag}__${info.assetName}")
+    }
+
+    private fun findValidCachedApk(info: UpdateInfo): File? {
+        val file = cachedApkFile(updatesDir(), info)
+        return file.takeIf { isValidApkFile(it, info.assetSizeBytes) }
+    }
+
+    private fun isValidApkFile(file: File, expectedSizeBytes: Long): Boolean {
+        if (!file.isFile || !file.canRead()) return false
+        val size = file.length()
+        if (size <= 0L) return false
+        if (expectedSizeBytes > 0L && size != expectedSizeBytes) return false
+        return true
+    }
+
+    private fun cleanupOldApks(dir: File, keepFileName: String? = null) {
         dir.listFiles()?.forEach { file ->
-            if (file.isFile && file.name.endsWith(".apk")) {
+            if (!file.isFile) return@forEach
+            if (file.name == keepFileName) return@forEach
+            if (file.name.endsWith(".apk") || file.name.endsWith(".part")) {
                 file.delete()
             }
         }
     }
 
     companion object {
+        private val SAFE_TAG_REGEX = Regex("[^a-zA-Z0-9._-]")
         private const val RELEASES_API_URL =
             "https://api.github.com/repos/pass-with-high-score/blockads-android/releases?per_page=20"
         private const val AUTO_CHECK_COOLDOWN_MS = 6L * 60 * 60 * 1000L

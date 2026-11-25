@@ -47,7 +47,10 @@ sealed interface UpdateState {
         val downloadedBytes: Long,
         val totalBytes: Long,
     ) : UpdateState
-    data class Downloaded(val filePath: String) : UpdateState
+    data class Downloaded(
+        val filePath: String,
+        val info: UpdateInfo? = null,
+    ) : UpdateState
     data object PlayReadyToInstall : UpdateState
     data class Error(val message: String) : UpdateState
 }
@@ -64,12 +67,16 @@ interface UpdatePreferencesStore {
 
 interface AppUpdateController {
     val state: StateFlow<UpdateState>
+    val dialogVisible: StateFlow<Boolean>
+    val bannerDismissed: StateFlow<Boolean>
     val supportsInAppUpdate: Boolean
     val supportsChannelSelection: Boolean
 
     suspend fun checkForUpdate(channel: UpdateChannel, manual: Boolean)
     suspend fun startUpdate(activity: Activity)
     fun completeUpdate()
+    fun openUpdateDialog()
+    fun dismissBanner()
     suspend fun dismissUpdate(skipVersion: Boolean)
     fun resetState()
 }

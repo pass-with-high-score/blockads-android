@@ -94,18 +94,40 @@ fun AppUpdateDialog(
         }
 
         is UpdateState.Downloaded -> {
+            val version = state.info?.versionName
+            val titleText = if (!version.isNullOrBlank()) {
+                "${stringResource(R.string.update_ready_install)} ($version)"
+            } else {
+                stringResource(R.string.update_ready_install)
+            }
+            val notes = state.info?.changelog?.takeIf { it.isNotBlank() }
+                ?: stringResource(R.string.update_available_default_notes)
             AlertDialog(
                 onDismissRequest = { onDismiss(false) },
-                title = { Text(stringResource(R.string.update_ready_install)) },
-                text = { Text(stringResource(R.string.update_available_default_notes)) },
+                title = { Text(titleText) },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(
+                            text = notes,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                },
                 confirmButton = {
                     TextButton(onClick = onStartUpdate) {
                         Text(stringResource(R.string.update_action_install))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { onDismiss(false) }) {
-                        Text(stringResource(R.string.update_action_later))
+                    Row {
+                        if (state.info != null && !state.info.isImmediate) {
+                            TextButton(onClick = { onDismiss(true) }) {
+                                Text(stringResource(R.string.update_action_skip))
+                            }
+                        }
+                        TextButton(onClick = { onDismiss(false) }) {
+                            Text(stringResource(R.string.update_action_later))
+                        }
                     }
                 },
             )

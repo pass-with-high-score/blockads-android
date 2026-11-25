@@ -62,6 +62,7 @@ import app.pwhs.blockads.ui.home.component.HomeEditableStatsList
 import app.pwhs.blockads.ui.home.component.HomeFeatureTipType
 import app.pwhs.blockads.ui.home.component.HomeRateAppPrompt
 import app.pwhs.blockads.ui.home.component.HomeStatusHeader
+import app.pwhs.blockads.ui.home.component.HomeUpdateBannerSlot
 import app.pwhs.blockads.ui.home.component.MilestoneBottomSheet
 import app.pwhs.blockads.ui.home.component.PowerButton
 import app.pwhs.blockads.ui.home.component.PrivateDnsWarningCard
@@ -183,6 +184,8 @@ fun HomeScreen(
             }
 
             val heroContent: @Composable () -> Unit = {
+                HomeUpdateBannerSlot()
+
                 if (privateDnsWarning) {
                     PrivateDnsWarningCard()
                 }

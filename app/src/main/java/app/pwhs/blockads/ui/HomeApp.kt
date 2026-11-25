@@ -118,6 +118,7 @@ fun HomeApp(
     val appPrefs: AppPreferences = koinInject()
     val updateController: AppUpdateController = koinInject()
     val updateState by updateController.state.collectAsStateWithLifecycle()
+    val showUpdateDialog by updateController.dialogVisible.collectAsStateWithLifecycle()
     val updateScope = androidx.compose.runtime.rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -710,7 +711,7 @@ fun HomeApp(
         }
     }
 
-    if (updateController.supportsInAppUpdate) {
+    if (updateController.supportsInAppUpdate && showUpdateDialog) {
         AppUpdateDialog(
             state = updateState,
             onStartUpdate = {

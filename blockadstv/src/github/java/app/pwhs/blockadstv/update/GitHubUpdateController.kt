@@ -123,33 +123,52 @@ class GitHubTvUpdateController(
         }
 
         lastReleasePageUrl = candidate.htmlUrl
-        _state.value = UpdateState.Available(
-            UpdateInfo(
-                versionName = candidate.name.ifBlank { candidate.tagName },
-                tagName = skipKey,
-                changelog = candidate.body,
-                downloadUrl = asset.browserDownloadUrl,
-                assetName = asset.name,
-                assetSizeBytes = asset.size,
-                publishedAtMillis = VersionComparator.parseIso8601Millis(candidate.publishedAt),
-                isNightly = channel == UpdateChannel.NIGHTLY,
-                releasePageUrl = candidate.htmlUrl,
-            )
+        val info = UpdateInfo(
+            versionName = candidate.name.ifBlank { candidate.tagName },
+            tagName = skipKey,
+            changelog = candidate.body,
+            downloadUrl = asset.browserDownloadUrl,
+            assetName = asset.name,
+            assetSizeBytes = asset.size,
+            publishedAtMillis = VersionComparator.parseIso8601Millis(candidate.publishedAt),
+            isNightly = channel == UpdateChannel.NIGHTLY,
+            releasePageUrl = candidate.htmlUrl,
         )
+
+        val cachedApk = findValidCachedApk(info)
+        if (cachedApk != null) {
+            cleanupOldApks(updatesDir(), keepFileName = cachedApk.name)
+            _state.value = UpdateState.Downloaded(cachedApk.absolutePath)
+        } else {
+            _state.value = UpdateState.Available(info)
+        }
     }
 
     override suspend fun startUpdate(activity: Activity) {
         val current = _state.value
+        if (current is UpdateState.Downloading) return
         if (current is UpdateState.Downloaded) {
-            installApk(activity, File(current.filePath))
-            return
+            val cached = File(current.filePath)
+            if (isValidApkFile(cached, 0L)) {
+                installApk(activity, cached)
+                return
+            }
         }
         val info = (current as? UpdateState.Available)?.info ?: return
         lastReleasePageUrl = info.releasePageUrl
 
-        val updatesDir = File(context.cacheDir, "updates").apply { mkdirs() }
-        cleanupOldApks(updatesDir)
-        val targetFile = File(updatesDir, info.assetName)
+        val cachedApk = findValidCachedApk(info)
+        if (cachedApk != null) {
+            _state.value = UpdateState.Downloaded(cachedApk.absolutePath)
+            installApk(activity, cachedApk)
+            return
+        }
+
+        val updatesDir = updatesDir().apply { mkdirs() }
+        val targetFile = cachedApkFile(updatesDir, info)
+        val tempFile = File(updatesDir, "${targetFile.name}.part")
+        cleanupOldApks(updatesDir, keepFileName = targetFile.name)
+        tempFile.delete()
 
         runCatching {
             withContext(Dispatchers.IO) {
@@ -164,7 +183,7 @@ class GitHubTvUpdateController(
                     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                     var downloaded = 0L
 
-                    targetFile.outputStream().use { output ->
+                    tempFile.outputStream().use { output ->
                         while (!channel.isClosedForRead) {
                             val bytesRead = channel.readAvailable(buffer)
                             if (bytesRead <= 0) break
@@ -183,13 +202,18 @@ class GitHubTvUpdateController(
                         }
                     }
                 }
+                if (targetFile.exists()) targetFile.delete()
+                if (!tempFile.renameTo(targetFile)) {
+                    tempFile.copyTo(targetFile, overwrite = true)
+                    tempFile.delete()
+                }
             }
         }.onSuccess {
             _state.value = UpdateState.Downloaded(targetFile.absolutePath)
             installApk(activity, targetFile)
         }.onFailure { error ->
             Timber.e(error, "TV APK download failed")
-            targetFile.delete()
+            tempFile.delete()
             _state.value = UpdateState.Error(error.message ?: "APK download failed")
         }
     }
@@ -239,15 +263,38 @@ class GitHubTvUpdateController(
         }
     }
 
-    private fun cleanupOldApks(dir: File) {
+    private fun updatesDir(): File = File(context.cacheDir, "updates")
+
+    private fun cachedApkFile(dir: File, info: UpdateInfo): File {
+        val safeTag = info.tagName.replace(SAFE_TAG_REGEX, "_")
+        return File(dir, "${safeTag}__${info.assetName}")
+    }
+
+    private fun findValidCachedApk(info: UpdateInfo): File? {
+        val file = cachedApkFile(updatesDir(), info)
+        return file.takeIf { isValidApkFile(it, info.assetSizeBytes) }
+    }
+
+    private fun isValidApkFile(file: File, expectedSizeBytes: Long): Boolean {
+        if (!file.isFile || !file.canRead()) return false
+        val size = file.length()
+        if (size <= 0L) return false
+        if (expectedSizeBytes > 0L && size != expectedSizeBytes) return false
+        return true
+    }
+
+    private fun cleanupOldApks(dir: File, keepFileName: String? = null) {
         dir.listFiles()?.forEach { file ->
-            if (file.isFile && file.name.endsWith(".apk")) {
+            if (!file.isFile) return@forEach
+            if (file.name == keepFileName) return@forEach
+            if (file.name.endsWith(".apk") || file.name.endsWith(".part")) {
                 file.delete()
             }
         }
     }
 
     companion object {
+        private val SAFE_TAG_REGEX = Regex("[^a-zA-Z0-9._-]")
         private const val RELEASES_API_URL =
             "https://api.github.com/repos/pass-with-high-score/blockads-android/releases?per_page=20"
         private const val AUTO_CHECK_COOLDOWN_MS = 6L * 60 * 60 * 1000L

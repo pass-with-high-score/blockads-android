@@ -43,6 +43,10 @@ class StoreUpdateController(
 
     private val _state = MutableStateFlow<UpdateState>(UpdateState.Idle)
     override val state: StateFlow<UpdateState> = _state.asStateFlow()
+    private val _dialogVisible = MutableStateFlow(false)
+    override val dialogVisible: StateFlow<Boolean> = _dialogVisible.asStateFlow()
+    private val _bannerDismissed = MutableStateFlow(false)
+    override val bannerDismissed: StateFlow<Boolean> = _bannerDismissed.asStateFlow()
     override val supportsInAppUpdate: Boolean = true
     override val supportsChannelSelection: Boolean = false
 
@@ -93,16 +97,19 @@ class StoreUpdateController(
 
         val info = runCatching { awaitAppUpdateInfo() }.getOrElse { error ->
             Timber.w(error, "Play In-App Update check failed")
-            _state.value = if (manual) {
-                UpdateState.Error(error.message ?: "Unable to check Play Store updates")
+            if (manual) {
+                _state.value = UpdateState.Error(error.message ?: "Unable to check Play Store updates")
+                _dialogVisible.value = true
             } else {
-                UpdateState.Idle
+                _state.value = UpdateState.Idle
             }
             return
         }
 
         if (info.installStatus() == InstallStatus.DOWNLOADED) {
+            _bannerDismissed.value = false
             _state.value = UpdateState.PlayReadyToInstall
+            _dialogVisible.value = manual
             return
         }
 
@@ -134,6 +141,8 @@ class StoreUpdateController(
 
         cachedAppUpdateInfo = info
         cachedUpdateType = updateType
+        _bannerDismissed.value = false
+        val isImmediate = updateType == AppUpdateType.IMMEDIATE
         _state.value = UpdateState.Available(
             UpdateInfo(
                 versionName = "v$versionLabel",
@@ -143,9 +152,10 @@ class StoreUpdateController(
                 assetName = "",
                 assetSizeBytes = info.totalBytesToDownload().coerceAtLeast(0L),
                 publishedAtMillis = 0L,
-                isImmediate = updateType == AppUpdateType.IMMEDIATE,
+                isImmediate = isImmediate,
             )
         )
+        _dialogVisible.value = manual || isImmediate
     }
 
     override suspend fun startUpdate(activity: Activity) {
@@ -157,6 +167,7 @@ class StoreUpdateController(
         }.onFailure { error ->
             Timber.e(error, "Failed to start Play In-App Update flow")
             _state.value = UpdateState.Error(error.message ?: "Failed to start Play update")
+            _dialogVisible.value = true
         }
     }
 
@@ -164,15 +175,28 @@ class StoreUpdateController(
         appUpdateManager.completeUpdate()
     }
 
+    override fun openUpdateDialog() {
+        _dialogVisible.value = true
+    }
+
+    override fun dismissBanner() {
+        _bannerDismissed.value = true
+    }
+
     override suspend fun dismissUpdate(skipVersion: Boolean) {
         val current = _state.value
+        _dialogVisible.value = false
         if (skipVersion && current is UpdateState.Available && !current.info.isImmediate) {
             prefs.setSkippedUpdateVersion(current.info.tagName)
+            _state.value = UpdateState.Idle
+        } else if (current is UpdateState.Error || current is UpdateState.UpToDate) {
+            _state.value = UpdateState.Idle
         }
-        _state.value = UpdateState.Idle
     }
 
     override fun resetState() {
+        _dialogVisible.value = false
+        _bannerDismissed.value = false
         _state.value = UpdateState.Idle
     }
 

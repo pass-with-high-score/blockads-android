@@ -9,12 +9,18 @@ import org.koin.dsl.module
 private class FdroidUpdateController : AppUpdateController {
     private val _state = MutableStateFlow<UpdateState>(UpdateState.Idle)
     override val state: StateFlow<UpdateState> = _state.asStateFlow()
+    private val _dialogVisible = MutableStateFlow(false)
+    override val dialogVisible: StateFlow<Boolean> = _dialogVisible.asStateFlow()
+    private val _bannerDismissed = MutableStateFlow(false)
+    override val bannerDismissed: StateFlow<Boolean> = _bannerDismissed.asStateFlow()
     override val supportsInAppUpdate: Boolean = false
     override val supportsChannelSelection: Boolean = false
 
     override suspend fun checkForUpdate(channel: UpdateChannel, manual: Boolean) = Unit
     override suspend fun startUpdate(activity: Activity) = Unit
     override fun completeUpdate() = Unit
+    override fun openUpdateDialog() = Unit
+    override fun dismissBanner() = Unit
     override suspend fun dismissUpdate(skipVersion: Boolean) = Unit
     override fun resetState() = Unit
 }
