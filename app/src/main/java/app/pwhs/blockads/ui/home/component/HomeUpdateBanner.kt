@@ -117,6 +117,12 @@ fun HomeUpdateBanner(
 
     val isClickable = state is UpdateState.Available || state is UpdateState.Downloaded
 
+    val changelogText = when (state) {
+        is UpdateState.Available -> state.info.changelog.trim()
+        is UpdateState.Downloaded -> state.info?.changelog?.trim().orEmpty()
+        else -> ""
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -125,7 +131,7 @@ fun HomeUpdateBanner(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
@@ -143,80 +149,34 @@ fun HomeUpdateBanner(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    val title = when (state) {
-                        is UpdateState.Available ->
-                            stringResource(R.string.update_available_title, state.info.versionName)
-                        is UpdateState.Downloading -> {
-                            val percent = (state.progress * 100f).roundToInt().coerceIn(0, 100)
-                            stringResource(R.string.update_downloading, percent)
-                        }
-                        is UpdateState.Downloaded -> {
-                            val version = state.info?.versionName
-                            if (!version.isNullOrBlank()) {
-                                "${stringResource(R.string.update_ready_install)} ($version)"
-                            } else {
-                                stringResource(R.string.update_ready_install)
-                            }
-                        }
-                        is UpdateState.PlayReadyToInstall ->
+                val title = when (state) {
+                    is UpdateState.Available ->
+                        stringResource(R.string.update_available_title, state.info.versionName)
+                    is UpdateState.Downloading -> {
+                        val percent = (state.progress * 100f).roundToInt().coerceIn(0, 100)
+                        stringResource(R.string.update_downloading, percent)
+                    }
+                    is UpdateState.Downloaded -> {
+                        val version = state.info?.versionName
+                        if (!version.isNullOrBlank()) {
+                            "${stringResource(R.string.update_ready_install)} ($version)"
+                        } else {
                             stringResource(R.string.update_ready_install)
-                        else -> ""
+                        }
                     }
-
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = contentColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-
-                    val subtitle = when (state) {
-                        is UpdateState.Available -> state.info.changelog
-                            .lineSequence()
-                            .map { it.trim() }
-                            .firstOrNull { it.isNotEmpty() }
-                            ?: stringResource(R.string.update_available_default_notes)
-                        is UpdateState.Downloaded,
-                        is UpdateState.PlayReadyToInstall ->
-                            stringResource(R.string.update_available_default_notes)
-                        else -> null
-                    }
-
-                    if (subtitle != null) {
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = contentColor.copy(alpha = 0.8f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    is UpdateState.PlayReadyToInstall ->
+                        stringResource(R.string.update_ready_install)
+                    else -> ""
                 }
 
-                if (state !is UpdateState.Downloading) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    val actionLabel = when (state) {
-                        is UpdateState.Downloaded -> stringResource(R.string.update_action_install)
-                        is UpdateState.PlayReadyToInstall -> stringResource(R.string.update_action_restart)
-                        else -> stringResource(R.string.https_settings_update_action)
-                    }
-                    Button(
-                        onClick = onPrimaryAction,
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                    ) {
-                        Text(
-                            text = actionLabel,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = contentColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
 
                 if (isDismissible) {
                     IconButton(
@@ -241,6 +201,45 @@ fun HomeUpdateBanner(
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = contentColor.copy(alpha = 0.2f),
                 )
+            } else {
+                val bodyText = changelogText.ifBlank {
+                    stringResource(R.string.update_available_default_notes)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = bodyText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = contentColor.copy(alpha = 0.85f),
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val actionLabel = when (state) {
+                        is UpdateState.Downloaded -> stringResource(R.string.update_action_install)
+                        is UpdateState.PlayReadyToInstall -> stringResource(R.string.update_action_restart)
+                        else -> stringResource(R.string.update_action_now)
+                    }
+                    Button(
+                        onClick = onPrimaryAction,
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    ) {
+                        Text(
+                            text = actionLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
             }
         }
     }
@@ -260,7 +259,7 @@ private fun HomeUpdateBannerAvailablePreview() {
                     UpdateInfo(
                         versionName = "v7.2.2",
                         tagName = "v7.2.2",
-                        changelog = "• Quick import .conf and .txt config files",
+                        changelog = "• Quick import .conf and .txt config files\n• Auto-restart VPN when Private DNS changes\n• Fixed Tailscale LAN access on mobile data",
                         downloadUrl = "",
                         assetName = "app-github-arm64-v8a-release.apk",
                         assetSizeBytes = 25_000_000L,
@@ -277,7 +276,7 @@ private fun HomeUpdateBannerAvailablePreview() {
                     info = UpdateInfo(
                         versionName = "v7.2.2",
                         tagName = "v7.2.2",
-                        changelog = "",
+                        changelog = "• Quick import .conf and .txt config files\n• Auto-restart VPN when Private DNS changes",
                         downloadUrl = "",
                         assetName = "app-github-arm64-v8a-release.apk",
                         assetSizeBytes = 25_000_000L,
