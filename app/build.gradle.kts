@@ -56,7 +56,9 @@ val isBuildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle
 android {
     namespace = "app.pwhs.blockads"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
     ndkVersion = "26.1.10909125"
 

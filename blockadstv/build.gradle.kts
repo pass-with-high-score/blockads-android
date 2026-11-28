@@ -26,7 +26,9 @@ tasks.matching { it.name == "assembleFdroidRelease" || it.name == "packageFdroid
 android {
     namespace = "app.pwhs.blockadstv"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 1
+        }
     }
 
     defaultConfig {
