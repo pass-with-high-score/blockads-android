@@ -41,7 +41,10 @@ class TailscaleViewModel(
     val uiEffect: SharedFlow<TailscaleUiEffect> = _uiEffect.asSharedFlow()
 
     private var pollJob: Job? = null
+    @Volatile
     private var authEngine: tunnel.Engine? = null
+    @Volatile
+    private var isHandingOffSession: Boolean = false
     private val tailscalePeerNotifier by lazy { TailscalePeerNotifier(getApplication()) }
 
     init {
@@ -97,14 +100,16 @@ class TailscaleViewModel(
             viewModelScope.launch {
                 AdBlockVpnService.state.collect { vpnState ->
                     val running = vpnState == VpnState.RUNNING
+                    val restarting = vpnState == VpnState.RESTARTING || vpnState == VpnState.STARTING
                     _uiState.update { state ->
                         val connState = when {
                             !state.isEnabled -> "DISCONNECTED"
+                            restarting -> "CONNECTING"
                             !running -> "VPN_DISCONNECTED"
-                            state.connectionState == "VPN_DISCONNECTED" -> "CONNECTING"
+                            state.connectionState == "VPN_DISCONNECTED" || state.connectionState == "DISCONNECTED" -> "CONNECTING"
                             else -> state.connectionState
                         }
-                        state.copy(isVpnRunning = running, connectionState = connState)
+                        state.copy(isVpnRunning = running || restarting, connectionState = connState)
                     }
                     if (running && _uiState.value.isEnabled && _uiState.value.isLoggedIn) {
                         startStatusPolling()
@@ -139,8 +144,9 @@ class TailscaleViewModel(
         when (intent) {
             is TailscaleUiIntent.ToggleEnabled -> toggleTailscale(intent.enabled)
             is TailscaleUiIntent.StartVpn -> ServiceController.requestStart(getApplication<Application>().applicationContext)
-            is TailscaleUiIntent.SignInWithBrowser -> signInWithBrowser()
-            is TailscaleUiIntent.SignInWithAuthKey -> signInWithAuthKey(intent.key)
+            is TailscaleUiIntent.SignInWithBrowser -> signInWithBrowser(intent.controlUrl)
+            is TailscaleUiIntent.SignInWithAuthKey -> signInWithAuthKey(intent.key, intent.controlUrl)
+            is TailscaleUiIntent.CancelAuth -> cancelAuth()
             is TailscaleUiIntent.SetControlUrl -> setControlUrl(intent.url)
             is TailscaleUiIntent.SelectExitNode -> selectExitNode(intent.nodeId)
             is TailscaleUiIntent.ToggleAdvertiseExitNode -> toggleAdvertiseExitNode(intent.enabled)
@@ -163,16 +169,17 @@ class TailscaleViewModel(
             val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
             val hasKeys = stateJson.contains("node_key") && stateJson.contains("machine_key")
 
+            val isVpnRunning = AdBlockVpnService.activeTunnelAdapter != null
             _uiState.update {
                 it.copy(
                     isEnabled = enabled,
-                    connectionState = if (enabled) "CONNECTING" else "DISCONNECTED"
+                    connectionState = if (enabled && isVpnRunning) "CONNECTING" else "DISCONNECTED"
                 )
             }
             if (enabled) {
                 if (!hasKeys) {
                     signInWithBrowser()
-                } else {
+                } else if (isVpnRunning) {
                     val adapter = AdBlockVpnService.activeTunnelAdapter
                     if (adapter != null && appPrefs.excludeLan.first()) {
                         AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
@@ -193,88 +200,212 @@ class TailscaleViewModel(
         }
     }
 
-    private fun signInWithBrowser() {
+    private fun cancelAuth() {
+        pollJob?.cancel()
+        pollJob = null
+        val engine = authEngine
+        authEngine = null
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isLoading = true, errorMessage = "") }
+            runCatching { engine?.stopTailscale() }
+        }
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                authUrl = "",
+                connectionState = "DISCONNECTED",
+                errorMessage = "",
+            )
+        }
+    }
+
+    private fun normalizeControlUrl(raw: String?): Result<String> {
+        val trimmed = raw?.trim().orEmpty()
+        if (trimmed.isEmpty()) return Result.success(DEFAULT_CONTROL_URL)
+        val withScheme = if (trimmed.startsWith("http://", ignoreCase = true) ||
+            trimmed.startsWith("https://", ignoreCase = true)
+        ) {
+            trimmed
+        } else {
+            "https://$trimmed"
+        }
+        val parsed = runCatching { java.net.URI(withScheme) }.getOrNull()
+        val host = parsed?.host.orEmpty()
+        if (host.isBlank() || host.contains(" ")) {
+            return Result.failure(IllegalArgumentException("Invalid control server URL: $trimmed"))
+        }
+        return Result.success(withScheme.trimEnd('/'))
+    }
+
+    private fun signInWithBrowser(controlUrlOverride: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val resolvedUrl = normalizeControlUrl(controlUrlOverride ?: appPrefs.tailscale.getControlUrlSnapshot())
+                .getOrElse { err ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            connectionState = "DISCONNECTED",
+                            errorMessage = err.message ?: "Invalid control server URL",
+                        )
+                    }
+                    return@launch
+                }
+
+            appPrefs.tailscale.setControlUrl(resolvedUrl)
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = "",
+                    authUrl = "",
+                    controlUrl = resolvedUrl,
+                )
+            }
             try {
                 authEngine?.stopTailscale()
                 authEngine = null
 
                 val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
-                val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
                 val authKey = appPrefs.tailscale.getAuthKeySnapshot()
 
                 val engine = tunnel.Tunnel.newEngine()
                 authEngine = engine
-                val updatedState = engine.configureTailscale(stateJson, controlUrl, authKey)
+                val updatedState = engine.configureTailscale(stateJson, resolvedUrl, authKey)
                 if (updatedState.isNotEmpty() && updatedState != "{}") {
                     appPrefs.tailscale.setStateJson(updatedState)
                 }
 
                 val authUrl = engine.startTailscaleAuth("blockads-android")
+                if (authUrl.isNotEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            authUrl = authUrl,
+                            connectionState = "NEEDS_AUTH",
+                            errorMessage = "",
+                        )
+                    }
+                    _uiEffect.emit(TailscaleUiEffect.OpenBrowser(authUrl))
+                    startStatusPolling()
+                } else {
+                    handleEmptyAuthUrl(engine)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Tailscale browser sign-in failed")
+                authEngine?.stopTailscale()
+                authEngine = null
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        authUrl = authUrl,
-                        connectionState = if (authUrl.isNotEmpty()) "NEEDS_AUTH" else "CONNECTED"
+                        authUrl = "",
+                        connectionState = "DISCONNECTED",
+                        errorMessage = e.message ?: "Sign-in error",
                     )
                 }
-
-                if (authUrl.isNotEmpty()) {
-                    _uiEffect.emit(TailscaleUiEffect.OpenBrowser(authUrl))
-                } else {
-                    val activeState = engine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
-                    engine.stopTailscale()
-                    authEngine = null
-                    applyActiveTailscaleSession(activeState)
-                }
-                startStatusPolling()
-            } catch (e: Exception) {
-                Timber.e(e, "Tailscale browser sign-in failed")
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "Sign-in error") }
             }
         }
     }
 
-    private fun signInWithAuthKey(key: String) {
+    private fun signInWithAuthKey(key: String, controlUrlOverride: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isLoading = true, errorMessage = "", authKey = key) }
+            val trimmedKey = key.trim()
+            val resolvedUrl = normalizeControlUrl(controlUrlOverride ?: appPrefs.tailscale.getControlUrlSnapshot())
+                .getOrElse { err ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            connectionState = "DISCONNECTED",
+                            errorMessage = err.message ?: "Invalid control server URL",
+                        )
+                    }
+                    return@launch
+                }
+
+            appPrefs.tailscale.setControlUrl(resolvedUrl)
+            appPrefs.tailscale.setAuthKey(trimmedKey)
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = "",
+                    authUrl = "",
+                    authKey = trimmedKey,
+                    controlUrl = resolvedUrl,
+                )
+            }
             try {
                 authEngine?.stopTailscale()
                 authEngine = null
 
-                appPrefs.tailscale.setAuthKey(key)
                 val stateJson = appPrefs.tailscale.getStateJsonSnapshot()
-                val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
 
                 val engine = tunnel.Tunnel.newEngine()
                 authEngine = engine
-                val updatedState = engine.configureTailscale(stateJson, controlUrl, key)
+                val updatedState = engine.configureTailscale(stateJson, resolvedUrl, trimmedKey)
                 if (updatedState.isNotEmpty() && updatedState != "{}") {
                     appPrefs.tailscale.setStateJson(updatedState)
                 }
 
                 val authUrl = engine.startTailscaleAuth("blockads-android")
+                if (authUrl.isNotEmpty()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            authUrl = authUrl,
+                            connectionState = "NEEDS_AUTH",
+                            errorMessage = "",
+                        )
+                    }
+                    _uiEffect.emit(TailscaleUiEffect.OpenBrowser(authUrl))
+                    startStatusPolling()
+                } else {
+                    handleEmptyAuthUrl(engine)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Tailscale auth-key sign-in failed")
+                authEngine?.stopTailscale()
+                authEngine = null
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        authUrl = authUrl,
-                        connectionState = if (authUrl.isNotEmpty()) "NEEDS_AUTH" else "CONNECTED"
+                        authUrl = "",
+                        connectionState = "DISCONNECTED",
+                        errorMessage = e.message ?: "Auth error",
                     )
                 }
-
-                if (authUrl.isEmpty()) {
-                    val activeState = engine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
-                    engine.stopTailscale()
-                    authEngine = null
-                    applyActiveTailscaleSession(activeState)
-                }
-                startStatusPolling()
-            } catch (e: Exception) {
-                Timber.e(e, "Tailscale auth-key sign-in failed")
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message ?: "Auth error") }
             }
         }
+    }
+
+    private suspend fun handleEmptyAuthUrl(engine: tunnel.Engine) {
+        val statusJson = runCatching { engine.tailscaleStatus }.getOrDefault("")
+        val parsed = runCatching {
+            TailscaleStatusParser.parse(statusJson, emptySet(), emptyMap())
+        }.getOrNull()
+
+        val failed = parsed == null ||
+            parsed.state == "ERROR" ||
+            parsed.error.isNotBlank() ||
+            (parsed.state != "CONNECTED" && parsed.selfIp.isNullOrEmpty())
+
+        if (failed) {
+            engine.stopTailscale()
+            authEngine = null
+            val errMsg = parsed?.error?.takeIf { it.isNotBlank() }
+                ?: "Unable to connect to control server. Please check the URL and try again."
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    authUrl = "",
+                    connectionState = "DISCONNECTED",
+                    errorMessage = errMsg,
+                )
+            }
+            return
+        }
+
+        val activeState = engine.tailscaleState.takeIf { it.isNotEmpty() && it != "{}" }
+        engine.stopTailscale()
+        authEngine = null
+        _uiState.update { it.copy(isLoading = false, authUrl = "", errorMessage = "") }
+        applyActiveTailscaleSession(activeState)
     }
 
     private fun setControlUrl(url: String) {
@@ -487,21 +618,43 @@ class TailscaleViewModel(
         pollJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
                 pollStatusOnce()
-                val interval = if (authEngine != null) 1000L else 3000L
-                delay(interval)
+                val curState = _uiState.value.connectionState
+                val isTransitioning = authEngine != null ||
+                    isHandingOffSession ||
+                    curState == "CONNECTING" ||
+                    curState == "AUTHENTICATING"
+                delay(if (isTransitioning) 1000L else 3000L)
             }
         }
     }
 
     private suspend fun pollStatusOnce() = withContext(Dispatchers.IO) {
+        if (isHandingOffSession) return@withContext
+        val vpnState = AdBlockVpnService.state.value
+        if (authEngine == null && (vpnState == VpnState.RESTARTING || vpnState == VpnState.STARTING)) {
+            return@withContext
+        }
         try {
             // When actively authenticating via authEngine, poll authEngine first.
             // Otherwise, query active VPN tunnel adapter.
+            val adapter = AdBlockVpnService.activeTunnelAdapter
+            if (authEngine == null &&
+                vpnState == VpnState.RUNNING &&
+                _uiState.value.isEnabled &&
+                _uiState.value.isLoggedIn &&
+                adapter != null &&
+                adapter.isEngineRunning() &&
+                !adapter.isTailscaleActive()
+            ) {
+                Timber.d("Tailscale enabled while VPN engine running without active manager; syncing session")
+                syncActiveSession()
+            }
+
             val statusJson = if (authEngine != null) {
                 val s = authEngine?.tailscaleStatus ?: ""
-                if (s.isNotEmpty() && s != "{}") s else AdBlockVpnService.activeTunnelAdapter?.getTailscaleStatus() ?: ""
+                if (s.isNotEmpty() && s != "{}") s else adapter?.getTailscaleStatus() ?: ""
             } else {
-                AdBlockVpnService.activeTunnelAdapter?.getTailscaleStatus() ?: ""
+                adapter?.getTailscaleStatus() ?: ""
             }
 
             if (statusJson.isNotEmpty() && statusJson != "{}") {
@@ -526,7 +679,39 @@ class TailscaleViewModel(
             val currentPeersMap = _uiState.value.peers.associateBy { it.id }
             val parsed = TailscaleStatusParser.parse(json, currentPinned, currentPeersMap)
 
+            if (parsed.state == "ERROR" && authEngine != null) {
+                val engine = authEngine
+                authEngine = null
+                pollJob?.cancel()
+                pollJob = null
+                viewModelScope.launch(Dispatchers.IO) {
+                    runCatching { engine?.stopTailscale() }
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        authUrl = "",
+                        connectionState = "DISCONNECTED",
+                        errorMessage = parsed.error.ifBlank { "Authentication failed" },
+                    )
+                }
+                return
+            }
+
             val isNowConnected = parsed.state == "CONNECTED"
+            val adapter = AdBlockVpnService.activeTunnelAdapter
+            val engineBooting = authEngine == null &&
+                _uiState.value.isEnabled &&
+                AdBlockVpnService.state.value == VpnState.RUNNING &&
+                (adapter == null || !adapter.isEngineRunning())
+            val effectiveState = if (parsed.state == "DISCONNECTED" && engineBooting) {
+                "CONNECTING"
+            } else {
+                parsed.state
+            }
+            if (effectiveState != _uiState.value.connectionState) {
+                Timber.d("Tailscale UI state: ${_uiState.value.connectionState} -> $effectiveState (raw=${parsed.state}, selfIp=${parsed.selfIp}, err=${parsed.error})")
+            }
             val staleExitCleared = isNowConnected &&
                 parsed.peers.isNotEmpty() &&
                 _uiState.value.activeExitNodeId != 0L &&
@@ -537,7 +722,7 @@ class TailscaleViewModel(
                     parsed.peers.find { p -> p.id == sel.id } ?: sel
                 }
                 it.copy(
-                    connectionState = parsed.state,
+                    connectionState = effectiveState,
                     isLoggedIn = it.isLoggedIn || isNowConnected,
                     selfIp = parsed.selfIp ?: it.selfIp,
                     magicDnsName = parsed.magicDnsName.ifEmpty { it.magicDnsName },
@@ -555,13 +740,18 @@ class TailscaleViewModel(
                 }
             }
 
-            if (isNowConnected && authEngine != null) {
-                viewModelScope.launch {
-                    val engine = authEngine
-                    authEngine = null
-                    val activeState = engine?.tailscaleState?.takeIf { it.isNotEmpty() && it != "{}" }
-                    engine?.stopTailscale()
-                    applyActiveTailscaleSession(activeState)
+            if (isNowConnected && authEngine != null && !isHandingOffSession) {
+                isHandingOffSession = true
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        val engine = authEngine
+                        authEngine = null
+                        val activeState = engine?.tailscaleState?.takeIf { it.isNotEmpty() && it != "{}" }
+                        engine?.stopTailscale()
+                        applyActiveTailscaleSession(activeState)
+                    } finally {
+                        isHandingOffSession = false
+                    }
                 }
             }
         } catch (_: Exception) {
@@ -573,36 +763,49 @@ class TailscaleViewModel(
             appPrefs.tailscale.setStateJson(activeState)
         }
         appPrefs.tailscale.setEnabled(true)
-        _uiState.update { it.copy(isEnabled = true, isLoggedIn = true, authUrl = "") }
-        _uiEffect.emit(TailscaleUiEffect.AuthSuccess)
         val adapter = AdBlockVpnService.activeTunnelAdapter
+        val vpnRunning = adapter != null || AdBlockVpnService.isRunning
+        _uiState.update {
+            it.copy(
+                isEnabled = true,
+                isLoggedIn = true,
+                isVpnRunning = vpnRunning,
+                authUrl = "",
+                connectionState = if (vpnRunning) "CONNECTING" else "VPN_DISCONNECTED",
+            )
+        }
+        _uiEffect.emit(TailscaleUiEffect.AuthSuccess)
         if (adapter != null && appPrefs.excludeLan.first()) {
             AdBlockVpnService.requestRestart(getApplication<Application>().applicationContext)
-        } else {
+        } else if (adapter != null) {
             syncActiveSession(activeState)
+        }
+        isHandingOffSession = false
+        if (vpnRunning) {
+            startStatusPolling()
         }
     }
 
     private suspend fun syncActiveSession(stateJson: String? = null) {
-        val adapter = AdBlockVpnService.activeTunnelAdapter
-        if (adapter != null) {
-            val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
-            val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
-            val authKey = appPrefs.tailscale.getAuthKeySnapshot()
-            adapter.configureTailscale(stateToUse, controlUrl, authKey)
-            val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
-            if (exitNodeId != 0L) {
-                adapter.setTailscaleExitNode(exitNodeId)
-            }
-            adapter.startTailscaleSession("blockads-android")
-        } else {
-            ServiceController.requestStart(getApplication<Application>().applicationContext)
+        val adapter = AdBlockVpnService.activeTunnelAdapter ?: return
+        val stateToUse = stateJson ?: appPrefs.tailscale.getStateJsonSnapshot()
+        val controlUrl = appPrefs.tailscale.getControlUrlSnapshot()
+        val authKey = appPrefs.tailscale.getAuthKeySnapshot()
+        adapter.configureTailscale(stateToUse, controlUrl, authKey)
+        val exitNodeId = appPrefs.tailscale.getExitNodeIdSnapshot()
+        if (exitNodeId != 0L) {
+            adapter.setTailscaleExitNode(exitNodeId)
         }
+        adapter.startTailscaleSession("blockads-android")
     }
 
     override fun onCleared() {
         super.onCleared()
         authEngine?.stopTailscale()
         authEngine = null
+    }
+
+    companion object {
+        const val DEFAULT_CONTROL_URL = "https://controlplane.tailscale.com"
     }
 }

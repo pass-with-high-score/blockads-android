@@ -56,8 +56,9 @@ data class TailscaleUiState(
 
 sealed interface TailscaleUiIntent {
     data class ToggleEnabled(val enabled: Boolean) : TailscaleUiIntent
-    data object SignInWithBrowser : TailscaleUiIntent
-    data class SignInWithAuthKey(val key: String) : TailscaleUiIntent
+    data class SignInWithBrowser(val controlUrl: String? = null) : TailscaleUiIntent
+    data class SignInWithAuthKey(val key: String, val controlUrl: String? = null) : TailscaleUiIntent
+    data object CancelAuth : TailscaleUiIntent
     data class SetControlUrl(val url: String) : TailscaleUiIntent
     data class SelectExitNode(val nodeId: Long) : TailscaleUiIntent
     data class ToggleAdvertiseExitNode(val enabled: Boolean) : TailscaleUiIntent

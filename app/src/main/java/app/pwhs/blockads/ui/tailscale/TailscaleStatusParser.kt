@@ -4,6 +4,7 @@ import org.json.JSONObject
 
 data class ParsedTailscaleStatus(
     val state: String,
+    val error: String = "",
     val selfIp: String?,
     val magicDnsName: String,
     val peers: List<TailscalePeer>,
@@ -19,6 +20,7 @@ object TailscaleStatusParser {
     ): ParsedTailscaleStatus {
         val obj = JSONObject(json)
         val state = obj.optString("state", "DISCONNECTED")
+        val error = obj.optString("error", "")
         val ipsList = mutableListOf<String>()
         val ipsArr = obj.optJSONArray("tailscale_ips")
         if (ipsArr != null) {
@@ -99,6 +101,7 @@ object TailscaleStatusParser {
 
         return ParsedTailscaleStatus(
             state = state,
+            error = error,
             selfIp = ipsList.firstOrNull(),
             magicDnsName = dnsName,
             peers = sortedPeers,

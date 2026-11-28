@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.OpenInBrowser
@@ -27,17 +28,22 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,18 +86,20 @@ fun TailscaleStatusCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        val isConnecting = uiState.connectionState == "CONNECTING" ||
+                            uiState.connectionState == "AUTHENTICATING"
                         val statusDotColor = when {
                             !uiState.isEnabled -> MaterialTheme.colorScheme.outline
                             !uiState.isVpnRunning -> Color(0xFFF59E0B)
                             uiState.connectionState == "CONNECTED" -> Color(0xFF22C55E)
-                            uiState.connectionState == "CONNECTING" -> Color(0xFFF59E0B)
+                            isConnecting -> Color(0xFFF59E0B)
                             else -> MaterialTheme.colorScheme.error
                         }
                         val statusText = when {
                             !uiState.isEnabled -> stringResource(R.string.tailscale_paused)
                             !uiState.isVpnRunning -> stringResource(R.string.tailscale_vpn_not_running)
                             uiState.connectionState == "CONNECTED" -> stringResource(R.string.tailscale_connected)
-                            uiState.connectionState == "CONNECTING" -> stringResource(R.string.tailscale_connecting)
+                            isConnecting -> stringResource(R.string.tailscale_connecting)
                             else -> stringResource(R.string.tailscale_disconnected)
                         }
                         Box(
@@ -152,7 +160,9 @@ fun TailscaleStatusCard(
                 }
             }
 
-            if (uiState.isEnabled && uiState.isVpnRunning && uiState.connectionState == "CONNECTING") {
+            if (uiState.isEnabled && uiState.isVpnRunning &&
+                (uiState.connectionState == "CONNECTING" || uiState.connectionState == "AUTHENTICATING")
+            ) {
                 Spacer(modifier = Modifier.height(12.dp))
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
@@ -219,7 +229,9 @@ fun TailscaleStatusCard(
 @Composable
 fun TailscaleWaitingAuthCard(
     authUrl: String,
+    controlUrl: String,
     onOpenUrl: () -> Unit,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -237,98 +249,232 @@ fun TailscaleWaitingAuthCard(
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium
             )
+            if (controlUrl.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = controlUrl,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onOpenUrl) {
+            Button(
+                onClick = onOpenUrl,
+                enabled = authUrl.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Icon(Icons.Default.OpenInBrowser, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.tailscale_open_auth_url))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = onCancel,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.cancel))
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TailscaleSignInCard(
     uiState: TailscaleUiState,
-    onSignInBrowser: () -> Unit,
-    onSignInAuthKey: (String) -> Unit,
+    onSignInBrowser: (controlUrl: String) -> Unit,
+    onSignInAuthKey: (key: String, controlUrl: String) -> Unit,
     onSetControlUrl: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showAdvanced by remember { mutableStateOf(false) }
+    val isStoredCustom = uiState.controlUrl.isNotBlank() &&
+        !uiState.controlUrl.equals(TailscaleViewModel.DEFAULT_CONTROL_URL, ignoreCase = true)
+
+    var useCustomServer by remember { mutableStateOf(isStoredCustom) }
+    var showTailscaleAuthKey by remember { mutableStateOf(false) }
     var authKeyInput by remember { mutableStateOf(uiState.authKey) }
-    var controlUrlInput by remember { mutableStateOf(uiState.controlUrl) }
+    var customUrlInput by remember {
+        mutableStateOf(if (isStoredCustom) uiState.controlUrl else "")
+    }
+
+    LaunchedEffect(uiState.controlUrl) {
+        val custom = uiState.controlUrl.isNotBlank() &&
+            !uiState.controlUrl.equals(TailscaleViewModel.DEFAULT_CONTROL_URL, ignoreCase = true)
+        if (custom && customUrlInput.isBlank()) {
+            customUrlInput = uiState.controlUrl
+            useCustomServer = true
+        }
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Button(
-                onClick = onSignInBrowser,
-                enabled = !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_tailscale),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = !useCustomServer,
+                    onClick = {
+                        useCustomServer = false
+                        onSetControlUrl(TailscaleViewModel.DEFAULT_CONTROL_URL)
+                    },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                ) {
+                    Text(stringResource(R.string.tailscale_title), maxLines = 1)
                 }
-                Text(stringResource(R.string.tailscale_sign_in_browser))
+                SegmentedButton(
+                    selected = useCustomServer,
+                    onClick = { useCustomServer = true },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                ) {
+                    Text("Headscale / Custom", maxLines = 1)
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(
-                onClick = { showAdvanced = !showAdvanced },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.tailscale_custom_settings))
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    imageVector = if (showAdvanced) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null
-                )
-            }
-
-            AnimatedVisibility(visible = showAdvanced) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedTextField(
-                        value = controlUrlInput,
-                        onValueChange = {
-                            controlUrlInput = it
-                            onSetControlUrl(it)
-                        },
-                        label = { Text(stringResource(R.string.tailscale_control_url_label)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = authKeyInput,
-                        onValueChange = { authKeyInput = it },
-                        label = { Text(stringResource(R.string.tailscale_auth_key_label)) },
-                        placeholder = { Text(stringResource(R.string.tailscale_auth_key_hint)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Button(
-                        onClick = { onSignInAuthKey(authKeyInput) },
-                        enabled = authKeyInput.isNotBlank() && !uiState.isLoading,
-                        modifier = Modifier.fillMaxWidth()
+            if (uiState.errorMessage.isNotBlank()) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(stringResource(R.string.tailscale_apply))
+                        Icon(
+                            imageVector = Icons.Default.ErrorOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = uiState.errorMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
                     }
+                }
+            }
+
+            if (!useCustomServer) {
+                Button(
+                    onClick = { onSignInBrowser(TailscaleViewModel.DEFAULT_CONTROL_URL) },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_tailscale),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(stringResource(R.string.tailscale_sign_in_browser))
+                }
+
+                TextButton(
+                    onClick = { showTailscaleAuthKey = !showTailscaleAuthKey },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.tailscale_apply))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = if (showTailscaleAuthKey) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null
+                    )
+                }
+
+                AnimatedVisibility(visible = showTailscaleAuthKey) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = authKeyInput,
+                            onValueChange = { authKeyInput = it },
+                            label = { Text(stringResource(R.string.tailscale_auth_key_label)) },
+                            placeholder = { Text(stringResource(R.string.tailscale_auth_key_hint)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedButton(
+                            onClick = { onSignInAuthKey(authKeyInput, TailscaleViewModel.DEFAULT_CONTROL_URL) },
+                            enabled = authKeyInput.isNotBlank() && !uiState.isLoading,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.tailscale_apply))
+                        }
+                    }
+                }
+            } else {
+                OutlinedTextField(
+                    value = customUrlInput,
+                    onValueChange = {
+                        customUrlInput = it
+                        onSetControlUrl(it)
+                    },
+                    label = { Text(stringResource(R.string.tailscale_control_url_label)) },
+                    placeholder = { Text("https://headscale.example.com") },
+                    singleLine = true,
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = authKeyInput,
+                    onValueChange = { authKeyInput = it },
+                    label = { Text(stringResource(R.string.tailscale_auth_key_label)) },
+                    placeholder = { Text(stringResource(R.string.tailscale_auth_key_hint)) },
+                    singleLine = true,
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                val usingKey = authKeyInput.isNotBlank()
+                Button(
+                    onClick = {
+                        if (usingKey) {
+                            onSignInAuthKey(authKeyInput, customUrlInput)
+                        } else {
+                            onSignInBrowser(customUrlInput)
+                        }
+                    },
+                    enabled = customUrlInput.isNotBlank() && !uiState.isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    } else if (!usingKey) {
+                        Icon(
+                            imageVector = Icons.Default.OpenInBrowser,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = if (usingKey) {
+                            stringResource(R.string.tailscale_apply)
+                        } else {
+                            stringResource(R.string.tailscale_open_auth_url)
+                        }
+                    )
                 }
             }
         }

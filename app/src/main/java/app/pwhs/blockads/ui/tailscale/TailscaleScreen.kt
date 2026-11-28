@@ -253,6 +253,7 @@ fun TailscaleScreen(
                 item {
                     TailscaleWaitingAuthCard(
                         authUrl = uiState.authUrl,
+                        controlUrl = uiState.controlUrl,
                         onOpenUrl = {
                             if (uiState.authUrl.isNotEmpty()) {
                                 try {
@@ -265,15 +266,16 @@ fun TailscaleScreen(
                                     context.startActivity(intent)
                                 }
                             }
-                        }
+                        },
+                        onCancel = { viewModel.processIntent(TailscaleUiIntent.CancelAuth) },
                     )
                 }
             } else {
                 item {
                     TailscaleSignInCard(
                         uiState = uiState,
-                        onSignInBrowser = { viewModel.processIntent(TailscaleUiIntent.SignInWithBrowser) },
-                        onSignInAuthKey = { key -> viewModel.processIntent(TailscaleUiIntent.SignInWithAuthKey(key)) },
+                        onSignInBrowser = { url -> viewModel.processIntent(TailscaleUiIntent.SignInWithBrowser(url)) },
+                        onSignInAuthKey = { key, url -> viewModel.processIntent(TailscaleUiIntent.SignInWithAuthKey(key, url)) },
                         onSetControlUrl = { url -> viewModel.processIntent(TailscaleUiIntent.SetControlUrl(url)) }
                     )
                 }

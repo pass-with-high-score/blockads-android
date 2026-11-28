@@ -32,6 +32,10 @@ func (e *Engine) Start(fd int, protector SocketProtector, wgConfigJSON string) {
 	if client := e.ssClient.Load(); client != nil {
 		client.SetProtectFn(protectFn)
 	}
+	if mgr := e.tsManager.Load(); mgr != nil {
+		mgr.SetProtectFn(protectFn)
+		_ = mgr.StartSession("blockads-android")
+	}
 	e.resolver = NewResolver(protectFn)
 	e.resolver.Configure(ParseProtocol(e.protocol), e.primaryDNS, e.fallbackDNS, e.dohURL)
 	e.resolver.SetODoHRelay(e.odohRelayURL)

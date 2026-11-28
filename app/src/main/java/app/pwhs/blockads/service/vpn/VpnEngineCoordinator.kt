@@ -293,9 +293,6 @@ class VpnEngineCoordinator(
         )
 
         if (appPrefs.tailscale.isEnabledSnapshot()) {
-            if (isWg) {
-                goTunnelAdapter.startTailscaleSession("blockads-android")
-            }
             startTailscaleBackgroundMonitor(goTunnelAdapter)
         }
     }
